@@ -27,7 +27,8 @@ class CUnitTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # TODO: MAKE FILE PATH/NAME DYNAMIC
-        cls._logger = CLog(logger_id='unittest', add_stream=True, file_handler='unittest.log', propagate=False)
+        cls._logger = CLog(logger_id='unittest', add_stream=True,
+                           file_handler='unittest.log', propagate=False)
         cls._logger.set_level('DEBUG')
 
     def timer(self):
