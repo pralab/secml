@@ -1,0 +1,20 @@
+numpy == 1.12.*
+scipy == 1.0.*
+matplotlib == 2.0.*
+scikit-learn == 0.18.*
+joblib
+Pillow
+llvmlite == 0.12.1
+numba == 0.25.*
+requests
+enum34
+FuncDesigner
+openopt == 0.5625
+
+# Pytorch
+pytorch == 0.4.*
+torchvision == 0.1.8
+
+# Unittests requirements
+pytest >= 2.9
+pytest-cov >= 2.3
