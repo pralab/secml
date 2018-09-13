@@ -1,0 +1,224 @@
+"""
+.. module:: CSecEval
+   :synopsis: Security evaluation for attack classes
+
+.. moduleauthor:: Battista Biggio <davide.maiorca@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+
+"""
+import time
+
+from prlib.core import CCreator
+from prlib.array import CArray
+
+from advlib.seceval import CSecEvalData, CSecEvalDataEvasion
+from advlib.c_attack import CAttack
+
+
+class CSecEval(CCreator):
+    """
+    This class repeat the security evaluation (where security is measured with
+    a given metric) while the power of the attacker increase.
+
+    Parameters
+    ----------
+    attack : CAttack
+        Class that implements an attack (e.g evasion or poisoning)
+    param_name : str
+        name of the parameter that represents the increasingly attacker power
+    param_values: CArray
+        array that contains values that param_name will assumes during the
+        attack (This define how the attacker power increases).
+        nb: If the first value is not zero, zero will be added as first value
+
+    See Also
+    --------
+    .CAttack : class that implements the attack.
+    """
+
+    def __init__(self, attack, param_name, param_values,
+                 save_adv_ds=False):
+
+        self.verbose = 1
+
+        # initialize read-write attribute
+        self._attack = None
+
+        self._save_adv_ds = None
+
+        # set read-write value
+        self.attack = attack
+        self._save_adv_ds = save_adv_ds
+
+        # read-only variables (security evaluation results)
+        if self.attack.class_type == 'evasion':
+            self._sec_eval_data = CSecEvalDataEvasion()
+        else:
+            self._sec_eval_data = CSecEvalData()
+        self._sec_eval_data.param_name = param_name
+        self._sec_eval_data.param_values = param_values
+        if not self._attack.y_target is None:
+            self._sec_eval_data.Y_target = CArray(self._attack.y_target).deepcopy()
+
+    ###########################################################################
+    #                     READ-WRITE ATTRIBUTES (INPUTS)
+    ###########################################################################
+
+    @property
+    def attack(self):
+        """Return the attack object that is used from CSecEval to perform
+        the attack."""
+        return self._attack
+
+    @attack.setter
+    def attack(self, value):
+        """Sets the attack object that will be used from CSecEval to perform
+        the attack"""
+        self._attack = value
+
+    @property
+    def save_adv_ds(self):
+        """
+        Returns
+        -------
+        True/False: whether to store or not the manipulated attack sample dataset
+
+        """
+        return self._save_adv_ds
+
+    @save_adv_ds.setter
+    def save_adv_ds(self, value):
+        """
+        Set to True/False depending on whether to store or not the
+        manipulated attack sample dataset.
+
+        Parameters
+        ----------
+        value: CBool
+
+        Returns
+        -------
+        None
+        """
+        self._save_adv_ds = bool(value)
+
+    ###########################################################################
+    #                     READ-ONLY ATTRIBUTES (OUTPUTS)
+    ###########################################################################
+
+    @property
+    def sec_eval_data(self):
+        """
+        Get a sec eval data objects.
+        It contains the Security Evaluation Results.
+
+        Returns
+        -------
+        sec_eval_data: CSecEvalData object
+                contains classifier security evaluation results
+        """
+        return self._sec_eval_data
+
+    ###########################################################################
+    #                           PUBLIC METHODS
+    ###########################################################################
+
+    def run_sec_eval(self, dataset):
+        """Performs attack while the power of the attacker (named param_name)
+        increase.
+
+        Parameters
+        ----------
+        dataset: CDataset
+            dataset that contain samples that will be manipulated
+            from the attacker while his attack power increase
+        random_seed: int or None
+            random seed for initial poisoning point sampling
+
+        Returns
+        ----------
+        scores: list of CArray
+            Contain one element for each attack power value.
+            Each element contain score assigned by the classifier to all the
+            dataset samples
+        Y_pred: list of CArray
+            Contain one element for each attack power value.
+            Each element contain label assigned to all the dataset
+            samples from the attack
+        adv_ds : list of CDataset
+            Contain one dataset for each different parameter value
+            the i-th dataset is modified with the i-th param_value attack power
+        time : CArray (n_patterns, num parameter values)
+            Each array row contain the times of the attack for one samples.
+            Each row element represent a different attack power
+        """
+        self.clear()
+
+        # store true labels within class
+        self._sec_eval_data.Y = CArray(dataset.Y).deepcopy()
+
+        # init predicted labels and scores
+        Y_pred = CArray.zeros(shape=(dataset.num_samples,))
+        scores = CArray.zeros(shape=(dataset.num_samples, dataset.num_classes))
+
+        # create data structures to store attack output
+        self._sec_eval_data.scores = [CArray(scores).deepcopy() for i in xrange(
+            self._sec_eval_data.param_values.size)]
+        self._sec_eval_data.Y_pred = [CArray(Y_pred).deepcopy() for i in xrange(
+            self._sec_eval_data.param_values.size)]
+
+        self._sec_eval_data.time = CArray.zeros(shape=(self._sec_eval_data.param_values.size,))
+
+        self._sec_eval_data.fobj = CArray.zeros((self._sec_eval_data.param_values.size,))
+
+        # manipulate attack samples
+        adv_ds = None
+        for k, value in enumerate(self._sec_eval_data.param_values):
+
+            self.logger.info("Attack with " + self._sec_eval_data.param_name +
+                             " = " + str(value))
+
+            # Update the value of parameter in attack class
+            # (e.g., value of dmax in CEvasion)
+            self._attack.set(self._sec_eval_data.param_name, value)
+
+            start_time = time.time()
+
+            # todo change x_init parameter with p_ds_init
+            attack_result = tuple(self._attack.run(
+                dataset.X, dataset.Y, ds_init=adv_ds))
+
+            # Expanding generic attack results
+            y_pred, scores, adv_ds, fobj = attack_result[:4]
+
+            if self.save_adv_ds is True:
+                if self._sec_eval_data.adv_ds is not None:
+                    self._sec_eval_data.adv_ds.append(adv_ds.deepcopy())
+                else:
+                    self._sec_eval_data.adv_ds = [adv_ds.deepcopy()]
+
+            if self.attack.class_type == 'evasion':
+                first_eva = attack_result[4]
+                if self._sec_eval_data.first_eva is not None:
+                    for e_i, e in enumerate(self._sec_eval_data.first_eva):
+                        if e is None and first_eva[e_i] is not None:
+                            self._sec_eval_data.first_eva[e_i] = first_eva[e_i]
+                else:
+                    self._sec_eval_data.first_eva = first_eva
+
+            self._sec_eval_data.Y_pred[k] = y_pred
+            self._sec_eval_data.scores[k] = scores
+            self._sec_eval_data.fobj[k] = fobj
+            self._sec_eval_data.time[k] = time.time() - start_time
+            self.logger.info("Time: " + str(self._sec_eval_data.time[k]))
+
+    def save_data(self, path):
+        """Store Sec Eval data to file."""
+        self.sec_eval_data.save(path)
+
+    def load_data(self, path):
+        """Restore Sec Eval data from file."""
+        if self.attack.class_type == 'evasion':
+            self._sec_eval_data = CSecEvalDataEvasion.load(path)
+        else:
+            self._sec_eval_data = CSecEvalData.load(path)

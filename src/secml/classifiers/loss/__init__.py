@@ -1,0 +1,4 @@
+from c_loss import CLoss
+from c_loss_epsilon_insensitive import CLossEpsilonInsensitive, CLossSquaredEpsilonInsensitive
+from c_loss_hinge import CLossHinge, CLossSquaredHinge
+from c_loss_squared import CLossSquared

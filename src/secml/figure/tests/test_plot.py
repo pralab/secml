@@ -1,0 +1,31 @@
+import unittest
+from prlib.utils import CUnitTest
+from prlib.figure import CFigure
+from prlib.array.c_array import CArray
+from prlib.core import constants
+
+
+class TestCPlot(CUnitTest):
+    """Unit test for TestCPlot."""
+
+    def test_quiver(self):
+        """Plot gradient arrows."""
+
+        # gradient values creation
+        xv = CArray.arange(0, 2 * constants.pi, .2)
+        yv = CArray.arange(0, 2 * constants.pi, .2)
+
+        X, Y = CArray.meshgrid((xv, yv))
+        U = CArray.cos(X)
+        V = CArray.sin(Y)
+
+        plot = CFigure()
+        plot.sp.title('Gradient arrow')
+
+        plot.sp.quiver(U, V)
+
+        plot.show()
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -1,0 +1,85 @@
+"""
+.. module:: KFold
+   :synopsis: K-Fold splitting
+
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+
+"""
+from sklearn.cross_validation import KFold
+
+from prlib.array import CArray
+from prlib.data.splitter import CDataSplitter
+
+
+class CDataSplitterKFold(CDataSplitter):
+    """K-Folds dataset splitting.
+
+    Provides train/test indices to split data in train and test sets.
+    Split dataset into 'num_folds' consecutive folds (with shuffling).
+
+    Each fold is then used a validation set once while the k - 1
+    remaining fold form the training set.
+
+    Parameters
+    ----------
+    num_folds : int, optional
+        Number of folds to create. Default 3.
+        This correspond to the size of tr_idx and ts_idx lists.
+    random_state : int, RandomState instance or None, optional (default=None)
+        If int, random_state is the seed used by the random number generator;
+        If RandomState instance, random_state is the random number generator;
+        If None, is the RandomState instance used by np.random.
+
+    Examples
+    --------
+    >>> from prlib.data import CDataset
+    >>> from prlib.data.splitter import CDataSplitterKFold
+
+    >>> ds = CDataset([[1,2],[3,4],[5,6]],[1,0,1])
+    >>> kfold = CDataSplitterKFold(num_folds=3, random_state=0).compute_indices(ds)
+    >>> print kfold.num_folds
+    3
+    >>> print kfold.tr_idx
+    [CArray(2,)(dense: [0 1]), CArray(2,)(dense: [0 2]), CArray(2,)(dense: [1 2])]
+    >>> print kfold.ts_idx
+    [CArray(1,)(dense: [2]), CArray(1,)(dense: [1]), CArray(1,)(dense: [0])]
+
+    """
+    class_type = 'kfold'
+
+    def __init__(self, num_folds=3, random_state=None):
+
+        super(CDataSplitterKFold, self).__init__(
+            num_folds=num_folds, random_state=random_state)
+
+    def compute_indices(self, dataset):
+        """Compute training set and test set indices for each fold.
+
+        Parameters
+        ----------
+        dataset : CDataset
+            Dataset to split.
+
+        Returns
+        -------
+        splitter : CDataSplitterKFold
+            Instance of the dataset splitter with tr/ts indices.
+
+        """
+        # Resetting indices
+        self.clear()
+
+        sk_splitter = KFold(dataset.num_samples,
+                            n_folds=self.num_folds,
+                            shuffle=True,
+                            random_state=self.random_state)
+
+        # We take sklearn indices (iterators) and map to list of CArrays
+        for train_index, test_index in sk_splitter:
+            train_index = CArray(train_index)
+            test_index = CArray(test_index)
+            self._tr_idx.append(train_index)
+            self._ts_idx.append(test_index)
+
+        return self

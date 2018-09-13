@@ -1,0 +1,2 @@
+from c_loss_hinge_numba import CLossHingeNumba, CLossSquaredHingeNumba
+from c_loss_squared_numba import CLossSquaredNumba
