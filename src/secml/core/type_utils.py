@@ -96,7 +96,8 @@ def is_slice(x):
 
 
 def is_str(x):
-    return isinstance(x, (str, np.str_))
+    # FIXME: CHANGE THIS FOR PYTHON 3 (STR ARE UNICODE)
+    return isinstance(x, (str, np.str_, unicode))
 
 
 def is_tuple(x):
