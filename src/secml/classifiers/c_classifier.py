@@ -449,5 +449,7 @@ class CClassifier(CCreator):
         .COptimizer : functions for optimization and approximation
 
         """
-        return COptimizer(self.discriminant_function).approx_fprime(
+        from prlib.optimization.function import CFunction
+        return COptimizer(
+            CFunction(fun=self.discriminant_function)).approx_fprime(
             value, 1e-6, label)
