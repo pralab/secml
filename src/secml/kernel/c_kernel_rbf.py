@@ -98,29 +98,26 @@ class CKernelRBF(CKernel):
         return CArray(metrics.pairwise.rbf_kernel(
             CArray(x).get_data(), CArray(y).get_data(), self.gamma))
 
-    def _gradient(self, u, v):
-        """Calculate RBF kernel gradient wrt vector 'v'.
+    def gradient(self, x, v):
+        """Calculates RBF kernel gradient wrt vector 'v'.
 
         The gradient of RBF kernel is given by::
 
-            dK(u,v)/dv = 2 * gamma * k(u,v) * (u - v)
+            dK(x,v)/dv = 2 * gamma * k(x,v) * (x - v)
 
         Parameters
         ----------
-        u : CArray
-            First array of shape (1, n_features).
-        v : CArray
-            Second array of shape (1, n_features).
+        x : CArray or array_like
+            First array of shape (n_x, n_features).
+        v : CArray or array_like
+            Second array of shape (n_features, ) or (1, n_features).
 
         Returns
         -------
-        kernel_gradient : Carray
-            Kernel gradient of u with respect to vector v,
-            shape (1, n_features).
-
-        See Also
-        --------
-        :meth:`.CKernel.gradient` : Gradient computation interface for kernels.
+        kernel_gradient : CArray
+            Kernel gradient of x with respect to vector v. Array of
+            shape (n_x, n_features) if n_x > 1, else a flattened
+            array of shape (n_features, ).
 
         Examples
         --------
@@ -137,15 +134,59 @@ class CKernelRBF(CKernel):
         CArray([ 0.  0.])
 
         """
+        x_carray = CArray(x).atleast_2d()
+        v_carray = CArray(v).atleast_2d()
+
+        # Checking if second array is a vector
+        if v_carray.shape[0] > 1:
+            raise ValueError(
+                "kernel gradient can be computed only wrt vector-like arrays.")
+
+        grad = self._gradient(x_carray, v_carray)
+        return grad.ravel() if x_carray.shape[0] == 1 else grad
+
+    def _gradient(self, u, v):
+        """Calculate RBF kernel gradient wrt vector 'v'.
+
+        The gradient of RBF kernel is given by::
+
+            dK(u,v)/dv = 2 * gamma * k(u,v) * (u - v)
+
+        Parameters
+        ----------
+        u : CArray or array_like
+            First array of shape (n_x, n_features).
+        v : CArray or array_like
+            Second array of shape (n_features, ) or (1, n_features).
+
+        Returns
+        -------
+        kernel_gradient : CArray
+            Kernel gradient of u with respect to vector v,
+            shape (1, n_features).
+
+        See Also
+        --------
+        :meth:`.CKernel.gradient` : Gradient computation interface for kernels.
+
+        """
         u_carray = CArray(u)
         v_carray = CArray(v)
-        if u_carray.shape[0] + v_carray.shape[0] > 2:
+        if v_carray.shape[0] > 1:
             raise ValueError(
-                "Both input arrays must be 2-Dim of shape (1, n_features).")
+                "2nd array must have shape shape (1, n_features).")
 
-        return CArray(2 * self.gamma *
-                      self._k(u_carray, v_carray) *
-                      (u_carray - v_carray))
-    
-    
+        if v_carray.issparse is True:
+            # Broadcasting not supported for sparse arrays
+            v_broadcast = v_carray.repeat(u_carray.shape[0], axis=0)
+        else:  # Broadcasting is supported by design for dense arrays
+            v_broadcast = v_carray
 
+        diff = (u_carray - v_broadcast)
+
+        k_grad = self._k(u_carray, v_carray)
+        # Casting the kernel to sparse if needed for efficient broadcasting
+        if diff.issparse is True:
+            k_grad = k_grad.tosparse()
+
+        return CArray(2 * self.gamma * diff * k_grad)
