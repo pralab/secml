@@ -153,9 +153,11 @@ class CClassifier(CCreator):
         """
         if not isinstance(dataset, CDataset):
             raise TypeError(
-                "training set should be provided as a single dataset.")
+                "training set should be provided as a CDataset object.")
+
         # Resetting the classifier
         self.clear()
+
         # Storing dataset classes
         self._classes = dataset.classes
         self._n_features = dataset.num_features
