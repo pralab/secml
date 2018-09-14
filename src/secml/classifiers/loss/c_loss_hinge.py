@@ -32,7 +32,7 @@ class CLossHinge(CLoss):
 
         """
         y = extend_binary_labels(y)
-        h = 1.0 - y * score
+        h = CArray(1.0 - y * score)
         h[h < 0] = 0.0
         return h
 
@@ -49,7 +49,7 @@ class CLossHinge(CLoss):
         """
         y = extend_binary_labels(y)
         h = 1.0 - y * score
-        d = -y.astype(float)
+        d = CArray(-y.astype(float))
         d[h < 0] = 0.0
         return d
 
@@ -78,7 +78,7 @@ class CLossSquaredHinge(CLoss):
         y = extend_binary_labels(y)
         h = 1.0 - y * score
         h[h < 0] = 0.0
-        return h**2
+        return h ** 2
 
     def dloss(self, y, score):
         """Compute Squared Hinge Loss Derivative.
