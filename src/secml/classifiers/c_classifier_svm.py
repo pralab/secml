@@ -232,7 +232,7 @@ class CClassifierSVM(CClassifierLinear):
         """Support Vectors."""
         return self._sv
 
-    def train(self, dataset):
+    def train(self, dataset, n_jobs=1):
         """Trains the SVM classifier.
 
         We use :class:`sklearn.svm.SVC` for weights and Support Vectors
@@ -248,6 +248,9 @@ class CClassifierSVM(CClassifierLinear):
         dataset : CDataset
             Binary (2-classes) Training set. Must be a :class:`.CDataset`
             instance with patterns data and corresponding labels.
+        n_jobs : int, optional
+            Number of parallel workers to use for training the classifier.
+            Default 1. Cannot be higher than processor's number of cores.
 
         Returns
         -------
@@ -256,7 +259,7 @@ class CClassifierSVM(CClassifierLinear):
 
         """
         # Train the SVM
-        super(CClassifierSVM, self).train(dataset)
+        super(CClassifierSVM, self).train(dataset, n_jobs=n_jobs)
         # Cleaning up kernel matrix to free memory
         self._k = None
 
