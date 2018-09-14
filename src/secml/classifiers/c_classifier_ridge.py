@@ -107,8 +107,10 @@ class CClassifierRidge(CClassifierLinear):
         # Setting up classifier parameters
         ridge = RidgeClassifier(alpha=self.alpha,
                                 fit_intercept=self.fit_intercept,
-                                tol=self.tol, max_iter=self.max_iter,
-                                class_weight=self.class_weight, solver='auto')
+                                tol=self.tol,
+                                max_iter=self.max_iter,
+                                class_weight=self.class_weight,
+                                solver='auto')
 
         # Storing training dataset (only if required by kernel)
         if self._kernel is not None:
