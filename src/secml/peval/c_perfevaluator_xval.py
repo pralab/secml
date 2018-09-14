@@ -108,7 +108,7 @@ class CPerfEvaluatorXVal(CPerfEvaluator):
         condidates_idx = diff.find(diff == diff.nanmin())
 
         if len(condidates_idx) < 1:
-            raise ValueError("all metric output value are equal to Nan!")
+            raise ValueError("all metric outputs are equal to Nan!")
 
         # Get the value of the result closest to the best value
         best_score = res_vect[condidates_idx[0]]
