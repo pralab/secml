@@ -1,0 +1,6 @@
+# DEFAULT SETTINGS FILE
+# will be copied TO secml.core.settings.DATA_DIR during installation
+
+[prlib]
+# True if Numba library should be globally used
+use_numba=True
