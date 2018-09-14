@@ -20,7 +20,7 @@ class CClassifierSGD(CClassifierLinear):
     class_type = 'sgd'
 
     def __init__(self, loss, regularizer, kernel=None, alpha=0.01,
-                 n_iter=5, shuffle=True, class_weight=None,
+                 n_iter=5, shuffle=True, class_weight=None, average=False,
                  fit_intercept=True, warm_start=False, normalizer=None,
                  learning_rate='optimal', eta0=10.0, power_t=0.5):
 
@@ -42,6 +42,7 @@ class CClassifierSGD(CClassifierLinear):
         self.learning_rate = learning_rate
         self.eta0 = eta0
         self.power_t = power_t
+        self.average = average
 
         # Similarity function (bound) to use for computing features
         # Keep private (not a param of SGD)
@@ -90,6 +91,19 @@ class CClassifierSGD(CClassifierLinear):
             raise ValueError("weight of positive (+1) and negative (0) "
                              "classes only must be specified.")
         self._class_weight = value
+
+    @property
+    def average(self):
+        """When set to True, computes the averaged SGD weights.
+        If set to an int greater than 1, averaging will begin once the total
+        number of samples seen reaches average.
+        So average=10 will begin averaging after seeing 10 samples."""
+        return self._average
+
+    @average.setter
+    def average(self, value):
+        """Sets the average parameter."""
+        self._average = value
 
     @property
     def eta0(self):
@@ -160,6 +174,7 @@ class CClassifierSGD(CClassifierLinear):
             eta0=self.eta0,
             power_t=self.power_t,
             class_weight=self.class_weight,
+            average=self.average,
             warm_start=self.warm_start)
 
         # Pass loss function parameters to classifier
