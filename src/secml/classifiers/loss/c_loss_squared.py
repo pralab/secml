@@ -19,6 +19,7 @@ class CLossSquared(CLoss):
     class_type = 'squared_loss'
     loss_type = 'regression'
 
+    # TODO: extend binary labels
     def loss(self, y, score):
         """Compute Squared Loss.
 

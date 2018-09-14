@@ -24,6 +24,7 @@ class CLossEpsilonInsensitive(CLoss):
     class_type = 'epsilon_insensitive'
     loss_type = 'regression'
 
+    # TODO: extend binary labels
     def __init__(self, epsilon=0.1):
         self._epsilon = float(epsilon)
 
