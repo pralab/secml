@@ -18,7 +18,7 @@ class CDataSplitter(CCreator):
     ----------
     num_folds : int, optional
         Number of folds to create. Default 3.
-        This correspond to the size of tr_idx and ts_idx lists.
+        This corresponds to the size of tr_idx and ts_idx lists.
     random_state : int, RandomState instance or None, optional (default=None)
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
