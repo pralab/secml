@@ -11,6 +11,7 @@ from prlib.data import CDataset
 from prlib.figure import CFigure
 from prlib.classifiers import CClassifierSVM
 from prlib.utils import CUnitTest
+from prlib.core import constants
 
 
 class TestCFigure(CUnitTest):
@@ -77,6 +78,24 @@ class TestCFigure(CUnitTest):
         except Exception as e:
             self.logger.info("Error: {:}".format(e))
             self.assertTrue(False, "Cannot plot function!")
+
+    def test_quiver(self):
+        """Plot gradient arrows."""
+
+        # gradient values creation
+        xv = CArray.arange(0, 2 * constants.pi, .2)
+        yv = CArray.arange(0, 2 * constants.pi, .2)
+
+        X, Y = CArray.meshgrid((xv, yv))
+        U = CArray.cos(X)
+        V = CArray.sin(Y)
+
+        plot = CFigure()
+        plot.sp.title('Gradient arrow')
+
+        plot.sp.quiver(U, V, X, Y)
+
+        plot.show()
 
     @classmethod
     def tearDownClass(cls):
