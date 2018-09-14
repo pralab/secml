@@ -16,7 +16,7 @@ class CKernelEuclidean(CKernel):
 
     Given matrices X and Y, this is computed by::
 
-        K(x, y) = ||x-y||
+        K(x, y) = ||x-y||^2
 
     for each pair of rows in X and in Y.
 
