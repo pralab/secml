@@ -13,7 +13,7 @@ from functools import wraps
 
 from secml.core.attr_utils import is_public, extract_attr, as_public, as_private
 from secml.core.type_utils import is_str
-import prlib.utils.pickle_utils as pck
+import secml.utils.pickle_utils as pck
 from secml.utils.list_utils import find_duplicates
 from secml.utils import CLog, SubLevelsDict
 

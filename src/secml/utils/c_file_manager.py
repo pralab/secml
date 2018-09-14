@@ -221,7 +221,7 @@ def abspath(file_name):
 
     Examples
     --------
-    >>> import prlib.utils.c_file_manager as fm
+    >>> import secml.utils.c_file_manager as fm
 
     >>> cur_file = fm.split(__file__)[1]  # Getting only the filename
     >>> cur_file  # doctest: +SKIP
@@ -244,7 +244,7 @@ def normpath(path):
 
     Examples
     --------
-    >>> import prlib.utils.c_file_manager as fm
+    >>> import secml.utils.c_file_manager as fm
 
     >>> cur_path = fm.split(__file__)[0]  # Getting only the filename
     >>> cur_path  # doctest: +SKIP
@@ -302,7 +302,7 @@ def split(path):
 
     Examples
     --------
-    >>> import prlib.utils.c_file_manager as fm
+    >>> import secml.utils.c_file_manager as fm
 
     >>> path = fm.join('dir1','dir2','dir3')
     >>> path
@@ -331,7 +331,7 @@ def splitext(path):
 
     Examples
     --------
-    >>> import prlib.utils.c_file_manager as fm
+    >>> import secml.utils.c_file_manager as fm
 
     >>> path = fm.join('dir1','file.gz')
     >>> path
@@ -370,7 +370,7 @@ def expanduser(path):
 
     Examples
     --------
-    >>> import prlib.utils.c_file_manager as fm
+    >>> import secml.utils.c_file_manager as fm
 
     >>> fm.expanduser('~')  # doctest: +SKIP
     '/home/username'
