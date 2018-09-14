@@ -1,15 +1,12 @@
 cache:
   key: "$CI_BUILD_NAME"
   paths:
-    - pip-cache
+    - .cache/pip
     - vendor/apt
 
 stages:
   - test
   - deploy
-
-before_script:
-  - export PIP_CACHE_DIR="pip-cache"
 
 test:xenial:
   image: ubuntu:xenial
