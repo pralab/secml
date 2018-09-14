@@ -16,13 +16,12 @@ from prlib.core.constants import inf
 class CNormalizerMinMax(CNormalizerLinear):
     """Standardizes array by scaling each feature to a given range.
 
-    This normalizer scales and shifts each feature
-    individually such that it belong in the given range on
+    This estimator scales and translates each feature
+    individually such that it is in the given range on
     the training array, i.e. between zero and one.
 
-    Input data is supposed to have one row for each patterns.
-    Flat array are considered as row array (One single sample with a number
-    of features equal to the array size)
+    Input data must have one row for each patterns,
+    so features to scale are on each array's column.
 
     The standardization is given by::
 
