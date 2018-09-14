@@ -12,7 +12,7 @@ FuncDesigner
 openopt == 0.5625
 
 # Pytorch
-pytorch == 0.4.*
+torch == 0.4.*
 torchvision == 0.1.8
 
 # Unittests requirements
