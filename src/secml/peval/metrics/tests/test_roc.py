@@ -13,10 +13,14 @@ class TestCRoc(CUnitTest):
 
     def setUp(self):
 
-        self.ds_loader = CDLRandom(n_features=1000, n_redundant=200,
-                                   n_informative=250, n_clusters_per_class=2)
-        self.ds1 = self.ds_loader.load()
-        self.ds2 = self.ds_loader.load()
+        self.dl1 = CDLRandom(n_features=1000, n_redundant=200,
+                             n_informative=250, n_clusters_per_class=2,
+                             random_state=0)
+        self.dl2 = CDLRandom(n_features=1000, n_redundant=200,
+                             n_informative=250, n_clusters_per_class=2,
+                             random_state=1000)
+        self.ds1 = self.dl1.load()
+        self.ds2 = self.dl2.load()
 
         self.svm = CClassifierSVM(C=1e-7).train(self.ds1)
 
