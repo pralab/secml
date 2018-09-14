@@ -1716,6 +1716,17 @@ class CPlot(CCreator):
             """
             return self._sp.imshow(img.tondarray(), *args, **kwargs)
 
+    def matshow(self, array, *args, **kwargs):
+            """Plot an array as a matrix.
+
+            Parameters
+            ----------
+            array : CArray
+                Array that we want plot as a matrix.
+
+            """
+            return self._sp.matshow(array.tondarray(), *args, **kwargs)
+
     def quiver(self, U, V, X=None, Y=None,
                color='k', linestyle='-', linewidth=1.0, alpha=1.0):
         """A quiver plot displays velocity vectors as arrows
