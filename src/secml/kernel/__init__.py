@@ -32,5 +32,3 @@ else:
 from c_kernel_hamming import CKernelHamming
 from c_kernel_euclidean import CKernelEuclidean
 from c_kernel_max import CKernelMax
-
-from gamma_estimation import gamma_estimation
