@@ -6,8 +6,6 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-import sklearn.metrics as skm
-
 from prlib.array import CArray
 
 
@@ -29,11 +27,11 @@ def refine_roc(tp, fp, th):
     if tp[0] != fp[0] or tp[0] != 0 or fp[0] != 0:
         fp = CArray(0).append(fp)
         tp = CArray(0).append(tp)
-        th = CArray(th[0] + 0.1).append(th)
+        th = CArray(th[0] + 1e-3).append(th)
     if tp[-1] != fp[-1] or tp[-1] != 1 or fp[-1] != 1:
         fp = fp.append(1)
         tp = tp.append(1)
-        th = th.append(th[-1] - 0.1)
+        th = th.append(th[-1] - 1e-3)
     return tp, fp, th
 
 
@@ -143,7 +141,8 @@ class CBaseRoc(object):
 
         Flat array with decreasing thresholds on the decision function
         used to compute fpr and tpr. `thresholds[0]` represents no
-        instances being predicted and is arbitrarily set to `max(score) + 0.1`.
+        instances being predicted and is arbitrarily set to
+        `max(score) + 1e-3`.
 
         """
         return self._th
@@ -154,7 +153,7 @@ class CBaseRoc(object):
         Parameters
         ----------
         y_true : CArray
-            Flat array with true binary labels in range {0, 1} or {-1, 1}
+            Flat array with true binary labels in range {0, 1}
             for each patterns or a single array.
             If labels are not binary, pos_label should be explicitly given.
         score : CArray
@@ -169,13 +168,30 @@ class CBaseRoc(object):
             Instance of the roc curve (tp, fp, th).
 
         """
-        # Computing ROC for a single (labels, scores) pair
-        fp, tp, th = skm.roc_curve(CArray(y_true).tondarray().ravel(),
-                                   CArray(score).tondarray().ravel(),
-                                   positive_label)
-        fp = CArray(fp)
-        tp = CArray(tp)
-        th = CArray(th)
+        th = score.unique()  # unique also sorts the values
+
+        n = CArray(score[y_true == 0])
+        p = CArray(score[y_true == 1])
+
+        # Counting the fp and the tp
+        fp_list = []
+        tp_list = []
+        for i in xrange(th.size):
+            fp_i = (n >= th[i]).sum() if n.size != 0 else 0
+            tp_i = (p >= th[i]).sum() if p.size != 0 else 0
+            fp_list.append(fp_i)
+            tp_list.append(tp_i)
+
+        # Returning increasing fp, tp...
+        fp_list.reverse()
+        tp_list.reverse()
+        # ...and th accordingly (decreasing)
+        th = CArray(th[::-1])
+
+        # Normalizing in 0-1
+        fp = CArray(fp_list) / float(n.size) if n.size != 0 else CArray([0])
+        tp = CArray(tp_list) / float(p.size) if p.size != 0 else CArray([0])
+
         # Ensure first and last points are (0,0) and (1,1) respectively
         self._fp, self._tp, self._th = refine_roc(fp, tp, th)
 
@@ -251,7 +267,7 @@ class CRoc(CBaseRoc):
         Flat array with decreasing thresholds on the decision function
         used to compute fpr and tpr or a list with one array for each
         repetition. `thresholds[0]` represents no instances being
-        predicted and is arbitrarily set to `max(score) + 0.1`.
+        predicted and is arbitrarily set to `max(score) + 1e-3`.
 
         """
         # This returns a list or a single arrays if one rep is available
@@ -318,7 +334,7 @@ class CRoc(CBaseRoc):
         ----------
         y_true : CArray, list
             List of flat arrays with true binary labels in range
-            {0, 1} or {-1, 1} for each patterns or a single array.
+            {0, 1} for each patterns or a single array.
             If a single array, one curve is returned
             for each (y_true, score[i]) pair.
             If labels are not binary, pos_label should be explicitly given.
@@ -345,7 +361,7 @@ class CRoc(CBaseRoc):
             Flat array with decreasing thresholds on the decision function
             used to compute fpr and tpr or a list with one array for each
             repetition. `thresholds[0]` represents no instances being
-            predicted and is arbitrarily set to `max(score) + 0.1`.
+            predicted and is arbitrarily set to `max(score) + 1e-3`.
 
         """
         # Working with lists
