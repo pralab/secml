@@ -56,13 +56,14 @@ class CMetricTPatFP(CMetric):
             Flat array with target scores for each pattern, can either be
             probability estimates of the positive class or confidence values.
 
-        Warning: the result is equal to nan if only one element vectors are
-        given
-
         Returns
         -------
         metric : float
             Returns metric value as float.
+
+        Warning
+        -------
+        The result is equal to nan if only one element vectors are given.
 
         Notes
         -----
