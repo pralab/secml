@@ -98,7 +98,7 @@ class CClassifierKDE(CClassifier):
             raise ValueError("training can be performed on (1-classes) "
                              "or binary datasets only. If dataset is binary "
                              "only negative class are considered.")
-        
+
         negative_samples_idx = dataset.Y.find(dataset.Y == 0)
 
         if negative_samples_idx is None:
@@ -108,8 +108,8 @@ class CClassifierKDE(CClassifier):
 
         self.logger.info("Number of training samples: {:}"
                          "".format(self._training_samples.shape[0]))
-            
-        return self 
+
+        return self
 
     def _discriminant_function(self, x, label):
         """Compute the probability of samples to being in class with specified label 
@@ -135,3 +135,25 @@ class CClassifierKDE(CClassifier):
         else:
             return CArray(
                 self.kernel.k(x, self._training_samples)).mean(keepdims=False)
+
+    def _gradient_x(self, x, y=1):
+        """Computes the gradient of the linear classifier's discriminant function wrt 'x'.
+
+        For the linear classifier this is equal to simply
+        return the weights vector w.
+
+        The input point x can be in fact ignored.
+
+        Returns
+        -------
+        grad : CArray or scalar
+            The gradient of the linear classifier's decision function.
+            This is equal to the vector with each feature's weight.
+            Format (dense or sparse) depends on training data.
+        y : int, optional
+            Index of the class wrt the gradient must be computed.
+            Default is 1, corresponding to the positive class.
+
+        """
+        k = self.kernel.gradient(self._training_samples, x)
+        return - (2 * y - 1) * k.mean(axis=0)
