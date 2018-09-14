@@ -388,9 +388,21 @@ class CClassifierSVM(CClassifierLinear):
         m = int(self.grad_sampling * self.n_sv.sum())  # Equivalent to floor
         idx = CArray.randsample(self.alpha.size, m)  # adding some randomness
 
-        gradient = self.kernel.gradient(self.sv[idx, :], x_carray)
-        gradient *= self.alpha[idx].T.dot(CArray.ones(self.n_features))
-        gradient = gradient.sum(axis=0)
+        gradient = self.kernel.gradient(self.sv[idx, :], x_carray).atleast_2d()
+
+        # Few shape check to ensure broadcasting works correctly
+        if gradient.shape != (idx.size, self.n_features):
+            raise ValueError("Gradient shape must be ({:}, {:})".format(
+                idx.size, self.n_features))
+
+        alpha_2d = self.alpha[idx].atleast_2d()
+        if gradient.issparse is True:  # To ensure the sparse dot is used
+            alpha_2d = alpha_2d.tosparse()
+        if alpha_2d.shape != (1, idx.size):
+            raise ValueError("Alpha vector shape must be ({:}, {:}) "
+                             "or ravel equivalent".format(1, idx.size))
+
+        gradient = alpha_2d.dot(gradient)
 
         sign = 2 * y - 1  # Sign depends on input label (0/1)
         return sign * gradient.ravel()
