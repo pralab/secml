@@ -65,7 +65,7 @@ class CClassifierLinear(CClassifier):
         return super(CClassifierLinear, self).is_clear() and \
             self._w is None and self._b is None
 
-    def train(self, dataset):
+    def train(self, dataset, n_jobs=1):
         """Trains the linear classifier.
 
         If a normalizer has been specified,
@@ -78,6 +78,9 @@ class CClassifierLinear(CClassifier):
         dataset : CDataset
             Binary (2-classes) training set. Must be a :class:`.CDataset`
             instance with patterns data and corresponding labels.
+        n_jobs : int
+            Number of parallel workers to use for training the classifier.
+            Default 1. Cannot be higher than processor's number of cores.
 
         Returns
         -------
@@ -92,7 +95,7 @@ class CClassifierLinear(CClassifier):
             raise ValueError(
                 "training available on binary (2-classes) datasets only.")
 
-        return super(CClassifierLinear, self).train(dataset)
+        return super(CClassifierLinear, self).train(dataset, n_jobs=n_jobs)
 
     def _discriminant_function(self, x, label=1):
         """Compute the distance of the samples in x from the separating hyperplane.
