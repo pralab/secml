@@ -170,8 +170,6 @@ class CClassifier(CCreator):
             self._train(CDataset(data_x, dataset.Y), n_jobs=n_jobs)
         except TypeError:  # Parallelization is probably not supported
             self._train(CDataset(data_x, dataset.Y))
-        except Exception as e:  # any other exception
-            raise e
 
         return self
 
