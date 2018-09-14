@@ -119,6 +119,9 @@ class CLineSearchBisect(CLineSearch):
             self.logger.debug("x1 and x2 are not feasible. Returning x.")
             return x, f0
 
+        # FIXME: THIS fun_idx_max thing is not working
+        # f1 = self._fun_idx_min if self._fun_idx_min is not None else \
+        #     self.fun.fun(x1, **kwargs)
         f1 = self.fun.fun(x1, **kwargs)
 
         if not self._is_feasible(x2):
@@ -132,6 +135,9 @@ class CLineSearchBisect(CLineSearch):
                               ", f(x1): " + str(f1))
             return x, f0
 
+        # FIXME: THIS fun_idx_max thing is not working
+        # f2 = self._fun_idx_max if self._fun_idx_max is not None else \
+        #     self.fun.fun(x2, **kwargs)
         f2 = self.fun.fun(x2, **kwargs)
 
         if not self._is_feasible(x1):
