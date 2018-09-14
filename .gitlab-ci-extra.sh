@@ -27,7 +27,7 @@ apt-get -o dir::cache::archives="vendor/apt" install -y -qq python-tk libpng-dev
 # OpenOpt dependencies
 apt-get -o dir::cache::archives="vendor/apt" install -y -qq libgmp3-dev libglpk-dev python-cvxopt
 # Update to latest pip version
-pip install -U pip
+pip install --user -U pip
 
 # Installation of OpenOpt dependencies from source
 # wget -q https://gmplib.org/download/gmp/gmp-6.1.0.tar.bz2 && tar -jxf gmp-6.1.0.tar.bz2

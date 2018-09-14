@@ -18,10 +18,10 @@ test:xenial:
     - sh .gitlab-ci-extra.sh > /dev/null
     - pip install numpy==1.12.*
     - pip install enum34
-    - LLVM_CONFIG=/usr/bin/llvm-config-3.7 pip install -r AdversariaLib2/requirements.txt
+    - LLVM_CONFIG=/usr/bin/llvm-config-3.7 pip install -r requirements.txt
     - mkdir /root/pralib/
-    - cp AdversariaLib2/settings.txt /root/pralib/
-    - cd AdversariaLib2/src
+    - cp settings.txt /root/pralib/
+    - cd src
     - PYTHONPATH=. py.test --cov-config ../.coveragerc secml --cov=prlib
 
 .test:trusty:
@@ -32,10 +32,10 @@ test:xenial:
     - pip install pyOpenSSL ndg-httpsclient pyasn1
     - pip install numpy==1.12.*
     - pip install enum34
-    - LLVM_CONFIG=/usr/bin/llvm-config-3.7 pip install -r AdversariaLib2/requirements.txt
+    - LLVM_CONFIG=/usr/bin/llvm-config-3.7 pip install -r requirements.txt
     - mkdir /root/pralib/
-    - cp AdversariaLib2/settings.txt /root/pralib/
-    - cd AdversariaLib2/src
+    - cp settings.txt /root/pralib/
+    - cd src
     - PYTHONPATH=. py.test --cov-config ../.coveragerc secml --cov=prlib
 
 deploy:xenial:
@@ -45,8 +45,7 @@ deploy:xenial:
     - sh .gitlab-ci-extra.sh > /dev/null
     - pip install numpy==1.12.*
     - pip install enum34
-    - LLVM_CONFIG=/usr/bin/llvm-config-3.7 pip install -r AdversariaLib2/requirements.txt
-    - cd AdversariaLib2
+    - LLVM_CONFIG=/usr/bin/llvm-config-3.7 pip install -r requirements.txt
     - python setup.py sdist --formats=zip
     - apt-get install -qq -y unzip > /dev/null
     - unzip dist/AdversariaLib2-*
