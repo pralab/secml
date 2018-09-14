@@ -53,7 +53,7 @@ class CClassifierSVM(CClassifierLinear):
     class_type = 'svm'
 
     def __init__(self, kernel=None, C=1.0, class_weight=None,
-                 normalizer=None, grad_sampling=1.0):
+                 normalizer=None, grad_sampling=1.0, store_dual_vars=None):
 
         # Calling the superclass init
         CClassifierLinear.__init__(self, normalizer=normalizer)
@@ -65,7 +65,7 @@ class CClassifierSVM(CClassifierLinear):
         self.grad_sampling = grad_sampling
 
         # Flag that control storing of dual variables (depends on kernel)
-        self._store_dual_vars = None
+        self._store_dual_vars = store_dual_vars
 
         # Setting up the kernel function
         self.kernel = CKernel.create('linear') if kernel is None \
