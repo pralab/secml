@@ -9,9 +9,9 @@ As first test method line use self.logger.info("UNITTEST - CLASSNAME - METHODNAM
 """
 import unittest
 
-from prlib.utils import CUnitTest
-from prlib.array import CArray
-from prlib.features.normalization import CNormalizerMinMax, CNormalizerZScore, CNormalizerRow
+from secml.utils import CUnitTest
+from secml.array import CArray
+from secml.features.normalization import CNormalizerMinMax, CNormalizerZScore, CNormalizerRow
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, Normalizer
 
 

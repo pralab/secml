@@ -8,7 +8,7 @@
 import sys
 import requests
 import hashlib
-from prlib.utils import fm
+from secml.utils import fm
 
 
 def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
@@ -104,7 +104,7 @@ def md5(fname, blocksize=65536):
     return hash_md5.hexdigest()
 
 
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 class CTestDLUtils(CUnitTest):
 
     def test_md5(self):

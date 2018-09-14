@@ -1,11 +1,11 @@
 import unittest
-from prlib.utils import CUnitTest
-from prlib.array import CArray
-from prlib.data.loader import CDLRandom
-from prlib.classifiers import CClassifierSVM
-from prlib.peval.metrics import CRoc
+from secml.utils import CUnitTest
+from secml.array import CArray
+from secml.data.loader import CDLRandom
+from secml.classifiers import CClassifierSVM
+from secml.peval.metrics import CRoc
 
-from prlib.figure import CFigure
+from secml.figure import CFigure
 
 
 class TestCRoc(CUnitTest):

@@ -7,8 +7,8 @@
 """
 import sklearn.metrics as skm
 
-from prlib.array import CArray
-from prlib.peval.metrics import CMetric
+from secml.array import CArray
+from secml.peval.metrics import CMetric
 
 
 class CMetricMSE(CMetric):
@@ -23,8 +23,8 @@ class CMetricMSE(CMetric):
 
     Examples
     --------
-    >>> from prlib.peval.metrics import CMetricMSE
-    >>> from prlib.array import CArray
+    >>> from secml.peval.metrics import CMetricMSE
+    >>> from secml.array import CArray
 
     >>> peval = CMetricMSE()
     >>> print peval.performance_score(CArray([0, 1, 0, 0]), score=CArray([0, 0, 0, 0]))

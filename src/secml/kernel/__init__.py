@@ -1,7 +1,7 @@
 from c_kernel import CKernel
 
 # Load optimized kernels if NUMBA is available
-from prlib.core.settings import USE_NUMBA
+from secml.core.settings import USE_NUMBA
 if USE_NUMBA is True:
     try:
         import numba

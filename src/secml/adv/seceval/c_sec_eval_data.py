@@ -5,9 +5,9 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.core import CCreator
-from prlib.array import CArray
-from prlib.utils import pickle_utils as pk
+from secml.core import CCreator
+from secml.array import CArray
+from secml.utils import pickle_utils as pk
 
 
 class CSecEvalData(CCreator):

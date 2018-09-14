@@ -1,18 +1,18 @@
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
 import random
 import torch
 import torchvision.transforms as transforms
 
-from prlib.utils import fm
+from secml.utils import fm
 from aisec18.core.settings import AISEC18_DIR
 
-from prlib.data.loader import CDataLoaderCIFAR10
+from secml.data.loader import CDataLoaderCIFAR10
 from aisec18.torch_nn.classifiers import CTorchClassifierDenseNet
 
 from aisec18.torch_nn.normalizers import CNormalizerMeanSTD
 
-from prlib.peval.metrics import CMetricAccuracy
+from secml.peval.metrics import CMetricAccuracy
 
 use_cuda = torch.cuda.is_available()
 print "Using CUDA: ", use_cuda

@@ -5,10 +5,10 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.classifiers.multiclass import CClassifierMulticlass
-from prlib.array import CArray
-from prlib.data import CDataset
-from prlib.parallel import parfor2
+from secml.classifiers.multiclass import CClassifierMulticlass
+from secml.array import CArray
+from secml.data import CDataset
+from secml.parallel import parfor2
 
 
 def _train_one_ova(

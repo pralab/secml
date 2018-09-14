@@ -5,9 +5,9 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.peval.metrics import CMetric
-from prlib.peval.metrics import CRoc
+from secml.array import CArray
+from secml.peval.metrics import CMetric
+from secml.peval.metrics import CRoc
 
 
 class CMetricTPatFP(CMetric):
@@ -28,8 +28,8 @@ class CMetricTPatFP(CMetric):
 
     Examples
     --------
-    >>> from prlib.peval.metrics import CMetricTPatFP
-    >>> from prlib.array import CArray
+    >>> from secml.peval.metrics import CMetricTPatFP
+    >>> from secml.array import CArray
 
     >>> peval = CMetricTPatFP(fp_rate=0.5)
     >>> print peval.performance_score(CArray([0, 1, 0, 0]), score=CArray([0, 0, 0, 0]))

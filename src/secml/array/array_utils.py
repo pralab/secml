@@ -8,7 +8,7 @@
 import numpy as np
 from scipy.sparse import issparse
 
-from prlib.core.type_utils import is_int, is_bool, is_tuple, is_slice
+from secml.core.type_utils import is_int, is_bool, is_tuple, is_slice
 
 __all__ = ['is_vector_index', 'tuple_atomic_tolist', 'tuple_sequence_tondarray']
 

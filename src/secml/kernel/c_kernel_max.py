@@ -8,8 +8,8 @@
 """
 from sklearn import metrics
 
-from prlib.array import CArray
-from prlib.kernel import CKernel
+from secml.array import CArray
+from secml.kernel import CKernel
 import numpy as np
 
 

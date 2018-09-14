@@ -5,8 +5,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.data.splitter import CDataSplitter
+from secml.array import CArray
+from secml.data.splitter import CDataSplitter
 
 
 class CDataSplitterLabelKFold(CDataSplitter):
@@ -27,9 +27,9 @@ class CDataSplitterLabelKFold(CDataSplitter):
 
     Examples
     --------
-    >>> from prlib.data import CDataset
-    >>> from prlib.data import CDataset
-    >>> from prlib.data.splitter import CDataSplitterLabelKFold
+    >>> from secml.data import CDataset
+    >>> from secml.data import CDataset
+    >>> from secml.data.splitter import CDataSplitterLabelKFold
     >>> ds = CDataset([[1,2],[3,4],[5,6],[7,8]], [1,0,1,2])
     >>> kfold = CDataSplitterLabelKFold(num_folds=3).compute_indices(ds)
     >>> print kfold.num_folds

@@ -8,14 +8,14 @@ against a classifier, under different constraints.
 
 """
 
-from advlib import CAttack
-from advlib.evasion.solvers import CSolver
-from prlib.array import CArray
-from prlib.data import CDataset
-from prlib.core.constants import nan
-from prlib.optimization.function import CFunction
-from prlib.optimization.constraints import CConstraint
-from prlib.classifiers.loss import CLossSoftMax
+from secml.adv.attacks import CAttack
+from secml.adv.attacks.evasion.solvers import CSolver
+from secml.array import CArray
+from secml.data import CDataset
+from secml.core.constants import nan
+from secml.optimization.function import CFunction
+from secml.optimization.constraints import CConstraint
+from secml.classifiers.loss import CLossSoftMax
 
 
 class CAttackEvasion(CAttack):

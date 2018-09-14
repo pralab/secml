@@ -7,8 +7,8 @@ cambiare con _params
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.classifiers import CClassifier
+from secml.array import CArray
+from secml.classifiers import CClassifier
 from sklearn.neighbors import NearestCentroid
 from sklearn.metrics import pairwise_distances
 

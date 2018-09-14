@@ -1,6 +1,6 @@
-from prlib.figure.c_figure import CFigure
-from prlib.data.selection import CPrototypesSelector
-from prlib.data.loader import CDLRandomBlobs
+from secml.figure.c_figure import CFigure
+from secml.data.selection import CPrototypesSelector
+from secml.data.loader import CDLRandomBlobs
 
 dataset = CDLRandomBlobs(n_features=2, n_samples=30,
                          centers=[[-0.5, 0], [0.5, 1]],

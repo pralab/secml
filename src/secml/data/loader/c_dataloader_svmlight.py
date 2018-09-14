@@ -8,9 +8,9 @@
 
 """
 from sklearn.datasets import load_svmlight_file, dump_svmlight_file
-from prlib.data.loader import CDataLoader
-from prlib.array import CArray
-from prlib.data import CDataset
+from secml.data.loader import CDataLoader
+from secml.array import CArray
+from secml.data import CDataset
 
 
 class CDataLoaderSvmLight(CDataLoader):
@@ -74,8 +74,8 @@ class CDataLoaderSvmLight(CDataLoader):
 
         Examples
         --------
-        >>> from prlib.data.loader import CDataLoaderSvmLight
-        >>> from prlib.array import CArray
+        >>> from secml.data.loader import CDataLoaderSvmLight
+        >>> from secml.array import CArray
         >>> patterns = CArray ([[1,0,2], [4,0,5]])
         >>> labels = CArray ([0, 1])
         >>> CDataLoaderSvmLight.dump(CDataset(patterns,labels), "myfile.libsvm")
@@ -145,8 +145,8 @@ class CDataLoaderSvmLight(CDataLoader):
 
         Examples
         --------
-        >>> from prlib.data.loader import CDataLoaderSvmLight
-        >>> from prlib.array import CArray
+        >>> from secml.data.loader import CDataLoaderSvmLight
+        >>> from secml.array import CArray
         >>> patterns = CArray([[1,0,2], [4,0,5]])
         >>> labels = CArray([0,1])
         >>> CDataLoaderSvmLight.dump(CDataset(patterns,labels), "myfile.libsvm")

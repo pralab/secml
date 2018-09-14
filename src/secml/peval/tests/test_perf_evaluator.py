@@ -1,18 +1,18 @@
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
 import sklearn.metrics as skm
 import numpy as np
 
-from prlib.classifiers import CClassifierSVM
-from prlib.classifiers.multiclass import CClassifierMulticlassOVA
-from prlib.kernel import CKernel
-from prlib.data.splitter import CDataSplitter
-from prlib.array import CArray
-from prlib.data.loader import CDLRandom
-from prlib.peval import CPerfEvaluatorXVal
-from prlib.peval.metrics import CMetric
-from prlib.core.constants import nan
+from secml.classifiers import CClassifierSVM
+from secml.classifiers.multiclass import CClassifierMulticlassOVA
+from secml.kernel import CKernel
+from secml.data.splitter import CDataSplitter
+from secml.array import CArray
+from secml.data.loader import CDLRandom
+from secml.peval import CPerfEvaluatorXVal
+from secml.peval.metrics import CMetric
+from secml.core.constants import nan
 
 class TestCPerfEvaluator(CUnitTest):
     """Unit test for CKernel."""

@@ -1,14 +1,14 @@
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.data.splitter import CDataSplitterKFold
-from prlib.data.loader import CDLRandom, CDLRandomBlobs
-from prlib.kernel import CKernelRBF
+from secml.data.splitter import CDataSplitterKFold
+from secml.data.loader import CDLRandom, CDLRandomBlobs
+from secml.kernel import CKernelRBF
 
-from prlib.classifiers.multiclass import CClassifierMulticlassOVA
-from prlib.kernel import gamma_estimation
+from secml.classifiers.multiclass import CClassifierMulticlassOVA
+from secml.kernel import gamma_estimation
 
-from prlib.classifiers import CClassifierSVM
+from secml.classifiers import CClassifierSVM
 
 
 class TestGammaSelection(CUnitTest):
@@ -87,7 +87,7 @@ class TestGammaSelection(CUnitTest):
         # another dataset classification
         y_pred, score_pred = multiclass.classify(self.ds_test.X)
 
-        from prlib.figure import CFigure
+        from secml.figure import CFigure
         fig = CFigure()
 
         fig = self._plot_decision_function(

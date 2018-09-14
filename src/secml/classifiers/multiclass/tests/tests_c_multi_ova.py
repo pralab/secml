@@ -3,14 +3,14 @@ Unittests for CClassifierMultiOVA
 @author: Marco Melis
 """
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.array import CArray
-from prlib.data.loader import CDLRandom
-from prlib.classifiers import CClassifierSVM
-from prlib.classifiers.multiclass import CClassifierMulticlassOVA
-from prlib.peval.metrics import CMetric
-from prlib.figure import CFigure
+from secml.array import CArray
+from secml.data.loader import CDLRandom
+from secml.classifiers import CClassifierSVM
+from secml.classifiers.multiclass import CClassifierMulticlassOVA
+from secml.peval.metrics import CMetric
+from secml.figure import CFigure
 
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
@@ -52,7 +52,7 @@ class TestMulticlass(CUnitTest):
 
     def test_set(self):
 
-        from prlib.kernel import CKernelRBF
+        from secml.kernel import CKernelRBF
         multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                               C=1, kernel=CKernelRBF())
         # Test set before training
@@ -119,8 +119,8 @@ class TestMulticlass(CUnitTest):
 
     def test_normalization(self):
         """Test data normalization inside CClassifierMulticlassOVA."""
-        from prlib.features.normalization import CNormalizerMinMax
-        from prlib.data import CDataset
+        from secml.features.normalization import CNormalizerMinMax
+        from secml.data import CDataset
 
         ds_norm_x = CNormalizerMinMax().train_normalize(self.dataset.X)
 

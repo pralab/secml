@@ -55,7 +55,7 @@ def merge_dicts(*dicts):
 
     Examples
     --------
-    >>> from prlib.utils import merge_dicts
+    >>> from secml.utils import merge_dicts
 
     >>> d1 = {'attr1': 100, 'attr2': 200}
     >>> d2 = {'attr3': 300, 'attr1': 999}  # Redefining `attr1`
@@ -88,7 +88,7 @@ def invert_dict(d):
 
     Examples
     --------
-    >>> from prlib.utils.dict_utils import invert_dict
+    >>> from secml.utils.dict_utils import invert_dict
 
     >>> a = {'k1': 2, 'k2': 2, 'k3': 1}
     >>> print invert_dict(a)
@@ -123,7 +123,7 @@ class LastInDict(MutableMapping):
 
     Examples
     --------
-    >>> from prlib.utils import LastInDict
+    >>> from secml.utils import LastInDict
 
     >>> li = LastInDict()
 
@@ -181,7 +181,7 @@ class SubLevelsDict(MutableMapping):
 
     Examples
     --------
-    >>> from prlib.utils import SubLevelsDict
+    >>> from secml.utils import SubLevelsDict
 
     >>> class Foo(object):
     ...     attr2 = 5

@@ -10,8 +10,8 @@ import sklearn
 from sklearn import ensemble
 import warnings
 
-from prlib.array import CArray
-from prlib.classifiers import CClassifier
+from secml.array import CArray
+from secml.classifiers import CClassifier
 
 
 class CClassifierRandomForest(CClassifier):

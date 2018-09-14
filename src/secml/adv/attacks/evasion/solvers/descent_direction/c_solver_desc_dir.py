@@ -6,10 +6,10 @@
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 """
-from advlib.evasion.solvers.descent_direction.explorer import \
+from secml.adv.attacks.evasion.solvers.descent_direction.explorer import \
     CExploreDescentDirection
-from prlib.array import CArray
-from advlib.evasion.solvers import CSolver
+from secml.array import CArray
+from secml.adv.attacks.evasion.solvers import CSolver
 
 
 class CSolverDescDir(CSolver):

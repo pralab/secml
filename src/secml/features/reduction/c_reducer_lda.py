@@ -6,8 +6,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.features.reduction import CReducer
+from secml.array import CArray
+from secml.features.reduction import CReducer
 from sklearn.lda import LDA
 
 
@@ -37,9 +37,9 @@ class CLda(CReducer):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.data import CDataset
-        >>> from prlib.features.reduction import CLda
+        >>> from secml.array import CArray
+        >>> from secml.data import CDataset
+        >>> from secml.features.reduction import CLda
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
         >>> CLda().train_transform(ds.X, ds.Y)
@@ -91,9 +91,9 @@ class CLda(CReducer):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.data import CDataset
-        >>> from prlib.features.reduction import CLda
+        >>> from secml.array import CArray
+        >>> from secml.data import CDataset
+        >>> from secml.features.reduction import CLda
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
         >>> lda = CLda().train(ds.X, ds.Y)
@@ -138,9 +138,9 @@ class CLda(CReducer):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.data import CDataset
-        >>> from prlib.features.reduction import CLda
+        >>> from secml.array import CArray
+        >>> from secml.data import CDataset
+        >>> from secml.features.reduction import CLda
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
         >>> lda = CLda().train(ds.X, ds.Y)
@@ -181,9 +181,9 @@ class CLda(CReducer):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.data import CDataset
-        >>> from prlib.features.reduction import CLda
+        >>> from secml.array import CArray
+        >>> from secml.data import CDataset
+        >>> from secml.features.reduction import CLda
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
         >>> lda = CLda().train(ds.X, ds.Y)

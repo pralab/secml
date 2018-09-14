@@ -6,8 +6,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.features.reduction import CReducer
+from secml.array import CArray
+from secml.features.reduction import CReducer
 
 __all__ = ['CPca', 'CKernelPca']
 
@@ -46,8 +46,8 @@ class CPca(CReducer):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.features.reduction import CPca
+        >>> from secml.array import CArray
+        >>> from secml.features.reduction import CPca
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
         >>> CPca().train_transform(array)
@@ -116,8 +116,8 @@ class CPca(CReducer):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.features.reduction import CPca
+        >>> from secml.array import CArray
+        >>> from secml.features.reduction import CPca
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
         >>> pca = CPca().train(array)
@@ -209,8 +209,8 @@ class CPca(CReducer):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.features.reduction import CPca
+        >>> from secml.array import CArray
+        >>> from secml.features.reduction import CPca
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
         >>> pca = CPca().train(array)
@@ -251,8 +251,8 @@ class CPca(CReducer):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.features.reduction import CPca
+        >>> from secml.array import CArray
+        >>> from secml.features.reduction import CPca
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
         >>> pca = CPca().train(array)
@@ -318,9 +318,9 @@ class CKernelPca(CPca):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.kernel import CKernelLinear
-        >>> from prlib.features.reduction import CKernelPca
+        >>> from secml.array import CArray
+        >>> from secml.kernel import CKernelLinear
+        >>> from secml.features.reduction import CKernelPca
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
         >>> CKernelPca(kernel=CKernelLinear()).train_transform(array)
         CArray([[ -4.07872199e+00   2.47826647e+00   5.96046448e-08]
@@ -331,7 +331,7 @@ class CKernelPca(CPca):
         super(self.__class__, self).__init__(n_components)
 
         # We now store the instance of desired kernel
-        from prlib.kernel import CKernel, CKernelLinear
+        from secml.kernel import CKernel, CKernelLinear
         if kernel is None:
             self.kernel = CKernelLinear()
         elif not isinstance(kernel, CKernel):
@@ -381,9 +381,9 @@ class CKernelPca(CPca):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.kernel import CKernelLinear
-        >>> from prlib.features.reduction import CKernelPca
+        >>> from secml.array import CArray
+        >>> from secml.kernel import CKernelLinear
+        >>> from secml.features.reduction import CKernelPca
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
         >>> kpca = CKernelPca(kernel=CKernelLinear()).train(array)
         >>> kpca.eigenval
@@ -433,9 +433,9 @@ class CKernelPca(CPca):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.kernel import CKernelLinear
-        >>> from prlib.features.reduction import CKernelPca
+        >>> from secml.array import CArray
+        >>> from secml.kernel import CKernelLinear
+        >>> from secml.features.reduction import CKernelPca
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
         >>> kpca = CKernelPca(kernel=CKernelLinear()).train(array)
         >>> kpca.transform(CArray.concatenate(array, [4., 2., -6.], axis=0))

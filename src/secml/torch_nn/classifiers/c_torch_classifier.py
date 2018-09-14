@@ -14,8 +14,8 @@ from torch.utils.data import DataLoader
 import torch.optim as optim
 from torch.autograd import Variable
 
-from prlib.array import CArray
-from prlib.classifiers import CClassifier
+from secml.array import CArray
+from secml.classifiers import CClassifier
 
 from aisec18.core.settings import USE_CUDA
 from aisec18.torch_nn.data import CTorchDataset

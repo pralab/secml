@@ -6,8 +6,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.classifiers.loss import CLoss
-from prlib.array import CArray
+from secml.classifiers.loss import CLoss
+from secml.array import CArray
 
 
 class CLossEpsilonInsensitive(CLoss):

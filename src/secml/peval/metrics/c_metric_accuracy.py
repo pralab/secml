@@ -7,8 +7,8 @@
 """
 import sklearn.metrics as skm
 
-from prlib.array import CArray
-from prlib.peval.metrics import CMetric
+from secml.array import CArray
+from secml.peval.metrics import CMetric
 
 
 class CMetricAccuracy(CMetric):
@@ -23,8 +23,8 @@ class CMetricAccuracy(CMetric):
 
     Examples
     --------
-    >>> from prlib.peval.metrics import CMetricAccuracy
-    >>> from prlib.array import CArray
+    >>> from secml.peval.metrics import CMetricAccuracy
+    >>> from secml.array import CArray
 
     >>> peval = CMetricAccuracy()
     >>> print peval.performance_score(CArray([0, 1, 2, 3]), CArray([0, 1, 1, 3]))

@@ -1,13 +1,13 @@
 from sklearn.neural_network import MLPClassifier
-from prlib.classifiers import CClassifier
-from prlib.array import CArray
+from secml.classifiers import CClassifier
+from secml.array import CArray
 from sklearn.utils.extmath import safe_sparse_dot
 import warnings
 import copy
 import numpy as np
 from sklearn.neural_network._base import ACTIVATIONS, DERIVATIVES, LOSS_FUNCTIONS
-from prlib.array.data_coversion_utils import nd_list_to_carray, flat_carray_to_np_list
-from prlib.core.constants import inf
+from secml.array.data_coversion_utils import nd_list_to_carray, flat_carray_to_np_list
+from secml.core.constants import inf
 
 #fix training starting
 # todo: using only CArray in loss and gradients computation functions

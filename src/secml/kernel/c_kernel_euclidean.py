@@ -7,8 +7,8 @@
 """
 from sklearn import metrics
 
-from prlib.array import CArray
-from prlib.kernel import CKernel
+from secml.array import CArray
+from secml.kernel import CKernel
 
 
 class CKernelEuclidean(CKernel):
@@ -26,8 +26,8 @@ class CKernelEuclidean(CKernel):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.kernel.c_kernel_euclidean import CKernelEuclidean
+    >>> from secml.array import CArray
+    >>> from secml.kernel.c_kernel_euclidean import CKernelEuclidean
 
     >>> print CKernelEuclidean().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
     CArray([[ 20.1246118   47.80167361]

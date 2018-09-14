@@ -118,7 +118,7 @@ PRLIB_SETTINGS = os.path.join(HOME_DIR, 'settings.txt')
 
 This can be globally set inside params file or per-script.
 To be effective, use in the head of your script. Example:
->>> from prlib.core import settings
+>>> from secml.core import settings
 >>> settings.USE_NUMBA = True
 >>>
 >>> **OTHER IMPORTS**

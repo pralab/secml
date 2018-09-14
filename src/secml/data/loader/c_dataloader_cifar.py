@@ -10,11 +10,11 @@ import cPickle
 from abc import ABCMeta, abstractmethod, abstractproperty
 import numpy as np
 
-from prlib.data.loader import CDataLoader
-from prlib.data import CDataset
-from prlib.utils import fm
-from prlib.utils.download_utils import dl_file, md5
-from prlib.core.settings import DATA_DIR
+from secml.data.loader import CDataLoader
+from secml.data import CDataset
+from secml.utils import fm
+from secml.utils.download_utils import dl_file, md5
+from secml.core.settings import DATA_DIR
 
 
 CIFAR10_URL_PYTHON = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'

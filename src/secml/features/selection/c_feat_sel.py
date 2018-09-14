@@ -1,4 +1,4 @@
-from prlib.core import CCreator
+from secml.core import CCreator
 
 
 class CFeatSel(CCreator):

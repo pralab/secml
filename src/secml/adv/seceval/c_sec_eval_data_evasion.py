@@ -5,7 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from advlib.seceval import CSecEvalData
+from secml.adv.seceval import CSecEvalData
 
 
 class CSecEvalDataEvasion(CSecEvalData):

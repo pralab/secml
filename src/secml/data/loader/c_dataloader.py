@@ -8,9 +8,9 @@
 
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
-from prlib.array import CArray
-from prlib.core import CCreator
-from prlib.data import CDataset
+from secml.array import CArray
+from secml.core import CCreator
+from secml.data import CDataset
 
 
 class CDataLoader(CCreator):
@@ -54,7 +54,7 @@ class CDataLoader(CCreator):
 
         Examples
         --------
-        >>> from prlib.data.loader import CDataLoader
+        >>> from secml.data.loader import CDataLoader
         >>> patterns = CArray([[1,0,2], [4,0,5]])
         >>> patterns, mapping = CDataLoader._remove_all_zero_features(patterns)
         >>> print patterns

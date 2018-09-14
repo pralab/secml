@@ -4,13 +4,13 @@ Created on 18 feb 2016
 @author: Davide Maiorca
 """
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.optimization.c_optimizer import COptimizer
-from prlib.optimization.constraints import CConstraintBox
-from prlib.optimization.function import CFunction
-from prlib.figure import CFigure
-from prlib.array import CArray
+from secml.optimization.c_optimizer import COptimizer
+from secml.optimization.constraints import CConstraintBox
+from secml.optimization.function import CFunction
+from secml.figure import CFigure
+from secml.array import CArray
 
 
 class TestCOptimizer(CUnitTest):

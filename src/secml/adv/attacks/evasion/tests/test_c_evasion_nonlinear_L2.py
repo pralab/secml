@@ -1,9 +1,9 @@
 import unittest
 from test_c_evasion import TestCEvasionCases
 
-from prlib.classifiers import CClassifierSVM
-from prlib.features.normalization import CNormalizerMinMax
-from prlib.kernel import CKernel
+from secml.classifiers import CClassifierSVM
+from secml.features.normalization import CNormalizerMinMax
+from secml.kernel import CKernel
 
 
 class TestEvasionNonLinearL2(TestCEvasionCases.TestCEvasion):

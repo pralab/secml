@@ -1,8 +1,8 @@
 import unittest
-from prlib.utils import CUnitTest
-from prlib.figure import CFigure
-from prlib.array.c_array import CArray
-from prlib.core import constants
+from secml.utils import CUnitTest
+from secml.figure import CFigure
+from secml.array.c_array import CArray
+from secml.core import constants
 
 
 class TestCPlot(CUnitTest):

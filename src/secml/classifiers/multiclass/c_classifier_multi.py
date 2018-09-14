@@ -7,8 +7,8 @@
 """
 from abc import abstractmethod
 
-from prlib.classifiers import CClassifier
-from prlib.array import CArray
+from secml.classifiers import CClassifier
+from secml.array import CArray
 
 
 class CClassifierMulticlass(CClassifier):

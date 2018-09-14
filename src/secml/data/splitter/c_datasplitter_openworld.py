@@ -5,8 +5,8 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.data.splitter import CDataSplitter
+from secml.array import CArray
+from secml.data.splitter import CDataSplitter
 
 
 class CDataSplitterOpenWorldKFold(CDataSplitter):
@@ -39,8 +39,8 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
 
     Examples
     --------
-    >>> from prlib.data import CDataset
-    >>> from prlib.data.splitter import CDataSplitterOpenWorldKFold
+    >>> from secml.data import CDataset
+    >>> from secml.data.splitter import CDataSplitterOpenWorldKFold
 
     >>> ds = CDataset([[1,2],[3,4],[5,6],[10,20],[30,40],[50,60],
     ...                [100,200],[300,400]],[1,0,1,2,0,1,0,2])

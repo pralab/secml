@@ -1,13 +1,13 @@
-from prlib.core import settings
+from secml.core import settings
 settings.USE_NUMBA = True
 
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.array import CArray
-from prlib.core.type_utils import is_scalar
-from prlib.data.loader import CDLRandom
-from prlib.kernel import CKernel
+from secml.array import CArray
+from secml.core.type_utils import is_scalar
+from secml.data.loader import CDLRandom
+from secml.kernel import CKernel
 
 
 class TestCKernelLaplacian(CUnitTest):
@@ -33,9 +33,9 @@ class TestCKernelLaplacian(CUnitTest):
         self.m1 = CArray.rand(shape=(10, 10000), sparse=True, density=0.05)
         self.m2 = CArray.rand(shape=(10, 10000), sparse=True, density=0.05)
 
-        from prlib.kernel.c_kernel_laplacian import CKernelLaplacian
+        from secml.kernel.c_kernel_laplacian import CKernelLaplacian
         self.kernel = CKernelLaplacian()
-        from prlib.kernel.numba_kernel.c_kernel_laplacian_numba import CKernelLaplacianNumba
+        from secml.kernel.numba_kernel.c_kernel_laplacian_numba import CKernelLaplacianNumba
         self.kernel_numba = CKernelLaplacianNumba()
 
         # System should create a kernel \w numba instance if numba is available

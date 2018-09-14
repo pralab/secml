@@ -1,9 +1,9 @@
 from sklearn.metrics import auc as sk_auc
 
-from prlib.figure.plots import CPlot
-from prlib.peval.metrics import CMetricConfusionMatrix
-from prlib.peval.metrics import CMetric
-from prlib.array import CArray
+from secml.figure.plots import CPlot
+from secml.peval.metrics import CMetricConfusionMatrix
+from secml.peval.metrics import CMetric
+from secml.array import CArray
 
 #fixme: da pulire
 class CPlotSecEval(CPlot):

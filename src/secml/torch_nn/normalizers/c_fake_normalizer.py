@@ -5,8 +5,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.features.normalization import CNormalizer
+from secml.array import CArray
+from secml.features.normalization import CNormalizer
 
 
 class CFakeNormalizer(CNormalizer):

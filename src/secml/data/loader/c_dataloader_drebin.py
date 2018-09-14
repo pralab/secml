@@ -10,13 +10,13 @@ from collections import OrderedDict
 from itertools import izip
 import numpy as np
 
-from prlib.data.loader import CDataLoader, CDataLoaderSvmLight
-from prlib.data import CDataset
-from prlib.array import CArray
-from prlib.utils import fm
-from prlib.utils.download_utils import dl_file
-from prlib.utils.dict_utils import invert_dict
-from prlib.core import settings
+from secml.data.loader import CDataLoader, CDataLoaderSvmLight
+from secml.data import CDataset
+from secml.array import CArray
+from secml.utils import fm
+from secml.utils.download_utils import dl_file
+from secml.utils.dict_utils import invert_dict
+from secml.core import settings
 
 
 DREBIN_URL = 'https://nue.diee.unica.it/public.php/webdav'

@@ -60,8 +60,8 @@ import torchvision
 import torchvision.transforms as transforms
 
 from aisec18.core.settings import AISEC18_DIR
-from prlib.utils import fm
-from prlib.data.loader import CDataLoaderCIFAR10
+from secml.utils import fm
+from secml.data.loader import CDataLoaderCIFAR10
 from aisec18.torch_nn.data import CTorchDataset
 
 ########################################################################

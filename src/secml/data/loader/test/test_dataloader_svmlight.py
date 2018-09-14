@@ -4,11 +4,11 @@ Created on 04/mag/2015
 @author: Davide Maiorca, Ambra Demontis
 """
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.data import CDataset
-from prlib.data.loader import CDataLoaderSvmLight
-from prlib.array import CArray, Csparse, Cdense
+from secml.data import CDataset
+from secml.data.loader import CDataLoaderSvmLight
+from secml.array import CArray, Csparse, Cdense
 
 
 class TestCDataLoaderSvmLight(CUnitTest):

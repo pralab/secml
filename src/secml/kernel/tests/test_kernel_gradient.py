@@ -8,16 +8,16 @@ Class to test kernels'gradient precision.
 If you find any BUGs, please notify authors first.
 
 """
-from prlib.core import settings
+from secml.core import settings
 settings.USE_NUMBA = True
 
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.kernel import *
-from prlib.array import CArray
-from prlib.data.loader import CDLRandom
-from prlib.optimization import COptimizer
+from secml.kernel import *
+from secml.array import CArray
+from secml.data.loader import CDLRandom
+from secml.optimization import COptimizer
 
 
 class TestKernelGradient(CUnitTest):

@@ -6,8 +6,8 @@
 
 """
 from c_prototypes_selector import CPrototypesSelector
-from prlib.array import CArray
-from prlib.kernel import CKernelEuclidean
+from secml.array import CArray
+from secml.kernel import CKernelEuclidean
 
 
 class CPSBorder(CPrototypesSelector):

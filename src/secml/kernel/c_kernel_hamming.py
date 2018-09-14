@@ -8,8 +8,8 @@
 """
 from sklearn import metrics
 
-from prlib.array import CArray
-from prlib.kernel import CKernel
+from secml.array import CArray
+from secml.kernel import CKernel
 
 
 class CKernelHamming(CKernel):
@@ -21,8 +21,8 @@ class CKernelHamming(CKernel):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.kernel.c_kernel_hamming import CKernelHamming
+    >>> from secml.array import CArray
+    >>> from secml.kernel.c_kernel_hamming import CKernelHamming
 
     >>> print CKernelHamming().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
     CArray([[ 1.  1.]

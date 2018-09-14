@@ -1,12 +1,12 @@
 import unittest
-from prlib.classifiers import CClassifierSVM
-from prlib.kernel import CKernel
-from advlib.evasion import CAttackEvasion
-from prlib.core import CCreator
-from prlib.data.loader import CDataLoaderMNIST
-from prlib.array import CArray
-from prlib.figure import CFigure
-from prlib.classifiers.multiclass import CClassifierMulticlassOVA
+from secml.classifiers import CClassifierSVM
+from secml.kernel import CKernel
+from secml.adv.attacks.evasion import CAttackEvasion
+from secml.core import CCreator
+from secml.data.loader import CDataLoaderMNIST
+from secml.array import CArray
+from secml.figure import CFigure
+from secml.classifiers.multiclass import CClassifierMulticlassOVA
 
 from numpy import random
 

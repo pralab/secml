@@ -1,8 +1,8 @@
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.peval.metrics import CMetric
-from prlib.array import CArray
+from secml.peval.metrics import CMetric
+from secml.array import CArray
 
 
 class TestCMetrics(CUnitTest):

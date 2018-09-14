@@ -6,8 +6,8 @@
 
 """
 from sklearn.metrics import confusion_matrix
-from prlib.array import CArray
-from prlib.peval.metrics import CMetric
+from secml.array import CArray
+from secml.peval.metrics import CMetric
 
 
 class CMetricConfusionMatrix(CMetric):

@@ -1,12 +1,12 @@
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.optimization.learning_rate import CStepConstant, CStepExponential, CStepInvscaling, CStepOptimal
+from secml.optimization.learning_rate import CStepConstant, CStepExponential, CStepInvscaling, CStepOptimal
 
-from prlib.array import CArray
+from secml.array import CArray
 import numpy as np
-from prlib.array import CArray
-from prlib.figure import CFigure
+from secml.array import CArray
+from secml.figure import CFigure
 
 
 class TestCStep(CUnitTest):

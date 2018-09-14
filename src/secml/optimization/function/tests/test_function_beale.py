@@ -1,9 +1,9 @@
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.figure import CFigure
-from prlib.array import CArray
-from prlib.optimization.function import CFunction
+from secml.figure import CFigure
+from secml.array import CArray
+from secml.optimization.function import CFunction
 
 
 class TestCFunctionBeale(CUnitTest):

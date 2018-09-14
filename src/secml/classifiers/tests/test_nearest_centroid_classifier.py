@@ -6,12 +6,12 @@ Class to test CClassifierKernelDensityEstimator
 If you find any BUG, please notify authors first.
 """
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.data.loader import CDLRandom
-from prlib.classifiers import CClassifierNearestCentroid
-from prlib.figure.c_figure import CFigure
-from prlib.features.normalization import CNormalizerMinMax
+from secml.data.loader import CDLRandom
+from secml.classifiers import CClassifierNearestCentroid
+from secml.figure.c_figure import CFigure
+from secml.features.normalization import CNormalizerMinMax
 
 
 class TestCClassifierNearestCentroid(CUnitTest):

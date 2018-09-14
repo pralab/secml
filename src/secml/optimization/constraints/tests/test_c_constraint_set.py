@@ -1,8 +1,8 @@
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.optimization.constraints import CConstraintBox, CConstraintL1, CConstraintL2, CConstraintSet
-from prlib.array import CArray
+from secml.optimization.constraints import CConstraintBox, CConstraintL1, CConstraintL2, CConstraintSet
+from secml.array import CArray
 import numpy as np
 
 

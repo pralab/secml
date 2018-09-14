@@ -8,8 +8,8 @@
 from sklearn import metrics
 import numpy as np
 
-from prlib.array import CArray
-from prlib.kernel import CKernel
+from secml.array import CArray
+from secml.kernel import CKernel
 
 
 class CKernelHistIntersect(CKernel):
@@ -28,8 +28,8 @@ class CKernelHistIntersect(CKernel):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.kernel.c_kernel_histintersect import CKernelHistIntersect
+    >>> from secml.array import CArray
+    >>> from secml.kernel.c_kernel_histintersect import CKernelHistIntersect
 
     >>> print CKernelHistIntersect().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
     CArray([[ 3.  3.]

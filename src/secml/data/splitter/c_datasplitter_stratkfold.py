@@ -7,8 +7,8 @@
 """
 from sklearn.cross_validation import StratifiedKFold
 
-from prlib.array import CArray
-from prlib.data.splitter import CDataSplitter
+from secml.array import CArray
+from secml.data.splitter import CDataSplitter
 
 
 class CDataSplitterStratifiedKFold(CDataSplitter):
@@ -34,8 +34,8 @@ class CDataSplitterStratifiedKFold(CDataSplitter):
 
     Examples
     --------
-    >>> from prlib.data import CDataset
-    >>> from prlib.data.splitter import CDataSplitterStratifiedKFold
+    >>> from secml.data import CDataset
+    >>> from secml.data.splitter import CDataSplitterStratifiedKFold
 
     >>> ds = CDataset([[1,2],[3,4],[5,6],[7,8]],[1,0,0,1])
     >>> stratkfold = CDataSplitterStratifiedKFold(num_folds=2, random_state=0).compute_indices(ds)

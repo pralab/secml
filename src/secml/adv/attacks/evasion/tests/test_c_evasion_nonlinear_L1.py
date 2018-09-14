@@ -1,9 +1,9 @@
 import unittest
 from test_c_evasion import TestCEvasionCases
 
-from prlib.classifiers import CClassifierSVM, CClassifierDecisionTree
-from prlib.features.normalization import CNormalizerMinMax
-from prlib.kernel import CKernelRBF, CKernelLaplacian
+from secml.classifiers import CClassifierSVM, CClassifierDecisionTree
+from secml.features.normalization import CNormalizerMinMax
+from secml.kernel import CKernelRBF, CKernelLaplacian
 
 
 class TestEvasionNonLinearL1(TestCEvasionCases.TestCEvasion):

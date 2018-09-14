@@ -8,10 +8,10 @@
 from numba import guvectorize
 from math import exp
 
-from prlib.array import CArray
-from prlib.kernel.c_kernel_rbf import CKernelRBF
+from secml.array import CArray
+from secml.kernel.c_kernel_rbf import CKernelRBF
 
-from prlib.kernel.numba_kernel.numba_utils import sqrd_eucl_dense
+from secml.kernel.numba_kernel.numba_utils import sqrd_eucl_dense
 
 
 class CKernelRBFNumba(CKernelRBF):
@@ -37,8 +37,8 @@ class CKernelRBFNumba(CKernelRBF):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.kernel.numba_kernel.c_kernel_rbf_numba import CKernelRBFNumba
+    >>> from secml.array import CArray
+    >>> from secml.kernel.numba_kernel.c_kernel_rbf_numba import CKernelRBFNumba
 
     >>> print CKernelRBFNumba(gamma=0.001).k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
     CArray([[ 0.66697681  0.10177406]
@@ -122,8 +122,8 @@ class CKernelRBFNumba(CKernelRBF):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.kernel.numba_kernel.c_kernel_rbf_numba import CKernelRBFNumba
+        >>> from secml.array import CArray
+        >>> from secml.kernel.numba_kernel.c_kernel_rbf_numba import CKernelRBFNumba
 
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])

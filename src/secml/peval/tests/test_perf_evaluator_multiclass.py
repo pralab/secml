@@ -1,11 +1,11 @@
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.classifiers import CClassifierSVM
-from prlib.classifiers.multiclass import CClassifierMulticlassOVA
-from prlib.kernel import CKernel
-from prlib.data.splitter import CDataSplitter
-from prlib.data.loader import CDLRandom
+from secml.classifiers import CClassifierSVM
+from secml.classifiers.multiclass import CClassifierMulticlassOVA
+from secml.kernel import CKernel
+from secml.data.splitter import CDataSplitter
+from secml.data.loader import CDLRandom
 
 
 class TestCPerfEvaluatorMulticlass(CUnitTest):

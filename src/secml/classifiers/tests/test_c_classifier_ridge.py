@@ -1,10 +1,10 @@
 import unittest
-from prlib.utils import CUnitTest
-from prlib.classifiers import CClassifierRidge, CClassifierSVM
-from prlib.data.loader import CDLRandom
-from prlib.features.normalization import CNormalizerMinMax
-from prlib.peval.metrics import CMetric
-from prlib.figure.c_figure import CFigure
+from secml.utils import CUnitTest
+from secml.classifiers import CClassifierRidge, CClassifierSVM
+from secml.data.loader import CDLRandom
+from secml.features.normalization import CNormalizerMinMax
+from secml.peval.metrics import CMetric
+from secml.figure.c_figure import CFigure
 
 
 class TestRidgeClassifier(CUnitTest):

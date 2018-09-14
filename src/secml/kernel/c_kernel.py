@@ -8,8 +8,8 @@
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-from prlib.core import CCreator
-from prlib.array import CArray
+from secml.core import CCreator
+from secml.array import CArray
 
 
 class CKernel(CCreator):
@@ -30,14 +30,14 @@ class CKernel(CCreator):
        supporting sparse data is available.
        As importing directly from `prlib.kernel` package
 
-       >>> from prlib.kernel import CKernelRBF  # doctest: +SKIP
+       >>> from secml.kernel import CKernelRBF  # doctest: +SKIP
 
        will load the Numba version automatically (if Numba is available
        on the system) its sometimes useful to import both kernel versions
        and use them differently when necessary:
 
-       >>> from prlib.kernel.c_kernel_rbf import CKernelRBF as RBF  # doctest: +SKIP
-       >>> from prlib.kernel.numba_kernel.c_kernel_rbf_numba import CKernelRBFNumba as RBFNumba  # doctest: +SKIP
+       >>> from secml.kernel.c_kernel_rbf import CKernelRBF as RBF  # doctest: +SKIP
+       >>> from secml.kernel.numba_kernel.c_kernel_rbf_numba import CKernelRBFNumba as RBFNumba  # doctest: +SKIP
 
     Attributes
     ----------
@@ -109,8 +109,8 @@ class CKernel(CCreator):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.kernel import CKernelRBF
+        >>> from secml.array import CArray
+        >>> from secml.kernel import CKernelRBF
 
         >>> array1 = CArray([[15,25],[45,55]])
         >>> array2 = CArray([[10,20],[40,50]])
@@ -221,8 +221,8 @@ class CKernel(CCreator):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.kernel import CKernelRBF
+        >>> from secml.array import CArray
+        >>> from secml.kernel import CKernelRBF
 
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])

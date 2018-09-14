@@ -16,9 +16,9 @@ import matplotlib.mlab as mlab
 
 from copy import deepcopy
 
-from prlib.core.type_utils import is_ndarray, is_list_of_lists, \
+from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_int, is_bool
-from prlib.array.array_utils import is_vector_index
+from secml.array.array_utils import is_vector_index
 
 
 class Cdense(object):
@@ -1038,7 +1038,7 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from prlib.array import Cdense
+        >>> from secml.array import Cdense
         >>> a0 = Cdense([1])
         >>> print(a0.repmat(2, 3))
         [[1 1 1]
@@ -1069,7 +1069,7 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from prlib.array import Cdense
+        >>> from secml.array import Cdense
 
         >>> x = Cdense([[1,2],[3,4]])
         
@@ -1450,7 +1450,7 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from prlib.array import Cdense
+        >>> from secml.array import Cdense
         >>> array = Cdense.zeros(2)
         >>> print array
         [ 0.  0.]
@@ -1483,7 +1483,7 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from prlib.array import Cdense
+        >>> from secml.array import Cdense
         >>> array = Cdense.ones(2)
         >>> print array
         [ 1.  1.]
@@ -1516,7 +1516,7 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from prlib.array import Cdense
+        >>> from secml.array import Cdense
         >>> array = Cdense.empty(2)
         >>> print array  # doctest: +SKIP
         [  6.94292784e-310   6.94292784e-310]
@@ -1552,7 +1552,7 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from prlib.array import Cdense
+        >>> from secml.array import Cdense
         >>> array = Cdense.eye(2)
         >>> print array
         [[ 1.  0.]
@@ -1584,7 +1584,7 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from prlib.array import Cdense
+        >>> from secml.array import Cdense
         >>> array = Cdense.rand(2, 3)
         >>> print(array)  # doctest: +SKIP
         [[ 0.68588225  0.88371576  0.3958642 ]
@@ -1629,7 +1629,7 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from prlib.array import Cdense
+        >>> from secml.array import Cdense
         >>> array = Cdense.randint(0, 5, 10)
         >>> print(array)  # doctest: +SKIP
         [1 0 2 0 4 3 0 2 4 2]
@@ -1649,7 +1649,7 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from prlib.array import Cdense
+        >>> from secml.array import Cdense
         >>> array = Cdense.randsample(10, 4)
         >>> print(array)  # doctest: +SKIP
         [1 0 2 3]
@@ -1776,7 +1776,7 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from prlib.array import Cdense
+        >>> from secml.array import Cdense
 
         >>> x = Cdense( [1,3,5] )
         >>> y = Cdense( [2,4,6] )

@@ -1,5 +1,5 @@
-from prlib.peval.metrics import CMetric
-from prlib.core.constants import nan,inf
+from secml.peval.metrics import CMetric
+from secml.core.constants import nan,inf
 
 class CMetricFirstNan(CMetric):
     class_type = 'some_nan'

@@ -10,12 +10,12 @@ As first test method line use self.logger.info("UNITTEST - CLASSNAME - METHODNAM
 """
 import unittest
 
-from prlib.utils import CUnitTest
-from prlib.array import CArray
-from prlib.features.reduction import CPca, CKernelPca, CLda
+from secml.utils import CUnitTest
+from secml.array import CArray
+from secml.features.reduction import CPca, CKernelPca, CLda
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.lda import LDA
-from prlib.figure import CFigure
+from secml.figure import CFigure
 
 
 class TestArrayDecomposition(CUnitTest):
@@ -67,7 +67,7 @@ class TestArrayDecomposition(CUnitTest):
     def test_kernelpca(self):
         """Test for Kernel PCA. This compares sklearn equivalent to our method."""
 
-        from prlib.kernel import CKernelLinear, CKernelRBF, CKernelPoly
+        from secml.kernel import CKernelLinear, CKernelRBF, CKernelPoly
 
         def sklearn_comp(array):
             kernels = [CKernelLinear(),

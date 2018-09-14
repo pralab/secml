@@ -6,15 +6,15 @@ Class to test CStochasticGradientDescentClassifier
 If you find any BUG, please notify authors first.
 """
 import unittest
-from prlib.utils import CUnitTest
-from prlib.classifiers import CClassifierSGD, CClassifierSVM
-from prlib.classifiers.regularizer import *
-from prlib.classifiers.loss import *
-from prlib.array import CArray
-from prlib.data.loader import CDLRandom, CDLRandomBlobs
-from prlib.features.normalization import CNormalizerMinMax
-from prlib.peval.metrics import CMetric
-from prlib.figure.c_figure import CFigure
+from secml.utils import CUnitTest
+from secml.classifiers import CClassifierSGD, CClassifierSVM
+from secml.classifiers.regularizer import *
+from secml.classifiers.loss import *
+from secml.array import CArray
+from secml.data.loader import CDLRandom, CDLRandomBlobs
+from secml.features.normalization import CNormalizerMinMax
+from secml.peval.metrics import CMetric
+from secml.figure.c_figure import CFigure
 
 
 class TestSGDClassifier(CUnitTest):

@@ -2,7 +2,7 @@ import torch
 from collections import OrderedDict
 
 from . import CTorchClassifier
-from prlib.utils.dict_utils import merge_dicts
+from secml.utils.dict_utils import merge_dicts
 
 
 class CTorchClassifierFullyConnected(CTorchClassifier):

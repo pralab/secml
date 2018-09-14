@@ -8,11 +8,11 @@
 """
 import time
 
-from prlib.core import CCreator
-from prlib.array import CArray
+from secml.core import CCreator
+from secml.array import CArray
 
-from advlib.seceval import CSecEvalData, CSecEvalDataEvasion
-from advlib.c_attack import CAttack
+from secml.adv.seceval import CSecEvalData, CSecEvalDataEvasion
+from secml.adv.attacks.c_attack import CAttack
 
 
 class CSecEval(CCreator):

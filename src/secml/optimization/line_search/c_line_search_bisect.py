@@ -5,8 +5,8 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 """
 
-from prlib.optimization.line_search.c_line_search import CLineSearch
-from prlib.array import CArray
+from secml.optimization.line_search.c_line_search import CLineSearch
+from secml.array import CArray
 
 
 class CLineSearchBisect(CLineSearch):

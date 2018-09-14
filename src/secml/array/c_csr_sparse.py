@@ -11,8 +11,8 @@ import scipy.sparse as scs
 from scipy.sparse.linalg import inv, norm
 import numpy as np
 
-from prlib.array import Cdense
-from prlib.core.type_utils import is_ndarray, is_list_of_lists, \
+from secml.array import Cdense
+from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_intlike, is_int, is_bool
 
 
@@ -1241,7 +1241,7 @@ class Csparse(object):
 
         Examples
         --------
-        >>> from prlib.array import Csparse
+        >>> from secml.array import Csparse
 
         >>> Csparse([-1, 0, 3]).argmin()
         Cdense([0])
@@ -1333,7 +1333,7 @@ class Csparse(object):
 
         Examples
         --------
-        >>> from prlib.array import Csparse
+        >>> from secml.array import Csparse
 
         >>> Csparse([-1, 0, 3]).argmax()
         Cdense([2])
@@ -1429,7 +1429,7 @@ class Csparse(object):
 
         Examples
         --------
-        >>> from prlib.array import Csparse
+        >>> from secml.array import Csparse
 
         >>> Csparse([[-1,0],[2,0]]).logical_and(Csparse([[2,-1],[2,-1]])).todense()
         Cdense([[ True, False],
@@ -1483,7 +1483,7 @@ class Csparse(object):
 
         Examples
         --------
-        >>> from prlib.array import Csparse
+        >>> from secml.array import Csparse
 
         >>> Csparse([[-1,0],[2,0]]).logical_or(Csparse([[2,0],[2,-1]])).todense()
         Cdense([[ True, False],
@@ -1549,7 +1549,7 @@ class Csparse(object):
 
         Examples
         --------
-        >>> from prlib.array import Csparse
+        >>> from secml.array import Csparse
         >>> array = Csparse.eye(2)
         >>> print array  # doctest: +SKIP
         (0, 0)	1.0

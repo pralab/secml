@@ -7,7 +7,7 @@
 
 """
 import unittest
-from prlib.utils import CLog
+from secml.utils import CLog
 
 
 class CUnitTest(unittest.TestCase):

@@ -9,9 +9,9 @@ If you find any BUG, please notify authors first.
 
 """
 import unittest
-from prlib.array import CArray
-from prlib.data import CDataset
-from prlib.utils import CUnitTest
+from secml.array import CArray
+from secml.data import CDataset
+from secml.utils import CUnitTest
 
 
 class TestDataset(CUnitTest):

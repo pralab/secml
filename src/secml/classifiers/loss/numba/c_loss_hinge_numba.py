@@ -5,7 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.classifiers.loss import CLoss
+from secml.classifiers.loss import CLoss
 from numba import jit
 
 

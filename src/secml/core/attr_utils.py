@@ -5,7 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.core.type_utils import is_str
+from secml.core.type_utils import is_str
 
 __all__ = ['as_public', 'as_private',
            'has_property', 'get_property', 'has_getter', 'has_setter',
@@ -24,7 +24,7 @@ def as_public(attr):
 
     Examples
     --------
-    >>> from prlib.core.attr_utils import as_public
+    >>> from secml.core.attr_utils import as_public
 
     >>> as_public('_attr1')
     'attr1'
@@ -288,7 +288,7 @@ def extract_attr(obj, mode):
 
 
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
 
 class TestAttributeUtilities(CUnitTest):

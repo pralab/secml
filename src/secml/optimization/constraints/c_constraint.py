@@ -8,8 +8,8 @@ Implements equality/inequality constraints in the canonic form
 '''
 
 from abc import ABCMeta, abstractmethod
-from prlib.core import CCreator
-from prlib.array import CArray
+from secml.core import CCreator
+from secml.array import CArray
 
 
 class CConstraint(CCreator):

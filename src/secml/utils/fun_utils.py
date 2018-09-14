@@ -24,7 +24,7 @@ class OrderedFlexibleClass(object):
 
     Examples
     --------
-    >>> from prlib.utils import OrderedFlexibleClass
+    >>> from secml.utils import OrderedFlexibleClass
 
     >>> c = OrderedFlexibleClass(('attr1', None), ('attr2', 5))
     >>> print tuple(attr for attr in c)

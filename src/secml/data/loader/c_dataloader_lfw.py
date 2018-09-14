@@ -5,11 +5,11 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.data.loader import CDataLoader
-from prlib.data import CDataset
-from prlib.array import CArray
-from prlib.utils import fm
-from prlib.core.settings import DATA_DIR
+from secml.data.loader import CDataLoader
+from secml.data import CDataset
+from secml.array import CArray
+from secml.utils import fm
+from secml.core.settings import DATA_DIR
 
 from sklearn.datasets import fetch_lfw_people
 

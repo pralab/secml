@@ -6,8 +6,8 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.optimization.constraints import CConstraint
-from prlib.array import CArray
+from secml.optimization.constraints import CConstraint
+from secml.array import CArray
 
 
 class CConstraintLinear(CConstraint):

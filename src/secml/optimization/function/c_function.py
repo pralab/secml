@@ -7,8 +7,8 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.core import CCreator
-from prlib.array import CArray
+from secml.core import CCreator
+from secml.array import CArray
 
 
 class CFunction(CCreator):

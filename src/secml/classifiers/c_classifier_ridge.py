@@ -8,9 +8,9 @@
 
 """
 from sklearn.linear_model import RidgeClassifier
-from prlib.classifiers import CClassifierLinear
-from prlib.array import CArray
-from prlib.kernel import CKernel
+from secml.classifiers import CClassifierLinear
+from secml.array import CArray
+from secml.kernel import CKernel
 
 
 class CClassifierRidge(CClassifierLinear):

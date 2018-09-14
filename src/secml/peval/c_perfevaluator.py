@@ -10,11 +10,11 @@ from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 from copy import deepcopy
 
-from prlib.core import CCreator
-from prlib.array import CArray
-from prlib.data.splitter import CDataSplitter
-from prlib.peval.metrics import CMetric
-from prlib.parallel import parfor2
+from secml.core import CCreator
+from secml.array import CArray
+from secml.data.splitter import CDataSplitter
+from secml.peval.metrics import CMetric
+from secml.parallel import parfor2
 
 
 def _evaluate_one(

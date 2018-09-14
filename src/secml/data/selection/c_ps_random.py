@@ -6,7 +6,7 @@
 
 """
 from c_prototypes_selector import CPrototypesSelector
-from prlib.array import CArray
+from secml.array import CArray
 
 
 class CPSRandom(CPrototypesSelector):

@@ -4,11 +4,11 @@ import numpy as np
 import pylab as pl
 from matplotlib.colors import ListedColormap
 
-from prlib.utils import CUnitTest
-from prlib.classifiers import CClassifierKNN
-from prlib.data import CDataset
-from prlib.data.loader import CDLRandom
-from prlib.peval.metrics import CMetricAccuracy
+from secml.utils import CUnitTest
+from secml.classifiers import CClassifierKNN
+from secml.data import CDataset
+from secml.data.loader import CDLRandom
+from secml.peval.metrics import CMetricAccuracy
 
 
 class TestCClassifierKNN(CUnitTest):

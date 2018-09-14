@@ -5,9 +5,9 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.classifiers import CClassifier
-from prlib.kernel import CKernel
+from secml.array import CArray
+from secml.classifiers import CClassifier
+from secml.kernel import CKernel
 
 
 class CClassifierKDE(CClassifier):

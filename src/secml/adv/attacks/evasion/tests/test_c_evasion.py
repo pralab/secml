@@ -1,16 +1,16 @@
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 from abc import ABCMeta, abstractmethod
 
 from numpy import *
 import time
 
-from prlib.core.type_utils import is_list
-from prlib.array import CArray
-from prlib.data.loader import CDLRandomBlobs
-from prlib.figure import CFigure
+from secml.core.type_utils import is_list
+from secml.array import CArray
+from secml.data.loader import CDLRandomBlobs
+from secml.figure import CFigure
 
-from advlib.evasion import CAttackEvasion
-from prlib.optimization.constraints import \
+from secml.adv.attacks.evasion import CAttackEvasion
+from secml.optimization.constraints import \
     CConstraintBox, CConstraintL1, CConstraintL2
 
 

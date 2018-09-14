@@ -11,11 +11,11 @@ from importlib import import_module
 from inspect import isclass, getmembers
 from functools import wraps
 
-from prlib.core.attr_utils import is_public, extract_attr, as_public, as_private
-from prlib.core.type_utils import is_str
+from secml.core.attr_utils import is_public, extract_attr, as_public, as_private
+from secml.core.type_utils import is_str
 import prlib.utils.pickle_utils as pck
-from prlib.utils.list_utils import find_duplicates
-from prlib.utils import CLog, SubLevelsDict
+from secml.utils.list_utils import find_duplicates
+from secml.utils import CLog, SubLevelsDict
 
 
 class CCreator(object):

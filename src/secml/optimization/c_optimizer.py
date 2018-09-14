@@ -9,11 +9,11 @@
 """
 from abc import ABCMeta, abstractmethod
 
-from prlib.core import CCreator
-from prlib.optimization.function import CFunction
-from prlib.array import CArray
+from secml.core import CCreator
+from secml.optimization.function import CFunction
+from secml.array import CArray
 from scipy import optimize as sc_opt
-from prlib.core.constants import eps
+from secml.core.constants import eps
 
 class COptimizer(CCreator):
     """Abstract class for implementing optimizers."""
@@ -207,8 +207,8 @@ class COptimizer(CCreator):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.optimization import COptimizer
+        >>> from secml.array import CArray
+        >>> from secml.optimization import COptimizer
 
         >>> def func(x, c0, c1):
         ...     "Coordinate vector `x` should be an array of size two."

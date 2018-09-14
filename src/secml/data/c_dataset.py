@@ -6,8 +6,8 @@
 .. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.core.attr_utils import extract_attr
+from secml.array import CArray
+from secml.core.attr_utils import extract_attr
 
 
 class CDataset(object):
@@ -45,7 +45,7 @@ class CDataset(object):
 
         Examples
         --------
-        >>> from prlib.data import CDataset
+        >>> from secml.data import CDataset
 
         >>> ds = CDataset([[1,2],[3,4],[5,6]],[1,0,1])
         >>> print ds.X
@@ -61,7 +61,7 @@ class CDataset(object):
         >>> print ds.Y
         CArray([1])
 
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
         >>> ds = CDataset(CArray([[1,0],[0,4],[1,0]],tosparse=True), CArray([1,0,1], tosparse=True))
         >>> print ds.X  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
@@ -239,7 +239,7 @@ class CDataset(object):
 
         Examples
         --------
-        >>> from prlib.data import CDataset
+        >>> from secml.data import CDataset
 
         >>> ds = CDataset([[1,2],[3,4],[5,6]],[1,0,1])
         >>> ds_new = ds.append(CDataset([[10,20],[30,40],[50,60]],[1,0,1]))
@@ -277,7 +277,7 @@ class CDataset(object):
 
         Examples
         --------
-        >>> from prlib.data import CDataset
+        >>> from secml.data import CDataset
 
         >>> ds = CDataset([[1,2],[3,4],[5,6]],[1,0,1])
         >>> ds_copy = ds.deepcopy()
@@ -311,7 +311,7 @@ class CDataset(object):
 
         Examples
         --------
-        >>> from prlib.data import CDataset
+        >>> from secml.data import CDataset
 
         >>> ds = CDataset([[1,2],[3,4],[5,6]],[1,0,1]).tosparse()
         >>> print ds.X  # doctest: +NORMALIZE_WHITESPACE
@@ -338,7 +338,7 @@ class CDataset(object):
 
         Examples
         --------
-        >>> from prlib.data import CDataset
+        >>> from secml.data import CDataset
 
         >>> ds = CDataset(CArray([[1,2],[3,4],[5,6]], tosparse=True),[1,0,1]).todense()
         >>> print ds.X
@@ -414,8 +414,8 @@ class CDataset(object):
 
         Examples
         ----------
-        >>> from prlib.array import CArray
-        >>> from prlib.data import  CDataset
+        >>> from secml.array import CArray
+        >>> from secml.data import  CDataset
 
         >>> ds = CDataset([[1,2,3],[4,5,6]], [1,2])
         >>> ds.get_bounds()

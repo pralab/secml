@@ -8,9 +8,9 @@
 
 """
 
-from prlib.core import CCreator
-from prlib.optimization.function import CFunction
-from prlib.optimization.constraints import CConstraint
+from secml.core import CCreator
+from secml.optimization.function import CFunction
+from secml.optimization.constraints import CConstraint
 from abc import ABCMeta, abstractmethod
 
 

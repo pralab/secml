@@ -1,6 +1,6 @@
-from prlib.figure.plots import CPlot
-from prlib.array import CArray
-from prlib.core.constants import inf
+from secml.figure.plots import CPlot
+from secml.array import CArray
+from secml.core.constants import inf
 
 
 class CPlotFunction(CPlot):

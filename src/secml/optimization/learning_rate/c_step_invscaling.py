@@ -1,5 +1,5 @@
 
-from prlib.optimization.learning_rate import CStep
+from secml.optimization.learning_rate import CStep
 
 
 class CStepInvscaling(CStep):

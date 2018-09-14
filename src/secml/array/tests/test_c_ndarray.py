@@ -10,8 +10,8 @@ If you find any BUG, please notify authors first.
 import unittest
 import numpy as np
 
-from prlib.utils import CUnitTest
-from prlib.array import Cdense
+from secml.utils import CUnitTest
+from secml.array import Cdense
 
 
 class TestCndarray(CUnitTest):

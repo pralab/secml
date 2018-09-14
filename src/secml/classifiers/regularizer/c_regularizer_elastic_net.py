@@ -6,7 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.classifiers.regularizer import CRegularizer
+from secml.classifiers.regularizer import CRegularizer
 
 
 class CRegularizerElasticNet(CRegularizer):

@@ -6,8 +6,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.classifiers.regularizer import CRegularizer
-from prlib.array import CArray
+from secml.classifiers.regularizer import CRegularizer
+from secml.array import CArray
 
 
 class CRegularizerL2(CRegularizer):

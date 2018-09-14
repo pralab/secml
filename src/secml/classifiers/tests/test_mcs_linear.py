@@ -1,10 +1,10 @@
 import unittest
-from prlib.utils import CUnitTest
-from prlib.array import CArray
-from prlib.figure import CFigure
-from prlib.data.loader import CDLRandom
-from prlib.classifiers import CClassifierMCSLinear, CClassifierSVM
-from prlib.peval.metrics import CMetric
+from secml.utils import CUnitTest
+from secml.array import CArray
+from secml.figure import CFigure
+from secml.data.loader import CDLRandom
+from secml.classifiers import CClassifierMCSLinear, CClassifierSVM
+from secml.peval.metrics import CMetric
 
 from sklearn.svm import SVC
 from sklearn.ensemble import BaggingClassifier

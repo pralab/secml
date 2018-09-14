@@ -8,8 +8,8 @@
 """
 from sklearn import metrics
 
-from prlib.array import CArray
-from prlib.kernel import CKernel
+from secml.array import CArray
+from secml.kernel import CKernel
 
 
 class CKernelRBF(CKernel):
@@ -35,8 +35,8 @@ class CKernelRBF(CKernel):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.kernel.c_kernel_rbf import CKernelRBF
+    >>> from secml.array import CArray
+    >>> from secml.kernel.c_kernel_rbf import CKernelRBF
 
     >>> print CKernelRBF(gamma=0.001).k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
     CArray([[ 0.66697681  0.10177406]
@@ -121,8 +121,8 @@ class CKernelRBF(CKernel):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.kernel.c_kernel_rbf import CKernelRBF
+        >>> from secml.array import CArray
+        >>> from secml.kernel.c_kernel_rbf import CKernelRBF
 
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])

@@ -1,7 +1,7 @@
 import unittest
 from test_c_evasion import TestCEvasionCases
 
-from prlib.classifiers import CClassifierDecisionTree
+from secml.classifiers import CClassifierDecisionTree
 
 
 class TestEvasionTreeL1(TestCEvasionCases.TestCEvasion):

@@ -5,9 +5,9 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 """
-from prlib.array import CArray
-from advlib.evasion.solvers import CSolver
-from prlib.core.constants import nan, inf
+from secml.array import CArray
+from secml.adv.attacks.evasion.solvers import CSolver
+from secml.core.constants import nan, inf
 
 
 class CSolverGradDesc(CSolver):

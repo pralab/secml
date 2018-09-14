@@ -7,8 +7,8 @@
 """
 from numba import guvectorize
 
-from prlib.array import CArray
-from prlib.kernel.c_kernel_histintersect import CKernelHistIntersect
+from secml.array import CArray
+from secml.kernel.c_kernel_histintersect import CKernelHistIntersect
 
 
 class CKernelHistIntersectNumba(CKernelHistIntersect):
@@ -27,8 +27,8 @@ class CKernelHistIntersectNumba(CKernelHistIntersect):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.kernel.numba_kernel.c_kernel_histintersect_numba import CKernelHistIntersectNumba
+    >>> from secml.array import CArray
+    >>> from secml.kernel.numba_kernel.c_kernel_histintersect_numba import CKernelHistIntersectNumba
 
     >>> print CKernelHistIntersectNumba().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
     CArray([[ 3.  3.]

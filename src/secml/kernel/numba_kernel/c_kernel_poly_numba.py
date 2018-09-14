@@ -7,10 +7,10 @@
 """
 from numba import guvectorize
 
-from prlib.array import CArray
-from prlib.kernel.c_kernel_poly import CKernelPoly
+from secml.array import CArray
+from secml.kernel.c_kernel_poly import CKernelPoly
 
-from prlib.kernel.numba_kernel.numba_utils import sqrd_eucl_dense, dot_dense
+from secml.kernel.numba_kernel.numba_utils import sqrd_eucl_dense, dot_dense
 
 
 class CKernelPolyNumba(CKernelPoly):
@@ -39,8 +39,8 @@ class CKernelPolyNumba(CKernelPoly):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.kernel.numba_kernel.c_kernel_poly_numba import CKernelPolyNumba
+    >>> from secml.array import CArray
+    >>> from secml.kernel.numba_kernel.c_kernel_poly_numba import CKernelPolyNumba
 
     >>> print CKernelPolyNumba(degree=3, gamma=0.001, coef0=2).k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
     CArray([[  8.615125   9.393931]
@@ -128,8 +128,8 @@ class CKernelPolyNumba(CKernelPoly):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.kernel.numba_kernel.c_kernel_poly_numba import CKernelPolyNumba
+        >>> from secml.array import CArray
+        >>> from secml.kernel.numba_kernel.c_kernel_poly_numba import CKernelPolyNumba
 
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])

@@ -5,11 +5,11 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.data.loader import CDataLoader
-from prlib.data import CDataset
-from prlib.array import CArray
-from prlib.utils import fm
-from prlib.utils.dict_utils import load_dict
+from secml.data.loader import CDataLoader
+from secml.data import CDataset
+from secml.array import CArray
+from secml.utils import fm
+from secml.utils.dict_utils import load_dict
 
 from PIL import Image
 

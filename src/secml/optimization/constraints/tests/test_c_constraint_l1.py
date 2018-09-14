@@ -6,13 +6,13 @@ Created on 27/apr/2015
 This module provides the test for the CConstraintL1
 """
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.array import CArray
-from prlib.figure import CFigure
-from prlib.data.loader import CDataLoader
-from prlib.optimization.constraints import CConstraint
-from prlib.optimization.constraints import CConstraintL1
+from secml.array import CArray
+from secml.figure import CFigure
+from secml.data.loader import CDataLoader
+from secml.optimization.constraints import CConstraint
+from secml.optimization.constraints import CConstraintL1
 
 
 class TestCConstraintL1(CUnitTest):

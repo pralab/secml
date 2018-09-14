@@ -8,12 +8,12 @@
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-from prlib.core import CCreator
-from prlib.array import CArray
-from prlib.data import CDataset
-from prlib.features.normalization import CNormalizer
-from prlib.optimization import COptimizer
-from prlib.parallel import parfor2
+from secml.core import CCreator
+from secml.array import CArray
+from secml.data import CDataset
+from secml.features.normalization import CNormalizer
+from secml.optimization import COptimizer
+from secml.parallel import parfor2
 
 
 def _classify_one(tr_class_idx, clf, test_x, verbose):
@@ -339,7 +339,7 @@ class CClassifier(CCreator):
 
         """
         # Import here as is only needed if this function is called
-        from prlib.peval import CPerfEvaluator
+        from secml.peval import CPerfEvaluator
 
         # Initialize the evaluator
         perf_eval = CPerfEvaluator.create(perf_evaluator, splitter, metric)
@@ -451,7 +451,7 @@ class CClassifier(CCreator):
         .COptimizer : functions for optimization and approximation
 
         """
-        from prlib.optimization.function import CFunction
+        from secml.optimization.function import CFunction
         return COptimizer(
             CFunction(fun=self.discriminant_function)).approx_fprime(
             value, 1e-6, label)

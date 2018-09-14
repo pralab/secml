@@ -6,7 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.classifiers.loss import CLoss
+from secml.classifiers.loss import CLoss
 
 
 class CLossSquared(CLoss):

@@ -6,10 +6,10 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.core import CCreator
-from prlib.figure.plots import CPlot
-from prlib.utils import LastInDict
-from prlib.core.type_utils import is_tuple
+from secml.core import CCreator
+from secml.figure.plots import CPlot
+from secml.utils import LastInDict
+from secml.core.type_utils import is_tuple
 
 import os
 import matplotlib as mpl
@@ -57,7 +57,7 @@ class CFigure(CCreator):
 
     Examples
     --------
-    >>> from prlib.figure import CFigure
+    >>> from secml.figure import CFigure
 
     >>> fig = CFigure(fontsize=14)
     >>> fig.sp.plot([0, 1], color='red')

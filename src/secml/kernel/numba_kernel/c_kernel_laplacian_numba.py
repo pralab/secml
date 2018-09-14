@@ -9,10 +9,10 @@ from numba import guvectorize
 import numpy as np
 from math import exp
 
-from prlib.array import CArray
-from prlib.kernel.c_kernel_laplacian import CKernelLaplacian
+from secml.array import CArray
+from secml.kernel.c_kernel_laplacian import CKernelLaplacian
 
-from prlib.kernel.numba_kernel.numba_utils import manh_dense
+from secml.kernel.numba_kernel.numba_utils import manh_dense
 
 
 class CKernelLaplacianNumba(CKernelLaplacian):

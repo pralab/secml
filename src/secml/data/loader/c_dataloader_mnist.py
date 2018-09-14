@@ -5,12 +5,12 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.data.loader import CDataLoader
-from prlib.data import CDataset
-from prlib.array import CArray
-from prlib.utils import fm
-from prlib.utils.download_utils import dl_file, md5
-from prlib.core.settings import DATA_DIR
+from secml.data.loader import CDataLoader
+from secml.data import CDataset
+from secml.array import CArray
+from secml.utils import fm
+from secml.utils.download_utils import dl_file, md5
+from secml.core.settings import DATA_DIR
 
 import gzip
 import struct

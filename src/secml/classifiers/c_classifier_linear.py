@@ -6,9 +6,9 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.classifiers import CClassifier
-from prlib.array import CArray
-from prlib.data import CDataset
+from secml.classifiers import CClassifier
+from secml.array import CArray
+from secml.data import CDataset
 
 
 class CClassifierLinear(CClassifier):

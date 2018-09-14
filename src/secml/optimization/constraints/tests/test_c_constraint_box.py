@@ -5,14 +5,14 @@ This class implements tests for the CConstraintBox
 
 """
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.data import CDataset
-from prlib.data.loader import CDataLoader
-from prlib.array import CArray
-from prlib.optimization.constraints import CConstraint
-from prlib.optimization.constraints import CConstraintBox
-from prlib.figure import CFigure
+from secml.data import CDataset
+from secml.data.loader import CDataLoader
+from secml.array import CArray
+from secml.optimization.constraints import CConstraint
+from secml.optimization.constraints import CConstraintBox
+from secml.figure import CFigure
 
 
 class TestCConstraintBox(CUnitTest):

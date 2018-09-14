@@ -1,9 +1,9 @@
 import unittest
 from test_c_evasion import TestCEvasionCases
 
-from prlib.classifiers import CClassifierSVM
-from prlib.classifiers.multiclass import CClassifierMulticlassOVA
-from prlib.features.normalization import CNormalizerMinMax
+from secml.classifiers import CClassifierSVM
+from secml.classifiers.multiclass import CClassifierMulticlassOVA
+from secml.features.normalization import CNormalizerMinMax
 
 
 class TestEvasionLinearL1(TestCEvasionCases.TestCEvasion):

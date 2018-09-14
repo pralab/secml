@@ -7,9 +7,9 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.features.normalization import CNormalizerLinear
-from prlib.core.constants import inf
+from secml.array import CArray
+from secml.features.normalization import CNormalizerLinear
+from secml.core.constants import inf
 
 
 # TODO: ADD SPARSE ARRAYS SUPPORT
@@ -51,8 +51,8 @@ class CNormalizerMinMax(CNormalizerLinear):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.features.normalization import CNormalizerMinMax
+    >>> from secml.array import CArray
+    >>> from secml.features.normalization import CNormalizerMinMax
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
     >>> print CNormalizerMinMax().train_normalize(array)
@@ -180,8 +180,8 @@ class CNormalizerMinMax(CNormalizerLinear):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.features.normalization import CNormalizerMinMax
+        >>> from secml.array import CArray
+        >>> from secml.features.normalization import CNormalizerMinMax
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
         >>> normalizer = CNormalizerMinMax().train(array)
@@ -234,8 +234,8 @@ class CNormalizerMinMax(CNormalizerLinear):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.features.normalization import CNormalizerMinMax
+        >>> from secml.array import CArray
+        >>> from secml.features.normalization import CNormalizerMinMax
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
         >>> normalizer = CNormalizerMinMax().train(array)
@@ -282,8 +282,8 @@ class CNormalizerMinMax(CNormalizerLinear):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.features.normalization import CNormalizerMinMax
+        >>> from secml.array import CArray
+        >>> from secml.features.normalization import CNormalizerMinMax
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
         >>> normalizer = CNormalizerMinMax().train(array)

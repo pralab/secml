@@ -1,9 +1,9 @@
 import unittest
-from prlib.utils import CUnitTest
-from prlib.optimization.function import CFunction
-from prlib.array import CArray
-from prlib.figure import CFigure
-from prlib.optimization.line_search import CLineSearchBisect
+from secml.utils import CUnitTest
+from secml.optimization.function import CFunction
+from secml.array import CArray
+from secml.figure import CFigure
+from secml.optimization.line_search import CLineSearchBisect
 
 
 class TestLineSearch(CUnitTest):

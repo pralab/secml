@@ -8,8 +8,8 @@
 """
 from sklearn.cross_validation import KFold
 
-from prlib.array import CArray
-from prlib.data.splitter import CDataSplitter
+from secml.array import CArray
+from secml.data.splitter import CDataSplitter
 
 
 class CDataSplitterKFold(CDataSplitter):
@@ -33,8 +33,8 @@ class CDataSplitterKFold(CDataSplitter):
 
     Examples
     --------
-    >>> from prlib.data import CDataset
-    >>> from prlib.data.splitter import CDataSplitterKFold
+    >>> from secml.data import CDataset
+    >>> from secml.data.splitter import CDataSplitterKFold
 
     >>> ds = CDataset([[1,2],[3,4],[5,6]],[1,0,1])
     >>> kfold = CDataSplitterKFold(num_folds=3, random_state=0).compute_indices(ds)

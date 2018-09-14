@@ -7,9 +7,9 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.data.loader import CDataLoader
-from prlib.data import CDataset
-from prlib.array import CArray
+from secml.data.loader import CDataLoader
+from secml.data import CDataset
+from secml.array import CArray
 
 __all__ = ['CDLRandom', 'CDLRandomRegression',
            'CDLRandomBlobs', 'CDLRandomBlobsRegression',
@@ -327,7 +327,7 @@ class CDLRandomBlobsRegression(CDataLoader):
 
     def _dts_function(self, X):
         """ TODO: Put a comment for this function. """
-        from prlib.stats import CDistributionGaussian
+        from secml.stats import CDistributionGaussian
         d = X.shape[1]  # number of features
         Y = self.bias
         for gauss_idx in xrange(len(self.centers)):

@@ -1,5 +1,5 @@
-from prlib.figure.plots import CPlot
-from prlib.peval.metrics import CRoc
+from secml.figure.plots import CPlot
+from secml.peval.metrics import CRoc
 
 
 class CPlotRoc(CPlot):

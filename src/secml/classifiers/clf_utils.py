@@ -5,7 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.array import CArray
+from secml.array import CArray
 
 
 def extend_binary_labels(labels):
@@ -24,8 +24,8 @@ def extend_binary_labels(labels):
 
     Examples
     --------
-    >>> from prlib.classifiers.clf_utils import extend_binary_labels
-    >>> from prlib.array import CArray
+    >>> from secml.classifiers.clf_utils import extend_binary_labels
+    >>> from secml.array import CArray
 
     >>> print extend_binary_labels(CArray([0,1,1,1,0,0]))
     CArray([-1  1  1  1 -1 -1])

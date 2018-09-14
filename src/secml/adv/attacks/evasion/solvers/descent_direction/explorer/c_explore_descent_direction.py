@@ -6,9 +6,9 @@
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 """
-from prlib.core import CCreator
-from prlib.optimization.line_search import CLineSearch
-from prlib.array import CArray
+from secml.core import CCreator
+from secml.optimization.line_search import CLineSearch
+from secml.array import CArray
 
 
 class CExploreDescentDirection(CCreator):

@@ -7,7 +7,7 @@ This module contains the class for the L2 constraint
 
 """
 
-from prlib.optimization.constraints import CConstraint
+from secml.optimization.constraints import CConstraint
 
 class CConstraintL2(CConstraint):
 

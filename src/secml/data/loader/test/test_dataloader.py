@@ -1,7 +1,7 @@
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.data.loader import CDataLoader
+from secml.data.loader import CDataLoader
 
 
 class TestCDataLoader(CUnitTest):

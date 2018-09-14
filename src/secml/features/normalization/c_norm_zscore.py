@@ -5,8 +5,8 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.features.normalization import CNormalizerLinear
+from secml.array import CArray
+from secml.features.normalization import CNormalizerLinear
 
 
 class CNormalizerZScore(CNormalizerLinear):
@@ -44,8 +44,8 @@ class CNormalizerZScore(CNormalizerLinear):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.features.normalization import CNormalizerZScore
+    >>> from secml.array import CArray
+    >>> from secml.features.normalization import CNormalizerZScore
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
     >>> print CNormalizerZScore().train_normalize(array)
@@ -146,8 +146,8 @@ class CNormalizerZScore(CNormalizerLinear):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.features.normalization import CNormalizerZScore
+        >>> from secml.array import CArray
+        >>> from secml.features.normalization import CNormalizerZScore
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]],tosparse=True)
 
         >>> normalizer = CNormalizerZScore().train(array)
@@ -202,8 +202,8 @@ class CNormalizerZScore(CNormalizerLinear):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.features.normalization import CNormalizerZScore
+        >>> from secml.array import CArray
+        >>> from secml.features.normalization import CNormalizerZScore
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]], tosparse=True)
 
         >>> normalizer = CNormalizerZScore().train(array)
@@ -260,8 +260,8 @@ class CNormalizerZScore(CNormalizerLinear):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.features.normalization import CNormalizerZScore
+        >>> from secml.array import CArray
+        >>> from secml.features.normalization import CNormalizerZScore
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
         >>> normalizer = CNormalizerZScore().train(array)

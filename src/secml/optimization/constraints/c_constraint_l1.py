@@ -7,8 +7,8 @@ This module contains the class for the L1 constraints
 
 """
 import numpy as np
-from prlib.array import CArray
-from prlib.optimization.constraints import CConstraint
+from secml.array import CArray
+from secml.optimization.constraints import CConstraint
 
 
 class CConstraintL1(CConstraint):

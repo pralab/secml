@@ -8,8 +8,8 @@
 """
 from sklearn import metrics
 
-from prlib.array import CArray
-from prlib.kernel import CKernel
+from secml.array import CArray
+from secml.kernel import CKernel
 import numpy as np
 
 
@@ -36,8 +36,8 @@ class CKernelLaplacian(CKernel):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.kernel.c_kernel_laplacian import CKernelLaplacian
+    >>> from secml.array import CArray
+    >>> from secml.kernel.c_kernel_laplacian import CKernelLaplacian
 
     >>> print CKernelLaplacian(gamma=0.01).k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
     CArray([[ 0.76337949  0.51170858]

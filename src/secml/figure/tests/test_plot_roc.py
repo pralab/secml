@@ -1,11 +1,11 @@
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.array import CArray
-from prlib.peval.metrics import CRoc
-from prlib.figure import CFigure
-from prlib.classifiers import CClassifierSVM
-from prlib.data.loader import CDLRandom
+from secml.array import CArray
+from secml.peval.metrics import CRoc
+from secml.figure import CFigure
+from secml.classifiers import CClassifierSVM
+from secml.data.loader import CDLRandom
 
 
 class TestCRoc(CUnitTest):
@@ -111,7 +111,7 @@ class TestCRoc(CUnitTest):
         from sklearn.metrics import roc_curve, auc
         from sklearn.cross_validation import StratifiedKFold
 
-        from prlib.figure import CFigure
+        from secml.figure import CFigure
         roc_fig = CFigure(width=12)
 
         # import some data to play with

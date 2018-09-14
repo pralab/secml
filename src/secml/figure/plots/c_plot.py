@@ -1,7 +1,7 @@
 
-from prlib.core import CCreator
-from prlib.array import CArray
-from prlib.array.array_utils import tuple_sequence_tondarray
+from secml.core import CCreator
+from secml.array import CArray
+from secml.array.array_utils import tuple_sequence_tondarray
 
 from matplotlib.axes import Axes
 

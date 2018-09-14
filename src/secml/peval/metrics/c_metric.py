@@ -8,7 +8,7 @@
 from abc import ABCMeta, abstractmethod
 import inspect
 
-from prlib.core import CCreator
+from secml.core import CCreator
 
 
 class CMetric(CCreator):
@@ -29,8 +29,8 @@ class CMetric(CCreator):
 
     Examples
     --------
-    >>> from prlib.peval.metrics import CMetric
-    >>> from prlib.array import CArray
+    >>> from secml.peval.metrics import CMetric
+    >>> from secml.array import CArray
 
     >>> peval = CMetric.create('accuracy')
     >>> print peval.performance_score(y_true=CArray([0, 1, 2, 3]), y_pred=CArray([0, 1, 1, 3]))

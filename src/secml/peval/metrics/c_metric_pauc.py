@@ -7,9 +7,9 @@
 """
 import sklearn.metrics as skm
 
-from prlib.array import CArray
-from prlib.peval.metrics import CMetric
-from prlib.peval.metrics import CRoc
+from secml.array import CArray
+from secml.peval.metrics import CMetric
+from secml.peval.metrics import CRoc
 
 
 class CMetricPartialAUC(CMetric):
@@ -38,8 +38,8 @@ class CMetricPartialAUC(CMetric):
 
     Examples
     --------
-    >>> from prlib.peval.metrics import CMetricPartialAUC
-    >>> from prlib.array import CArray
+    >>> from secml.peval.metrics import CMetricPartialAUC
+    >>> from secml.array import CArray
 
     >>> peval = CMetricPartialAUC(fp_rate=0.5)
     >>> print peval.performance_score(CArray([0, 1, 0, 0]), score=CArray([0, 0, 0, 0]))

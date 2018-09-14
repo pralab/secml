@@ -6,12 +6,12 @@ Class to test CFigure
 
 """
 import unittest
-from prlib.array import CArray
-from prlib.data import CDataset
-from prlib.figure import CFigure
-from prlib.classifiers import CClassifierSVM
-from prlib.utils import CUnitTest
-from prlib.core import constants
+from secml.array import CArray
+from secml.data import CDataset
+from secml.figure import CFigure
+from secml.classifiers import CClassifierSVM
+from secml.utils import CUnitTest
+from secml.core import constants
 
 
 class TestCFigure(CUnitTest):
@@ -42,7 +42,7 @@ class TestCFigure(CUnitTest):
         """Set up method for tests."""
         self.logger.info("Starting Test...")
         self.logger.info("." * 50)
-        from prlib.kernel import CKernelRBF
+        from secml.kernel import CKernelRBF
         self.classifier = CClassifierSVM(kernel=CKernelRBF())
         self.classifier.train(self.dataset)
 

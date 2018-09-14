@@ -8,11 +8,11 @@
 """
 from sklearn import linear_model
 
-from prlib.classifiers import CClassifierLinear
-from prlib.array import CArray
-from prlib.classifiers.regularizer import CRegularizer
-from prlib.classifiers.loss import CLoss
-from prlib.kernel import CKernel
+from secml.classifiers import CClassifierLinear
+from secml.array import CArray
+from secml.classifiers.regularizer import CRegularizer
+from secml.classifiers.loss import CLoss
+from secml.kernel import CKernel
 
 
 class CClassifierSGD(CClassifierLinear):

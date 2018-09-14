@@ -1,10 +1,10 @@
 import unittest
 
-from prlib.data import CDataset
-from prlib.array import CArray
-from prlib.data.splitter import *
-from prlib.data.loader import CDLRandom
-from prlib.utils import CUnitTest
+from secml.data import CDataset
+from secml.array import CArray
+from secml.data.splitter import *
+from secml.data.loader import CDLRandom
+from secml.utils import CUnitTest
 
 
 class TestCDataSplitter(CUnitTest):

@@ -6,20 +6,20 @@ This class tests the CClassifierSVM
 If you find any BUG, please notify authors first.
 """
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
 import numpy as np
 import numpy.testing as npt
 from sklearn.svm import SVC
 import sklearn.metrics as skm
 
-from prlib.data import CDataset
-from prlib.data.loader import CDLRandom
-from prlib.array import CArray
-from prlib.classifiers import CClassifierSVM
-from prlib.figure import CFigure
-from prlib.kernel import *
-from prlib.optimization import COptimizer
+from secml.data import CDataset
+from secml.data.loader import CDLRandom
+from secml.array import CArray
+from secml.classifiers import CClassifierSVM
+from secml.figure import CFigure
+from secml.kernel import *
+from secml.optimization import COptimizer
 
 
 class TestSVM(CUnitTest):
@@ -268,7 +268,7 @@ class TestSVM(CUnitTest):
 
     def test_normalizer(self):
 
-        from prlib.features.normalization import CNormalizerMinMax
+        from secml.features.normalization import CNormalizerMinMax
 
         data = CDLRandom().load()
         norm = CNormalizerMinMax()

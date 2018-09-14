@@ -1,9 +1,9 @@
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.figure.c_figure import CFigure
-from prlib.data.selection import CPrototypesSelector
-from prlib.data.loader import CDLRandomBlobs
+from secml.figure.c_figure import CFigure
+from secml.data.selection import CPrototypesSelector
+from secml.data.loader import CDLRandomBlobs
 
 
 class TestPS(CUnitTest):

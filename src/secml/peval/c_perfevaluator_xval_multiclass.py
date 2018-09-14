@@ -5,9 +5,9 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.peval import CPerfEvaluator
-from prlib.array import CArray
-from prlib.core.type_utils import is_scalar
+from secml.peval import CPerfEvaluator
+from secml.array import CArray
+from secml.core.type_utils import is_scalar
 
 
 class CPerfEvaluatorXValMulticlass(CPerfEvaluator):

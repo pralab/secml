@@ -6,7 +6,7 @@ Last revision on 26/feb/2016
 @author: Battista Biggio
 '''
 
-from prlib.optimization.constraints.c_constraint import CConstraint
+from secml.optimization.constraints.c_constraint import CConstraint
 
 
 class CConstraintSet(CConstraint):

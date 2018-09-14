@@ -13,9 +13,9 @@ import scipy.sparse as scs
 import operator as op
 import itertools
 
-from prlib.utils import CUnitTest
-from prlib.array import CArray, Cdense, Csparse
-from prlib.core.type_utils import is_scalar, is_bool, is_list, is_list_of_lists
+from secml.utils import CUnitTest
+from secml.array import CArray, Cdense, Csparse
+from secml.core.type_utils import is_scalar, is_bool, is_list, is_list_of_lists
 
 from numpy import matlib
 

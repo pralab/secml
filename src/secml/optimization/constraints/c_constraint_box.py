@@ -6,10 +6,10 @@ This module contains the class for the Box constraint
 
 '''
 
-from prlib.optimization.constraints import CConstraint
-from prlib.array import CArray
-from prlib.core.type_utils import is_scalar
-from prlib.core.constants import inf
+from secml.optimization.constraints import CConstraint
+from secml.array import CArray
+from secml.core.type_utils import is_scalar
+from secml.core.constants import inf
 
 
 class CConstraintBox(CConstraint):

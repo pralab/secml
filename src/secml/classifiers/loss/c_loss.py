@@ -7,7 +7,7 @@
 
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
-from prlib.core import CCreator
+from secml.core import CCreator
 
 
 class CLoss(CCreator):

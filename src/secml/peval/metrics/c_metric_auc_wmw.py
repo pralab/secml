@@ -5,8 +5,8 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.peval.metrics import CMetric
+from secml.array import CArray
+from secml.peval.metrics import CMetric
 
 
 class CMetricAUCWMW(CMetric):
@@ -22,8 +22,8 @@ class CMetricAUCWMW(CMetric):
 
     Examples
     --------
-    >>> from prlib.peval.metrics import CMetricAUCWMW
-    >>> from prlib.array import CArray
+    >>> from secml.peval.metrics import CMetricAUCWMW
+    >>> from secml.array import CArray
 
     >>> peval = CMetricAUCWMW()
     >>> print peval.performance_score(CArray([0, 1, 0, 0]), score=CArray([0, 0, 0, 0]))

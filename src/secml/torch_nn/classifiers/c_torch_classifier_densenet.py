@@ -10,7 +10,7 @@ import torchvision.transforms as transforms
 
 from . import CTorchClassifier
 from ..models.cifar import densenet
-from prlib.utils.dict_utils import merge_dicts
+from secml.utils.dict_utils import merge_dicts
 
 
 class CTorchClassifierDenseNet(CTorchClassifier):

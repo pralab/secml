@@ -6,7 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.array import CArray
+from secml.array import CArray
 
 
 def refine_roc(tp, fp, th):

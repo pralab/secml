@@ -8,8 +8,8 @@
 """
 from sklearn import metrics
 
-from prlib.array import CArray
-from prlib.kernel import CKernel
+from secml.array import CArray
+from secml.kernel import CKernel
 
 
 class CKernelPoly(CKernel):
@@ -38,8 +38,8 @@ class CKernelPoly(CKernel):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.kernel.c_kernel_poly import CKernelPoly
+    >>> from secml.array import CArray
+    >>> from secml.kernel.c_kernel_poly import CKernelPoly
 
     >>> print CKernelPoly(degree=3, gamma=0.001, coef0=2).k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
     CArray([[  8.615125   9.393931]
@@ -165,8 +165,8 @@ class CKernelPoly(CKernel):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.kernel.c_kernel_poly import CKernelPoly
+        >>> from secml.array import CArray
+        >>> from secml.kernel.c_kernel_poly import CKernelPoly
 
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])

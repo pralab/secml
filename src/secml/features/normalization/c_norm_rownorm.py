@@ -5,8 +5,8 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.features.normalization import CNormalizer
+from secml.array import CArray
+from secml.features.normalization import CNormalizer
 
 
 class CNormalizerRow(CNormalizer):
@@ -36,8 +36,8 @@ class CNormalizerRow(CNormalizer):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.features.normalization import CNormalizerRow
+    >>> from secml.array import CArray
+    >>> from secml.features.normalization import CNormalizerRow
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
     >>> dense_normalized = CNormalizerRow().train_normalize(array)
@@ -118,8 +118,8 @@ class CNormalizerRow(CNormalizer):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.features.normalization import CNormalizerRow
+        >>> from secml.array import CArray
+        >>> from secml.features.normalization import CNormalizerRow
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]], tosparse=True)
 
         >>> normalizer = CNormalizerRow().train(array)
@@ -181,8 +181,8 @@ class CNormalizerRow(CNormalizer):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.features.normalization import CNormalizerRow
+        >>> from secml.array import CArray
+        >>> from secml.features.normalization import CNormalizerRow
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]], tosparse=True)
 
         >>> normalizer = CNormalizerRow().train(array)

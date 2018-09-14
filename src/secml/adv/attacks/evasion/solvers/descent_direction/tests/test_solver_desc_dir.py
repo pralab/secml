@@ -1,12 +1,12 @@
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from advlib.evasion.solvers import CSolverDescDir
-from prlib.optimization.function import CFunction
-from prlib.optimization.constraints import CConstraintL2, CConstraintBox
+from secml.adv.attacks.evasion.solvers import CSolverDescDir
+from secml.optimization.function import CFunction
+from secml.optimization.constraints import CConstraintL2, CConstraintBox
 
-from prlib.array import CArray
-from prlib.figure import CFigure
+from secml.array import CArray
+from secml.figure import CFigure
 
 
 class TestCSolverDescDir(CUnitTest):

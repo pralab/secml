@@ -6,9 +6,9 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.data import CDataset
-from prlib.classifiers import CClassifierLinear
+from secml.array import CArray
+from secml.data import CDataset
+from secml.classifiers import CClassifierLinear
 
 
 class CClassifierMCSLinear(CClassifierLinear):

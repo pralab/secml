@@ -8,8 +8,8 @@
 """
 from sklearn import metrics
 
-from prlib.array import CArray
-from prlib.kernel import CKernel
+from secml.array import CArray
+from secml.kernel import CKernel
 
 
 class CKernelLinear(CKernel):
@@ -28,8 +28,8 @@ class CKernelLinear(CKernel):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.kernel.c_kernel_linear import CKernelLinear
+    >>> from secml.array import CArray
+    >>> from secml.kernel.c_kernel_linear import CKernelLinear
 
     >>> print CKernelLinear().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
     CArray([[  50.  110.]
@@ -93,8 +93,8 @@ class CKernelLinear(CKernel):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.kernel.c_kernel_linear import CKernelLinear
+        >>> from secml.array import CArray
+        >>> from secml.kernel.c_kernel_linear import CKernelLinear
 
         >>> array = CArray([[15, 25], [45, 55]])
         >>> vector = CArray([2, 5])

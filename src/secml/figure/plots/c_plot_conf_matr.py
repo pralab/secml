@@ -1,4 +1,4 @@
-from prlib.figure.plots import CPlot
+from secml.figure.plots import CPlot
 import numpy as np
 import itertools
 

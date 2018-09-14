@@ -9,9 +9,9 @@ a dataset w.r.t increasing attack power
 TODO: Add assertEquals statements to check the correctness of the test
 """
 import unittest
-from prlib.array import CArray
+from secml.array import CArray
 
-from advlib.evasion import CAttackEvasion
+from secml.adv.attacks.evasion import CAttackEvasion
 from test_c_sec_eval import TestCSecEvalCases
 
 

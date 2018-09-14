@@ -8,20 +8,20 @@ This module tests the CSecEval class, which performs an attacks on
 a dataset w.r.t increasing attack power
 TODO: Add assertEquals statements to check the correctness of the test
 """
-from prlib.utils import CUnitTest
-from prlib.array import CArray
-from prlib.data.loader import CDataLoader
-from advlib.seceval import CSecEval
-from prlib.figure import CFigure
-from prlib.utils import data_utils
-from prlib.peval.metrics import CRoc
-from prlib.data.loader import CDataLoaderMNIST
+from secml.utils import CUnitTest
+from secml.array import CArray
+from secml.data.loader import CDataLoader
+from secml.adv.seceval import CSecEval
+from secml.figure import CFigure
+from secml.utils import data_utils
+from secml.peval.metrics import CRoc
+from secml.data.loader import CDataLoaderMNIST
 from abc import ABCMeta, abstractmethod
-from prlib.classifiers import CClassifierSVM
+from secml.classifiers import CClassifierSVM
 
 from numpy import random
-from prlib.data.loader import CDLRandomBlobs
-from prlib.features.normalization import CNormalizerMinMax
+from secml.data.loader import CDLRandomBlobs
+from secml.features.normalization import CNormalizerMinMax
 
 
 class TestCSecEvalCases(object):

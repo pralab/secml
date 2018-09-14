@@ -1,8 +1,8 @@
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.data.loader import CDLRandomToy
-from prlib.classifiers import CClassifierRandomForest
+from secml.data.loader import CDLRandomToy
+from secml.classifiers import CClassifierRandomForest
 
 
 class TestCRandomForest(CUnitTest):

@@ -9,8 +9,8 @@ from copy import deepcopy
 import numpy as np
 import scipy.sparse as scs
 
-from prlib.array import Cdense, Csparse
-from prlib.core.type_utils import \
+from secml.array import Cdense, Csparse
+from secml.core.type_utils import \
     is_int, is_scalar, is_bool, is_ndarray, is_scsarray, to_builtin
 
 __all__ = ['is_array', 'is_array_buffer']
@@ -48,7 +48,7 @@ class CArray(object):
 
     Examples
     --------
-    >>> from prlib.array import CArray
+    >>> from secml.array import CArray
 
     >>> print CArray([[1, 2], [3, 4]])
     CArray([[1 2]
@@ -216,7 +216,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([1,0,3,0], tosparse=True).nnz
         2
@@ -238,7 +238,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray([1,0,3,0], tosparse=True)
         >>> nzz_indices = array.nnz_indices
@@ -269,7 +269,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray([1,0,3,0], tosparse=True)
         >>> print array.nnz_data  # doctest: +NORMALIZE_WHITESPACE
@@ -288,7 +288,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> a = CArray([1,2,3])
         >>> a.is_vector_like
@@ -334,7 +334,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[2, 0], [3, 4]], tosparse=True).todense(dtype=float)
         CArray([[ 2.  0.]
@@ -379,7 +379,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[2, 0], [3, 4]]).tosparse(dtype=float)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	2.0
@@ -412,7 +412,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray([1,2,3]).tondarray()
         >>> array
@@ -441,7 +441,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray([[1,2],[0,4]], tosparse=True).tocsr()
         >>> print array  # doctest: +NORMALIZE_WHITESPACE
@@ -475,7 +475,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray([[1,2],[0,4]]).tolist()
         >>> array
@@ -1152,7 +1152,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray([[1, 2], [3, 4]])
         >>> for elem in array:
@@ -1184,7 +1184,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([1])
         CArray([1])
@@ -1216,7 +1216,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> repr(CArray([]))
         'CArray(0,)(dense: [])'
@@ -1275,7 +1275,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray([1,2,3])
         >>> array_deepcopy = array.deepcopy()
@@ -1396,7 +1396,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[1,2]]).has_compatible_shape(CArray([[1],[2]]))
         False
@@ -1426,7 +1426,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([1, 2, 3]).transpose()
         CArray([[1]
@@ -1471,7 +1471,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[1,0,2],[2,0,3]]).unique()
         CArray([0 1 2 3])
@@ -1528,7 +1528,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[1,2],[3,4]]).append([[11],[22]])
         CArray([ 1  2  3  4 11 22])
@@ -1588,7 +1588,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[1,1],[2,2]]).dot(CArray([[1,1],[0,0]], tosparse=True))
         CArray([[1 1]
@@ -1637,7 +1637,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([1,2,3]).reshape((3,1))
         CArray([[1]
@@ -1680,7 +1680,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([1,2,3]).resize((3,3))
         CArray([[1 2 3]
@@ -1698,7 +1698,7 @@ class CArray(object):
         >>> print CArray([[1,2,3]]).resize((5, ))
         CArray([1 2 3 0 0])
 
-        >>> from prlib.core.constants import inf
+        >>> from secml.core.constants import inf
         >>> print CArray([[1,2,3]]).resize((5, ), constant=inf)  # doctest: +SKIP
         CArray([                   1                    2                    3
          -9223372036854775808 -9223372036854775808])
@@ -1733,7 +1733,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([1, 2, 3]).astype(float)
         CArray([ 1.  2.  3.])
@@ -1771,7 +1771,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[1, 2, 3], [10, 20, 30]]).diag(k=1)
         CArray([ 2 30])
@@ -1816,7 +1816,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([-1, 0, 3]).argmax()
         2
@@ -1858,7 +1858,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([-1, 0, 3]).argmin()
         0
@@ -1906,7 +1906,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> import numpy as np
         >>> print CArray([5, np.nan]).argmax()
@@ -1953,7 +1953,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> import numpy as np
         >>> print CArray([5, np.nan]).argmin()
@@ -1997,7 +1997,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([-3,0,2]).sum()
         -1
@@ -2036,7 +2036,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([-3,0,2]).cumsum()
         CArray([-3 -3 -1])
@@ -2095,7 +2095,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[1,2],[3,4]]).prod()
         24
@@ -2139,13 +2139,13 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[1,2],[3,4]]).clip(2, 4)
         CArray([[2 2]
          [3 4]])
 
-        >>> from prlib.core.constants import inf
+        >>> from secml.core.constants import inf
 
         >>> # inf is a float, array will be casted accordingly
         >>> print CArray([[1,2],[3,4]]).clip(-inf, 2)
@@ -2178,7 +2178,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray([1,0,-6,2,0])
         >>> array_find = array.find(array > 0)
@@ -2229,7 +2229,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray([[1,0],[-6,3],[2,7]])
         >>> array_find = array.find_2d(array > 0)
@@ -2270,7 +2270,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> a = CArray([1, 2, 3, 1, 6])
         >>> print a.bincount()
@@ -2303,7 +2303,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[0,0.1],[0.4,1.0]], tosparse=True).binary_search(0.3)
         2
@@ -2348,7 +2348,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[-2,0,2]]).sign()
         CArray([[-1  0  1]])
@@ -2387,7 +2387,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[1,2]],tosparse=True).repmat(2,2)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1.0
@@ -2435,7 +2435,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> x = CArray([[1,2],[3,4]])
         
@@ -2493,7 +2493,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[1,2],[3,4]]).ravel()
         CArray([1 2 3 4])
@@ -2525,7 +2525,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[1,2],[3,4]]).flatten()
         CArray([1 2 3 4])
@@ -2572,7 +2572,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[True,False],[True,True]], tosparse=True).all()
         False
@@ -2627,7 +2627,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[True,False],[True,True]], tosparse=True).any()
         True
@@ -2674,7 +2674,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray([5,-1,0,-3])
         >>> array.sort()
@@ -2736,7 +2736,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([0,-3,5]).argsort()
         CArray([1 0 2])
@@ -2771,7 +2771,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
         >>> import numpy as np
         >>> np.set_printoptions(precision=1)
 
@@ -2819,7 +2819,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[-1,0],[2,0]], tosparse=True).max()
         2
@@ -2875,7 +2875,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[-1,0],[2,0]], tosparse=True).min()
         -1
@@ -2932,7 +2932,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> import numpy as np
         >>> print CArray([5, np.nan]).max()
@@ -2987,7 +2987,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> import numpy as np
         >>> print CArray([5, np.nan]).min()
@@ -3036,7 +3036,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[-1,0],[2,0]]).maximum(CArray([[2,-1],[2,-1]]))
         CArray([[2 0]
@@ -3090,7 +3090,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[-1,0],[2,0]]).minimum(CArray([[2,-1],[2,-1]]))
         CArray([[-1 -1]
@@ -3161,7 +3161,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([1.28,5.62]).round()
         CArray([ 1.  6.])
@@ -3197,7 +3197,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([-1.7, -1.5, -0.2, 0.2, 1.5, 1.7, 2.0]).ceil()
         CArray([-1. -1. -0.  1.  2.  2.  2.])
@@ -3236,7 +3236,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([-1.7, -1.5, -0.2, 0.2, 1.5, 1.7, 2.0]).floor()
         CArray([-2. -2. -1.  0.  1.  1.  2.])
@@ -3285,7 +3285,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[1,4],[4,3]], tosparse=True).mean()
         3.0
@@ -3336,7 +3336,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[1,4],[4,3]]).median()
         3.5
@@ -3411,7 +3411,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print round(CArray([[1,4],[4,3]],tosparse=True).std(), 2)
         1.22
@@ -3454,7 +3454,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray(2).sqrt()
         CArray([ 1.41421356])
@@ -3494,7 +3494,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[-1,0],[2,0]]).logical_and(CArray([[2,-1],[2,-1]]))
         CArray([[ True False]
@@ -3535,7 +3535,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[-1,0],[2,0]]).logical_or(CArray([[2,0],[2,-1]]))
         CArray([[ True False]
@@ -3571,7 +3571,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([[-1,0],[2,0]]).logical_not()
         CArray([[False  True]
@@ -3612,7 +3612,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray([[1., 2.], [3., 4.]])
         >>> array_inv = array.inv()
@@ -3682,7 +3682,7 @@ class CArray(object):
                
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         The following example checks that:
             array * array_pinv * array == array and array_pinv * array * array_pinv == array_pinv
@@ -3743,7 +3743,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
         >>> import numpy as np
 
         >>> print round(CArray([1,2,3]).norm(), 5)
@@ -3836,7 +3836,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
         >>> import numpy as np
 
         >>> print round(CArray([1,2,3]).norm_2d(), 5)
@@ -3874,7 +3874,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray([2,3,0,1])
         >>> array.shuffle()
@@ -3905,7 +3905,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([1,2,3]).atleast_2d()
         CArray([[1 2 3]])
@@ -3943,8 +3943,8 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.core.constants import pi
+        >>> from secml.array import CArray
+        >>> from secml.core.constants import pi
 
         >>> print (CArray([0,90,180,270,360,-90,-180,-270])*pi/180).sin().round()
         CArray([ 0.  1.  0. -1. -0. -1. -0.  1.])
@@ -3971,8 +3971,8 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.core.constants import pi
+        >>> from secml.array import CArray
+        >>> from secml.core.constants import pi
 
         >>> print (CArray([0,90,180,270,360,-90,-180,-270])*pi/180).cos().round()
         CArray([ 1.  0. -1. -0.  1.  0. -1. -0.])
@@ -4009,7 +4009,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([0,1,3]).exp()
         CArray([  1.           2.71828183  20.08553692])
@@ -4050,7 +4050,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([0,1,3]).log()
         CArray([       -inf  0.          1.09861229])
@@ -4091,7 +4091,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([0,1,3]).log10()
         CArray([       -inf  0.          0.47712125])
@@ -4121,7 +4121,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([1,2,3]).pow(2)
         CArray([1 4 9])
@@ -4164,7 +4164,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray([1,2,3]).normpdf()
         CArray([ 0.24197072  0.05399097  0.00443185])
@@ -4211,9 +4211,9 @@ class CArray(object):
         --------
         .. plot::
 
-            >>> from prlib.array import CArray
-            >>> from prlib.figure import CFigure
-            >>> from prlib.core.constants import pi
+            >>> from secml.array import CArray
+            >>> from secml.figure import CFigure
+            >>> from secml.core.constants import pi
 
             >>> fig = CFigure(fontsize=14)
             >>> x_array = CArray.linspace(0, 2*pi, 10)
@@ -4255,7 +4255,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> a = CArray([[1,2,3],[10,20,30],[100,200,300]])
 
@@ -4304,7 +4304,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray.empty(3)
         >>> print array  # doctest: +SKIP
@@ -4343,7 +4343,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray.zeros(2)
         CArray([ 0.  0.])
@@ -4392,7 +4392,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray.ones(2)
         CArray([ 1.  1.])
@@ -4435,7 +4435,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
         >>> array = CArray.eye(2)
         >>> print array
         CArray([[ 1.  0.]
@@ -4487,7 +4487,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array_dense = CArray.rand(shape=(2, 3))
         >>> print array_dense  # doctest: +SKIP
@@ -4533,7 +4533,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array_dense = CArray.randn(shape=(2, 3))
         >>> print array_dense  # doctest: +SKIP
@@ -4586,7 +4586,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray.randint(5, shape=10)
         >>> print array  # doctest: +SKIP
@@ -4642,7 +4642,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray.randsample(10, 4)
         >>> print array  # doctest: +SKIP
@@ -4710,7 +4710,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> array = CArray.linspace(3.0, 4, num=5)
         >>> print array
@@ -4778,7 +4778,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray.arange(4)
         CArray([0 1 2 3])
@@ -4833,7 +4833,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray.concatenate([[1,2],[3,4]], [[11],[22]])
         CArray([[ 1  2 11]
@@ -4940,7 +4940,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> x = CArray([1,3,5])
         >>> y = CArray([2,4,6])
@@ -4986,7 +4986,7 @@ class CArray(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
+        >>> from secml.array import CArray
 
         >>> print CArray.from_iterables([[1, 2], (3, 4), CArray([5, 6])])
         CArray([1 2 3 4 5 6])

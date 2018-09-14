@@ -81,8 +81,8 @@ class CLog(object):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.utils import CLog
+    >>> from secml.array import CArray
+    >>> from secml.utils import CLog
 
     >>> log = CLog()
     >>> log.info("{:}".format(CArray([1,2,3])))  # doctest: +SKIP
@@ -275,8 +275,8 @@ class CLog(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.utils import CLog
+        >>> from secml.array import CArray
+        >>> from secml.utils import CLog
 
         >>> log = CLog()
         >>> log.set_level(10)
@@ -306,8 +306,8 @@ class CLog(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.utils import CLog
+        >>> from secml.array import CArray
+        >>> from secml.utils import CLog
 
         >>> log = CLog()
         >>> log.set_level(10)
@@ -352,8 +352,8 @@ class CTimer(object):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.utils import CTimer
+    >>> from secml.array import CArray
+    >>> from secml.utils import CTimer
 
     >>> with CTimer() as t:
     ...     a = CArray([1,2,3])  # doctest: +ELLIPSIS
@@ -365,7 +365,7 @@ class CTimer(object):
     Timing the instruction...
     Elapsed time: ... ms
 
-    >>> from prlib.utils import CLog
+    >>> from secml.utils import CLog
     >>> logger = CLog()
     >>> logger.set_level(10)
     >>> with CTimer(CLog()) as t:
@@ -432,8 +432,8 @@ class CTimer(object):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.utils import CTimer
+        >>> from secml.array import CArray
+        >>> from secml.utils import CTimer
 
         >>> @CTimer.timed()
         ... def abc():
@@ -486,7 +486,7 @@ class CTestLogging(unittest.TestCase):
 
     def test_timed_logging(self):
 
-        from prlib.array import CArray
+        from secml.array import CArray
 
         timer = self.logger.timer()  # Does nothing... Use as context manager!
 

@@ -31,7 +31,7 @@ but generally yelds approximately 1.49e-08.
 
 Examples
 --------
->>> from prlib.core.constants import eps
+>>> from secml.core.constants import eps
 >>> print eps
 1.4901161193847656e-08
 
@@ -43,7 +43,7 @@ eps = np.sqrt(np.finfo(float).eps)
 
 Examples
 --------
->>> from prlib.core.constants import e
+>>> from secml.core.constants import e
 >>> print e
 2.718281828459045
 
@@ -55,7 +55,7 @@ e = math.e
 
 Examples
 --------
->>> from prlib.core.constants import pi
+>>> from secml.core.constants import pi
 >>> pi
 3.141592653589793
 

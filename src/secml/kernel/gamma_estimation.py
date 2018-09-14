@@ -5,8 +5,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.array import CArray
-from prlib.classifiers import CClassifierKNN
+from secml.array import CArray
+from secml.classifiers import CClassifierKNN
 
 
 # TODO: DECIDE WHERE TO PUT THIS FUNCTION

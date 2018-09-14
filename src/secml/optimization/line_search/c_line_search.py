@@ -1,5 +1,5 @@
-from prlib.core import CCreator
-from prlib.array import CArray
+from secml.core import CCreator
+from secml.array import CArray
 from abc import ABCMeta, abstractmethod
 
 

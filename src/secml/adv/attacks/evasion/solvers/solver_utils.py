@@ -1,4 +1,4 @@
-from prlib.array import CArray
+from secml.array import CArray
 import itertools
 
 __all__ = ['check_neighbours']

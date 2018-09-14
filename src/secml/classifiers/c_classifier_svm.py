@@ -8,10 +8,10 @@
 """
 from sklearn.svm import SVC
 
-from prlib.array import CArray
-from prlib.classifiers import CClassifierLinear
-from prlib.classifiers.clf_utils import extend_binary_labels
-from prlib.kernel import CKernel
+from secml.array import CArray
+from secml.classifiers import CClassifierLinear
+from secml.classifiers.clf_utils import extend_binary_labels
+from secml.kernel import CKernel
 
 
 class CClassifierSVM(CClassifierLinear):

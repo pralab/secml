@@ -1,8 +1,8 @@
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.array import CArray
-from prlib.kernel.numba_kernel.numba_utils import *
+from secml.array import CArray
+from secml.kernel.numba_kernel.numba_utils import *
 
 
 class TestNumbaUtils(CUnitTest):

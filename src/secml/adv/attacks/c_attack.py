@@ -7,14 +7,14 @@ Interface class for evasion and poisoning attacks.
 
 """
 
-from prlib.core import CCreator
-from prlib.array import CArray
-from prlib.classifiers import CClassifier, CClassifierSVM
-from prlib.data import CDataset
-from prlib.data.splitter import CDataSplitter
-# from prlib.optimization.function import CFunction
-# from prlib.optimization.constraints import CConstraint
-# from advlib.evasion.solvers import CSolver
+from secml.core import CCreator
+from secml.array import CArray
+from secml.classifiers import CClassifier, CClassifierSVM
+from secml.data import CDataset
+from secml.data.splitter import CDataSplitter
+# from secml.optimization.function import CFunction
+# from secml.optimization.constraints import CConstraint
+# from secml.adv.attacks.evasion.solvers import CSolver
 from abc import ABCMeta, abstractmethod
 
 

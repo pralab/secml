@@ -7,10 +7,10 @@
 """
 from numba import guvectorize
 
-from prlib.array import CArray
-from prlib.kernel.c_kernel_linear import CKernelLinear
+from secml.array import CArray
+from secml.kernel.c_kernel_linear import CKernelLinear
 
-from prlib.kernel.numba_kernel.numba_utils import sqrd_eucl_dense, dot_dense
+from secml.kernel.numba_kernel.numba_utils import sqrd_eucl_dense, dot_dense
 
 
 class CKernelLinearNumba(CKernelLinear):
@@ -29,8 +29,8 @@ class CKernelLinearNumba(CKernelLinear):
 
     Examples
     --------
-    >>> from prlib.array import CArray
-    >>> from prlib.kernel.numba_kernel.c_kernel_linear_numba import CKernelLinearNumba
+    >>> from secml.array import CArray
+    >>> from secml.kernel.numba_kernel.c_kernel_linear_numba import CKernelLinearNumba
 
     >>> print CKernelLinearNumba().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
     CArray([[  50.  110.]
@@ -117,8 +117,8 @@ class CKernelLinearNumba(CKernelLinear):
 
         Examples
         --------
-        >>> from prlib.array import CArray
-        >>> from prlib.kernel.numba_kernel.c_kernel_linear_numba import CKernelLinearNumba
+        >>> from secml.array import CArray
+        >>> from secml.kernel.numba_kernel.c_kernel_linear_numba import CKernelLinearNumba
 
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])

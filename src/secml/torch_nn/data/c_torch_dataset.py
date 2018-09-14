@@ -9,7 +9,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from prlib.data import CDataset
+from secml.data import CDataset
 
 
 class CTorchDataset(Dataset):

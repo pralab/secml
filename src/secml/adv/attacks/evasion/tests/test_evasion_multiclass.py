@@ -1,21 +1,21 @@
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.array import CArray
-from prlib.data.loader import CDLRandom, CDLRandomBlobs
-from prlib.classifiers import CClassifierSVM
-from prlib.classifiers.multiclass import CClassifierMulticlassOVA
-from prlib.classifiers.multiclass import CClassifierMulticlassOVAReject
-from prlib.kernel import CKernelRBF
+from secml.array import CArray
+from secml.data.loader import CDLRandom, CDLRandomBlobs
+from secml.classifiers import CClassifierSVM
+from secml.classifiers.multiclass import CClassifierMulticlassOVA
+from secml.classifiers.multiclass import CClassifierMulticlassOVAReject
+from secml.kernel import CKernelRBF
 
-from prlib.figure import CFigure
-from prlib.optimization.constraints import \
+from secml.figure import CFigure
+from secml.optimization.constraints import \
     CConstraintBox, CConstraintL1, CConstraintL2
-from prlib.features.normalization import CNormalizerMinMax
+from secml.features.normalization import CNormalizerMinMax
 
-from advlib.evasion import CAttackEvasion
+from secml.adv.attacks.evasion import CAttackEvasion
 
-from prlib.kernel import gamma_estimation
+from secml.kernel import gamma_estimation
 
 
 class TestEvasionMulticlass(CUnitTest):

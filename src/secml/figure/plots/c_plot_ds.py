@@ -1,5 +1,5 @@
-from prlib.figure.plots import CPlot
-from prlib.core.type_utils import is_list
+from secml.figure.plots import CPlot
+from secml.core.type_utils import is_list
 from matplotlib import cm
 
 

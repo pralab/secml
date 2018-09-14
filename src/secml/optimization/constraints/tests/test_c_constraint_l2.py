@@ -4,11 +4,11 @@ Created on 27/apr/2015
 @author: davidemaiorca
 """
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.data import CDataset
+from secml.data import CDataset
 from sklearn import datasets
-from prlib.optimization.constraints import CConstraint, CConstraintL2
+from secml.optimization.constraints import CConstraint, CConstraintL2
 
 
 class TestCConstraintBox(CUnitTest):

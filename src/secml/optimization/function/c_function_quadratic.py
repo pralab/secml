@@ -7,7 +7,7 @@
 
 """
 from c_function import CFunction
-from prlib.array import CArray
+from secml.array import CArray
 
 
 class CFunctionQuadratic(CFunction):

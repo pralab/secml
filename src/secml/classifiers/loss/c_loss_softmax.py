@@ -5,9 +5,9 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.classifiers.loss import CLoss
-from prlib.classifiers.clf_utils import extend_binary_labels
-from prlib.array import CArray
+from secml.classifiers.loss import CLoss
+from secml.classifiers.clf_utils import extend_binary_labels
+from secml.array import CArray
 
 
 class CLossSoftMax(CLoss):

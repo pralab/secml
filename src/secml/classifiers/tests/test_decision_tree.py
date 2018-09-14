@@ -6,10 +6,10 @@ Class to test CDecisionTree
 If you find any BUG, please notify authors first.
 """
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.data.loader import CDLRandomToy
-from prlib.classifiers import CClassifierDecisionTree
+from secml.data.loader import CDLRandomToy
+from secml.classifiers import CClassifierDecisionTree
 
 
 class TestCDecisionTree(CUnitTest):

@@ -6,13 +6,13 @@ Class to test CClassifierKernelDensityEstimator
 If you find any BUG, please notify authors first.
 """
 import unittest
-from prlib.utils import CUnitTest
+from secml.utils import CUnitTest
 
-from prlib.data.loader import CDLRandom
-from prlib.classifiers import CClassifierKDE
-from prlib.figure import CFigure
-from prlib.kernel import CKernelRBF
-from prlib.features.normalization import CNormalizerMinMax
+from secml.data.loader import CDLRandom
+from secml.classifiers import CClassifierKDE
+from secml.figure import CFigure
+from secml.kernel import CKernelRBF
+from secml.features.normalization import CNormalizerMinMax
 
 
 class TestCClassifierKernelDensityEstimator(CUnitTest):
