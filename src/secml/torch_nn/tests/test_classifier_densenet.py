@@ -5,12 +5,12 @@ import torch
 import torchvision.transforms as transforms
 
 from secml.utils import fm
-from aisec18.core.settings import AISEC18_DIR
+from secml.core.settings import AISEC18_DIR
 
 from secml.data.loader import CDataLoaderCIFAR10
-from aisec18.torch_nn.classifiers import CTorchClassifierDenseNet
+from secml.torch_nn.classifiers import CTorchClassifierDenseNet
 
-from aisec18.torch_nn.normalizers import CNormalizerMeanSTD
+from secml.torch_nn.normalizers import CNormalizerMeanSTD
 
 from secml.peval.metrics import CMetricAccuracy
 

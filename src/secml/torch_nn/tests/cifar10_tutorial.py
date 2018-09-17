@@ -59,10 +59,10 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 
-from aisec18.core.settings import AISEC18_DIR
+from secml.core.settings import AISEC18_DIR
 from secml.utils import fm
 from secml.data.loader import CDataLoaderCIFAR10
-from aisec18.torch_nn.data import CTorchDataset
+from secml.torch_nn.data import CTorchDataset
 
 ########################################################################
 # The output of torchvision datasets are PILImage images of range [0, 1].

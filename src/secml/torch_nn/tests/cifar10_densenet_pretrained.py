@@ -19,15 +19,15 @@ import torch.utils.data as data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
-from aisec18.core.settings import AISEC18_DIR
+from secml.core.settings import AISEC18_DIR
 from secml.utils import fm
 
 from secml.data.loader import CDataLoaderCIFAR10
-from aisec18.torch_nn.data import CTorchDataset
+from secml.torch_nn.data import CTorchDataset
 
-import aisec18.torch_nn.models.cifar as models
+import secml.torch_nn.models.cifar as models
 
-from aisec18.torch_nn.utils import AverageMeter, accuracy
+from secml.torch_nn.utils import AverageMeter, accuracy
 
 
 model_names = sorted(name for name in models.__dict__
