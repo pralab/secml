@@ -1,4 +1,3 @@
-import unittest
 from secml.classifiers import CClassifierSVM
 from secml.kernel import CKernel
 from secml.adv.attacks.evasion import CAttackEvasion
@@ -159,4 +158,5 @@ class TestEvasionMNIST(CCreator):
         self._show_adv(self._x0, self._y0, p_opt.X, y_pred)
 
 
-TestEvasionMNIST().run()
+if __name__ == '__main__':
+    TestEvasionMNIST().run()
