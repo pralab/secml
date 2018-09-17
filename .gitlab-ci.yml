@@ -3,6 +3,7 @@ cache:
   paths:
     - .cache/pip
     - vendor/apt
+    - pralib
 
 stages:
   - test
