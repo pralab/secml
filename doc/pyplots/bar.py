@@ -1,5 +1,5 @@
-from prlib.array import CArray
-from prlib.figure import CFigure
+from secml.array import CArray
+from secml.figure import CFigure
 
 fig = CFigure(fontsize=12)
 

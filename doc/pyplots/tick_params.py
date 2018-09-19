@@ -1,6 +1,6 @@
-from prlib.array import CArray
-from prlib.figure import CFigure
-from prlib.core.constants import pi
+from secml.array import CArray
+from secml.figure import CFigure
+from secml.core.constants import pi
 
 X = CArray.linspace(-3.14, 3.14, 256, endpoint=True)
 C, S = X.cos(), X.sin()

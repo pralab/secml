@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from prlib.figure import CFigure
+from secml.figure import CFigure
 
 fig = CFigure(fontsize=16)
 

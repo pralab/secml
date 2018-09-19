@@ -1,5 +1,5 @@
-from prlib.array import CArray
-from prlib.figure import CFigure
+from secml.array import CArray
+from secml.figure import CFigure
 
 
 # we must define a function that take an array and return a value for every row

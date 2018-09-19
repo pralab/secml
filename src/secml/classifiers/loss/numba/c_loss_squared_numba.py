@@ -18,7 +18,7 @@ class CLossSquaredNumba(CLoss):
     -----
     Numba optimized loss functions works with scalar.
     For array-compatible functions see content of
-    `.prlib.classifiers.loss` package.
+    `.secml.classifiers.loss` package.
 
     """
 

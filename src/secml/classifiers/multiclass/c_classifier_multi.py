@@ -222,7 +222,7 @@ class CClassifierMulticlass(CClassifier):
         This method should store the list of trained classifiers
         inside self._trained_classifiers attribute.
 
-        `prlib.parallel.parfor2` can be used for parallelization.
+        `secml.parallel.parfor2` can be used for parallelization.
 
         Parameters
         ----------

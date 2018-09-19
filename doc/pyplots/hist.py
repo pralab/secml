@@ -1,5 +1,6 @@
-from prlib.array import CArray
-from prlib.figure import CFigure
+from secml.array import CArray
+from secml.figure import CFigure
+from secml.stats import CDistributionGaussian
 
 fig = CFigure(fontsize=14)
 

@@ -28,7 +28,7 @@ class CKernel(CCreator):
        Kernels optimized with Numba library will fallback
        automatically to standard kernels when no function
        supporting sparse data is available.
-       As importing directly from `prlib.kernel` package
+       As importing directly from `secml.kernel` package
 
        >>> from secml.kernel import CKernelRBF  # doctest: +SKIP
 

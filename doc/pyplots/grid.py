@@ -1,5 +1,5 @@
-from prlib.array import CArray
-from prlib.figure import CFigure
+from secml.array import CArray
+from secml.figure import CFigure
 
 X = CArray.linspace(-3.14, 3.14, 256, endpoint=True)
 C, S = X.cos(), X.sin()

@@ -18,7 +18,7 @@ class CLossHingeNumba(CLoss):
     -----
     Numba optimized loss functions works with scalar.
     For array-compatible functions see content of
-    `.prlib.classifiers.loss` package.
+    `.secml.classifiers.loss` package.
 
     """
     
@@ -72,7 +72,7 @@ class CLossSquaredHingeNumba(CLoss):
     -----
     Numba optimized loss functions works with scalar.
     For array-compatible functions see content of
-    `.prlib.classifiers.loss` package.
+    `.secml.classifiers.loss` package.
 
     """
 

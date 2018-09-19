@@ -7,8 +7,8 @@
 
 """
 from scipy.stats import multivariate_normal
-from prlib.array import CArray
-from prlib.core import CCreator
+from secml.array import CArray
+from secml.core import CCreator
 
 
 class CDistributionGaussian(CCreator):

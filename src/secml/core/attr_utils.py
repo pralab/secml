@@ -292,7 +292,7 @@ from secml.utils import CUnitTest
 
 
 class TestAttributeUtilities(CUnitTest):
-    """Unit test for prlib.core.attr_utils."""
+    """Unit test for secml.core.attr_utils."""
 
     def test_extract_attr(self):
         # Toy class for testing

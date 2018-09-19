@@ -1,5 +1,5 @@
-from prlib.data import CDataset
-from prlib.figure import CFigure
+from secml.data import CDataset
+from secml.figure import CFigure
 
 dataset = CDataset.create_random()
 

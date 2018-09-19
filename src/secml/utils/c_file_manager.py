@@ -227,7 +227,7 @@ def abspath(file_name):
     >>> cur_file  # doctest: +SKIP
     'c_folder_manager.py'
     >>> fm.abspath(cur_file)[-12:]
-    '/prlib/utils'
+    '/secml/utils'
 
     """
     return os.path.dirname(os.path.abspath(file_name))
@@ -248,10 +248,10 @@ def normpath(path):
 
     >>> cur_path = fm.split(__file__)[0]  # Getting only the filename
     >>> cur_path  # doctest: +SKIP
-    '---/src/prlib/utils'
+    '---/src/secml/utils'
     >>> upper_path = fm.join(cur_path, '..', '..')
     >>> upper_path  # doctest: +SKIP
-    '---/src/prlib/utils/../..'
+    '---/src/secml/utils/../..'
     >>> fm.normpath(upper_path)  # doctest: +SKIP
     '---/src'
 

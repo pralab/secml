@@ -306,7 +306,7 @@ class CKernelPca(CPca):
 
         See Also
         --------
-        prlib.kernel : module with all the available kernel metrics.
+        secml.kernel : module with all the available kernel metrics.
         CPca : standard PCA transformation.
 
         References
@@ -335,7 +335,7 @@ class CKernelPca(CPca):
         if kernel is None:
             self.kernel = CKernelLinear()
         elif not isinstance(kernel, CKernel):
-            raise TypeError("kernel must be an CKernel subclass. See prlib.kernel for more informations.")
+            raise TypeError("kernel must be an CKernel subclass. See secml.kernel for more informations.")
         else:
             self.kernel = kernel
         # We have to store training array to compute kernel later
