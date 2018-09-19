@@ -5,7 +5,7 @@ import torch
 import torchvision.transforms as transforms
 
 from secml.utils import fm
-from secml.core.settings import AISEC18_DIR
+from secml.core.settings import PYTORCH_MODELS_DIR
 
 from secml.data.loader import CDataLoaderCIFAR10
 from secml.torch_nn.classifiers import CTorchClassifierDenseNet
@@ -52,7 +52,7 @@ class TestCClassifier(CUnitTest):
     def _load_pretrained(self, model_name):
         """Load and return a pretrained pytorch model state."""
         return torch.load(
-            fm.join(AISEC18_DIR, 'models', model_name, 'model_best.pth.tar'))
+            fm.join(PYTORCH_MODELS_DIR, model_name, 'model_best.pth.tar'))
 
     def test_train_cifar10(self):
         """Test training the classifier on CIFAR10 dataset."""

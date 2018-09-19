@@ -19,7 +19,7 @@ import torch.utils.data as data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
-from secml.core.settings import AISEC18_DIR
+from secml.core.settings import PYTORCH_DATA_DIR, PYTORCH_MODELS_DIR
 from secml.utils import fm
 
 from secml.data.loader import CDataLoaderCIFAR10
@@ -86,17 +86,17 @@ def main():
 
     trainset = CTorchDataset(tr, transform=transform)
 
-    # trainset = torchvision.datasets.CIFAR10(root=fm.join(AISEC18_DIR, 'data'),
-    #                                         train=True, download=True,
-    #                                         transform=transform)
+    # trainset = datasets.CIFAR10(root=fm.join(PYTORCH_DATA_DIR, 'data'),
+    #                             train=True, download=True,
+    #                             transform=transform)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=25,
                                               shuffle=True, num_workers=2)
 
     testset = CTorchDataset(ts, transform=transform)
 
-    # testset = torchvision.datasets.CIFAR10(root=fm.join(AISEC18_DIR, 'data'),
-    #                                        train=False, download=True,
-    #                                        transform=transform)
+    # testset = datasets.CIFAR10(root=fm.join(PYTORCH_DATA_DIR, 'data'),
+    #                            train=False, download=True,
+    #                            transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=25,
                                              shuffle=False, num_workers=2)
 
@@ -111,7 +111,7 @@ def main():
     model = torch.nn.DataParallel(model).cuda()
 
     state = torch.load(
-        fm.join(AISEC18_DIR, 'models', model_name, 'model_best.pth.tar'))
+        fm.join(PYTORCH_MODELS_DIR, model_name, 'model_best.pth.tar'))
 
     epoch = state['epoch']
     best_acc = state['best_acc']
