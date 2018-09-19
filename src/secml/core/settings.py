@@ -9,7 +9,9 @@ import os
 from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError, Error
 
 
-__all__ = ['HOME_DIR', 'EXP_DIR', 'DATA_DIR', 'USE_NUMBA']
+__all__ = ['HOME_DIR', 'EXP_DIR', 'DATA_DIR',
+           'USE_NUMBA',
+           'USE_CUDA']
 
 
 def parse_setting(params_file, section, parameter, default=None, dtype=None):
@@ -113,6 +115,7 @@ DATA_DIR = os.path.join(HOME_DIR, 'datasets')
 """Main directory of parameters `settings.txt` file."""
 PRLIB_SETTINGS = os.path.join(HOME_DIR, 'settings.txt')
 
+# [PRLIB]
 
 """True if functions optimized with Numba library should be used.
 
@@ -127,3 +130,23 @@ To be effective, use in the head of your script. Example:
 """
 USE_NUMBA = parse_setting(
     PRLIB_SETTINGS, 'prlib', 'use_numba', dtype=bool, default=True)
+
+# [PYTORCH]
+
+"""True if CUDA should be used in PyTorch wrappers.
+
+PyTorch may use CUDA too speed up computations when a 
+compatible device is found. 
+Set this to False will force PyTorch to use CPU anyway.
+
+This can be set globally or per-script.
+To be effective, use in the head of your script. Example:
+>>> from secml.core import settings
+>>> settings.USE_CUDA = False
+>>>
+>>> **OTHER IMPORTS**
+>>> **REST OF CODE**
+
+"""
+USE_CUDA = parse_setting(
+    PRLIB_SETTINGS, 'pytorch', 'use_cuda', dtype=bool, default=True)
