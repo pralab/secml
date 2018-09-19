@@ -4,3 +4,7 @@
 [prlib]
 # True if Numba library should be globally used
 use_numba=True
+
+[pytorch]
+# True if CUDA should be used in PyTorch wrappers
+use_cuda=True
