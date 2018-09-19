@@ -17,7 +17,7 @@ from torch.autograd import Variable
 from secml.array import CArray
 from secml.classifiers import CClassifier
 
-from secml.core.settings import USE_CUDA  # TODO: ADD THIS PARAMETER TO SETTINGS
+from secml.core.settings import USE_CUDA
 from secml.torch_nn.data import CTorchDataset
 from secml.torch_nn.utils import AverageMeter, accuracy
 
