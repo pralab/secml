@@ -5,7 +5,6 @@ from secml.array import CArray
 from secml.data.loader import CDLRandom, CDLRandomBlobs
 from secml.classifiers import CClassifierSVM
 from secml.classifiers.multiclass import CClassifierMulticlassOVA
-from secml.classifiers.multiclass import CClassifierMulticlassOVAReject
 from secml.kernel import CKernelRBF
 
 from secml.figure import CFigure
@@ -14,8 +13,6 @@ from secml.optimization.constraints import \
 from secml.features.normalization import CNormalizerMinMax
 
 from secml.adv.attacks.evasion import CAttackEvasion
-
-from secml.kernel import gamma_estimation
 
 
 class TestEvasionMulticlass(CUnitTest):
@@ -41,9 +38,7 @@ class TestEvasionMulticlass(CUnitTest):
         self.y_target = 2
 
         # self.kernel = None
-        self.kernel = CKernelRBF(gamma=gamma_estimation(self.ds, 0.3))
-
-        self.reject = False
+        self.kernel = CKernelRBF(gamma=1)
 
         # END SETUP
 
@@ -53,22 +48,13 @@ class TestEvasionMulticlass(CUnitTest):
         if self.normalizer is not None:
             self.ds.X = self.normalizer.train_normalize(self.ds.X)
 
-        if self.reject is True:
-            self.multiclass = CClassifierMulticlassOVAReject(
-                classifier=CClassifierSVM, C=1, class_weight='auto',
-                kernel=self.kernel, threshold=0)
-            self.multiclass.verbose = 0
-        else:
-            self.multiclass = CClassifierMulticlassOVA(
-                classifier=CClassifierSVM, class_weight='auto',
-                normalizer=None, kernel=self.kernel)
-            self.multiclass.verbose = 0
+        self.multiclass = CClassifierMulticlassOVA(
+            classifier=CClassifierSVM, class_weight='auto',
+            normalizer=None, kernel=self.kernel)
+        self.multiclass.verbose = 0
 
         # Training and classification
         self.multiclass.train(self.ds)
-
-        if self.reject is True:
-            self.multiclass.set_operating_point(0.3, dataset=self.ds)
 
         self.y_pred, self.score_pred = self.multiclass.classify(self.ds.X)
 
@@ -243,9 +229,8 @@ class TestEvasionMulticlass(CUnitTest):
 
         k_name = self.kernel.class_type if self.kernel is not None else 'lin'
         fig.savefig("multiclass_{:}c_kernel-{:}_"
-                    "target-{:}_reject-{:}.pdf".format(
-            self.ds.num_classes, k_name,
-            self.y_target, self.reject))
+                    "target-{:}.pdf".format(
+            self.ds.num_classes, k_name, self.y_target))
 
     #######################################
     # PRIVATE METHODS
@@ -297,14 +282,6 @@ class TestEvasionMulticlass(CUnitTest):
                            s=70, c=styles[c_idx][0], edgecolors='k',
                            facecolors='none', linewidths=1,
                            label='c {:}'.format(c))
-
-        if self.reject is True:
-            # Plotting rejected
-            fig.sp.scatter(self.ds.X[self.y_pred == -1, 0],
-                           self.ds.X[self.y_pred == -1, 1],
-                           s=70, c='r', edgecolors='k',
-                           facecolors='none', linewidths=1.5,
-                           label='c {:}'.format(-1))
 
         # Plotting multiclass decision function
         fig.switch_sptype('function')
