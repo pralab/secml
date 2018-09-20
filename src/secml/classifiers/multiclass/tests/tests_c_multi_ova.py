@@ -186,7 +186,6 @@ class TestMulticlass(CUnitTest):
         multiclass = CClassifierMulticlassOVA(
             classifier=CClassifierSVM, class_weight='balanced',
             normalizer='minmax')
-        multiclass.verbose = 2
 
         # Training and classification
         multiclass.train(ds)
