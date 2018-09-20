@@ -6,7 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from sklearn.cross_validation import ShuffleSplit
+from sklearn.model_selection import ShuffleSplit
 
 from secml.array import CArray
 from secml.data.splitter import CDataSplitter
@@ -101,14 +101,14 @@ class CDataSplitterShuffle(CDataSplitter):
         # Resetting indices
         self.clear()
 
-        sk_splitter = ShuffleSplit(dataset.num_samples,
-                                   n_iter=self.num_folds,
+        sk_splitter = ShuffleSplit(n_splits=self.num_folds,
                                    train_size=self.train_size,
                                    test_size=self.test_size,
                                    random_state=self.random_state)
 
         # We take sklearn indices (iterators) and map to list of CArrays
-        for train_index, test_index in sk_splitter:
+        for train_index, test_index in \
+                sk_splitter.split(dataset.X.tondarray()):
             train_index = CArray(train_index)
             test_index = CArray(test_index)
             self._tr_idx.append(train_index)
