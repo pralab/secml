@@ -110,8 +110,7 @@ def main():
             )
     model = torch.nn.DataParallel(model).cuda()
 
-    state = torch.load(
-        fm.join(PYTORCH_MODELS_DIR, model_name, 'model_best.pth.tar'))
+    state = dl_pytorch_model(model_name)
 
     epoch = state['epoch']
     best_acc = state['best_acc']
