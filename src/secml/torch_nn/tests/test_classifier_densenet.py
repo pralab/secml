@@ -5,12 +5,14 @@ import torch
 import torchvision.transforms as transforms
 
 from secml.utils import fm
-from secml.core.settings import AISEC18_DIR
+from secml.core.settings import PYTORCH_MODELS_DIR
 
 from secml.data.loader import CDataLoaderCIFAR10
 from secml.torch_nn.classifiers import CTorchClassifierDenseNet
 
 from secml.torch_nn.normalizers import CNormalizerMeanSTD
+
+from secml.torch_nn.models import dl_pytorch_model
 
 from secml.peval.metrics import CMetricAccuracy
 
@@ -49,11 +51,6 @@ class TestCClassifier(CUnitTest):
 
         return tr, ts, transform_train
 
-    def _load_pretrained(self, model_name):
-        """Load and return a pretrained pytorch model state."""
-        return torch.load(
-            fm.join(AISEC18_DIR, 'models', model_name, 'model_best.pth.tar'))
-
     def test_train_cifar10(self):
         """Test training the classifier on CIFAR10 dataset."""
         if self._run_train is False:
@@ -79,7 +76,7 @@ class TestCClassifier(CUnitTest):
                                            std=(0.2023, 0.1994, 0.2010)))
         clf.verbose = 2
 
-        state = self._load_pretrained('densenet-bc-L100-K12')
+        state = dl_pytorch_model('densenet-bc-L100-K12')
 
         clf.load_state(state, dataparallel=True)
 
@@ -98,7 +95,7 @@ class TestCClassifier(CUnitTest):
                                        train_transform=transform_tr)
         clf.verbose = 2
 
-        state = self._load_pretrained('densenet-bc-L100-K12')
+        state = dl_pytorch_model('densenet-bc-L100-K12')
 
         clf.load_state(state, dataparallel=True)
 

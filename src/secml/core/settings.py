@@ -11,7 +11,7 @@ from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError, Error
 
 __all__ = ['HOME_DIR', 'EXP_DIR', 'DATA_DIR',
            'USE_NUMBA',
-           'USE_CUDA']
+           'PYTORCH_DATA_DIR', 'PYTORCH_MODELS_DIR', 'USE_CUDA']
 
 
 def parse_setting(params_file, section, parameter, default=None, dtype=None):
@@ -117,6 +117,9 @@ PRLIB_SETTINGS = os.path.join(HOME_DIR, 'settings.txt')
 
 # [PRLIB]
 
+# [PRLIB]
+
+
 """True if functions optimized with Numba library should be used.
 
 This can be globally set inside params file or per-script.
@@ -131,7 +134,9 @@ To be effective, use in the head of your script. Example:
 USE_NUMBA = parse_setting(
     PRLIB_SETTINGS, 'prlib', 'use_numba', dtype=bool, default=True)
 
+
 # [PYTORCH]
+
 
 """True if CUDA should be used in PyTorch wrappers.
 
@@ -150,3 +155,19 @@ To be effective, use in the head of your script. Example:
 """
 USE_CUDA = parse_setting(
     PRLIB_SETTINGS, 'pytorch', 'use_cuda', dtype=bool, default=True)
+
+
+"""Main directory for storing PyTorch data, subdirectory of HOME_DIR.
+
+This is set by default to: 'HOME_DIR/pytorch'
+
+"""
+PYTORCH_DATA_DIR = os.path.join(HOME_DIR, 'pytorch')
+
+
+"""Main directory for storing PyTorch models, subdirectory of PYTORCH_DATA_DIR.
+
+This is set by default to: 'HOME_DIR/PYTORCH_DATA_DIR/models'
+
+"""
+PYTORCH_MODELS_DIR = os.path.join(PYTORCH_DATA_DIR, 'models')

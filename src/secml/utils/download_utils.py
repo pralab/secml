@@ -33,6 +33,8 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
     """
     # Parsing user string
     auth = tuple(user.split(':')) if user is not None else None
+    # If no password is specified, use an empty string
+    auth = (auth[0], '') if auth is not None and len(auth) == 1 else auth
 
     r = requests.get(url, auth=auth, stream=True)
 
