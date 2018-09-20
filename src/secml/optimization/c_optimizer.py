@@ -93,7 +93,6 @@ class COptimizer(CCreator):
 #             "`minimize` method must be implemented by {:} subclasses."
 #             "".format(COptimizer.__name__))
 
-
     @staticmethod
     def _fun_toarray(xk, fun, fprime, *args):
         """Wrapper for functions that use and return CArrays.
@@ -128,8 +127,6 @@ class COptimizer(CCreator):
         # NOTE: fprime is not used. This is a wrapper for fun
         return CArray(fun(CArray(xk), *args)).tondarray()
 
-
-
     @staticmethod
     def _fprime_toarray(xk, fun, fprime, *args):
         """Wrapper for functions that use and return CArrays.
@@ -163,7 +160,6 @@ class COptimizer(CCreator):
         """
         # NOTE: fun is not used. This is a wrapper for fprime
         return CArray(fprime(CArray(xk), *args)).tondarray()
-
 
     def approx_fprime(self, xk, epsilon, *args):
         """Finite-difference approximation of the gradient of a
@@ -209,15 +205,16 @@ class COptimizer(CCreator):
         --------
         >>> from secml.array import CArray
         >>> from secml.optimization import COptimizer
+        >>> from secml.optimization.function import CFunction
+        >>> from secml.core.constants import eps
 
         >>> def func(x, c0, c1):
         ...     "Coordinate vector `x` should be an array of size two."
         ...     return c0 * x[0]**2 + c1*x[1]**2
 
         >>> c0, c1 = (1, 200)
-        >>> eps = COptimizer.epsilon
-        >>> COptimizer(func).approx_fprime(CArray.ones(2), [eps, (200 ** 0.5) * eps], c0, c1)
-        CArray([   2.          400.00004198])
+        >>> COptimizer(CFunction(func)).approx_fprime(CArray.ones(2), [eps, (200 ** 0.5) * eps], c0, c1)
+        CArray(2,)(dense: [   2.        400.000042])
 
         """
         xk_ndarray = CArray(CArray(xk).ravel()).tondarray()  # double casting to always have a CArray
@@ -225,8 +222,6 @@ class COptimizer(CCreator):
         # We use fun_toarray as the main callable for scipy to have
         # always an ndarray as output of self.fun
         return CArray(sc_opt.approx_fprime(xk_ndarray, self._fun_toarray, epsilon, self.fun.fun, self.fun.gradient, *args))
-
-
 
     def check_grad(self, x, *args, **kwargs):
         """Check the correctness of a gradient function by comparing
@@ -276,4 +271,3 @@ class COptimizer(CCreator):
             raise ValueError("Unknown keyword arguments: %r" % (list(kwargs.keys()),))
         x_carray = CArray(x)
         return CArray(self.fun.gradient(x_carray, *args) - self.approx_fprime(x_carray, epsilon, *args)).norm()
-
