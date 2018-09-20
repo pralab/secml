@@ -115,6 +115,7 @@ DATA_DIR = os.path.join(HOME_DIR, 'datasets')
 """Main directory of parameters `settings.txt` file."""
 PRLIB_SETTINGS = os.path.join(HOME_DIR, 'settings.txt')
 
+# [PRLIB]
 
 # [PRLIB]
 
