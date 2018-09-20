@@ -5,7 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from sklearn.cross_validation import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold
 
 from secml.array import CArray
 from secml.data.splitter import CDataSplitter
@@ -71,13 +71,14 @@ class CDataSplitterStratifiedKFold(CDataSplitter):
         # Resetting indices
         self.clear()
 
-        sk_splitter = StratifiedKFold(dataset.Y.tondarray(),
-                                      n_folds=self.num_folds,
+        sk_splitter = StratifiedKFold(n_splits=self.num_folds,
                                       shuffle=True,
                                       random_state=self.random_state)
 
         # We take sklearn indices (iterators) and map to list of CArrays
-        for train_index, test_index in sk_splitter:
+        for train_index, test_index in \
+                sk_splitter.split(X=dataset.X.tondarray(),
+                                  y=dataset.Y.tondarray()):
             train_index = CArray(train_index)
             test_index = CArray(test_index)
             self._tr_idx.append(train_index)

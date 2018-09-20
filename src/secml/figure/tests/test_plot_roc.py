@@ -109,7 +109,7 @@ class TestCRoc(CUnitTest):
 
         from sklearn import svm, datasets
         from sklearn.metrics import roc_curve, auc
-        from sklearn.cross_validation import StratifiedKFold
+        from sklearn.model_selection import StratifiedKFold
 
         from secml.figure import CFigure
         roc_fig = CFigure(width=12)
@@ -128,7 +128,6 @@ class TestCRoc(CUnitTest):
         # Classification and ROC analysis
 
         # Run classifier with cross-validation and plot ROC curves
-        cv = StratifiedKFold(y, n_folds=6)
         classifier = svm.SVC(kernel='linear', probability=True,
                              random_state=random_state)
 
@@ -137,7 +136,8 @@ class TestCRoc(CUnitTest):
         mean_tpr = 0.0
         mean_fpr = np.linspace(0, 1, 1000)
 
-        for i, (train, test) in enumerate(cv):
+        cv = StratifiedKFold(n_splits=6)
+        for i, (train, test) in enumerate(cv.split(X, y)):
             probas_ = classifier.fit(X[train], y[train]).predict_proba(X[test])
             # Compute ROC curve and area the curve
             fpr, tpr, thresholds = roc_curve(y[test], probas_[:, 1])
@@ -150,7 +150,7 @@ class TestCRoc(CUnitTest):
         roc_fig.sp.plot([0, 1], [0, 1], '--', color=(0.6, 0.6, 0.6),
                         label='Luck')
 
-        mean_tpr /= len(cv)
+        mean_tpr /= cv.get_n_splits()
         mean_tpr[-1] = 1.0
         mean_auc = auc(mean_fpr, mean_tpr)
 
@@ -171,7 +171,7 @@ class TestCRoc(CUnitTest):
 
         score = []
         true_y = []
-        for i, (train, test) in enumerate(cv):
+        for i, (train, test) in enumerate(cv.split(X, y)):
             probas_ = classifier.fit(X[train], y[train]).predict_proba(X[test])
             true_y.append(CArray(y[test]))
             score.append(CArray(probas_[:, 1]))

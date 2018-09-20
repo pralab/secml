@@ -5,7 +5,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
  
 """
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from secml.data import CDataset
 from secml.array import CArray
 from httplib import ImproperConnectionState

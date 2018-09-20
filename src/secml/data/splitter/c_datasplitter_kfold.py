@@ -6,7 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from sklearn.cross_validation import KFold
+from sklearn.model_selection import KFold
 
 from secml.array import CArray
 from secml.data.splitter import CDataSplitter
@@ -70,13 +70,13 @@ class CDataSplitterKFold(CDataSplitter):
         # Resetting indices
         self.clear()
 
-        sk_splitter = KFold(dataset.num_samples,
-                            n_folds=self.num_folds,
+        sk_splitter = KFold(n_splits=self.num_folds,
                             shuffle=True,
                             random_state=self.random_state)
 
         # We take sklearn indices (iterators) and map to list of CArrays
-        for train_index, test_index in sk_splitter:
+        for train_index, test_index in \
+                sk_splitter.split(dataset.X.tondarray()):
             train_index = CArray(train_index)
             test_index = CArray(test_index)
             self._tr_idx.append(train_index)
