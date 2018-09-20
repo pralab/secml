@@ -25,12 +25,12 @@ class CClassifierSVM(CClassifierLinear):
         SVM will be created.
     C : float, optional
         Penalty parameter C of the error term. Default 1.0.
-    class_weight : {dict, 'auto', None}, optional
+    class_weight : {dict, 'balanced', None}, optional
         Set the parameter C of class i to `class_weight[i] * C`.
         If not given (default), all classes are supposed to have
-        weight one. The 'auto' mode uses the values of labels to
+        weight one. The 'balanced' mode uses the values of labels to
         automatically adjust weights inversely proportional to
-        class frequencies.
+        class frequencies as `n_samples / (n_classes * np.bincount(y))`.
     normalizer : str, CNormalizer
         Features normalizer to applied to input data.
         Can be a CNormalizer subclass or a string with the desired
@@ -141,11 +141,12 @@ class CClassifierSVM(CClassifierLinear):
 
         Parameters
         ----------
-        value : {dict, 'auto', None}
+        value : {dict, 'balanced', None}
             Set the parameter C of class i to `class_weight[i] * C`.
             If None, all classes are supposed to have weight one.
             The 'auto' mode uses the values of labels to automatically
-            adjust weights inversely proportional to class frequencies.
+             adjust weights inversely proportional to class frequencies
+             as `n_samples / (n_classes * np.bincount(y))`.
 
         """
         if isinstance(value, dict) and len(value) != 2:

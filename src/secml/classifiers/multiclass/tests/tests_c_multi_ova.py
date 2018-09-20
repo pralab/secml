@@ -24,10 +24,10 @@ class TestMulticlass(CUnitTest):
 
     def test_predict_withsvm(self):
 
-        svc = SVC(kernel='linear', class_weight='auto')
+        svc = SVC(kernel='linear', class_weight='balanced')
         multiclass_sklearn = OneVsRestClassifier(svc)
         multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,
-                                              class_weight='auto')
+                                              class_weight='balanced')
         multiclass.verbose = 2
 
         multiclass.train(self.dataset, n_jobs=2)
@@ -109,7 +109,7 @@ class TestMulticlass(CUnitTest):
     def test_apply_method(self):
 
         multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,
-                                              class_weight='auto')
+                                              class_weight='balanced')
         multiclass.train(self.dataset)
         multiclass.apply_method(CClassifierSVM.set, param_name='C',
                                 param_value=150)
@@ -125,12 +125,12 @@ class TestMulticlass(CUnitTest):
         ds_norm_x = CNormalizerMinMax().train_normalize(self.dataset.X)
 
         multi_nonorm = CClassifierMulticlassOVA(classifier=CClassifierSVM,
-                                                class_weight='auto')
+                                                class_weight='balanced')
         multi_nonorm.train(CDataset(ds_norm_x, self.dataset.Y))
         pred_y_nonorm = multi_nonorm.classify(ds_norm_x)[0]
 
         multi = CClassifierMulticlassOVA(classifier=CClassifierSVM,
-                                         class_weight='auto',
+                                         class_weight='balanced',
                                          normalizer='minmax')
         multi.train(self.dataset)
         pred_y = multi.classify(self.dataset.X)[0]
@@ -145,7 +145,7 @@ class TestMulticlass(CUnitTest):
     def test_gradient(self):
         """Unittests for gradient() function."""
         multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,
-                                              class_weight='auto')
+                                              class_weight='balanced')
         multiclass.train(self.dataset)
 
         import random
@@ -184,7 +184,7 @@ class TestMulticlass(CUnitTest):
                        random_state=0).load()
 
         multiclass = CClassifierMulticlassOVA(
-            classifier=CClassifierSVM, class_weight='auto',
+            classifier=CClassifierSVM, class_weight='balanced',
             normalizer='minmax')
         multiclass.verbose = 2
 
