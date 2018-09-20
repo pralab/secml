@@ -186,7 +186,6 @@ class TestMulticlass(CUnitTest):
         multiclass = CClassifierMulticlassOVA(
             classifier=CClassifierSVM, class_weight='balanced',
             normalizer='minmax')
-        multiclass.verbose = 2
 
         # Training and classification
         multiclass.train(ds)
@@ -225,7 +224,7 @@ class TestMulticlass(CUnitTest):
         fig.switch_sptype('function')
         fig.sp.plot_fobj(lambda x: multiclass.classify(x)[0],
                          grid_limits=ds.get_bounds(offset=5), colorbar=False,
-                         n_grid_points=1000, plot_levels=False)
+                         n_grid_points=50, plot_levels=False)
 
         fig.sp.xlim(x_bounds[0] - .5 * x_bounds[1],
                     x_bounds[1] + .5 * x_bounds[1])
