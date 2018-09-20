@@ -49,7 +49,7 @@ class TestEvasionMulticlass(CUnitTest):
             self.ds.X = self.normalizer.train_normalize(self.ds.X)
 
         self.multiclass = CClassifierMulticlassOVA(
-            classifier=CClassifierSVM, class_weight='auto',
+            classifier=CClassifierSVM, class_weight='balanced',
             normalizer=None, kernel=self.kernel)
         self.multiclass.verbose = 0
 
