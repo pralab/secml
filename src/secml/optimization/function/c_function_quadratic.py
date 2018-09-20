@@ -44,14 +44,20 @@ class CFunctionQuadratic(CFunction):
                                                  gradient=self._quadratic_grad)
 
     def _quadratic_fun(self, x):
-        """Apply quadratic function to point x."""
-        if x.ndim == 2 and x.shape[0] > 1:
-            score = CArray.zeros(x.shape[0])
-            for i in xrange(x.shape[0]):
-                score[i] = x[i, :].dot(self._A).dot(
-                    x[i, :].T) + x[i, :].dot(self._b) + self._c
-            return score
-        return CArray(x.dot(self._A).dot(x.T) + x.dot(self._b) + self._c)
+        """Apply quadratic function to point x.
+
+        Parameters
+        ----------
+        x : CArray
+            Data point.
+
+        Returns
+        -------
+        scalar
+            Result of the function applied to input point.
+
+        """
+        return x.dot(self._A).dot(x.T) + x.dot(self._b) + self._c
 
     def _quadratic_grad(self, x):
         """Implements gradient of quadratic function wrt point x."""
