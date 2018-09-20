@@ -20,6 +20,7 @@ from secml.classifiers import CClassifierSVM
 from secml.figure import CFigure
 from secml.kernel import *
 from secml.optimization import COptimizer
+from secml.optimization.function import CFunction
 
 
 class TestSVM(CUnitTest):
@@ -216,8 +217,8 @@ class TestSVM(CUnitTest):
                 gradient = svm.gradient('x', pattern, y=1)
                 self.logger.info("Gradient: %s", str(gradient))
                 check_grad_val = COptimizer(
-                    svm.discriminant_function,
-                    svm._gradient_x).check_grad(pattern)
+                    CFunction(svm.discriminant_function,
+                              svm._gradient_x)).check_grad(pattern)
                 self.logger.info(
                     "norm(grad - num_grad): %s", str(check_grad_val))
                 self.assertLess(check_grad_val, 1e-3,
