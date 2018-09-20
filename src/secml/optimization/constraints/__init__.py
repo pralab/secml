@@ -3,5 +3,3 @@ from c_constraint_linear import CConstraintLinear
 from c_constraint_box import CConstraintBox
 from c_constraint_l2 import CConstraintL2
 from c_constraint_l1 import CConstraintL1
-# from c_constraint_discretize import CConstraintDiscretize
-from c_constraint_set import CConstraintSet
