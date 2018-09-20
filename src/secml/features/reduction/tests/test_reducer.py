@@ -14,7 +14,6 @@ from secml.utils import CUnitTest
 from secml.array import CArray
 from secml.features.reduction import CPca, CKernelPca, CLda
 from sklearn.decomposition import PCA, KernelPCA
-from sklearn.lda import LDA
 from secml.figure import CFigure
 
 
