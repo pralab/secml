@@ -4,6 +4,7 @@ from secml.utils import CUnitTest
 from secml.figure import CFigure
 from secml.array import CArray
 from secml.optimization.function import CFunction
+from secml.core.type_utils import is_scalar
 
 
 class TestCFunctionBeale(CUnitTest):
@@ -24,6 +25,7 @@ class TestCFunctionBeale(CUnitTest):
         self.logger.info("Correct result: {:}".format(correct_result))
         self.logger.info("Function result: {:}".format(funct_res))
 
+        self.assertTrue(is_scalar(funct_res))
         self.assertEquals(correct_result, funct_res)
 
     def test_2D(self):

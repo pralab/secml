@@ -4,6 +4,7 @@ from secml.utils import CUnitTest
 from secml.figure import CFigure
 from secml.array import CArray
 from secml.optimization.function import CFunction
+from secml.core.type_utils import is_scalar
 
 
 class TestCFunctionMcCormick(CUnitTest):
@@ -24,6 +25,7 @@ class TestCFunctionMcCormick(CUnitTest):
         self.logger.info("Correct result: {:}".format(correct_result))
         self.logger.info("Function result: {:}".format(funct_res))
 
+        self.assertTrue(is_scalar(funct_res))
         self.assertAlmostEqual(correct_result, funct_res, places=3)
 
     def test_2D(self):

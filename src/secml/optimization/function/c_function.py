@@ -80,12 +80,14 @@ class CFunction(CCreator):
         Returns
         -------
         out_fun : scalar
-            Function output.
+            Function output, single scalar.
 
         """
         out_fun = CArray(self._fun(x, *args, **kwargs)).ravel()
+        if out_fun.size != 1:
+            raise ValueError("function must return a scalar!")
         self._n_fun_eval += 1
-        return out_fun
+        return out_fun[0]
 
     def fun_ndarray(self, x, *args, **kwargs):
         """Evaluates function at point x (ndarray).
@@ -100,7 +102,7 @@ class CFunction(CCreator):
         Returns
         -------
         out_fun : scalar
-            Function output.
+            Function output, single scalar.
 
         """
         return self.fun(CArray(x), *args, **kwargs)

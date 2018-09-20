@@ -30,14 +30,21 @@ class CFunctionLinear(CFunction):
                                               gradient=self._linear_grad)
 
     def _linear_fun(self, x):
-        """Apply quadratic function to point x."""
-        if x.ndim == 2 and x.shape[0] > 1:
-            score = CArray.zeros(x.shape[0])
-            for i in xrange(x.shape[0]):
-                score[i] = x[i, :].dot(self._b) + self._c
-            return score
-        return CArray(x.dot(self._b) + self._c)
+        """Apply linear function to point x.
 
-    def _linear_grad(self, x=None):
+        Parameters
+        ----------
+        x : CArray
+            Data point.
+
+        Returns
+        -------
+        scalar
+            Result of the function applied to input point.
+
+        """
+        return x.dot(self._b) + self._c
+
+    def _linear_grad(self):
         """Implements gradient of linear function wrt point x."""
         return CArray(self._b.ravel())

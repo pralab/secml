@@ -39,6 +39,11 @@ class CFunctionMcCormick(CFunction):
         x : CArray
             Data point.
 
+        Returns
+        -------
+        float
+            Result of the function applied to input point.
+
         """
         x = x.atleast_2d()
         if x.shape[1] != 2:

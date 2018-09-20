@@ -15,7 +15,7 @@ class TestLineSearch(CUnitTest):
             "Test for binary line search  ... ")
 
         def fun_test(x):
-            return x.ravel() ** 2 - 1
+            return x ** 2 - 1
 
         self.fun = CFunction(fun=fun_test)
 
@@ -39,7 +39,7 @@ class TestLineSearch(CUnitTest):
     def _plot_fun(self):
         # cons_box = CConstraintBox(ub=3, lb=-3)
         x_range = CArray.arange(-5, 20, 0.5, )
-        score_range = self.fun.fun(x_range)
+        score_range = x_range.T.apply_fun_torow(self.fun.fun)
         # self.logger.info("Result scores : " + str(score_range))
         ref_line = CArray.zeros(x_range.size)
         fig = CFigure(height=6, width=12)
