@@ -1,7 +1,7 @@
 numpy == 1.12.*
 scipy == 1.0.*
 matplotlib == 2.0.*
-scikit-learn == 0.19.*
+scikit-learn >= 0.19.*
 joblib
 Pillow
 llvmlite == 0.12.1
