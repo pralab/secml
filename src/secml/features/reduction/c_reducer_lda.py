@@ -8,7 +8,7 @@
 """
 from secml.array import CArray
 from secml.features.reduction import CReducer
-from sklearn.lda import LDA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 
 class CLda(CReducer):
@@ -114,7 +114,7 @@ class CLda(CReducer):
             if self.n_components > (self.classes.size - 1):
                 raise ValueError("Maximum number of components is {:}".format(self.classes.size - 1))
 
-        self._lda = LDA(n_components=self.n_components)
+        self._lda = LinearDiscriminantAnalysis(n_components=self.n_components)
         self._lda.fit(data_carray.tondarray(), targets.tondarray())
         self._eigenvec = CArray(self._lda.scalings_)
         self._mean = CArray(self._lda.xbar_)
