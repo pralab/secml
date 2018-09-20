@@ -109,7 +109,8 @@ class CAttackEvasion(CAttack):
 
             # the attacker aims to avoid the reject region,
             # to have the attack sample misclassified as a valid class.
-            if self._solver_clf.has_reject_option():
+            if hasattr(self._solver_clf, 'reject_option') and \
+                    self._solver_clf.reject_option is True:
                 scores[:, -1] = nan
         else:
             # targeted evasion
@@ -138,7 +139,8 @@ class CAttackEvasion(CAttack):
 
             # the attacker aims to avoid the reject region,
             # to have the attack sample misclassified as a valid class.
-            if self._solver_clf.has_reject_option():
+            if hasattr(self._solver_clf, 'reject_option') and \
+                    self._solver_clf.reject_option is True:
                 scores[:, -1] = nan
         else:
             # targeted evasion
