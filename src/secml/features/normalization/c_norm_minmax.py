@@ -254,9 +254,6 @@ class CNormalizerMinMax(CNormalizerLinear):
         """
         data_scaled = super(CNormalizerMinMax, self).normalize(data)
 
-        # Setting values outside feature_range to the bound
-        data_scaled[data_scaled < self.feature_range[0]] = self.feature_range[0]
-        data_scaled[data_scaled > self.feature_range[1]] = self.feature_range[1]
         # replacing any nan
         data_scaled.nan_to_num()
 
