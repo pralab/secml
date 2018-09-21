@@ -77,24 +77,46 @@ class TestArrayNormalizers(CUnitTest):
         sklearn_comp(self.column_dense)
         sklearn_comp(self.column_sparse)
 
-    def test_minmaxscaler(self):
-        """Test for MinMaxScaler. This compares sklearn equivalent to our normalizer."""
+    def test_norm_minmax(self):
+        """Test for CNormalizerMinMax."""
 
         def sklearn_comp(array):
 
             self.logger.info("Original array is:\n{:}".format(array))
 
             # Sklearn normalizer (requires float dtype input)
-            target = CArray(MinMaxScaler().fit_transform(array.astype(float).tondarray())).round(4)
+            array_sk = array.astype(float).tondarray()
+            sk_norm = MinMaxScaler().fit(array_sk)
+
+            target = CArray(sk_norm.transform(array_sk)).round(4)
+
             # Our normalizer
-            result = CNormalizerMinMax().train_normalize(array).round(4)
+            our_norm = CNormalizerMinMax().train(array)
+            result = our_norm.normalize(array).round(4)
 
-            self.assertFalse((target != result).any(), "\n{:}\nis different from target\n{:}".format(result, target))
+            self.logger.info("Correct result is:\n{:}".format(target))
+            self.logger.info("Our result is:\n{:}".format(result))
 
-            self.logger.info("Correct result is:\n{:}".format(result))
+            self.assertFalse((target != result).any())
+
+            # Testing out of range normalization
+
+            self.logger.info("Testing out of range normalization")
+
+            # Sklearn normalizer (requires float dtype input)
+            target = CArray(sk_norm.transform(array_sk + 1)).round(4)
+
+            # Our normalizer
+            result = our_norm.normalize(array + 1).round(4)
+
+            self.logger.info("Correct result is:\n{:}".format(target))
+            self.logger.info("Our result is:\n{:}".format(result))
+
+            self.assertFalse((target != result).any())
 
         sklearn_comp(self.array_dense)
-        sklearn_comp(self.row_dense.atleast_2d())  # We manage flat vectors differently from numpy/sklearn
+        sklearn_comp(self.array_dense)
+        sklearn_comp(self.row_dense.atleast_2d())
         sklearn_comp(self.column_dense)
 
 
