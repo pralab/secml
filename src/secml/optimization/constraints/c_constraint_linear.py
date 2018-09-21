@@ -12,7 +12,6 @@ from secml.array import CArray
 
 class CConstraintLinear(CConstraint):
     """Class that defines a linear constraint in the form Ax <= b."""
-
     class_type = "linear"
 
     def __init__(self, A, b):
@@ -45,12 +44,23 @@ class CConstraintLinear(CConstraint):
         self._b = CArray(CArray(value).ravel())
 
     def _constraint(self, x):
+        """Returns the value of the constraint for the sample x.
+
+        The constraint value y is given by:
+         y = max(A.dot(x) - b)
+
+        Parameters
+        ----------
+        x : CArray
+            Flat 1-D array with the sample.
+
+        Returns
+        -------
+        float
+            Value of the constraint.
+
         """
-        This function returns the value of Ax-b,
-        to be compared against 0.
-        x is assumed to be a row (flat) vector
-        """
-        cons = (self._A.dot(x.T)).ravel() - self._b
+        cons = CArray(self._A.dot(x.T)).ravel() - self._b
         return float(cons.max())
 
     def _projection(self, x):

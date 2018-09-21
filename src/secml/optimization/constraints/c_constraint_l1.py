@@ -41,10 +41,24 @@ class CConstraintL1(CConstraint):
         """Sets the semidiagonal of the constraint."""
         self._radius = value
 
-    # on a single sample
     def _constraint(self, x):
-        """Return c(x) value."""
-        return (x - self._center).ravel().norm(ord=1) - self._radius
+        """Returns the value of the constraint for the sample x.
+
+        The constraint value y is given by:
+         y = ||x - center||_1 - radius
+
+        Parameters
+        ----------
+        x : CArray
+            Flat 1-D array with the sample.
+
+        Returns
+        -------
+        float
+            Value of the constraint.
+
+        """
+        return float((x - self._center).norm(ord=1) - self._radius)
 
     # TODO: make tests
     def _gradient(self, x):

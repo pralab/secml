@@ -62,9 +62,22 @@ class CConstraintBox(CConstraint):
         self.ub = ub
 
     def _constraint(self, x):
-        """Returns an integer that depends on
-        the position of the point inside the box."""
+        """Returns the value of the constraint for the sample x.
 
+        The constraint value y is given by:
+         y = max(abs(x - center) - radius)
+
+        Parameters
+        ----------
+        x : CArray
+            Flat 1-D array with the sample.
+
+        Returns
+        -------
+        float
+            Value of the constraint.
+
+        """
         # if x is sparse, and center and radius are not (sparse) vectors,
         # call sparse implementation
         if x.issparse and self.center.size != x.size and \
@@ -72,12 +85,28 @@ class CConstraintBox(CConstraint):
             return self._constraint_sparse(x)
 
         z = abs(x - self.center) - self.radius
-        return z.max()
+        return float(z.max())
 
     def _constraint_sparse(self, x):
-        """Returns an integer that depends on
-        the position of the point inside the box."""
+        """Returns the value of the constraint for the sparse sample x.
 
+        The constraint value y is given by:
+         y = max(abs(x - center) - radius)
+
+        This implementation for sparse arrays only allows a scalar value
+         for center and radius.
+
+        Parameters
+        ----------
+        x : CArray
+            Flat 1-D array with the sample.
+
+        Returns
+        -------
+        float
+            Value of the constraint.
+
+        """
         if self.center.size > 1 and self.radius.size > 1:
             raise ValueError("Box center and radius are not scalar values.")
 
@@ -91,11 +120,11 @@ class CConstraintBox(CConstraint):
         # if there are no zeros in x... (it may be effectively "dense")
         if x.nnz == x.size:
             # return current maximum value
-            return m
+            return float(m)
 
         # otherwise evaluate also the l-inf dist. of 0 elements to the center,
         # and also consider that in the max computation
-        return max(m, m0)
+        return float(max(m, m0))
 
     def _projection(self, x):
         """Project x onto the feasible domain (box)."""
