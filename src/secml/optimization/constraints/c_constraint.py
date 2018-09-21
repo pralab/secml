@@ -22,13 +22,6 @@ class CConstraint(CCreator):
         """Defines constraint type."""
         raise NotImplementedError()
 
-    @abstractmethod
-    def _constraint(self, x):
-        """Returns the left-hand-value c(x) in the constraint, to be compared against 0
-            x: a single sample
-        """
-        raise NotImplementedError()
-
     # This is not abstract as some constraints may not be differentiable
     def _gradient(self, x):
         """Returns the gradient of c(x) at x
@@ -74,45 +67,100 @@ class CConstraint(CCreator):
 
         return is_active
 
-    def is_violated(self, X):
+    def is_violated(self, x, precision=4):
+        """Returns the violated status of the constraint for each sample in x.
+
+        Parameters
+        ----------
+        x : CArray
+            Array of data, 1-D or 2-D, one sample for each row.
+        precision : int, optional
+            Number of digits to check when computing the violated status
+            Default is 4.
+
+        Returns
+        -------
+        CArray or bool
+            Violated status of the constraint. Boolean True/False value.
+            If input is 1-D or 2-D with shape[0] == 1, a bool is returned.
+            If input is 2-D with shape[0] > 1, a 1-D boolean array
+             is returned with the value of the constraint for each sample.
+
         """
-        Works either on a array of len(data.shape)==2,
-        each row representing a data sample,
-        or on a single sample (len(data.shape)==1).
-        In the former case, it returns a vector, otherwise a scalar.
-        """
-        if len(X.shape) == 1 or X.shape[0] == 1:  # TODO check if 1d vector
-            return self._is_violated(X.ravel())
-        is_violated = CArray.ones(X.shape[0])
-        for i in xrange(X.shape[0]):
-            is_violated[i] = self._is_violated(X[i, :].ravel())  # TODO todense
+        if x.ndim == 1 or x.shape[0] == 1:
+            # Single point case
+            return self._is_violated(x.ravel(), precision)
+
+        # Multi-point case
+        is_violated = CArray.ones(x.shape[0], dtype=bool)
+        for i in xrange(x.shape[0]):
+            is_violated[i] = self._is_violated(x[i, :].ravel(), precision)
 
         return is_violated
 
-    def _is_violated(self, x, ndigits=4):
-        """Returns true or false depending on whether
-        the constraint is violated or not.
-            By default we assume constraints of the form c(x) <= 0
-            x: a single sample
+    def _is_violated(self, x, precision=4):
+        """Returns the violated status of the constraint for the sample x.
+
+        Parameters
+        ----------
+        x : CArray
+            Flat 1-D array with the sample.
+        precision : int, optional
+            Number of digits to check when computing the violated status
+            Default is 4.
+
+        Returns
+        -------
+        bool
+            Violated status of the constraint. Boolean True/False value.
+
         """
-        if self._constraint(x).round(ndigits) > 0:
+        if round(self._constraint(x), precision) > 0:
             return True
         return False
 
-    def constraint(self, X):
-        """
-        Works either on a array of len(data.shape)==2,
-        each row representing a data sample,
-        or on a single sample (len(data.shape)==1).
-        In the former case, it returns a vector, otherwise a scalar.
-        """
+    @abstractmethod
+    def _constraint(self, x):
+        """Returns the value of the constraint for the sample x.
 
-        if len(X.shape) == 1 or X.shape[0] == 1:
-            return self._constraint(X.ravel())
+        Parameters
+        ----------
+        x : CArray
+            Flat 1-D array with the sample.
 
-        constr = CArray.ones(X.shape[0])
-        for i in xrange(0, X.shape[0]):
-            constr[i] = self._constraint(X[i, :].ravel())  # todo: todense?
+        Returns
+        -------
+        scalar
+            Value of the constraint.
+
+        """
+        raise NotImplementedError()
+
+    def constraint(self, x):
+        """Returns the value of the constraint for each sample in x.
+
+        Parameters
+        ----------
+        x : CArray
+            Array of data, 1-D or 2-D, one sample for each row.
+
+        Returns
+        -------
+        CArray or scalar
+            Value of the constraint.
+            If input is 1-D or 2-D with shape[0] == 1, a scalar is returned.
+            If input is 2-D with shape[0] > 1, a 1-D array is returned with
+             the value of the constraint for each sample.
+
+        """
+        if x.ndim == 1 or x.shape[0] == 1:
+            # Single point case
+            return self._constraint(x.ravel())
+
+        # Multi-point case
+        constr = CArray.ones(x.shape[0], dtype=float)
+        for i in xrange(x.shape[0]):
+            constr[i] = self._constraint(x[i, :].ravel())
         return constr
 
     def projection(self, X):
