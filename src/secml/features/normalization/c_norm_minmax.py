@@ -205,7 +205,7 @@ class CNormalizerMinMax(CNormalizerLinear):
         # Setting the linear normalization properties
         # y = m * x + q
         r = CArray(self.max - self.min)
-        self._m = CArray.zeros(r.size)
+        self._m = CArray.ones(r.size)
         self._m[r != 0] = 1.0 / r[r != 0]  # avoids division by zero
         self._q = -self.min * self._m
         # z = n * y + v  ->  Y = n * m * x + (n * q + v)
