@@ -50,7 +50,8 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
     if chunk_size < 1:
         raise ValueError("chunk_size must be at least 1 byte")
 
-    sys.stdout.write("Downloading from `{:}`\n".format(url))
+    sys.stdout.write(
+        "Downloading from `{:}` ({:} bytes)\n".format(url, total_size))
     sys.stdout.flush()
 
     # Create output directory if not exists
@@ -68,12 +69,13 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
                 # Report progress
                 dl += len(chunk)
                 done = int(float(50 * dl) / total_size)
-                sys.stdout.write("\r[{:}{:}] {:}/{:}".format(
-                    '=' * done, ' ' * (50-done), dl, total_size))
-                sys.stdout.flush()
-        sys.stdout.write("\n")
+                if sys.stdout.isatty() is True:
+                    # Provide real-time updates (if stdout is a tty)
+                    sys.stdout.write("\r[{:}{:}] {:}/{:}".format(
+                        '=' * done, ' ' * (50-done), dl, total_size))
+                    sys.stdout.flush()
 
-    sys.stdout.write("File stored in `{:}`\n".format(out_path))
+    sys.stdout.write("\nFile stored in `{:}`\n".format(out_path))
     sys.stdout.flush()
 
     if md5_digest is not None and md5_digest != md5(out_path, chunk_size):
