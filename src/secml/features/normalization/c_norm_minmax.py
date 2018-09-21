@@ -205,7 +205,7 @@ class CNormalizerMinMax(CNormalizerLinear):
         # Setting the linear normalization properties
         # y = m * x + q
         r = CArray(self.max - self.min)
-        self._m = CArray.zeros(r.size)
+        self._m = CArray.ones(r.size)
         self._m[r != 0] = 1.0 / r[r != 0]  # avoids division by zero
         self._q = -self.min * self._m
         # z = n * y + v  ->  Y = n * m * x + (n * q + v)
@@ -254,9 +254,6 @@ class CNormalizerMinMax(CNormalizerLinear):
         """
         data_scaled = super(CNormalizerMinMax, self).normalize(data)
 
-        # Setting values outside feature_range to the bound
-        data_scaled[data_scaled < self.feature_range[0]] = self.feature_range[0]
-        data_scaled[data_scaled > self.feature_range[1]] = self.feature_range[1]
         # replacing any nan
         data_scaled.nan_to_num()
 
