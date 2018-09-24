@@ -275,7 +275,7 @@ class CAttackEvasion(CAttack):
         self._grad_eval = 0
 
         # if data can not be modified by the attacker, exit
-        if not self._is_attack_class(y0):
+        if not self.is_attack_class(y0):
             self._x_seq = x_init
             self._x_opt = x_init
             self._f_opt = nan
