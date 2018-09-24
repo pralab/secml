@@ -49,8 +49,8 @@ class TestCSecEvalEvasion(CSecEvalTestCases.TestCSecEval):
 
         # sec eval params
         self.param_name = 'dmax'
-        dmax = 10 # 10000
-        dmax_step = 1 # 1000
+        dmax = 5 # 10000
+        dmax_step = 0.5 # 1000
         self.param_values = CArray.arange(
             start=0, step=dmax_step,
             stop=dmax + 1)
