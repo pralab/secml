@@ -178,7 +178,7 @@ class CKernelRBF(CKernel):
 
         if v_carray.issparse is True:
             # Broadcasting not supported for sparse arrays
-            v_broadcast = v_carray.repeat(u_carray.shape[0], axis=0)
+            v_broadcast = v_carray.repmat(u_carray.shape[0], 1)
         else:  # Broadcasting is supported by design for dense arrays
             v_broadcast = v_carray
 
