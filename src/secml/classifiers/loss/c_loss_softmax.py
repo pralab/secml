@@ -51,22 +51,18 @@ class CLossSoftMax(CLoss):
         score = score - score.max(axis=1)  # broadcasting...
 
         score_exp = score.exp()
-        # TODO: potential CArray BUG - if you ravel score_exp_sum
-        # and replace score_exp_sum[y == class_label, :] with
-        # score_exp_sum[y == class_label] the output is different.
-        score_exp_sum = CArray(score_exp.sum(axis=1))
+        score_exp_sum = CArray(score_exp.sum(axis=1, keepdims=False))
+
         if c is None:
             for class_label in y.unique():
-                # TODO: other bug in CArray. when all elements of
-                # y == class_label are true, it crashes
                 post_prob[y == class_label] = \
-                    score_exp[y == class_label, class_label] / \
-                    score_exp_sum[y == class_label, :]
+                    score_exp[y == class_label, class_label].ravel() / \
+                    score_exp_sum[y == class_label]
         else:
             for class_label in y.unique():
                 post_prob[y == class_label] = \
-                    score_exp[y == class_label, c] / \
-                    score_exp_sum[y == class_label, :]
+                    score_exp[y == class_label, c].ravel() / \
+                    score_exp_sum[y == class_label]
 
         return post_prob
 
