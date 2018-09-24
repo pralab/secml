@@ -90,7 +90,7 @@ class TestCEvasionCases(object):
                 "lb": self.lb,
                 "ub": self.ub,
                 "discrete": self.discrete,
-                "attack_classes": +1,
+                "attack_classes": CArray([1]),
                 "y_target": None,
                 "solver_type": self.solver_type,
                 "solver_params": self.solver_params

@@ -28,7 +28,7 @@ class TestCSecEvalEvasion(TestCSecEvalCases.TestCSecEval):
 
         # only manipulate positive samples, targeting negative ones
         self.y_target = None
-        self.attack_classes = 1
+        self.attack_classes = CArray([1])
 
         params = {
             "classifier": self.classifier,
