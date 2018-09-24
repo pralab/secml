@@ -8,6 +8,7 @@ Interface class for evasion and poisoning attacks.
 """
 
 from secml.core import CCreator
+from secml.core.type_utils import is_int
 from secml.array import CArray
 from secml.classifiers import CClassifier, CClassifierSVM
 from secml.data import CDataset
@@ -34,7 +35,7 @@ class CAttack(CCreator):
                  ub=None,
                  discrete=False,
                  y_target=None,
-                 attack_classes=-1,
+                 attack_classes='all',
                  solver_type=None,
                  solver_params=None):
         """
@@ -51,8 +52,9 @@ class CAttack(CCreator):
         discrete: True/False (default: false).
                   If True, input space is considered discrete (integer-valued),
                   otherwise continuous.
-        attack_classes: list of classes that can be manipulated by the attacker
-                 -1 means all classes can be manipulated.
+        attack_classes : 'all' or CArray, optional
+            List of classes that can be manipulated by the attacker or
+             'all' (default) if all classes can be manipulated.
 
         """
 
@@ -145,55 +147,49 @@ class CAttack(CCreator):
 
     @attack_classes.setter
     def attack_classes(self, values):
-        self._attack_classes = CArray(values)
-
-    def _is_attack_class(self, y):
-        """
-        Private function working on single label.
-
-        Parameters
-        ----------
-        y: class label to be checked
-
-        Returns
-        -------
-        True: if class y can be manipulated by the attacker, False otherwise
-
-        """
-        if self._attack_classes[self._attack_classes == -1].any():
-            return True  # all classes can be manipulated
-
-        for i in xrange(self._attack_classes.size):
-            if y == self._attack_classes[i]:
-                return True
-
-        return False
+        if not (values == 'all' or isinstance(values, CArray)):
+            raise ValueError("`attack_classes` can be 'all' or a CArray")
+        self._attack_classes = values
 
     def is_attack_class(self, y):
-        """
-        For each y value, this function returns True/False.
-        The i-th element is True if y[i] is an attack class, False otherwise.
+        """Returns True/False if the input class can be attacked.
+
         Parameters
         ----------
-        y: label vector, or single label
+        y : int or CArray
+            CArray or single label of the class to to be checked.
 
         Returns
         -------
-        v: Boolean vector or True/false.
+        bool or CArray
+            True if class y can be manipulated by the attacker,
+             False otherwise. If CArray, a True/False value for each
+             input label will be returned.
+
         """
-        if not isinstance(y, CArray):
-            return self._is_attack_class(y)
+        if is_int(y):
+            if self._attack_classes == 'all':
+                return True  # all classes can be manipulated
+            elif CArray(y == self._attack_classes).any():
+                return True  # y can be manipulated
+            else:
+                return False
 
-        v = CArray.zeros(shape=y.shape, dtype=bool)
+        elif isinstance(y, CArray):
 
-        if self._attack_classes[self._attack_classes == -1].any():
-            v[:] = True  # all classes can be manipulated
+            v = CArray.zeros(shape=y.shape, dtype=bool)
+
+            if self.attack_classes == 'all':
+                v[:] = True  # all classes can be manipulated
+                return v
+
+            for i in xrange(self.attack_classes.size):
+                v[y == self.attack_classes[i]] = True  # y can be manipulated
+
             return v
 
-        for i in xrange(self._attack_classes.size):
-            v[y == self._attack_classes[i]] = True
-
-        return v
+        else:
+            raise TypeError("y can be an integer or a CArray")
 
     ###########################################################################
     #                         ABSTRACT PUBLIC METHODS

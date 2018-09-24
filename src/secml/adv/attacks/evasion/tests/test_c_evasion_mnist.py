@@ -58,7 +58,7 @@ class TestEvasionMNIST(CCreator):
             surrogate_classifier=self.classifier,
             surrogate_data=self._val_dts,
             distance=self.distance,
-            attack_classes=-1,
+            attack_classes='all',
             lb=self.lb,
             ub=self.ub,
             dmax=self.dmax,
