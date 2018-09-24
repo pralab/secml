@@ -34,7 +34,7 @@ class CAttack(CCreator):
                  ub=None,
                  discrete=False,
                  y_target=None,
-                 attack_classes=-1,
+                 attack_classes='all',
                  solver_type=None,
                  solver_params=None):
         """
@@ -51,8 +51,9 @@ class CAttack(CCreator):
         discrete: True/False (default: false).
                   If True, input space is considered discrete (integer-valued),
                   otherwise continuous.
-        attack_classes: list of classes that can be manipulated by the attacker
-                 -1 means all classes can be manipulated.
+        attack_classes : 'all' or CArray, optional
+            List of classes that can be manipulated by the attacker or
+             'all' (default) if all classes can be manipulated.
 
         """
 
@@ -145,7 +146,9 @@ class CAttack(CCreator):
 
     @attack_classes.setter
     def attack_classes(self, values):
-        self._attack_classes = CArray(values)
+        if not (values == 'all' or isinstance(values, CArray)):
+            raise ValueError("`attack_classes` can be 'all' or a CArray")
+        self._attack_classes = values
 
     def _is_attack_class(self, y):
         """

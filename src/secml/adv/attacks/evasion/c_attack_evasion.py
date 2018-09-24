@@ -33,7 +33,7 @@ class CAttackEvasion(CAttack):
                  ub=1,
                  discrete=False,
                  y_target=None,
-                 attack_classes=-1,
+                 attack_classes='all',
                  solver_type=None,
                  solver_params=None):
         """
@@ -46,12 +46,13 @@ class CAttackEvasion(CAttack):
         TODO: complete list of parameters
 
         Parameters
-        ------
+        ----------
         discrete: True/False (default: false).
                   If True, input space is considered discrete (integer-valued),
                   otherwise continuous.
-        attack_classes: list of classes that can be manipulated by the attacker
-                 -1 means all classes can be manipulated.
+        attack_classes : 'all' or CArray, optional
+            List of classes that can be manipulated by the attacker or
+             'all' (default) if all classes can be manipulated.
 
         """
         self._x0 = None
