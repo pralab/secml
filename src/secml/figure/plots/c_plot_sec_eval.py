@@ -330,7 +330,7 @@ class CPlotSecEval(CPlot):
 
             perf = self._compute_sec_eval_curve(sec_eval_data, samples_idx,
                                                 consider_target, metric)
-            self.plot(sec_eval_data[0].param_values, perf, label=str(cls))
+            self.plot(sec_eval_data[0].param_values, perf[0], label=str(cls))
 
         self.legend(loc=1, labelspacing=0.4, handletextpad=0.3)
         self._apply_params()
