@@ -56,12 +56,12 @@ class CLossSoftMax(CLoss):
         if c is None:
             for class_label in y.unique():
                 post_prob[y == class_label] = \
-                    score_exp[y == class_label, class_label].ravel() / \
+                    CArray(score_exp[y == class_label, class_label]).ravel() / \
                     score_exp_sum[y == class_label]
         else:
             for class_label in y.unique():
                 post_prob[y == class_label] = \
-                    score_exp[y == class_label, c].ravel() / \
+                    CArray(score_exp[y == class_label, c]).ravel() / \
                     score_exp_sum[y == class_label]
 
         return post_prob
