@@ -306,7 +306,7 @@ class CSolverDescDir(CSolver):
         """
 
         d = self._explorer._current_descent_direction()
-        next_point = x - self._explorer.eta * d
+        next_point = x - d * self._explorer.eta
         x_constr = constr.projection(next_point)
 
         # assuming gradient on x_constr to be equal to that in x
