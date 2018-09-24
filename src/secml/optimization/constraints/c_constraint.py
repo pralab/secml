@@ -18,9 +18,10 @@ class CConstraint(CCreator):
     __super__ = 'CConstraint'
 
     @property
-    def constraint_type(self):
+    def class_type(self):
         """Defines constraint type."""
-        raise NotImplementedError()
+        raise NotImplementedError(
+            "define `class_type` attribute to support `CCreator.create()`.")
 
     # This is not abstract as some constraints may not be differentiable
     def _gradient(self, x):
