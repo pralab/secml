@@ -127,14 +127,25 @@ class CConstraintBox(CConstraint):
         return float(max(m, m0))
 
     def _projection(self, x):
-        """Project x onto the feasible domain (box)."""
+        """Project x onto the feasible domain (box).
 
-        if is_scalar(self._ub):
+        Parameters
+        ----------
+        x : CArray
+            Point to be projected.
+
+        Returns
+        -------
+        CArray
+            Point after projection.
+
+        """
+        if self.ub.size == 1:  # Same ub for all the features
             x[x >= self._ub] = self._ub
         else:
             x[x >= self._ub] = self._ub[x >= self._ub]
 
-        if is_scalar(self._lb):
+        if self.lb.size == 1:  # Same lb for all the features
             x[x <= self._lb] = self._lb
         else:
             x[x <= self._lb] = self._lb[x <= self._lb]
