@@ -12,10 +12,10 @@ import unittest
 from secml.array import CArray
 
 from secml.adv.attacks.evasion import CAttackEvasion
-from test_c_sec_eval import TestCSecEvalCases
+from test_c_sec_eval import CSecEvalTestCases
 
 
-class TestCSecEvalEvasion(TestCSecEvalCases.TestCSecEval):
+class TestCSecEvalEvasion(CSecEvalTestCases.TestCSecEval):
     """
     SecEvalEvasion unittest
     """

@@ -14,7 +14,7 @@ from secml.optimization.constraints import \
     CConstraintBox, CConstraintL1, CConstraintL2
 
 
-class TestCEvasionCases(object):
+class CEvasionTestCases(object):
     """Wrapper for TestCEvasion to make unittest.main() work correctly."""
 
     class TestCEvasion(CUnitTest):

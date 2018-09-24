@@ -1,12 +1,12 @@
 import unittest
-from test_c_evasion import TestCEvasionCases
+from test_c_evasion import CEvasionTestCases
 
 from secml.classifiers import CClassifierSVM
 from secml.features.normalization import CNormalizerMinMax
 from secml.kernel import CKernel
 
 
-class TestEvasionNonLinearL2(TestCEvasionCases.TestCEvasion):
+class TestEvasionNonLinearL2(CEvasionTestCases.TestCEvasion):
     """Evasion with nonlinear differentiable classifier
     and L2 distance constraint."""
 

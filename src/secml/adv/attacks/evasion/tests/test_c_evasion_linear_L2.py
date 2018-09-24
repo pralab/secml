@@ -1,11 +1,11 @@
 import unittest
-from test_c_evasion import TestCEvasionCases
+from test_c_evasion import CEvasionTestCases
 
 from secml.classifiers import CClassifierSVM
 from secml.features.normalization import CNormalizerMinMax
 
 
-class TestEvasionLinearL2(TestCEvasionCases.TestCEvasion):
+class TestEvasionLinearL2(CEvasionTestCases.TestCEvasion):
     """Evasion with linear classifier and L2 distance constraint."""
 
     def param_setter(self):

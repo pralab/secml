@@ -24,7 +24,7 @@ from secml.data.loader import CDLRandomBlobs
 from secml.features.normalization import CNormalizerMinMax
 
 
-class TestCSecEvalCases(object):
+class CSecEvalTestCases(object):
     """
     Wrapper for TestCSecEval to make unittest.main() work correctly
     """

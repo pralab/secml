@@ -1,10 +1,10 @@
 import unittest
-from test_c_evasion import TestCEvasionCases
+from test_c_evasion import CEvasionTestCases
 
 from secml.classifiers import CClassifierDecisionTree
 
 
-class TestEvasionTreeL1(TestCEvasionCases.TestCEvasion):
+class TestEvasionTreeL1(CEvasionTestCases.TestCEvasion):
     """Evasion with Tree classifier and L1 distance constraint."""
 
     def param_setter(self):
