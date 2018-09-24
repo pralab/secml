@@ -73,7 +73,7 @@ class TestEvasionMulticlass(CUnitTest):
         dmax = 5
 
         self.solver_type = 'descent-direction'
-        self.solver_params = {'eta': 1e-2, 'eta_min': 0.1}
+        self.solver_params = {'eta': 1e-1, 'eta_min': 0.1}
 
         eva = CAttackEvasion(self.multiclass, self.multiclass,
                              surrogate_data=self.ds,
@@ -156,7 +156,7 @@ class TestEvasionMulticlass(CUnitTest):
         # for d_idx, d in enumerate([dmax]):
         for d in xrange(1, dmax + 1):
             fig.sp.plot_fobj(func=self._rescaled_distance,
-                             supports_multipoint=True,
+                             multipoint=True,
                              plot_background=False,
                              n_grid_points=100, levels_color='gray',
                              grid_limits=ds_bounds,
@@ -187,7 +187,7 @@ class TestEvasionMulticlass(CUnitTest):
         # for d_idx, d in enumerate([dmax]):
         for d in xrange(1, dmax + 1):
             fig.sp.plot_fobj(func=self._rescaled_distance,
-                             supports_multipoint=True,
+                             multipoint=True,
                              plot_background=False,
                              n_grid_points=100, levels_color='w',
                              grid_limits=ds_bounds,
@@ -198,7 +198,7 @@ class TestEvasionMulticlass(CUnitTest):
         # Use the actual target used in evasion
         # target = self.ds.Y[p_idx] if target_class is None else target_class
         fig.sp.plot_fobj(lambda x: eva._objective_function(x),
-                         supports_multipoint=True,
+                         multipoint=True,
                          grid_limits=ds_bounds,
                          colorbar=False, n_grid_points=100,
                          plot_levels=False)
@@ -286,7 +286,7 @@ class TestEvasionMulticlass(CUnitTest):
         # Plotting multiclass decision function
         fig.switch_sptype('function')
         fig.sp.plot_fobj(lambda x: self.multiclass.classify(x)[0],
-                         supports_multipoint=True, cmap='Set2',
+                         multipoint=True, cmap='Set2',
                          grid_limits=self.ds.get_bounds(offset=5),
                          colorbar=False, n_grid_points=300, plot_levels=True,
                          plot_background=True, levels=[-1, 0, 1, 2],
