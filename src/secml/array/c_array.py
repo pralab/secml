@@ -3697,12 +3697,7 @@ class CArray(object):
         return self.__class__(self._data.pinv(rcond))
 
     def norm(self, ord=None, axis=None):
-        """Entrywise matrix or vector norm.
-
-        .. warning::
-
-            Currently only the 2-Order norm is available for sparse
-            arrays. Convert to dense if necessary.
+        """Entrywise vector norm.
 
         This function is able to return one of an infinite number
         of vector norms (described below), depending on the value
@@ -3733,9 +3728,9 @@ class CArray(object):
         Differently from numpy, we consider flat vectors as 2-Dimensional
         with shape (1,array.size).
 
-        If input 2-Dimensional array has NOT a vector-like shape,
-        ValueError will be raised. In that case, call `.norm_2d()` or
-        specify the axis parameter.
+        If input 2-Dimensional array has NOT a vector-like shape and
+        axis is None, ValueError will be raised. In that case,
+        call `.norm_2d()` or specify the axis parameter.
 
         See Also
         --------
@@ -3791,13 +3786,22 @@ class CArray(object):
                     "Array has shape {:}. Call .norm_2d() to compute "
                     "matricial norm or specify axis.".format(self.shape))
             array = self  # 2D array and specified axis
+            axis_fake = axis  # To handle next special case
+
         else:  # Array has vector-like shape
             # All other arrays are considered flat
             array = self.ravel()
+            # For sparse "vectors" we use axis = 1 to get the correct results
+            # as flat vectors are columns in numpy/scipy
+            axis_fake = 1 if self.issparse is True and axis is None else axis
 
-        out = array._data.norm(ord, axis)
+        # 'fro' is a matrix-norm. We can exit...
+        if ord == 'fro':
+            raise ValueError('Invalid norm order for vectors.')
 
-        # Return float if axis is None, else CArray
+        out = array._data.norm(ord, axis_fake)
+
+        # Return float if axis (not the axis_fake) is None, else CArray
         if axis is None:
             return self._instance_array(out)
         else:
@@ -3861,10 +3865,7 @@ class CArray(object):
         3.16228
 
         """
-        if self.issparse is True:
-            return self._instance_array(self.atleast_2d()._data.norm_2d(ord))
-        else:
-            return self._instance_array(self.atleast_2d()._data.norm(ord))
+        return self._instance_array(self.atleast_2d()._data.norm(ord))
 
     def shuffle(self):
         """Modify array in-place by shuffling its contents.

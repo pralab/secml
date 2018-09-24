@@ -915,32 +915,37 @@ class Csparse(object):
         """Compute the (Moore-Penrose) pseudo-inverse of a matrix."""
         raise NotImplementedError
 
-    def norm(self, ord=None, axis=None):
-        """Return the vector norm of store data."""
-        if ord not in (None, 2):
-            raise NotImplementedError("Only 2-Order `norm` is currently "
-                                      "implemented for sparse arrays, "
-                                      "convert to dense first.")
-
-        if self.size == 0:
-            # Special handle for empty arrays
-            # TODO: CHECK IF FIXED IN SCIPY > 0.16
-            return Cdense([0.0])
-
-        return Cdense(self.pow(2).sum(axis)).sqrt()
-
-    def norm_2d(self, ord=None):
+    def norm(self, order=None, axis=None):
         """Return the matrix norm of store data."""
-        if self.size == 0:
-            # Special handle as 1-norm raise error
-            # TODO: CHECK IF FIXED IN SCIPY > 0.16
-            if ord not in (None, 'fro', np.inf, -np.inf, 1, -1):
-                if ord in (2, -2):
-                    raise NotImplementedError
-                raise ValueError("Invalid norm order.")
-            return Cdense([0.0])
+        if axis is not None and order == 'fro':
+            raise ValueError('Invalid norm order for vectors.')
 
-        return Cdense(norm(self.tocsr(), ord=ord))
+        # Only the vector-norms listed below are supported
+        if axis is not None and \
+                order not in (None, np.inf, -np.inf, 0, 1, 2):
+            raise NotImplementedError(
+                "norm order {:} not implemented.".format(order))
+
+        if self.size == 0:
+            # Special handle norm raises error for empty arrays
+            # TODO: CHECK IF FIXED IN SCIPY > 0.16
+            if axis is None and order in (2, -2):
+                # Return an error consistent with scipy
+                raise NotImplementedError
+            if (axis is None and order not in (
+                    None, 'fro', np.inf, -np.inf, 1, -1)) or \
+                    (axis is not None and order == 'fro'):
+                raise ValueError("Invalid norm order {:}.".format(order))
+            return self.__class__([0.0])
+
+        out = Cdense(norm(self.tocsr(), ord=order, axis=axis)).astype(float)
+
+        if axis is None:
+            # out is already a vector, so nothing to do
+            return out
+        else:
+            # return a column if needed
+            return out.atleast_2d().T if axis == 1 else out.atleast_2d()
 
     def shuffle(self):
         """Shuffle array data in-place."""
