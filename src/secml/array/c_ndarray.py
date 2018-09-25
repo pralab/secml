@@ -1115,20 +1115,22 @@ class Cdense(object):
         """Element-wise logical ! (not) of array elements."""
         return self.__class__(np.logical_not(self.toarray()))
 
-    def norm(self, ord=None, axis=None):
+    def norm(self, order=None, axis=None):
         """Wrapper for numpy norm."""
+        if (self.ndim < 2 or axis is not None) and order == 'fro':
+            # 'fro' is a matrix norm
+            raise ValueError("Invalid norm order {:}.".format(order))
+
         if self.size == 0:
-            # Special handle as inf-norm raise error
-            # TODO: CHECK IF FIXED IN NUMPY > 1.10
-            if self.ndim == 2 and ord not in (
-                        None, 'fro', np.inf, -np.inf, 1, -1, 2, -2) or \
-                    self.ndim < 2 and ord == 'fro':
-                raise ValueError("Invalid norm order {:}.".format(ord))
+            # Special handle as few norms raise error for empty arrays
+            if self.ndim == 2 and axis is None and order not in (
+                        None, 'fro', np.inf, -np.inf, 1, -1, 2, -2):
+                raise ValueError("Invalid norm order {:}.".format(order))
             return self.__class__([0.0])
 
         out = np.linalg.norm(
             self.atleast_2d().toarray().astype(float) if axis is not None
-            else self.toarray().astype(float), ord, axis)
+            else self.toarray().astype(float), order, axis)
 
         # Always return a Cdense of floats
         out = self.__class__(out).astype(float)
