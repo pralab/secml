@@ -15,7 +15,8 @@ import itertools
 
 from secml.utils import CUnitTest
 from secml.array import CArray, Cdense, Csparse
-from secml.core.type_utils import is_scalar, is_bool, is_list, is_list_of_lists
+from secml.core.type_utils import \
+    is_scalar, is_int, is_bool, is_list, is_list_of_lists
 
 from numpy import matlib
 
@@ -4422,71 +4423,124 @@ class TestCArray(CUnitTest):
         """Test for CArray.norm_2d() method."""
         self.logger.info("Test for CArray.norm_2d() method.")
 
-        def _check_norm_2d(array, expected):
+        def _check_norm_2d(array):
             self.logger.info("array:\n{:}".format(array))
 
-            for ord_idx, ord in enumerate(
-                    (None, 'fro', np.inf, -np.inf, 1, -1, 2, -2)):
+            for axis_idx, axis in enumerate((None, 0, 1)):
+                for ord_idx, ord in enumerate(
+                        (None, 'fro', np.inf, -np.inf, 1, -1, 2, -2, 3, -3)):
 
-                if array.issparse is True and ord in (2, -2):
-                    # (-)2-norm is available for dense arrays only
-                    with self.assertRaises(NotImplementedError):
-                        array.norm_2d(ord=ord)
-                    continue
+                    if axis is None and ord in (2, -2):
+                        self.logger.info(
+                            "array.norm_2d(ord={:}, axis={:}): "
+                            "NotImplementedError".format(ord, axis,))
+                        # Norms not implemented for matrices
+                        with self.assertRaises(NotImplementedError):
+                            array.norm_2d(ord=ord, axis=axis)
+                        continue
 
-                res = round(array.norm_2d(ord=ord), 4)
-                self.logger.info(
-                    "array.norm_2d(ord={:}):\n{:}".format(ord, res))
+                    if axis is None and ord in (3, -3):
+                        self.logger.info(
+                            "array.norm_2d(ord={:}, axis={:}): "
+                            "ValueError".format(ord, axis,))
+                        # Invalid norm order for matrices
+                        with self.assertRaises(ValueError):
+                            array.norm_2d(ord=ord, axis=axis)
+                        continue
 
-                self.assertTrue(is_scalar(res))
+                    if axis is not None and ord == 'fro':
+                        self.logger.info(
+                            "array.norm_2d(ord={:}, axis={:}): "
+                            "ValueError".format(ord, axis,))
+                        # fro-norm is a matrix norm
+                        with self.assertRaises(ValueError):
+                            array.norm_2d(ord=ord, axis=axis)
+                        continue
 
-                self.assertEqual(expected[ord_idx], res)
-                self.assertEqual(float, type(res))
+                    if array.issparse is True and axis is not None and \
+                            (is_int(ord) and ord < 0):
+                        self.logger.info(
+                            "array.norm_2d(ord={:}, axis={:}): "
+                            "NotImplementedError".format(ord, axis,))
+                        # Negative vector norms not implemented for sparse
+                        with self.assertRaises(NotImplementedError):
+                            array.norm_2d(ord=ord, axis=axis)
+                        continue
 
-            with self.assertRaises(ValueError):
-                array.norm_2d(ord=0)  # Norm 0 not implemented
-            with self.assertRaises(ValueError):
-                array.norm_2d(ord=3)  # Norm > 2 not implemented
-            with self.assertRaises(ValueError):
-                array.norm_2d(ord=-3)  # Norm < -2 not implemented
+                    res = array.norm_2d(ord=ord, axis=axis)
+                    self.logger.info("array.norm_2d(ord={:}, axis={:}):"
+                                     "\n{:}".format(ord, axis, res))
+
+                    # Special handle of empty arrays
+                    if array.size == 0:
+                        if axis is None:
+                            self.assertTrue(is_scalar(res))
+                            self.assertEqual(float, type(res))
+                            self.assertEqual(0, res)
+                        else:
+                            self.assertEqual(2, res.ndim)  # Out always 2D
+                            self.assertEqual(float, res.dtype)
+                            self.assertFalse((CArray([[0.0]]) != res).any())
+                        continue
+
+                    res_np = np.linalg.norm(array.atleast_2d().tondarray(),
+                                            ord=ord, axis=axis,
+                                            keepdims=True).round(4)
+
+                    if axis is None:
+                        res = round(res, 4)
+                        self.assertTrue(is_scalar(res))
+                        self.assertEqual(float, type(res))
+                        self.assertEqual(res_np, res)
+                    else:
+                        res = res.round(4)
+                        self.assertEqual(2, res.ndim)  # Out always 2D
+                        if array.ndim == 1:
+                            if axis == 0:  # Return a row
+                                self.assertEqual(array.shape[0], res.shape[1])
+                            else:  # Return an array with a single value
+                                self.assertEqual(1, res.size)
+                        else:
+                            if axis == 0:  # Should return a row
+                                self.assertEqual(1, res.shape[0])
+                                self.assertEqual(
+                                    array.shape[1], res.shape[1])
+                            else:  # Should return a column
+                                self.assertEqual(1, res.shape[1])
+                                self.assertEqual(
+                                    array.shape[0], res.shape[0])
+
+                        self.assertEqual(res_np.dtype, res.dtype)
+
+                        self.assertFalse((res_np != res.tondarray()).any())
+
+                with self.assertRaises(ValueError):
+                    self.logger.info("array.norm_2d(ord={:}): "
+                                     "NotImplementedError".format(0))
+                    array.norm_2d(ord=0)  # Norm 0 not implemented
 
         # Sparse arrays
-        _check_norm_2d(self.array_sparse,
-                       (9.5394, 9.5394, 9.0, 6.0, 10.0, 0.0))
-        _check_norm_2d(self.row_sparse,
-                       (7.2111, 7.2111, 10.0, 10.0, 6.0, 0.0))
-        _check_norm_2d(self.column_sparse,
-                       (7.2111, 7.2111, 6.0, 0.0, 10.0, 10.0))
+        _check_norm_2d(self.array_sparse)
+        _check_norm_2d(self.row_sparse)
+        _check_norm_2d(self.column_sparse)
 
         # Dense arrays
-        _check_norm_2d(self.array_dense,
-                       (9.5394, 9.5394, 9.0, 6.0, 10.0, 0.0, 8.0827, 0.0))
-        _check_norm_2d(self.row_flat_dense,
-                       (7.2111, 7.2111, 10.0, 10.0, 6.0, 0.0, 7.2111, 7.2111))
-        _check_norm_2d(self.row_dense,
-                       (7.2111, 7.2111, 10.0, 10.0, 6.0, 0.0, 7.2111, 7.2111))
-        _check_norm_2d(self.column_dense,
-                       (7.2111, 7.2111, 6.0, 0.0, 10.0, 10.0, 7.2111, 7.2111))
+        _check_norm_2d(self.array_dense)
+        _check_norm_2d(self.row_flat_dense)
+        _check_norm_2d(self.row_dense)
+        _check_norm_2d(self.column_dense)
 
         # Bool arrays
-        _check_norm_2d(self.array_dense_bool,
-                       (2.6458, 2.6458, 4.0, 0.0, 2.0, 1.0, 2.5576, 0.0))
-        _check_norm_2d(self.array_sparse_bool,
-                       (2.6458, 2.6458, 4.0, 0.0, 2.0, 1.0))
+        _check_norm_2d(self.array_dense_bool)
+        _check_norm_2d(self.array_sparse_bool)
 
-        _check_norm_2d(self.single_flat_dense,
-                       (4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0))
-        _check_norm_2d(self.single_dense,
-                       (4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0))
-        _check_norm_2d(self.single_sparse,
-                       (4.0, 4.0, 4.0, 4.0, 4.0, 4.0))
+        _check_norm_2d(self.single_flat_dense)
+        _check_norm_2d(self.single_dense)
+        _check_norm_2d(self.single_sparse)
 
-        _check_norm_2d(self.empty_dense,
-                       (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
-        _check_norm_2d(self.empty_flat_dense,
-                       (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
-        _check_norm_2d(self.empty_sparse,
-                       (0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
+        _check_norm_2d(self.empty_dense)
+        _check_norm_2d(self.empty_flat_dense)
+        _check_norm_2d(self.empty_sparse)
 
     def test_mixed(self):
         """Used for mixed testing.
