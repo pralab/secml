@@ -3807,32 +3807,38 @@ class CArray(object):
         else:
             return self.__class__(out if self.ndim < 2 else out.atleast_2d())
 
-    def norm_2d(self, ord=None):
-        """Matrix norm.
+    def norm_2d(self, ord=None, axis=None):
+        """Matrix norm or vector norm along axis.
 
         This function is able to return one of seven different
-        matrix norms, depending on the value of the ord parameter.
+        matrix norms, or one of an infinite number of vector norms
+        (described below), depending on the value of the ord parameter.
+
+        Flat arrays will be converted to 2D before computing the norms.
 
         Parameters
         ----------
         ord : {'fro', non-zero int, np.inf, -np.inf}, optional
-            Order of the norm (see table under Notes). 'fro' stands
-            for Frobenius norm.
+            Order of the norm (see table under Notes).
+            'fro' stands for Frobenius norm.
+        axis : int or None, optional
+            If axis is an integer, it specifies the axis of array along
+            which to compute the vector norms.
+            If axis is None then the matrix norm is returned.
 
         Returns
         -------
-        out : float
-            Norm of the array.
+        out : float or CArray
+            Norm of the array. If axis is None, float is returned. Otherwise,
+            a CArray with shape and number of dimensions consistent with the
+            original array and the axis parameter is returned.
 
         Notes
         -----
-        See np.norm for description of available matrix norms.
-
-        Differently from numpy, we consider flat vectors as 2-Dimensional
-        with shape (1,array.size).
-
-        The (-)2-norm, (smallest) largest sing. value is currently available
-        for dense arrays only.
+        For integer ord parameter, norm is computed as
+        norm = sum(abs(array)**ord)**(1./ord). For other norm types,
+        see np.norm description.
+        Negative vector norms along axis are only supported for dense arrays.
 
         See Also
         --------
@@ -3844,8 +3850,6 @@ class CArray(object):
         >>> import numpy as np
 
         >>> print round(CArray([1,2,3]).norm_2d(), 5)
-        3.74166
-        >>> print round(CArray([1,2,3]).norm_2d(2), 5)
         3.74166
 
         >>> print CArray([1,2,3]).norm_2d(1)  # max(sum(abs(x), axis=0))
@@ -3861,11 +3865,39 @@ class CArray(object):
         >>> print CArray([[1,2],[2,4]], tosparse=True).norm_2d()
         5.0
 
-        >>> print round(CArray([1,0,3], tosparse=True).norm_2d(), 5)
-        3.16228
+        >>> print CArray([[1,2],[2,4]]).norm_2d(axis=0).round(5)
+        CArray([[ 2.23607  4.47214]])
+        >>> print CArray([[1,2],[2,4]]).norm_2d(axis=1).round(5)
+        CArray([[ 2.23607]
+         [ 4.47214]])
+
+        >>> print CArray([1,2,3]).norm_2d(2, axis=0)
+        CArray([[ 1.  2.  3.]])
+        >>> print CArray([1,2,3]).norm_2d(2, axis=1).round(5)
+        CArray([[ 3.74166]])
+
+        >>> print CArray([1,0,3], tosparse=True).norm_2d(axis=0)  # Norm is dense
+        CArray([[ 1.  0.  3.]])
+        >>> print CArray([1,0,3], tosparse=True).norm_2d(axis=1).round(5)
+        CArray([[ 3.16228]])
 
         """
-        return self._instance_array(self.atleast_2d()._data.norm(ord))
+        if axis is None and ord in (2, -2):
+            # For consistency between sparse and dense case, we block (2, -2)
+            raise NotImplementedError
+
+        if self.issparse is True:
+            out = self._instance_array(
+                self.atleast_2d()._data.norm_2d(ord, axis=axis))
+        else:
+            out = self._instance_array(
+                self.atleast_2d()._data.norm(ord, axis=axis))
+
+        # Return float if axis is None, else CArray
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(CArray(out).atleast_2d())
 
     def shuffle(self):
         """Modify array in-place by shuffling its contents.
