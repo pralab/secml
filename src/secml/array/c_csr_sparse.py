@@ -947,6 +947,33 @@ class Csparse(object):
             # return a column if needed
             return out.atleast_2d().T if axis == 1 else out.atleast_2d()
 
+    def norm_2d(self, order=None, axis=None):
+        """Return the matrix norm of store data."""
+        if axis is not None and (is_int(order) and order < 0):
+            # Scipy does not supports negative norms along axis
+            raise NotImplementedError
+
+        if axis is not None and order == 'fro':
+            # 'fro' is a matrix norm
+            raise ValueError("Invalid norm order {:}.".format(order))
+
+        if self.size == 0:
+            # Special handle as few norms raise error for empty arrays
+            if axis is None and order in (2, -2):
+                # Return an error consistent with scipy
+                raise NotImplementedError
+            if axis is None and order not in (
+                    None, 'fro', np.inf, -np.inf, 1, -1):
+                raise ValueError("Invalid norm order {:}.".format(order))
+            return self.__class__([0.0])
+
+        out = Cdense(norm(self.tocsr(), ord=order, axis=axis)).astype(float)
+
+        if axis is None:
+            return out  # out is already a vector, so nothing to do
+        else:  # return a column if needed
+            return out.atleast_2d().T if axis == 1 else out.atleast_2d()
+
     def shuffle(self):
         """Shuffle array data in-place."""
         if self.size > 0:
