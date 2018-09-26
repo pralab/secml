@@ -915,37 +915,19 @@ class Csparse(object):
         """Compute the (Moore-Penrose) pseudo-inverse of a matrix."""
         raise NotImplementedError
 
-    def norm(self, order=None, axis=None):
+    def norm(self, order=None):
         """Return the matrix norm of store data."""
-        if axis is not None and order == 'fro':
-            raise ValueError('Invalid norm order for vectors.')
-
-        # Only the vector-norms listed below are supported
-        if axis is not None and \
-                order not in (None, np.inf, -np.inf, 0, 1, 2):
-            raise NotImplementedError(
-                "norm order {:} not implemented.".format(order))
+        if is_int(order) and order < 0:
+            # Scipy does not supports negative norms along axis
+            raise NotImplementedError
 
         if self.size == 0:
-            # Special handle norm raises error for empty arrays
-            # TODO: CHECK IF FIXED IN SCIPY > 0.16
-            if axis is None and order in (2, -2):
-                # Return an error consistent with scipy
-                raise NotImplementedError
-            if (axis is None and order not in (
-                    None, 'fro', np.inf, -np.inf, 1, -1)) or \
-                    (axis is not None and order == 'fro'):
+            # Special handle as few norms raise error for empty arrays
+            if order == 'fro':
                 raise ValueError("Invalid norm order {:}.".format(order))
             return self.__class__([0.0])
 
-        out = Cdense(norm(self.tocsr(), ord=order, axis=axis)).astype(float)
-
-        if axis is None:
-            # out is already a vector, so nothing to do
-            return out
-        else:
-            # return a column if needed
-            return out.atleast_2d().T if axis == 1 else out.atleast_2d()
+        return Cdense(norm(self.tocsr(), ord=order, axis=1)).astype(float)
 
     def norm_2d(self, order=None, axis=None):
         """Return the matrix norm of store data."""

@@ -3696,8 +3696,10 @@ class CArray(object):
         """
         return self.__class__(self._data.pinv(rcond))
 
-    def norm(self, ord=None, axis=None):
+    def norm(self, ord=None):
         """Entrywise vector norm.
+
+        This function provides vector norms on vector-like arrays.
 
         This function is able to return one of an infinite number
         of vector norms (described below), depending on the value
@@ -3707,17 +3709,11 @@ class CArray(object):
         ----------
         ord : {int, np.inf, -np.inf}, optional
             Order of the norm (see table under Notes).
-        axis : int or None, optional
-            If axis is an integer, it specifies the axis of array along
-            which to compute the vector norms. If axis is None then
-            the vector norm is returned.
 
         Returns
         -------
-        out : float or CArray
-            Norm of the array. If axis is None, float is returned. Otherwise,
-            a CArray with shape and number of dimensions consistent with the
-            original array and the axis parameter is returned.
+        out : float
+            Norm of the array.
 
         Notes
         -----
@@ -3725,12 +3721,13 @@ class CArray(object):
         norm = sum(abs(array)**ord)**(1./ord). For other norm types,
         see np.norm description.
 
+        Negative vector norms are only supported for dense arrays.
+
         Differently from numpy, we consider flat vectors as 2-Dimensional
         with shape (1,array.size).
 
-        If input 2-Dimensional array has NOT a vector-like shape and
-        axis is None, ValueError will be raised. In that case,
-        call `.norm_2d()` or specify the axis parameter.
+        If input 2-Dimensional array is NOT vector-like,
+        ValueError will be raised.
 
         See Also
         --------
@@ -3743,12 +3740,12 @@ class CArray(object):
 
         >>> print round(CArray([1,2,3]).norm(), 5)
         3.74166
-        >>> print round(CArray([1,2,3]).norm(2), 5)
+        >>> print round(CArray([[1,2,3]]).norm(2), 5)
         3.74166
 
         >>> print CArray([1,2,3]).norm(1)
         6.0
-        >>> print CArray([[1,2,3]]).norm(1)  # Array is vector-like
+        >>> print CArray([1,2,3]).tosparse().norm(1)
         6.0
 
         >>> print CArray([1,2,3]).norm(np.inf)
@@ -3761,51 +3758,20 @@ class CArray(object):
             ...
         ValueError: Array has shape (2, 2). Call .norm_2d() to compute matricial norm or specify axis.
 
-        >>> print CArray([[1,2],[2,4]]).norm(axis=0).round(5)
-        CArray([[ 2.23607  4.47214]])
-        >>> print CArray([[1,2],[2,4]]).norm(axis=1).round(5)
-        CArray([[ 2.23607]
-         [ 4.47214]])
-
-        >>> print CArray([1,2,3]).norm(2, axis=0)
-        CArray([ 1.  2.  3.])
-        >>> print CArray([1,2,3]).norm(2, axis=1).round(5)
-        CArray([ 3.74166])
-
-        >>> print round(CArray([1,0,3], tosparse=True).norm(), 5)
-        3.16228
-        >>> print CArray([1,0,3], tosparse=True).norm(axis=0)  # Norm is dense
-        CArray([[ 1.  0.  3.]])
-        >>> print CArray([1,0,3], tosparse=True).norm(2, axis=1).round(5)
-        CArray([[ 3.16228]])
-
         """
         if self.is_vector_like is False:
-            if axis is None:
-                raise ValueError(
-                    "Array has shape {:}. Call .norm_2d() to compute "
-                    "matricial norm or specify axis.".format(self.shape))
-            array = self  # 2D array and specified axis
-            axis_fake = axis  # To handle next special case
+            raise ValueError(
+                "Array has shape {:}. Call .norm_2d() to compute "
+                "matricial norm or vector norm along axis.".format(self.shape))
 
-        else:  # Array has vector-like shape
-            # All other arrays are considered flat
-            array = self.ravel()
-            # For sparse "vectors" we use axis = 1 to get the correct results
-            # as flat vectors are columns in numpy/scipy
-            axis_fake = 1 if self.issparse is True and axis is None else axis
+        # Flat array to simplify dense case
+        array = self.ravel()
 
         # 'fro' is a matrix-norm. We can exit...
         if ord == 'fro':
             raise ValueError('Invalid norm order for vectors.')
 
-        out = array._data.norm(ord, axis_fake)
-
-        # Return float if axis (not the axis_fake) is None, else CArray
-        if axis is None:
-            return self._instance_array(out)
-        else:
-            return self.__class__(out if self.ndim < 2 else out.atleast_2d())
+        return self._instance_array(array._data.norm(ord))
 
     def norm_2d(self, ord=None, axis=None):
         """Matrix norm or vector norm along axis.
