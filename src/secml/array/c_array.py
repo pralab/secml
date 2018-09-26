@@ -3810,11 +3810,13 @@ class CArray(object):
     def norm_2d(self, ord=None, axis=None):
         """Matrix norm or vector norm along axis.
 
+        This function provides matrix norm or vector norm along axis
+        of 2D arrays. Flat arrays will be converted to 2D before
+        computing the norms.
+
         This function is able to return one of seven different
         matrix norms, or one of an infinite number of vector norms
         (described below), depending on the value of the ord parameter.
-
-        Flat arrays will be converted to 2D before computing the norms.
 
         Parameters
         ----------
