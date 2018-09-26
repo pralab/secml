@@ -4433,7 +4433,7 @@ class TestCArray(CUnitTest):
                     if axis is None and ord in (2, -2):
                         self.logger.info(
                             "array.norm_2d(ord={:}, axis={:}): "
-                            "NotImplementedError".format(ord, axis,))
+                            "NotImplementedError".format(ord, axis))
                         # Norms not implemented for matrices
                         with self.assertRaises(NotImplementedError):
                             array.norm_2d(ord=ord, axis=axis)
@@ -4442,7 +4442,7 @@ class TestCArray(CUnitTest):
                     if axis is None and ord in (3, -3):
                         self.logger.info(
                             "array.norm_2d(ord={:}, axis={:}): "
-                            "ValueError".format(ord, axis,))
+                            "ValueError".format(ord, axis))
                         # Invalid norm order for matrices
                         with self.assertRaises(ValueError):
                             array.norm_2d(ord=ord, axis=axis)
@@ -4451,7 +4451,7 @@ class TestCArray(CUnitTest):
                     if axis is not None and ord == 'fro':
                         self.logger.info(
                             "array.norm_2d(ord={:}, axis={:}): "
-                            "ValueError".format(ord, axis,))
+                            "ValueError".format(ord, axis))
                         # fro-norm is a matrix norm
                         with self.assertRaises(ValueError):
                             array.norm_2d(ord=ord, axis=axis)
@@ -4461,7 +4461,7 @@ class TestCArray(CUnitTest):
                             (is_int(ord) and ord < 0):
                         self.logger.info(
                             "array.norm_2d(ord={:}, axis={:}): "
-                            "NotImplementedError".format(ord, axis,))
+                            "NotImplementedError".format(ord, axis))
                         # Negative vector norms not implemented for sparse
                         with self.assertRaises(NotImplementedError):
                             array.norm_2d(ord=ord, axis=axis)
