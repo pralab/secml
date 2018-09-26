@@ -52,7 +52,10 @@ def dl_pytorch_model(model_id):
             raise RuntimeError('Something wrong happened while '
                                'downloading the model. Please try again')
 
-    return torch.load(data_path)
+    # If CUDA is not available, map the model to cpu
+    map_location = 'cpu' if torch.cuda.is_available() is False else None
+
+    return torch.load(data_path, map_location=map_location)
 
 
 # UNITTESTS
