@@ -125,13 +125,13 @@ class CNormalizerRow(CNormalizer):
         >>> normalizer = CNormalizerRow().train(array)
         >>> array_normalized = normalizer.normalize(array)
         >>> print array_normalized  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 2)	0.816496580928
+        CArray(  (0, 0)	0.408248290464
           (0, 1)	-0.408248290464
-          (0, 0)	0.408248290464
+          (0, 2)	0.816496580928
           (1, 0)	1.0
-          (2, 2)	-0.707106781187
-          (2, 1)	0.707106781187)
-        >>> print array_normalized.todense().norm(ord=normalizer.ord, axis=1)
+          (2, 1)	0.707106781187
+          (2, 2)	-0.707106781187)
+        >>> print array_normalized.todense().norm_2d(ord=normalizer.ord, axis=1)
         CArray([[ 1.]
          [ 1.]
          [ 1.]])
@@ -140,7 +140,7 @@ class CNormalizerRow(CNormalizer):
         data_array = CArray(data)  # working on CArrays
 
         # Computing and storing norm (can be used for revert)
-        self._norm = CArray(data_array.norm(ord=self.ord, axis=1))
+        self._norm = CArray(data_array.norm_2d(ord=self.ord, axis=1))
 
         if data_array.issparse:  # Avoid conversion to dense
             data_array = data_array.deepcopy().astype(float)
