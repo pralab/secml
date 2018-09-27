@@ -1311,20 +1311,27 @@ class CSparse(_CArrayInterface):
         raise NotImplementedError(
             "`binary_search` is not implemented for sparse arrays!")
 
-    def sort(self, axis=-1):
+    def sort(self, axis=-1, kind='quicksort', inplace=False):
         """sort array in places"""
+        if kind != 'quicksort':
+            raise ValueError("only `quicksort` algorithm is supported")
+
+        tosort = self if inplace is True else self.deepcopy()
+
         if axis == 1 or axis == -1:
-            for i in xrange(self.shape[0]):
-                row = self[i, :].todense()
-                row.sort(axis=1)
-                self[i, :] = row
+            for i in xrange(tosort.shape[0]):
+                row = tosort[i, :].todense()
+                row.sort(axis=1, inplace=True)
+                tosort[i, :] = row
         elif axis == 0:
-            for i in xrange(self.shape[1]):
-                column = self[:, i].todense()
-                column.sort(axis=0)
-                self[:, i] = column
+            for i in xrange(tosort.shape[1]):
+                column = tosort[:, i].todense()
+                column.sort(axis=0, inplace=True)
+                tosort[:, i] = column
         else:
             raise ValueError("wrong sorting axis.")
+        
+        return tosort
 
     def argsort(self, axis=-1, kind='quicksort'):
         """

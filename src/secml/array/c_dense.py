@@ -1018,9 +1018,20 @@ class CDense(_CArrayInterface):
             raise ValueError("condition size must be {:}".format(self.size))
         return map(list, np.nonzero(condition.atleast_2d().tondarray()))
 
-    def sort(self, axis=-1, kind='quicksort', order=None):
+    def sort(self, axis=-1, kind='quicksort', inplace=False, order=None):
         """sort in place"""
-        self.atleast_2d()._data.sort(axis=axis, kind=kind, order=order)
+        if inplace is True:
+            self.atleast_2d()._data.sort(axis=axis, kind=kind, order=order)
+            # We return ourselves for output consistency
+            return self
+        elif inplace is False:
+            out_sort = self.__class__(
+                np.sort(self.atleast_2d().tondarray(),
+                        axis=axis, kind=kind, order=order))
+            return out_sort.ravel() if self.ndim < 2 else out_sort
+        else:
+            raise ValueError("`{:}` is not a valid value for "
+                             "the `inplace` parameter", inplace)
 
     def argsort(self, axis=-1, kind='quicksort', order=None):
         # Fast argsort only available for flat arrays

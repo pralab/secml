@@ -2727,15 +2727,23 @@ class CArray(_CArrayInterface):
             if self.isdense is True else self._data.any()
         return self._instance_array(out_any)
 
-    def sort(self, axis=-1, kind='quicksort'):
+    def sort(self, axis=-1, kind='quicksort', inplace=False):
         """Sort an array, in-place.
 
         Parameters
         ----------
         axis : int, optional
             Axis along which to sort. The default is -1 (the last axis).
-        kind : {'quicksort', 'mergesort', 'heapsort'}, optional, dense only
+        kind : {'quicksort', 'mergesort', 'heapsort'}, optional
             Sorting algorithm to use. Default 'quicksort'.
+            For sparse arrays, only 'quicksort' is available.
+        inplace : bool, optional
+            If True, array will be sorted in-place. Default False.
+
+        Returns
+        -------
+        CArray
+            Sorted array. This will be a new array only if inplace is False.
 
         Notes
         -----
@@ -2755,34 +2763,29 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> array = CArray([5,-1,0,-3])
-        >>> array.sort()
-        >>> print array
+        >>> print array.sort()
         CArray([-3 -1  0  5])
 
         >>> array = CArray([5,-1,0,-3])
-        >>> array.sort(axis=0)
-        >>> print array
+        >>> print array.sort(axis=0)
         CArray([ 5 -1  0 -3])
 
         >>> array = CArray([5,-1,0,-3])
-        >>> array.sort(axis=1)
-        >>> print array
+        >>> print array.sort(axis=1)
         CArray([-3 -1  0  5])
 
-        >>> array = CArray([[5,-1],[7,0],[-3,-5]], tosparse=True)
-        >>> array.sort()
-        >>> print array # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	-1
-          (0, 1)	5
-          (1, 1)	7
-          (2, 0)	-5
-          (2, 1)	-3)
+        >>> array = CArray([5,-1,0,-3])
+        >>> out = array.sort(inplace=True)
+        >>> print out
+        CArray([-3 -1  0  5])
+        >>> array[0] = 100
+        >>> print out
+        CArray([100  -1   0   5])
 
         """
-        if self.isdense:
-            self._data.sort(axis=axis, kind=kind)
-        else:
-            self._data.sort(axis=axis)
+        data_sorted = self._data.sort(axis=axis, kind=kind, inplace=inplace)
+        # We return ourselves for inplace sort otherwise a new object
+        return self if inplace is True else self.__class__(data_sorted)
 
     def argsort(self, axis=None, kind='quicksort'):
         """Returns the indices that would sort an array.

@@ -850,15 +850,32 @@ class TestCArray(CUnitTest):
             array_isdense = array.isdense
             array_issparse = array.issparse
 
-            array_sorted = copy.deepcopy(array)  # in-place method
-            array_sorted.sort(axis=axis)
-            self.logger.info(
-                "Array sorted along axis {:}:\n{:}".format(axis, array_sorted))
+            for inplace in (False, True):
+                array_copy = copy.deepcopy(array)
+                array_sorted = array_copy.sort(axis=axis, inplace=inplace)
+                self.logger.info("Array sorted along axis {:}:"
+                                 "\n{:}".format(axis, array_sorted))
 
-            self.assertEquals(array_sorted.issparse, array_issparse)
-            self.assertEquals(array_sorted.isdense, array_isdense)
+                self.assertEquals(array_sorted.issparse, array_issparse)
+                self.assertEquals(array_sorted.isdense, array_isdense)
 
-            self.assertFalse((sorted_expected != array_sorted).any())
+                self.assertFalse((sorted_expected != array_sorted).any())
+
+                # Value we are going to replace to check inplace parameter
+                alter_value = CArray(100, dtype=array_copy.dtype)
+
+                if array_copy.ndim < 2:
+                    array_copy[0] = alter_value
+                    if inplace is False:
+                        self.assertTrue(array_sorted[0] != alter_value[0])
+                    else:
+                        self.assertTrue(array_sorted[0] == alter_value[0])
+                else:
+                    array_copy[0, 0] = alter_value
+                    if inplace is False:
+                        self.assertTrue(array_sorted[0, 0] != alter_value[0])
+                    else:
+                        self.assertTrue(array_sorted[0, 0] == alter_value[0])
 
         # Sparse arrays
         _sort(-1, self.array_sparse,

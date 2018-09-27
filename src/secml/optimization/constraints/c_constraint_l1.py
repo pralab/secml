@@ -155,7 +155,7 @@ class CConstraintL1(CConstraint):
             return v  # best projection: itself!
         # get the array of cumulative sums of a sorted (decreasing) copy of v
         u = v.deepcopy()
-        u.sort()
+        u.sort(inplace=True)
         u = u[::-1]
         if u.issparse:
             u_nnz = CArray(u.nnz_data).todense()
