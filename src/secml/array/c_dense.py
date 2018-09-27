@@ -1038,7 +1038,7 @@ class CDense(object):
 
         Examples
         --------
-        >>> from secml.array import CDense
+        >>> from secml.array.c_dense import CDense
         >>> a0 = CDense([1])
         >>> print(a0.repmat(2, 3))
         [[1 1 1]
@@ -1069,7 +1069,7 @@ class CDense(object):
 
         Examples
         --------
-        >>> from secml.array import CDense
+        >>> from secml.array.c_dense import CDense
 
         >>> x = CDense([[1,2],[3,4]])
         
@@ -1452,7 +1452,7 @@ class CDense(object):
 
         Examples
         --------
-        >>> from secml.array import CDense
+        >>> from secml.array.c_dense import CDense
         >>> array = CDense.zeros(2)
         >>> print array
         [ 0.  0.]
@@ -1485,7 +1485,7 @@ class CDense(object):
 
         Examples
         --------
-        >>> from secml.array import CDense
+        >>> from secml.array.c_dense import CDense
         >>> array = CDense.ones(2)
         >>> print array
         [ 1.  1.]
@@ -1518,7 +1518,7 @@ class CDense(object):
 
         Examples
         --------
-        >>> from secml.array import CDense
+        >>> from secml.array.c_dense import CDense
         >>> array = CDense.empty(2)
         >>> print array  # doctest: +SKIP
         [  6.94292784e-310   6.94292784e-310]
@@ -1554,7 +1554,7 @@ class CDense(object):
 
         Examples
         --------
-        >>> from secml.array import CDense
+        >>> from secml.array.c_dense import CDense
         >>> array = CDense.eye(2)
         >>> print array
         [[ 1.  0.]
@@ -1586,7 +1586,7 @@ class CDense(object):
 
         Examples
         --------
-        >>> from secml.array import CDense
+        >>> from secml.array.c_dense import CDense
         >>> array = CDense.rand(2, 3)
         >>> print(array)  # doctest: +SKIP
         [[ 0.68588225  0.88371576  0.3958642 ]
@@ -1631,7 +1631,7 @@ class CDense(object):
 
         Examples
         --------
-        >>> from secml.array import CDense
+        >>> from secml.array.c_dense import CDense
         >>> array = CDense.randint(0, 5, 10)
         >>> print(array)  # doctest: +SKIP
         [1 0 2 0 4 3 0 2 4 2]
@@ -1651,7 +1651,7 @@ class CDense(object):
 
         Examples
         --------
-        >>> from secml.array import CDense
+        >>> from secml.array.c_dense import CDense
         >>> array = CDense.randsample(10, 4)
         >>> print(array)  # doctest: +SKIP
         [1 0 2 3]
@@ -1778,7 +1778,7 @@ class CDense(object):
 
         Examples
         --------
-        >>> from secml.array import CDense
+        >>> from secml.array.c_dense import CDense
 
         >>> x = CDense( [1,3,5] )
         >>> y = CDense( [2,4,6] )

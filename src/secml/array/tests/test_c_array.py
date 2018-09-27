@@ -4,7 +4,9 @@ import operator as op
 import itertools
 
 from secml.utils import CUnitTest, fm
-from secml.array import CArray, CDense, CSparse
+from secml.array import CArray
+from secml.array.c_dense import CDense
+from secml.array.c_sparse import CSparse
 from secml.core.type_utils import \
     is_scalar, is_int, is_bool, is_list, is_list_of_lists
 
