@@ -58,7 +58,7 @@ class CConstraintL1(CConstraint):
             Value of the constraint.
 
         """
-        return float((x - self._center).norm(ord=1) - self._radius)
+        return float((x - self._center).norm(order=1) - self._radius)
 
     # TODO: make tests
     def _gradient(self, x):

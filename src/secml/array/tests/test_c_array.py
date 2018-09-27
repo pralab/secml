@@ -4170,28 +4170,28 @@ class TestCArray(CUnitTest):
         def _check_norm(array):
             self.logger.info("array:\n{:}".format(array))
 
-            for ord_idx, ord in enumerate((None, 'fro', np.inf, -np.inf,
+            for ord_idx, order in enumerate((None, 'fro', np.inf, -np.inf,
                                            0, 1, -1, 2, -2, 3, -3)):
 
-                if ord == 'fro':  # Frobenius is a matrix norm
+                if order == 'fro':  # Frobenius is a matrix norm
                     self.logger.info(
-                        "array.norm(ord={:}): ValueError".format(ord))
+                        "array.norm(order={:}): ValueError".format(order))
                     with self.assertRaises(ValueError):
-                        array.norm(ord=ord)
+                        array.norm(order=order)
                     continue
 
                 # Scipy does not supports negative norms
-                if array.issparse is True and is_int(ord) and ord < 0:
+                if array.issparse is True and is_int(order) and order < 0:
                     self.logger.info(
-                        "array.norm(ord={:}): ValueError".format(ord))
+                        "array.norm(order={:}): ValueError".format(order))
                     with self.assertRaises(NotImplementedError):
-                        array.norm(ord=ord)
+                        array.norm(order=order)
                     continue
 
-                res = array.norm(ord=ord)
+                res = array.norm(order=order)
 
-                self.logger.info("array.norm(ord={:}):\n{:}"
-                                 "".format(ord, res))
+                self.logger.info("array.norm(order={:}):\n{:}"
+                                 "".format(order, res))
 
                 # Special handle of empty arrays
                 if array.size == 0:
@@ -4201,7 +4201,7 @@ class TestCArray(CUnitTest):
                     continue
 
                 res_np = np.linalg.norm(
-                    array.tondarray().ravel(), ord=ord).round(4)
+                    array.tondarray().ravel(), ord=order).round(4)
 
                 res = round(res, 4)
                 self.assertTrue(is_scalar(res))
@@ -4237,49 +4237,49 @@ class TestCArray(CUnitTest):
             self.logger.info("array:\n{:}".format(array))
 
             for axis_idx, axis in enumerate((None, 0, 1)):
-                for ord_idx, ord in enumerate(
+                for ord_idx, order in enumerate(
                         (None, 'fro', np.inf, -np.inf, 1, -1, 2, -2, 3, -3)):
 
-                    if axis is None and ord in (2, -2):
+                    if axis is None and order in (2, -2):
                         self.logger.info(
-                            "array.norm_2d(ord={:}, axis={:}): "
-                            "NotImplementedError".format(ord, axis))
+                            "array.norm_2d(order={:}, axis={:}): "
+                            "NotImplementedError".format(order, axis))
                         # Norms not implemented for matrices
                         with self.assertRaises(NotImplementedError):
-                            array.norm_2d(ord=ord, axis=axis)
+                            array.norm_2d(order=order, axis=axis)
                         continue
 
-                    if axis is None and ord in (3, -3):
+                    if axis is None and order in (3, -3):
                         self.logger.info(
-                            "array.norm_2d(ord={:}, axis={:}): "
-                            "ValueError".format(ord, axis))
+                            "array.norm_2d(order={:}, axis={:}): "
+                            "ValueError".format(order, axis))
                         # Invalid norm order for matrices
                         with self.assertRaises(ValueError):
-                            array.norm_2d(ord=ord, axis=axis)
+                            array.norm_2d(order=order, axis=axis)
                         continue
 
-                    if axis is not None and ord == 'fro':
+                    if axis is not None and order == 'fro':
                         self.logger.info(
-                            "array.norm_2d(ord={:}, axis={:}): "
-                            "ValueError".format(ord, axis))
+                            "array.norm_2d(order={:}, axis={:}): "
+                            "ValueError".format(order, axis))
                         # fro-norm is a matrix norm
                         with self.assertRaises(ValueError):
-                            array.norm_2d(ord=ord, axis=axis)
+                            array.norm_2d(order=order, axis=axis)
                         continue
 
                     if array.issparse is True and axis is not None and \
-                            (is_int(ord) and ord < 0):
+                            (is_int(order) and order < 0):
                         self.logger.info(
-                            "array.norm_2d(ord={:}, axis={:}): "
-                            "NotImplementedError".format(ord, axis))
+                            "array.norm_2d(order={:}, axis={:}): "
+                            "NotImplementedError".format(order, axis))
                         # Negative vector norms not implemented for sparse
                         with self.assertRaises(NotImplementedError):
-                            array.norm_2d(ord=ord, axis=axis)
+                            array.norm_2d(order=order, axis=axis)
                         continue
 
-                    res = array.norm_2d(ord=ord, axis=axis)
-                    self.logger.info("array.norm_2d(ord={:}, axis={:}):"
-                                     "\n{:}".format(ord, axis, res))
+                    res = array.norm_2d(order=order, axis=axis)
+                    self.logger.info("array.norm_2d(order={:}, axis={:}):"
+                                     "\n{:}".format(order, axis, res))
 
                     # Special handle of empty arrays
                     if array.size == 0:
@@ -4294,7 +4294,7 @@ class TestCArray(CUnitTest):
                         continue
 
                     res_np = np.linalg.norm(array.atleast_2d().tondarray(),
-                                            ord=ord, axis=axis,
+                                            ord=order, axis=axis,
                                             keepdims=True).round(4)
 
                     if axis is None:
@@ -4325,9 +4325,9 @@ class TestCArray(CUnitTest):
                         self.assertFalse((res_np != res.tondarray()).any())
 
                 with self.assertRaises(ValueError):
-                    self.logger.info("array.norm_2d(ord={:}): "
+                    self.logger.info("array.norm_2d(order={:}): "
                                      "NotImplementedError".format(0))
-                    array.norm_2d(ord=0)  # Norm 0 not implemented
+                    array.norm_2d(order=0)  # Norm 0 not implemented
 
         # Sparse arrays
         _check_norm_2d(self.array_sparse)

@@ -3756,18 +3756,18 @@ class CArray(object):
         """
         return self.__class__(self._data.pinv(rcond))
 
-    def norm(self, ord=None):
+    def norm(self, order=None):
         """Entrywise vector norm.
 
         This function provides vector norms on vector-like arrays.
 
         This function is able to return one of an infinite number
         of vector norms (described below), depending on the value
-        of the ord parameter.
+        of the order parameter.
 
         Parameters
         ----------
-        ord : {int, np.inf, -np.inf}, optional
+        order : {int, np.inf, -np.inf}, optional
             Order of the norm (see table under Notes).
 
         Returns
@@ -3777,8 +3777,8 @@ class CArray(object):
 
         Notes
         -----
-        For integer ord parameter, norm is computed as
-        norm = sum(abs(array)**ord)**(1./ord). For other norm types,
+        For integer order parameter, norm is computed as
+        norm = sum(abs(array)**order)**(1./order). For other norm types,
         see np.norm description.
 
         Negative vector norms are only supported for dense arrays.
@@ -3828,12 +3828,12 @@ class CArray(object):
         array = self.ravel()
 
         # 'fro' is a matrix-norm. We can exit...
-        if ord == 'fro':
+        if order == 'fro':
             raise ValueError('Invalid norm order for vectors.')
 
-        return self._instance_array(array._data.norm(ord))
+        return self._instance_array(array._data.norm(order))
 
-    def norm_2d(self, ord=None, axis=None):
+    def norm_2d(self, order=None, axis=None):
         """Matrix norm or vector norm along axis.
 
         This function provides matrix norm or vector norm along axis
@@ -3842,11 +3842,11 @@ class CArray(object):
 
         This function is able to return one of seven different
         matrix norms, or one of an infinite number of vector norms
-        (described below), depending on the value of the ord parameter.
+        (described below), depending on the value of the order parameter.
 
         Parameters
         ----------
-        ord : {'fro', non-zero int, np.inf, -np.inf}, optional
+        order : {'fro', non-zero int, np.inf, -np.inf}, optional
             Order of the norm (see table under Notes).
             'fro' stands for Frobenius norm.
         axis : int or None, optional
@@ -3863,8 +3863,8 @@ class CArray(object):
 
         Notes
         -----
-        For integer ord parameter, norm is computed as
-        norm = sum(abs(array)**ord)**(1./ord). For other norm types,
+        For integer order parameter, norm is computed as
+        norm = sum(abs(array)**order)**(1./order). For other norm types,
         see np.norm description.
         Negative vector norms along axis are only supported for dense arrays.
 
@@ -3910,16 +3910,16 @@ class CArray(object):
         CArray([[ 3.16228]])
 
         """
-        if axis is None and ord in (2, -2):
+        if axis is None and order in (2, -2):
             # For consistency between sparse and dense case, we block (2, -2)
             raise NotImplementedError
 
         if self.issparse is True:
             out = self._instance_array(
-                self.atleast_2d()._data.norm_2d(ord, axis=axis))
+                self.atleast_2d()._data.norm_2d(order, axis=axis))
         else:
             out = self._instance_array(
-                self.atleast_2d()._data.norm(ord, axis=axis))
+                self.atleast_2d()._data.norm(order, axis=axis))
 
         # Return float if axis is None, else CArray
         if axis is None:

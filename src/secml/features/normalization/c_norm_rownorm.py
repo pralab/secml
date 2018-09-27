@@ -22,7 +22,7 @@ class CNormalizerRow(CNormalizer):
 
     Parameters
     ----------
-    ord : {1, 2}, optional
+    order : {1, 2}, optional
         Order of the norm to normalize each pattern with. Only
         1 ('l1') and 2 ('l2') norm are supported. 2 ('l2') is default.
         For sparse arrays, only 2nd order norm is supported.
@@ -46,7 +46,7 @@ class CNormalizerRow(CNormalizer):
      [ 1.          0.          0.        ]
      [ 0.          0.70710678 -0.70710678]])
 
-    >>> print CNormalizerRow(ord=1).train_normalize(array)
+    >>> print CNormalizerRow(order=1).train_normalize(array)
     CArray([[ 0.25 -0.25  0.5 ]
      [ 1.    0.    0.  ]
      [ 0.    0.5  -0.5 ]])
@@ -54,11 +54,11 @@ class CNormalizerRow(CNormalizer):
     """
     class_type = 'rownorm'
 
-    def __init__(self, ord=2):
+    def __init__(self, order=2):
         """Class constructor"""
-        if ord != 1 and ord != 2:
-            raise ValueError("Norm of order {:} is not supported.".format(ord))
-        self._ord = ord
+        if order != 1 and order != 2:
+            raise ValueError("Norm of order {:} is not supported.".format(order))
+        self._order = order
         self._norm = None
 
     def __clear(self):
@@ -70,9 +70,9 @@ class CNormalizerRow(CNormalizer):
         return self.norm is None
 
     @property
-    def ord(self):
+    def order(self):
         """Returns the order of the norm used for patterns normalization."""
-        return self._ord
+        return self._order
 
     @property
     def norm(self):
@@ -131,7 +131,7 @@ class CNormalizerRow(CNormalizer):
           (1, 0)	1.0
           (2, 1)	0.707106781187
           (2, 2)	-0.707106781187)
-        >>> print array_normalized.todense().norm_2d(ord=normalizer.ord, axis=1)
+        >>> print array_normalized.todense().norm_2d(order=normalizer.order, axis=1)
         CArray([[ 1.]
          [ 1.]
          [ 1.]])
@@ -140,7 +140,7 @@ class CNormalizerRow(CNormalizer):
         data_array = CArray(data)  # working on CArrays
 
         # Computing and storing norm (can be used for revert)
-        self._norm = CArray(data_array.norm_2d(ord=self.ord, axis=1))
+        self._norm = CArray(data_array.norm_2d(order=self.order, axis=1))
 
         if data_array.issparse:  # Avoid conversion to dense
             data_array = data_array.deepcopy().astype(float)

@@ -33,7 +33,7 @@ class CRegularizerL1(CRegularizer):
             Vector-like array.
 
         """
-        return w.norm(ord=1)
+        return w.norm(order=1)
 
     def dregularizer(self, w):
         """Returns Norm-L1 derivative.

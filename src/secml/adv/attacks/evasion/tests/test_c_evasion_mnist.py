@@ -134,7 +134,7 @@ class TestEvasionMNIST(CCreator):
 
         if self.distance == 'l1':
             print "Norm of input perturbation (l1): ", \
-                added_noise.ravel().norm(ord=1)
+                added_noise.ravel().norm(order=1)
         else:
             print "Norm of input perturbation (l2): ", \
                 added_noise.ravel().norm()
