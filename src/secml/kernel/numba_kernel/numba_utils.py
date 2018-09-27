@@ -88,7 +88,7 @@ def dot_dense(x, y, x_row, y_row):
 def dot_sparse(x_data, y_data, x_indices, y_indices, x_indptr, y_indptr, k):
     """Dot Product for sparse arrays \w Numba.
 
-    Takes Csparse internal structures as input (indices, indptr, data).
+    Takes CSparse internal structures as input (indices, indptr, data).
 
     """
     for x_row in xrange(x_indptr.size - 1):
@@ -116,7 +116,7 @@ def dot_sparse(x_data, y_data, x_indices, y_indices, x_indptr, y_indptr, k):
 def dot_sparse2(x_data, y_data, x_indices, y_indices, x_indptr, y_indptr, k):
     """Dot Product for sparse arrays \w Numba.
 
-    Takes Csparse internal structures as input (indices, indptr, data).
+    Takes CSparse internal structures as input (indices, indptr, data).
 
     """
     last_j = np.empty(y_indptr.size - 1, dtype=np.int32)

@@ -1,24 +1,24 @@
 import numpy as np
 
 from secml.utils import CUnitTest, fm
-from secml.array import Cdense, Csparse
+from secml.array import CDense, CSparse
 
 
 class Testcsr_Csparse(CUnitTest):
-    """Unit test for Csparse."""
+    """Unit test for CSparse."""
      
     def setUp(self):
         """Basic set up."""
-        self.dense = Cdense([[1, 0, 0, 0, 5],
+        self.dense = CDense([[1, 0, 0, 0, 5],
                              [2, 4, 0, 0, 0],
                              [3, 4, 5, 0, 0]])
-        self.dense_vector = Cdense([1, 0, 0, 0, 3])
-        self.sparse_matrix = Csparse(self.dense)
-        self.sparse_vector = Csparse(self.dense_vector)
+        self.dense_vector = CDense([1, 0, 0, 0, 3])
+        self.sparse_matrix = CSparse(self.dense)
+        self.sparse_vector = CSparse(self.dense_vector)
 
     def test_save_load(self):
         """Test save/load of sparse arrays"""
-        self.logger.info("UNITTEST - Csparse - save/load")
+        self.logger.info("UNITTEST - CSparse - save/load")
 
         test_file = fm.join(fm.abspath(__file__), 'test.txt')
 
@@ -29,7 +29,7 @@ class Testcsr_Csparse(CUnitTest):
             self.logger.info(e.message)
 
         self.logger.info(
-            "UNITTEST - Csparse - Testing save/load for sparse matrix")
+            "UNITTEST - CSparse - Testing save/load for sparse matrix")
 
         self.sparse_matrix.save(test_file)
 
@@ -39,16 +39,16 @@ class Testcsr_Csparse(CUnitTest):
             self.sparse_matrix.save(test_file)
         self.logger.info(e.exception)
 
-        loaded_sparse_matrix = Csparse.load(test_file, dtype=int)
+        loaded_sparse_matrix = CSparse.load(test_file, dtype=int)
 
         self.assertFalse((loaded_sparse_matrix != self.sparse_matrix).any(),
                          "Saved and loaded arrays (matrices) are not equal!")
 
         self.logger.info(
-            "UNITTEST - Csparse - Testing save/load for sparse vector")
+            "UNITTEST - CSparse - Testing save/load for sparse vector")
 
         self.sparse_vector.save(test_file, overwrite=True)
-        loaded_sparse_vector = Csparse.load(test_file, dtype=int)
+        loaded_sparse_vector = CSparse.load(test_file, dtype=int)
 
         self.assertFalse((loaded_sparse_vector != self.sparse_vector).any(),
                          "Saved and loaded arrays (vectors) are not equal!")

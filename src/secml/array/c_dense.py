@@ -21,9 +21,9 @@ from secml.core.type_utils import is_ndarray, is_list_of_lists, \
 from secml.array.array_utils import is_vector_index
 
 
-class Cdense(object):
+class CDense(object):
     """Dense array. Encapsulation for np.ndarray."""
-    __slots__ = '_data'  # Cdense has only one slot for the ndarray
+    __slots__ = '_data'  # CDense has only one slot for the ndarray
 
     def __init__(self, data=None, dtype=None, copy=False, shape=None):
         # Not implemented operators return NotImplemented
@@ -103,15 +103,15 @@ class Cdense(object):
     # ----------------------------#
 
     def toarray(self):
-        """Return a np.ndarray view of current Cdense."""
+        """Return a np.ndarray view of current CDense."""
         return self._data
 
     def tocsr(self):
-        """Return current Cdense as a scipy.sparse.csr_matrix."""
+        """Return current CDense as a scipy.sparse.csr_matrix."""
         return scs.csr_matrix(self.toarray())
 
     def tolist(self):
-        """Return current Cdense as a list."""
+        """Return current CDense as a list."""
         return self._data.tolist()
 
     # ---------------------------- #
@@ -129,18 +129,18 @@ class Cdense(object):
         Parameters
         ----------
         idx : object
-            - Cdense boolean mask
+            - CDense boolean mask
               Number of rows should be equal or higher
               than the number array's dimensions.
             - tuple of 2 or more elements. Any of the following:
-                - Cdense
+                - CDense
                 - Iterable built-in types (list, slice).
                 - Atomic built-in types (int, bool).
                 - Numpy atomic types (np.integer, np.bool_).
             - for vector-like arrays, one element between the above ones.
 
         """
-        if isinstance(idx, Cdense):
+        if isinstance(idx, CDense):
             if idx.dtype.kind == 'b':  # boolean mask
                 # Numpy requires a mask with the same dims of target array
                 if self.ndim == 1 and idx.ndim == 2:
@@ -231,7 +231,7 @@ class Cdense(object):
             if self.ndim == 1:
                 # We now check the first index if is suitable for flat arrays
 
-                if isinstance(idx[0], Cdense):
+                if isinstance(idx[0], CDense):
                     idx_0 = idx[0].toarray()
                 else:
                     idx_0 = idx[0]
@@ -247,7 +247,7 @@ class Cdense(object):
 
             for e_i, e in enumerate(idx_list):
                 # Check each tuple element and convert to ndarray
-                if isinstance(e, Cdense):
+                if isinstance(e, CDense):
                     idx_list[e_i] = e.toarray()
                     # Check the size of any boolean array inside tuple
                     t = [None, None]  # Fake index for booleans check
@@ -277,7 +277,7 @@ class Cdense(object):
 
                 else:
                     raise TypeError("{:} should not be used for "
-                                    "Csparse indexing.".format(type(idx)))
+                                    "CSparse indexing.".format(type(idx)))
 
             # Converting back to tuple
             idx = tuple(idx_list)
@@ -287,9 +287,9 @@ class Cdense(object):
                 idx = np.ix_(*idx)
 
         else:
-            # No other object is accepted for Csparse indexing
+            # No other object is accepted for CSparse indexing
             raise TypeError("{:} should not be used for "
-                            "Cdense indexing.".format(type(idx)))
+                            "CDense indexing.".format(type(idx)))
 
         return idx
 
@@ -367,11 +367,11 @@ class Cdense(object):
     def __setitem__(self, idx, value):
         """Redefinition of the set operation."""
         # Check for setitem value
-        if isinstance(value, Cdense):
+        if isinstance(value, CDense):
             value = value.toarray()
         elif not (is_scalar(value) or is_bool(value)):
             raise TypeError("{:} cannot be used for setting "
-                            "a Cdense.".format(type(value)))
+                            "a CDense.".format(type(value)))
 
         if is_list_of_lists(idx):
             # Natively supported for multi-dimensional (not flat) arrays
@@ -393,18 +393,18 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
+        other : CDense or scalar or bool
             Element to add to current array. If a Cdense, element-wise
             addition will be performed. If scalar or boolean, the element
             will be sum to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after addition.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
                 np.add(self.toarray(), self._buffer_to_builtin(other)))
         else:
@@ -421,7 +421,7 @@ class Cdense(object):
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after addition.
 
         """
@@ -435,18 +435,18 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
+        other : CDense or scalar or bool
             Element to subtract to current array. If a Cdense, element-wise
             subtraction will be performed. If scalar or boolean, the element
             will be subtracted to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after subtraction.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
                 np.subtract(self.toarray(), self._buffer_to_builtin(other)))
         else:
@@ -463,7 +463,7 @@ class Cdense(object):
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after subtraction.
 
         """
@@ -477,18 +477,18 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
+        other : CDense or scalar or bool
             Element to multiplied to current array. If a Cdense, element-wise
             product will be performed. If scalar or boolean, the element
             will be multiplied to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after product.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
                 np.multiply(self.toarray(), self._buffer_to_builtin(other)))
         else:
@@ -505,7 +505,7 @@ class Cdense(object):
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after product.
 
         """
@@ -519,18 +519,18 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
+        other : CDense or scalar or bool
             Element to divided to current array. If a Cdense, element-wise
             division will be performed. If scalar or boolean, the element
             will be divided to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after division.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
                 np.true_divide(self.toarray(), self._buffer_to_builtin(other)))
         else:
@@ -547,7 +547,7 @@ class Cdense(object):
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after division.
 
         """
@@ -577,7 +577,7 @@ class Cdense(object):
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array with the corresponding elements without sign.
 
         """
@@ -588,7 +588,7 @@ class Cdense(object):
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array with the corresponding elements with negated sign.
 
         """
@@ -599,18 +599,18 @@ class Cdense(object):
 
         Parameters
         ----------
-        power : Cdense or scalar or bool
+        power : CDense or scalar or bool
             Power to use. If scalar or boolean, each array element will be
             elevated to power. If a Cdense, each array element will be
             elevated to the corresponding element of the input array.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after power.
 
         """
-        if is_scalar(power) or is_bool(power) or isinstance(power, Cdense):
+        if is_scalar(power) or is_bool(power) or isinstance(power, CDense):
             return self.__class__(
                 self.toarray().__pow__(self._buffer_to_builtin(power)))
         else:
@@ -626,7 +626,7 @@ class Cdense(object):
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after power.
 
         """
@@ -640,18 +640,18 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
+        other : CDense or scalar or bool
             Element to be compared. If a Cdense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Boolean array with comparison result.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
                 self.toarray() == self._buffer_to_builtin(other))
         else:
@@ -662,18 +662,18 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
+        other : CDense or scalar or bool
             Element to be compared. If a Cdense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Boolean array with comparison result.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
                 self.toarray() < self._buffer_to_builtin(other))
         else:
@@ -684,18 +684,18 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
+        other : CDense or scalar or bool
             Element to be compared. If a Cdense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Boolean array with comparison result.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
                 self.toarray() <= self._buffer_to_builtin(other))
         else:
@@ -706,18 +706,18 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
+        other : CDense or scalar or bool
             Element to be compared. If a Cdense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Boolean array with comparison result.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
                 self.toarray() > self._buffer_to_builtin(other))
         else:
@@ -728,18 +728,18 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
+        other : CDense or scalar or bool
             Element to be compared. If a Cdense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Boolean array with comparison result.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
                 self.toarray() >= self._buffer_to_builtin(other))
         else:
@@ -750,18 +750,18 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
+        other : CDense or scalar or bool
             Element to be compared. If a Cdense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Boolean array with comparison result.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
                 self.toarray() != self._buffer_to_builtin(other))
         else:
@@ -774,10 +774,10 @@ class Cdense(object):
     __nonzero__ = __bool__  # Compatibility with python < 3
 
     def __str__(self):
-        return str(self._data).replace('array', 'Cdense', 1)
+        return str(self._data).replace('array', 'CDense', 1)
 
     def __repr__(self):
-        return repr(self._data).replace('array', 'Cdense', 1)
+        return repr(self._data).replace('array', 'CDense', 1)
 
     def __iter__(self):
         """Yields array elements in raster-scan order."""
@@ -870,7 +870,7 @@ class Cdense(object):
 
         Returns
         -------
-        loaded : Cdense
+        loaded : CDense
             Array resulting from loading, 2-dimensional.
 
         """
@@ -919,7 +919,7 @@ class Cdense(object):
         return self.__class__(a_resize, dtype=self.dtype)
 
     def astype(self, newtype):
-        """Return current Cdense with specified type."""
+        """Return current CDense with specified type."""
         return self.__class__(self._data.astype(newtype))
 
     def dot(self, other):
@@ -950,7 +950,7 @@ class Cdense(object):
 
         Examples
         --------
-        >>> a = Cdense([[1,2,3],[4,5,6]])
+        >>> a = CDense([[1,2,3],[4,5,6]])
         >>> idx = a.find(a > 2)
         >>> idx
         [[0, 1, 1, 1], [2, 0, 1, 2]]
@@ -1038,8 +1038,8 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
-        >>> a0 = Cdense([1])
+        >>> from secml.array import CDense
+        >>> a0 = CDense([1])
         >>> print(a0.repmat(2, 3))
         [[1 1 1]
          [1 1 1]]
@@ -1069,9 +1069,9 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
+        >>> from secml.array import CDense
 
-        >>> x = Cdense([[1,2],[3,4]])
+        >>> x = CDense([[1,2],[3,4]])
         
         >>> x.repeat(2)
         Cdense([1, 1, 2, 2, 3, 3, 4, 4])
@@ -1096,19 +1096,19 @@ class Cdense(object):
             np.repeat(self.toarray(), repeats=repeats, axis=axis))
 
     def maximum(self, y):
-        """Element-wise maximum with respect to input Cdense."""
+        """Element-wise maximum with respect to input CDense."""
         return self.__class__(np.maximum(self.toarray(), y.toarray()))
 
     def minimum(self, y):
-        """Element-wise minimum with respect to input Cdense."""
+        """Element-wise minimum with respect to input CDense."""
         return self.__class__(np.minimum(self.toarray(), y.toarray()))
 
     def logical_and(self, y):
-        """Element-wise logical & (and) with respect to input Cdense."""
+        """Element-wise logical & (and) with respect to input CDense."""
         return self.__class__(np.logical_and(self.toarray(), y.toarray()))
 
     def logical_or(self, y):
-        """Element-wise logical | (or) with respect to input Cdense."""
+        """Element-wise logical | (or) with respect to input CDense."""
         return self.__class__(np.logical_or(self.toarray(), y.toarray()))
 
     def logical_not(self):
@@ -1132,7 +1132,7 @@ class Cdense(object):
             self.atleast_2d().toarray().astype(float) if axis is not None
             else self.toarray().astype(float), order, axis)
 
-        # Always return a Cdense of floats
+        # Always return a CDense of floats
         out = self.__class__(out).astype(float)
 
         if axis is None:
@@ -1299,7 +1299,7 @@ class Cdense(object):
 
         Returns
         -------
-        array_sin : Cdense
+        array_sin : CDense
             New array with trigonometric sine element-wise.
 
         """
@@ -1313,7 +1313,7 @@ class Cdense(object):
 
         Returns
         -------
-        array_cos : Cdense
+        array_cos : CDense
             New array with trigonometric cosine element-wise.
 
         """
@@ -1324,7 +1324,7 @@ class Cdense(object):
 
         Returns
         -------
-        y : Cdense
+        y : CDense
             New array with element-wise exponential of current data.
 
         """
@@ -1335,7 +1335,7 @@ class Cdense(object):
 
         Returns
         -------
-        y : Cdense
+        y : CDense
             New array with element-wise natural logarithm of current data.
 
         """
@@ -1346,7 +1346,7 @@ class Cdense(object):
 
         Returns
         -------
-        y : Cdense
+        y : CDense
             New array with element-wise base 10 logarithm of current data.
 
         """
@@ -1361,14 +1361,14 @@ class Cdense(object):
 
         Parameters
         ----------
-        exp : Cdense or scalar
+        exp : CDense or scalar
             Exponent of power, can be another array or a
             single scalar. If array, must have the same
             shape of original array.
 
         Returns
         -------
-        pow_array : Cdense
+        pow_array : CDense
             New array with the power of current data using
             input exponents.
 
@@ -1389,7 +1389,7 @@ class Cdense(object):
 
         Returns
         -------
-        y : Cdense
+        y : CDense
             Normal distribution values
 
         """
@@ -1417,7 +1417,7 @@ class Cdense(object):
 
         Returns
         -------
-        out_interp : Cdense
+        out_interp : CDense
             The interpolated values, same shape as x.
 
         Notes
@@ -1452,14 +1452,14 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
-        >>> array = Cdense.zeros(2)
+        >>> from secml.array import CDense
+        >>> array = CDense.zeros(2)
         >>> print array
         [ 0.  0.]
         >>> print array.shape
         (2,)
 
-        >>> array = Cdense.zeros((2, 1), dtype=int)
+        >>> array = CDense.zeros((2, 1), dtype=int)
         >>> print array
         [[0]
          [0]]
@@ -1485,14 +1485,14 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
-        >>> array = Cdense.ones(2)
+        >>> from secml.array import CDense
+        >>> array = CDense.ones(2)
         >>> print array
         [ 1.  1.]
         >>> print array.shape
         (2,)
 
-        >>> array = Cdense.ones(2, 1, dtype=int)
+        >>> array = CDense.ones(2, 1, dtype=int)
         >>> print array
         [[1]
          [1]]
@@ -1518,14 +1518,14 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
-        >>> array = Cdense.empty(2)
+        >>> from secml.array import CDense
+        >>> array = CDense.empty(2)
         >>> print array  # doctest: +SKIP
         [  6.94292784e-310   6.94292784e-310]
         >>> print array.shape
         (2,)
 
-        >>> array = Cdense.empty(2, 1, dtype=int)
+        >>> array = CDense.empty(2, 1, dtype=int)
         >>> print array  # doctest: +SKIP
         [[              0]
          [140526427175696]]
@@ -1554,15 +1554,15 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
-        >>> array = Cdense.eye(2)
+        >>> from secml.array import CDense
+        >>> array = CDense.eye(2)
         >>> print array
         [[ 1.  0.]
          [ 0.  1.]]
         >>> print array.shape
         (2, 2)
 
-        >>> array = Cdense.eye(2, k=1, dtype=int)
+        >>> array = CDense.eye(2, k=1, dtype=int)
         >>> print array
         [[0 1]
          [0 0]]
@@ -1586,8 +1586,8 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
-        >>> array = Cdense.rand(2, 3)
+        >>> from secml.array import CDense
+        >>> array = CDense.rand(2, 3)
         >>> print(array)  # doctest: +SKIP
         [[ 0.68588225  0.88371576  0.3958642 ]
          [ 0.58243871  0.05104796  0.77719998]]
@@ -1631,8 +1631,8 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
-        >>> array = Cdense.randint(0, 5, 10)
+        >>> from secml.array import CDense
+        >>> array = CDense.randint(0, 5, 10)
         >>> print(array)  # doctest: +SKIP
         [1 0 2 0 4 3 0 2 4 2]
 
@@ -1651,17 +1651,17 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
-        >>> array = Cdense.randsample(10, 4)
+        >>> from secml.array import CDense
+        >>> array = CDense.randsample(10, 4)
         >>> print(array)  # doctest: +SKIP
         [1 0 2 3]
 
-        >>> array = Cdense.randsample(Cdense([1,5,6,7,3]), 4)
+        >>> array = CDense.randsample(CDense([1,5,6,7,3]), 4)
         >>> print(array)  # doctest: +SKIP
         [1 6 3 7]
 
         """
-        if isinstance(array, cls):  # Cast input Cdense to ndarray
+        if isinstance(array, cls):  # Cast input CDense to ndarray
             array = array.toarray()
         return cls(np.random.choice(array, size, replace))
 
@@ -1669,8 +1669,8 @@ class Cdense(object):
     def concatenate(cls, array1, array2, axis=1):
         """Wrapper for ma.concatenate
         we use this and not concatenate because it preserve also np mask
-        array1: Cdense
-        array2: Cdense
+        array1: CDense
+        array2: CDense
         axis: int (default 1 )
         axis 0 put second array above
         axis 1 attach second array at right
@@ -1711,7 +1711,7 @@ class Cdense(object):
         --------
         >>> a = [[1, 2, 3], [4, 5], [6, 7]]
 
-        >>> Cdense.comblist(a)
+        >>> CDense.comblist(a)
         Cdense([[ 1.,  4.,  6.],
                [ 1.,  4.,  7.],
                [ 1.,  5.,  6.],
@@ -1778,11 +1778,11 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
+        >>> from secml.array import CDense
 
-        >>> x = Cdense( [1,3,5] )
-        >>> y = Cdense( [2,4,6] )
-        >>> xv, yv = Cdense.meshgrid((x, y))
+        >>> x = CDense( [1,3,5] )
+        >>> y = CDense( [2,4,6] )
+        >>> xv, yv = CDense.meshgrid((x, y))
         >>> xv
         Cdense([[1, 3, 5],
                [1, 3, 5],
@@ -1792,7 +1792,7 @@ class Cdense(object):
                [4, 4, 4],
                [6, 6, 6]])
 
-        >>> xv, yv = Cdense.meshgrid((x, y), indexing='ij')
+        >>> xv, yv = CDense.meshgrid((x, y), indexing='ij')
         >>> xv
         Cdense([[1, 1, 1],
                [3, 3, 3],

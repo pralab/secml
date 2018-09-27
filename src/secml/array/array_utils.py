@@ -72,8 +72,8 @@ def tuple_sequence_tondarray(idx):
         - bool, np.bool_
         - list
         - ndarray
-        - Cdense
-        - Csparse (are converted to dense first)
+        - CDense
+        - CSparse (are converted to dense first)
         - CArray
 
     Parameters
@@ -92,9 +92,9 @@ def tuple_sequence_tondarray(idx):
     # Extracting data buffer from CArray
     idx = tuple([elem.tondarray() if
                  hasattr(elem, 'tondarray') else elem for elem in idx])
-    # Converting Csparse to Cdense
+    # Converting CSparse to CDense
     idx = tuple([elem.todense() if issparse(elem) else elem for elem in idx])
-    # Converting Cdense to ndarray
+    # Converting CDense to ndarray
     idx = tuple([elem.toarray() if
                  hasattr(elem, 'toarray') else elem for elem in idx])
     # Converting not-slice and not-None to ndarray

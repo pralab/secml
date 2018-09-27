@@ -11,14 +11,14 @@ import scipy.sparse as scs
 from scipy.sparse.linalg import inv, norm
 import numpy as np
 
-from secml.array import Cdense
+from secml.array import CDense
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_intlike, is_int, is_bool
 
 
-class Csparse(object):
+class CSparse(object):
     """Sparse array. Encapsulation for scipy.sparse.csr_matrix."""
-    __slots__ = '_data'  # Csparse has only one slot for the scs.csr_matrix
+    __slots__ = '_data'  # CSparse has only one slot for the scs.csr_matrix
 
     def __init__(self, data=None, dtype=None, copy=False, shape=None):
         """Sparse matrix initialization."""
@@ -38,7 +38,7 @@ class Csparse(object):
 
     def _buffer_to_builtin(self, data):
         """Convert data buffer to built-in arrays"""
-        if isinstance(data, Cdense):  # Extract np.ndarray
+        if isinstance(data, CDense):  # Extract np.ndarray
             return data.toarray()
         elif isinstance(data, self.__class__):  # Extract scs.csr_matrix
             return data.tocsr()
@@ -74,14 +74,14 @@ class Csparse(object):
     @property
     def nnz_row_indices(self):
         """Return indices of the rows where nz elements are."""
-        return Cdense([ptr_idx for ptr_idx in xrange(
+        return CDense([ptr_idx for ptr_idx in xrange(
             self._data.indptr.size - 1) for elem in xrange(
             self._data.indptr[ptr_idx], self._data.indptr[ptr_idx + 1])])
 
     @property
     def nnz_column_indices(self):
         """Return indices of the columns where nz elements are."""
-        return Cdense(self._data.indices)
+        return CDense(self._data.indices)
 
     @property
     def nnz_indices(self):
@@ -114,7 +114,7 @@ class Csparse(object):
 
     def todense(self, order=None):
         """Convert to ndarray."""
-        return Cdense(self.toarray(order))
+        return CDense(self.toarray(order))
 
     def tolist(self):
         """Convert to list."""
@@ -132,19 +132,19 @@ class Csparse(object):
         Parameters
         ----------
         idx : object
-            - Cdense, Csparse boolean masks
+            - CDense, CSparse boolean masks
               Number of rows should be equal to 2.
             - List of lists (output of `find_2d` method).
               Number of elements should be equal to 2.
             - tuple of 2 or more elements. Any of the following:
-                - Cdense, Csparse
+                - CDense, CSparse
                 - Iterable built-in types (list, slice).
                 - Atomic built-in types (int, bool).
                 - Numpy atomic types (np.integer, np.bool_).
             - for vector-like arrays, one element between the above ones.
 
         """
-        if isinstance(idx, Cdense) or isinstance(idx, Csparse):
+        if isinstance(idx, CDense) or isinstance(idx, CSparse):
 
             # Boolean mask
             if idx.dtype.kind == 'b':
@@ -154,8 +154,8 @@ class Csparse(object):
                     idx = idx.atleast_2d()
 
                 # Convert indices to built-in arrays
-                idx = idx.toarray() if isinstance(idx, Cdense) else idx
-                idx = idx.tocsr() if isinstance(idx, Csparse) else idx
+                idx = idx.toarray() if isinstance(idx, CDense) else idx
+                idx = idx.tocsr() if isinstance(idx, CSparse) else idx
 
                 # Check the shape of the boolean mask
                 if idx.shape != self.shape:
@@ -239,7 +239,7 @@ class Csparse(object):
 
             for e_i, e in enumerate(idx_list):
                 # Check each tuple element and convert to ndarray
-                if isinstance(e, Cdense) or isinstance(e, Csparse):
+                if isinstance(e, CDense) or isinstance(e, CSparse):
                     idx_list[e_i] = e.toarray()
                     # Check the size of any boolean array inside tuple
                     t = [None, None]  # Fake index for booleans check
@@ -268,7 +268,7 @@ class Csparse(object):
 
                 else:
                     raise TypeError("{:} should not be used for "
-                                    "Csparse indexing.".format(type(idx)))
+                                    "CSparse indexing.".format(type(idx)))
 
             # Converting back to tuple
             idx = tuple(idx_list)
@@ -282,9 +282,9 @@ class Csparse(object):
                 idx = tuple(elem.ravel()[0] for elem in idx)
 
         else:
-            # No other object is accepted for Csparse indexing
+            # No other object is accepted for CSparse indexing
             raise TypeError("{:} should not be used for "
-                            "Csparse indexing.".format(type(idx)))
+                            "CSparse indexing.".format(type(idx)))
 
         return idx
 
@@ -323,13 +323,13 @@ class Csparse(object):
     def __setitem__(self, idx, value):
         """Redefinition of the get (brackets) operator."""
         # Check for setitem value
-        if isinstance(value, Cdense):
+        if isinstance(value, CDense):
             value = value.toarray()
-        elif isinstance(value, Csparse):
+        elif isinstance(value, CSparse):
             value = value.tocsr()
         elif not (is_scalar(value) or is_bool(value)):
             raise TypeError("{:} cannot be used for setting "
-                            "a Csparse.".format(type(value)))
+                            "a CSparse.".format(type(value)))
 
         # Check index for all other cases
         idx = self._check_index(idx)
@@ -349,12 +349,12 @@ class Csparse(object):
 
         Parameters
         ----------
-        other : Csparse or Cdense
+        other : CSparse or Cdense
             Element to add to current array.
 
         Returns
         -------
-        array : Csparse or Cdense
+        array : CSparse or CDense
             If input is a Csparse, a Csparse will be returned.
             If input is a Cdense, a Cdense will be returned.
 
@@ -362,11 +362,11 @@ class Csparse(object):
         if is_scalar(other) or is_bool(other):
             raise NotImplementedError("adding a nonzero scalar "
                                       "to a sparse array is not supported")
-        elif isinstance(other, Csparse):  # Sparse + Sparse = Sparse
+        elif isinstance(other, CSparse):  # Sparse + Sparse = Sparse
             return self.__class__(self._data.__add__(other.tocsr()))
-        elif isinstance(other, Cdense) \
+        elif isinstance(other, CDense) \
                 and other.size > 1:  # Sparse + Dense = Dense
-            return Cdense(self._data.__add__(other.toarray()))
+            return CDense(self._data.__add__(other.toarray()))
         else:
             return NotImplemented
 
@@ -380,12 +380,12 @@ class Csparse(object):
 
         Parameters
         ----------
-        other : Csparse or Cdense
+        other : CSparse or CDense
             Element to subtraction to current array.
 
         Returns
         -------
-        array : Csparse or Cdense
+        array : CSparse or Cdense
             If input is a Csparse, a Csparse will be returned.
             If input is a Cdense, a Cdense will be returned.
 
@@ -393,11 +393,11 @@ class Csparse(object):
         if is_scalar(other) or is_bool(other):
             raise NotImplementedError("subtracting a nonzero scalar "
                                       "to a sparse array is not supported")
-        elif isinstance(other, Csparse):  # Sparse - Sparse = Sparse
+        elif isinstance(other, CSparse):  # Sparse - Sparse = Sparse
             return self.__class__(self._data.__sub__(other.tocsr()))
-        elif isinstance(other, Cdense) \
+        elif isinstance(other, CDense) \
                 and other.size > 1:  # Sparse + Dense = Dense
-            return Cdense(self._data.__sub__(other.toarray()))
+            return CDense(self._data.__sub__(other.toarray()))
         else:
             return NotImplemented
 
@@ -411,19 +411,19 @@ class Csparse(object):
 
         Parameters
         ----------
-        other : Csparse or Cdense or scalar or bool
+        other : CSparse or CDense or scalar or bool
             Element to multiply to current array. If an array, element-wise
             product will be performed. If scalar or boolean, the element
             will be multiplied to each array element.
 
         Returns
         -------
-        array : Csparse
+        array : CSparse
             Array after product.
 
         """
         if is_scalar(other) or is_bool(other) or \
-                isinstance(other, (Csparse, Cdense)):  # Always Sparse
+                isinstance(other, (CSparse, CDense)):  # Always Sparse
             return self.__class__(
                 self._data.multiply(self._buffer_to_builtin(other)))
         else:
@@ -440,7 +440,7 @@ class Csparse(object):
 
         Returns
         -------
-        array : Csparse
+        array : CSparse
             Array after product.
 
         """
@@ -451,21 +451,21 @@ class Csparse(object):
 
         Parameters
         ----------
-        other : Csparse or Cdense or scalar or bool
+        other : CSparse or CDense or scalar or bool
             Element to divide to current array. If an array, element-wise
             division will be performed. If scalar or boolean, the element
             will be divided to each array element.
 
         Returns
         -------
-        array : Csparse or Cdense
+        array : CSparse or Cdense
             Array after division. Csparse if other is a scalar or bool,
             Cdense otherwise.
 
         """
         if is_scalar(other) or is_bool(other):
             return self.__class__(self._data.__div__(other))
-        elif isinstance(other, (Csparse, Cdense)):
+        elif isinstance(other, (CSparse, CDense)):
             this = self
             other = other.atleast_2d()
             if this.shape != other.shape:  # Broadcast not supported by scipy
@@ -488,7 +488,7 @@ class Csparse(object):
                 else:
                     raise ValueError("inconsistent shapes")
             # Compatible shapes, call built-in div
-            return Cdense(this._data.__div__(this._buffer_to_builtin(other)))
+            return CDense(this._data.__div__(this._buffer_to_builtin(other)))
         else:
             return NotImplemented
 
@@ -518,7 +518,7 @@ class Csparse(object):
 
         Returns
         -------
-        array : Csparse
+        array : CSparse
             Array with the corresponding elements without sign.
 
         """
@@ -529,7 +529,7 @@ class Csparse(object):
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array with the corresponding elements with negated sign.
 
         """
@@ -545,7 +545,7 @@ class Csparse(object):
 
         Returns
         -------
-        array : Csparse
+        array : CSparse
             Array after power.
 
         """
@@ -566,14 +566,14 @@ class Csparse(object):
 
         Parameters
         ----------
-        other : Csparse or Cdense or scalar or bool
+        other : CSparse or CDense or scalar or bool
             Element to be compared. If an array, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Csparse or Cdense
+        array : CSparse or Cdense
             If input is a Csparse or a scalar or a bool,
             a Csparse will be returned. If input is a Cdense,
             a Cdense will be returned.
@@ -581,10 +581,10 @@ class Csparse(object):
         """
         if is_scalar(other) or is_bool(other):
             return self.__class__(self._data.__eq__(other))
-        elif isinstance(other, Csparse):  # Sparse == Sparse = Sparse
+        elif isinstance(other, CSparse):  # Sparse == Sparse = Sparse
             return self.__class__(self._data.__eq__(other.tocsr()))
-        elif isinstance(other, Cdense):  # Sparse == Dense = Dense
-            return Cdense(self._data.__eq__(other.toarray()))
+        elif isinstance(other, CDense):  # Sparse == Dense = Dense
+            return CDense(self._data.__eq__(other.toarray()))
         else:
             return NotImplemented
 
@@ -593,14 +593,14 @@ class Csparse(object):
 
         Parameters
         ----------
-        other : Csparse or Cdense or scalar or bool
+        other : CSparse or CDense or scalar or bool
             Element to be compared. If an array, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Csparse or Cdense
+        array : CSparse or Cdense
             If input is a Csparse or a scalar or a bool,
             a Csparse will be returned. If input is a Cdense,
             a Cdense will be returned.
@@ -608,10 +608,10 @@ class Csparse(object):
         """
         if is_scalar(other) or is_bool(other):
             return self.__class__(self._data.__lt__(other))
-        elif isinstance(other, Csparse):  # Sparse < Sparse = Sparse
+        elif isinstance(other, CSparse):  # Sparse < Sparse = Sparse
             return self.__class__(self._data.__lt__(other.tocsr()))
-        elif isinstance(other, Cdense):  # Sparse < Dense = Dense
-            return Cdense(self._data.__lt__(other.toarray()))
+        elif isinstance(other, CDense):  # Sparse < Dense = Dense
+            return CDense(self._data.__lt__(other.toarray()))
         else:
             return NotImplemented
 
@@ -620,14 +620,14 @@ class Csparse(object):
 
         Parameters
         ----------
-        other : Csparse or Cdense or scalar or bool
+        other : CSparse or CDense or scalar or bool
             Element to be compared. If an array, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Csparse or Cdense
+        array : CSparse or Cdense
             If input is a Csparse or a scalar or a bool,
             a Csparse will be returned. If input is a Cdense,
             a Cdense will be returned.
@@ -635,10 +635,10 @@ class Csparse(object):
         """
         if is_scalar(other) or is_bool(other):
             return self.__class__(self._data.__le__(other))
-        elif isinstance(other, Csparse):  # Sparse <= Sparse = Sparse
+        elif isinstance(other, CSparse):  # Sparse <= Sparse = Sparse
             return self.__class__(self._data.__le__(other.tocsr()))
-        elif isinstance(other, Cdense):  # Sparse <= Dense = Dense
-            return Cdense(self._data.__le__(other.toarray()))
+        elif isinstance(other, CDense):  # Sparse <= Dense = Dense
+            return CDense(self._data.__le__(other.toarray()))
         else:
             return NotImplemented
 
@@ -647,14 +647,14 @@ class Csparse(object):
 
         Parameters
         ----------
-        other : Csparse or Cdense or scalar or bool
+        other : CSparse or CDense or scalar or bool
             Element to be compared. If an array, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Csparse or Cdense
+        array : CSparse or Cdense
             If input is a Csparse or a scalar or a bool,
             a Csparse will be returned. If input is a Cdense,
             a Cdense will be returned.
@@ -662,10 +662,10 @@ class Csparse(object):
         """
         if is_scalar(other) or is_bool(other):
             return self.__class__(self._data.__gt__(other))
-        elif isinstance(other, Csparse):  # Sparse > Sparse = Sparse
+        elif isinstance(other, CSparse):  # Sparse > Sparse = Sparse
             return self.__class__(self._data.__gt__(other.tocsr()))
-        elif isinstance(other, Cdense):  # Sparse > Dense = Dense
-            return Cdense(self._data.__gt__(other.toarray()))
+        elif isinstance(other, CDense):  # Sparse > Dense = Dense
+            return CDense(self._data.__gt__(other.toarray()))
         else:
             return NotImplemented
 
@@ -674,14 +674,14 @@ class Csparse(object):
 
         Parameters
         ----------
-        other : Csparse or Cdense or scalar or bool
+        other : CSparse or CDense or scalar or bool
             Element to be compared. If an array, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Csparse or Cdense
+        array : CSparse or CDense
             If input is a Csparse or a scalar or a bool,
             a Csparse will be returned. If input is a Cdense,
             a Cdense will be returned.
@@ -689,10 +689,10 @@ class Csparse(object):
         """
         if is_scalar(other) or is_bool(other):
             return self.__class__(self._data.__ge__(other))
-        elif isinstance(other, Csparse):  # Sparse >= Sparse = Sparse
+        elif isinstance(other, CSparse):  # Sparse >= Sparse = Sparse
             return self.__class__(self._data.__ge__(other.tocsr()))
-        elif isinstance(other, Cdense):  # Sparse >= Dense = Dense
-            return Cdense(self._data.__ge__(other.toarray()))
+        elif isinstance(other, CDense):  # Sparse >= Dense = Dense
+            return CDense(self._data.__ge__(other.toarray()))
         else:
             return NotImplemented
 
@@ -701,14 +701,14 @@ class Csparse(object):
 
         Parameters
         ----------
-        other : Csparse or Cdense or scalar or bool
+        other : CSparse or Cdense or scalar or bool
             Element to be compared. If an array, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Csparse or Cdense
+        array : CSparse or CDense
             If input is a Csparse or a scalar or a bool,
             a Csparse will be returned. If input is a Cdense,
             a Cdense will be returned.
@@ -716,10 +716,10 @@ class Csparse(object):
         """
         if is_scalar(other) or is_bool(other):
             return self.__class__(self._data.__ne__(other))
-        elif isinstance(other, Csparse):  # Sparse != Sparse = Sparse
+        elif isinstance(other, CSparse):  # Sparse != Sparse = Sparse
             return self.__class__(self._data.__ne__(other.tocsr()))
-        elif isinstance(other, Cdense):  # Sparse != Dense = Dense
-            return Cdense(self._data.__ne__(other.toarray()))
+        elif isinstance(other, CDense):  # Sparse != Dense = Dense
+            return CDense(self._data.__ne__(other.toarray()))
         else:
             return NotImplemented
 
@@ -746,7 +746,7 @@ class Csparse(object):
     # -------------------------------#
 
     def __copy__(self):
-        """Called when copy.copy(Csparse) is called.
+        """Called when copy.copy(CSparse) is called.
 
         Consistently with numpy.ndarray,
         this returns a DEEP COPY of current array.
@@ -755,7 +755,7 @@ class Csparse(object):
         return self.__class__(self._data.copy())
 
     def __deepcopy__(self, memo):
-        """Called when copy.deepcopy(Csparse) is called."""
+        """Called when copy.deepcopy(CSparse) is called."""
         y = self.__class__(self._data.copy())
         memo[id(self)] = y
         return y
@@ -797,16 +797,16 @@ class Csparse(object):
                           "or delete the file.".format(datafile))
 
         # Flatting data to store (for sparse this results in 1 x size arrays)
-        data_cndarray = Cdense(
+        data_cndarray = CDense(
             self._data.data).reshape((1, self._data.data.shape[0]))
         # Converting explicitly to int as in 64 bit machines the
         # following arrays are stored with dtype == np.int32
-        indices_cndarray = Cdense(self._data.indices).reshape(
+        indices_cndarray = CDense(self._data.indices).reshape(
             (1, self._data.indices.shape[0])).astype(int)
-        indptr_cndarray = Cdense(self._data.indptr).reshape(
+        indptr_cndarray = CDense(self._data.indptr).reshape(
             (1, self._data.indptr.shape[0])).astype(int)
 
-        # Error handling is managed by Cdense.save()
+        # Error handling is managed by CDense.save()
         # file will be closed exiting from context
         with open(datafile, mode='w+') as fhandle:
             data_cndarray.save(fhandle)
@@ -829,19 +829,19 @@ class Csparse(object):
 
         Returns
         -------
-        loaded : Csparse
+        loaded : CSparse
             Array resulting from loading, 2-dimensional.
 
         """
-        # Cdense.load() will manage IO errors
-        imported_data = Cdense.load(
+        # CDense.load() will manage IO errors
+        imported_data = CDense.load(
             datafile, dtype=dtype, startrow=0, skipend=3).ravel().toarray()
         # Indices are always integers
-        imported_indices = Cdense.load(
+        imported_indices = CDense.load(
             datafile, dtype=int, startrow=1, skipend=2).ravel().toarray()
-        imported_indptr = Cdense.load(
+        imported_indptr = CDense.load(
             datafile, dtype=int, startrow=2, skipend=1).ravel().toarray()
-        shape_ndarray = Cdense.load(
+        shape_ndarray = CDense.load(
             datafile, dtype=int, startrow=3, skipend=0).ravel().toarray()
 
         return cls((imported_data, imported_indices, imported_indptr),
@@ -927,7 +927,7 @@ class Csparse(object):
                 raise ValueError("Invalid norm order {:}.".format(order))
             return self.__class__([0.0])
 
-        return Cdense(norm(self.tocsr(), ord=order, axis=1)).astype(float)
+        return CDense(norm(self.tocsr(), ord=order, axis=1)).astype(float)
 
     def norm_2d(self, order=None, axis=None):
         """Return the matrix norm of store data."""
@@ -949,7 +949,7 @@ class Csparse(object):
                 raise ValueError("Invalid norm order {:}.".format(order))
             return self.__class__([0.0])
 
-        out = Cdense(norm(self.tocsr(), ord=order, axis=axis)).astype(float)
+        out = CDense(norm(self.tocsr(), ord=order, axis=axis)).astype(float)
 
         if axis is None:
             return out  # out is already a vector, so nothing to do
@@ -960,10 +960,10 @@ class Csparse(object):
         """Shuffle array data in-place."""
         if self.size > 0:
             if self.shape[0] > 1:  # only rows are shuffled
-                shuffle_idx = Cdense.randsample(self.shape[0], self.shape[0])
+                shuffle_idx = CDense.randsample(self.shape[0], self.shape[0])
                 self[:, :] = self[shuffle_idx, :]
             else:
-                shuffle_idx = Cdense.randsample(self.shape[1], self.shape[1])
+                shuffle_idx = CDense.randsample(self.shape[1], self.shape[1])
                 self[:, :] = self[0, shuffle_idx]
 
     def nan_to_num(self):
@@ -976,7 +976,7 @@ class Csparse(object):
         # Appending nonzero elements
         unique_items += np.unique(self._data.data).tolist()
         # Return unique elements with correct dtype
-        return Cdense(unique_items).astype(self.dtype)
+        return CDense(unique_items).astype(self.dtype)
 
     def atleast_2d(self):
         """Force array to have 2 dimensions.
@@ -997,9 +997,9 @@ class Csparse(object):
     def sum(self, axis=None, keepdims=True):
         """Sum of array elements over a given axis."""
         if self.size == 0:
-            out_sum = Cdense([[0.0]])
+            out_sum = CDense([[0.0]])
         else:
-            out_sum = Cdense(self._data.sum(axis))
+            out_sum = CDense(self._data.sum(axis))
         return \
             out_sum.ravel() if axis is None or keepdims is False else out_sum
 
@@ -1023,13 +1023,13 @@ class Csparse(object):
                 else:  # If any element is zero, product is zero
                     return self.__class__(0.0, dtype=dtype)
             elif axis == 0:
-                out = Csparse((1, self.shape[1]), dtype=dtype)
+                out = CSparse((1, self.shape[1]), dtype=dtype)
                 c_bincount = self.nnz_column_indices.bincount()
                 for e_idx, e in enumerate(c_bincount == self.shape[0]):
                     if bool(e) is True:
                         out[0, e_idx] = self[:, e_idx].todense().prod()
             elif axis == 1 or axis == -1:
-                out = Csparse((self.shape[0], 1), dtype=dtype)
+                out = CSparse((self.shape[0], 1), dtype=dtype)
                 c_bincount = self.nnz_row_indices.bincount()
                 for e_idx, e in enumerate(c_bincount == self.shape[1]):
                     if bool(e) is True:
@@ -1063,7 +1063,7 @@ class Csparse(object):
 
     def mean(self, axis=None, keepdims=True):
         """Mean of array elements over a given axis."""
-        out_mean = Cdense(self._data.mean(axis))
+        out_mean = CDense(self._data.mean(axis))
         return \
             out_mean.ravel() if axis is None or keepdims is False else out_mean
 
@@ -1123,7 +1123,7 @@ class Csparse(object):
         n = self.size if axis is None else self.shape[axis]
         variance = (1.0 / (float(n) - ddof)) * (centered_array ** 2)
 
-        return Cdense(variance.sum(axis=axis, keepdims=keepdims).sqrt())
+        return CDense(variance.sum(axis=axis, keepdims=keepdims).sqrt())
 
     def pow(self, exp):
         """Array elements raised to powers from input exponent, element-wise.
@@ -1137,7 +1137,7 @@ class Csparse(object):
 
         Returns
         -------
-        pow_array : Csparse
+        pow_array : CSparse
             New array with the power of current data using
             input exponents.
 
@@ -1212,7 +1212,7 @@ class Csparse(object):
                 raise ValueError(
                     "wrong axis parameter in argsort function for sparse data")
 
-        index_matrix = Cdense().zeros(array.shape, dtype=int)
+        index_matrix = CDense().zeros(array.shape, dtype=int)
 
         axis_element = None
         for i in xrange(axis_elem_num):
@@ -1223,7 +1223,7 @@ class Csparse(object):
                 axis_element = array[:, i]  # order for column
 
             # argsort of current axis element
-            sorted_data_idx = Cdense(
+            sorted_data_idx = CDense(
                 axis_element.todense()).argsort(axis=axis, kind='quicksort')
 
             if axis == 1 or axis == -1 or axis is None:
@@ -1244,9 +1244,9 @@ class Csparse(object):
 
         Returns
         -------
-        index : int, Cdense
+        index : int, CDense
             Scalar with index of the minimum value for flattened array or
-            Cdense with indices along the given axis.
+            CDense with indices along the given axis.
 
         Notes
         -----
@@ -1255,16 +1255,16 @@ class Csparse(object):
 
         Examples
         --------
-        >>> from secml.array import Csparse
+        >>> from secml.array import CSparse
 
-        >>> Csparse([-1, 0, 3]).argmin()
-        Cdense([0])
+        >>> CSparse([-1, 0, 3]).argmin()
+        CDense([0])
 
-        >>> Csparse([[-1, 0],[4, 3]]).argmin(axis=0)  # We return the index of minimum for each row
-        Cdense([[0, 0]])
+        >>> CSparse([[-1, 0],[4, 3]]).argmin(axis=0)  # We return the index of minimum for each row
+        CDense([[0, 0]])
 
-        >>> Csparse([[-1, 0],[4, 3]]).argmin(axis=1)  # We return the index of maximum for each column
-        Cdense([[0],
+        >>> CSparse([[-1, 0],[4, 3]]).argmin(axis=1)  # We return the index of maximum for each column
+        CDense([[0],
                [1]])
 
         """
@@ -1285,7 +1285,7 @@ class Csparse(object):
         else:
             raise ValueError("{:} is not a valid axis.")
 
-        index_matrix = Cdense.zeros(axis_elem_num, dtype=array.dtype)
+        index_matrix = CDense.zeros(axis_elem_num, dtype=array.dtype)
 
         for i in xrange(axis_elem_num):
 
@@ -1336,9 +1336,9 @@ class Csparse(object):
 
         Returns
         -------
-        index : int, Cdense
+        index : int, CDense
             Scalar with index of the maximum value for flattened array or
-            Cdense with indices along the given axis.
+            CDense with indices along the given axis.
 
         Notes
         -----
@@ -1347,16 +1347,16 @@ class Csparse(object):
 
         Examples
         --------
-        >>> from secml.array import Csparse
+        >>> from secml.array import CSparse
 
-        >>> Csparse([-1, 0, 3]).argmax()
-        Cdense([2])
+        >>> CSparse([-1, 0, 3]).argmax()
+        CDense([2])
 
-        >>> Csparse([[-1, 0],[4, 3]]).argmax(axis=0)  # We return the index of minimum for each row
-        Cdense([[1, 1]])
+        >>> CSparse([[-1, 0],[4, 3]]).argmax(axis=0)  # We return the index of minimum for each row
+        CDense([[1, 1]])
 
-        >>> Csparse([[-1, 0],[4, 3]]).argmax(axis=1)  # We return the index of maximum for each column
-        Cdense([[1],
+        >>> CSparse([[-1, 0],[4, 3]]).argmax(axis=1)  # We return the index of maximum for each column
+        CDense([[1],
                [0]])
 
         """
@@ -1377,7 +1377,7 @@ class Csparse(object):
         else:
             raise ValueError("{:} is not a valid axis.")
 
-        index_matrix = Cdense.zeros(axis_elem_num, dtype=array.dtype)
+        index_matrix = CDense.zeros(axis_elem_num, dtype=array.dtype)
 
         for i in xrange(axis_elem_num):
 
@@ -1443,18 +1443,18 @@ class Csparse(object):
 
         Examples
         --------
-        >>> from secml.array import Csparse
+        >>> from secml.array import CSparse
 
-        >>> Csparse([[-1,0],[2,0]]).logical_and(Csparse([[2,-1],[2,-1]])).todense()
-        Cdense([[ True, False],
+        >>> CSparse([[-1,0],[2,0]]).logical_and(CSparse([[2,-1],[2,-1]])).todense()
+        CDense([[ True, False],
                [ True, False]], dtype=bool)
 
-        >>> Csparse([-1]).logical_and(Csparse([2])).todense()
-        Cdense([[ True]], dtype=bool)
+        >>> CSparse([-1]).logical_and(CSparse([2])).todense()
+        CDense([[ True]], dtype=bool)
 
-        >>> array = Csparse([1,0,2,-1])
+        >>> array = CSparse([1,0,2,-1])
         >>> (array > 0).logical_and(array < 2).todense()
-        Cdense([[ True, False, False, False]], dtype=bool)
+        CDense([[ True, False, False, False]], dtype=bool)
 
         """
         if self.shape != y.shape:
@@ -1497,18 +1497,18 @@ class Csparse(object):
 
         Examples
         --------
-        >>> from secml.array import Csparse
+        >>> from secml.array import CSparse
 
-        >>> Csparse([[-1,0],[2,0]]).logical_or(Csparse([[2,0],[2,-1]])).todense()
-        Cdense([[ True, False],
+        >>> CSparse([[-1,0],[2,0]]).logical_or(CSparse([[2,0],[2,-1]])).todense()
+        CDense([[ True, False],
                [ True,  True]], dtype=bool)
 
-        >>> Csparse([False]).logical_and(Csparse([False])).todense()
-        Cdense([[False]], dtype=bool)
+        >>> CSparse([False]).logical_and(CSparse([False])).todense()
+        CDense([[False]], dtype=bool)
 
-        >>> array = Csparse([1,0,2,-1])
+        >>> array = CSparse([1,0,2,-1])
         >>> (array > 0).logical_or(array < 2).todense()
-        Cdense([[ True,  True,  True,  True]], dtype=bool)
+        CDense([[ True,  True,  True,  True]], dtype=bool)
 
         """
         if self.shape != y.shape:
@@ -1532,7 +1532,7 @@ class Csparse(object):
         old_nnz_column_indices = self.nnz_column_indices.tolist()
 
         # Create an array full of Trues (VERY expensive!)
-        new_not = self.__class__(Cdense.ones(*self.shape)).astype(bool)
+        new_not = self.__class__(CDense.ones(*self.shape)).astype(bool)
         # All old nonzeros should be zeros!
         new_not[[old_nnz_row_indices, old_nnz_column_indices]] = False
         # Eliminate newly created zeros from internal csr_matrix structures
@@ -1563,15 +1563,15 @@ class Csparse(object):
 
         Examples
         --------
-        >>> from secml.array import Csparse
-        >>> array = Csparse.eye(2)
+        >>> from secml.array import CSparse
+        >>> array = CSparse.eye(2)
         >>> print array  # doctest: +SKIP
         (0, 0)	1.0
         (1, 1)	1.0
         >>> print array.shape
         (2, 2)
 
-        >>> array = Csparse.eye(2, k=1, dtype=int)
+        >>> array = CSparse.eye(2, k=1, dtype=int)
         >>> print array  # doctest: +SKIP
         (0, 1)	1
         >>> print array.shape

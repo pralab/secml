@@ -9,7 +9,7 @@ from copy import deepcopy
 import numpy as np
 import scipy.sparse as scs
 
-from secml.array import Cdense, Csparse
+from secml.array import CDense, CSparse
 from secml.core.type_utils import \
     is_int, is_scalar, is_bool, is_ndarray, is_scsarray, to_builtin
 
@@ -43,8 +43,8 @@ class CArray(object):
 
     See Also
     --------
-    .Cdense : Array container for dense data.
-    .Csparse : Array container for sparse data.
+    .CDense : Array container for dense data.
+    .CSparse : Array container for sparse data.
 
     Examples
     --------
@@ -91,10 +91,10 @@ class CArray(object):
             if dtype is not None and self._data.dtype != dtype:
                 self._data = self._data.astype(dtype)
         elif tosparse is True or \
-                isinstance(data, Csparse) or scs.issparse(data):
-            self._data = Csparse(data, dtype, copy, shape)
+                isinstance(data, CSparse) or scs.issparse(data):
+            self._data = CSparse(data, dtype, copy, shape)
         else:
-            self._data = Cdense(data, dtype, copy, shape)
+            self._data = CDense(data, dtype, copy, shape)
 
     def get_data(self):
         """Return stored data as a standard dtype.
@@ -124,7 +124,7 @@ class CArray(object):
         data : array_like, scalar_like, NotImplemented
             Data to be converted. Could be:
              - NotImplemented (raised by not implemented built-in operators)
-             - CArray buffers (Cdense, Csparse)
+             - CArray buffers (CDense, CSparse)
              - scalar-like (int, float, str, bool and numpy equivalents)
 
         Returns
@@ -142,7 +142,7 @@ class CArray(object):
             # Probably the input is an array buffer or NotImplemented
             pass
 
-        if is_array_buffer(data):  # Cdense, Csparse
+        if is_array_buffer(data):  # CDense, CSparse
             out = self.__class__(data)
             if out.size == 1:
                 # For (1,) or (1, 1) array return the contained scalar
@@ -164,12 +164,12 @@ class CArray(object):
     @property
     def isdense(self):
         """True if data is stored in DENSE form, False otherwise."""
-        return True if isinstance(self._data, Cdense) else False
+        return True if isinstance(self._data, CDense) else False
 
     @property
     def issparse(self):
         """True if data is stored in SPARSE form, False otherwise."""
-        return True if isinstance(self._data, Csparse) else False
+        return True if isinstance(self._data, CSparse) else False
 
     @property
     def T(self):
@@ -501,8 +501,8 @@ class CArray(object):
 
     def _check_index(self, idx):
         """Consistency checks for __getitem__ and __setitem__ functions."""
-        # This routine only transforms input CArrays into Cdense/Csparse
-        # Object validity is checked by Cdense/Csparse
+        # This routine only transforms input CArrays into CDense/CSparse
+        # Object validity is checked by CDense/CSparse
         if isinstance(idx, tuple):
             # Extracting buffer from CArrays and rebuilding the tuple
             idx_data = tuple(
@@ -581,7 +581,7 @@ class CArray(object):
             # Dense arrays only accept setting dense values
             if self.isdense:
                 value = value.todense()
-            # Now we extract buffer (Cdense, Csparse) from the CArray
+            # Now we extract buffer (CDense, CSparse) from the CArray
             value = value._data
 
         # Calling setitem of data buffer
@@ -1362,10 +1362,10 @@ class CArray(object):
         if arrayformat is 'dense':
             if cols is None:
                 cols = CArray([])
-            return cls(Cdense.load(datafile, dtype=dtype, startrow=startrow,
+            return cls(CDense.load(datafile, dtype=dtype, startrow=startrow,
                                    skipend=skipend, cols=cols._data))
         elif arrayformat is 'sparse':
-            return cls(Csparse.load(datafile, dtype=dtype))
+            return cls(CSparse.load(datafile, dtype=dtype))
         else:
             raise ValueError("Supported arrayformat are 'dense' and 'sparse'.")
 
@@ -4319,7 +4319,7 @@ class CArray(object):
         (2, 1)
 
         """
-        return cls(Cdense.empty(*((shape,) if not isinstance(shape, tuple)
+        return cls(CDense.empty(*((shape,) if not isinstance(shape, tuple)
                                   else shape), dtype=dtype), tosparse=sparse)
 
     @classmethod
@@ -4357,12 +4357,12 @@ class CArray(object):
 
         """
         if sparse is not True:
-            return cls(Cdense.zeros(shape, dtype=dtype))
+            return cls(CDense.zeros(shape, dtype=dtype))
         else:  # Sparse case
             shape = (1, shape) if not isinstance(shape, tuple) else shape
             shape = (1, shape[0]) if len(shape) <= 1 else shape
-            # We now use a secret init for Csparse... :)
-            return cls(Csparse(shape, dtype=dtype))
+            # We now use a secret init for CSparse... :)
+            return cls(CSparse(shape, dtype=dtype))
 
     @classmethod
     def ones(cls, shape, dtype=float, sparse=False):
@@ -4404,9 +4404,9 @@ class CArray(object):
 
         """
         if isinstance(shape, tuple):
-            return cls(Cdense.ones(*shape, dtype=dtype), tosparse=sparse)
+            return cls(CDense.ones(*shape, dtype=dtype), tosparse=sparse)
         else:
-            return cls(Cdense.ones(shape, dtype=dtype), tosparse=sparse)
+            return cls(CDense.ones(shape, dtype=dtype), tosparse=sparse)
 
     @classmethod
     def eye(cls, n_rows, n_cols=None, k=0, dtype=float, sparse=False):
@@ -4452,9 +4452,9 @@ class CArray(object):
 
         """
         if sparse is True:
-            return cls(Csparse.eye(n_rows, n_cols, k=k, dtype=dtype))
+            return cls(CSparse.eye(n_rows, n_cols, k=k, dtype=dtype))
         else:
-            return cls(Cdense.eye(n_rows, n_cols, k=k, dtype=dtype))
+            return cls(CDense.eye(n_rows, n_cols, k=k, dtype=dtype))
 
     @classmethod
     def rand(cls, shape, sparse=False, density=0.5, random_state=None):
@@ -4504,9 +4504,9 @@ class CArray(object):
         np.random.seed(random_state)  # Setting the random seed
         if sparse is True:
             shape = (1, shape[0]) if len(shape) <= 1 else shape
-            return cls(Csparse.rand(*shape, density=density))
+            return cls(CSparse.rand(*shape, density=density))
         else:
-            return cls(Cdense.rand(*shape))
+            return cls(CDense.rand(*shape))
 
     @classmethod
     def randn(cls, shape, random_state=None):
@@ -4543,7 +4543,7 @@ class CArray(object):
 
         """
         np.random.seed(random_state)  # Setting the random seed
-        return cls(Cdense.randn(*shape))
+        return cls(CDense.randn(*shape))
 
     @classmethod
     def randint(cls, low, high=None,
@@ -4604,7 +4604,7 @@ class CArray(object):
 
         """
         np.random.seed(random_state)  # Setting the random seed
-        return cls(Cdense.randint(
+        return cls(CDense.randint(
             low=low, high=high, size=shape), tosparse=sparse)
 
     @classmethod
@@ -4661,7 +4661,7 @@ class CArray(object):
         """
         array = a if not isinstance(a, cls) else a.ravel()._data
         np.random.seed(random_state)  # Setting the random seed
-        return cls(Cdense.randsample(
+        return cls(CDense.randsample(
             array=array, size=shape, replace=replace), tosparse=sparse)
 
     @classmethod
@@ -4722,7 +4722,7 @@ class CArray(object):
         CArray([ 3.   3.2  3.4  3.6  3.8])
 
         """
-        return cls(Cdense.linspace(
+        return cls(CDense.linspace(
             start, stop, num=num, endpoint=endpoint), tosparse=sparse)
 
     @classmethod
@@ -4797,7 +4797,7 @@ class CArray(object):
         CArray([ 0.   0.8  1.6  2.4  3.2])
 
         """
-        return cls(Cdense.arange(
+        return cls(CDense.arange(
             start=start, stop=stop, step=step, dtype=dtype), tosparse=sparse)
 
     @classmethod
@@ -4868,10 +4868,10 @@ class CArray(object):
         """
         # Return sparse only if both original arrays are sparse
         if isinstance(array1, cls) and array1.issparse:
-            return cls(Csparse.concatenate(
+            return cls(CSparse.concatenate(
                 array1._data, cls(array2, tosparse=True)._data, axis=axis))
         else:
-            return cls(Cdense.concatenate(
+            return cls(CDense.concatenate(
                 cls(array1)._data, cls(array2).todense()._data, axis=axis))
 
     @classmethod
@@ -4912,7 +4912,7 @@ class CArray(object):
          [2 3]])
 
         """
-        return cls(Cdense.comblist(list_of_list, dtype=dtype))
+        return cls(CDense.comblist(list_of_list, dtype=dtype))
 
     @classmethod
     def meshgrid(cls, xi, indexing='xy'):
@@ -4967,7 +4967,7 @@ class CArray(object):
 
         """
         xi = tuple(x._data for x in xi)
-        return tuple(cls(elem) for elem in Cdense.meshgrid(xi, indexing=indexing))
+        return tuple(cls(elem) for elem in CDense.meshgrid(xi, indexing=indexing))
 
     @classmethod
     def from_iterables(cls, iterables_list):
@@ -5006,8 +5006,8 @@ def is_array(x):
 
 
 def is_array_buffer(x):
-    """Return True if CArray data buffer (Cdense or Csparse)."""
-    return isinstance(x, (Cdense, Csparse))
+    """Return True if CArray data buffer (CDense or CSparse)."""
+    return isinstance(x, (CDense, CSparse))
 
 
 if __name__ == "__main__":

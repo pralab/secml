@@ -4,7 +4,7 @@ import operator as op
 import itertools
 
 from secml.utils import CUnitTest, fm
-from secml.array import CArray, Cdense, Csparse
+from secml.array import CArray, CDense, CSparse
 from secml.core.type_utils import \
     is_scalar, is_int, is_bool, is_list, is_list_of_lists
 
@@ -164,15 +164,15 @@ class TestCArray(CUnitTest):
             self.assertFalse((array != init_elem).any())
 
         self.logger.info(
-            "Initializing CArray with a Cdense or an ndarray...")
-        dense_list = [Cdense([[2, 3], [22, 33]]),
-                       Cdense([2, 3]),
-                       Cdense([[2], [3]]),
-                       Cdense([3]),
-                       np.array([[2, 3], [22, 33]]),
-                       np.array([2, 3]),
-                       np.array([[2], [3]]),
-                       np.array([3])]
+            "Initializing CArray with a CDense or an ndarray...")
+        dense_list = [CDense([[2, 3], [22, 33]]),
+                      CDense([2, 3]),
+                      CDense([[2], [3]]),
+                      CDense([3]),
+                      np.array([[2, 3], [22, 33]]),
+                      np.array([2, 3]),
+                      np.array([[2], [3]]),
+                      np.array([3])]
 
         for init_elem in dense_list:
             array = CArray(init_elem)
@@ -191,11 +191,11 @@ class TestCArray(CUnitTest):
             self.assertFalse((array != init_elem).any())
 
         self.logger.info(
-            "Initializing CArray with a Csparse or csr_matrix...")
-        sparse_list = [Csparse([[2, 3], [22, 33]]),
-                       Csparse([2, 3]),
-                       Csparse([[2], [3]]),
-                       Csparse([3]),
+            "Initializing CArray with a CSparse or csr_matrix...")
+        sparse_list = [CSparse([[2, 3], [22, 33]]),
+                       CSparse([2, 3]),
+                       CSparse([[2], [3]]),
+                       CSparse([3]),
                        scs.csr_matrix([[2, 3], [22, 33]]),
                        scs.csr_matrix([2, 3]),
                        scs.csr_matrix([[2], [3]]),
@@ -1590,10 +1590,10 @@ class TestCArray(CUnitTest):
         d_vs_s = self.array_dense.dot(self.array_sparse.T)
 
         # Check if method returned correct datatypes
-        self.assertIsInstance(s_vs_s._data, Csparse)
-        self.assertIsInstance(s_vs_d._data, Csparse)
-        self.assertIsInstance(d_vs_d._data, Cdense)
-        self.assertIsInstance(d_vs_s._data, Cdense)
+        self.assertIsInstance(s_vs_s._data, CSparse)
+        self.assertIsInstance(s_vs_d._data, CSparse)
+        self.assertIsInstance(d_vs_d._data, CDense)
+        self.assertIsInstance(d_vs_s._data, CDense)
 
         # Check if we have the same output in all cases
         self.assertTrue(
@@ -1729,7 +1729,7 @@ class TestCArray(CUnitTest):
     def test_operators_array_vs_array(self):
         """Test for mathematical operators array vs array."""
         operators = [op.add, op.sub]
-        expected_result = [Csparse, Cdense, Cdense, Cdense]
+        expected_result = [CSparse, CDense, CDense, CDense]
         items = [(self.array_sparse, self.array_sparse),
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
@@ -1737,7 +1737,7 @@ class TestCArray(CUnitTest):
         self._test_cycle(operators, items, expected_result)
 
         operators = [op.mul]
-        expected_result = [Csparse, Csparse, Cdense, Cdense]
+        expected_result = [CSparse, CSparse, CDense, CDense]
         items = [(self.array_sparse, self.array_sparse),
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
@@ -1745,7 +1745,7 @@ class TestCArray(CUnitTest):
         self._test_cycle(operators, items, expected_result)
 
         operators = [op.div]
-        expected_result = [Cdense, Cdense, Cdense, Cdense]
+        expected_result = [CDense, CDense, CDense, CDense]
         items = [(self.array_sparse, self.array_sparse),
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
@@ -1753,7 +1753,7 @@ class TestCArray(CUnitTest):
         self._test_cycle(operators, items, expected_result)
 
         operators = [op.pow, CArray.pow]
-        expected_result = [Cdense, Cdense]
+        expected_result = [CDense, CDense]
         items = [(self.array_dense, self.array_sparse),
                  (self.array_dense, self.array_dense)]
         self._test_cycle(operators, items, expected_result)
@@ -1775,8 +1775,8 @@ class TestCArray(CUnitTest):
         s_abs = abs(self.array_sparse)
         d_abs = abs(self.array_dense)
         # Check if method returned correct datatypes
-        self.assertIsInstance(s_abs._data, Csparse)
-        self.assertIsInstance(d_abs._data, Cdense)
+        self.assertIsInstance(s_abs._data, CSparse)
+        self.assertIsInstance(d_abs._data, CDense)
         # Check if we have the same output in all cases
         self.assertTrue(self._test_multiple_eq([s_abs, d_abs]))
 
@@ -1785,8 +1785,8 @@ class TestCArray(CUnitTest):
         s_abs = self.array_sparse.abs()
         d_abs = self.array_dense.abs()
         # Check if method returned correct datatypes
-        self.assertIsInstance(s_abs._data, Csparse)
-        self.assertIsInstance(d_abs._data, Cdense)
+        self.assertIsInstance(s_abs._data, CSparse)
+        self.assertIsInstance(d_abs._data, CDense)
         # Check if we have the same output in all cases
         self.assertTrue(self._test_multiple_eq([s_abs, d_abs]))
 
@@ -1795,8 +1795,8 @@ class TestCArray(CUnitTest):
         s_abs = -self.array_sparse
         d_abs = -self.array_dense
         # Check if method returned correct datatypes
-        self.assertIsInstance(s_abs._data, Csparse)
-        self.assertIsInstance(d_abs._data, Cdense)
+        self.assertIsInstance(s_abs._data, CSparse)
+        self.assertIsInstance(d_abs._data, CDense)
         # Check if we have the same output in all cases
         self.assertTrue(self._test_multiple_eq([s_abs, d_abs]))
 
@@ -1805,10 +1805,10 @@ class TestCArray(CUnitTest):
 
         # ARRAY +,* SCALAR, SCALAR +,* ARRAY
         operators = [op.add, op.mul]
-        expected_result = [Cdense, Cdense,
-                           Cdense, Cdense,
-                           Cdense, Cdense,
-                           Cdense, Cdense]
+        expected_result = [CDense, CDense,
+                           CDense, CDense,
+                           CDense, CDense,
+                           CDense, CDense]
         items = [(self.array_dense, 2), (2, self.array_dense),
                  (self.array_dense, np.ravel(2)[0]),
                  (np.ravel(2)[0], self.array_dense),
@@ -1820,10 +1820,10 @@ class TestCArray(CUnitTest):
 
         # ARRAY * SCALAR, SCALAR * ARRAY
         operators = [op.mul]
-        expected_result = [Csparse, Csparse,
-                           Csparse, Csparse,
-                           Csparse, Csparse,
-                           Csparse, Csparse]
+        expected_result = [CSparse, CSparse,
+                           CSparse, CSparse,
+                           CSparse, CSparse,
+                           CSparse, CSparse]
         items = [(self.array_sparse, 2),
                  (2, self.array_sparse),
                  (self.array_sparse, np.ravel(2)[0]),
@@ -1836,7 +1836,7 @@ class TestCArray(CUnitTest):
 
         # ARRAY / SCALAR
         operators = [op.div]
-        expected_result = [Csparse, Csparse, Csparse, Csparse]
+        expected_result = [CSparse, CSparse, CSparse, CSparse]
         items = [(self.array_sparse, 2),
                  (self.array_sparse, np.ravel(2)[0]),
                  (self.array_sparse, np.ravel(2.0)[0]),
@@ -1845,7 +1845,7 @@ class TestCArray(CUnitTest):
 
         # ARRAY -,/ SCALAR
         operators = [op.sub, op.div]
-        expected_result = [Cdense, Cdense, Cdense, Cdense]
+        expected_result = [CDense, CDense, CDense, CDense]
         items = [(self.array_dense, 2),
                  (self.array_dense, np.ravel(2)[0]),
                  (self.array_dense, np.ravel(2.0)[0]),
@@ -1854,7 +1854,7 @@ class TestCArray(CUnitTest):
 
         # SCALAR -,/ ARRAY
         operators = [op.sub, op.div]
-        expected_result = [Cdense, Cdense, Cdense, Cdense]
+        expected_result = [CDense, CDense, CDense, CDense]
         items = [(2, self.array_dense),
                  (np.ravel(2)[0], self.array_dense),
                  (np.ravel(2.0)[0], self.array_dense),
@@ -1863,10 +1863,10 @@ class TestCArray(CUnitTest):
 
         # ARRAY ** SCALAR
         operators = [op.pow, CArray.pow]
-        expected_result = [Csparse, Cdense,
-                           Csparse, Cdense,
-                           Csparse, Cdense,
-                           Csparse, Cdense]
+        expected_result = [CSparse, CDense,
+                           CSparse, CDense,
+                           CSparse, CDense,
+                           CSparse, CDense]
         items = [(self.array_sparse, 2), (self.array_dense, 2),
                  (self.array_sparse, np.ravel(2)[0]),
                  (self.array_dense, np.ravel(2)[0]),
@@ -1878,7 +1878,7 @@ class TestCArray(CUnitTest):
 
         # SCALAR ** ARRAY
         operators = [op.pow]
-        expected_result = [Cdense, Cdense, Cdense, Cdense]
+        expected_result = [CDense, CDense, CDense, CDense]
         items = [(2, self.array_dense),
                  (np.ravel(2)[0], self.array_dense),
                  (np.ravel(2.0)[0], self.array_dense),
@@ -1971,7 +1971,7 @@ class TestCArray(CUnitTest):
     def test_comparison_array_vs_array(self):
         """Test for comparison operators array vs array."""
         operators = [op.eq, op.lt, op.le, op.gt, op.ge, op.ne]
-        expected_result = [Csparse, Cdense, Cdense, Cdense]
+        expected_result = [CSparse, CDense, CDense, CDense]
         items = [(self.array_sparse, self.array_sparse),
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
@@ -1981,7 +1981,7 @@ class TestCArray(CUnitTest):
     def test_comparison_array_vs_scalar(self):
         """Test for comparison operators array vs scalar."""
         operators = [op.eq, op.lt, op.le, op.gt, op.ge, op.ne]
-        expected_result = [Csparse, Cdense, Csparse, Cdense]
+        expected_result = [CSparse, CDense, CSparse, CDense]
         items = [(self.array_sparse, 2),
                  (self.array_dense, 2),
                  (self.array_sparse, np.ravel(2)[0]),
@@ -2210,7 +2210,7 @@ class TestCArray(CUnitTest):
                          "Saved and loaded arrays (sparse) are not equal!")
 
         self.logger.info(
-            "UNITTEST - Csparse - Testing save/load for dense matrix")
+            "UNITTEST - CSparse - Testing save/load for dense matrix")
 
         self.array_dense.save(test_file, overwrite=True)
 
