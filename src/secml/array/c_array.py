@@ -1391,7 +1391,7 @@ class CArray(object):
             self._data.save(datafile, overwrite=overwrite)
 
     @classmethod
-    def load(cls, datafile, arrayformat='dense', dtype=float,
+    def load(cls, datafile, dtype=float, arrayformat='dense',
              startrow=0, skipend=0, cols=None):
         """Load array data from plain text file.
 
@@ -1400,11 +1400,11 @@ class CArray(object):
         datafile : str, file_handle
             File or filename to read. If the filename extension
             is gz or bz2, the file is first decompressed.
-        arrayformat : {'dense', 'sparse'}, optional
-            Format of array to load, default 'dense'.
         dtype : str, dtype, optional
             Data type of the resulting array, default 'float'. If None,
             the dtype will be determined by the contents of the file.
+        arrayformat : {'dense', 'sparse'}, optional
+            Format of array to load, default 'dense'.
         startrow : int, optional, dense only
             Array row to start loading from.
         skipend : int, optional, dense only
