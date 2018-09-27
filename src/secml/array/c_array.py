@@ -1812,17 +1812,15 @@ class CArray(object):
 
         Parameters
         ----------
-        k : int
+        k : int, optional
             Diagonal index. Default is 0.
             Use k > 0 for diagonals above the main diagonal,
             k < 0 for diagonals below the main diagonal.
-            This parameter used to extract the k-th diagonal
-            is not supported for sparse arrays.
 
         Returns
         -------
-        diag : CArray
-            The extracted diagonal or constructed diagonal array.
+        CArray
+            The extracted diagonal or constructed diagonal dense array.
             If array is 2-Dimensional, returns its k-th diagonal.
              Depending on numpy version resulting array can be read-only
              or a view of the original array's diagonal. To make output
@@ -1837,15 +1835,16 @@ class CArray(object):
         >>> print CArray([[1, 2, 3], [10, 20, 30]]).diag(k=1)
         CArray([ 2 30])
 
-        >>> print CArray([[1, 1]], tosparse=True).diag()  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	1
+        >>> print CArray([[2, 1]], tosparse=True).diag()  # doctest: +NORMALIZE_WHITESPACE
+        CArray(  (0, 0)	2
           (1, 1)	1)
 
-        >>> print CArray([[1, 1], [0, 0]], tosparse=True).diag(k=1)
-        Traceback (most recent call last):
-          ...
-        ValueError: Extracting the k-th diagonal is not supported.
-
+        >>> print CArray([1, 2, 3]).diag(k=1)
+        CArray([[0 1 0 0]
+         [0 0 2 0]
+         [0 0 0 3]
+         [0 0 0 0]])
+         
         """
         if self.size == 0:
             raise ValueError("cannot use diag() on empty arrays.")

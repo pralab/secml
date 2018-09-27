@@ -695,6 +695,7 @@ class TestCArray(CUnitTest):
             diag = array.diag(k=k)
             self.logger.info("({:})-th diagonal is: {:}".format(k, diag))
             self.assertEquals(diag.ndim, 1)
+            self.assertTrue(diag.isdense)
             self.assertTrue((diag == out).all())
 
         self.logger.info("Testing diagonal extraction...")
@@ -704,18 +705,26 @@ class TestCArray(CUnitTest):
         extract_diag(self.array_dense, k=0, out=CArray([1, 4, 0]))
         extract_diag(self.array_dense, k=1, out=CArray([0, 0, 0]))
         extract_diag(self.array_dense, k=-1, out=CArray([2, 6]))
-        extract_diag(self.array_dense, k=5, out=CArray([]))
+
+        with self.assertRaises(ValueError):
+            # k is higher/lower than array shape
+            print self.array_dense.diag(k=4)
+        with self.assertRaises(ValueError):
+            # k is higher/lower than array shape
+            self.array_dense.diag(k=-3)
 
         self.logger.info("Array is:\n{:}".format(self.array_sparse))
 
-        diag_sparse = self.array_sparse.diag()
-        self.logger.info("0-th diagonal is: {:}".format(diag_sparse))
-        self.assertTrue(diag_sparse.issparse)
-        self.assertEquals(diag_sparse.ndim, 2)
-        self.assertTrue((diag_sparse == CArray([1, 4, 0])).all())
+        extract_diag(self.array_sparse, k=0, out=CArray([1, 4, 0]))
+        extract_diag(self.array_sparse, k=1, out=CArray([0, 0, 0]))
+        extract_diag(self.array_sparse, k=-1, out=CArray([2, 6]))
 
         with self.assertRaises(ValueError):
-            self.array_sparse.diag(k=1)
+            # k is higher/lower than array shape
+            print self.array_sparse.diag(k=4)
+        with self.assertRaises(ValueError):
+            # k is higher/lower than array shape
+            self.array_sparse.diag(k=-3)
 
         self.logger.info("Testing diagonal array creation...")
 

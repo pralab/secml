@@ -1288,6 +1288,9 @@ class CDense(object):
 
     def diag(self, k=0):
         """Extract a diagonal or construct a diagonal array."""
+        if self.ndim > 1 and (k > 0 and k > self.shape[1] - 1) or \
+                (k < 0 and abs(k) > self.shape[0] - 1):
+            raise ValueError("k exceeds matrix dimensions")
         return self.__class__(np.diag(self.tondarray(), k=k))
 
     def inv(self):

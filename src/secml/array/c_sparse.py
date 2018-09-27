@@ -1125,13 +1125,11 @@ class CSparse(object):
 
     def diag(self, k=0):
         """Extract a diagonal or construct a diagonal array."""
-        if self.shape[0] == 1:  # We use diags as numpy's diag (no offset's')
+        if self.shape[0] == 1:
             return self.__class__(scs.diags(
                 self.tondarray(), offsets=[k], format='csr', dtype=self.dtype))
-        elif k == 0:
-            return self.__class__(self.tocsr().diagonal())
         else:
-            raise ValueError("Extracting the k-th diagonal is not supported.")
+            return CDense(self.tocsr().diagonal(k=k))
 
     def sum(self, axis=None, keepdims=True):
         """Sum of array elements over a given axis."""
