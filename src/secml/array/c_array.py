@@ -312,7 +312,7 @@ class CArray(object):
         >>> a.is_vector_like
         True
 
-        >>> a = CArray([1,2,3], tosparse=True)  # sparse arrays always 2-Dimensional
+        >>> a = CArray([1,2,3], tosparse=True)  # sparse arrays always 2-D
         >>> a.is_vector_like
         True
 
@@ -321,7 +321,12 @@ class CArray(object):
         False
 
         """
-        return True if not (self.ndim > 1 and self.shape[0] > 1) else False
+        if len(self._data.shape) == 1:
+            return True
+        elif len(self._data.shape) == 2 and self._data.shape[0] == 1:
+            return True
+        else:
+            return False
 
     # --------------------------- #
     # # # # # # CASTING # # # # # #
