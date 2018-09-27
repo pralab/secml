@@ -98,11 +98,11 @@ class CArray(object):
             self._data = CDense(data, dtype, copy, shape)
 
     def get_data(self):
-        """Return stored data as a standard dtype.
+        """Return stored data as a standard array type.
 
         Returns
         -------
-        out : np.ndarray, scipy.sparse.csr_matrix
+        np.ndarray or scipy.sparse.csr_matrix
             If array is dense, a np.ndarray is returned.
             If array is sparse, a scipy.sparse.csr_matrix is returned.
 
@@ -122,7 +122,7 @@ class CArray(object):
 
         Parameters
         ----------
-        data : array_like, scalar_like, NotImplemented
+        data : array_like or scalar or NotImplemented
             Data to be converted. Could be:
              - NotImplemented (raised by not implemented built-in operators)
              - CArray buffers (CDense, CSparse)
@@ -130,7 +130,7 @@ class CArray(object):
 
         Returns
         -------
-        out : CArray, scalar_like, NotImplemented
+        CArray or scalar or NotImplemented
             A scalar-like data-type for any one-element array or scalar.
              Built-in types will be returned (int, bool, float)
             A CArray for any array of size > 1.
@@ -164,12 +164,26 @@ class CArray(object):
 
     @property
     def isdense(self):
-        """True if data is stored in DENSE form, False otherwise."""
+        """True if data is stored in DENSE form, False otherwise.
+
+        Returns
+        -------
+        bool
+            True if data is stored in DENSE form, False otherwise.
+
+        """
         return True if isinstance(self._data, CDense) else False
 
     @property
     def issparse(self):
-        """True if data is stored in SPARSE form, False otherwise."""
+        """True if data is stored in SPARSE form, False otherwise.
+
+        Returns
+        -------
+        bool
+            True if data is stored in SPARSE form, False otherwise.
+
+        """
         return True if isinstance(self._data, CSparse) else False
 
     @property
@@ -287,6 +301,11 @@ class CArray(object):
         An array is vector-like when 1-Dimensional or
         2-Dimensional with shape[0] == 1.
 
+        Returns
+        -------
+        bool
+            True if array is vector-like.
+
         Examples
         --------
         >>> from secml.array import CArray
@@ -324,7 +343,7 @@ class CArray(object):
 
         Returns
         -------
-        out : CArray
+        CArray
             Dense array with input data and desired dtype and/or shape.
 
         Notes
@@ -369,7 +388,7 @@ class CArray(object):
 
         Returns
         -------
-        out : CArray
+        CArray
             Sparse array with input data and desired dtype and/or shape.
 
         Notes
@@ -407,7 +426,7 @@ class CArray(object):
 
         Returns
         -------
-        arr : numpy.ndarray
+        numpy.ndarray
             A representation of current data as numpy.ndarray.
             If possible, we avoid copying original data.
 
@@ -436,7 +455,7 @@ class CArray(object):
 
         Returns
         -------
-        arr : scipy.sparse.csr_matrix
+        scipy.sparse.csr_matrix
             A representation of current data as scipy.sparse.csr_matrix.
             If possible, we avoid copying original data.
 
@@ -471,7 +490,7 @@ class CArray(object):
 
         Returns
         -------
-        out : list
+        list
             The possibly nested list of array elements.
 
         Examples
@@ -519,7 +538,7 @@ class CArray(object):
         return idx_data
 
     def __getitem__(self, idx):
-        """Return new array with slicing/indexing result.
+        """Return a new array with slicing/indexing result.
 
         Parameters
         ----------
@@ -598,13 +617,14 @@ class CArray(object):
         Parameters
         ----------
         other : CArray or scalar or bool
-            Element to add to current array. If a CArray, element-wise
-            addition will be performed. If scalar or boolean, the element
-            will be sum to each array element.
+            Element to add to current array.
+            If a CArray, element-wise addition will be performed.
+            If scalar or boolean, the element will be sum
+            to each array element.
 
         Returns
         -------
-        array : CArray
+        CArray
             Array after addition.
             If input is a scalar or a boolean, array format is preserved.
             If input is a CArray, format of output array depends on the input:
@@ -643,8 +663,8 @@ class CArray(object):
 
         Returns
         -------
-        array : CArray
-            Array after addition. Format is preserved.
+        CArray
+            Array after addition. Array format is always preserved.
 
         .. warning::
             for sparse format, scalar/bool addition is not available
@@ -668,7 +688,7 @@ class CArray(object):
 
         Returns
         -------
-        array : CArray
+        CArray
             Array after subtraction.
             If input is a scalar or a boolean, array format is preserved.
             If input is a CArray, format of output array depends on the input:
@@ -707,8 +727,8 @@ class CArray(object):
 
         Returns
         -------
-        array : CArray
-            Array after subtraction.
+        CArray
+            Array after subtraction. Array format is always preserved.
 
         .. warning::
             for sparse format, scalar/bool subtraction is not available
@@ -732,7 +752,7 @@ class CArray(object):
 
         Returns
         -------
-        array : CArray
+        CArray
             Array after product.
             If input is a scalar or a boolean, array format is preserved.
             If input is a CArray, format of output array depends on the
@@ -772,7 +792,7 @@ class CArray(object):
 
         Returns
         -------
-        array : CArray
+        CArray
             Array after product. Array format is always preserved.
 
         See Also
@@ -797,8 +817,8 @@ class CArray(object):
 
         Returns
         -------
-        array : CArray
-            Array after division.
+        CArray
+            Array after floor division.
             If input is a scalar or a boolean, array format is preserved.
             If input is a CArray, format of output array depends on the
             format of current array:
@@ -827,14 +847,13 @@ class CArray(object):
 
         Parameters
         ----------
-        other : CArray or scalar or bool
-            Element to divide to current array. If a CArray, element-wise
-            division will be performed. If scalar or boolean, the element
-            will be divided to each array element.
+        other : scalar or bool
+            Element to divide to current array.
+            The element will be divided to each array element.
 
         Returns
         -------
-        array : CArray
+        CArray
             Array after division. Array format is always preserved.
 
         """
@@ -844,7 +863,7 @@ class CArray(object):
             return NotImplemented
 
     def __div__(self, other):
-        """Element-wise division.
+        """Element-wise division. True division will be performed.
 
         See .__truediv__() for more informations.
 
@@ -852,7 +871,7 @@ class CArray(object):
         return self.__truediv__(other)
 
     def __rdiv__(self, other):
-        """Element-wise (inverse) division.
+        """Element-wise (inverse) division. True division will be performed.
 
         See .__rtruediv__() for more informations.
 
@@ -864,15 +883,14 @@ class CArray(object):
 
         Parameters
         ----------
-        other : CArray or scalar or bool
-            Element to divide to current array. If a CArray, element-wise
-            division will be performed. If scalar or boolean, the element
-            will be divided to each array element.
+        other : scalar or bool
+            Element to divide to current array.
+            The element will be divided to each array element.
 
         Returns
         -------
-        array : CArray
-            Array after division.
+        CArray
+            Array after true division.
             If input is a scalar or a boolean, array format is preserved.
             If input is a CArray, format of output array depends on the
             format of current array:
@@ -902,13 +920,14 @@ class CArray(object):
         Parameters
         ----------
         other : CArray or scalar or bool
-            Element to divide to current array. If a CArray, element-wise
-            division will be performed. If scalar or boolean, the element
-            will be divided to each array element.
+            Element to divide to current array.
+            If a CArray, element-wise division will be performed.
+            If scalar or boolean, the element will be divided
+            to each array element.
 
         Returns
         -------
-        array : CArray
+        CArray
             Array after division. Array format is always preserved.
 
         """
@@ -922,7 +941,7 @@ class CArray(object):
 
         Returns
         -------
-        array : CArray
+        CArray
             Array with the corresponding elements without sign.
 
         """
@@ -933,7 +952,7 @@ class CArray(object):
 
         Returns
         -------
-        array : CArray
+        CArray
             Array with the corresponding elements with negated sign.
 
         """
@@ -951,7 +970,7 @@ class CArray(object):
 
         Returns
         -------
-        array : CArray
+        CArray
             Array after power. Array format is always preserved.
 
         .. warning:: sparse ** array is not supported.
@@ -983,7 +1002,7 @@ class CArray(object):
 
         Returns
         -------
-        array : CArray
+        CArray
             Array after power. Array format is always preserved.
 
         """
@@ -998,13 +1017,14 @@ class CArray(object):
         Parameters
         ----------
         other : CArray or scalar or bool
-            Element to be compared. If a CArray, element-wise
-            comparison will be performed. If scalar or boolean,
-            the element will be compared to each array element.
+            Element to be compared.
+            If a CArray, element-wise comparison will be performed.
+            If scalar or boolean, the element will be compared
+            to each array element.
 
         Returns
         -------
-        array : CArray
+        CArray
             Boolean array with comparison result.
             If input is a scalar or a boolean, array format is preserved.
             If input is a CArray, format of output array depends on the input:
@@ -1034,13 +1054,14 @@ class CArray(object):
         Parameters
         ----------
         other : CArray or scalar or bool
-            Element to be compared. If a CArray, element-wise
-            comparison will be performed. If scalar or boolean,
-            the element will be compared to each array element.
+            Element to be compared.
+            If a CArray, element-wise comparison will be performed.
+            If scalar or boolean, the element will be compared
+            to each array element.
 
         Returns
         -------
-        array : CArray
+        CArray
             Boolean array with comparison result.
             If input is a scalar or a boolean, array format is preserved.
             If input is a CArray, format of output array depends on the input:
@@ -1068,13 +1089,14 @@ class CArray(object):
         Parameters
         ----------
         other : CArray or scalar or bool
-            Element to be compared. If a CArray, element-wise
-            comparison will be performed. If scalar or boolean,
-            the element will be compared to each array element.
+            Element to be compared.
+            If a CArray, element-wise comparison will be performed.
+            If scalar or boolean, the element will be compared
+            to each array element.
 
         Returns
         -------
-        array : CArray
+        CArray
             Boolean array with comparison result.
             If input is a scalar or a boolean, array format is preserved.
             If input is a CArray, format of output array depends on the input:
@@ -1102,13 +1124,14 @@ class CArray(object):
         Parameters
         ----------
         other : CArray or scalar or bool
-            Element to be compared. If a CArray, element-wise
-            comparison will be performed. If scalar or boolean,
-            the element will be compared to each array element.
+            Element to be compared.
+            If a CArray, element-wise comparison will be performed.
+            If scalar or boolean, the element will be compared
+            to each array element.
 
         Returns
         -------
-        array : CArray
+        CArray
             Boolean array with comparison result.
             If input is a scalar or a boolean, array format is preserved.
             If input is a CArray, format of output array depends on the input:
@@ -1136,13 +1159,14 @@ class CArray(object):
         Parameters
         ----------
         other : CArray or scalar or bool
-            Element to be compared. If a CArray, element-wise
-            comparison will be performed. If scalar or boolean,
-            the element will be compared to each array element.
+            Element to be compared.
+            If a CArray, element-wise comparison will be performed.
+            If scalar or boolean, the element will be compared
+            to each array element.
 
         Returns
         -------
-        array : CArray
+        CArray
             Boolean array with comparison result.
             If input is a scalar or a boolean, array format is preserved.
             If input is a CArray, format of output array depends on the input:
@@ -1170,13 +1194,14 @@ class CArray(object):
         Parameters
         ----------
         other : CArray or scalar or bool
-            Element to be compared. If a CArray, element-wise
-            comparison will be performed. If scalar or boolean,
-            the element will be compared to each array element.
+            Element to be compared.
+            If a CArray, element-wise comparison will be performed.
+            If scalar or boolean, the element will be compared
+            to each array element.
 
         Returns
         -------
-        array : CArray
+        CArray
             Boolean array with comparison result.
             If input is a scalar or a boolean, array format is preserved.
             If input is a CArray, format of output array depends on the input:
@@ -1208,6 +1233,11 @@ class CArray(object):
 
     def __iter__(self):
         """Yields array elements in raster-scan order.
+
+        Yields
+        ------
+        scalar
+            Each array's element in raster-scan order.
 
         Examples
         --------
@@ -1365,8 +1395,8 @@ class CArray(object):
         ----------
         datafile : str, file_handle (dense only)
             Text file to save data to. If a string, it's supposed
-            to be the filename of file to save. If file is a file
-            handle, data will be stored using active file handle mode.
+            to be the filename of file to save. If a file handle,
+            data will be stored using active file handle mode.
             If the filename ends in .gz, the file is automatically
             saved in compressed gzip format. load() function understands
             gzipped files transparently.
@@ -1397,7 +1427,7 @@ class CArray(object):
 
         Parameters
         ----------
-        datafile : str, file_handle
+        datafile : str or file_handle
             File or filename to read. If the filename extension
             is gz or bz2, the file is first decompressed.
         dtype : str, dtype, optional
@@ -1414,10 +1444,11 @@ class CArray(object):
 
         Returns
         -------
-        loaded : CArray
-            Array resulting from loading, 2-dimensional.
+        CArray
+            Array resulting from loading, 2-Dimensional.
 
         """
+        # TODO: CMatrix should return a 2-D, CVector a 1-D and so on...
         if arrayformat is 'dense':
             if cols is None:
                 cols = CArray([])
@@ -1445,9 +1476,8 @@ class CArray(object):
 
         Return
         ------
-        out_check : bool
-            True if input array has compatible shape with
-            current array.
+        bool
+            True if input array has compatible shape with current array.
 
         See Also
         --------
@@ -1476,12 +1506,13 @@ class CArray(object):
 
     def transpose(self):
         """Returns current array with axes transposed.
+
         A view is returned if possible.
 
         Returns
         -------
-        out : CArray
-            A view, if possibile, of current array with axes suitably permuted.
+        CArray
+            A view, if possible, of current array with axes suitably permuted.
 
         Examples
         --------
@@ -1496,6 +1527,7 @@ class CArray(object):
         CArray([[1 2 3]])
 
         """
+        # TODO: ADD SUPPORT FOR COPY PARAMETER
         return self.__class__(self._data.transpose())
 
     def unique(self, return_index=False,
@@ -1559,32 +1591,31 @@ class CArray(object):
         else:
             return self.__class__(out)
 
-    def append(self, array2, axis=None):
+    def append(self, array, axis=None):
         """Append values to the end of an array.
 
         Parameters
         ----------
-        array2 : CArray or array_like
-            Second array. If array2 is not an array, a CArray will be
-            created before appending.
+        array : CArray or array_like
+            Second array.
         axis : int or None, optional
             The axis along which values are appended.
             If axis is None, both arrays are flattened before use.
 
         Returns
         -------
-        out_append : CArray
+        CArray
             A copy of array with values appended to axis. Note that append
             does not occur in-place: a new array is allocated and filled.
             If axis is None, out is a flattened array. Always return an
-            array with the same format of original array.
+            array with the same format of the first array.
 
         Notes
         -----
         Differently from numpy, we manage flat vectors as 2-Dimensional of
         shape (1, array.size). Consequently, result of appending a flat
         array to a flat array is 1-Dimensional only if axis=1. Appending
-        a flat array to a 2-Dimensional array, or viceversa, always results
+        a flat array to a 2-Dimensional array, or vice versa, always results
         in a 2-Dimensional array.
 
         Examples
@@ -1620,11 +1651,11 @@ class CArray(object):
 
         """
         if self.issparse:  # Return sparse if first array is sparse
-            array2 = CArray(array2, tosparse=True)
+            array = CArray(array, tosparse=True)
         else:
-            array2 = CArray(array2).todense()
+            array = CArray(array).todense()
 
-        return self.__class__(self._data.append(array2._data, axis=axis))
+        return self.__class__(self._data.append(array._data, axis=axis))
 
     def dot(self, array):
         """Dot product of two arrays.
@@ -1642,7 +1673,7 @@ class CArray(object):
 
         Returns
         -------
-        out : CArray, scalar_like
+        scalar or CArray
             Result of dot product.
             A CArray with the same format of first argument or
             scalar if out.size == 1.
@@ -1690,9 +1721,11 @@ class CArray(object):
             If an integer or a tuple of length 1, resulting array
             will have shape (n,) if dense, (1,n) if sparse.
 
+        A copy is made only if needed.
+
         Returns
         -------
-        out : CArray
+        CArray
             Array with new shape. If possible, a view of original array data
             will be returned, otherwise a copy will be made first.
 
@@ -1735,7 +1768,7 @@ class CArray(object):
 
         Returns
         -------
-        out : CArray
+        CArray
             Array with new shape. Array dtype is preserved.
             Missing entries are filled with the desired constant (default 0).
 
@@ -1789,7 +1822,7 @@ class CArray(object):
 
         Returns
         -------
-        out : CArray
+        CArray
             Copy of the original array casted to new data type.
 
         Examples
@@ -1865,9 +1898,9 @@ class CArray(object):
 
         Returns
         -------
-        index : int, CArray
+        int or CArray
             Scalar with index of the maximum value for flattened array or
-            Carray with indices along the given axis.
+            CArray with indices along the given axis.
 
         Notes
         -----
@@ -1907,9 +1940,9 @@ class CArray(object):
 
         Returns
         -------
-        index : int, CArray
+        int or CArray
             Scalar with index of the minimum value for flattened array or
-            Carray with indices along the given axis.
+            CArray with indices along the given axis.
 
         Notes
         -----
@@ -1943,7 +1976,7 @@ class CArray(object):
 
         For all-NaN slices ValueError is raised.
         Warning: the results cannot be trusted if a slice
-        contains only NaNs and Infs.
+        contains only NaNs and infs.
 
         DENSE ARRAYS ONLY
 
@@ -1955,7 +1988,7 @@ class CArray(object):
 
         Returns
         -------
-        index : int, CArray
+        int or CArray
             Scalar with index of the maximum value for flattened array or
             CArray with indices along the given axis.
 
@@ -1992,7 +2025,7 @@ class CArray(object):
 
         For all-NaN slices ValueError is raised.
         Warning: the results cannot be trusted if a slice
-        contains only NaNs and Infs.
+        contains only NaNs and infs.
 
         Parameters
         ----------
@@ -2002,7 +2035,7 @@ class CArray(object):
 
         Returns
         -------
-        index : int, CArray
+        int or CArray
             Scalar with index of the minimum value for flattened array or
             CArray with indices along the given axis.
 
@@ -2039,19 +2072,19 @@ class CArray(object):
 
         Parameters
         ----------
-        axis : int, None, optional
+        axis : int or None, optional
             Axis along which a sum is performed. The default
             (axis = None) is perform a sum over all the
             dimensions of the input array. axis may be negative,
             in which case it counts from the last to the first axis.
-        keepdims : bool, optional, dense only
+        keepdims : bool, optional
             If this is set to True (default), the result will
             broadcast correctly against the original array.
             Otherwise resulting array is flattened.
 
         Returns
         -------
-        out : scalar_like, CArray
+        scalar or CArray
             A 2-dim array with the elements sum along specified axis.
             If axis is None, a scalar is returned.
 
@@ -2082,14 +2115,14 @@ class CArray(object):
 
         Parameters
         ----------
-        axis : int, None, optional
+        axis : int or None, optional
             Axis along which the cumulative sum is computed.
             The default (None) is to compute the cumsum over
             the flattened array.
 
         Returns
         -------
-        out : CArray
+        CArray
             New array with cumulative sum of elements.
             If axis is None, flat array with same size of input array.
             If axis is not None, same shape of input array.
@@ -2137,7 +2170,7 @@ class CArray(object):
 
         Returns
         -------
-        out_prod : scalar or CArray
+        scalar or CArray
             A 2-dim array with the elements product along specified axis.
             If axis is None, a scalar is returned.
 
@@ -2192,7 +2225,7 @@ class CArray(object):
 
         Returns
         -------
-        out_clip : CArray
+        CArray
             Returns a new array containing the clipped array elements.
             Dtype of the output array depends on the dtype of original array
             and on the dtype of the clipping limits.
@@ -2223,12 +2256,12 @@ class CArray(object):
 
         Parameters
         ----------
-        condition : CArray or array_like
-            Array like with booleans representing desired condition.
+        condition : CArray
+            Array with booleans representing desired condition.
 
         Returns
         -------
-        out_find : list
+        list
             List with indices corresponding to array elements
             where condition is True.
 
@@ -2272,15 +2305,16 @@ class CArray(object):
 
         Parameters
         ----------
-        condition : CArray or array_like
-            Array like with booleans representing desired condition.
+        condition : CArray
+            Array with booleans representing desired condition.
 
         Returns
         -------
-        out_find : list
-            List of len(out_find) == 2 with indices corresponding to
-            array elements where condition is True. out_find[0] holds
-            the indices of rows, out_find[1] the indices of columns.
+        list
+            List of len(out_find) == ndim with indices corresponding to
+            array elements where condition is True. Es. for matrices,
+            out_find[0] holds the indices of rows, out_find[1] the
+            indices of columns.
 
         Notes
         -----
@@ -2351,13 +2385,13 @@ class CArray(object):
 
         Parameters
         ----------
-        value : scalar or array_like
+        value : scalar or CArray
             Element or array of elements to search inside
             the flattened array.
 
         Returns
         -------
-        out_index : int or CArray
+        int or CArray
             Position of input value, or the closest one, inside
             flattened array. If `value` is an array, a CArray
             with the position of each `value` element is returned.
@@ -2386,9 +2420,8 @@ class CArray(object):
 
         Returns
         -------
-        out : CArray
+        CArray
             Array with sign of each element.
-            Same shape as original array.
 
         Examples
         --------
@@ -2409,7 +2442,7 @@ class CArray(object):
 
         Returns
         -------
-        array : CArray
+        CArray
             Array with the corresponding elements without sign.
 
         """
@@ -2426,7 +2459,7 @@ class CArray(object):
 
         Returns
         -------
-        rep_array : CArray
+        CArray
             The result of repeating array m X n times.
 
         Examples
@@ -2472,7 +2505,7 @@ class CArray(object):
 
         Returns
         -------
-        repeated_array : CArray
+        CArray
             Output array which has the same shape as original array,
             except along the given axis. If axis is None, a flat array
             is returned.
@@ -2523,7 +2556,7 @@ class CArray(object):
     def ravel(self):
         """Return a flattened array.
 
-        For dense format a 1-dim array, containing the
+        For dense format a 1-D array, containing the
         elements of the input, is returned. For sparse
         format a (1 x array.size) array will be returned.
 
@@ -2531,9 +2564,10 @@ class CArray(object):
 
         Returns
         -------
-        flat_array : CArray
-            Output of the same dtype as a, of shape (array.size,)
-            for dense format or (1,array.size) for sparse format.
+        CArray
+            Flattened view (if possible) of the array with
+            shape (array.size,) for dense format or
+            (1, array.size) for sparse format.
 
         Examples
         --------
@@ -2557,13 +2591,9 @@ class CArray(object):
         elements of the input, is returned. For sparse
         format a (1 x array.size) array will be returned.
 
-        Differently from ravel, a CArray is always returned.
-        Use .ravel() after call to .flatten() to get structure
-        with the minimum dimensions (e.g. scalar).
-
         Returns
         -------
-        flat_array : CArray
+        CArray
             Output of the same dtype as a, of shape (array.size,)
             for dense format or (1,array.size) for sparse format.
 
@@ -2586,7 +2616,7 @@ class CArray(object):
     def all(self, axis=None, keepdims=True):
         """Test whether all array elements along a given axis evaluate to True.
 
-        Axis selection is available for DENSE formay only.
+        Axis selection is available for DENSE format only.
         For sparse format, logical operation is performed
         over all the dimensions of the array
 
@@ -2605,7 +2635,7 @@ class CArray(object):
 
         Returns
         -------
-        out_all : bool or CArray
+        bool or CArray
             A new boolean or array with logical AND element-wise.
 
         Notes
@@ -2660,7 +2690,7 @@ class CArray(object):
 
         Returns
         -------
-        out_all : bool or CArray
+        bool or CArray
             A new boolean or array with logical OR element-wise.
 
         Notes
@@ -2760,11 +2790,12 @@ class CArray(object):
 
         Parameters
         ----------
-        axis : int, None, optional
+        axis : int or None, optional
             Axis along which to sort.
             If None (default), the flattened array is used.
-        kind : {'quicksort', 'mergesort', 'heapsort'}, optional, dense only
+        kind : {'quicksort', 'mergesort', 'heapsort'}, optional
             Sorting algorithm to use. Default 'quicksort'.
+            For sparse arrays, only 'quicksort' is available.
 
         Returns
         -------
@@ -2805,9 +2836,10 @@ class CArray(object):
 
         Notes
         -----
-        We use the IEEE Standard for Binary Floating-Point for Arithmetic (IEEE 754).
-        This means that Not a Number is not equivalent to infinity.
-
+        We use the IEEE Standard for Binary Floating-Point for
+        Arithmetic (IEEE 754). This means that Not a Number
+        is not equivalent to infinity.
+        
         Examples
         --------
         >>> from secml.array import CArray
@@ -2841,7 +2873,7 @@ class CArray(object):
 
         Returns
         -------
-        array_max : scalar_like or CArray
+        scalar or CArray
             Maximum of array.
             If axis is None, the result is a scalar value.
             If axis is given, the result will
@@ -2898,7 +2930,7 @@ class CArray(object):
 
         Returns
         -------
-        array_min : scalar_like or CArray
+        scalar or CArray
             Minimum of array.
             If axis is None, the result is a scalar value.
             If axis is given, the result will
@@ -2959,7 +2991,7 @@ class CArray(object):
 
         Returns
         -------
-        array_max : scalar_like or CArray
+        scalar or CArray
             Maximum of array ignoring Nans.
             If axis is None, the result is a scalar value.
             If axis is given, the result is an array of
@@ -3014,7 +3046,7 @@ class CArray(object):
 
         Returns
         -------
-        array_min : scalar_like or CArray
+        scalar or CArray
             Minimum of array ignoring nans.
             If axis is None, the result is a scalar value.
             If axis is given, the result is an array of
@@ -3219,8 +3251,8 @@ class CArray(object):
     def ceil(self):
         """Return the ceiling of the input, element-wise.
 
-        The ceil of the scalar x is the smallest integer i,
-        such that i >= x.
+        The ceil of the scalar x is the smallest integer i, such that i >= x.
+
 
         Returns
         -------
@@ -3251,9 +3283,8 @@ class CArray(object):
 
     def floor(self):
         """Return the floor of the input, element-wise.
-
-        The floor of the scalar x is the largest integer i,
-        such that i <= x.
+        
+        The floor of the scalar x is the largest integer i, such that i <= x.
 
         Returns
         -------
@@ -3306,8 +3337,8 @@ class CArray(object):
 
         Returns
         -------
-        out_mean : float or CArray
-            Returns a new dense array containing the mean for givenaxis.
+        float or CArray
+            Returns a new dense array containing the mean for given axis.
             If axis=None, returns a float scalar with global average of array.
 
         Notes
@@ -3360,7 +3391,7 @@ class CArray(object):
 
         Returns
         -------
-        out_median : float or CArray
+        float or CArray
             Returns a new array containing the median values for given
             axis or, if axis=None, return a float scalar with global
             median of array.
@@ -3417,7 +3448,7 @@ class CArray(object):
 
         Returns
         -------
-        out_std : float or CArray
+        float or CArray
             Returns a new array containing the standard deviation
             values for given axis or, if axis=None, return a float
             scalar with global standard deviation of array.
@@ -3478,7 +3509,7 @@ class CArray(object):
 
         Returns
         -------
-        out_sqrt : CArray
+        CArray
             A new array with the element-wise positive square-root
             of original array.
 
@@ -3598,7 +3629,7 @@ class CArray(object):
 
         Returns
         -------
-        out_not : CArray
+        CArray
             The element-wise logical NOT.
 
         Notes
@@ -3749,7 +3780,7 @@ class CArray(object):
 
         Returns
         -------
-        out : float
+        float
             Norm of the array.
 
         Notes
@@ -3833,7 +3864,7 @@ class CArray(object):
 
         Returns
         -------
-        out : float or CArray
+        float or CArray
             Norm of the array. If axis is None, float is returned. Otherwise,
             a CArray with shape and number of dimensions consistent with the
             original array and the axis parameter is returned.
@@ -3931,15 +3962,17 @@ class CArray(object):
     def atleast_2d(self):
         """View original array with at least two dimensions.
 
+        A copy is made only if needed.
+        
         Returns
         -------
         out : CArray
-            Array with array.ndim >= 2. Copies are avoided where possible.
+            Array with array.ndim >= 2.
 
         Notes
         -----
-        For sparse format arrays are always 2 dimensional so this method
-        return a view (if possibile) of original array without any changes.
+        Sparse arrays are always 2 dimensional so this method returns
+        a view (if possible) of the original array without any changes.
 
         Examples
         --------
@@ -3961,7 +3994,7 @@ class CArray(object):
 
         Returns
         -------
-        array_sin : CArray
+        CArray
             New array with trigonometric sine element-wise.
 
         Notes
@@ -4004,7 +4037,7 @@ class CArray(object):
 
         Returns
         -------
-        array_cos : CArray
+        CArray
             New array with trigonometric cosine element-wise.
 
         Examples
@@ -4029,7 +4062,7 @@ class CArray(object):
 
         Returns
         -------
-        y : CArray
+        CArray
             New array with element-wise exponential of current data.
 
         Notes
@@ -4062,7 +4095,7 @@ class CArray(object):
 
         Returns
         -------
-        y : CArray
+        CArray
             New array with element-wise natural logarithm of current data.
 
         Notes
@@ -4103,7 +4136,7 @@ class CArray(object):
 
         Returns
         -------
-        y : CArray
+        CArray
             New array with element-wise base 10 logarithm of current data.
 
         Notes
@@ -4153,7 +4186,7 @@ class CArray(object):
 
         Returns
         -------
-        pow_array : CArray
+        CArray
             New array with the power of current data using
             input exponents.
 
@@ -4178,6 +4211,8 @@ class CArray(object):
         """Return normal distribution function value with mean
         and standard deviation given for the current array values.
 
+        DENSE ARRAYS ONLY
+
         The norm pdf is given by:
 
         .. math::
@@ -4191,13 +4226,13 @@ class CArray(object):
         Parameters
         ----------
         mu : float, optional
-            Normal distribution mean. Default = 0.
+            Normal distribution mean. Default 0.0.
         sigma : float, optional
-            Normal distribution standard deviation. Default = 1.
+            Normal distribution standard deviation. Default 1.0.
 
         Returns
         -------
-        y : CArray
+        CArray
             Normal distribution values.
 
         Examples
@@ -4218,15 +4253,15 @@ class CArray(object):
 
         DENSE FORMAT ONLY
 
-        Returns the one-dimensional piecewise linear interpolant
-        to a function with given values at discrete data-points.
+        Returns the 1-D piecewise linear interpolant to a function
+        with given values at discrete data-points.
 
         Parameters
         ----------
-        x_data : array_like (floats)
+        x_data : CArray
             Flat array of floats with the x-coordinates
             of the data points, must be increasing.
-        y_data : array_like (floats)
+        y_data : CArray
             Flat array of floats with the y-coordinates
             of the data points, same length as `x_data`.
         return_left : float, optional
@@ -4236,7 +4271,7 @@ class CArray(object):
 
         Returns
         -------
-        out_interp : CArray
+        CArray
             The interpolated values, same shape as x.
 
         Notes
@@ -4289,7 +4324,7 @@ class CArray(object):
 
         Returns
         -------
-        out : CArray
+        CArray
             1-Dimensional array of size `data.shape[0]` with the
             output of `func` for each row in data. Datatype of
             output array is always float.
@@ -4338,7 +4373,7 @@ class CArray(object):
         ----------
         shape : int or tuple of ints
             Shape of the new array, e.g., 2 or (2,3).
-        dtype : str or datatype, optional
+        dtype : str or dtype, optional
             The desired data-type for the array. Default is float.
         sparse : bool, optional
             If False (default) a dense array will be returned. Otherwise,
@@ -4346,8 +4381,8 @@ class CArray(object):
 
         Returns
         -------
-        out_empty : CArray
-            Array of arbitrary values with the given shape, dtype, and format.
+        CArray
+            Array of arbitrary values with the given properties.
 
         Notes
         -----
@@ -4382,17 +4417,17 @@ class CArray(object):
         ----------
         shape : int or tuple of ints
             Shape of the new array, e.g., 2 or (2,3).
-        dtype : str or datatype, optional
+        dtype : str or dtype, optional
             The desired data-type for the array. Default is float.
         sparse : bool, optional
             If False (default) a dense array will be returned. Otherwise,
             a sparse array of zeros is created. Note that sparse arrays
-            with only zeros apper empty when printing.
+            with only zeros appear empty when printing.
 
         Returns
         -------
-        out_zeros : CArray
-            Array of zeros with the given shape, dtype, and format.
+        CArray
+            Array of zeros with the given properties.
 
         Examples
         --------
@@ -4420,12 +4455,11 @@ class CArray(object):
     def ones(cls, shape, dtype=float, sparse=False):
         """Return a new array of given shape and type, filled with ones.
 
-
         Parameters
         ----------
         shape : int or tuple of ints
             Shape of the new array, e.g., 2 or (2,3).
-        dtype : str or datatype, optional
+        dtype : str or dtypw, optional
             The desired data-type for the array. Default is float.
         sparse : bool, optional
             If False (default) a dense array will be returned. Otherwise,
@@ -4433,8 +4467,8 @@ class CArray(object):
 
         Returns
         -------
-        out_zeros : CArray
-            Array of ones with the given shape, dtype, and format.
+        CArray
+            Array of ones with the given properties.
 
         Notes
         -----
@@ -4482,7 +4516,7 @@ class CArray(object):
 
         Returns
         -------
-        out_eye : CArray
+        CArray
             An array where all elements are equal to zero, except for the
             k-th diagonal, whose values are equal to one.
 
@@ -4535,7 +4569,7 @@ class CArray(object):
 
         Returns
         -------
-        out_rand : CArray
+        CArray
             Array of random floats with the given shape and format.
 
         Examples
@@ -4579,7 +4613,7 @@ class CArray(object):
 
         Returns
         ----------
-        out : CArray or float
+        CArray or float
             A new array of given shape with floating-point samples
             from the standard normal distribution, or a single such
             float if no parameters were supplied.
@@ -4626,7 +4660,7 @@ class CArray(object):
 
         Returns
         -------
-        out_sample : CArray
+        CArray
             Size-shaped array of random integers.
 
         Notes
@@ -4681,7 +4715,7 @@ class CArray(object):
 
         Returns
         -------
-        out_sample : CArray
+        CArray
             The generated random samples.
 
         Notes
@@ -4743,7 +4777,7 @@ class CArray(object):
 
         Returns
         -------
-        out_samples : CArray
+        CArray
             There are num equally spaced samples in the closed interval
             [start, stop] or the half-open interval [start, stop) (depending
             on whether endpoint is True or False).
@@ -4810,7 +4844,7 @@ class CArray(object):
 
         Returns
         -------
-        out : Carray
+        CArray
             Array of evenly spaced values. For floating point arguments,
             the length of the result is ceil((stop - start)/step). Because
             of floating point overflow, this rule may result in the last
@@ -4873,7 +4907,7 @@ class CArray(object):
 
         Returns
         -------
-        out : CArray
+        CArray
             The concatenated array. If first array is sparse, return sparse.
 
         Notes
@@ -4932,12 +4966,12 @@ class CArray(object):
         ----------
         list_of_list : list of list
             1-D arrays to form the cartesian product of.
-        dtype : str
+        dtype : str or dtype
             Datatype of output array. Default float.
     
         Returns
         -------
-        out : CArray
+        CArray
             2-D array of shape (M, len(arrays)) containing
             cartesian products between input arrays.
     
@@ -4968,13 +5002,15 @@ class CArray(object):
     def meshgrid(cls, xi, indexing='xy'):
         """Return coordinate matrices from coordinate vectors.
 
+        DENSE ARRAYS ONLY
+
         Make N-D coordinate arrays for vectorized evaluations of N-D
         scalar/vector fields over N-D grids, given one-dimensional
         coordinate arrays x1, x2,..., xn.
 
         Parameters
         ----------
-        x1,x2, ... xn : tuple of CArray or list
+        x1, x2, ..., xi : tuple of CArray or list
             1-D arrays representing the coordinates of a grid.
         indexing : {'xy', 'ij'}, optional
             Cartesian ('xy', default) or matrix ('ij') indexing of
@@ -4982,7 +5018,7 @@ class CArray(object):
 
         Returns
         -------
-        X1, X2,..., XN : tuple of CArray
+        X1, X2, ..., XN : tuple of CArray
             For vectors x1, x2,..., 'xn' with lengths Ni=len(xi),
             return (N1, N2, N3,...Nn) shaped arrays if indexing='ij'
             or (N2, N1, N3,...Nn) shaped arrays if indexing='xy' with
@@ -5016,8 +5052,9 @@ class CArray(object):
          [2 4 6]])
 
         """
-        xi = tuple(x._data for x in xi)
-        return tuple(cls(elem) for elem in CDense.meshgrid(xi, indexing=indexing))
+        xi = tuple(x._data for x in xi)  # This is correct-ish, xi are CArrays
+        return tuple(cls(elem) for elem in CDense.meshgrid(
+            xi, indexing=indexing))
 
     @classmethod
     def from_iterables(cls, iterables_list):
@@ -5025,14 +5062,14 @@ class CArray(object):
 
         Parameters
         ----------
-        iterables_list : list
+        iterables_list : list of iterable
             List of iterables to chain. Valid objects are CArrays,
             lists, tuples, and any other iterable. N-Dimensional arrays
             are flattened before chaining.
 
         Returns
         -------
-        chained_values : CArray
+        CArray
             Flat CArray with all values chained from input objects.
 
         Examples
