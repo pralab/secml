@@ -14,7 +14,7 @@ class CFunctionMcCormick(CFunction):
 
     2-Dimensional function.
 
-    Global minimum f(x) = -1.9133 @ x = (-0.54719, -1.54719).
+    Global minimum f(x) = -1.9132 @ x = (-0.5472, -1.5472).
 
     Given by:
     .. math::
@@ -75,3 +75,29 @@ class CFunctionMcCormick(CFunction):
         grad2 = CArray(grad2_1 + grad2_2 + grad2_3)
 
         return CArray.concatenate(grad1, grad2, axis=1)
+
+    def global_min(self):
+        """Value of the global minimum of the function.
+
+        Global minimum f(x) = -1.9132 @ x = (-0.5472, -1.5472).
+
+        Returns
+        -------
+        float
+            Value of the global minimum of the function.
+
+        """
+        return -1.9132
+
+    def global_min_x(self):
+        """Global minimum point of the function.
+
+        Global minimum f(x) = -1.9132 @ x = (-0.5472, -1.5472).
+
+        Returns
+        -------
+        CArray
+            The global minimum point of the function.
+
+        """
+        return CArray([-0.5472, -1.5472])

@@ -78,3 +78,29 @@ class CFunctionBeale(CFunction):
         grad2 = CArray(grad2_1 + grad2_2 + grad2_3)
 
         return CArray.concatenate(grad1, grad2, axis=1)
+
+    def global_min(self):
+        """Value of the global minimum of the function.
+
+        Global minimum f(x) = 0 @ x = (3, 0.5).
+
+        Returns
+        -------
+        float
+            Value of the global minimum of the function.
+
+        """
+        return 0.
+
+    def global_min_x(self):
+        """Global minimum point of the function.
+
+        Global minimum f(x) = 0 @ x = (3, 0.5).
+
+        Returns
+        -------
+        CArray
+            The global minimum point of the function.
+
+        """
+        return CArray([3., 0.5])

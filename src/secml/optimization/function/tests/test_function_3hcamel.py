@@ -14,19 +14,23 @@ class TestCFunctionThreeHumpCamel(CUnitTest):
 
         self.fun_obj = CFunction.create('3h_camel')
 
+        self.logger.info("Global minimum: {:}".format(
+            self.fun_obj.global_min()))
+        self.logger.info("Global minimum @: {:}".format(
+            self.fun_obj.global_min_x()))
+
     def test_function_result(self):
         """Test if function returns the correct value."""
         x = CArray([0, 0])
 
-        correct_result = 0
-
         funct_res = self.fun_obj.fun(x)
 
-        self.logger.info("Correct result: {:}".format(correct_result))
+        self.logger.info(
+            "Correct result: {:}".format(self.fun_obj.global_min()))
         self.logger.info("Function result: {:}".format(funct_res))
 
         self.assertTrue(is_scalar(funct_res))
-        self.assertEqual(correct_result, funct_res)
+        self.assertAlmostEqual(self.fun_obj.global_min(), funct_res, places=4)
 
     def test_2D(self):
         """Plot of a 2D example."""

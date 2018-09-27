@@ -80,3 +80,38 @@ class CFunctionRosenbrock(CFunction):
         grad2 = CArray(200 * (x[:, 1] - x[:, 0] ** 2))
 
         return CArray.concatenate(grad1, grad2, axis=1)
+
+    def global_min(self):
+        """Value of the global minimum of the function.
+
+        Global minimum f(x) = 0 @ x = (1, 1, ...., 1).
+
+        Returns
+        -------
+        float
+            Value of the global minimum of the function.
+
+        """
+        return 0.
+
+    def global_min_x(self, ndim=2):
+        """Global minimum point of the function.
+
+        Global minimum f(x) = 0 @ x = (1, 1, ...., 1).
+
+        Parameters
+        ----------
+        ndim : int, optional
+            Number of dimensions to consider, higher or equal to 2. Default 2.
+
+        Returns
+        -------
+        CArray
+            The global minimum point of the function.
+
+        """
+        if ndim < 2:
+            raise ValueError(
+                "Rosenbrock function available for at least 2 dimensions")
+
+        return CArray.ones((ndim, ), dtype=float)

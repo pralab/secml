@@ -1,183 +1,205 @@
 """
-.. module:: OptimizerOpenOpt
-   :synopsis: Interface for function optimization and minimization with OpenOpt
+.. module:: Optimizer
+   :synopsis: Interface for function optimization and minimization
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
-.. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
+
+from scipy import optimize as sc_opt
 
 from secml.core import CCreator
-from secml.optimization.function import CFunction
 from secml.array import CArray
-from scipy import optimize as sc_opt
+from secml.optimization.function import CFunction
+from secml.optimization.opt_utils import fun_tondarray, fprime_tondarray
 from secml.core.constants import eps
 
+
 class COptimizer(CCreator):
-    """Abstract class for implementing optimizers."""
+    """Generic optimizer.
+
+    Parameters
+    ----------
+    fun : CFunction
+        Function to be optimized.
+    solver : or None, optional
+        Solver to use for optimization.
+
+    """
     __metaclass__ = ABCMeta
     __super__ = 'COptimizer'
+    class_type = 'opt'
 
     def __init__(self, fun, solver=None):
-
-        if not isinstance(fun, CFunction):
-            raise TypeError("Input parameter is not a `CFunction`.")
-
+        """Class initializer."""
         self.fun = fun
-        self.solver = solver
-
-        COptimizer.__clear(self)
-
-    def __clear(self):
-        self._x_star = None
-        self._score = None
-        self._solver_output = None
+        self._solver = solver
 
     @property
     def fun(self):
-        """Function or vector to optimize."""
+        """Function to optimize."""
         return self._fun
 
     @fun.setter
     def fun(self, val):
-        """Function or vector to optimize."""
+        """Function to optimize.
+
+        Parameters
+        ----------
+        val : CFunction
+            Function to optimize.
+
+        """
         if not isinstance(val, CFunction):
             raise TypeError('Input expected to be `CFunction`')
+
         self._fun = val
 
     @property
     def solver(self):
+        """Solver to use for optimization."""
         return self._solver
 
-    @solver.setter
-    def solver(self, val):
+    def minimize(self, x0, args=(), method=None, jac=None,
+                 tol=None, options=None):
+        """Minimize function.
+
+        Wrapper of `scipy.optimize.minimize`.
+
+        Parameters
+        ----------
+        x0 : CArray
+            Initial guess. Dense flat array of real elements of size 'n',
+            where 'n' is the number of independent variables.
+        args : tuple, optional
+            Extra arguments passed to the objective function and its
+            derivatives (`fun`, `jac` and `hess` functions).
+        method : str or callable, optional
+            Type of solver.  Should be one of
+                - 'Nelder-Mead' :ref:`(see here) <optimize.minimize-neldermead>`
+                - 'Powell'      :ref:`(see here) <optimize.minimize-powell>`
+                - 'CG'          :ref:`(see here) <optimize.minimize-cg>`
+                - 'BFGS'        :ref:`(see here) <optimize.minimize-bfgs>`
+                - 'Newton-CG'   :ref:`(see here) <optimize.minimize-newtoncg>`
+                - 'L-BFGS-B'    :ref:`(see here) <optimize.minimize-lbfgsb>`
+                - 'TNC'         :ref:`(see here) <optimize.minimize-tnc>`
+                - 'COBYLA'      :ref:`(see here) <optimize.minimize-cobyla>`
+                - 'SLSQP'       :ref:`(see here) <optimize.minimize-slsqp>`
+                - 'trust-constr':ref:`(see here) <optimize.minimize-trustconstr>`
+                - 'dogleg'      :ref:`(see here) <optimize.minimize-dogleg>`
+                - 'trust-ncg'   :ref:`(see here) <optimize.minimize-trustncg>`
+                - 'trust-exact' :ref:`(see here) <optimize.minimize-trustexact>`
+                - 'trust-krylov' :ref:`(see here) <optimize.minimize-trustkrylov>`
+                - custom - a callable object.
+            If not given, chosen to be one of ``BFGS``, ``L-BFGS-B``, ``SLSQP``,
+            depending if the problem has constraints or bounds.
+        jac : {'2-point', '3-point', 'cs', bool}, optional
+            Method for computing the gradient vector. Only for CG, BFGS,
+            Newton-CG, L-BFGS-B, TNC, SLSQP, dogleg, trust-ncg, trust-krylov,
+            trust-exact and trust-constr.
+            The function in `self.fun.gradient` will be used (if defined).
+            Alternatively, the keywords {'2-point', '3-point', 'cs'} select a
+            finite difference scheme for numerical estimation of the gradient.
+            Options '3-point' and 'cs' are available only to 'trust-constr'.
+            If `jac` is a Boolean and is True, `fun` is assumed to return the
+            gradient along with the objective function. If False, the gradient
+            will be estimated using '2-point' finite difference estimation.
+        tol : float, optional
+            Tolerance for termination. For detailed control,
+            use solver-specific options.
+        options : dict, optional
+            A dictionary of solver options. All methods accept the following
+            generic options:
+                maxiter : int
+                    Maximum number of iterations to perform.
+                disp : bool
+                    Set to True to print convergence messages.
+            For method-specific options, see :func:`show_options()`.
+
+        Returns
+        -------
+        x : CArray
+            The solution of the optimization.
+        jac : CArray
+            Value of the Jacobian.
+        fun_val : scalar
+            Value of the objective function.
+        out_msg : dict
+            Dictionary with other minimizer output.
+            Refer to `scipy.optimize.OptimizeResult` description
+            for more informations.
+
+        Warnings
+        --------
+        Due to limitations of the current wrappers,
+        not all solver methods listed above are supported.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+        >>> from secml.optimization import COptimizer
+        >>> from secml.optimization.function import CFunctionRosenbrock
+
+        >>> x0 = CArray([1.3, 0.7])
+        >>> opt = COptimizer(CFunctionRosenbrock())
+        >>> min_x, jac, fun_val, res = opt.minimize(
+        ... x0, method='BFGS', options={'gtol': 1e-6, 'disp': True})
+        Optimization terminated successfully.
+                 Current function value: 0.000000
+                 Iterations: 32
+                 Function evaluations: 39
+                 Gradient evaluations: 39
+        >>> print min_x
+        CArray([ 1.  1.])
+        >>> print jac
+        CArray([  3.230858e-08  -1.558678e-08])
+        >>> print fun_val
+        9.29438398164e-19
+        >>> print res['message']
+        Optimization terminated successfully.
+
         """
-        val : str
-            Identifier of the solver to use. Default `pclp`.
-            A faster alternative is `lpSolve` (needs separate installation).
-        """
-        if val is None or isinstance(val, basestring):
-            self._solver = val
+        if x0.issparse is True or x0.is_vector_like is False:
+            raise ValueError("x0 must be a dense flat array")
+
+        # Manage any optional argument to be passed to fun
+        if args is ():
+            args = (self.fun.fun, self.fun.gradient)
         else:
-            raise TypeError('Input expected to be None or a string \
-                        specifying a valid solver')
+            args = (self.fun.fun, self.fun.gradient, args)
 
-    @property
-    def n_dim(self):
-        """Returns the dimensionality of x (input of fun)."""
-        return self._fun.n_dim
+        # This wraps fun.gradient to be usable with scipy.minimize
+        jac = fprime_tondarray if jac is None else jac
 
-    # TODO: questa cosa e' da sistemare.
-    # in questa classe non servono cose
-    # specifiche di OpenOpt
-    def _store_result(self, result):
-        """Sets the final point and the score."""
-        # Final optimizer point
-        self._x_star = CArray(result.xf)[:self.n_dim]
-        # Final objective function value
-        self._score = result.ff
-        # Other useful solver output
-        self._solver_output = {'slack': CArray(result.xf)[self.n_dim:] if self.n_dim < len(result.xf) else None,
-                               'isFeasible': result.isFeasible,
-                               'solver_name': result.solverInfo['name'],
-                               'solver_time': result.elapsed['solver_time'],
-                               # TODO: MAP stopcase TO SOMETHING READABLE
-                               'solver_stopcase': result.stopcase
-                               }
+        sc_opt_out = sc_opt.minimize(fun_tondarray, x0.ravel().tondarray(),
+                                     args=args, method=method, jac=jac,
+                                     tol=tol,  options=options)
 
-#     @abstractmethod
-#     def minimize(self, x=None):
-#         raise NotImplementedError(
-#             "`minimize` method must be implemented by {:} subclasses."
-#             "".format(COptimizer.__name__))
+        sc_opt_out_msg = {'status': sc_opt_out.status,
+                          'success': sc_opt_out.success,
+                          'message': sc_opt_out.message,
+                          'nfev': sc_opt_out.nfev, 'nit': sc_opt_out.nit}
 
-    @staticmethod
-    def _fun_toarray(xk, fun, fprime, *args):
-        """Wrapper for functions that use and return CArrays.
-
-        This function wraps any callable (bound) method that
-        takes as input CArray(s) and return CArray(s) in order
-        to take any array like object and return an ndarray.
-
-        Even if both fun and fprime are required, this function
-        runs `fun` only. See :meth:`_fprime_toarray` for `fprime`
-        wrapper.
-
-        Parameters
-        ----------
-        xk : array_like
-            First input of the function.
-        fun : bound method
-            Callable function that takes CArray(s) as input and
-            return a CArray as result.
-        fprime : bound method
-            Callable function that takes CArray(s) as input and
-            return a CArray as result.
-        args : \*args, optional
-            Extra arguments passed to `fun`.
-
-        Returns
-        -------
-        out_fun : ndarray
-            Output of 'fun' casted to ndarray.
-
-        """
-        # NOTE: fprime is not used. This is a wrapper for fun
-        return CArray(fun(CArray(xk), *args)).tondarray()
-
-    @staticmethod
-    def _fprime_toarray(xk, fun, fprime, *args):
-        """Wrapper for functions that use and return CArrays.
-
-        This function wraps any callable (bound) method that
-        takes as input CArray(s) and return CArray(s) in order
-        to take any array like object and return an ndarray.
-
-        Even if both fun and fprime are required, this function
-        runs `fprime` only. See :meth:`_fun_toarray` for `fun`
-        wrapper.
-
-        Parameters
-        ----------
-        xk : array_like
-            First input of the function.
-        fun : bound method
-            Callable function that takes CArray(s) as input and
-            return a CArray as result.
-        fprime : bound method
-            Callable function that takes CArray(s) as input and
-            return a CArray as result.
-        args : \*args, optional
-            Extra arguments passed to `fun`.
-
-        Returns
-        -------
-        out_fprime : ndarray
-            Output of 'fun' casted to ndarray.
-
-        """
-        # NOTE: fun is not used. This is a wrapper for fprime
-        return CArray(fprime(CArray(xk), *args)).tondarray()
+        return CArray(sc_opt_out.x), CArray(sc_opt_out.jac), \
+            sc_opt_out.fun, sc_opt_out_msg
 
     def approx_fprime(self, xk, epsilon, *args):
-        """Finite-difference approximation of the gradient of a
-        scalar function.
+        """Finite-difference approximation of the gradient of a scalar function.
 
         Wrapper for scipy function :func:`scipy.optimize.approx_fprime`.
 
         Parameters
         ----------
         xk : CArray
-            Flat array with pattern at which to determine the gradient of `f`.
+            The flat dense vector with the point at which to determine
+            the gradient of `fun`.
         epsilon : scalar or CArray
             Increment of `xk` to use for determining the function gradient.
             If a scalar, uses the same finite difference delta for all partial
-            derivatives.  If an array, should contain one value per element of
-            `xk`. A default value is provided by `COptimizer.epsilon` but should
-            be passed explicitly to `approx_fprime`.
-        \*args : args, optional
+            derivatives.
+            If an array, should contain one value per element of `xk`.
+        *args : args, optional
             Any other arguments that are to be passed to `fun`.
 
         Returns
@@ -187,7 +209,7 @@ class COptimizer(CCreator):
 
         See Also
         --------
-        .check_grad : Check correctness of gradient function against approx_fprime.
+        `.check_grad` : Check correctness of gradient function against `approx_fprime`.
 
         Notes
         -----
@@ -217,29 +239,34 @@ class COptimizer(CCreator):
         CArray(2,)(dense: [   2.        400.000042])
 
         """
-        xk_ndarray = CArray(CArray(xk).ravel()).tondarray()  # double casting to always have a CArray
-        epsilon = epsilon.tondarray() if isinstance(epsilon, CArray) else epsilon
-        # We use fun_toarray as the main callable for scipy to have
-        # always an ndarray as output of self.fun
-        return CArray(sc_opt.approx_fprime(xk_ndarray, self._fun_toarray, epsilon, self.fun.fun, self.fun.gradient, *args))
+        if xk.issparse is True or xk.is_vector_like is False:
+            raise ValueError("x0 must be a dense flat array")
 
-    def check_grad(self, x, *args, **kwargs):
+        # double casting to always have a CArray
+        xk_ndarray = CArray(xk).ravel().tondarray()
+
+        epsilon = epsilon.tondarray() if isinstance(epsilon, CArray) else epsilon
+
+        return CArray(
+            sc_opt.approx_fprime(xk_ndarray, fun_tondarray, epsilon,
+                                 self.fun.fun, self.fun.gradient, *args))
+
+    def check_grad(self, x, *args, **epsilon):
         """Check the correctness of a gradient function by comparing
-        it against a (forward) finite-difference approximation of
-        the gradient.
+         it against a (forward) finite-difference approximation of
+         the gradient.
 
         Parameters
         ----------
         x : CArray
-            Pattern to check function gradient against forward difference
-            approximation of function gradient using `fun` stored in the
-            COptimizer instance.
+            Flat dense pattern to check function gradient against
+            forward difference approximation of function gradient.
         epsilon : scalar or CArray
             Increment to `xk` to use for determining the function gradient.
             If a scalar, uses the same finite difference delta for all partial
             derivatives.  If an array, should contain one value per element of
             `xk`. If not provided, value of `COptimizer.epsilon` is used.
-        args : \*args, optional
+        *args : *args, optional
             Extra arguments passed to `fun` and `fprime`.
 
         Returns
@@ -258,16 +285,35 @@ class COptimizer(CCreator):
 
         See Also
         --------
-        .approx_fprime : Finite-difference approximation of the gradient of a scalar function.
+        `.approx_fprime` : Finite-difference approximation of the gradient of a scalar function.
+
+        Examples
+        --------
+        >>> from secml.optimization import COptimizer
+        >>> from secml.optimization.function import CFunction
+
+        >>> def func(x):
+        ...     return x[0]**2 - 0.5 * x[1]**3
+        >>> def grad(x):
+        ...     return [2 * x[0], -1.5 * x[1]**2]
+
+        >>> opt = COptimizer(CFunction(func, grad))
+        >>> opt.check_grad(CArray([1.5, -1.5]))
+        2.9802322387695312e-08
 
         """
-        # We now take 'epsilon' from kwargs and check if any other
-        # input has been passed as kwargs (we do not want it)
-        if 'epsilon' in kwargs :
-            epsilon = kwargs.pop('epsilon', eps)
-        else :
+        if x.issparse is True or x.is_vector_like is False:
+            raise ValueError("x0 must be a dense flat array")
+
+        # We now extract 'epsilon' if passed by the user
+        if 'epsilon' in epsilon:
+            epsilon = epsilon.pop('epsilon', eps)
+        else:
             epsilon = eps
-        if kwargs:
-            raise ValueError("Unknown keyword arguments: %r" % (list(kwargs.keys()),))
-        x_carray = CArray(x)
-        return CArray(self.fun.gradient(x_carray, *args) - self.approx_fprime(x_carray, epsilon, *args)).norm()
+
+        # real value of the gradient on x
+        grad = self.fun.gradient(x, *args)
+        # value of the approximated gradient on x
+        approx = self.approx_fprime(x, epsilon, *args)
+
+        return (grad - approx).norm()
