@@ -994,6 +994,36 @@ class CSparse(object):
                 shuffle_idx = CDense.randsample(self.shape[1], self.shape[1])
                 self[:, :] = self[0, shuffle_idx]
 
+    def sin(self):
+        """Trigonometric sine, element-wise."""
+        return self.__class__(self.tocsr().sin())
+
+    def cos(self):
+        """Trigonometric cosine, element-wise."""
+        raise NotImplementedError("`cos` is not available for sparse arrays!")
+
+    def exp(self):
+        """Exponential, element-wise."""
+        raise NotImplementedError("`exp` is not available for sparse arrays!")
+
+    def log(self):
+        """Natural logarithm, element-wise."""
+        raise NotImplementedError("`exp` is not available for sparse arrays!")
+
+    def log10(self):
+        """Base 10 logarithm, element-wise."""
+        raise NotImplementedError("`log10` is not available for sparse arrays!")
+
+    def normpdf(self, mu=0, sigma=1):
+        """Return normal distribution function."""
+        raise NotImplementedError(
+            "`normpdf` is not available for sparse arrays!")
+
+    def interp(self, x_data, y_data, return_left=None, return_right=None):
+        """One-dimensional linear interpolation."""
+        raise NotImplementedError(
+            "`interp` is not available for sparse arrays!")
+
     def nan_to_num(self):
         """Replace nan with zero and inf with finite numbers."""
         self._data.data = np.nan_to_num(self._data.data)
