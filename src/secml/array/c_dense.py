@@ -36,6 +36,9 @@ class CDense(object):
         # numpy created an object array, maybe input is malformed?!
         if obj.dtype.char is 'O':
             raise TypeError("Array is malformed, check input data.")
+        # We do not currently support arrays with ndim > 2
+        if obj.ndim > 2:
+            raise TypeError('expected dimension <= 2 array or matrix')
         self._data = obj
         # Reshape created array if necessary
         if shape is not None and shape != self.shape:
