@@ -429,7 +429,7 @@ class CArray(object):
         <type 'numpy.ndarray'>
 
         """
-        return self._data.toarray()
+        return self._data.tondarray()
 
     def tocsr(self):
         """Return a sparse scipy.sparse.csr_matrix representation of array.

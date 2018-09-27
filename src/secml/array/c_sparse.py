@@ -39,7 +39,7 @@ class CSparse(object):
     def _buffer_to_builtin(self, data):
         """Convert data buffer to built-in arrays"""
         if isinstance(data, CDense):  # Extract np.ndarray
-            return data.toarray()
+            return data.tondarray()
         elif isinstance(data, self.__class__):  # Extract scs.csr_matrix
             return data.tocsr()
         else:
@@ -104,7 +104,22 @@ class CSparse(object):
     # # # # # # CASTING # # # # # #
     # ----------------------------#
 
-    def toarray(self, order=None):
+    def get_data(self):
+        """Return stored data as a standard array object.
+
+        Returns
+        -------
+        out : scipy.sparse.csr_matrix
+            Array as a csr_matrix object.
+
+        See Also
+        --------
+        `.tocsr()` : returns a scipy.sparse.csr_matrix.
+
+        """
+        return self.tocsr()
+
+    def tondarray(self, order=None):
         """Convert csr_matrix to ndarray."""
         return self._data.toarray(order)
 
@@ -113,8 +128,8 @@ class CSparse(object):
         return self._data
 
     def todense(self, order=None):
-        """Convert to ndarray."""
-        return CDense(self.toarray(order))
+        """Convert to CDense."""
+        return CDense(self.tondarray(order))
 
     def tolist(self):
         """Convert to list."""
@@ -154,7 +169,7 @@ class CSparse(object):
                     idx = idx.atleast_2d()
 
                 # Convert indices to built-in arrays
-                idx = idx.toarray() if isinstance(idx, CDense) else idx
+                idx = idx.tondarray() if isinstance(idx, CDense) else idx
                 idx = idx.tocsr() if isinstance(idx, CSparse) else idx
 
                 # Check the shape of the boolean mask
@@ -170,7 +185,7 @@ class CSparse(object):
                                  "to arrays with shape[0] == 1.")
 
             # Fake 2D index. Use ndarrays to mimic Matlab-like indexing
-            idx = (np.asarray([0]), idx.toarray())
+            idx = (np.asarray([0]), idx.tondarray())
 
             # SPECIAL CASE: Matlab-like indexing
             idx = np.ix_(*idx)
@@ -240,7 +255,7 @@ class CSparse(object):
             for e_i, e in enumerate(idx_list):
                 # Check each tuple element and convert to ndarray
                 if isinstance(e, CDense) or isinstance(e, CSparse):
-                    idx_list[e_i] = e.toarray()
+                    idx_list[e_i] = e.tondarray()
                     # Check the size of any boolean array inside tuple
                     t = [None, None]  # Fake index for booleans check
                     t[e_i] = idx_list[e_i]
@@ -324,7 +339,7 @@ class CSparse(object):
         """Redefinition of the get (brackets) operator."""
         # Check for setitem value
         if isinstance(value, CDense):
-            value = value.toarray()
+            value = value.tondarray()
         elif isinstance(value, CSparse):
             value = value.tocsr()
         elif not (is_scalar(value) or is_bool(value)):
@@ -366,7 +381,7 @@ class CSparse(object):
             return self.__class__(self._data.__add__(other.tocsr()))
         elif isinstance(other, CDense) \
                 and other.size > 1:  # Sparse + Dense = Dense
-            return CDense(self._data.__add__(other.toarray()))
+            return CDense(self._data.__add__(other.tondarray()))
         else:
             return NotImplemented
 
@@ -397,7 +412,7 @@ class CSparse(object):
             return self.__class__(self._data.__sub__(other.tocsr()))
         elif isinstance(other, CDense) \
                 and other.size > 1:  # Sparse + Dense = Dense
-            return CDense(self._data.__sub__(other.toarray()))
+            return CDense(self._data.__sub__(other.tondarray()))
         else:
             return NotImplemented
 
@@ -612,7 +627,7 @@ class CSparse(object):
         elif isinstance(other, CSparse):  # Sparse == Sparse = Sparse
             return self.__class__(self._data.__eq__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse == Dense = Dense
-            return CDense(self._data.__eq__(other.toarray()))
+            return CDense(self._data.__eq__(other.tondarray()))
         else:
             return NotImplemented
 
@@ -639,7 +654,7 @@ class CSparse(object):
         elif isinstance(other, CSparse):  # Sparse < Sparse = Sparse
             return self.__class__(self._data.__lt__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse < Dense = Dense
-            return CDense(self._data.__lt__(other.toarray()))
+            return CDense(self._data.__lt__(other.tondarray()))
         else:
             return NotImplemented
 
@@ -666,7 +681,7 @@ class CSparse(object):
         elif isinstance(other, CSparse):  # Sparse <= Sparse = Sparse
             return self.__class__(self._data.__le__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse <= Dense = Dense
-            return CDense(self._data.__le__(other.toarray()))
+            return CDense(self._data.__le__(other.tondarray()))
         else:
             return NotImplemented
 
@@ -693,7 +708,7 @@ class CSparse(object):
         elif isinstance(other, CSparse):  # Sparse > Sparse = Sparse
             return self.__class__(self._data.__gt__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse > Dense = Dense
-            return CDense(self._data.__gt__(other.toarray()))
+            return CDense(self._data.__gt__(other.tondarray()))
         else:
             return NotImplemented
 
@@ -720,7 +735,7 @@ class CSparse(object):
         elif isinstance(other, CSparse):  # Sparse >= Sparse = Sparse
             return self.__class__(self._data.__ge__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse >= Dense = Dense
-            return CDense(self._data.__ge__(other.toarray()))
+            return CDense(self._data.__ge__(other.tondarray()))
         else:
             return NotImplemented
 
@@ -747,7 +762,7 @@ class CSparse(object):
         elif isinstance(other, CSparse):  # Sparse != Sparse = Sparse
             return self.__class__(self._data.__ne__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse != Dense = Dense
-            return CDense(self._data.__ne__(other.toarray()))
+            return CDense(self._data.__ne__(other.tondarray()))
         else:
             return NotImplemented
 
@@ -863,14 +878,14 @@ class CSparse(object):
         """
         # CDense.load() will manage IO errors
         imported_data = CDense.load(
-            datafile, dtype=dtype, startrow=0, skipend=3).ravel().toarray()
+            datafile, dtype=dtype, startrow=0, skipend=3).ravel().tondarray()
         # Indices are always integers
         imported_indices = CDense.load(
-            datafile, dtype=int, startrow=1, skipend=2).ravel().toarray()
+            datafile, dtype=int, startrow=1, skipend=2).ravel().tondarray()
         imported_indptr = CDense.load(
-            datafile, dtype=int, startrow=2, skipend=1).ravel().toarray()
+            datafile, dtype=int, startrow=2, skipend=1).ravel().tondarray()
         shape_ndarray = CDense.load(
-            datafile, dtype=int, startrow=3, skipend=0).ravel().toarray()
+            datafile, dtype=int, startrow=3, skipend=0).ravel().tondarray()
 
         return cls((imported_data, imported_indices, imported_indptr),
                    shape=(shape_ndarray[0], shape_ndarray[1]))
@@ -1046,7 +1061,7 @@ class CSparse(object):
         """Extract a diagonal or construct a diagonal array."""
         if self.shape[0] == 1:  # We use diags as numpy's diag (no offset's')
             return self.__class__(scs.diags(
-                self.toarray(), offsets=[k], format='csr', dtype=self.dtype))
+                self.tondarray(), offsets=[k], format='csr', dtype=self.dtype))
         elif k == 0:
             return self.__class__(self.tocsr().diagonal())
         else:
@@ -1528,7 +1543,7 @@ class CSparse(object):
             y_same_bool = (y.nnz_row_indices == this_elem_row).logical_and(
                 y.nnz_column_indices == this_elem_col)
             if y_same_bool.any() == True:  # found an element in same position!
-                same_position_val = int(y._data.data[y_same_bool.toarray()])
+                same_position_val = int(y._data.data[y_same_bool.tondarray()])
                 if np.logical_and(el, same_position_val):
                     and_result[this_elem_row, this_elem_col] = True
 
