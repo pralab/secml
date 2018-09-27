@@ -959,9 +959,9 @@ class CDense(object):
         """Wrapper for numpy ravel"""
         return self.__class__(np.ravel(self.tondarray(), order))
 
-    def reshape(self, newshape):
+    def reshape(self, shape):
         """Reshape array."""
-        return self.__class__(self.tondarray().reshape(newshape))
+        return self.__class__(self.tondarray().reshape(shape))
 
     def resize(self, new_shape, constant=0):
         """Return a new array with the specified shape."""
