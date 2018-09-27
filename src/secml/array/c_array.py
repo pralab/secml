@@ -2885,8 +2885,8 @@ class CArray(object):
         nan
 
         """
-        max_func = self._data.max if self.issparse is True else self._data.amax
-        return self._instance_array(max_func(axis=axis, keepdims=keepdims))
+        return self._instance_array(
+            self._data.max(axis=axis, keepdims=keepdims))
 
     def min(self, axis=None, keepdims=True):
         """Return the minimum of an array or minimum along an axis.
@@ -2941,8 +2941,8 @@ class CArray(object):
         nan
 
         """
-        min_func = self._data.min if self.issparse is True else self._data.amin
-        return self._instance_array(min_func(axis=axis, keepdims=keepdims))
+        return self._instance_array(
+            self._data.min(axis=axis, keepdims=keepdims))
 
     def nanmax(self, axis=None, keepdims=True):
         """Return the maximum of an array or maximum along an axis ignoring Nans.
@@ -3054,7 +3054,7 @@ class CArray(object):
         return self._instance_array(
             self._data.nanmin(axis=axis, keepdims=keepdims))
 
-    def maximum(self, y):
+    def maximum(self, array):
         """Element-wise maximum of array elements.
 
         Compare two arrays and returns a new array containing
@@ -3068,15 +3068,15 @@ class CArray(object):
 
         Parameters
         ----------
-        y : CArray or array_like
+        array : CArray or array_like
             The array like object holding the elements to compare
             current array with. Must have the same shape of first
             array.
 
         Returns
         -------
-        out_maximum : CArray or scalar
-            The element-wise maximum between first array and y.
+        CArray or scalar
+            The element-wise maximum between the two arrays.
             Returns scalar if both arrays have size == 1.
 
         Examples
@@ -3095,7 +3095,7 @@ class CArray(object):
         2
 
         """
-        other_carray = self.__class__(y)
+        other_carray = self.__class__(array)
         if not self.has_compatible_shape(other_carray):
             raise ValueError("arrays to compare must have the same shape. "
                              "{:} different from {:}."
@@ -3108,7 +3108,7 @@ class CArray(object):
             return self._instance_array(
                 self._data.maximum(other_carray.todense()._data))
 
-    def minimum(self, y):
+    def minimum(self, array):
         """Element-wise minimum of array elements.
 
         Compare two arrays and returns a new array containing
@@ -3122,15 +3122,15 @@ class CArray(object):
 
         Parameters
         ----------
-        y : CArray or array_like
+        array : CArray or array_like
             The array like object holding the elements to compare
             current array with. Must have the same shape of first
             array.
 
         Returns
         -------
-        out_minimum : CArray or scalar
-            The element-wise minimum between first array and y.
+        CArray or scalar
+            The element-wise minimum between the two arrays.
             Returns scalar if both arrays have size == 1.
 
         Examples
@@ -3152,7 +3152,7 @@ class CArray(object):
         -1
 
         """
-        other_carray = self.__class__(y)
+        other_carray = self.__class__(array)
         if not self.has_compatible_shape(other_carray):
             raise ValueError("arrays to compare must have the same shape. "
                              "{:} different from {:}."
@@ -3519,7 +3519,7 @@ class CArray(object):
         """
         return self.__class__(self._data.sqrt())
 
-    def logical_and(self, y):
+    def logical_and(self, array):
         """Element-wise logical AND of array elements.
 
         Compare two arrays and returns a new array containing
@@ -3527,15 +3527,15 @@ class CArray(object):
 
         Parameters
         ----------
-        y : CArray or array_like
+        array : CArray or array_like
             The array like object holding the elements to compare
             current array with. Must have the same shape of first
             array.
 
         Returns
         -------
-        out_and : CArray
-            The element-wise logical AND between first array and y.
+        CArray
+            The element-wise logical AND between the two arrays.
 
         Examples
         --------
@@ -3554,13 +3554,13 @@ class CArray(object):
 
         """
         if self.issparse:
-            y = self.__class__(y, tosparse=True)
+            array = self.__class__(array, tosparse=True)
         else:
-            y = self.__class__(y).todense()
+            array = self.__class__(array).todense()
 
-        return self.__class__(self._data.logical_and(y._data))
+        return self.__class__(self._data.logical_and(array._data))
 
-    def logical_or(self, y):
+    def logical_or(self, array):
         """Element-wise logical OR of array elements.
 
         Compare two arrays and returns a new array containing
@@ -3568,7 +3568,7 @@ class CArray(object):
 
         Parameters
         ----------
-        y : CArray or array_like
+        array : CArray or array_like
             The array like object holding the elements to compare
             current array with. Must have the same shape of first
             array.
@@ -3576,7 +3576,7 @@ class CArray(object):
         Returns
         -------
         out_and : CArray
-            The element-wise logical OR between first array and y.
+            The element-wise logical OR between the two arrays.
 
         Examples
         --------
@@ -3595,11 +3595,11 @@ class CArray(object):
 
         """
         if self.issparse:
-            y = self.__class__(y, tosparse=True)
+            array = self.__class__(array, tosparse=True)
         else:
-            y = self.__class__(y).todense()
+            array = self.__class__(array).todense()
 
-        return self.__class__(self._data.logical_or(y._data))
+        return self.__class__(self._data.logical_or(array._data))
 
     def logical_not(self):
         """Element-wise logical NOT of array elements.
@@ -4236,7 +4236,7 @@ class CArray(object):
             of the data points, must be increasing.
         y_data : array_like (floats)
             Flat array of floats with the y-coordinates
-            of the data points, same lenght as `x_data`.
+            of the data points, same length as `x_data`.
         return_left : float, optional
             Value to return for x < x_data[0], default is y_data[0].
         return_right : float, optional

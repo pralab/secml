@@ -1065,14 +1065,14 @@ class CDense(object):
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 
-    def amax(self, axis=None, keepdims=False):
+    def max(self, axis=None, keepdims=False):
         """Wrapper for numpy max."""
         out = np.amax(
             self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 
-    def amin(self, axis=None, keepdims=False):
+    def min(self, axis=None, keepdims=False):
         """Wrapper for numpy min."""
         out = np.amin(
             self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
