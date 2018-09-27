@@ -1729,7 +1729,7 @@ class CSparse(object):
         return cls(scs.eye(n_rows, n_cols, k=k, dtype=dtype, format='csr'))
 
     @classmethod
-    def rand(cls, n_rows, n_cols, density=0.01):
+    def rand(cls, shape, random_state=None, density=0.01):
         """Wrapper for scipy.sparse.rand.
 
         Creates a random sparse array of [0, 1] floats
@@ -1738,7 +1738,12 @@ class CSparse(object):
         density of 0 means a matrix with no non-zero items.
 
         """
+        n_rows, n_cols = shape  # Unpacking the shape
         return cls(scs.rand(n_rows, n_cols, density=density, format='csr'))
+
+    @classmethod
+    def randn(cls, shape, random_state=None):
+        raise NotImplementedError
 
     @classmethod
     def concatenate(cls, array1, array2, axis=1):

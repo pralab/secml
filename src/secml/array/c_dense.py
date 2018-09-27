@@ -1696,7 +1696,7 @@ class CDense(object):
         return cls(np.linspace(start, stop, num=num, endpoint=endpoint))
 
     @classmethod
-    def rand(cls, *shape):
+    def rand(cls, shape, random_state=None):
         """Wrapper for random.random_sample.
 
         Creates a random array with random values in [0, 1)
@@ -1711,34 +1711,21 @@ class CDense(object):
          [ 0.58243871  0.05104796  0.77719998]]
 
         """
+        np.random.seed(random_state)  # Setting the random seed
         return cls(np.random.random_sample(shape))
 
     @classmethod
-    def randn(cls, *shape):
+    def randn(cls, shape, random_state=None):
         """Return a sample (or samples) from the "standard normal" distribution.
 
         The samples are generated from a univariate "normal"
-        (Gaussian) distribution of mean 0 and variance 1.
-
-        Parameters
-        ----------
-        shape : int, optional
-            The dimensions of the returned array, should be all
-            positive. If no argument is given a single Python float
-            is returned.
-
-        Returns
-        -------
-        Z : CndArray or float
-            A new array of given shape with floating-point samples
-            from the standard normal distribution, or a single such
-            float if no parameters were supplied.
 
         """
+        np.random.seed(random_state)  # Setting the random seed
         return cls(np.random.randn(*shape))
 
     @classmethod
-    def randint(cls, low, high=None, size=None):
+    def randint(cls, low, high=None, size=None, random_state=None):
         """Wrapper for random.randint.
 
         Creates a random array with random integers in [low, high) interval.
@@ -1755,10 +1742,11 @@ class CDense(object):
         [1 0 2 0 4 3 0 2 4 2]
 
         """
+        np.random.seed(random_state)  # Setting the random seed
         return cls(np.random.randint(low, high, size))
 
     @classmethod
-    def randsample(cls, array, size=None, replace=False):
+    def randsample(cls, array, size=None, replace=False, random_state=None):
         """Wrapper for random.choice.
 
         Generates a random sample from a given 1-D array
@@ -1781,6 +1769,7 @@ class CDense(object):
         """
         if isinstance(array, cls):  # Cast input CDense to ndarray
             array = array.tondarray()
+        np.random.seed(random_state)  # Setting the random seed
         return cls(np.random.choice(array, size, replace))
 
     @classmethod

@@ -4509,7 +4509,7 @@ class CArray(object):
             return cls(CDense.eye(n_rows, n_cols, k=k, dtype=dtype))
 
     @classmethod
-    def rand(cls, shape, density=0.5, random_state=None, sparse=False):
+    def rand(cls, shape, random_state=None, sparse=False, density=0.5):
         """Return random floats in the half-open interval [0.0, 1.0).
 
         Results are from the "continuous uniform" distribution over
@@ -4522,16 +4522,16 @@ class CArray(object):
         ----------
         shape : tuple of ints
             Shape of the new array.
-        density : scalar, optional, sparse only
-            Density of the generated sparse array, default 0.5.
-            Density equal to one means a full array, density of 0 means
-            no non-zero items.
         random_state : int or None, optional
             If int, random_state is the seed used by the
             random number generator; If None, is the seed used by np.random.
         sparse : bool, optional
             If False (default) a dense array will be returned. Otherwise,
             a sparse array of zeros is created.
+        density : scalar, optional, sparse only
+            Density of the generated sparse array, default 0.5.
+            Density equal to one means a full array, density of 0 means
+            no non-zero items.
 
         Returns
         -------
@@ -4553,12 +4553,12 @@ class CArray(object):
           (1, 1)	0.521906773406)
 
         """
-        np.random.seed(random_state)  # Setting the random seed
         if sparse is True:
             shape = (1, shape[0]) if len(shape) <= 1 else shape
-            return cls(CSparse.rand(*shape, density=density))
+            return cls(CSparse.rand(
+                shape, random_state=random_state, density=density))
         else:
-            return cls(CDense.rand(*shape))
+            return cls(CDense.rand(shape, random_state=random_state))
 
     @classmethod
     def randn(cls, shape, random_state=None):
@@ -4594,8 +4594,7 @@ class CArray(object):
          [-1.3842878   0.2673215   0.18978747]])
 
         """
-        np.random.seed(random_state)  # Setting the random seed
-        return cls(CDense.randn(*shape))
+        return cls(CDense.randn(shape, random_state=random_state))
 
     @classmethod
     def randint(cls, low, high=None,
@@ -4655,9 +4654,8 @@ class CArray(object):
          [0 2]])
 
         """
-        np.random.seed(random_state)  # Setting the random seed
-        return cls(CDense.randint(
-            low=low, high=high, size=shape), tosparse=sparse)
+        return cls(CDense.randint(low=low, high=high, size=shape,
+                                  random_state=random_state), tosparse=sparse)
 
     @classmethod
     def randsample(cls, a, shape=None,
@@ -4712,9 +4710,9 @@ class CArray(object):
 
         """
         array = a if not isinstance(a, cls) else a.ravel()._data
-        np.random.seed(random_state)  # Setting the random seed
         return cls(CDense.randsample(
-            array=array, size=shape, replace=replace), tosparse=sparse)
+            array=array, size=shape, replace=replace,
+            random_state=random_state), tosparse=sparse)
 
     @classmethod
     def linspace(cls, start, stop, num=50, endpoint=True, sparse=False):
