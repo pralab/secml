@@ -23,7 +23,7 @@ def dl_pytorch_model(model_id):
 
     Returns a pre-trained pytorch model given its id.
     The list of available models can be found at:
-     `secml.torch_nn.models.PYTORCH_MODELS`
+     `secml.pytorch.models.PYTORCH_MODELS`
 
     Parameters
     ----------

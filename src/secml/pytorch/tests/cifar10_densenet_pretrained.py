@@ -23,11 +23,12 @@ from secml.core.settings import PYTORCH_DATA_DIR, PYTORCH_MODELS_DIR
 from secml.utils import fm
 
 from secml.data.loader import CDataLoaderCIFAR10
-from secml.torch_nn.data import CTorchDataset
+from secml.pytorch.data import CTorchDataset
 
-import secml.torch_nn.models.cifar as models
+from secml.pytorch.models import dl_pytorch_model
+import secml.pytorch.models.cifar as models
 
-from secml.torch_nn.utils import AverageMeter, accuracy
+from secml.pytorch.utils import AverageMeter, accuracy
 
 
 model_names = sorted(name for name in models.__dict__

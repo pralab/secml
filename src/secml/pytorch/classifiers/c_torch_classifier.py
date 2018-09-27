@@ -18,8 +18,8 @@ from secml.array import CArray
 from secml.classifiers import CClassifier
 
 from secml.core.settings import USE_CUDA
-from secml.torch_nn.data import CTorchDataset
-from secml.torch_nn.utils import AverageMeter, accuracy
+from secml.pytorch.data import CTorchDataset
+from secml.pytorch.utils import AverageMeter, accuracy
 
 # Use CUDA ?!
 use_cuda = torch.cuda.is_available() and USE_CUDA
