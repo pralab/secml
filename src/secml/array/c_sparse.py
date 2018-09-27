@@ -903,11 +903,11 @@ class CSparse(object):
     def eliminate_zeros(self):
         self._data.eliminate_zeros()
 
-    def dot(self, x):
+    def dot(self, array):
         # Only matrix multiplication is supported for sparse arrays
-        if len(x.shape) == 1:  # We work with 2D arrays
-            x = x.atleast_2d()
-        return self.__class__(self._data.dot(self._buffer_to_builtin(x)))
+        if len(array.shape) == 1:  # We work with 2D arrays
+            array = array.atleast_2d()
+        return self.__class__(self._data.dot(self._buffer_to_builtin(array)))
 
     def all(self, axis=None, keepdims=None):
         """Return True if all array elements are boolean True."""

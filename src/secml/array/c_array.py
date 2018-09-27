@@ -1626,10 +1626,10 @@ class CArray(object):
 
         return self.__class__(self._data.append(array2._data, axis=axis))
 
-    def dot(self, x):
+    def dot(self, array):
         """Dot product of two arrays.
 
-        For 2-dim arrays it is equivalent to matrix multiplication.
+        For 2-D arrays it is equivalent to matrix multiplication.
         If both arrays are dense flat (rows), it is equivalent to the
         inner product of vectors (without complex conjugation).
 
@@ -1637,7 +1637,7 @@ class CArray(object):
 
         Parameters
         ----------
-        x : CArray
+        array : CArray
             Second argument of dot product.
 
         Returns
@@ -1675,10 +1675,10 @@ class CArray(object):
 
         """
         # We have to handle only one problematic case: dense vs sparse dot
-        if self.isdense is True and x.issparse is True:
-            return self._instance_array(self._data.dot(x.todense()._data))
+        if self.isdense is True and array.issparse is True:
+            return self._instance_array(self._data.dot(array.todense()._data))
         else:
-            return self._instance_array(self._data.dot(x._data))
+            return self._instance_array(self._data.dot(array._data))
 
     def reshape(self, shape):
         """Gives a new shape to an array without changing its data.
