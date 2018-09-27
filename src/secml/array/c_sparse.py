@@ -11,7 +11,7 @@ import scipy.sparse as scs
 from scipy.sparse.linalg import inv, norm
 import numpy as np
 
-from secml.array import CDense
+from . import CDense
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_intlike, is_int, is_bool
 

@@ -9,7 +9,7 @@ from copy import deepcopy
 import numpy as np
 import scipy.sparse as scs
 
-from secml.array import CDense, CSparse
+from . import CDense, CSparse
 from secml.core.type_utils import \
     is_int, is_scalar, is_bool, is_ndarray, is_scsarray, to_builtin
 
