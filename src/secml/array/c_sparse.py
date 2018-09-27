@@ -909,12 +909,20 @@ class CSparse(object):
             x = x.atleast_2d()
         return self.__class__(self._data.dot(self._buffer_to_builtin(x)))
 
-    def all(self):
+    def all(self, axis=None, keepdims=None):
         """Return True if all array elements are boolean True."""
+        if axis is not None or keepdims is not None:
+            raise NotImplementedError(
+                "`axis` and `keepdims` are currently not supported")
+
         return bool(self.size == self.nnz and self._data.data.all())
 
-    def any(self):
+    def any(self, axis=None, keepdims=None):
         """Return True if any array element is boolean True."""
+        if axis is not None or keepdims is not None:
+            raise NotImplementedError(
+                "`axis` and `keepdims` are currently not supported")
+
         return bool(self._data.data.any())
 
     def reshape(self, shape):
