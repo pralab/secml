@@ -1746,7 +1746,7 @@ class TestCArray(CUnitTest):
                  (self.array_dense, self.array_dense)]
         self._test_cycle(operators, items, expected_result)
 
-        operators = [op.div]
+        operators = [op.div, op.floordiv]
         expected_result = [CDense, CDense, CDense, CDense]
         items = [(self.array_sparse, self.array_sparse),
                  (self.array_sparse, self.array_dense),
@@ -1837,7 +1837,7 @@ class TestCArray(CUnitTest):
         self._test_cycle(operators, items, expected_result)
 
         # ARRAY / SCALAR
-        operators = [op.div]
+        operators = [op.div, op.floordiv]
         expected_result = [CSparse, CSparse, CSparse, CSparse]
         items = [(self.array_sparse, 2),
                  (self.array_sparse, np.ravel(2)[0]),
@@ -1846,7 +1846,7 @@ class TestCArray(CUnitTest):
         self._test_cycle(operators, items, expected_result)
 
         # ARRAY -,/ SCALAR
-        operators = [op.sub, op.div]
+        operators = [op.sub, op.div, op.floordiv]
         expected_result = [CDense, CDense, CDense, CDense]
         items = [(self.array_dense, 2),
                  (self.array_dense, np.ravel(2)[0]),
@@ -1855,7 +1855,7 @@ class TestCArray(CUnitTest):
         self._test_cycle(operators, items, expected_result)
 
         # SCALAR -,/ ARRAY
-        operators = [op.sub, op.div]
+        operators = [op.sub, op.div, op.floordiv]
         expected_result = [CDense, CDense, CDense, CDense]
         items = [(2, self.array_dense),
                  (np.ravel(2)[0], self.array_dense),
@@ -1911,7 +1911,8 @@ class TestCArray(CUnitTest):
         """Test for mathematical operators array vs unsupported types."""
 
         def test_unsupported(x):
-            for operator in [op.add, op.sub, op.mul, op.div, op.pow]:
+            for operator in [op.add, op.sub, op.mul,
+                             op.div, op.floordiv, op.pow]:
                 with self.assertRaises(TypeError):
                     self.logger.info("Testing {:} dense vs '{:}'".format(
                         operator.__name__, type(x).__name__))
@@ -1941,7 +1942,8 @@ class TestCArray(CUnitTest):
         """Test for mathematical operators unsupported types vs array."""
 
         def test_unsupported(x):
-            for operator in [op.add, op.sub, op.mul, op.div, op.pow]:
+            for operator in [op.add, op.sub, op.mul,
+                             op.div, op.floordiv, op.pow]:
                 with self.assertRaises(TypeError):
                     self.logger.info("Testing {:} '{:}' vs dense".format(
                         operator.__name__, type(x).__name__))

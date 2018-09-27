@@ -859,6 +859,64 @@ class CArray(object):
         """
         return self.__rtruediv__(other)
 
+    def __floordiv__(self, other):
+        """Element-wise floor division (// operator).
+
+        Parameters
+        ----------
+        other : CArray or scalar or bool
+            Element to divide to current array. If a CArray, element-wise
+            division will be performed. If scalar or boolean, the element
+            will be divided to each array element.
+
+        Returns
+        -------
+        array : CArray
+            Array after division.
+            If input is a scalar or a boolean, array format is preserved.
+            If input is a CArray, format of output array depends on the
+            format of current array:
+             - sparse / sparse : sparse
+             - sparse / dense : sparse
+             - dense / sparse : dense
+             - dense / dense : dense
+
+        """
+        if is_scalar(other) or is_bool(other):
+            return self.__class__(self._data.__floordiv__(other))
+        elif isinstance(other, CArray):
+            # dense vs sparse not supported (sparse vs dense IS supported)
+            if self.isdense is True and other.issparse is True:
+                other = other.todense()
+            return self.__class__(self._data.__floordiv__(other._data))
+        elif is_ndarray(other) or is_scsarray(other):
+            raise TypeError("unsupported operand type(s) for //: "
+                            "'{:}' and '{:}'".format(type(self).__name__,
+                                                     type(other).__name__))
+        else:
+            return NotImplemented
+
+    def __rfloordiv__(self, other):
+        """Element-wise (inverse) floor division (// operator).
+
+        Parameters
+        ----------
+        other : CArray or scalar or bool
+            Element to divide to current array. If a CArray, element-wise
+            division will be performed. If scalar or boolean, the element
+            will be divided to each array element.
+
+        Returns
+        -------
+        array : CArray
+            Array after division. Array format is always preserved.
+
+        """
+        if is_scalar(other) or is_bool(other):
+            return self.__class__(self._data.__rfloordiv__(other))
+        else:
+            return NotImplemented
+
     def __abs__(self):
         """Returns array elements without sign.
 

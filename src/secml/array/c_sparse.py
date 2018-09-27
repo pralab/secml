@@ -513,6 +513,34 @@ class CSparse(object):
         """
         return self.__rtruediv__(other)
 
+    def __floordiv__(self, other):
+        """Element-wise floor division.
+
+        Parameters
+        ----------
+        other : CSparse or scalar or bool
+            Element to divided to current array. If a CDense, element-wise
+            division will be performed. If scalar or boolean, the element
+            will be divided to each array element.
+
+        Returns
+        -------
+        array : CSparse
+            Array after division.
+
+        """
+        # Scipy does not implement floor division
+        out_truediv = self.__truediv__(other)
+        if out_truediv is NotImplemented:
+            return NotImplemented
+        else:  # Return the integer part of the truediv result
+            return out_truediv.floor()
+
+    def __rfloordiv__(self, other):
+        """Element-wise (inverse) floor division."""
+        raise NotImplementedError(
+            "dividing a scalar by a sparse array is not supported")
+
     def __abs__(self):
         """Returns array elements without sign.
 

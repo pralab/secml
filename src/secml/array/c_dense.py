@@ -572,6 +572,53 @@ class CDense(object):
         """
         return self.__rtruediv__(other)
 
+    def __floordiv__(self, other):
+        """Element-wise floor division.
+
+        Parameters
+        ----------
+        other : CDense or scalar or bool
+            Element to divided to current array. If a CDense, element-wise
+            division will be performed. If scalar or boolean, the element
+            will be divided to each array element.
+
+        Returns
+        -------
+        array : CDense
+            Array after division.
+
+        """
+        # Result of Numpy floor division is not reliable
+        # (nan in place of inf, etc.)... Let's floor the truediv result
+        out_truediv = self.__truediv__(other)
+        if out_truediv is NotImplemented:
+            return NotImplemented
+        else:  # Return the integer part of the truediv result
+            return out_truediv.floor()
+
+    def __rfloordiv__(self, other):
+        """Element-wise (inverse) floor division.
+
+        Parameters
+        ----------
+        other : scalar or bool
+            Element to divided to current array.
+            The element will be divided to each array element.
+
+        Returns
+        -------
+        array : CDense
+            Array after division.
+
+        """
+        # Result of Numpy floor division is not reliable
+        # (nan in place of inf, etc.)... Let's floor the truediv result
+        out_truediv = self.__rtruediv__(other)
+        if out_truediv is NotImplemented:
+            return NotImplemented
+        else:  # Return the integer part of the truediv result
+            return out_truediv.floor()
+
     def __abs__(self):
         """Returns array elements without sign.
 
