@@ -1319,7 +1319,7 @@ class CDense(object):
 
         Returns
         -------
-        out_index : CDense
+        out_index : int or CDense
             Position of input value, or the closest one, inside
             flattened array. If `value` is an array, a CDense
             with the position of each `value` element is returned.
@@ -1329,10 +1329,10 @@ class CDense(object):
         >>> from secml.array.c_dense import CDense
 
         >>> print CDense([[0,0.1],[0.4,1.0]]).binary_search(0.3)
-        [2]
+        2
 
         >>> print CDense([1,2,3,4]).binary_search(10)
-        [3]
+        3
 
         >>> print CDense([1,2,3,4]).binary_search(CDense([-10,1,2.2,10]))
         [0 0 1 3]
@@ -1352,8 +1352,8 @@ class CDense(object):
                 return pos
 
         # As bisect_left returns a single index, so we should ravel the array
-        return CDense(
-            map(lambda x: bs_single(self.ravel(), x), CDense(value))).ravel()
+        out = map(lambda x: bs_single(self.ravel(), x), CDense(value))
+        return CDense(out) if len(out) > 1 else out[0]
 
     def atleast_2d(self):
         """Force array to have at least 2 dimensions."""
