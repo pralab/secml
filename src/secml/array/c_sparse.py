@@ -104,21 +104,6 @@ class CSparse(object):
     # # # # # # CASTING # # # # # #
     # ----------------------------#
 
-    def get_data(self):
-        """Return stored data as a standard array object.
-
-        Returns
-        -------
-        out : scipy.sparse.csr_matrix
-            Array as a csr_matrix object.
-
-        See Also
-        --------
-        `.tocsr()` : returns a scipy.sparse.csr_matrix.
-
-        """
-        return self.tocsr()
-
     def tondarray(self, order=None):
         """Convert csr_matrix to ndarray."""
         return self._data.toarray(order)
@@ -1078,8 +1063,8 @@ class CSparse(object):
             flat_a = self.ravel()
 
             # csr_matrix indices must be sorted to extract unique indices
-            if not bool(flat_a.get_data().has_sorted_indices):
-                flat_a.get_data().sort_indices()
+            if not bool(flat_a._data.has_sorted_indices):
+                flat_a._data.sort_indices()
 
             # Let's get the index of the first zero...
             unique_index = CDense(dtype=int)
@@ -1312,7 +1297,7 @@ class CSparse(object):
     def bincount(self):
         """Count number of occurrences of each value in array of non-negative ints."""
         n_zeros = self.size - self.nnz
-        nnz_bincount = np.bincount(self.get_data().data)
+        nnz_bincount = np.bincount(self._data.data)
         # The number of zeros must be replaced (no zeros in nnz_data)
         nnz_bincount[0] = n_zeros
         return CDense(nnz_bincount)

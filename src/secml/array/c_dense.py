@@ -102,21 +102,6 @@ class CDense(object):
     # # # # # # CASTING # # # # # #
     # ----------------------------#
 
-    def get_data(self):
-        """Return stored data as a standard array object.
-
-        Returns
-        -------
-        out : np.ndarray
-            Array as a ndarray object.
-
-        See Also
-        --------
-        `.tondarray()` : returns a np.ndarray.
-
-        """
-        return self.tondarray()
-
     def tondarray(self):
         """Return a np.ndarray view of current CDense."""
         return self._data
