@@ -80,12 +80,12 @@ class TestCClassifier(CUnitTest):
 
         clf.load_state(state, dataparallel=True)
 
-        labels, scores = clf.classify(ts.X)
+        labels, scores = clf.classify(ts[50:100, :].X)
 
-        acc = CMetricAccuracy().performance_score(ts.Y, labels)
+        acc = CMetricAccuracy().performance_score(ts[50:100, :].Y, labels)
         self.logger.info("Accuracy: {:}".format(acc))
 
-        self.assertEqual(0.9546, acc)  # We should always get the same acc
+        self.assertEqual(0.92, acc)  # We should always get the same acc
 
     def test_gradient(self):
         """Test gradient of the CIFAR10 dataset."""
