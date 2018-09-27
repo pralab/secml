@@ -1,9 +1,11 @@
+variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
 cache:
-  key: "$CI_BUILD_NAME"
+  key: "$CI_JOB_NAME"
   paths:
-    - .cache/pip
-    - vendor/apt
-    - pralib
+    - "$CI_PROJECT_DIR/.cache/pip"
+    - "$CI_PROJECT_DIR/.vendor/apt"
 
 stages:
   - test

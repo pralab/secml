@@ -17,15 +17,15 @@ if [ "$(lsb_release -cs)" = "trusty" ]; then
 fi
 
 # Cache directory for apt-get packages
-mkdir -p vendor/apt
+mkdir -p ".vendor/apt"
 
-apt-get -o dir::cache::archives="vendor/apt" install -y -qq wget build-essential pkg-config gfortran libatlas-base-dev python-dev python-pip libffi-dev libssl-dev
+apt-get -o dir::cache::archives=".vendor/apt" install -y -qq wget build-essential pkg-config gfortran libatlas-base-dev python-dev python-pip libffi-dev libssl-dev
 # Numba dependencies
-apt-get -o dir::cache::archives="vendor/apt" install -y -qq m4 zlib1g zlib1g-dev libedit2 libedit-dev llvm-3.7 llvm-3.7-dev llvm-dev
+apt-get -o dir::cache::archives=".vendor/apt" install -y -qq m4 zlib1g zlib1g-dev libedit2 libedit-dev llvm-3.7 llvm-3.7-dev llvm-dev
 # Matplotlib dependencies
-apt-get -o dir::cache::archives="vendor/apt" install -y -qq python-tk libpng-dev libgif-dev libjpeg8-dev libtiff5-dev libpng12-dev libfreetype6-dev
+apt-get -o dir::cache::archives=".vendor/apt" install -y -qq python-tk libpng-dev libgif-dev libjpeg8-dev libtiff5-dev libpng12-dev libfreetype6-dev
 # OpenOpt dependencies
-apt-get -o dir::cache::archives="vendor/apt" install -y -qq libgmp3-dev libglpk-dev python-cvxopt
+apt-get -o dir::cache::archives=".vendor/apt" install -y -qq libgmp3-dev libglpk-dev python-cvxopt
 # Update to latest pip version
 pip install -U pip
 
