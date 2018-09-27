@@ -1,19 +1,9 @@
-"""
-Created on 27/apr/2015
-
-This module tests the CArray class
-If you find any BUG, please notify authors first.
-
-@author: Marco Melis
-
-"""
-import unittest
 import numpy as np
 import scipy.sparse as scs
 import operator as op
 import itertools
 
-from secml.utils import CUnitTest
+from secml.utils import CUnitTest, fm
 from secml.array import CArray, Cdense, Csparse
 from secml.core.type_utils import \
     is_scalar, is_int, is_bool, is_list, is_list_of_lists
@@ -2193,39 +2183,38 @@ class TestCArray(CUnitTest):
         """Test save/load of CArray"""
         self.logger.info("UNITTEST - CArray - save/load")
 
-        # Cleaning temp file
+        test_file = fm.join(fm.abspath(__file__), 'test.txt')
+        test_file_2 = fm.join(fm.abspath(__file__), 'test2.txt')
+
+        # Cleaning test files
         try:
-            import os
-            os.remove('test.txt')
+            fm.remove_file(test_file)
+            fm.remove_file(test_file_2)
         except (OSError, IOError) as e:
             self.logger.info(e.message)
 
-        self.logger.info("UNITTEST - CArray - Testing save/load for sparse matrix")
+        self.logger.info(
+            "UNITTEST - CArray - Testing save/load for sparse matrix")
 
-        self.array_sparse.save('test.txt')
+        self.array_sparse.save(test_file)
 
         # Saving to a file handle is not supported for sparse arrays
         with self.assertRaises(NotImplementedError):
-            with open('test2.txt', 'w') as f:
+            with open(test_file_2, 'w') as f:
                 self.array_sparse.save(f)
 
-        # Cleaning temp file
-        try:
-            import os
-            os.remove('test2.txt')
-        except (OSError, IOError) as e:
-            self.logger.info(e.message)
-
-        loaded_array_sparse = CArray.load('test.txt', arrayformat='sparse', dtype=int)
+        loaded_array_sparse = CArray.load(
+            test_file, arrayformat='sparse', dtype=int)
 
         self.assertFalse((loaded_array_sparse != self.array_sparse).any(),
                          "Saved and loaded arrays (sparse) are not equal!")
 
-        self.logger.info("UNITTEST - Csparse - Testing save/load for dense matrix")
+        self.logger.info(
+            "UNITTEST - Csparse - Testing save/load for dense matrix")
 
-        self.array_dense.save('test.txt', overwrite=True)
+        self.array_dense.save(test_file, overwrite=True)
 
-        loaded_array_dense = CArray.load('test.txt', arrayformat='dense', dtype=int)
+        loaded_array_dense = CArray.load(test_file, arrayformat='dense', dtype=int)
 
         self.assertFalse((loaded_array_dense != self.array_dense).any(),
                          "Saved and loaded arrays (sparse) are not equal!")
@@ -2236,12 +2225,12 @@ class TestCArray(CUnitTest):
 
         # Only 'dense' and 'sparse' arrayformat are supported
         with self.assertRaises(ValueError):
-            CArray.load('test.txt', arrayformat='test')
+            CArray.load(test_file, arrayformat='test')
 
-        # Cleaning temp file
+        # Cleaning test files
         try:
-            import os
-            os.remove('test.txt')
+            fm.remove_file(test_file)
+            fm.remove_file(test_file_2)
         except (OSError, IOError) as e:
             self.logger.info(e.message)
 
@@ -4368,4 +4357,4 @@ class TestCArray(CUnitTest):
     
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

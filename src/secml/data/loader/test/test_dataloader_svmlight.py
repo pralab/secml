@@ -1,14 +1,9 @@
-"""
-Created on 04/mag/2015
-
-@author: Davide Maiorca, Ambra Demontis
-"""
-import unittest
 from secml.utils import CUnitTest
 
 from secml.data import CDataset
 from secml.data.loader import CDataLoaderSvmLight
 from secml.array import CArray, Csparse, Cdense
+from secml.utils import fm
 
 
 class TestCDataLoaderSvmLight(CUnitTest):
@@ -37,20 +32,28 @@ class TestCDataLoaderSvmLight(CUnitTest):
         """Testing libsvm dataset loading and saving."""
         self.logger.info("Testing libsvm dataset loading and saving...")
 
+        test_file = fm.join(fm.abspath(__file__), "myfile.libsvm")
+
+        # Cleaning test file
+        try:
+            fm.remove_file(test_file)
+        except (OSError, IOError) as e:
+            self.logger.info(e.message)
+
         self.logger.info("Patterns saved:\n{:}".format(self.patterns))
         self.logger.info("Labels saved:\n{:}".format(self.labels))
 
         CDataLoaderSvmLight.dump(
-            CDataset(self.patterns, self.labels), "myfile.libsvm")
+            CDataset(self.patterns, self.labels), test_file)
 
-        new_dataset = CDataLoaderSvmLight().load("myfile.libsvm")
+        new_dataset = CDataLoaderSvmLight().load(test_file)
 
         self.assertFalse((new_dataset.X != self.patterns).any())
         self.assertFalse((new_dataset.Y != self.labels).any())
 
         # load data but now remove all zero features (colums)
         new_dataset = CDataLoaderSvmLight().load(
-            "myfile.libsvm", remove_all_zero=True)
+            test_file, remove_all_zero=True)
 
         self.logger.info("Patterns loaded:\n{:}".format(new_dataset.X))
         self.logger.info("Labels loaded:\n{:}".format(new_dataset.Y))
@@ -72,6 +75,12 @@ class TestCDataLoaderSvmLight(CUnitTest):
         original[:, new_dataset.idx_mapping] = new_dataset.X
         self.assertFalse((self.patterns != original).any())
 
+        # Cleaning test file
+        try:
+            fm.remove_file(test_file)
+        except (OSError, IOError) as e:
+            self.logger.info(e.message)
+
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()
