@@ -4175,7 +4175,7 @@ class CArray(object):
         """
         return self.__pow__(exp)
 
-    def normpdf(self, mu=0, sigma=1):
+    def normpdf(self, mu=0.0, sigma=1.0):
         """Return normal distribution function value with mean
         and standard deviation given for the current array values.
 

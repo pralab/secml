@@ -1491,7 +1491,7 @@ class CDense(object):
         return self.__class__(
             np.power(self.tondarray(), self._buffer_to_builtin(exp)))
 
-    def normpdf(self, mu, sigma):
+    def normpdf(self, mu=0.0, sigma=1.0):
         """Return normal distribution function value with mean
         and standard deviation given for the current array values.
 

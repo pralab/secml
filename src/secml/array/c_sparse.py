@@ -1037,7 +1037,7 @@ class CSparse(object):
         """Base 10 logarithm, element-wise."""
         raise NotImplementedError("`log10` is not available for sparse arrays!")
 
-    def normpdf(self, mu=0, sigma=1):
+    def normpdf(self, mu=0.0, sigma=1.0):
         """Return normal distribution function."""
         raise NotImplementedError(
             "`normpdf` is not available for sparse arrays!")
