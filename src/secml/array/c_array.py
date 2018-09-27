@@ -4517,7 +4517,7 @@ class CArray(object):
             return cls(CDense.eye(n_rows, n_cols, k=k, dtype=dtype))
 
     @classmethod
-    def rand(cls, shape, sparse=False, density=0.5, random_state=None):
+    def rand(cls, shape, density=0.5, random_state=None, sparse=False):
         """Return random floats in the half-open interval [0.0, 1.0).
 
         Results are from the "continuous uniform" distribution over
@@ -4530,9 +4530,6 @@ class CArray(object):
         ----------
         shape : tuple of ints
             Shape of the new array.
-        sparse : bool, optional
-            If False (default) a dense array will be returned. Otherwise,
-            a sparse array of zeros is created.
         density : scalar, optional, sparse only
             Density of the generated sparse array, default 0.5.
             Density equal to one means a full array, density of 0 means
@@ -4540,6 +4537,9 @@ class CArray(object):
         random_state : int or None, optional
             If int, random_state is the seed used by the
             random number generator; If None, is the seed used by np.random.
+        sparse : bool, optional
+            If False (default) a dense array will be returned. Otherwise,
+            a sparse array of zeros is created.
 
         Returns
         -------
@@ -4607,7 +4607,7 @@ class CArray(object):
 
     @classmethod
     def randint(cls, low, high=None,
-                shape=None, sparse=False, random_state=None):
+                shape=None, random_state=None, sparse=False):
         """Return random integers from low (inclusive) to high (exclusive).
 
         Return random integers from the "discrete uniform" distribution
@@ -4626,12 +4626,12 @@ class CArray(object):
             high=None).
         shape : int, tuple of ints or None, optional
             Shape of output array. If None, a single value is returned.
-        sparse : bool, optional
-            If False (default) a dense array will be returned. Otherwise,
-            a random sparse array is created.
         random_state : int or None, optional
             If int, random_state is the seed used by the
             random number generator; If None, is the seed used by np.random.
+        sparse : bool, optional
+            If False (default) a dense array will be returned. Otherwise,
+            a random sparse array is created.
 
         Returns
         -------
@@ -4669,7 +4669,7 @@ class CArray(object):
 
     @classmethod
     def randsample(cls, a, shape=None,
-                   replace=False, sparse=False, random_state=None):
+                   replace=False, random_state=None, sparse=False):
         """Generates a random sample from a given array.
 
         Parameters
@@ -4682,12 +4682,12 @@ class CArray(object):
             Shape of output array. If None, a single value is returned.
         replace : bool, optional
             Whether the sample is with or without replacement, default False.
-        sparse : bool, optional
-            If False (default) a dense array will be returned. Otherwise,
-            a random sparse array is created.
         random_state : int or None, optional
             If int, random_state is the seed used by the
             random number generator; If None, is the seed used by np.random.
+        sparse : bool, optional
+            If False (default) a dense array will be returned. Otherwise,
+            a random sparse array is created.
 
         Returns
         -------
