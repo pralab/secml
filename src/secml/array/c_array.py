@@ -3070,9 +3070,8 @@ class CArray(object):
 
         Returns
         -------
-        CArray or scalar
+        CArray
             The element-wise maximum between the two arrays.
-            Returns scalar if both arrays have size == 1.
 
         Examples
         --------
@@ -3087,7 +3086,7 @@ class CArray(object):
           (1, 0)	2)
 
         >>> print CArray([-1]).maximum(CArray([2]))
-        2
+        CArray([2])
 
         """
         other_carray = self.__class__(array)
@@ -3095,13 +3094,13 @@ class CArray(object):
             raise ValueError("arrays to compare must have the same shape. "
                              "{:} different from {:}."
                              "".format(self.shape, other_carray.shape))
-        # Arrays have compatible shape, let's compare them
+
         if self.issparse:
-            return self._instance_array(
-                self._data.maximum(other_carray.tosparse()._data))
+            other_carray = other_carray.tosparse()
         else:
-            return self._instance_array(
-                self._data.maximum(other_carray.todense()._data))
+            other_carray = other_carray.todense()
+
+        return self.__class__(self._data.maximum(other_carray._data))
 
     def minimum(self, array):
         """Element-wise minimum of array elements.
@@ -3122,11 +3121,10 @@ class CArray(object):
             current array with. Must have the same shape of first
             array.
 
-        Returns
+                Returns
         -------
-        CArray or scalar
+        CArray
             The element-wise minimum between the two arrays.
-            Returns scalar if both arrays have size == 1.
 
         Examples
         --------
@@ -3142,9 +3140,8 @@ class CArray(object):
           (1, 0)	2
           (1, 1)	-1)
 
-
         >>> print CArray([-1]).minimum(CArray([2]))
-        -1
+        CArray([-1])
 
         """
         other_carray = self.__class__(array)
@@ -3152,13 +3149,13 @@ class CArray(object):
             raise ValueError("arrays to compare must have the same shape. "
                              "{:} different from {:}."
                              "".format(self.shape, other_carray.shape))
-        # Arrays have compatible shape, let's compare them
+
         if self.issparse:
-            return self._instance_array(
-                self._data.minimum(other_carray.tosparse()._data))
+            other_carray = other_carray.tosparse()
         else:
-            return self._instance_array(
-                self._data.minimum(other_carray.todense()._data))
+            other_carray = other_carray.todense()
+
+        return self.__class__(self._data.minimum(other_carray._data))
 
     def round(self, decimals=0):
         """Evenly round to the given number of decimals.
