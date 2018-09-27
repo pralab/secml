@@ -26,12 +26,12 @@ class TestCSolverDescDir(CUnitTest):
         fig.switch_sptype(sp_type='function')
 
         # Plot objective function
-        fig.sp.plot_fobj(func=CArray.apply_fun_torow,
+        fig.sp.plot_fobj(func=CArray.apply_along_axis,
                          plot_background=True,
                          n_grid_points=50, n_colors=50,
                          grid_limits=grid_limits,
                          levels=[1], levels_color='gray', levels_style='--',
-                         colorbar=True, func_args=(solver.f.fun,),
+                         colorbar=True, func_args=(solver.f.fun, 1,),
                          vmin=vmin, vmax=vmax)
 
         # Plot distance constraint

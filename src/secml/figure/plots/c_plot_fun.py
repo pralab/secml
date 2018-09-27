@@ -148,8 +148,8 @@ class CPlotFunction(CPlot):
             grid_points_value = func(
                 pad_grid_point_features, *func_args, **func_kwargs)
         else:
-            grid_points_value = pad_grid_point_features.apply_fun_torow(
-                func, *func_args, **func_kwargs)
+            grid_points_value = pad_grid_point_features.apply_along_axis(
+                func, 1, *func_args, **func_kwargs)
 
         grid_points_val_reshaped = grid_points_value.reshape(
             (pad_xgrid.shape[0], pad_xgrid.shape[1]))

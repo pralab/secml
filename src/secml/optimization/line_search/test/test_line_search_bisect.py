@@ -39,7 +39,7 @@ class TestLineSearch(CUnitTest):
     def _plot_fun(self):
         # cons_box = CConstraintBox(ub=3, lb=-3)
         x_range = CArray.arange(-5, 20, 0.5, )
-        score_range = x_range.T.apply_fun_torow(self.fun.fun)
+        score_range = x_range.T.apply_along_axis(self.fun.fun, axis=1)
         # self.logger.info("Result scores : " + str(score_range))
         ref_line = CArray.zeros(x_range.size)
         fig = CFigure(height=6, width=12)

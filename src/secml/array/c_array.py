@@ -4277,18 +4277,21 @@ class CArray(object):
                               CArray(y_data).astype(float)._data,
                               return_left, return_right))
 
-    def apply_fun_torow(self, func, *args, **kwargs):
-        """Apply function to each array's row.
+    def apply_along_axis(self, func, axis, *args, **kwargs):
+        """Apply function to 1-D slices along the given axis.
 
-        Call function "func" passing each array's row.
+        `func` should accept 1-D arrays and return a single scalar or
+        a 1-D array.
 
-        `func` should return a single scalar or an array of size == 1.
+        Only 1-D and 2-D arrays are currently supported.
 
         Parameters
         ----------
         func : function
-            Function object to apply to each data row.
-            Must return a single scalar or an array of size == 1.
+            Function object to apply along the given axis.
+            Must return a single scalar or a 1-D array.
+        axis : int
+            Axis along which to apply the function.
         *args, **kwargs : optional
             Any other input value for `func`.
 
@@ -4303,20 +4306,32 @@ class CArray(object):
         --------
         >>> from secml.array import CArray
 
-        >>> a = CArray([[1,2,3],[10,20,30],[100,200,300]])
+        >>> a = CArray([[1,2],[10,20],[100,200]])
 
         >>> def return_sum(x):
         ...     return x.sum()
 
-        >>> print a.apply_fun_torow(return_sum)
-        CArray([   6.   60.  600.])
+        >>> print a.apply_along_axis(return_sum, axis=0)  # Column-wise
+        CArray([ 111.  222.])
+
+        >>> print a.apply_along_axis(return_sum, axis=1)  # Row-wise
+        CArray([   3.   30.  300.])
 
         """
         data_2d = self.atleast_2d()
-        # Preallocating output array
-        out = CArray.zeros(self.shape[0])
-        for i in xrange(self.shape[0]):
-            out[i] = func(data_2d[i, :], *args, **kwargs)
+        # Preallocate output array
+        if axis == 0:
+            out = CArray.zeros(self.shape[1])
+            for i in xrange(self.shape[1]):
+                out[i] = func(data_2d[:, i], *args, **kwargs)
+        elif axis == 1:
+            out = CArray.zeros(self.shape[0])
+            for i in xrange(self.shape[0]):
+                out[i] = func(data_2d[i, :], *args, **kwargs)
+        else:
+            raise ValueError("`apply_along_axis` currently available "
+                             "for 1-D and 2-D arrays only.")
+
         return out
 
     # -------------------------------- #
