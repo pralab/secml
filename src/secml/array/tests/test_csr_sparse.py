@@ -1,17 +1,6 @@
-"""
-Created on 27/apr/2015
-
-This module tests the csr_sparse class.
-
-If you find any BUG, please notify authors first.
-
-@author: Davide Maiorca
-
-"""
-import unittest
 import numpy as np
 
-from secml.utils import CUnitTest
+from secml.utils import CUnitTest, fm
 from secml.array import Cdense, Csparse
 
 
@@ -31,39 +20,42 @@ class Testcsr_Csparse(CUnitTest):
         """Test save/load of sparse arrays"""
         self.logger.info("UNITTEST - Csparse - save/load")
 
-        # Cleaning temp file
+        test_file = fm.join(fm.abspath(__file__), 'test.txt')
+
+        # Cleaning test file
         try:
-            import os
-            os.remove('test.txt')
+            fm.remove_file(test_file)
         except (OSError, IOError) as e:
             self.logger.info(e.message)
 
-        self.logger.info("UNITTEST - Csparse - Testing save/load for sparse matrix")
+        self.logger.info(
+            "UNITTEST - Csparse - Testing save/load for sparse matrix")
 
-        self.sparse_matrix.save('test.txt')
+        self.sparse_matrix.save(test_file)
 
-        self.logger.info("Saving again with overwrite=False... IOError should be raised.")
+        self.logger.info(
+            "Saving again with overwrite=False... IOError should be raised.")
         with self.assertRaises(IOError) as e:
-            self.sparse_matrix.save('test.txt')
+            self.sparse_matrix.save(test_file)
         self.logger.info(e.exception)
 
-        loaded_sparse_matrix = Csparse.load('test.txt', dtype=int)
+        loaded_sparse_matrix = Csparse.load(test_file, dtype=int)
 
         self.assertFalse((loaded_sparse_matrix != self.sparse_matrix).any(),
                          "Saved and loaded arrays (matrices) are not equal!")
 
-        self.logger.info("UNITTEST - Csparse - Testing save/load for sparse vector")
+        self.logger.info(
+            "UNITTEST - Csparse - Testing save/load for sparse vector")
 
-        self.sparse_vector.save('test.txt', overwrite=True)
-        loaded_sparse_vector = Csparse.load('test.txt', dtype=int)
+        self.sparse_vector.save(test_file, overwrite=True)
+        loaded_sparse_vector = Csparse.load(test_file, dtype=int)
 
         self.assertFalse((loaded_sparse_vector != self.sparse_vector).any(),
                          "Saved and loaded arrays (vectors) are not equal!")
 
-        # Cleaning temp file
+        # Cleaning test file
         try:
-            import os
-            os.remove('test.txt')
+            fm.remove_file(test_file)
         except (OSError, IOError) as e:
             self.logger.info(e.message)
 
@@ -74,4 +66,4 @@ class Testcsr_Csparse(CUnitTest):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

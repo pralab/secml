@@ -1,4 +1,3 @@
-import unittest
 from secml.utils import CUnitTest
 
 from secml.array import CArray
@@ -6,6 +5,7 @@ from secml.data.loader import CDLRandom, CDLRandomBlobs
 from secml.classifiers import CClassifierSVM
 from secml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.kernel import CKernelRBF
+from secml.utils import fm
 
 from secml.figure import CFigure
 from secml.optimization.constraints import \
@@ -228,9 +228,11 @@ class TestEvasionMulticlass(CUnitTest):
         fig.show()
 
         k_name = self.kernel.class_type if self.kernel is not None else 'lin'
-        fig.savefig("multiclass_{:}c_kernel-{:}_"
-                    "target-{:}.pdf".format(
-            self.ds.num_classes, k_name, self.y_target))
+        fig.savefig(fm.join(
+            fm.abspath(__file__),
+            "multiclass_{:}c_kernel-{:}_target-{:}.pdf".format(
+                self.ds.num_classes, k_name, self.y_target)
+        ))
 
     #######################################
     # PRIVATE METHODS
@@ -301,4 +303,4 @@ class TestEvasionMulticlass(CUnitTest):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

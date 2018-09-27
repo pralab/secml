@@ -1,9 +1,10 @@
-import unittest
+from secml.utils import CUnitTest
 from test_c_evasion import CEvasionTestCases
 
 from secml.classifiers import CClassifierSVM
 from secml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.features.normalization import CNormalizerMinMax
+from secml.utils import fm
 
 
 class TestEvasionLinearL1(CEvasionTestCases.TestCEvasion):
@@ -34,8 +35,8 @@ class TestEvasionLinearL1(CEvasionTestCases.TestCEvasion):
         self.ub = +5.0
 
         self.grid_limits = [(-5.5, 5.5), (-5.5, 5.5)]
-        self.name_file = 'L1_linear.pdf'
+        self.name_file = fm.join(fm.abspath(__file__), 'L1_linear.pdf')
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()
