@@ -1,10 +1,10 @@
 import numpy as np
 
 from secml.utils import CUnitTest, fm
-from secml.array import CDense
+from secml.array.c_dense import CDense
 
 
-class TestCndarray(CUnitTest):
+class TestCDense(CUnitTest):
     """Unit test for CDense."""
 
     def test_save_load(self):

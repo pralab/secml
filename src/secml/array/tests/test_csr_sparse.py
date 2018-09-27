@@ -1,10 +1,11 @@
 import numpy as np
 
 from secml.utils import CUnitTest, fm
-from secml.array import CDense, CSparse
+from secml.array.c_dense import CDense
+from secml.array.c_sparse import CSparse
 
 
-class Testcsr_Csparse(CUnitTest):
+class TestCSparse(CUnitTest):
     """Unit test for CSparse."""
      
     def setUp(self):

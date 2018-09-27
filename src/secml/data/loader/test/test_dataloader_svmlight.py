@@ -2,7 +2,7 @@ from secml.utils import CUnitTest
 
 from secml.data import CDataset
 from secml.data.loader import CDataLoaderSvmLight
-from secml.array import CArray, CSparse, CDense
+from secml.array import CArray
 from secml.utils import fm
 
 
