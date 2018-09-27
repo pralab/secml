@@ -1167,7 +1167,7 @@ class CDense(object):
         """Element-wise logical ! (not) of array elements."""
         return self.__class__(np.logical_not(self.tondarray()))
 
-    def norm(self, order=None, axis=None):
+    def norm(self, order=None, axis=None, keepdims=False):
         """Wrapper for numpy norm."""
         if (self.ndim < 2 or axis is not None) and order == 'fro':
             # 'fro' is a matrix norm
@@ -1189,12 +1189,14 @@ class CDense(object):
 
         if axis is None:
             return out
-        elif self.ndim <= 1:
+        elif self.ndim <= 1 or keepdims is False:
             # custom axis and flat vectors, return a flat vector
             return out.ravel()
-        elif self.ndim == 2:
-            # for matrices always return a 2D array consistent with axis
+        elif self.ndim == 2 and keepdims is True:
+            # return a 2D array consistent with axis if keepdims=True
             return out.atleast_2d().T if axis == 1 else out.atleast_2d()
+        else:
+            ValueError("unknown use of `axis` and `keepdims` parameters")
 
     def sum(self, axis=None, keepdims=False):
         """Wrapper for numpy sum"""

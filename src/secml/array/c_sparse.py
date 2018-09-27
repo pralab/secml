@@ -965,7 +965,7 @@ class CSparse(object):
 
         return CDense(norm(self.tocsr(), ord=order, axis=1)).astype(float)
 
-    def norm_2d(self, order=None, axis=None):
+    def norm_2d(self, order=None, axis=None, keepdims=False):
         """Return the matrix norm of store data."""
         if axis is not None and (is_int(order) and order < 0):
             # Scipy does not supports negative norms along axis
@@ -987,10 +987,10 @@ class CSparse(object):
 
         out = CDense(norm(self.tocsr(), ord=order, axis=axis)).astype(float)
 
-        if axis is None:
-            return out  # out is already a vector, so nothing to do
-        else:  # return a column if needed
+        if axis is not None or keepdims is True:
             return out.atleast_2d().T if axis == 1 else out.atleast_2d()
+        else:
+            return out  # out is already a vector, so nothing to do
 
     def shuffle(self):
         """Shuffle array data in-place."""

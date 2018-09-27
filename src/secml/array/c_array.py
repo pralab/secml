@@ -3844,7 +3844,7 @@ class CArray(object):
 
         return self._instance_array(array._data.norm(order))
 
-    def norm_2d(self, order=None, axis=None):
+    def norm_2d(self, order=None, axis=None, keepdims=True):
         """Matrix norm or vector norm along axis.
 
         This function provides matrix norm or vector norm along axis
@@ -3864,6 +3864,10 @@ class CArray(object):
             If axis is an integer, it specifies the axis of array along
             which to compute the vector norms.
             If axis is None then the matrix norm is returned.
+        keepdims : bool, optional
+            If this is set to True (default), the result will
+            broadcast correctly against the original array.
+            Otherwise resulting array is flattened.
 
         Returns
         -------
@@ -3926,11 +3930,11 @@ class CArray(object):
             raise NotImplementedError
 
         if self.issparse is True:
-            out = self._instance_array(
-                self.atleast_2d()._data.norm_2d(order, axis=axis))
+            out = self._instance_array(self.atleast_2d()._data.norm_2d(
+                order, axis=axis, keepdims=keepdims))
         else:
-            out = self._instance_array(
-                self.atleast_2d()._data.norm(order, axis=axis))
+            out = self._instance_array(self.atleast_2d()._data.norm(
+                order, axis=axis, keepdims=keepdims))
 
         # Return float if axis is None, else CArray
         if axis is None:
