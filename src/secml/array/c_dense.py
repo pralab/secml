@@ -948,6 +948,10 @@ class CDense(_CArrayInterface):
         """Wrapper for numpy ravel"""
         return self.__class__(np.ravel(self.tondarray(), order))
 
+    def flatten(self, order=None):
+        """Wrapper for numpy flatten."""
+        return self.__class__(self.tondarray().flatten(order))
+
     def reshape(self, shape):
         """Reshape array."""
         return self.__class__(self.tondarray().reshape(shape))

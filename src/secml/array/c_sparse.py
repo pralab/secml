@@ -944,6 +944,10 @@ class CSparse(_CArrayInterface):
         """Reshape sparse matrix to 1 x size array."""
         return self.reshape((1, self.size))
 
+    def flatten(self):
+        """Return a flattened copy of array."""
+        return self.ravel().deepcopy()
+
     def inv(self):
         """Compute the (multiplicative) inverse of a square matrix."""
         return self.__class__(inv(self._data))
