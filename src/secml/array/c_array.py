@@ -2768,10 +2768,9 @@ class CArray(object):
 
         Returns
         -------
-        index_array : CArray, int
-            Array of indices or single integer that sort the array
-            along the specified axis. In other words, array[index_array]
-            yields a sorted array.
+        CArray
+            Array of indices that sort the array along the specified axis.
+            In other words, array[index_array] yields a sorted array.
 
         See Also
         --------
@@ -2793,11 +2792,7 @@ class CArray(object):
         CArray([1 0 3 2])
 
         """
-        if self.isdense:
-            return self._instance_array(self._data.argsort(axis=axis,
-                                                           kind=kind))
-        else:
-            return self._instance_array(self._data.argsort(axis=axis))
+        return self.__class__(self._data.argsort(axis=axis, kind=kind))
 
     def nan_to_num(self):
         """Replace nan with zero and inf with finite numbers.

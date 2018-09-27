@@ -1268,12 +1268,15 @@ class CSparse(object):
         else:
             raise ValueError("wrong sorting axis.")
 
-    def argsort(self, axis=-1):
+    def argsort(self, axis=-1, kind='quicksort'):
         """
         Returns the indices that would sort an array.
         If possible is better if you use sort function 
         axis= -1 order based on last axis (which in sparse matrix is 1 horizontal)
         """
+        if kind != 'quicksort':
+            raise ValueError("only `quicksort` algorithm is supported")
+
         # for all element of chosen axis
         if axis is None:
             array = self.ravel()
