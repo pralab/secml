@@ -48,11 +48,11 @@ deploy:xenial:
     - LLVM_CONFIG=/usr/bin/llvm-config-3.7 pip install -r requirements.txt
     - python setup.py sdist --formats=zip
     - apt-get install -qq -y unzip > /dev/null
-    - unzip dist/AdversariaLib2-*
-    - cd AdversariaLib2-*
+    - unzip dist/SecML-Lib-*
+    - cd SecML-Lib-*
     - python setup.py install
     - python -c "import secml"
   artifacts:
-    name: "${CI_PROJECT_NAME}_${CI_BUILD_REF_NAME}"
+    name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
     paths:
-    - AdversariaLib2/dist/AdversariaLib2-*.zip
+    - ${CI_PROJECT_DIR}/dist/SecML-Lib-*.zip
