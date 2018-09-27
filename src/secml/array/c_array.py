@@ -1653,7 +1653,7 @@ class CArray(object):
         >>> CArray([1,2,3]).reshape(4)
         Traceback (most recent call last):
           ...
-        ValueError: total size of new array must be unchanged
+        ValueError: cannot reshape array of size 3 into shape (4,)
 
         """
         return self.__class__(self._data.reshape(newshape))
@@ -2391,14 +2391,14 @@ class CArray(object):
         >>> from secml.array import CArray
 
         >>> print CArray([[1,2]],tosparse=True).repmat(2,2)  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	1.0
-          (0, 1)	2.0
-          (0, 2)	1.0
-          (0, 3)	2.0
-          (1, 0)	1.0
-          (1, 1)	2.0
-          (1, 2)	1.0
-          (1, 3)	2.0)
+        CArray(  (0, 0)	1
+          (0, 1)	2
+          (0, 2)	1
+          (0, 3)	2
+          (1, 0)	1
+          (1, 1)	2
+          (1, 2)	1
+          (1, 3)	2)
 
         >>> print CArray([1,2]).repmat(2,2)
         CArray([[1 2 1 2]
@@ -2468,7 +2468,7 @@ class CArray(object):
         >>> print x.repeat(2, axis=1)  # No columns to repeat
         Traceback (most recent call last):
           ...
-        ValueError: axis(=1) out of bounds
+        AxisError: axis 1 is out of bounds for array of dimension 1
 
         """
         if isinstance(repeats, (self.__class__, list)):
@@ -2779,7 +2779,8 @@ class CArray(object):
         >>> array = CArray([-1,0,1,np.nan,np.inf,-np.inf])
         >>> array.nan_to_num()
         >>> print array
-        CArray([ -1.0e+000   0.0e+000   1.0e+000   0.0e+000   1.8e+308  -1.8e+308])
+        CArray([ -1.000000e+000   0.000000e+000   1.000000e+000   0.000000e+000
+           1.797693e+308  -1.797693e+308])
 
         >>> # Restoring default print precision
         >>> np.set_printoptions(precision=8)
@@ -3458,10 +3459,10 @@ class CArray(object):
         >>> from secml.array import CArray
 
         >>> print CArray(2).sqrt()
-        CArray([ 1.41421356])
+        CArray([ 1.414214])
 
         >>> print CArray([2,3,4]).sqrt()
-        CArray([ 1.41421356  1.73205081  2.        ])
+        CArray([ 1.414214  1.732051  2.      ])
 
         >>> print CArray([[2,3],[4,5]],tosparse=True).sqrt()  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1.41421356237
@@ -3757,7 +3758,7 @@ class CArray(object):
         >>> print CArray([[1,2],[2,4]]).norm()
         Traceback (most recent call last):
             ...
-        ValueError: Array has shape (2, 2). Call .norm_2d() to compute matricial norm or specify axis.
+        ValueError: Array has shape (2, 2). Call .norm_2d() to compute matricial norm or vector norm along axis.
 
         """
         if self.is_vector_like is False:
@@ -3952,8 +3953,8 @@ class CArray(object):
         CArray([ 0.  1.  0. -1. -0. -1. -0.  1.])
 
         >>> print (CArray([[45,135],[225,315]])*pi/180).sin()
-        CArray([[ 0.70710678  0.70710678]
-         [-0.70710678 -0.70710678]])
+        CArray([[ 0.707107  0.707107]
+         [-0.707107 -0.707107]])
 
         """
         return self.__class__(self._data.sin())
@@ -3980,8 +3981,8 @@ class CArray(object):
         CArray([ 1.  0. -1. -0.  1.  0. -1. -0.])
 
         >>> print (CArray([[45,135],[225,315]])*pi/180).cos()
-        CArray([[ 0.70710678 -0.70710678]
-         [-0.70710678  0.70710678]])
+        CArray([[ 0.707107 -0.707107]
+         [-0.707107  0.707107]])
 
         """
         return self.__class__(self._data.cos())
@@ -4014,7 +4015,7 @@ class CArray(object):
         >>> from secml.array import CArray
 
         >>> print CArray([0,1,3]).exp()
-        CArray([  1.           2.71828183  20.08553692])
+        CArray([  1.         2.718282  20.085537])
 
         """
         return self.__class__(self._data.exp())
@@ -4055,7 +4056,7 @@ class CArray(object):
         >>> from secml.array import CArray
 
         >>> print CArray([0,1,3]).log()
-        CArray([       -inf  0.          1.09861229])
+        CArray([     -inf  0.        1.098612])
 
         """
         return self.__class__(self._data.log())
@@ -4096,7 +4097,7 @@ class CArray(object):
         >>> from secml.array import CArray
 
         >>> print CArray([0,1,3]).log10()
-        CArray([       -inf  0.          0.47712125])
+        CArray([     -inf  0.        0.477121])
 
         """
         return self.__class__(self._data.log10())
@@ -4169,10 +4170,10 @@ class CArray(object):
         >>> from secml.array import CArray
 
         >>> print CArray([1,2,3]).normpdf()
-        CArray([ 0.24197072  0.05399097  0.00443185])
+        CArray([ 0.241971  0.053991  0.004432])
 
         >>> print CArray([1,2,3]).normpdf(2,0.5)
-        CArray([ 0.10798193  0.79788456  0.10798193])
+        CArray([ 0.107982  0.797885  0.107982])
 
         """
         return self.__class__(self._data.normpdf(float(mu), float(sigma)))

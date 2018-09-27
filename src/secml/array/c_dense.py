@@ -394,7 +394,7 @@ class CDense(object):
         Parameters
         ----------
         other : CDense or scalar or bool
-            Element to add to current array. If a Cdense, element-wise
+            Element to add to current array. If a CDense, element-wise
             addition will be performed. If scalar or boolean, the element
             will be sum to each array element.
 
@@ -436,7 +436,7 @@ class CDense(object):
         Parameters
         ----------
         other : CDense or scalar or bool
-            Element to subtract to current array. If a Cdense, element-wise
+            Element to subtract to current array. If a CDense, element-wise
             subtraction will be performed. If scalar or boolean, the element
             will be subtracted to each array element.
 
@@ -478,7 +478,7 @@ class CDense(object):
         Parameters
         ----------
         other : CDense or scalar or bool
-            Element to multiplied to current array. If a Cdense, element-wise
+            Element to multiplied to current array. If a CDense, element-wise
             product will be performed. If scalar or boolean, the element
             will be multiplied to each array element.
 
@@ -520,7 +520,7 @@ class CDense(object):
         Parameters
         ----------
         other : CDense or scalar or bool
-            Element to divided to current array. If a Cdense, element-wise
+            Element to divided to current array. If a CDense, element-wise
             division will be performed. If scalar or boolean, the element
             will be divided to each array element.
 
@@ -601,7 +601,7 @@ class CDense(object):
         ----------
         power : CDense or scalar or bool
             Power to use. If scalar or boolean, each array element will be
-            elevated to power. If a Cdense, each array element will be
+            elevated to power. If a CDense, each array element will be
             elevated to the corresponding element of the input array.
 
         Returns
@@ -641,7 +641,7 @@ class CDense(object):
         Parameters
         ----------
         other : CDense or scalar or bool
-            Element to be compared. If a Cdense, element-wise
+            Element to be compared. If a CDense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
@@ -663,7 +663,7 @@ class CDense(object):
         Parameters
         ----------
         other : CDense or scalar or bool
-            Element to be compared. If a Cdense, element-wise
+            Element to be compared. If a CDense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
@@ -685,7 +685,7 @@ class CDense(object):
         Parameters
         ----------
         other : CDense or scalar or bool
-            Element to be compared. If a Cdense, element-wise
+            Element to be compared. If a CDense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
@@ -707,7 +707,7 @@ class CDense(object):
         Parameters
         ----------
         other : CDense or scalar or bool
-            Element to be compared. If a Cdense, element-wise
+            Element to be compared. If a CDense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
@@ -729,7 +729,7 @@ class CDense(object):
         Parameters
         ----------
         other : CDense or scalar or bool
-            Element to be compared. If a Cdense, element-wise
+            Element to be compared. If a CDense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
@@ -751,7 +751,7 @@ class CDense(object):
         Parameters
         ----------
         other : CDense or scalar or bool
-            Element to be compared. If a Cdense, element-wise
+            Element to be compared. If a CDense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
@@ -944,7 +944,7 @@ class CDense(object):
         each containing the indexes (one per dimension) of an element that
         satisfies the given condition.
 
-        When using a list or array of N elements to index a Cdense of N
+        When using a list or array of N elements to index a CDense of N
         dimensions, we get the corresponding elements (standard ndarray
         indexing).
 
@@ -955,7 +955,7 @@ class CDense(object):
         >>> idx
         [[0, 1, 1, 1], [2, 0, 1, 2]]
         >>> a[idx]
-        Cdense([3, 4, 5, 6])
+        CDense([3, 4, 5, 6])
 
         """
         # size instead of shape as we just need one condition for each element
@@ -1074,19 +1074,19 @@ class CDense(object):
         >>> x = CDense([[1,2],[3,4]])
         
         >>> x.repeat(2)
-        Cdense([1, 1, 2, 2, 3, 3, 4, 4])
+        CDense([1, 1, 2, 2, 3, 3, 4, 4])
         
         >>> x.repeat(2, axis=1)
-        Cdense([[1, 1, 2, 2],
+        CDense([[1, 1, 2, 2],
                [3, 3, 4, 4]])
         >>> x.repeat(2, axis=0)
-        Cdense([[1, 2],
+        CDense([[1, 2],
                [1, 2],
                [3, 4],
                [3, 4]])
         
         >>> x.repeat([1, 2], axis=0)
-        Cdense([[1, 2],
+        CDense([[1, 2],
                [3, 4],
                [3, 4]])
 
@@ -1712,7 +1712,7 @@ class CDense(object):
         >>> a = [[1, 2, 3], [4, 5], [6, 7]]
 
         >>> CDense.comblist(a)
-        Cdense([[ 1.,  4.,  6.],
+        CDense([[ 1.,  4.,  6.],
                [ 1.,  4.,  7.],
                [ 1.,  5.,  6.],
                [ 1.,  5.,  7.],
@@ -1784,21 +1784,21 @@ class CDense(object):
         >>> y = CDense( [2,4,6] )
         >>> xv, yv = CDense.meshgrid((x, y))
         >>> xv
-        Cdense([[1, 3, 5],
+        CDense([[1, 3, 5],
                [1, 3, 5],
                [1, 3, 5]])
         >>> yv
-        Cdense([[2, 2, 2],
+        CDense([[2, 2, 2],
                [4, 4, 4],
                [6, 6, 6]])
 
         >>> xv, yv = CDense.meshgrid((x, y), indexing='ij')
         >>> xv
-        Cdense([[1, 1, 1],
+        CDense([[1, 1, 1],
                [3, 3, 3],
                [5, 5, 5]])
         >>> yv
-        Cdense([[2, 4, 6],
+        CDense([[2, 4, 6],
                [2, 4, 6],
                [2, 4, 6]])
 

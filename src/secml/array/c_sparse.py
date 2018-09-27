@@ -355,7 +355,7 @@ class CSparse(object):
         Returns
         -------
         array : CSparse or CDense
-            If input is a Csparse, a Csparse will be returned.
+            If input is a CSparse, a CSparse will be returned.
             If input is a Cdense, a Cdense will be returned.
 
         """
@@ -386,7 +386,7 @@ class CSparse(object):
         Returns
         -------
         array : CSparse or Cdense
-            If input is a Csparse, a Csparse will be returned.
+            If input is a CSparse, a CSparse will be returned.
             If input is a Cdense, a Cdense will be returned.
 
         """
@@ -459,7 +459,7 @@ class CSparse(object):
         Returns
         -------
         array : CSparse or Cdense
-            Array after division. Csparse if other is a scalar or bool,
+            Array after division. CSparse if other is a scalar or bool,
             Cdense otherwise.
 
         """
@@ -574,8 +574,8 @@ class CSparse(object):
         Returns
         -------
         array : CSparse or Cdense
-            If input is a Csparse or a scalar or a bool,
-            a Csparse will be returned. If input is a Cdense,
+            If input is a CSparse or a scalar or a bool,
+            a CSparse will be returned. If input is a Cdense,
             a Cdense will be returned.
 
         """
@@ -601,8 +601,8 @@ class CSparse(object):
         Returns
         -------
         array : CSparse or Cdense
-            If input is a Csparse or a scalar or a bool,
-            a Csparse will be returned. If input is a Cdense,
+            If input is a CSparse or a scalar or a bool,
+            a CSparse will be returned. If input is a Cdense,
             a Cdense will be returned.
 
         """
@@ -628,8 +628,8 @@ class CSparse(object):
         Returns
         -------
         array : CSparse or Cdense
-            If input is a Csparse or a scalar or a bool,
-            a Csparse will be returned. If input is a Cdense,
+            If input is a CSparse or a scalar or a bool,
+            a CSparse will be returned. If input is a Cdense,
             a Cdense will be returned.
 
         """
@@ -655,8 +655,8 @@ class CSparse(object):
         Returns
         -------
         array : CSparse or Cdense
-            If input is a Csparse or a scalar or a bool,
-            a Csparse will be returned. If input is a Cdense,
+            If input is a CSparse or a scalar or a bool,
+            a CSparse will be returned. If input is a Cdense,
             a Cdense will be returned.
 
         """
@@ -682,8 +682,8 @@ class CSparse(object):
         Returns
         -------
         array : CSparse or CDense
-            If input is a Csparse or a scalar or a bool,
-            a Csparse will be returned. If input is a Cdense,
+            If input is a CSparse or a scalar or a bool,
+            a CSparse will be returned. If input is a Cdense,
             a Cdense will be returned.
 
         """
@@ -709,8 +709,8 @@ class CSparse(object):
         Returns
         -------
         array : CSparse or CDense
-            If input is a Csparse or a scalar or a bool,
-            a Csparse will be returned. If input is a Cdense,
+            If input is a CSparse or a scalar or a bool,
+            a CSparse will be returned. If input is a Cdense,
             a Cdense will be returned.
 
         """
@@ -1431,14 +1431,14 @@ class CSparse(object):
 
         Parameters
         ----------
-        y : csr_Csparse or array_like
+        y : CSparse or array_like
             The array like object holding the elements to compare
             current array with. Must have the same shape of first
             array.
 
         Returns
         -------
-        out_and : csr_Csparse or bool
+        out_and : CSparse or bool
             The element-wise logical AND between first array and y.
 
         Examples
@@ -1484,14 +1484,14 @@ class CSparse(object):
 
         Parameters
         ----------
-        y : csr_Csparse or array_like
+        y : CSparse or array_like
             The array like object holding the elements to compare
             current array with. Must have the same shape of first
             array.
 
         Returns
         -------
-        out_and : csr_Csparse or bool
+        out_and : CSparse or bool
             The element-wise logical OR between first array and y.
          
 
