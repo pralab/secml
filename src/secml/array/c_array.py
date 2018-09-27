@@ -2319,13 +2319,11 @@ class CArray(object):
     def bincount(self):
         """Count number of occurrences of each value in array of non-negative ints.
 
-        Only flat arrays of integer dtype are supported.
-
-        DENSE FORMAT ONLY
+        Only vector like arrays of integer dtype are supported.
 
         Returns
         -------
-        counts : CArray
+        CArray
             The occurrence number for every different element of array.
             The length of output array is equal to a.max()+1.
 
@@ -2333,12 +2331,13 @@ class CArray(object):
         --------
         >>> from secml.array import CArray
 
-        >>> a = CArray([1, 2, 3, 1, 6])
+        >>> a = CArray([1, 2, 3, 1, 6], tosparse=True)
         >>> print a.bincount()
         CArray([0 2 1 1 0 0 1])
 
         """
-        if self.ndim > 1:
+        if (self.isdense and self.ndim > 1) or \
+                (self.issparse and not self.is_vector_like):
             raise ValueError("array must be 1-Dimensional")
         return self.__class__(self._data.bincount())
 

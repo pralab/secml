@@ -2892,7 +2892,7 @@ class TestCArray(CUnitTest):
             res = array.bincount()
             self.logger.info("array.bincount():\n{:}".format(res))
 
-            self.assertEqual(res.ndim, 1)
+            self.assertTrue(res.is_vector_like)
             self.assertEqual(res.size, array.max()+1)
             self.assertFalse((res != expected).any())
 
@@ -2901,9 +2901,9 @@ class TestCArray(CUnitTest):
         with self.assertRaises(ValueError):
             self.array_dense.bincount()
         with self.assertRaises(ValueError):
-            # NotImplementedError is not raised as ValueError is raised first
             self.array_sparse.bincount()
 
+        _check_bincount(self.row_sparse, CArray([1, 0, 0, 0, 1, 0, 1]))
         _check_bincount(self.row_flat_dense, CArray([1, 0, 0, 0, 1, 0, 1]))
         _check_bincount(self.single_flat_dense, CArray([0, 0, 0, 0, 1]))
         _check_bincount(self.single_bool_flat_dense, CArray([0, 1]))

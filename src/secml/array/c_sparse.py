@@ -1304,8 +1304,12 @@ class CSparse(object):
         return map(list, scs.find(condition.tocsr()))[:2]
 
     def bincount(self):
-        raise NotImplementedError(
-            "Bincount not implemented for sparse! Convert to dense first.")
+        """Count number of occurrences of each value in array of non-negative ints."""
+        n_zeros = self.size - self.nnz
+        nnz_bincount = np.bincount(self.get_data().data)
+        # The number of zeros must be replaced (no zeros in nnz_data)
+        nnz_bincount[0] = n_zeros
+        return CDense(nnz_bincount)
 
     def binary_search(self, value):
         raise NotImplementedError(
