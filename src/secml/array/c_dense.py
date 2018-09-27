@@ -16,12 +16,13 @@ import matplotlib.mlab as mlab
 
 from copy import deepcopy
 
+from c_array_interface import _CArrayInterface
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_int, is_bool
 from secml.array.array_utils import is_vector_index
 
 
-class CDense(object):
+class CDense(_CArrayInterface):
     """Dense array. Encapsulation for np.ndarray."""
     __slots__ = '_data'  # CDense has only one slot for the ndarray
 

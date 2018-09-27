@@ -11,12 +11,13 @@ import scipy.sparse as scs
 from scipy.sparse.linalg import inv, norm
 import numpy as np
 
+from c_array_interface import _CArrayInterface
 from c_dense import CDense
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_intlike, is_int, is_bool
 
 
-class CSparse(object):
+class CSparse(_CArrayInterface):
     """Sparse array. Encapsulation for scipy.sparse.csr_matrix."""
     __slots__ = '_data'  # CSparse has only one slot for the scs.csr_matrix
 

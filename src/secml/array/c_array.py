@@ -9,13 +9,14 @@ from copy import deepcopy
 import numpy as np
 import scipy.sparse as scs
 
+from c_array_interface import _CArrayInterface
 from c_dense import CDense
 from c_sparse import CSparse
 from secml.core.type_utils import \
     is_int, is_scalar, is_bool, is_ndarray, is_scsarray, to_builtin
 
 
-class CArray(object):
+class CArray(_CArrayInterface):
     """Creates an array.
 
     Data will be stored in dense form by default.
