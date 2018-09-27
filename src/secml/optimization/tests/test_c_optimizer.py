@@ -1,81 +1,70 @@
-"""
-Created on 18 feb 2016
-
-@author: Davide Maiorca
-"""
-import unittest
 from secml.utils import CUnitTest
 
 from secml.optimization.c_optimizer import COptimizer
-from secml.optimization.constraints import CConstraintBox
 from secml.optimization.function import CFunction
-from secml.figure import CFigure
 from secml.array import CArray
 
 
 class TestCOptimizer(CUnitTest):
     """Test for COptimizer class."""
 
+    def setUp(self):
+
+        avail_funcs = ['3h_camel', 'beale', 'mc_cormick', 'rosenbrock']
+
+        # Instancing the available functions to test optimizer
+        self.funcs = {}
+        for fun_id in avail_funcs:
+            self.funcs[fun_id] = CFunction.create(fun_id)
+
     def test_minimize(self):
-        """Testing function minimization."""
-        self.logger.info("Test for minimize methods ... ")
-        self.n_ft = 100
-        A = CArray.eye(self.n_ft)
-        # b = CArray.zeros(self.n_ft).T
-        b = -0.1 * CArray.ones(self.n_ft).T
-        self.circle = CFunction.create('quadratic', A, b, 0)
-        startPoint = CArray.ones(self.n_ft)
+        """Test for COptimizer.minimize() method."""
+        self.logger.info("Test for COptimizer.minimize() method.")
 
-        opt = []
-        opt.append(COptimizer(solver='gradient', max_iter=2000, eta=0.1))
-        opt.append(COptimizer(solver='descent_direction',
-                              max_iter=2000,
-                              eta=0.005, n_dimensions=100))
+        x0 = CArray([0., 0.])  # Starting point for minimization
 
-        box = CConstraintBox(lb=-1, ub=1)
-        for i in range(len(opt)):
-            with self.timer():
-                # TODO: move inside optimizer/solver
-                self.circle.reset()  # resets grad and fun evals
-                self.logger.info("**** Testing Optimizer " + str(i) +
-                                 " ****")
-                opt[i].minimize(self.circle, startPoint, box)
-                self.logger.info("Result point : " + str(opt[i].x_seq[-1, :]))
-                self.logger.info("Number of fun/grad evaluations: " +
-                                 str(self.circle.n_fun_eval) + "/" +
-                                 str(self.circle.n_grad_eval))
+        for fun_id in self.funcs:
 
-        fig = CFigure(height=6, width=12)
-        if self.n_ft is 2:
+            fun = self.funcs[fun_id]
 
-            grid_limits = [(-4, 4), (-4, 4)]
-            for i in xrange(1, len(opt) + 1):
-                fig.subplot(1, len(opt) + 1, i)
+            self.logger.info(
+                "Testing minimization of {:}".format(fun.__class__.__name__))
 
-                fig.switch_sptype(sp_type='function')
+            opt = COptimizer(fun)
+            min_x, jac, fun_val, res = opt.minimize(
+                x0, method='BFGS', options={'gtol': 1e-6, 'disp': True})
 
-                fig.sp.plot_fobj(func=CArray.apply_fun_torow, plot_levels=False,
-                                 grid_limits=grid_limits, func_args=(self.circle.fun, ))
+            self.logger.info("Found minimum: {:}".format(min_x))
+            self.logger.info("Fun value @ minimum: {:}".format(fun_val))
 
-                fig.sp.plot_fobj(func=box.constraint, plot_background=False, levels=[0], n_grid_points=50,
-                                 grid_limits=grid_limits)
+            # Round results for easier asserts
+            self.assertAlmostEqual(
+                round(fun_val, 4), fun.global_min(), places=4)
+            self.assertFalse(
+                (min_x.round(decimals=4) != fun.global_min_x()).any())
 
-                fig.sp.plot_path(opt[i - 1].x_seq)
-                fig.sp.title("Path of optimizer " + str(i - 1))
-            fig.subplot(1, len(opt) + 1, len(opt) + 1)
-            for i in xrange(len(opt)):
-                fig.sp.plot(opt[i].f_seq, label='opt ' + str(i))
-            fig.sp.legend()
-            fig.sp.title("Objective functions g(x)")
-            fig.show()
+    def test_approx_fprime_check_grad(self):
+        """Test for COptimizer.approx_fprime() and .check_grad() methods."""
+        self.logger.info(
+            "Test for COptimizer.approx_fprime() and .check_grad() methods.")
 
-        else:
-            for i in xrange(len(opt)):
-                fig.sp.plot(opt[i].f_seq, label='opt ' + str(i))
-            fig.sp.legend()
-            fig.sp.title("Objective functions g(x)")
-            fig.show()
+        x0 = CArray([0., 0.])  # Starting point for minimization
+
+        for fun_id in self.funcs:
+
+            fun = self.funcs[fun_id]
+
+            self.logger.info(
+                "Testing grad approx of {:}".format(fun.__class__.__name__))
+
+            opt = COptimizer(fun)
+            grad_err = opt.check_grad(x0)
+
+            self.logger.info(
+                "(Real grad - approx).norm(): {:}".format(grad_err))
+
+            self.assertLess(grad_err, 1e-3)
 
 
 if __name__ == "__main__":
-    unittest.main()
+    CUnitTest.main()

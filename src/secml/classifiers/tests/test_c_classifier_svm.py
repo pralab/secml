@@ -209,7 +209,7 @@ class TestSVM(CUnitTest):
             svm.train(self.dataset)
 
             for i in random.sample(xrange(self.dataset.num_samples), 10):
-                pattern = self.dataset.X[i, :].get_data()
+                pattern = self.dataset.X[i, :]
 
                 self.logger.info("P {:}: {:}".format(i, pattern))
 

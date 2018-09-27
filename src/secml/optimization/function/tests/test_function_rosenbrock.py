@@ -14,6 +14,11 @@ class TestCFunctionRosenbrock(CUnitTest):
 
         self.fun_obj = CFunction.create('rosenbrock')
 
+        self.logger.info("Global minimum: {:}".format(
+            self.fun_obj.global_min()))
+        self.logger.info("Global minimum @: {:}".format(
+            self.fun_obj.global_min_x()))
+
     def test_function_result(self):
         """Test if function returns the correct value."""
         x = CArray([-2, 5])

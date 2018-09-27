@@ -14,19 +14,23 @@ class TestCFunctionMcCormick(CUnitTest):
 
         self.fun_obj = CFunction.create('mc_cormick')
 
+        self.logger.info("Global minimum: {:}".format(
+            self.fun_obj.global_min()))
+        self.logger.info("Global minimum @: {:}".format(
+            self.fun_obj.global_min_x()))
+
     def test_function_result(self):
         """Test if function returns the correct value."""
-        x = CArray([-0.54719, -1.54719])
-
-        correct_result = -1.9133
+        x = CArray([-0.5472, -1.5472])
 
         funct_res = self.fun_obj.fun(x)
 
-        self.logger.info("Correct result: {:}".format(correct_result))
+        self.logger.info(
+            "Correct result: {:}".format(self.fun_obj.global_min()))
         self.logger.info("Function result: {:}".format(funct_res))
 
         self.assertTrue(is_scalar(funct_res))
-        self.assertAlmostEqual(correct_result, funct_res, places=3)
+        self.assertAlmostEqual(self.fun_obj.global_min(), funct_res, places=4)
 
     def test_2D(self):
         """Plot of a 2D example."""

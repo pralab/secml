@@ -156,3 +156,47 @@ class CFunction(CCreator):
     def is_equal(self, x, val, tol=1e-6):
         """Evaluates if function value is close to `val` within tol."""
         return True if abs(float(self.fun(x)) - val) <= tol else False
+
+    def global_min(self):
+        """Value of the global minimum of the function (if known).
+
+        Returns
+        -------
+        float
+            Value of the global minimum of the function.
+
+        """
+        raise NotImplementedError
+
+    def global_min_x(self):
+        """Global minimum point of the function (if known).
+
+        Returns
+        -------
+        CArray
+            The global minimum point of the function.
+
+        """
+        raise NotImplementedError
+
+    def global_max(self):
+        """Value of the global maximum of the function (if known).
+
+        Returns
+        -------
+        float
+            Value of the global maximum of the function.
+
+        """
+        raise NotImplementedError
+
+    def global_max_x(self):
+        """Global maximum point of the function (if known).
+
+        Returns
+        -------
+        CArray
+            The global maximum point of the function.
+
+        """
+        raise NotImplementedError
