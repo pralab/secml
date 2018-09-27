@@ -14,8 +14,6 @@ from c_sparse import CSparse
 from secml.core.type_utils import \
     is_int, is_scalar, is_bool, is_ndarray, is_scsarray, to_builtin
 
-__all__ = ['is_array', 'is_array_buffer']
-
 
 class CArray(object):
     """Creates an array.
@@ -143,7 +141,7 @@ class CArray(object):
             # Probably the input is an array buffer or NotImplemented
             pass
 
-        if is_array_buffer(data):  # CDense, CSparse
+        if isinstance(data, (CDense, CSparse)):  # CDense, CSparse
             out = self.__class__(data)
             if out.size == 1:
                 # For (1,) or (1, 1) array return the contained scalar
@@ -5085,16 +5083,6 @@ class CArray(object):
         """
         import itertools
         return CArray(list(itertools.chain.from_iterable(iterables_list)))
-
-
-def is_array(x):
-    """Return True if input is a CArray."""
-    return isinstance(x, CArray)
-
-
-def is_array_buffer(x):
-    """Return True if CArray data buffer (CDense or CSparse)."""
-    return isinstance(x, (CDense, CSparse))
 
 
 if __name__ == "__main__":
