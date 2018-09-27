@@ -1780,3 +1780,8 @@ class CSparse(object):
     def comblist(cls, list_of_list, dtype=float):
         """Return the norm of store data."""
         raise NotImplementedError
+
+    @classmethod
+    def meshgrid(cls, xi, indexing='xy'):
+        """Return coordinate matrices from coordinate vectors."""
+        raise NotImplementedError
