@@ -1203,6 +1203,10 @@ class CDense(_CArrayInterface):
         else:
             ValueError("unknown use of `axis` and `keepdims` parameters")
 
+    def norm_2d(self, order=None, axis=None, keepdims=True):
+        """Wrapper for numpy norm."""
+        return self.norm(order, axis, keepdims)
+
     def sum(self, axis=None, keepdims=False):
         """Wrapper for numpy sum"""
         if self.size == 0:
