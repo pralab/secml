@@ -8,11 +8,11 @@ from secml.utils import fm
 from secml.core.settings import PYTORCH_MODELS_DIR
 
 from secml.data.loader import CDataLoaderCIFAR10
-from secml.torch_nn.classifiers import CTorchClassifierDenseNet
+from secml.pytorch.classifiers import CTorchClassifierDenseNet
 
-from secml.torch_nn.normalizers import CNormalizerMeanSTD
+from secml.pytorch.normalizers import CNormalizerMeanSTD
 
-from secml.torch_nn.models import dl_pytorch_model
+from secml.pytorch.models import dl_pytorch_model
 
 from secml.peval.metrics import CMetricAccuracy
 

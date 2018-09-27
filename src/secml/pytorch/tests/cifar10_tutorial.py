@@ -62,7 +62,7 @@ import torchvision.transforms as transforms
 from secml.core.settings import PYTORCH_DATA_DIR
 from secml.utils import fm
 from secml.data.loader import CDataLoaderCIFAR10
-from secml.torch_nn.data import CTorchDataset
+from secml.pytorch.data import CTorchDataset
 
 ########################################################################
 # The output of torchvision datasets are PILImage images of range [0, 1].
