@@ -623,17 +623,20 @@ class TestCArray(CUnitTest):
             self.logger.info("Array:\n{:}".format(array))
 
             if array.isdense:
-                array_unique, unique_indices, unique_inverse = array.unique(
-                    return_index=True, return_inverse=True)
+                array_unique, u_indices, u_inverse, u_counts = array.unique(
+                    return_index=True, return_inverse=True, return_counts=True)
                 # Testing call without the optional parameters
                 array_unique_single = array.unique()
                 self.assertFalse((array_unique != array_unique_single).any())
             elif array.issparse:
-                # return_index, return_inverse parameters are not available
-                # for sparse arrays
-                with self.assertRaises(ValueError):
-                    array.unique(return_index=True, return_inverse=True)
-                array_unique = array.unique()
+                # return_inverse parameters are not available
+                with self.assertRaises(NotImplementedError):
+                    array.unique(return_inverse=True)
+                array_unique, u_indices, u_counts = array.unique(
+                    return_index=True, return_counts=True)
+                # Testing call without the optional parameters
+                array_unique_single = array.unique()
+                self.assertFalse((array_unique != array_unique_single).any())
             else:
                 raise ValueError("Unknown input array format")
             self.logger.info("array.unique():\n{:}".format(array_unique))
@@ -650,13 +653,19 @@ class TestCArray(CUnitTest):
                     unique_ok = False
             self.assertTrue(unique_ok)
 
+            # unique_indices construct unique array from original FLAT one
+            self.assertFalse(
+                (array.ravel()[u_indices] != array_unique).any())
+
+            self.assertEqual(array_unique.size, u_counts.size)
+            for e_idx, e in enumerate(array_unique):
+                self.assertEqual(u_counts[e_idx], sum(array == e))
+
             if array.isdense:
+                self.assertEqual(array.size, u_inverse.size)
                 # unique_inverse reconstruct the original FLAT array
                 self.assertFalse(
-                    (array.ravel() != array_unique[unique_inverse]).any())
-                # unique_indices construct unique array from original FLAT one
-                self.assertFalse(
-                    (array.ravel()[unique_indices] != array_unique).any())
+                    (array.ravel() != array_unique[u_inverse]).any())
 
         _unique(self.array_dense, CArray([0, 1, 2, 3, 4, 5, 6]))
         _unique(self.array_sparse, CArray([0, 1, 2, 3, 4, 5, 6]))

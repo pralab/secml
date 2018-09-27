@@ -1045,10 +1045,12 @@ class CDense(object):
         return out.ravel() if axis is None or (
             self.ndim <= 1 and val.ndim <= 1 and axis == 1) else out
 
-    def unique(self, return_index=False, return_inverse=False):
+    def unique(self, return_index=False,
+               return_inverse=False, return_counts=False):
         """Wrapper for unique."""
-        out = np.unique(self.tondarray(), return_index, return_inverse)
-        if return_index is False and return_inverse is False:
+        out = np.unique(
+            self.tondarray(), return_index, return_inverse, return_counts)
+        if not any([return_index, return_inverse, return_counts]):
             return self.__class__(out)
         else:
             return tuple([self.__class__(elem) for elem in out])

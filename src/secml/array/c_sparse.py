@@ -1043,13 +1043,71 @@ class CSparse(object):
         """Replace nan with zero and inf with finite numbers."""
         self._data.data = np.nan_to_num(self._data.data)
 
-    def unique(self):
+    def unique(self, return_index=False,
+               return_inverse=False, return_counts=False):
         """Return unique array elements in dense format."""
-        unique_items = [0] if self.nnz != self.size else []  # We have at least a zero?
+        # Let's compute the number of zeros (will be used multiple times)
+        n_zeros = self.size - self.nnz
+        unique_items = [0] if n_zeros > 0 else []  # We have at least a zero?
         # Appending nonzero elements
-        unique_items += np.unique(self._data.data).tolist()
-        # Return unique elements with correct dtype
-        return CDense(unique_items).astype(self.dtype)
+        out = np.unique(self._data.data,
+                        return_index=return_index,
+                        return_inverse=return_inverse,
+                        return_counts=return_counts)
+        if not any([return_index, return_inverse, return_counts]):
+            # Return unique elements with correct dtype
+            return CDense(unique_items + out.tolist()).astype(self.dtype)
+        else:  # np.unique returned a tuple
+            unique_items = CDense(
+                unique_items + out[0].tolist()).astype(self.dtype)
+
+        # If any extra parameter has been specified, output will be a tuple
+        outputs = [unique_items]
+
+        if return_index is True:
+
+            # Indices will be extracted from flattened array
+            flat_a = self.ravel()
+
+            # csr_matrix indices must be sorted to extract unique indices
+            if not bool(flat_a.get_data().has_sorted_indices):
+                flat_a.get_data().sort_indices()
+
+            # Let's get the index of the first zero...
+            unique_index = CDense(dtype=int)
+            if n_zeros > 0:  # ... if any!
+                for i in xrange(flat_a.size):
+                    # If a column is missing for nnz_column_indices,
+                    # means that a zero is there!
+                    if i + 1 > flat_a.nnz_column_indices.size or \
+                            flat_a.nnz_column_indices[i] != i:
+                        unique_index = CDense([i])
+                        break
+
+            # Let's get the indices of the nnz elements (columns indices)
+            unique_index = unique_index.append(
+                flat_a.nnz_column_indices[CDense(out[1])])
+            # Add result to the list of returned items
+            outputs.append(unique_index)
+
+        if return_inverse is True:
+            raise NotImplementedError(
+                "`return_inverse` is currently not supported")
+
+        if return_counts is True:
+            # Let's check the number of extra parameters (to parse out)
+            num_params = sum([return_index, return_inverse, return_counts])
+
+            # Let's check the number of zeros
+            counts_zeros = [n_zeros] if n_zeros > 0 else []
+
+            # size of the out tuple depends on the number of extra params
+            unique_counts = CDense(
+                counts_zeros + out[min(3, num_params)].tolist())
+            # Add result to the list of returned items
+            outputs.append(unique_counts)
+
+        return tuple(outputs)
 
     def atleast_2d(self):
         """Force array to have 2 dimensions.

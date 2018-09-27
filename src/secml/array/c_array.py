@@ -1498,35 +1498,38 @@ class CArray(object):
         """
         return self.__class__(self._data.transpose())
 
-    def unique(self, return_index=False, return_inverse=False):
+    def unique(self, return_index=False,
+               return_inverse=False, return_counts=False):
         """Find the unique elements of an array.
 
-        There are two optional outputs in addition to the unique
-        elements: the indices of the input array that give the
-        unique values, and the indices of the unique array that
-        reconstruct the input array.
+         There are three optional outputs in addition to the unique elements:
+         - the indices of the input array that give the unique values
+         - the indices of the unique array that reconstruct the input array
+         - the number of times each unique value comes up in the input array
 
         Parameters
         ----------
-        return_index : bool, optional, dense only
+        return_index : bool, optional
             If True, also return the indices of array that result
             in the unique array (default False).
         return_inverse : bool, optional, dense only
             If True, also return the indices of the unique array
             that can be used to reconstruct the original array
             (default False).
+        return_counts : bool, optional
+            If True, also return the number of times each unique item appears.
 
         Returns
         -------
         unique : CArray
             Dense array with the sorted unique values of the array.
-        unique_indices : CArray, optional, dense only
+        unique_index : CArray, optional
             The indices of the first occurrences of the unique values
             in the (flattened) original array. Only provided if
             return_index is True.
-        unique_inverse : CArray, optional, dense only
-            The indices to reconstruct the (flattened) original array
-            from the unique array. Only provided if return_inverse is True.
+        unique_counts : CArray, optional
+            The number of times each unique item appears in the original array.
+            Only provided if return_counts is True.
 
         Examples
         --------
@@ -1544,18 +1547,17 @@ class CArray(object):
         >>> print u[u_inv]  # original (flattened) array reconstructed from unique_inverse
         CArray([2 2 3 3])
 
+        >>> u, u_counts = CArray([[2,2,2,3,3]]).unique(return_counts=True)
+        >>> print u_counts  # The number of times each unique item appears
+        CArray([3 2])
+
         """
-        if self.isdense is True:
-            out = self._data.unique(return_index, return_inverse)
-            if isinstance(out, tuple):  # unique returned multiple elements
-                return tuple([self.__class__(elem) for elem in out])
-            else:
-                return self.__class__(out)
+        out = self._data.unique(
+            return_index, return_inverse, return_counts)
+        if isinstance(out, tuple):  # unique returned multiple elements
+            return tuple([self.__class__(elem) for elem in out])
         else:
-            if return_index is not False or return_inverse is not False:
-                raise ValueError("return_index and return_inverse parameters "
-                                 "are only available for dense arrays.")
-            return self.__class__(self._data.unique())
+            return self.__class__(out)
 
     def append(self, array2, axis=None):
         """Append values to the end of an array.
