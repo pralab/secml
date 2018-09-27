@@ -1304,6 +1304,57 @@ class CDense(object):
         """Count number of occurrences of each non-negative int."""
         return self.__class__(np.bincount(self.tondarray()))
 
+    def binary_search(self, value):
+        """Returns the index of each input value inside the array.
+
+        If value is not found inside the array, the index
+        of the closest value will be returned.
+        Array will be flattened before search.
+
+        Parameters
+        ----------
+        value : scalar or array_like
+            Element or array of elements to search inside
+            the flattened array.
+
+        Returns
+        -------
+        out_index : CDense
+            Position of input value, or the closest one, inside
+            flattened array. If `value` is an array, a CDense
+            with the position of each `value` element is returned.
+
+        Examples
+        --------
+        >>> from secml.array.c_dense import CDense
+
+        >>> print CDense([[0,0.1],[0.4,1.0]]).binary_search(0.3)
+        [2]
+
+        >>> print CDense([1,2,3,4]).binary_search(10)
+        [3]
+
+        >>> print CDense([1,2,3,4]).binary_search(CDense([-10,1,2.2,10]))
+        [0 0 1 3]
+
+        """
+        from bisect import bisect_left
+
+        def bs_single(array, e):
+            """Binary search of input scalar 'e' inside `array`."""
+            pos = bisect_left(array.tolist(), e, 0, array.size)
+            if pos == 0:  # workaround of zero-based python indexing
+                return 0
+            elif pos == array.size or \
+                    abs(e - array[pos - 1]) < abs(e - array[pos]):
+                return pos - 1
+            else:
+                return pos
+
+        # As bisect_left returns a single index, so we should ravel the array
+        return CDense(
+            map(lambda x: bs_single(self.ravel(), x), CDense(value))).ravel()
+
     def atleast_2d(self):
         """Force array to have at least 2 dimensions."""
         # All other not-empty arrays

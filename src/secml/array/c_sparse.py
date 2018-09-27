@@ -1249,6 +1249,10 @@ class CSparse(object):
         raise NotImplementedError(
             "Bincount not implemented for sparse! Convert to dense first.")
 
+    def binary_search(self, value):
+        raise NotImplementedError(
+            "`binary_search` is not implemented for sparse arrays!")
+
     def sort(self, axis=-1):
         """sort array in places"""
         if axis == 1 or axis == -1:

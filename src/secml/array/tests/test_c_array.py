@@ -3079,11 +3079,12 @@ class TestCArray(CUnitTest):
 
         _check_binary_search(CArray([1, 2.4, 3, 4.3]))
         _check_binary_search(CArray([[1, 2.4, 3, 4.3]]))
-        _check_binary_search(CArray([[1, 2.4, 3, 4.3]], tosparse=True))
         _check_binary_search(CArray([[1], [2.4], [3], [4.3]]))
-        _check_binary_search(CArray([[1], [2.4], [3], [4.3]], tosparse=True))
         _check_binary_search(CArray([[1, 2.4], [3, 4.3]]))
-        _check_binary_search(CArray([[1, 2.4], [3, 4.3]], tosparse=True))
+
+        # Sparse arrays are not supported
+        with self.assertRaises(NotImplementedError):
+            self.array_sparse.binary_search(3)
 
     def test_todense(self):
         """Test for CArray.todense() method."""

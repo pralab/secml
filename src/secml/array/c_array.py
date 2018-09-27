@@ -2343,6 +2343,8 @@ class CArray(object):
     def binary_search(self, value):
         """Returns the index of each input value inside the array.
 
+        DENSE ARRAYS ONLY
+
         If value is not found inside the array, the index
         of the closest value will be returned.
         Array will be flattened before search.
@@ -2364,7 +2366,7 @@ class CArray(object):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[0,0.1],[0.4,1.0]], tosparse=True).binary_search(0.3)
+        >>> print CArray([[0,0.1],[0.4,1.0]]).binary_search(0.3)
         2
 
         >>> print CArray([1,2,3,4]).binary_search(10)
@@ -2374,25 +2376,8 @@ class CArray(object):
         CArray([0 0 1 3])
 
         """
-        from bisect import bisect_left
-
-        def bs_single(array, e):
-            """Binary search of input scalar 'e' inside `array`."""
-            pos = bisect_left(array.tolist(), e, 0, array.size)
-            if pos == 0:  # workaround of zero-based python indexing
-                return 0
-            elif pos == array.size or \
-                    abs(e - array[pos - 1]) < abs(e - array[pos]):
-                return pos - 1
-            else:
-                return pos
-
-        # bisect returns a single index, so we should ravel the array
-        a_ravel = self.todense().ravel()
-        v_carray = self.__class__(value)  # casting to CArray
-
-        return CArray(
-            map(lambda x: bs_single(a_ravel, x), v_carray)).ravel()
+        return self._instance_array(
+            self._data.binary_search(self.__class__(value)._data))
 
     def sign(self):
         """Returns element-wise sign of the array.
