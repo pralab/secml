@@ -456,7 +456,6 @@ class _CArrayInterface(object):
         """Return the cumulative sum of the array elements."""
         raise NotImplementedError
 
-    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def prod(self, axis=None, dtype=None, keepdims=True):
         """Return the product of array elements over a given axis."""

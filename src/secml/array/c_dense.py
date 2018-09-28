@@ -1299,7 +1299,7 @@ class CDense(_CArrayInterface):
         return self.__class__(out).ravel() if \
             self.ndim <= 1 else self.__class__(out)
 
-    def prod(self, axis=None, dtype=None, keepdims=False):
+    def prod(self, axis=None, dtype=None, keepdims=True):
         """Return the product of array elements over a given axis."""
         if self.size == 0:
             out = self.__class__([[1.0]], dtype=dtype)
@@ -1898,7 +1898,7 @@ class CDense(_CArrayInterface):
             return cls()
 
         # Computing number of expected combinations
-        n = cls([x.size for x in arrays]).prod().tolist()[0]
+        n = cls([x.size for x in arrays]).prod(keepdims=False).tolist()[0]
         # If no custom target array is specified, initialize an array of zeros
         out = cls.zeros((n, len(arrays)), dtype=dtype)
 
