@@ -1721,6 +1721,11 @@ class CSparse(_CArrayInterface):
     # ---------------------------------#
 
     @classmethod
+    def empty(cls, shape, dtype=float):
+        """Return a new array of given shape and type, without filling it."""
+        return cls(scs.csr_matrix(shape, dtype=dtype))
+
+    @classmethod
     def eye(cls, n_rows, n_cols=None, k=0, dtype=float):
         """Return an array of desired dimension with ones on the diagonal and zeros elsewhere.
         See scipy.sparse.eye for more informations.

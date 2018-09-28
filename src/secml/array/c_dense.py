@@ -1600,13 +1600,13 @@ class CDense(_CArrayInterface):
     # ---------------------------------#
 
     @classmethod
-    def empty(cls, *shape, **dtype):
+    def empty(cls, shape, dtype=float):
         """Return an (theoretically) empty array of desired shape.
         See numpy.empty for more informations.
 
         Parameters
         ----------
-        shape : shape of array, integer or sequence of integers.
+        shape : shape of array, integer or tuple
         dtype : datatype of array data.
 
         Returns
@@ -1622,7 +1622,7 @@ class CDense(_CArrayInterface):
         >>> print array.shape
         (2,)
 
-        >>> array = CDense.empty(2, 1, dtype=int)
+        >>> array = CDense.empty((2, 1), dtype=int)
         >>> print array  # doctest: +SKIP
         [[              0]
          [140526427175696]]
@@ -1630,7 +1630,7 @@ class CDense(_CArrayInterface):
         (2, 1)
 
         """
-        return cls(np.empty(shape, **dtype))
+        return cls(np.empty(shape, dtype))
 
     @classmethod
     def zeros(cls, shape, **dtype):

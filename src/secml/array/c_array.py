@@ -4397,7 +4397,7 @@ class CArray(_CArrayInterface):
 
         Parameters
         ----------
-        shape : int or tuple of ints
+        shape : int or tuple
             Shape of the new array, e.g., 2 or (2,3).
         dtype : str or dtype, optional
             The desired data-type for the array. Default is float.
@@ -4412,9 +4412,10 @@ class CArray(_CArrayInterface):
 
         Notes
         -----
-        `.empty`, unlike `.zeros`, does not set the array values to zero, and may
-        therefore be marginally faster. On the other hand, it requires the user
-        to manually set all the values in the array, and should be used with caution.
+        `.empty`, unlike `.zeros`, does not set the array values to zero,
+        and may therefore be marginally faster. On the other hand,
+        it requires the user to manually set all the values in the array,
+        and should be used with caution.
 
         Examples
         --------
@@ -4425,15 +4426,21 @@ class CArray(_CArrayInterface):
         CArray([  0.00000000e+000   4.94944794e+173   6.93660640e-310])  # random
 
         >>> array = CArray.empty((2,1), dtype=int, sparse=True)
-        >>> print array  # doctest: +SKIP
-        CArray(  (0, 0)	391726787298048
-          (1, 0)	3414398447641579603)  # random
+        >>> print array
+        CArray()
         >>> print array.shape
         (2, 1)
 
         """
-        return cls(CDense.empty(*((shape,) if not isinstance(shape, tuple)
-                                  else shape), dtype=dtype), tosparse=sparse)
+        # Converting integer "shape" to actual shape
+        shape = (shape,) if not isinstance(shape, tuple) else shape
+
+        if sparse is True:
+            # We fake the shape to create a sparse "vector"
+            shape = (1, shape[0]) if len(shape) == 1 else shape
+            return cls(CSparse.empty(shape, dtype=dtype))
+        else:
+            return cls(CDense.empty(shape, dtype=dtype))
 
     @classmethod
     def zeros(cls, shape, dtype=float, sparse=False):
