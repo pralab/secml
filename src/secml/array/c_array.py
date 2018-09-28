@@ -1736,7 +1736,7 @@ class CArray(_CArrayInterface):
         """
         return self.__class__(self._data.reshape(shape))
 
-    def resize(self, shape, constant=0):
+    def resize(self, newshape, constant=0):
         """Return a new array with the specified shape.
 
         Missing entries are filled with input constant (default 0).
@@ -1745,7 +1745,7 @@ class CArray(_CArrayInterface):
 
         Parameters
         ----------
-        shape : int or sequence of ints
+        newshape : int or sequence of ints
             Integer or one integer for each desired dimension of output array.
             If a tuple of length 1, output sparse array will have shape (1, n).
         constant : scalar
@@ -1795,7 +1795,7 @@ class CArray(_CArrayInterface):
          [2 3]])
 
         """
-        return self.__class__(self._data.resize(shape, constant=constant))
+        return self.__class__(self._data.resize(newshape, constant=constant))
 
     def astype(self, dtype):
         """Copy of the array, casted to a specified type.

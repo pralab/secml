@@ -936,7 +936,7 @@ class CSparse(_CArrayInterface):
         return self.__class__(scs.coo_matrix(
             (array_coo.data, (new_row, new_col)), shape=shape))
 
-    def resize(self, new_shape, constant=0):
+    def resize(self, newshape, constant=0):
         """Return a new array with the specified shape."""
         raise NotImplementedError
 

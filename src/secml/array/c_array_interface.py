@@ -297,7 +297,7 @@ class _CArrayInterface(object):
         raise NotImplementedError
 
     @abstractmethod
-    def resize(self, shape, constant=0):
+    def resize(self, newshape, constant=0):
         """Return a new array with the specified shape."""
         raise NotImplementedError
 

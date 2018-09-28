@@ -2816,9 +2816,9 @@ class TestCArray(CUnitTest):
             self.logger.info("Array:\n{:}".format(array))
 
             for constant in [0, 2, True, False]:
-                res = array.resize(shape=shape, constant=constant)
+                res = array.resize(newshape=shape, constant=constant)
                 self.logger.info(
-                    "array.resize(shape={:}, constant={:}):"
+                    "array.resize(newshape={:}, constant={:}):"
                     "\n{:}".format(shape, constant, res))
 
                 if not isinstance(shape, tuple):

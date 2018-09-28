@@ -956,13 +956,13 @@ class CDense(_CArrayInterface):
         """Reshape array."""
         return self.__class__(self.tondarray().reshape(shape))
 
-    def resize(self, new_shape, constant=0):
+    def resize(self, newshape, constant=0):
         """Return a new array with the specified shape."""
-        if is_scalar(new_shape):  # Compatibility between N and (N, )
-            new_shape = (new_shape,)
+        if is_scalar(newshape):  # Compatibility between N and (N, )
+            newshape = (newshape,)
         # Compute size of of output array
-        out_size = new_shape[0] if \
-            len(new_shape) == 1 else new_shape[0] * new_shape[1]
+        out_size = newshape[0] if \
+            len(newshape) == 1 else newshape[0] * newshape[1]
         if out_size > self.size:  # Append missing elements
             old_array = self.ravel().append(
                 self.__class__.ones(out_size - self.size,
@@ -970,7 +970,7 @@ class CDense(_CArrayInterface):
         else:  # Caching old array
             old_array = self
 
-        a_resize = np.resize(old_array.tondarray(), new_shape=new_shape)
+        a_resize = np.resize(old_array.tondarray(), new_shape=newshape)
         return self.__class__(a_resize, dtype=self.dtype)
 
     def astype(self, newtype):
