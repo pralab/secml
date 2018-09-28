@@ -4669,7 +4669,7 @@ class CArray(_CArrayInterface):
          [0 2]])
 
         """
-        return cls(CDense.randint(low=low, high=high, size=shape,
+        return cls(CDense.randint(low=low, high=high, shape=shape,
                                   random_state=random_state), tosparse=sparse)
 
     @classmethod
@@ -4724,9 +4724,9 @@ class CArray(_CArrayInterface):
         ValueError: Cannot take a larger sample than population when 'replace=False'
 
         """
-        array = a if not isinstance(a, cls) else a.ravel()._data
+        a = a if not isinstance(a, cls) else a.ravel()._data
         return cls(CDense.randsample(
-            array=array, size=shape, replace=replace,
+            a=a, shape=shape, replace=replace,
             random_state=random_state), tosparse=sparse)
 
     @classmethod

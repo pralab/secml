@@ -883,8 +883,8 @@ class CSparse(_CArrayInterface):
     def transpose(self):
         return self.__class__(self._data.transpose())
 
-    def astype(self, newtype):
-        return self.__class__(self._data.astype(newtype))
+    def astype(self, dtype):
+        return self.__class__(self._data.astype(dtype))
 
     def eliminate_zeros(self):
         self._data.eliminate_zeros()
@@ -1194,22 +1194,22 @@ class CSparse(_CArrayInterface):
         return \
             out_mean.ravel() if axis is None or keepdims is False else out_mean
 
-    def maximum(self, other):
+    def maximum(self, array):
         """Element-wise maximum."""
         return self.__class__(
-            self._data.maximum(self._buffer_to_builtin(other)))
+            self._data.maximum(self._buffer_to_builtin(array)))
 
-    def minimum(self, other):
+    def minimum(self, array):
         """Element-wise minimum."""
         return self.__class__(
-            self._data.minimum(self._buffer_to_builtin(other)))
+            self._data.minimum(self._buffer_to_builtin(array)))
 
     def median(self, axis=None, keepdims=True):
         """Median of array elements over a given axis."""
         raise NotImplementedError
 
-    def clip(self, min, max):
-        """Clip arrays acording to limits."""
+    def clip(self, c_min, c_max):
+        """Clip (limit) the values in an array."""
         raise NotImplementedError
 
     def round(self, decimals=0):
@@ -1267,14 +1267,14 @@ class CSparse(_CArrayInterface):
         """
         return self.__pow__(exp)
 
-    def append(self, array2, axis=None):
+    def append(self, array, axis=None):
         """Append an  arrays along the given axis."""
         # If axis is None we simulate numpy flattening
         if axis is None:
             return self.__class__.concatenate(self.ravel(),
-                                              array2.ravel(), axis=1)
+                                              array.ravel(), axis=1)
         else:
-            return self.__class__.concatenate(self, array2, axis)
+            return self.__class__.concatenate(self, array, axis)
 
     def repmat(self, m, n):
         """Wrapper for repmat
@@ -1564,7 +1564,7 @@ class CSparse(_CArrayInterface):
     def nanargmin(self, axis=None):
         raise NotImplementedError
 
-    def logical_and(self, y):
+    def logical_and(self, array):
         """Element-wise logical AND of array elements.
 
         Compare two arrays and returns a new array containing
@@ -1572,7 +1572,7 @@ class CSparse(_CArrayInterface):
 
         Parameters
         ----------
-        y : CSparse or array_like
+        array : CSparse or array_like
             The array like object holding the elements to compare
             current array with. Must have the same shape of first
             array.
@@ -1580,7 +1580,7 @@ class CSparse(_CArrayInterface):
         Returns
         -------
         out_and : CSparse or bool
-            The element-wise logical AND between first array and y.
+            The element-wise logical AND between the two arrays.
 
         Examples
         --------
@@ -1598,7 +1598,7 @@ class CSparse(_CArrayInterface):
         CDense([[ True, False, False, False]], dtype=bool)
 
         """
-        if self.shape != y.shape:
+        if self.shape != array.shape:
             raise ValueError("array to compare must be {:}".format(self.shape))
 
         and_result = self.__class__(self.shape, dtype=bool)
@@ -1608,16 +1608,16 @@ class CSparse(_CArrayInterface):
             this_elem_row = self.nnz_row_indices[0, el_idx]
             this_elem_col = self.nnz_column_indices[0, el_idx]
             # Check is second array has an element in the same position
-            y_same_bool = (y.nnz_row_indices == this_elem_row).logical_and(
-                y.nnz_column_indices == this_elem_col)
+            y_same_bool = (array.nnz_row_indices == this_elem_row).logical_and(
+                array.nnz_column_indices == this_elem_col)
             if y_same_bool.any() == True:  # found an element in same position!
-                same_position_val = int(y._data.data[y_same_bool.tondarray()])
+                same_position_val = int(array._data.data[y_same_bool.tondarray()])
                 if np.logical_and(el, same_position_val):
                     and_result[this_elem_row, this_elem_col] = True
 
         return and_result
 
-    def logical_or(self, y):
+    def logical_or(self, array):
         """Element-wise logical OR of array elements.
 
         Compare two arrays and returns a new array containing
@@ -1625,7 +1625,7 @@ class CSparse(_CArrayInterface):
 
         Parameters
         ----------
-        y : CSparse or array_like
+        array : CSparse or array_like
             The array like object holding the elements to compare
             current array with. Must have the same shape of first
             array.
@@ -1633,7 +1633,7 @@ class CSparse(_CArrayInterface):
         Returns
         -------
         out_and : CSparse or bool
-            The element-wise logical OR between first array and y.
+            The element-wise logical OR between the two arrays.
          
 
         Examples
@@ -1652,15 +1652,15 @@ class CSparse(_CArrayInterface):
         CDense([[ True,  True,  True,  True]], dtype=bool)
 
         """
-        if self.shape != y.shape:
+        if self.shape != array.shape:
             raise ValueError("array to compare must be {:}".format(self.shape))
 
         or_matrix = self.astype(bool)
         # Be sure there are only non-zeros in 2nd array
-        y.eliminate_zeros()
+        array.eliminate_zeros()
         # add True for each non-zero element of second array
-        or_matrix[[y.nnz_row_indices.tolist(),
-                   y.nnz_column_indices.tolist()]] = True
+        or_matrix[[array.nnz_row_indices.tolist(),
+                   array.nnz_column_indices.tolist()]] = True
 
         return or_matrix
 

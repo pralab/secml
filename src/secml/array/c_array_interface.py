@@ -343,11 +343,13 @@ class _CArrayInterface(object):
         """Returns array elements without sign."""
         return abs(self)
 
+    # TODO: CHECK AXIS
     @abstractmethod
     def sort(self, axis=-1, kind='quicksort', inplace=False):
         """Sort an array."""
         raise NotImplementedError
 
+    # TODO: CHECK AXIS
     @abstractmethod
     def argsort(self, axis=None, kind='quicksort'):
         """Returns the indices that would sort an array."""
@@ -440,41 +442,49 @@ class _CArrayInterface(object):
         """Array norm."""
         raise NotImplementedError
 
+    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def norm_2d(self, order=None, axis=None, keepdims=True):
         """Array norm."""
         raise NotImplementedError
 
+    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def sum(self, axis=None, keepdims=True):
         """Sum of array elements over a given axis."""
         raise NotImplementedError
 
+    # TODO: CHECK DTYPE
     @abstractmethod
     def cumsum(self, axis=None):
         """Return the cumulative sum of the array elements."""
         raise NotImplementedError
 
+    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def prod(self, axis=None, dtype=None, keepdims=True):
         """Return the product of array elements over a given axis."""
         raise NotImplementedError
 
+    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def all(self, axis=None, keepdims=True):
         """Test whether all array elements evaluate to True."""
         raise NotImplementedError
 
+    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def any(self, axis=None, keepdims=True):
         """Test whether any array elements evaluate to True."""
         raise NotImplementedError
 
+    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def max(self, axis=None, keepdims=True):
         """Return the maximum of an array or maximum along an axis."""
         raise NotImplementedError
 
+    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def min(self, axis=None, keepdims=True):
         """Return the minimum of an array or minimum along an axis."""
@@ -490,11 +500,13 @@ class _CArrayInterface(object):
         """Indices of the minimum values along an axis."""
         raise NotImplementedError
 
+    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def nanmax(self, axis=None, keepdims=True):
         """Return the maximum ignoring Nans."""
         raise NotImplementedError
 
+    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def nanmin(self, axis=None, keepdims=True):
         """Return the minimum ignoring Nans."""
@@ -510,16 +522,21 @@ class _CArrayInterface(object):
         """Indices of the minimum values along an axis ignoring Nans."""
         raise NotImplementedError
 
+    # TODO: CHECK KEEPDIMS
+    # TODO: CHECK DTYPE
     @abstractmethod
     def mean(self, axis=None, keepdims=True):
         """Compute the arithmetic mean along the specified axis."""
         raise NotImplementedError
 
+    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def median(self, axis=None, keepdims=True):
         """Compute the median along the specified axis."""
         raise NotImplementedError
 
+    # TODO: CHECK KEEPDIMS
+    # TODO: CHECK DTYPE
     @abstractmethod
     def std(self, axis=None, ddof=0, keepdims=True):
         """Compute the standard deviation along the specified axis."""

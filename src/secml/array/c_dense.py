@@ -973,22 +973,22 @@ class CDense(_CArrayInterface):
         a_resize = np.resize(old_array.tondarray(), new_shape=newshape)
         return self.__class__(a_resize, dtype=self.dtype)
 
-    def astype(self, newtype):
-        """Return current CDense with specified type."""
-        return self.__class__(self._data.astype(newtype))
+    def astype(self, dtype):
+        """Clip (limit) the values in an array."""
+        return self.__class__(self._data.astype(dtype))
 
-    def dot(self, other):
+    def dot(self, array):
 
-        if len(self.shape) + len(other.shape) != 2:  # Matrix multiplication
+        if len(self.shape) + len(array.shape) != 2:  # Matrix multiplication
             # Reshaping flat vectors to 1 x N (row vectors)
             array1 = self.reshape((1, self.shape[0])) if \
                 len(self.shape) == 1 else self
-            array2 = other.reshape((1, other.shape[0])) if \
-                len(other.shape) == 1 else other
+            array2 = array.reshape((1, array.shape[0])) if \
+                len(array.shape) == 1 else array
 
         else:  # Inner product between flat arrays
             array1 = self
-            array2 = other
+            array2 = array
 
         return self.__class__(np.dot(array1.tondarray(), array2.tondarray()))
 
@@ -1042,12 +1042,12 @@ class CDense(_CArrayInterface):
             return self.__class__(
                 np.argsort(self.tondarray(), axis, kind, order))
 
-    def append(self, val, axis=None):
+    def append(self, array, axis=None):
         """Wrapper for append."""
         out = self.__class__(np.append(self.atleast_2d().tondarray(),
-                                       val.atleast_2d().tondarray(), axis))
+                                       array.atleast_2d().tondarray(), axis))
         return out.ravel() if axis is None or (
-            self.ndim <= 1 and val.ndim <= 1 and axis == 1) else out
+                self.ndim <= 1 and array.ndim <= 1 and axis == 1) else out
 
     def unique(self, return_index=False,
                return_inverse=False, return_counts=False):
@@ -1163,21 +1163,23 @@ class CDense(_CArrayInterface):
         return self.__class__(
             np.repeat(self.tondarray(), repeats=repeats, axis=axis))
 
-    def maximum(self, y):
+    def maximum(self, array):
         """Element-wise maximum with respect to input CDense."""
-        return self.__class__(np.maximum(self.tondarray(), y.tondarray()))
+        return self.__class__(np.maximum(self.tondarray(), array.tondarray()))
 
-    def minimum(self, y):
+    def minimum(self, array):
         """Element-wise minimum with respect to input CDense."""
-        return self.__class__(np.minimum(self.tondarray(), y.tondarray()))
+        return self.__class__(np.minimum(self.tondarray(), array.tondarray()))
 
-    def logical_and(self, y):
+    def logical_and(self, array):
         """Element-wise logical & (and) with respect to input CDense."""
-        return self.__class__(np.logical_and(self.tondarray(), y.tondarray()))
+        return self.__class__(
+            np.logical_and(self.tondarray(), array.tondarray()))
 
-    def logical_or(self, y):
+    def logical_or(self, array):
         """Element-wise logical | (or) with respect to input CDense."""
-        return self.__class__(np.logical_or(self.tondarray(), y.tondarray()))
+        return self.__class__(
+            np.logical_or(self.tondarray(), array.tondarray()))
 
     def logical_not(self):
         """Element-wise logical ! (not) of array elements."""
@@ -1411,9 +1413,10 @@ class CDense(_CArrayInterface):
         return out_max if axis is None or self.ndim <= 1 else \
             (out_max.atleast_2d() if axis == 0 else out_max.atleast_2d().T)
 
-    def clip(self, a_min, a_max):
-        """Wrapper for numpy clip."""
-        return self.__class__(np.clip(self.tondarray(), a_min=a_min, a_max=a_max))
+    def clip(self, c_min, c_max):
+        """Clip (limit) the values in an array."""
+        return self.__class__(
+            np.clip(self.tondarray(), a_min=c_min, a_max=c_max))
 
     def sin(self):
         """Trigonometric sine, element-wise.
@@ -1731,14 +1734,27 @@ class CDense(_CArrayInterface):
         return cls(np.random.randn(*shape))
 
     @classmethod
-    def randint(cls, low, high=None, size=None, random_state=None):
+    def randint(cls, low, high=None, shape=None, random_state=None):
         """Wrapper for random.randint.
 
         Creates a random array with random integers in [low, high) interval.
-        High value (if specified) is excluded.size : int or tuple of ints, optional
+        High value (if specified) is excluded.
 
-        size: Output shape. If the given shape is, e.g., (m, n, k),
-        then m * n * k samples are drawn. Default is None, in which case a single value is returned.
+        Parameters
+        ----------
+        low : int
+            Lowest (signed) integer to be drawn from the distribution
+            (unless high=None, in which case this parameter is the
+            highest such integer).
+        high : int or None, optional
+            If provided, one above the largest (signed) integer to be
+            drawn from the distribution (see above for behavior if
+            high=None).
+        shape : int, tuple of ints or None, optional
+            Shape of output array. If None, a single value is returned.
+        random_state : int or None, optional
+            If int, random_state is the seed used by the
+            random number generator; If None, is the seed used by np.random.
 
         Examples
         --------
@@ -1749,34 +1765,34 @@ class CDense(_CArrayInterface):
 
         """
         np.random.seed(random_state)  # Setting the random seed
-        return cls(np.random.randint(low, high, size))
+        return cls(np.random.randint(low, high, shape))
 
     @classmethod
-    def randsample(cls, array, size=None, replace=False, random_state=None):
+    def randsample(cls, a, shape=None, replace=False, random_state=None):
         """Wrapper for random.choice.
 
-        Generates a random sample from a given 1-D array
-        High value (if specified) is excluded.size : int or tuple of ints, optional
+        Generates a random sample from a given 1-D a
+        High value (if specified) is excluded.shape : int or tuple of ints, optional
 
-        size: Output shape. If the given shape is, e.g., (m, n, k),
+        shape: Output shape. If the given shape is, e.g., (m, n, k),
         then m * n * k samples are drawn. Default is None, in which case a single value is returned.
 
         Examples
         --------
         >>> from secml.array.c_dense import CDense
-        >>> array = CDense.randsample(10, 4)
-        >>> print(array)  # doctest: +SKIP
+        >>> a = CDense.randsample(10, 4)
+        >>> print(a)  # doctest: +SKIP
         [1 0 2 3]
 
-        >>> array = CDense.randsample(CDense([1,5,6,7,3]), 4)
-        >>> print(array)  # doctest: +SKIP
+        >>> a = CDense.randsample(CDense([1,5,6,7,3]), 4)
+        >>> print(a)  # doctest: +SKIP
         [1 6 3 7]
 
         """
-        if isinstance(array, cls):  # Cast input CDense to ndarray
-            array = array.tondarray()
+        if isinstance(a, cls):  # Cast input CDense to ndarray
+            a = a.tondarray()
         np.random.seed(random_state)  # Setting the random seed
-        return cls(np.random.choice(array, size, replace))
+        return cls(np.random.choice(a, shape, replace))
 
     @classmethod
     def concatenate(cls, array1, array2, axis=1):
