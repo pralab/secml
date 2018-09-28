@@ -466,7 +466,6 @@ class _CArrayInterface(object):
         """Test whether all array elements evaluate to True."""
         raise NotImplementedError
 
-    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def any(self, axis=None, keepdims=True):
         """Test whether any array elements evaluate to True."""

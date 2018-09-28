@@ -3188,9 +3188,8 @@ class CArray(_CArrayInterface):
         True
 
         """
-        out_any = self._data.any(axis=axis, keepdims=keepdims) \
-            if self.isdense is True else self._data.any()
-        return self._instance_array(out_any)
+        return self._instance_array(
+            self._data.any(axis=axis, keepdims=keepdims))
 
     def max(self, axis=None, keepdims=True):
         """Return the maximum of an array or maximum along an axis.

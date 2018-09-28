@@ -1316,7 +1316,7 @@ class CDense(_CArrayInterface):
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 
-    def any(self, axis=None, keepdims=False):
+    def any(self, axis=None, keepdims=True):
         """Wrapper for numpy any."""
         out = np.any(self.atleast_2d().tondarray(), axis=axis,
                      keepdims=keepdims)

@@ -1388,9 +1388,9 @@ class CSparse(_CArrayInterface):
 
         return bool(self.size == self.nnz and self._data.data.all())
 
-    def any(self, axis=None, keepdims=None):
+    def any(self, axis=None, keepdims=True):
         """Return True if any array element is boolean True."""
-        if axis is not None or keepdims is not None:
+        if axis is not None or keepdims is not True:
             raise NotImplementedError(
                 "`axis` and `keepdims` are currently not supported")
 
