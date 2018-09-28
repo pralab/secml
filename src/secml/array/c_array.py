@@ -4695,7 +4695,7 @@ class CArray(_CArrayInterface):
             If provided, one above the largest (signed) integer to be
             drawn from the distribution (see above for behavior if
             high=None).
-        shape : int, tuple of ints or None, optional
+        shape : int, tuple or None, optional
             Shape of output array. If None, a single value is returned.
         random_state : int or None, optional
             If int, random_state is the seed used by the
@@ -4709,12 +4709,11 @@ class CArray(_CArrayInterface):
         CArray
             Size-shaped array of random integers.
 
-        Notes
-        -----
-        When sparse is True, array is converted to sparse format
-        after random generation under dense environment. Consequently,
-        for large distributions, performance is not comparable to
-        classical sparse array creation routines.
+        Warnings
+        --------
+        When sparse is True, array is created as dense and then converted
+        to sparse format. Consequently, the performance of this method
+        is not comparable to other sparse array creation routines.
 
         Examples
         --------
@@ -4748,7 +4747,7 @@ class CArray(_CArrayInterface):
             If an array, a random sample is generated from its
             elements. If an int, the random sample is generated
             as if a was CArray.arange(n)
-        shape : int, tuple of ints or None, optional
+        shape : int, tuple or None, optional
             Shape of output array. If None, a single value is returned.
         replace : bool, optional
             Whether the sample is with or without replacement, default False.
@@ -4775,11 +4774,12 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> array = CArray.randsample(10, 4)
+        >>> array = CArray.randsample(10, shape=(2, 3))
         >>> print array  # doctest: +SKIP
-        CArray([1 8 3 5])
+        CArray([[2 9 4]
+         [8 6 5]])
 
-        >>> array = CArray.randsample(CArray([1,5,6,7,3]), 4)
+        >>> array = CArray.randsample(CArray([1,5,6,7,3]), shape=4)
         >>> print array  # doctest: +SKIP
         CArray([3 7 5 6])
 

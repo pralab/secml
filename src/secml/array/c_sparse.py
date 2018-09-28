@@ -1789,6 +1789,16 @@ class CSparse(_CArrayInterface):
         raise NotImplementedError
 
     @classmethod
+    def randint(cls, low, high=None, shape=None, random_state=None):
+        """Return random integers from low (inclusive) to high (exclusive)."""
+        raise NotImplementedError
+
+    @classmethod
+    def randsample(cls, a, shape=None, replace=False, random_state=None):
+        """Generates a random sample from a given array."""
+        raise NotImplementedError
+
+    @classmethod
     def concatenate(cls, array1, array2, axis=1):
         """Concatenate a sequence of arrays along the given axis."""
         if not isinstance(array1, cls) or not isinstance(array2, cls):
