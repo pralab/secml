@@ -1363,25 +1363,6 @@ class CArray(_CArrayInterface):
         """Called when copy.copy(CArray) is called."""
         return self.__class__(self)
 
-    def deepcopy(self):
-        """Return a deepcopy of current array.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> array = CArray([1,2,3])
-        >>> array_deepcopy = array.deepcopy()
-        >>> array_deepcopy[0] = 100
-
-        >>> print array
-        CArray([1 2 3])
-        >>> print array_deepcopy
-        CArray([100   2   3])
-
-        """
-        return deepcopy(self)
-
     def __deepcopy__(self, memo):
         """Called when copy.deepcopy(CArray) is called."""
         return self.__class__(deepcopy(self._data, memo))
