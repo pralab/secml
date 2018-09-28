@@ -544,7 +544,7 @@ class CTorchClassifier(CClassifier):
 
         # FIXME: GRADIENT OF THE TRANSFORMATION?
 
-        return CArray(x.grad.data.cpu().numpy()).ravel()
+        return CArray(x.grad.data.cpu().numpy().ravel())
 
     def gradient_w_out_x(self, x, w, layer=None):
         """Compute the loss gradient multiplied by w wrt input.
@@ -595,7 +595,7 @@ class CTorchClassifier(CClassifier):
 
         # FIXME: GRADIENT OF THE TRANSFORMATION?
 
-        return CArray(x.grad.data.cpu().numpy()).ravel()
+        return CArray(x.grad.data.cpu().numpy().ravel())
 
     def get_layer_output(self, x, layer=None):
         """Returns the output of the desired net layer.
