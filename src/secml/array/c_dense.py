@@ -1295,8 +1295,7 @@ class CDense(_CArrayInterface):
 
     def cumsum(self, axis=None, dtype=None):
         """Wrapper for numpy cumsum"""
-        out = np.cumsum(self.atleast_2d().tondarray(), axis=axis,
-                        dtype=dtype)
+        out = np.cumsum(self.atleast_2d().tondarray(), axis=axis, dtype=dtype)
         return self.__class__(out).ravel() if \
             self.ndim <= 1 else self.__class__(out)
 

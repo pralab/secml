@@ -451,9 +451,8 @@ class _CArrayInterface(object):
         """Sum of array elements over a given axis."""
         raise NotImplementedError
 
-    # TODO: CHECK DTYPE
     @abstractmethod
-    def cumsum(self, axis=None):
+    def cumsum(self, axis=None, dtype=None):
         """Return the cumulative sum of the array elements."""
         raise NotImplementedError
 

@@ -2977,7 +2977,7 @@ class CArray(_CArrayInterface):
         return self._instance_array(
             self._data.sum(axis=axis, keepdims=keepdims))
 
-    def cumsum(self, axis=None):
+    def cumsum(self, axis=None, dtype=None):
         """Return the cumulative sum of the array elements along a given axis.
 
         DENSE FORMAT ONLY
@@ -2988,6 +2988,12 @@ class CArray(_CArrayInterface):
             Axis along which the cumulative sum is computed.
             The default (None) is to compute the cumsum over
             the flattened array.
+        dtype : dtype or None, optional
+            Type of the returned array and of the accumulator in which
+            the elements are summed. If dtype is not specified, it defaults
+            to the dtype of a, unless a has an integer dtype with a precision
+            less than that of the default platform integer. In that case,
+            the default platform integer is used.
 
         Returns
         -------
@@ -3008,15 +3014,15 @@ class CArray(_CArrayInterface):
         >>> print CArray([-3,0,1,2]).cumsum(axis=1)
         CArray([-3 -3 -2  0])
 
-        >>> print CArray([[-3,0],[1,2]]).cumsum()
-        CArray([-3 -3 -2  0])
+        >>> print CArray([[-3,0],[1,2]]).cumsum(dtype=float)
+        CArray([-3. -3. -2.  0.])
 
         >>> print CArray([[-3,0],[1,2]]).cumsum(axis=1)
         CArray([[-3 -3]
          [ 1  3]])
 
         """
-        return self.__class__(self._data.cumsum(axis=axis))
+        return self.__class__(self._data.cumsum(axis=axis, dtype=dtype))
 
     def prod(self, axis=None, dtype=None, keepdims=True):
         """Return the product of array elements over a given axis.

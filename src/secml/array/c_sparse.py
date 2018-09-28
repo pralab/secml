@@ -1344,7 +1344,7 @@ class CSparse(_CArrayInterface):
         return \
             out_sum.ravel() if axis is None or keepdims is False else out_sum
 
-    def cumsum(self, axis=None):
+    def cumsum(self, axis=None, dtype=None):
         """Return the cumulative sum of the array elements."""
         raise NotImplementedError
 

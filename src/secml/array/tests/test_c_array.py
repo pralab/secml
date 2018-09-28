@@ -2553,70 +2553,54 @@ class TestCArray(CUnitTest):
         """Test for CArray.cumsum() method."""
         self.logger.info("Test for CArray.cumsum() method.")
 
-        def _check_cumsum(array, expected):
+        def _check_cumsum(array):
             self.logger.info("Array:\n{:}".format(array))
 
             for res_idx, axis in enumerate([None, 0, 1]):
+                for dtype in (None, float, int):
 
-                res = array.cumsum(axis=axis)
-                self.logger.info("array.cumsum(axis={:}):\n{:}".format(axis, res))
+                    res = array.cumsum(axis=axis, dtype=dtype)
+                    self.logger.info("array.cumsum(axis={:}, dtype={:}):"
+                                     "\n{:}".format(axis, dtype, res))
 
-                res_expected = expected[res_idx]
-                if not isinstance(res_expected, CArray):
-                    self.assertNotIsInstance(res, CArray)
-                else:
+                    res_np = np.cumsum(array.atleast_2d().tondarray(),
+                                       axis=axis, dtype=dtype)
+
+                    if array.ndim == 1:
+                        # We pass to numpy 2D arrays but result
+                        # for vectors will be flat
+                        res_np = res_np.ravel()
+
                     self.assertIsInstance(res, CArray)
-                    self.assertEqual(res.isdense, res_expected.isdense)
-                    self.assertEqual(res.issparse, res_expected.issparse)
-                    self.assertEqual(res.shape, res_expected.shape)
-                self.assertFalse((res != res_expected).any())
+                    self.assertTrue(res.isdense)
+                    self.assertEqual(res.shape, res_np.shape)
+                    self.assertEqual(res.dtype, res_np.dtype)
+                    self.assertFalse((res != CArray(res_np)).any())
 
         # array_dense = CArray([[1, 0, 0, 5], [2, 4, 0, 0], [3, 6, 0, 0]])
         # row_flat_dense = CArray([4, 0, 6])
 
         self.logger.info("Testing CArray.cumsum()")
 
-        _check_cumsum(self.array_dense,
-                      (CArray([1, 1, 1, 6, 8, 12, 12, 12, 15, 21, 21, 21]),
-                       CArray([[1, 0, 0, 5], [3, 4, 0, 5], [6, 10, 0, 5]]),
-                       CArray([[1, 1, 1, 6], [2, 6, 6, 6], [3, 9, 9, 9]])))
+        _check_cumsum(self.array_dense)
 
-        _check_cumsum(self.array_dense_bool,
-                      (CArray([1, 1, 2, 3, 3, 3, 3, 3, 4, 5, 6, 7]),
-                       CArray([[1, 0, 1, 1], [1, 0, 1, 1], [2, 1, 2, 2]]),
-                       CArray([[1, 1, 2, 3], [0, 0, 0, 0], [1, 2, 3, 4]])))
+        _check_cumsum(self.row_flat_dense)
+        _check_cumsum(self.row_dense)
+        _check_cumsum(self.column_dense)
 
-        _check_cumsum(self.row_flat_dense,
-                      (CArray([4, 4, 10]),
-                       CArray([4, 0, 6]),
-                       CArray([4, 4, 10])))
-        _check_cumsum(self.row_dense,
-                      (CArray([4, 4, 10]),
-                       CArray([[4, 0, 6]]),
-                       CArray([[4, 4, 10]])))
+        _check_cumsum(self.single_flat_dense)
+        _check_cumsum(self.single_dense)
 
-        _check_cumsum(self.column_dense,
-                      (CArray([4, 4, 10]),
-                       CArray([[4], [4], [10]]),
-                       CArray([[4], [0], [6]])))
+        _check_cumsum(self.array_dense_bool)
 
-        _check_cumsum(self.single_flat_dense,
-                      (CArray([4]), CArray([4]), CArray([4])))
-        _check_cumsum(self.single_dense,
-                      (CArray([4]), CArray([[4]]), CArray([[4]])))
+        _check_cumsum(self.single_bool_flat_dense)
+        _check_cumsum(self.single_bool_dense)
 
-        _check_cumsum(self.single_bool_flat_dense,
-                      (CArray([1]), CArray([1]), CArray([1])))
-        _check_cumsum(self.single_bool_dense,
-                      (CArray([1]), CArray([[1]]), CArray([[1]])))
-
-        _check_cumsum(self.empty_flat_dense,
-                      (CArray([]), CArray([]), CArray([])))
-        _check_cumsum(self.empty_dense,
-                      (CArray([]), CArray([[]]), CArray([[]])))
+        _check_cumsum(self.empty_flat_dense)
+        _check_cumsum(self.empty_dense)
 
         with self.assertRaises(NotImplementedError):
-            _check_cumsum(self.array_sparse, ())
+            _check_cumsum(self.array_sparse)
 
     def test_prod(self):
         """Test for CArray.prod() method."""
