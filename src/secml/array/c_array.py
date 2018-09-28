@@ -4524,7 +4524,7 @@ class CArray(_CArrayInterface):
             return cls(CDense.eye(n_rows, n_cols, k=k, dtype=dtype))
 
     @classmethod
-    def rand(cls, shape, random_state=None, sparse=False, density=0.5):
+    def rand(cls, shape, random_state=None, sparse=False, density=0.01):
         """Return random floats in the half-open interval [0.0, 1.0).
 
         Results are from the "continuous uniform" distribution over
@@ -4544,7 +4544,7 @@ class CArray(_CArrayInterface):
             If False (default) a dense array will be returned. Otherwise,
             a sparse array of zeros is created.
         density : scalar, optional, sparse only
-            Density of the generated sparse array, default 0.5.
+            Density of the generated sparse array, default 0.01 (1%).
             Density equal to one means a full array, density of 0 means
             no non-zero items.
 
