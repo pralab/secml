@@ -3134,9 +3134,8 @@ class CArray(_CArrayInterface):
         True
 
         """
-        out_all = self._data.all(axis=axis, keepdims=keepdims) \
-            if self.isdense is True else self._data.all()
-        return self._instance_array(out_all)
+        return self._instance_array(
+            self._data.all(axis=axis, keepdims=keepdims))
 
     def any(self, axis=None, keepdims=True):
         """Test whether any array elements along a given axis evaluate to True.

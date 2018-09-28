@@ -1380,9 +1380,9 @@ class CSparse(_CArrayInterface):
 
         return out.ravel() if axis is None or keepdims is False else out
 
-    def all(self, axis=None, keepdims=None):
+    def all(self, axis=None, keepdims=True):
         """Return True if all array elements are boolean True."""
-        if axis is not None or keepdims is not None:
+        if axis is not None or keepdims is not True:
             raise NotImplementedError(
                 "`axis` and `keepdims` are currently not supported")
 

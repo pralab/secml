@@ -1309,7 +1309,7 @@ class CDense(_CArrayInterface):
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 
-    def all(self, axis=None, keepdims=False):
+    def all(self, axis=None, keepdims=True):
         """Wrapper for numpy all."""
         out = np.all(self.atleast_2d().tondarray(), axis=axis,
                      keepdims=keepdims)

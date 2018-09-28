@@ -461,7 +461,6 @@ class _CArrayInterface(object):
         """Return the product of array elements over a given axis."""
         raise NotImplementedError
 
-    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def all(self, axis=None, keepdims=True):
         """Test whether all array elements evaluate to True."""
