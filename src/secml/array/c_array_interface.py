@@ -471,13 +471,11 @@ class _CArrayInterface(object):
         """Test whether any array elements evaluate to True."""
         raise NotImplementedError
 
-    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def max(self, axis=None, keepdims=True):
         """Return the maximum of an array or maximum along an axis."""
         raise NotImplementedError
 
-    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def min(self, axis=None, keepdims=True):
         """Return the minimum of an array or minimum along an axis."""
