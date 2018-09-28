@@ -2422,17 +2422,6 @@ class CArray(_CArrayInterface):
         """
         return self.__class__(self._data.sign())
 
-    def abs(self):
-        """Returns array elements without sign.
-
-        Returns
-        -------
-        CArray
-            Array with the corresponding elements without sign.
-
-        """
-        return abs(self)
-
     def repmat(self, m, n):
         """Repeat an array M x N times.
 
