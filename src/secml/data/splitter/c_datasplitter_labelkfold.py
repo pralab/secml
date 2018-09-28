@@ -76,7 +76,7 @@ class CDataSplitterLabelKFold(CDataSplitter):
         n_samples_per_label = labels.bincount()
 
         # Distribute the most frequent labels first
-        indices = n_samples_per_label.argsort()[::-1]
+        indices = n_samples_per_label.argsort(axis=None)[::-1]
         n_samples_per_label = n_samples_per_label[indices]
 
         # Total weight of each fold

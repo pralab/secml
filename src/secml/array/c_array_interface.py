@@ -343,15 +343,13 @@ class _CArrayInterface(object):
         """Returns array elements without sign."""
         return abs(self)
 
-    # TODO: CHECK AXIS
     @abstractmethod
     def sort(self, axis=-1, kind='quicksort', inplace=False):
         """Sort an array."""
         raise NotImplementedError
 
-    # TODO: CHECK AXIS
     @abstractmethod
-    def argsort(self, axis=None, kind='quicksort'):
+    def argsort(self, axis=-1, kind='quicksort'):
         """Returns the indices that would sort an array."""
         raise NotImplementedError
 

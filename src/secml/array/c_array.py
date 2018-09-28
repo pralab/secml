@@ -2003,7 +2003,7 @@ class CArray(_CArrayInterface):
         # We return ourselves for inplace sort otherwise a new object
         return self if inplace is True else self.__class__(data_sorted)
 
-    def argsort(self, axis=None, kind='quicksort'):
+    def argsort(self, axis=-1, kind='quicksort'):
         """Returns the indices that would sort an array.
 
         Perform an indirect sort along the given axis using
@@ -2014,8 +2014,8 @@ class CArray(_CArrayInterface):
         Parameters
         ----------
         axis : int or None, optional
-            Axis along which to sort.
-            If None (default), the flattened array is used.
+            Axis along which to sort. The default is -1 (the last axis).
+            If None, the flattened array is used.
         kind : {'quicksort', 'mergesort', 'heapsort'}, optional
             Sorting algorithm to use. Default 'quicksort'.
             For sparse arrays, only 'quicksort' is available.
@@ -2042,7 +2042,7 @@ class CArray(_CArrayInterface):
         CArray([[1 0]
          [1 0]])
 
-        >>> print CArray([[0,-3],[5,1]]).argsort()  # Sorting the flattened array
+        >>> print CArray([[0,-3],[5,1]]).argsort(axis=None)  # Sorting the flattened array
         CArray([1 0 3 2])
 
         """
