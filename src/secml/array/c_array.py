@@ -1233,8 +1233,6 @@ class CArray(_CArrayInterface):
         """Manage 'and' and 'or' operators."""
         return bool(self._data)
 
-    __nonzero__ = __bool__  # Compatibility with python < 3
-
     def __iter__(self):
         """Yields array elements in raster-scan order.
 
