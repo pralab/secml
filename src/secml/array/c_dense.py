@@ -1633,13 +1633,13 @@ class CDense(_CArrayInterface):
         return cls(np.empty(shape, dtype))
 
     @classmethod
-    def zeros(cls, shape, **dtype):
+    def zeros(cls, shape, dtype=float):
         """Return an array of desired shape with zeros.
         See numpy.zeros for more informations.
 
         Parameters
         ----------
-        shape : shape of array, integer or sequence of integers.
+        shape : shape of array, integer or tuple
         dtype : datatype of array data.
 
         Returns
@@ -1663,7 +1663,7 @@ class CDense(_CArrayInterface):
         (2, 1)
 
         """
-        return cls(np.zeros(shape, **dtype))
+        return cls(np.zeros(shape, dtype))
 
     @classmethod
     def ones(cls, *shape, **dtype):

@@ -4448,7 +4448,7 @@ class CArray(_CArrayInterface):
 
         Parameters
         ----------
-        shape : int or tuple of ints
+        shape : int or tuple
             Shape of the new array, e.g., 2 or (2,3).
         dtype : str or dtype, optional
             The desired data-type for the array. Default is float.
@@ -4476,13 +4476,14 @@ class CArray(_CArrayInterface):
         (2, 1)
 
         """
-        if sparse is not True:
+        # Converting integer "shape" to actual shape
+        shape = (shape,) if not isinstance(shape, tuple) else shape
+        if sparse is True:
+            # We fake the shape to create a sparse "vector"
+            shape = (1, shape[0]) if len(shape) == 1 else shape
+            return cls(CSparse.zeros(shape, dtype=dtype))
+        else:
             return cls(CDense.zeros(shape, dtype=dtype))
-        else:  # Sparse case
-            shape = (1, shape) if not isinstance(shape, tuple) else shape
-            shape = (1, shape[0]) if len(shape) <= 1 else shape
-            # We now use a secret init for CSparse... :)
-            return cls(CSparse(shape, dtype=dtype))
 
     @classmethod
     def ones(cls, shape, dtype=float, sparse=False):
