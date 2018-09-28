@@ -4763,12 +4763,11 @@ class CArray(_CArrayInterface):
         CArray
             The generated random samples.
 
-        Notes
-        -----
-        When sparse is True, array is converted to sparse format
-        after random generation under dense environment. Consequently,
-        for large distributions, performance is not comparable to
-        classical sparse array creation routines.
+        Warnings
+        --------
+        When sparse is True, array is created as dense and then converted
+        to sparse format. Consequently, the performance of this method
+        is not comparable to other sparse array creation routines.
 
         Examples
         --------
@@ -4828,12 +4827,11 @@ class CArray(_CArrayInterface):
             [start, stop] or the half-open interval [start, stop) (depending
             on whether endpoint is True or False).
 
-        Notes
-        -----
-        When sparse is True, array is converted to sparse format
-        after random generation under dense environment. Consequently,
-        for large distributions, performance is not comparable to
-        classical sparse array creation routines.
+        Warnings
+        --------
+        When sparse is True, array is created as dense and then converted
+        to sparse format. Consequently, the performance of this method
+        is not comparable to other sparse array creation routines.
 
         See Also
         --------
