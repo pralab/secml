@@ -654,7 +654,7 @@ class _CArrayInterface(object):
 
     @classmethod
     @abstractmethod
-    def arange(cls, start, stop=None, step=1, dtype=None):
+    def arange(cls, start=None, stop=None, step=1, dtype=None):
         """Return evenly spaced values within a given interval."""
         raise NotImplementedError
 

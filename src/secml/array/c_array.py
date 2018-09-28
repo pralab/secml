@@ -4856,7 +4856,7 @@ class CArray(_CArrayInterface):
             start, stop, num=num, endpoint=endpoint), tosparse=sparse)
 
     @classmethod
-    def arange(cls, start, stop=None, step=1, dtype=None, sparse=False):
+    def arange(cls, start=None, stop=None, step=1, dtype=None, sparse=False):
         """Return evenly spaced values within a given interval.
 
         Values are generated within the half-open interval [start, stop).
@@ -4868,15 +4868,13 @@ class CArray(_CArrayInterface):
 
         Parameters
         ----------
-        start : scalar
-            Lowest scalar to be drawn from the distribution (unless
-            stop=None, in which case this parameter is the highest
-            such scalar). The default start value is 0.
-        stop : scalar, optional
-            If provided, end of the interval (see above for behavior
-            if stop=None). The interval does not include this value,
+        start : scalar, optional
+            Start of interval. The interval includes this value.
+            The default start value is 0.
+        stop : scalar
+            End of interval. The interval does not include this value,
             except in some cases where step is not an integer and
-            floating point round-off affects the length of out.
+            floating point round-off affects the length of the output.
         step : scalar, optional
             Spacing between values. For any output out, this is the distance
             between two adjacent values, out[i+1] - out[i]. The default step
@@ -4896,12 +4894,11 @@ class CArray(_CArrayInterface):
             of floating point overflow, this rule may result in the last
             element of out being greater than stop.
 
-        Notes
-        -----
-        When sparse is True, array is converted to sparse format
-        after random generation under dense environment. Consequently,
-        for large distributions, performance is not comparable to
-        classical sparse array creation routines.
+        Warnings
+        --------
+        When sparse is True, array is created as dense and then converted
+        to sparse format. Consequently, the performance of this method
+        is not comparable to other sparse array creation routines.
 
         See Also
         --------

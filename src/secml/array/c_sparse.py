@@ -1804,6 +1804,11 @@ class CSparse(_CArrayInterface):
         raise NotImplementedError
 
     @classmethod
+    def arange(cls, start=None, stop=None, step=1, dtype=None):
+        """Return evenly spaced values within a given interval."""
+        raise NotImplementedError
+
+    @classmethod
     def concatenate(cls, array1, array2, axis=1):
         """Concatenate a sequence of arrays along the given axis."""
         if not isinstance(array1, cls) or not isinstance(array2, cls):

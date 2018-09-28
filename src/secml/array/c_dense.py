@@ -1831,7 +1831,7 @@ class CDense(_CArrayInterface):
         return cls(np.linspace(start, stop, num=num, endpoint=endpoint))
 
     @classmethod
-    def arange(cls, start=None, stop=None, step=None, dtype=None):
+    def arange(cls, start=None, stop=None, step=1, dtype=None):
         """Create a flatten array from 'start' to 'stop' using input 'step'."""
         return cls(np.arange(start=start, stop=stop, step=step, dtype=dtype))
 
