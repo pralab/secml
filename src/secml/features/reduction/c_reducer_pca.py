@@ -166,7 +166,7 @@ class CPca(CReducer):
         components = CArray(v)
 
         # Now we sort the eigenvalues/eigenvectors
-        idx = (-eigenval).argsort()
+        idx = (-eigenval).argsort(axis=None)
         eigenval = CArray(eigenval[idx])
         eigenvec = CArray(eigenvec[:, idx]).atleast_2d()
         components = CArray(components[idx, :]).atleast_2d()

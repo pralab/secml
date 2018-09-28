@@ -499,7 +499,7 @@ class CTestLogging(unittest.TestCase):
         # Testing logging of method run time
         with self.logger.timer():
             a = CArray.arange(-5, 100, 0.1).transpose()
-            a.sort()
+            a.sort(inplace=True)
 
         # Test for predefined interval with error
         with self.assertRaises(TypeError):

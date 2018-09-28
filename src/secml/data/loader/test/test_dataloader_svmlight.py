@@ -2,7 +2,7 @@ from secml.utils import CUnitTest
 
 from secml.data import CDataset
 from secml.data.loader import CDataLoaderSvmLight
-from secml.array import CArray, Csparse, Cdense
+from secml.array import CArray
 from secml.utils import fm
 
 
@@ -67,8 +67,7 @@ class TestCDataLoaderSvmLight(CUnitTest):
         # non-zero elements should be unchanged
         self.assertEquals(self.patterns.nnz, new_dataset.X.nnz)
         new_nnz_data = new_dataset.X.nnz_data
-        new_nnz_data.sort()
-        self.assertFalse((self.patterns.nnz_data != new_nnz_data).any())
+        self.assertFalse((self.patterns.nnz_data != new_nnz_data.sort()).any())
 
         # With idx_mapping we should be able to reconstruct original data
         original = CArray.zeros(self.patterns.shape, sparse=True)

@@ -65,5 +65,5 @@ class CConstraintL2(CConstraint):
         return self._center + self._radius * (x - self._center) / \
             (x - self._center).norm()
 
-    def _gradient(self,x):
-        return (x-self._center).ravel()/(x-self._center).norm(ord=2)
+    def _gradient(self, x):
+        return (x - self._center).ravel() / (x - self._center).norm(order=2)

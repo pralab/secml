@@ -39,8 +39,8 @@ class TestCFunctionCircle(CUnitTest):
 
         fig = CFigure()
         fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(func=CArray.apply_fun_torow, plot_levels=False,
-                         grid_limits=grid_limits, func_args=(circle.fun, ))
+        fig.sp.plot_fobj(func=CArray.apply_along_axis, plot_levels=False,
+                         grid_limits=grid_limits, func_args=(circle.fun, 1, ))
 
         fig.sp.title("Quadratic function")
         fig.show()

@@ -16,14 +16,15 @@ import matplotlib.mlab as mlab
 
 from copy import deepcopy
 
+from c_array_interface import _CArrayInterface
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_int, is_bool
 from secml.array.array_utils import is_vector_index
 
 
-class Cdense(object):
+class CDense(_CArrayInterface):
     """Dense array. Encapsulation for np.ndarray."""
-    __slots__ = '_data'  # Cdense has only one slot for the ndarray
+    __slots__ = '_data'  # CDense has only one slot for the ndarray
 
     def __init__(self, data=None, dtype=None, copy=False, shape=None):
         # Not implemented operators return NotImplemented
@@ -36,17 +37,13 @@ class Cdense(object):
         # numpy created an object array, maybe input is malformed?!
         if obj.dtype.char is 'O':
             raise TypeError("Array is malformed, check input data.")
+        # We do not currently support arrays with ndim > 2
+        if obj.ndim > 2:
+            raise TypeError('expected dimension <= 2 array or matrix')
         self._data = obj
         # Reshape created array if necessary
         if shape is not None and shape != self.shape:
             self._data = self.reshape(shape)._data
-
-    def _buffer_to_builtin(self, data):
-        """Convert data buffer to built-in arrays"""
-        if isinstance(data, self.__class__):  # Extract np.ndarray
-            return data.toarray()
-        else:
-            return data
 
     # ------------------------------ #
     # # # # # # PROPERTIES # # # # # #
@@ -68,23 +65,10 @@ class Cdense(object):
     def dtype(self):
         return self._data.dtype
 
-    def transpose(self):
-        """Transpose array data"""
-        if len(self.shape) == 1:  # We consider flat arrays as 1 x N
-            return self.__class__(
-                np.transpose(self.reshape((1, self.shape[0])).toarray()))
-        else:
-            return self.__class__(np.transpose(self.toarray()))
-
-    @property
-    def T(self):
-        """Transpose array data"""
-        return self.transpose()
-
     @property
     def nnz(self):
         """Return the number of non zero elements."""
-        return (self != 0).sum().tolist()[0]
+        return (self != 0).sum(keepdims=False).tolist()[0]
 
     @property
     def nnz_indices(self):
@@ -98,21 +82,33 @@ class Cdense(object):
             return self.__class__([])
         return self[self.nnz_indices]
 
+    @property
+    def T(self):
+        """Transpose array data"""
+        return self.transpose()
+
     # --------------------------- #
     # # # # # # CASTING # # # # # #
     # ----------------------------#
 
-    def toarray(self):
-        """Return a np.ndarray view of current Cdense."""
+    def tondarray(self):
+        """Return a np.ndarray view of current CDense."""
         return self._data
 
     def tocsr(self):
-        """Return current Cdense as a scipy.sparse.csr_matrix."""
-        return scs.csr_matrix(self.toarray())
+        """Return current CDense as a scipy.sparse.csr_matrix."""
+        return scs.csr_matrix(self.tondarray())
 
     def tolist(self):
-        """Return current Cdense as a list."""
+        """Return current CDense as a list."""
         return self._data.tolist()
+
+    def _buffer_to_builtin(self, data):
+        """Convert data buffer to built-in arrays"""
+        if isinstance(data, self.__class__):  # Extract np.ndarray
+            return data.tondarray()
+        else:
+            return data
 
     # ---------------------------- #
     # # # # # # INDEXING # # # # # #
@@ -129,26 +125,26 @@ class Cdense(object):
         Parameters
         ----------
         idx : object
-            - Cdense boolean mask
+            - CDense boolean mask
               Number of rows should be equal or higher
               than the number array's dimensions.
             - tuple of 2 or more elements. Any of the following:
-                - Cdense
+                - CDense
                 - Iterable built-in types (list, slice).
                 - Atomic built-in types (int, bool).
                 - Numpy atomic types (np.integer, np.bool_).
             - for vector-like arrays, one element between the above ones.
 
         """
-        if isinstance(idx, Cdense):
+        if isinstance(idx, CDense):
             if idx.dtype.kind == 'b':  # boolean mask
                 # Numpy requires a mask with the same dims of target array
                 if self.ndim == 1 and idx.ndim == 2:
-                    idx = idx.ravel().toarray()
+                    idx = idx.ravel().tondarray()
                 elif self.ndim == 2 and idx.ndim == 1:
-                    idx = idx.atleast_2d().toarray()
+                    idx = idx.atleast_2d().tondarray()
                 else:
-                    idx = idx.toarray()
+                    idx = idx.tondarray()
 
                 # Check the shape of the boolean mask
                 if idx.shape != self.shape:
@@ -157,11 +153,11 @@ class Cdense(object):
 
             elif self.ndim == 1:
                 # Converting to ndarray
-                idx = idx.toarray()
+                idx = idx.tondarray()
 
             elif self.ndim > 1 and self.shape[0] == 1:
                 # Fake 2D index. Use ndarrays to mimic Matlab-like indexing
-                idx = (np.asarray([0]), idx.toarray())
+                idx = (np.asarray([0]), idx.tondarray())
                 # 2D array: matlab-like indexing
                 idx = np.ix_(*idx)
 
@@ -231,8 +227,8 @@ class Cdense(object):
             if self.ndim == 1:
                 # We now check the first index if is suitable for flat arrays
 
-                if isinstance(idx[0], Cdense):
-                    idx_0 = idx[0].toarray()
+                if isinstance(idx[0], CDense):
+                    idx_0 = idx[0].tondarray()
                 else:
                     idx_0 = idx[0]
 
@@ -247,8 +243,8 @@ class Cdense(object):
 
             for e_i, e in enumerate(idx_list):
                 # Check each tuple element and convert to ndarray
-                if isinstance(e, Cdense):
-                    idx_list[e_i] = e.toarray()
+                if isinstance(e, CDense):
+                    idx_list[e_i] = e.tondarray()
                     # Check the size of any boolean array inside tuple
                     t = [None, None]  # Fake index for booleans check
                     t[e_i] = idx_list[e_i]
@@ -277,7 +273,7 @@ class Cdense(object):
 
                 else:
                     raise TypeError("{:} should not be used for "
-                                    "Csparse indexing.".format(type(idx)))
+                                    "CSparse indexing.".format(type(idx)))
 
             # Converting back to tuple
             idx = tuple(idx_list)
@@ -287,9 +283,9 @@ class Cdense(object):
                 idx = np.ix_(*idx)
 
         else:
-            # No other object is accepted for Csparse indexing
+            # No other object is accepted for CSparse indexing
             raise TypeError("{:} should not be used for "
-                            "Cdense indexing.".format(type(idx)))
+                            "CDense indexing.".format(type(idx)))
 
         return idx
 
@@ -356,33 +352,33 @@ class Cdense(object):
         if is_list_of_lists(idx):
             # Natively supported for multi-dimensional (not flat) arrays
             return self.__class__(
-                np.ndarray.__getitem__(self.atleast_2d().toarray(), idx))
+                np.ndarray.__getitem__(self.atleast_2d().tondarray(), idx))
 
         # Check index for all other cases
         idx = self._check_index(idx)
 
         # We are ready for numpy
-        return self.__class__(np.ndarray.__getitem__(self.toarray(), idx))
+        return self.__class__(np.ndarray.__getitem__(self.tondarray(), idx))
 
     def __setitem__(self, idx, value):
         """Redefinition of the set operation."""
         # Check for setitem value
-        if isinstance(value, Cdense):
-            value = value.toarray()
+        if isinstance(value, CDense):
+            value = value.tondarray()
         elif not (is_scalar(value) or is_bool(value)):
             raise TypeError("{:} cannot be used for setting "
-                            "a Cdense.".format(type(value)))
+                            "a CDense.".format(type(value)))
 
         if is_list_of_lists(idx):
             # Natively supported for multi-dimensional (not flat) arrays
-            np.ndarray.__setitem__(self.atleast_2d().toarray(), idx, value)
+            np.ndarray.__setitem__(self.atleast_2d().tondarray(), idx, value)
             return
 
         # Check index for all other cases
         idx = self._check_index(idx)
 
         # We are ready for numpy
-        np.ndarray.__setitem__(self.toarray(), idx, value)
+        np.ndarray.__setitem__(self.tondarray(), idx, value)
 
     # ------------------------------------ #
     # # # # # # SYSTEM OVERLOADS # # # # # #
@@ -393,20 +389,20 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
-            Element to add to current array. If a Cdense, element-wise
+        other : CDense or scalar or bool
+            Element to add to current array. If a CDense, element-wise
             addition will be performed. If scalar or boolean, the element
             will be sum to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after addition.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
-                np.add(self.toarray(), self._buffer_to_builtin(other)))
+                np.add(self.tondarray(), self._buffer_to_builtin(other)))
         else:
             return NotImplemented
 
@@ -421,12 +417,12 @@ class Cdense(object):
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after addition.
 
         """
         if is_scalar(other) or is_bool(other):
-            return self.__class__(np.add(other, self.toarray()))
+            return self.__class__(np.add(other, self.tondarray()))
         else:
             return NotImplemented
 
@@ -435,20 +431,20 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
-            Element to subtract to current array. If a Cdense, element-wise
+        other : CDense or scalar or bool
+            Element to subtract to current array. If a CDense, element-wise
             subtraction will be performed. If scalar or boolean, the element
             will be subtracted to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after subtraction.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
-                np.subtract(self.toarray(), self._buffer_to_builtin(other)))
+                np.subtract(self.tondarray(), self._buffer_to_builtin(other)))
         else:
             return NotImplemented
 
@@ -463,12 +459,12 @@ class Cdense(object):
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after subtraction.
 
         """
         if is_scalar(other) or is_bool(other):
-            return self.__class__(np.subtract(other, self.toarray()))
+            return self.__class__(np.subtract(other, self.tondarray()))
         else:
             return NotImplemented
 
@@ -477,20 +473,20 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
-            Element to multiplied to current array. If a Cdense, element-wise
+        other : CDense or scalar or bool
+            Element to multiplied to current array. If a CDense, element-wise
             product will be performed. If scalar or boolean, the element
             will be multiplied to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after product.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
-                np.multiply(self.toarray(), self._buffer_to_builtin(other)))
+                np.multiply(self.tondarray(), self._buffer_to_builtin(other)))
         else:
             return NotImplemented
 
@@ -505,12 +501,12 @@ class Cdense(object):
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after product.
 
         """
         if is_scalar(other) or is_bool(other):
-            return self.__class__(np.multiply(other, self.toarray()))
+            return self.__class__(np.multiply(other, self.tondarray()))
         else:
             return NotImplemented
 
@@ -519,20 +515,21 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
-            Element to divided to current array. If a Cdense, element-wise
+        other : CDense or scalar or bool
+            Element to divided to current array. If a CDense, element-wise
             division will be performed. If scalar or boolean, the element
             will be divided to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after division.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
-                np.true_divide(self.toarray(), self._buffer_to_builtin(other)))
+                np.true_divide(self.tondarray(),
+                               self._buffer_to_builtin(other)))
         else:
             return NotImplemented
 
@@ -547,12 +544,12 @@ class Cdense(object):
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after division.
 
         """
         if is_scalar(other) or is_bool(other):
-            return self.__class__(np.true_divide(other, self.toarray()))
+            return self.__class__(np.true_divide(other, self.tondarray()))
         else:
             return NotImplemented
 
@@ -572,47 +569,94 @@ class Cdense(object):
         """
         return self.__rtruediv__(other)
 
+    def __floordiv__(self, other):
+        """Element-wise floor division.
+
+        Parameters
+        ----------
+        other : CDense or scalar or bool
+            Element to divided to current array. If a CDense, element-wise
+            division will be performed. If scalar or boolean, the element
+            will be divided to each array element.
+
+        Returns
+        -------
+        array : CDense
+            Array after division.
+
+        """
+        # Result of Numpy floor division is not reliable
+        # (nan in place of inf, etc.)... Let's floor the truediv result
+        out_truediv = self.__truediv__(other)
+        if out_truediv is NotImplemented:
+            return NotImplemented
+        else:  # Return the integer part of the truediv result
+            return out_truediv.floor()
+
+    def __rfloordiv__(self, other):
+        """Element-wise (inverse) floor division.
+
+        Parameters
+        ----------
+        other : scalar or bool
+            Element to divided to current array.
+            The element will be divided to each array element.
+
+        Returns
+        -------
+        array : CDense
+            Array after division.
+
+        """
+        # Result of Numpy floor division is not reliable
+        # (nan in place of inf, etc.)... Let's floor the truediv result
+        out_truediv = self.__rtruediv__(other)
+        if out_truediv is NotImplemented:
+            return NotImplemented
+        else:  # Return the integer part of the truediv result
+            return out_truediv.floor()
+
     def __abs__(self):
         """Returns array elements without sign.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array with the corresponding elements without sign.
 
         """
-        return self.__class__(np.abs(self.toarray()))
+        return self.__class__(np.abs(self.tondarray()))
 
     def __neg__(self):
         """Returns array elements with negated sign.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array with the corresponding elements with negated sign.
 
         """
-        return self.__class__(np.negative(self.toarray()))
+        return self.__class__(np.negative(self.tondarray()))
 
     def __pow__(self, power):
         """Element-wise power.
 
         Parameters
         ----------
-        power : Cdense or scalar or bool
+        power : CDense or scalar or bool
             Power to use. If scalar or boolean, each array element will be
-            elevated to power. If a Cdense, each array element will be
+            elevated to power. If a CDense, each array element will be
             elevated to the corresponding element of the input array.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after power.
 
         """
-        if is_scalar(power) or is_bool(power) or isinstance(power, Cdense):
+        if is_scalar(power) or is_bool(power) or isinstance(power, CDense):
             return self.__class__(
-                self.toarray().__pow__(self._buffer_to_builtin(power)))
+                self.tondarray().__pow__(self._buffer_to_builtin(power)))
         else:
             return NotImplemented
 
@@ -626,12 +670,12 @@ class Cdense(object):
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Array after power.
 
         """
         if is_scalar(power) or is_bool(power):
-            return self.__class__(self.toarray().__rpow__(power))
+            return self.__class__(self.tondarray().__rpow__(power))
         else:
             return NotImplemented
 
@@ -640,20 +684,20 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
-            Element to be compared. If a Cdense, element-wise
+        other : CDense or scalar or bool
+            Element to be compared. If a CDense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Boolean array with comparison result.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
-                self.toarray() == self._buffer_to_builtin(other))
+                self.tondarray() == self._buffer_to_builtin(other))
         else:
             return NotImplemented
 
@@ -662,20 +706,20 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
-            Element to be compared. If a Cdense, element-wise
+        other : CDense or scalar or bool
+            Element to be compared. If a CDense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Boolean array with comparison result.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
-                self.toarray() < self._buffer_to_builtin(other))
+                self.tondarray() < self._buffer_to_builtin(other))
         else:
             return NotImplemented
 
@@ -684,20 +728,20 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
-            Element to be compared. If a Cdense, element-wise
+        other : CDense or scalar or bool
+            Element to be compared. If a CDense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Boolean array with comparison result.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
-                self.toarray() <= self._buffer_to_builtin(other))
+                self.tondarray() <= self._buffer_to_builtin(other))
         else:
             return NotImplemented
 
@@ -706,20 +750,20 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
-            Element to be compared. If a Cdense, element-wise
+        other : CDense or scalar or bool
+            Element to be compared. If a CDense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Boolean array with comparison result.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
-                self.toarray() > self._buffer_to_builtin(other))
+                self.tondarray() > self._buffer_to_builtin(other))
         else:
             return NotImplemented
 
@@ -728,20 +772,20 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
-            Element to be compared. If a Cdense, element-wise
+        other : CDense or scalar or bool
+            Element to be compared. If a CDense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Boolean array with comparison result.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
-                self.toarray() >= self._buffer_to_builtin(other))
+                self.tondarray() >= self._buffer_to_builtin(other))
         else:
             return NotImplemented
 
@@ -750,20 +794,20 @@ class Cdense(object):
 
         Parameters
         ----------
-        other : Cdense or scalar or bool
-            Element to be compared. If a Cdense, element-wise
+        other : CDense or scalar or bool
+            Element to be compared. If a CDense, element-wise
             comparison will be performed. If scalar or boolean,
             the element will be compared to each array element.
 
         Returns
         -------
-        array : Cdense
+        array : CDense
             Boolean array with comparison result.
 
         """
-        if is_scalar(other) or is_bool(other) or isinstance(other, Cdense):
+        if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
-                self.toarray() != self._buffer_to_builtin(other))
+                self.tondarray() != self._buffer_to_builtin(other))
         else:
             return NotImplemented
 
@@ -772,12 +816,6 @@ class Cdense(object):
         return bool(self._data)
 
     __nonzero__ = __bool__  # Compatibility with python < 3
-
-    def __str__(self):
-        return str(self._data).replace('array', 'Cdense', 1)
-
-    def __repr__(self):
-        return repr(self._data).replace('array', 'Cdense', 1)
 
     def __iter__(self):
         """Yields array elements in raster-scan order."""
@@ -788,6 +826,12 @@ class Cdense(object):
         for row_id in xrange(n_rows):
             for column_id in xrange(n_columns):
                 yield self[row_id, column_id]
+
+    def __str__(self):
+        return str(self._data).replace('array', 'CDense', 1)
+
+    def __repr__(self):
+        return repr(self._data).replace('array', 'CDense', 1)
 
     # ------------------------------ #
     # # # # # # COPY UTILS # # # # # #
@@ -845,7 +889,7 @@ class Cdense(object):
 
         try:
             np.savetxt(
-                datafile, self.atleast_2d().toarray(), delimiter=' ', fmt=fmt)
+                datafile, self.atleast_2d().tondarray(), delimiter=' ', fmt=fmt)
         except IOError as e:  # Prevent stopping after standard IOError
             print e
 
@@ -870,7 +914,7 @@ class Cdense(object):
 
         Returns
         -------
-        loaded : Cdense
+        loaded : CDense
             Array resulting from loading, 2-dimensional.
 
         """
@@ -893,21 +937,42 @@ class Cdense(object):
     # # # # # # UTILITIES # # # # # #
     # ------------------------------#
 
+    # ---------------- #
+    # SHAPE ALTERATION #
+    # ---------------- #
+
+    def transpose(self):
+        """Transpose array data"""
+        if len(self.shape) == 1:  # We consider flat arrays as 1 x N
+            return self.__class__(
+                np.transpose(self.reshape((1, self.shape[0])).tondarray()))
+        else:
+            return self.__class__(np.transpose(self.tondarray()))
+
     def ravel(self, order=None):
         """Wrapper for numpy ravel"""
-        return self.__class__(np.ravel(self.toarray(), order))
+        return self.__class__(np.ravel(self.tondarray(), order))
+
+    def flatten(self, order=None):
+        """Wrapper for numpy flatten."""
+        return self.__class__(self.tondarray().flatten(order))
+
+    def atleast_2d(self):
+        """Force array to have at least 2 dimensions."""
+        # All other not-empty arrays
+        return self.__class__(np.atleast_2d(self.tondarray()))
 
     def reshape(self, newshape):
         """Reshape array."""
-        return self.__class__(self.toarray().reshape(newshape))
+        return self.__class__(self.tondarray().reshape(newshape))
 
-    def resize(self, new_shape, constant=0):
+    def resize(self, newshape, constant=0):
         """Return a new array with the specified shape."""
-        if is_scalar(new_shape):  # Compatibility between N and (N, )
-            new_shape = (new_shape,)
+        if is_scalar(newshape):  # Compatibility between N and (N, )
+            newshape = (newshape,)
         # Compute size of of output array
-        out_size = new_shape[0] if \
-            len(new_shape) == 1 else new_shape[0] * new_shape[1]
+        out_size = newshape[0] if \
+            len(newshape) == 1 else newshape[0] * newshape[1]
         if out_size > self.size:  # Append missing elements
             old_array = self.ravel().append(
                 self.__class__.ones(out_size - self.size,
@@ -915,57 +980,53 @@ class Cdense(object):
         else:  # Caching old array
             old_array = self
 
-        a_resize = np.resize(old_array.toarray(), new_shape=new_shape)
+        a_resize = np.resize(old_array.tondarray(), new_shape=newshape)
         return self.__class__(a_resize, dtype=self.dtype)
 
-    def astype(self, newtype):
-        """Return current Cdense with specified type."""
-        return self.__class__(self._data.astype(newtype))
+    # --------------- #
+    # DATA ALTERATION #
+    # --------------- #
 
-    def dot(self, other):
+    def astype(self, dtype):
+        """Clip (limit) the values in an array."""
+        return self.__class__(self._data.astype(dtype))
 
-        if len(self.shape) + len(other.shape) != 2:  # Matrix multiplication
-            # Reshaping flat vectors to 1 x N (row vectors)
-            array1 = self.reshape((1, self.shape[0])) if \
-                len(self.shape) == 1 else self
-            array2 = other.reshape((1, other.shape[0])) if \
-                len(other.shape) == 1 else other
+    def nan_to_num(self):
+        """Replace nan with zero and inf with finite numbers."""
+        self[:, :] = self.__class__(np.nan_to_num(self.tondarray()))
 
-        else:  # Inner product between flat arrays
-            array1 = self
-            array2 = other
+    def round(self, decimals=0):
+        """Return a copy of your array rounded"""
+        return self.__class__(
+            np.around(self.tondarray(), decimals=decimals))
 
-        return self.__class__(np.dot(array1.toarray(), array2.toarray()))
+    def ceil(self):
+        """Return the ceiling of the input, element-wise."""
+        return self.__class__(np.ceil(self.tondarray()))
 
-    def find(self, condition):
-        """Indices of current array with True condition.
+    def floor(self):
+        """Return the floor of the input, element-wise."""
+        return self.__class__(np.floor(self.tondarray()))
 
-        Returns a list (of lists, if the array has more than one dimension),
-        each containing the indexes (one per dimension) of an element that
-        satisfies the given condition.
+    def clip(self, c_min, c_max):
+        """Clip (limit) the values in an array."""
+        return self.__class__(
+            np.clip(self.tondarray(), a_min=c_min, a_max=c_max))
 
-        When using a list or array of N elements to index a Cdense of N
-        dimensions, we get the corresponding elements (standard ndarray
-        indexing).
-
-        Examples
-        --------
-        >>> a = Cdense([[1,2,3],[4,5,6]])
-        >>> idx = a.find(a > 2)
-        >>> idx
-        [[0, 1, 1, 1], [2, 0, 1, 2]]
-        >>> a[idx]
-        Cdense([3, 4, 5, 6])
-
-        """
-        # size instead of shape as we just need one condition for each element
-        if condition.size != self.size:
-            raise ValueError("condition size must be {:}".format(self.size))
-        return map(list, np.nonzero(condition.atleast_2d().toarray()))
-
-    def sort(self, axis=-1, kind='quicksort', order=None):
+    def sort(self, axis=-1, kind='quicksort', inplace=False, order=None):
         """sort in place"""
-        self.atleast_2d()._data.sort(axis=axis, kind=kind, order=order)
+        if inplace is True:
+            self.atleast_2d()._data.sort(axis=axis, kind=kind, order=order)
+            # We return ourselves for output consistency
+            return self
+        elif inplace is False:
+            out_sort = self.__class__(
+                np.sort(self.atleast_2d().tondarray(),
+                        axis=axis, kind=kind, order=order))
+            return out_sort.ravel() if self.ndim < 2 else out_sort
+        else:
+            raise ValueError("`{:}` is not a valid value for "
+                             "the `inplace` parameter", inplace)
 
     def argsort(self, axis=-1, kind='quicksort', order=None):
         # Fast argsort only available for flat arrays
@@ -974,62 +1035,29 @@ class Cdense(object):
                 range(self.size), key=lambda x: self.__getitem__((0, x))))
         else:
             return self.__class__(
-                np.argsort(self.toarray(), axis, kind, order))
+                np.argsort(self.tondarray(), axis, kind, order))
 
-    def append(self, val, axis=None):
+    def shuffle(self):
+        """Wrapper for numpy.random.shuffle. In-place operation."""
+        if self.size > 0:
+            if self.ndim == 2 and self.shape[0] == 1:
+                array = self.ravel()._data
+                np.random.shuffle(array)
+                self._data = array
+                self._data = self.atleast_2d()._data
+            else:
+                np.random.shuffle(self._data)
+
+    # ------------ #
+    # APPEND/MERGE #
+    # ------------ #
+
+    def append(self, array, axis=None):
         """Wrapper for append."""
-        out = self.__class__(np.append(self.atleast_2d().toarray(),
-                                       val.atleast_2d().toarray(), axis))
+        out = self.__class__(np.append(self.atleast_2d().tondarray(),
+                                       array.atleast_2d().tondarray(), axis))
         return out.ravel() if axis is None or (
-            self.ndim <= 1 and val.ndim <= 1 and axis == 1) else out
-
-    def unique(self, return_index=False, return_inverse=False):
-        """Wrapper for unique."""
-        out = np.unique(self.toarray(), return_index, return_inverse)
-        if return_index is False and return_inverse is False:
-            return self.__class__(out)
-        else:
-            return tuple([self.__class__(elem) for elem in out])
-
-    def all(self, axis=None, keepdims=False):
-        """Wrapper for numpy all."""
-        out = np.all(self.atleast_2d().toarray(), axis=axis, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
-
-    def any(self, axis=None, keepdims=False):
-        """Wrapper for numpy any."""
-        out = np.any(self.atleast_2d().toarray(), axis=axis, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
-
-    def amax(self, axis=None, keepdims=False):
-        """Wrapper for numpy max."""
-        out = np.amax(
-            self.atleast_2d().toarray(), axis=axis, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
-
-    def amin(self, axis=None, keepdims=False):
-        """Wrapper for numpy min."""
-        out = np.amin(
-            self.atleast_2d().toarray(), axis=axis, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
-
-    def nanmax(self, axis=None, keepdims=False):
-        """Wrapper for numpy nanmax."""
-        out = np.nanmax(
-            self.atleast_2d().toarray(), axis=axis, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
-
-    def nanmin(self, axis=None, keepdims=False):
-        """Wrapper for numpy nanmin."""
-        out = np.nanmin(
-            self.atleast_2d().toarray(), axis=axis, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
+                self.ndim <= 1 and array.ndim <= 1 and axis == 1) else out
 
     def repmat(self, m, n):
         """Wrapper for repmat
@@ -1038,14 +1066,14 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
-        >>> a0 = Cdense([1])
+        >>> from secml.array.c_dense import CDense
+        >>> a0 = CDense([1])
         >>> print(a0.repmat(2, 3))
         [[1 1 1]
          [1 1 1]]
 
         """
-        return self.__class__(np.matlib.repmat(self.toarray(), m, n))
+        return self.__class__(np.matlib.repmat(self.tondarray(), m, n))
 
     def repeat(self, repeats, axis=None):
         """Wrapper for repeat.
@@ -1069,53 +1097,158 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
+        >>> from secml.array.c_dense import CDense
 
-        >>> x = Cdense([[1,2],[3,4]])
-        
+        >>> x = CDense([[1,2],[3,4]])
+
         >>> x.repeat(2)
-        Cdense([1, 1, 2, 2, 3, 3, 4, 4])
-        
+        CDense([1, 1, 2, 2, 3, 3, 4, 4])
+
         >>> x.repeat(2, axis=1)
-        Cdense([[1, 1, 2, 2],
+        CDense([[1, 1, 2, 2],
                [3, 3, 4, 4]])
         >>> x.repeat(2, axis=0)
-        Cdense([[1, 2],
+        CDense([[1, 2],
                [1, 2],
                [3, 4],
                [3, 4]])
-        
+
         >>> x.repeat([1, 2], axis=0)
-        Cdense([[1, 2],
+        CDense([[1, 2],
                [3, 4],
                [3, 4]])
 
         """
         repeats = self._buffer_to_builtin(repeats)
         return self.__class__(
-            np.repeat(self.toarray(), repeats=repeats, axis=axis))
+            np.repeat(self.tondarray(), repeats=repeats, axis=axis))
 
-    def maximum(self, y):
-        """Element-wise maximum with respect to input Cdense."""
-        return self.__class__(np.maximum(self.toarray(), y.toarray()))
+    # ---------- #
+    # COMPARISON #
+    # ---------- #
 
-    def minimum(self, y):
-        """Element-wise minimum with respect to input Cdense."""
-        return self.__class__(np.minimum(self.toarray(), y.toarray()))
+    def logical_and(self, array):
+        """Element-wise logical & (and) with respect to input CDense."""
+        return self.__class__(
+            np.logical_and(self.tondarray(), array.tondarray()))
 
-    def logical_and(self, y):
-        """Element-wise logical & (and) with respect to input Cdense."""
-        return self.__class__(np.logical_and(self.toarray(), y.toarray()))
-
-    def logical_or(self, y):
-        """Element-wise logical | (or) with respect to input Cdense."""
-        return self.__class__(np.logical_or(self.toarray(), y.toarray()))
+    def logical_or(self, array):
+        """Element-wise logical | (or) with respect to input CDense."""
+        return self.__class__(
+            np.logical_or(self.tondarray(), array.tondarray()))
 
     def logical_not(self):
         """Element-wise logical ! (not) of array elements."""
-        return self.__class__(np.logical_not(self.toarray()))
+        return self.__class__(np.logical_not(self.tondarray()))
 
-    def norm(self, order=None, axis=None):
+    def maximum(self, array):
+        """Element-wise maximum with respect to input CDense."""
+        return self.__class__(np.maximum(self.tondarray(), array.tondarray()))
+
+    def minimum(self, array):
+        """Element-wise minimum with respect to input CDense."""
+        return self.__class__(np.minimum(self.tondarray(), array.tondarray()))
+
+    # ------ #
+    # SEARCH #
+    # ------ #
+
+    def find(self, condition):
+        """Indices of current array with True condition.
+
+        Returns a list (of lists, if the array has more than one dimension),
+        each containing the indexes (one per dimension) of an element that
+        satisfies the given condition.
+
+        When using a list or array of N elements to index a CDense of N
+        dimensions, we get the corresponding elements (standard ndarray
+        indexing).
+
+        Examples
+        --------
+        >>> a = CDense([[1,2,3],[4,5,6]])
+        >>> idx = a.find(a > 2)
+        >>> idx
+        [[0, 1, 1, 1], [2, 0, 1, 2]]
+        >>> a[idx]
+        CDense([3, 4, 5, 6])
+
+        """
+        # size instead of shape as we just need one condition for each element
+        if condition.size != self.size:
+            raise ValueError("condition size must be {:}".format(self.size))
+        return map(list, np.nonzero(condition.atleast_2d().tondarray()))
+
+    def binary_search(self, value):
+        """Returns the index of each input value inside the array.
+
+        If value is not found inside the array, the index
+        of the closest value will be returned.
+        Array will be flattened before search.
+
+        Parameters
+        ----------
+        value : scalar or array_like
+            Element or array of elements to search inside
+            the flattened array.
+
+        Returns
+        -------
+        out_index : int or CDense
+            Position of input value, or the closest one, inside
+            flattened array. If `value` is an array, a CDense
+            with the position of each `value` element is returned.
+
+        Examples
+        --------
+        >>> from secml.array.c_dense import CDense
+
+        >>> print CDense([[0,0.1],[0.4,1.0]]).binary_search(0.3)
+        2
+
+        >>> print CDense([1,2,3,4]).binary_search(10)
+        3
+
+        >>> print CDense([1,2,3,4]).binary_search(CDense([-10,1,2.2,10]))
+        [0 0 1 3]
+
+        """
+        from bisect import bisect_left
+
+        def bs_single(array, e):
+            """Binary search of input scalar 'e' inside `array`."""
+            pos = bisect_left(array.tolist(), e, 0, array.size)
+            if pos == 0:  # workaround of zero-based python indexing
+                return 0
+            elif pos == array.size or \
+                    abs(e - array[pos - 1]) < abs(e - array[pos]):
+                return pos - 1
+            else:
+                return pos
+
+        # As bisect_left returns a single index, so we should ravel the array
+        out = map(lambda x: bs_single(self.ravel(), x), CDense(value))
+        return CDense(out) if len(out) > 1 else out[0]
+
+    # ------------- #
+    # DATA ANALYSIS #
+    # ------------- #
+
+    def unique(self, return_index=False,
+               return_inverse=False, return_counts=False):
+        """Wrapper for unique."""
+        out = np.unique(
+            self.tondarray(), return_index, return_inverse, return_counts)
+        if not any([return_index, return_inverse, return_counts]):
+            return self.__class__(out)
+        else:
+            return tuple([self.__class__(elem) for elem in out])
+
+    def bincount(self):
+        """Count the number of occurrences of each non-negative int."""
+        return self.__class__(np.bincount(self.tondarray()))
+
+    def norm(self, order=None, axis=None, keepdims=False):
         """Wrapper for numpy norm."""
         if (self.ndim < 2 or axis is not None) and order == 'fro':
             # 'fro' is a matrix norm
@@ -1124,138 +1257,91 @@ class Cdense(object):
         if self.size == 0:
             # Special handle as few norms raise error for empty arrays
             if self.ndim == 2 and axis is None and order not in (
-                        None, 'fro', np.inf, -np.inf, 1, -1, 2, -2):
+                    None, 'fro', np.inf, -np.inf, 1, -1, 2, -2):
                 raise ValueError("Invalid norm order {:}.".format(order))
             return self.__class__([0.0])
 
         out = np.linalg.norm(
-            self.atleast_2d().toarray().astype(float) if axis is not None
-            else self.toarray().astype(float), order, axis)
+            self.atleast_2d().tondarray().astype(float) if axis is not None
+            else self.tondarray().astype(float), order, axis)
 
-        # Always return a Cdense of floats
+        # Always return a CDense of floats
         out = self.__class__(out).astype(float)
 
         if axis is None:
             return out
-        elif self.ndim <= 1:
+        elif self.ndim <= 1 or keepdims is False:
             # custom axis and flat vectors, return a flat vector
             return out.ravel()
-        elif self.ndim == 2:
-            # for matrices always return a 2D array consistent with axis
+        elif self.ndim == 2 and keepdims is True:
+            # return a 2D array consistent with axis if keepdims=True
             return out.atleast_2d().T if axis == 1 else out.atleast_2d()
+        else:
+            ValueError("unknown use of `axis` and `keepdims` parameters")
 
-    def sum(self, axis=None, keepdims=False):
+    def norm_2d(self, order=None, axis=None, keepdims=True):
+        """Wrapper for numpy norm on 2-D arrays."""
+        return self.norm(order, axis, keepdims)
+
+    def sum(self, axis=None, keepdims=True):
         """Wrapper for numpy sum"""
         if self.size == 0:
             out = self.__class__([[0.0]])
         else:
             out = np.sum(
-                self.atleast_2d().toarray(), axis=axis, keepdims=keepdims)
+                self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 
     def cumsum(self, axis=None, dtype=None):
         """Wrapper for numpy cumsum"""
-        out = np.cumsum(self.atleast_2d().toarray(), axis=axis, dtype=dtype)
+        out = np.cumsum(self.atleast_2d().tondarray(), axis=axis, dtype=dtype)
         return self.__class__(out).ravel() if \
             self.ndim <= 1 else self.__class__(out)
 
-    def prod(self, axis=None, dtype=None, keepdims=False):
+    def prod(self, axis=None, dtype=None, keepdims=True):
         """Return the product of array elements over a given axis."""
         if self.size == 0:
             out = self.__class__([[1.0]], dtype=dtype)
         else:
-            out = np.prod(self.atleast_2d().toarray(),
+            out = np.prod(self.atleast_2d().tondarray(),
                           axis=axis, dtype=dtype, keepdims=keepdims)
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 
-    def mean(self, axis=None, dtype=float, keepdims=False):
-        """Wrapper for mean"""
-        out = np.mean(self.atleast_2d().toarray(),
-                      axis=axis, dtype=dtype, keepdims=keepdims)
+    def all(self, axis=None, keepdims=True):
+        """Wrapper for numpy all."""
+        out = np.all(self.atleast_2d().tondarray(), axis=axis,
+                     keepdims=keepdims)
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 
-    def median(self, axis=None, keepdims=False):
-        """Wrapper for median"""
-        out = np.median(
-            self.atleast_2d().toarray(), axis=axis, keepdims=keepdims)
+    def any(self, axis=None, keepdims=True):
+        """Wrapper for numpy any."""
+        out = np.any(self.atleast_2d().tondarray(), axis=axis,
+                     keepdims=keepdims)
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 
-    def std(self, axis=None, dtype=float, ddof=0, keepdims=False):
-        """Wrapper for mean"""
-        out = np.std(self.atleast_2d().toarray(),
-                     axis=axis, dtype=dtype, ddof=ddof, keepdims=keepdims)
+    def max(self, axis=None, keepdims=True):
+        """Wrapper for numpy max."""
+        out = np.amax(
+            self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 
-    def sqrt(self):
-        """Wrapper for np.sqrt"""
-        return self.__class__(np.sqrt(self.toarray()))
-
-    def round(self, decimals=0):
-        """Return a copy of your array rounded"""
-        return self.__class__(np.around(self.toarray(), decimals=decimals))
-
-    def rint(self):
-        """Round elements of the array to the nearest integer."""
-        return self.round(decimals=0)
-
-    def ceil(self):
-        """Return the ceiling of the input, element-wise."""
-        return self.__class__(np.ceil(self.toarray()))
-
-    def floor(self):
-        """Return the floor of the input, element-wise."""
-        return self.__class__(np.floor(self.toarray()))
-
-    def shuffle(self):
-        """Wrapper for numpy.random.shuffle. In-place operation."""
-        if self.size > 0:
-            if self.ndim == 2 and self.shape[0] == 1:
-                array = self.ravel()._data
-                np.random.shuffle(array)
-                self._data = array
-                self._data = self.atleast_2d()._data
-            else:
-                np.random.shuffle(self._data)
-
-    def diag(self, k=0):
-        """Extract a diagonal or construct a diagonal array."""
-        return self.__class__(np.diag(self.toarray(), k=k))
-
-    def inv(self):
-        """Compute the (multiplicative) inverse of a square matrix."""
-        return self.__class__(inv(self.toarray()))
-
-    def pinv(self, rcond=1e-15):
-        """Compute the (Moore-Penrose) pseudo-inverse of a matrix."""
-        return self.__class__(pinv(self.toarray(), rcond))
-
-    def sign(self):
-        """Return array sign element-wise"""
-        return self.__class__(np.sign(self.toarray()))
-
-    def bincount(self):
-        """Count number of occurrences of each non-negative int."""
-        return self.__class__(np.bincount(self.toarray()))
-
-    def atleast_2d(self):
-        """Force array to have at least 2 dimensions."""
-        # All other not-empty arrays
-        return self.__class__(np.atleast_2d(self.toarray()))
-
-    def nan_to_num(self):
-        """Replace nan with zero and inf with finite numbers."""
-        self[:, :] = self.__class__(np.nan_to_num(self.toarray()))
+    def min(self, axis=None, keepdims=True):
+        """Wrapper for numpy min."""
+        out = np.amin(
+            self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
+        return self.__class__(out).ravel() if \
+            self.ndim <= 1 or keepdims is False else self.__class__(out)
 
     def argmin(self, axis=None):
         """Wrapper for numpy argmin"""
         out_min = self.__class__(np.argmin(
-            self.toarray() if axis is None else
-            self.atleast_2d().toarray(), axis=axis))
+            self.tondarray() if axis is None else
+            self.atleast_2d().tondarray(), axis=axis))
 
         return out_min if axis is None or self.ndim <= 1 else \
             (out_min.atleast_2d() if axis == 0 else out_min.atleast_2d().T)
@@ -1263,17 +1349,31 @@ class Cdense(object):
     def argmax(self, axis=None):
         """Wrapper for numpy argmax"""
         out_max = self.__class__(np.argmax(
-            self.toarray() if axis is None else
-            self.atleast_2d().toarray(), axis=axis))
+            self.tondarray() if axis is None else
+            self.atleast_2d().tondarray(), axis=axis))
 
         return out_max if axis is None or self.ndim <= 1 else \
             (out_max.atleast_2d() if axis == 0 else out_max.atleast_2d().T)
 
+    def nanmax(self, axis=None, keepdims=True):
+        """Wrapper for numpy nanmax."""
+        out = np.nanmax(
+            self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
+        return self.__class__(out).ravel() if \
+            self.ndim <= 1 or keepdims is False else self.__class__(out)
+
+    def nanmin(self, axis=None, keepdims=True):
+        """Wrapper for numpy nanmin."""
+        out = np.nanmin(
+            self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
+        return self.__class__(out).ravel() if \
+            self.ndim <= 1 or keepdims is False else self.__class__(out)
+
     def nanargmin(self, axis=None):
         """Wrapper for numpy nanargmin"""
         out_min = self.__class__(
-            np.nanargmin(self.toarray() if axis is None else
-                         self.atleast_2d().toarray(), axis=axis))
+            np.nanargmin(self.tondarray() if axis is None else
+                         self.atleast_2d().tondarray(), axis=axis))
 
         return out_min if axis is None or self.ndim <= 1 else \
             (out_min.atleast_2d() if axis == 0 else out_min.atleast_2d().T)
@@ -1281,15 +1381,40 @@ class Cdense(object):
     def nanargmax(self, axis=None):
         """Wrapper for numpy nanargmax"""
         out_max = self.__class__(
-            np.nanargmax(self.toarray() if axis is None else
-                         self.atleast_2d().toarray(), axis=axis))
+            np.nanargmax(self.tondarray() if axis is None else
+                         self.atleast_2d().tondarray(), axis=axis))
 
         return out_max if axis is None or self.ndim <= 1 else \
             (out_max.atleast_2d() if axis == 0 else out_max.atleast_2d().T)
 
-    def clip(self, a_min, a_max):
-        """Wrapper for numpy clip."""
-        return self.__class__(np.clip(self.toarray(), a_min=a_min, a_max=a_max))
+    def mean(self, axis=None, dtype=None, keepdims=True):
+        """Wrapper for mean"""
+        out = np.mean(self.atleast_2d().tondarray(),
+                      axis=axis, dtype=dtype, keepdims=keepdims)
+        return self.__class__(out).ravel() if \
+            self.ndim <= 1 or keepdims is False else self.__class__(out)
+
+    def median(self, axis=None, keepdims=True):
+        """Wrapper for median"""
+        out = np.median(
+            self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
+        return self.__class__(out).ravel() if \
+            self.ndim <= 1 or keepdims is False else self.__class__(out)
+
+    def std(self, axis=None, ddof=0, keepdims=True):
+        """Wrapper for mean"""
+        out = np.std(self.atleast_2d().tondarray(),
+                     axis=axis, dtype=np.float64, ddof=ddof, keepdims=keepdims)
+        return self.__class__(out).ravel() if \
+            self.ndim <= 1 or keepdims is False else self.__class__(out)
+
+    # ----------------- #
+    # MATH ELEMENT-WISE #
+    # ----------------- #
+
+    def sqrt(self):
+        """Wrapper for np.sqrt"""
+        return self.__class__(np.sqrt(self.tondarray()))
 
     def sin(self):
         """Trigonometric sine, element-wise.
@@ -1299,11 +1424,11 @@ class Cdense(object):
 
         Returns
         -------
-        array_sin : Cdense
+        array_sin : CDense
             New array with trigonometric sine element-wise.
 
         """
-        return self.__class__(np.sin(self.toarray()))
+        return self.__class__(np.sin(self.tondarray()))
 
     def cos(self):
         """Trigonometric cosine, element-wise.
@@ -1313,44 +1438,44 @@ class Cdense(object):
 
         Returns
         -------
-        array_cos : Cdense
+        array_cos : CDense
             New array with trigonometric cosine element-wise.
 
         """
-        return self.__class__(np.cos(self.toarray()))
+        return self.__class__(np.cos(self.tondarray()))
 
     def exp(self):
         """Calculate the exponential of all elements in the input array.
 
         Returns
         -------
-        y : Cdense
+        y : CDense
             New array with element-wise exponential of current data.
 
         """
-        return self.__class__(np.exp(self.toarray()))
+        return self.__class__(np.exp(self.tondarray()))
 
     def log(self):
         """Calculate the natural logarithm of all elements in the input array.
 
         Returns
         -------
-        y : Cdense
+        y : CDense
             New array with element-wise natural logarithm of current data.
 
         """
-        return self.__class__(np.log(self.toarray()))
+        return self.__class__(np.log(self.tondarray()))
 
     def log10(self):
         """Calculate the base 10 logarithm of all elements in the input array.
 
         Returns
         -------
-        y : Cdense
+        y : CDense
             New array with element-wise base 10 logarithm of current data.
 
         """
-        return self.__class__(np.log10(self.toarray()))
+        return self.__class__(np.log10(self.tondarray()))
 
     def pow(self, exp):
         """Array elements raised to powers from input exponent, element-wise.
@@ -1361,27 +1486,27 @@ class Cdense(object):
 
         Parameters
         ----------
-        exp : Cdense or scalar
+        exp : CDense or scalar
             Exponent of power, can be another array or a
             single scalar. If array, must have the same
             shape of original array.
 
         Returns
         -------
-        pow_array : Cdense
+        pow_array : CDense
             New array with the power of current data using
             input exponents.
 
         """
         return self.__class__(
-            np.power(self.toarray(), self._buffer_to_builtin(exp)))
+            np.power(self.tondarray(), self._buffer_to_builtin(exp)))
 
-    def normpdf(self, mu, sigma):
+    def normpdf(self, mu=0.0, sigma=1.0):
         """Return normal distribution function value with mean
         and standard deviation given for the current array values.
 
         Parameters
-        ----------  
+        ----------
         mu : float
             Normal distribution mean.
         sigma : float
@@ -1389,12 +1514,42 @@ class Cdense(object):
 
         Returns
         -------
-        y : Cdense
+        y : CDense
             Normal distribution values
 
         """
         return self.__class__(
-            mlab.normpdf(self.toarray(), float(mu), float(sigma)))
+            mlab.normpdf(self.tondarray(), float(mu), float(sigma)))
+
+    # ----- #
+    # MIXED #
+    # ----- #
+
+    def sign(self):
+        """Return array sign element-wise"""
+        return self.__class__(np.sign(self.tondarray()))
+
+    def diag(self, k=0):
+        """Extract a diagonal or construct a diagonal array."""
+        if self.ndim > 1 and (k > 0 and k > self.shape[1] - 1) or \
+                (k < 0 and abs(k) > self.shape[0] - 1):
+            raise ValueError("k exceeds matrix dimensions")
+        return self.__class__(np.diag(self.tondarray(), k=k))
+
+    def dot(self, array):
+
+        if len(self.shape) + len(array.shape) != 2:  # Matrix multiplication
+            # Reshaping flat vectors to 1 x N (row vectors)
+            array1 = self.reshape((1, self.shape[0])) if \
+                len(self.shape) == 1 else self
+            array2 = array.reshape((1, array.shape[0])) if \
+                len(array.shape) == 1 else array
+
+        else:  # Inner product between flat arrays
+            array1 = self
+            array2 = array
+
+        return self.__class__(np.dot(array1.tondarray(), array2.tondarray()))
 
     def interp(self, x_data, y_data, return_left=None, return_right=None):
         """One-dimensional linear interpolation.
@@ -1417,7 +1572,7 @@ class Cdense(object):
 
         Returns
         -------
-        out_interp : Cdense
+        out_interp : CDense
             The interpolated values, same shape as x.
 
         Notes
@@ -1427,89 +1582,31 @@ class Cdense(object):
         results are nonsense.
 
         """
-        return self.__class__(sc_interp(self.toarray(),
-                                        x_data.ravel().toarray(),
-                                        y_data.ravel().toarray(),
+        return self.__class__(sc_interp(self.tondarray(),
+                                        x_data.ravel().tondarray(),
+                                        y_data.ravel().tondarray(),
                                         return_left, return_right))
+
+    def inv(self):
+        """Compute the (multiplicative) inverse of a square matrix."""
+        return self.__class__(inv(self.tondarray()))
+
+    def pinv(self, rcond=1e-15):
+        """Compute the (Moore-Penrose) pseudo-inverse of a matrix."""
+        return self.__class__(pinv(self.tondarray(), rcond))
 
     # -------------------------------- #
     # # # # # # CLASSMETHODS # # # # # #
     # ---------------------------------#
 
     @classmethod
-    def zeros(cls, shape, **dtype):
-        """Return an array of desired shape with zeros.
-        See numpy.zeros for more informations.
-
-        Parameters
-        ----------
-        shape : shape of array, integer or sequence of integers.
-        dtype : datatype of array data.
-
-        Returns
-        -------
-        Array of zeros with desired shape.
-
-        Examples
-        --------
-        >>> from secml.array import Cdense
-        >>> array = Cdense.zeros(2)
-        >>> print array
-        [ 0.  0.]
-        >>> print array.shape
-        (2,)
-
-        >>> array = Cdense.zeros((2, 1), dtype=int)
-        >>> print array
-        [[0]
-         [0]]
-        >>> print array.shape
-        (2, 1)
-
-        """
-        return cls(np.zeros(shape, **dtype))
-
-    @classmethod
-    def ones(cls, *shape, **dtype):
-        """Return an array of desired shape with ones.
-        See numpy.ones for more informations.
-
-        Parameters
-        ----------
-        shape : shape of array, integer or sequence of integers.
-        dtype : datatype of array data.
-
-        Returns
-        -------
-        Array of ones with desired shape.
-
-        Examples
-        --------
-        >>> from secml.array import Cdense
-        >>> array = Cdense.ones(2)
-        >>> print array
-        [ 1.  1.]
-        >>> print array.shape
-        (2,)
-
-        >>> array = Cdense.ones(2, 1, dtype=int)
-        >>> print array
-        [[1]
-         [1]]
-        >>> print array.shape
-        (2, 1)
-
-        """
-        return cls(np.ones(shape, **dtype))
-
-    @classmethod
-    def empty(cls, *shape, **dtype):
+    def empty(cls, shape, dtype=float):
         """Return an (theoretically) empty array of desired shape.
         See numpy.empty for more informations.
 
         Parameters
         ----------
-        shape : shape of array, integer or sequence of integers.
+        shape : shape of array, integer or tuple
         dtype : datatype of array data.
 
         Returns
@@ -1518,14 +1615,14 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
-        >>> array = Cdense.empty(2)
+        >>> from secml.array.c_dense import CDense
+        >>> array = CDense.empty(2)
         >>> print array  # doctest: +SKIP
         [  6.94292784e-310   6.94292784e-310]
         >>> print array.shape
         (2,)
 
-        >>> array = Cdense.empty(2, 1, dtype=int)
+        >>> array = CDense.empty((2, 1), dtype=int)
         >>> print array  # doctest: +SKIP
         [[              0]
          [140526427175696]]
@@ -1533,7 +1630,73 @@ class Cdense(object):
         (2, 1)
 
         """
-        return cls(np.empty(shape, **dtype))
+        return cls(np.empty(shape, dtype))
+
+    @classmethod
+    def zeros(cls, shape, dtype=float):
+        """Return an array of desired shape with zeros.
+        See numpy.zeros for more informations.
+
+        Parameters
+        ----------
+        shape : shape of array, integer or tuple
+        dtype : datatype of array data.
+
+        Returns
+        -------
+        Array of zeros with desired shape.
+
+        Examples
+        --------
+        >>> from secml.array.c_dense import CDense
+        >>> array = CDense.zeros(2)
+        >>> print array
+        [ 0.  0.]
+        >>> print array.shape
+        (2,)
+
+        >>> array = CDense.zeros((2, 1), dtype=int)
+        >>> print array
+        [[0]
+         [0]]
+        >>> print array.shape
+        (2, 1)
+
+        """
+        return cls(np.zeros(shape, dtype))
+
+    @classmethod
+    def ones(cls, shape, dtype=float):
+        """Return an array of desired shape with ones.
+        See numpy.ones for more informations.
+
+        Parameters
+        ----------
+        shape : shape of array, integer or tuple
+        dtype : datatype of array data.
+
+        Returns
+        -------
+        Array of ones with desired shape.
+
+        Examples
+        --------
+        >>> from secml.array.c_dense import CDense
+        >>> array = CDense.ones(2)
+        >>> print array
+        [ 1.  1.]
+        >>> print array.shape
+        (2,)
+
+        >>> array = CDense.ones((2, 1), dtype=int)
+        >>> print array
+        [[1]
+         [1]]
+        >>> print array.shape
+        (2, 1)
+
+        """
+        return cls(np.ones(shape, dtype=dtype))
 
     @classmethod
     def eye(cls, n_rows, n_cols=None, k=0, dtype=float):
@@ -1554,15 +1717,15 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
-        >>> array = Cdense.eye(2)
+        >>> from secml.array.c_dense import CDense
+        >>> array = CDense.eye(2)
         >>> print array
         [[ 1.  0.]
          [ 0.  1.]]
         >>> print array.shape
         (2, 2)
 
-        >>> array = Cdense.eye(2, k=1, dtype=int)
+        >>> array = CDense.eye(2, k=1, dtype=int)
         >>> print array
         [[0 1]
          [0 0]]
@@ -1573,12 +1736,7 @@ class Cdense(object):
         return cls(np.eye(n_rows, n_cols, k=k, dtype=dtype))
 
     @classmethod
-    def linspace(cls, start, stop, num=50, endpoint=True):
-        """parameter: (start, stop, num, endpoint)"""
-        return cls(np.linspace(start, stop, num=num, endpoint=endpoint))
-
-    @classmethod
-    def rand(cls, *shape):
+    def rand(cls, shape, random_state=None):
         """Wrapper for random.random_sample.
 
         Creates a random array with random values in [0, 1)
@@ -1586,91 +1744,103 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
-        >>> array = Cdense.rand(2, 3)
+        >>> from secml.array.c_dense import CDense
+        >>> array = CDense.rand(2, 3)
         >>> print(array)  # doctest: +SKIP
         [[ 0.68588225  0.88371576  0.3958642 ]
          [ 0.58243871  0.05104796  0.77719998]]
 
         """
+        np.random.seed(random_state)  # Setting the random seed
         return cls(np.random.random_sample(shape))
 
     @classmethod
-    def randn(cls, *shape):
+    def randn(cls, shape, random_state=None):
         """Return a sample (or samples) from the "standard normal" distribution.
 
         The samples are generated from a univariate "normal"
-        (Gaussian) distribution of mean 0 and variance 1.
-
-        Parameters
-        ----------
-        shape : int, optional
-            The dimensions of the returned array, should be all
-            positive. If no argument is given a single Python float
-            is returned.
-
-        Returns
-        -------
-        Z : CndArray or float
-            A new array of given shape with floating-point samples
-            from the standard normal distribution, or a single such
-            float if no parameters were supplied.
 
         """
-        return cls(np.random.randn(*shape))
+        np.random.seed(random_state)  # Setting the random seed
+        return cls(np.random.randn(*shape))  # randn only accepts sequences
 
     @classmethod
-    def randint(cls, low, high=None, size=None):
+    def randint(cls, low, high=None, shape=None, random_state=None):
         """Wrapper for random.randint.
 
         Creates a random array with random integers in [low, high) interval.
-        High value (if specified) is excluded.size : int or tuple of ints, optional
+        High value (if specified) is excluded.
 
-        size: Output shape. If the given shape is, e.g., (m, n, k),
-        then m * n * k samples are drawn. Default is None, in which case a single value is returned.
+        Parameters
+        ----------
+        low : int
+            Lowest (signed) integer to be drawn from the distribution
+            (unless high=None, in which case this parameter is the
+            highest such integer).
+        high : int or None, optional
+            If provided, one above the largest (signed) integer to be
+            drawn from the distribution (see above for behavior if
+            high=None).
+        shape : int, tuple of ints or None, optional
+            Shape of output array. If None, a single value is returned.
+        random_state : int or None, optional
+            If int, random_state is the seed used by the
+            random number generator; If None, is the seed used by np.random.
 
         Examples
         --------
-        >>> from secml.array import Cdense
-        >>> array = Cdense.randint(0, 5, 10)
+        >>> from secml.array.c_dense import CDense
+        >>> array = CDense.randint(0, 5, 10)
         >>> print(array)  # doctest: +SKIP
         [1 0 2 0 4 3 0 2 4 2]
 
         """
-        return cls(np.random.randint(low, high, size))
+        np.random.seed(random_state)  # Setting the random seed
+        return cls(np.random.randint(low, high, shape))
 
     @classmethod
-    def randsample(cls, array, size=None, replace=False):
+    def randsample(cls, a, shape=None, replace=False, random_state=None):
         """Wrapper for random.choice.
 
-        Generates a random sample from a given 1-D array
-        High value (if specified) is excluded.size : int or tuple of ints, optional
+        Generates a random sample from a given 1-D a
+        High value (if specified) is excluded.shape : int or tuple of ints, optional
 
-        size: Output shape. If the given shape is, e.g., (m, n, k),
+        shape: Output shape. If the given shape is, e.g., (m, n, k),
         then m * n * k samples are drawn. Default is None, in which case a single value is returned.
 
         Examples
         --------
-        >>> from secml.array import Cdense
-        >>> array = Cdense.randsample(10, 4)
-        >>> print(array)  # doctest: +SKIP
+        >>> from secml.array.c_dense import CDense
+        >>> a = CDense.randsample(10, 4)
+        >>> print(a)  # doctest: +SKIP
         [1 0 2 3]
 
-        >>> array = Cdense.randsample(Cdense([1,5,6,7,3]), 4)
-        >>> print(array)  # doctest: +SKIP
+        >>> a = CDense.randsample(CDense([1,5,6,7,3]), 4)
+        >>> print(a)  # doctest: +SKIP
         [1 6 3 7]
 
         """
-        if isinstance(array, cls):  # Cast input Cdense to ndarray
-            array = array.toarray()
-        return cls(np.random.choice(array, size, replace))
+        if isinstance(a, cls):  # Cast input CDense to ndarray
+            a = a.tondarray()
+        np.random.seed(random_state)  # Setting the random seed
+        return cls(np.random.choice(a, shape, replace))
+
+    @classmethod
+    def linspace(cls, start, stop, num=50, endpoint=True):
+        """parameter: (start, stop, num, endpoint)"""
+        return cls(np.linspace(start, stop, num=num, endpoint=endpoint))
+
+    @classmethod
+    def arange(cls, start=None, stop=None, step=1, dtype=None):
+        """Create a flatten array from 'start' to 'stop' using input 'step'."""
+        return cls(np.arange(start=start, stop=stop, step=step, dtype=dtype))
 
     @classmethod
     def concatenate(cls, array1, array2, axis=1):
         """Wrapper for ma.concatenate
         we use this and not concatenate because it preserve also np mask
-        array1: Cdense
-        array2: Cdense
+        array1: CDense
+        array2: CDense
         axis: int (default 1 )
         axis 0 put second array above
         axis 1 attach second array at right
@@ -1678,17 +1848,12 @@ class Cdense(object):
         """
         # Flat arrays are transformed to 2-Dims before concatenating
         conc_array = cls(np.ma.concatenate(
-            (array1.atleast_2d().toarray(),
-             array2.atleast_2d().toarray()), axis=axis))
+            (array1.atleast_2d().tondarray(),
+             array2.atleast_2d().tondarray()), axis=axis))
         # Return flat only if both array1/array2 are flat
         # and we are concatenating horizontally
         return conc_array.ravel() if \
             array1.ndim <= 1 and array2.ndim <= 1 and axis == 1 else conc_array
-
-    @classmethod
-    def arange(cls, start=None, stop=None, step=None, dtype=None):
-        """Create a flatten array from 'start' to 'stop' using input 'step'."""
-        return cls(np.arange(start=start, stop=stop, step=step, dtype=dtype))
 
     @classmethod
     def comblist(cls, list_of_list, dtype=float):
@@ -1711,8 +1876,8 @@ class Cdense(object):
         --------
         >>> a = [[1, 2, 3], [4, 5], [6, 7]]
 
-        >>> Cdense.comblist(a)
-        Cdense([[ 1.,  4.,  6.],
+        >>> CDense.comblist(a)
+        CDense([[ 1.,  4.,  6.],
                [ 1.,  4.,  7.],
                [ 1.,  5.,  6.],
                [ 1.,  5.,  7.],
@@ -1733,7 +1898,7 @@ class Cdense(object):
             return cls()
 
         # Computing number of expected combinations
-        n = cls([x.size for x in arrays]).prod().tolist()[0]
+        n = cls([x.size for x in arrays]).prod(keepdims=False).tolist()[0]
         # If no custom target array is specified, initialize an array of zeros
         out = cls.zeros((n, len(arrays)), dtype=dtype)
 
@@ -1778,30 +1943,30 @@ class Cdense(object):
 
         Examples
         --------
-        >>> from secml.array import Cdense
+        >>> from secml.array.c_dense import CDense
 
-        >>> x = Cdense( [1,3,5] )
-        >>> y = Cdense( [2,4,6] )
-        >>> xv, yv = Cdense.meshgrid((x, y))
+        >>> x = CDense( [1,3,5] )
+        >>> y = CDense( [2,4,6] )
+        >>> xv, yv = CDense.meshgrid((x, y))
         >>> xv
-        Cdense([[1, 3, 5],
+        CDense([[1, 3, 5],
                [1, 3, 5],
                [1, 3, 5]])
         >>> yv
-        Cdense([[2, 2, 2],
+        CDense([[2, 2, 2],
                [4, 4, 4],
                [6, 6, 6]])
 
-        >>> xv, yv = Cdense.meshgrid((x, y), indexing='ij')
+        >>> xv, yv = CDense.meshgrid((x, y), indexing='ij')
         >>> xv
-        Cdense([[1, 1, 1],
+        CDense([[1, 1, 1],
                [3, 3, 3],
                [5, 5, 5]])
         >>> yv
-        Cdense([[2, 4, 6],
+        CDense([[2, 4, 6],
                [2, 4, 6],
                [2, 4, 6]])
 
         """
-        xi = list(x.toarray() if isinstance(x, cls) else x for x in xi)
+        xi = list(x.tondarray() if isinstance(x, cls) else x for x in xi)
         return tuple(cls(elem) for elem in np.meshgrid(*xi, indexing=indexing))

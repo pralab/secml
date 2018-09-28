@@ -151,11 +151,10 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
                 train_classes = train_classes.append(train_class)
 
             # We store the sorted training classes list
-            train_classes.sort()
-            self._tr_classes += [train_classes]
+            self._tr_classes += [train_classes.sort()]
 
             # Storing a sorted array of training samples indices
-            train_samples_idx.sort()
+            train_samples_idx.sort(inplace=True)
 
             # All other samples go to test
             test_samples_idx = CArray(

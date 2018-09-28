@@ -3,7 +3,7 @@ Sparse Format Container
 
 This is the container for sparse arrays, wrapper of :class:`scipy.sparse.csr_matrix`.
 
-Sparse Arrays (Csparse)
+Sparse Arrays (CSparse)
 -----------------------
 
 .. automodule:: prlib.array.c_csr_sparse

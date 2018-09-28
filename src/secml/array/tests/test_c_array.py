@@ -4,7 +4,9 @@ import operator as op
 import itertools
 
 from secml.utils import CUnitTest, fm
-from secml.array import CArray, Cdense, Csparse
+from secml.array import CArray
+from secml.array.c_dense import CDense
+from secml.array.c_sparse import CSparse
 from secml.core.type_utils import \
     is_scalar, is_int, is_bool, is_list, is_list_of_lists
 
@@ -164,15 +166,15 @@ class TestCArray(CUnitTest):
             self.assertFalse((array != init_elem).any())
 
         self.logger.info(
-            "Initializing CArray with a Cdense or an ndarray...")
-        dense_list = [Cdense([[2, 3], [22, 33]]),
-                       Cdense([2, 3]),
-                       Cdense([[2], [3]]),
-                       Cdense([3]),
-                       np.array([[2, 3], [22, 33]]),
-                       np.array([2, 3]),
-                       np.array([[2], [3]]),
-                       np.array([3])]
+            "Initializing CArray with a CDense or an ndarray...")
+        dense_list = [CDense([[2, 3], [22, 33]]),
+                      CDense([2, 3]),
+                      CDense([[2], [3]]),
+                      CDense([3]),
+                      np.array([[2, 3], [22, 33]]),
+                      np.array([2, 3]),
+                      np.array([[2], [3]]),
+                      np.array([3])]
 
         for init_elem in dense_list:
             array = CArray(init_elem)
@@ -191,11 +193,11 @@ class TestCArray(CUnitTest):
             self.assertFalse((array != init_elem).any())
 
         self.logger.info(
-            "Initializing CArray with a Csparse or csr_matrix...")
-        sparse_list = [Csparse([[2, 3], [22, 33]]),
-                       Csparse([2, 3]),
-                       Csparse([[2], [3]]),
-                       Csparse([3]),
+            "Initializing CArray with a CSparse or csr_matrix...")
+        sparse_list = [CSparse([[2, 3], [22, 33]]),
+                       CSparse([2, 3]),
+                       CSparse([[2], [3]]),
+                       CSparse([3]),
                        scs.csr_matrix([[2, 3], [22, 33]]),
                        scs.csr_matrix([2, 3]),
                        scs.csr_matrix([[2], [3]]),
@@ -621,17 +623,20 @@ class TestCArray(CUnitTest):
             self.logger.info("Array:\n{:}".format(array))
 
             if array.isdense:
-                array_unique, unique_indices, unique_inverse = array.unique(
-                    return_index=True, return_inverse=True)
+                array_unique, u_indices, u_inverse, u_counts = array.unique(
+                    return_index=True, return_inverse=True, return_counts=True)
                 # Testing call without the optional parameters
                 array_unique_single = array.unique()
                 self.assertFalse((array_unique != array_unique_single).any())
             elif array.issparse:
-                # return_index, return_inverse parameters are not available
-                # for sparse arrays
-                with self.assertRaises(ValueError):
-                    array.unique(return_index=True, return_inverse=True)
-                array_unique = array.unique()
+                # return_inverse parameters are not available
+                with self.assertRaises(NotImplementedError):
+                    array.unique(return_inverse=True)
+                array_unique, u_indices, u_counts = array.unique(
+                    return_index=True, return_counts=True)
+                # Testing call without the optional parameters
+                array_unique_single = array.unique()
+                self.assertFalse((array_unique != array_unique_single).any())
             else:
                 raise ValueError("Unknown input array format")
             self.logger.info("array.unique():\n{:}".format(array_unique))
@@ -648,13 +653,19 @@ class TestCArray(CUnitTest):
                     unique_ok = False
             self.assertTrue(unique_ok)
 
+            # unique_indices construct unique array from original FLAT one
+            self.assertFalse(
+                (array.ravel()[u_indices] != array_unique).any())
+
+            self.assertEqual(array_unique.size, u_counts.size)
+            for e_idx, e in enumerate(array_unique):
+                self.assertEqual(u_counts[e_idx], sum(array == e))
+
             if array.isdense:
+                self.assertEqual(array.size, u_inverse.size)
                 # unique_inverse reconstruct the original FLAT array
                 self.assertFalse(
-                    (array.ravel() != array_unique[unique_inverse]).any())
-                # unique_indices construct unique array from original FLAT one
-                self.assertFalse(
-                    (array.ravel()[unique_indices] != array_unique).any())
+                    (array.ravel() != array_unique[u_inverse]).any())
 
         _unique(self.array_dense, CArray([0, 1, 2, 3, 4, 5, 6]))
         _unique(self.array_sparse, CArray([0, 1, 2, 3, 4, 5, 6]))
@@ -684,6 +695,7 @@ class TestCArray(CUnitTest):
             diag = array.diag(k=k)
             self.logger.info("({:})-th diagonal is: {:}".format(k, diag))
             self.assertEquals(diag.ndim, 1)
+            self.assertTrue(diag.isdense)
             self.assertTrue((diag == out).all())
 
         self.logger.info("Testing diagonal extraction...")
@@ -693,18 +705,26 @@ class TestCArray(CUnitTest):
         extract_diag(self.array_dense, k=0, out=CArray([1, 4, 0]))
         extract_diag(self.array_dense, k=1, out=CArray([0, 0, 0]))
         extract_diag(self.array_dense, k=-1, out=CArray([2, 6]))
-        extract_diag(self.array_dense, k=5, out=CArray([]))
+
+        with self.assertRaises(ValueError):
+            # k is higher/lower than array shape
+            print self.array_dense.diag(k=4)
+        with self.assertRaises(ValueError):
+            # k is higher/lower than array shape
+            self.array_dense.diag(k=-3)
 
         self.logger.info("Array is:\n{:}".format(self.array_sparse))
 
-        diag_sparse = self.array_sparse.diag()
-        self.logger.info("0-th diagonal is: {:}".format(diag_sparse))
-        self.assertTrue(diag_sparse.issparse)
-        self.assertEquals(diag_sparse.ndim, 2)
-        self.assertTrue((diag_sparse == CArray([1, 4, 0])).all())
+        extract_diag(self.array_sparse, k=0, out=CArray([1, 4, 0]))
+        extract_diag(self.array_sparse, k=1, out=CArray([0, 0, 0]))
+        extract_diag(self.array_sparse, k=-1, out=CArray([2, 6]))
 
         with self.assertRaises(ValueError):
-            self.array_sparse.diag(k=1)
+            # k is higher/lower than array shape
+            print self.array_sparse.diag(k=4)
+        with self.assertRaises(ValueError):
+            # k is higher/lower than array shape
+            self.array_sparse.diag(k=-3)
 
         self.logger.info("Testing diagonal array creation...")
 
@@ -830,15 +850,32 @@ class TestCArray(CUnitTest):
             array_isdense = array.isdense
             array_issparse = array.issparse
 
-            array_sorted = copy.deepcopy(array)  # in-place method
-            array_sorted.sort(axis=axis)
-            self.logger.info(
-                "Array sorted along axis {:}:\n{:}".format(axis, array_sorted))
+            for inplace in (False, True):
+                array_copy = copy.deepcopy(array)
+                array_sorted = array_copy.sort(axis=axis, inplace=inplace)
+                self.logger.info("Array sorted along axis {:}:"
+                                 "\n{:}".format(axis, array_sorted))
 
-            self.assertEquals(array_sorted.issparse, array_issparse)
-            self.assertEquals(array_sorted.isdense, array_isdense)
+                self.assertEquals(array_sorted.issparse, array_issparse)
+                self.assertEquals(array_sorted.isdense, array_isdense)
 
-            self.assertFalse((sorted_expected != array_sorted).any())
+                self.assertFalse((sorted_expected != array_sorted).any())
+
+                # Value we are going to replace to check inplace parameter
+                alter_value = CArray(100, dtype=array_copy.dtype)
+
+                if array_copy.ndim < 2:
+                    array_copy[0] = alter_value
+                    if inplace is False:
+                        self.assertTrue(array_sorted[0] != alter_value[0])
+                    else:
+                        self.assertTrue(array_sorted[0] == alter_value[0])
+                else:
+                    array_copy[0, 0] = alter_value
+                    if inplace is False:
+                        self.assertTrue(array_sorted[0, 0] != alter_value[0])
+                    else:
+                        self.assertTrue(array_sorted[0, 0] == alter_value[0])
 
         # Sparse arrays
         _sort(-1, self.array_sparse,
@@ -1590,10 +1627,10 @@ class TestCArray(CUnitTest):
         d_vs_s = self.array_dense.dot(self.array_sparse.T)
 
         # Check if method returned correct datatypes
-        self.assertIsInstance(s_vs_s._data, Csparse)
-        self.assertIsInstance(s_vs_d._data, Csparse)
-        self.assertIsInstance(d_vs_d._data, Cdense)
-        self.assertIsInstance(d_vs_s._data, Cdense)
+        self.assertIsInstance(s_vs_s._data, CSparse)
+        self.assertIsInstance(s_vs_d._data, CSparse)
+        self.assertIsInstance(d_vs_d._data, CDense)
+        self.assertIsInstance(d_vs_s._data, CDense)
 
         # Check if we have the same output in all cases
         self.assertTrue(
@@ -1729,7 +1766,7 @@ class TestCArray(CUnitTest):
     def test_operators_array_vs_array(self):
         """Test for mathematical operators array vs array."""
         operators = [op.add, op.sub]
-        expected_result = [Csparse, Cdense, Cdense, Cdense]
+        expected_result = [CSparse, CDense, CDense, CDense]
         items = [(self.array_sparse, self.array_sparse),
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
@@ -1737,15 +1774,15 @@ class TestCArray(CUnitTest):
         self._test_cycle(operators, items, expected_result)
 
         operators = [op.mul]
-        expected_result = [Csparse, Csparse, Cdense, Cdense]
+        expected_result = [CSparse, CSparse, CDense, CDense]
         items = [(self.array_sparse, self.array_sparse),
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
                  (self.array_dense, self.array_dense)]
         self._test_cycle(operators, items, expected_result)
 
-        operators = [op.div]
-        expected_result = [Cdense, Cdense, Cdense, Cdense]
+        operators = [op.div, op.floordiv]
+        expected_result = [CDense, CDense, CDense, CDense]
         items = [(self.array_sparse, self.array_sparse),
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
@@ -1753,7 +1790,7 @@ class TestCArray(CUnitTest):
         self._test_cycle(operators, items, expected_result)
 
         operators = [op.pow, CArray.pow]
-        expected_result = [Cdense, Cdense]
+        expected_result = [CDense, CDense]
         items = [(self.array_dense, self.array_sparse),
                  (self.array_dense, self.array_dense)]
         self._test_cycle(operators, items, expected_result)
@@ -1775,8 +1812,8 @@ class TestCArray(CUnitTest):
         s_abs = abs(self.array_sparse)
         d_abs = abs(self.array_dense)
         # Check if method returned correct datatypes
-        self.assertIsInstance(s_abs._data, Csparse)
-        self.assertIsInstance(d_abs._data, Cdense)
+        self.assertIsInstance(s_abs._data, CSparse)
+        self.assertIsInstance(d_abs._data, CDense)
         # Check if we have the same output in all cases
         self.assertTrue(self._test_multiple_eq([s_abs, d_abs]))
 
@@ -1785,8 +1822,8 @@ class TestCArray(CUnitTest):
         s_abs = self.array_sparse.abs()
         d_abs = self.array_dense.abs()
         # Check if method returned correct datatypes
-        self.assertIsInstance(s_abs._data, Csparse)
-        self.assertIsInstance(d_abs._data, Cdense)
+        self.assertIsInstance(s_abs._data, CSparse)
+        self.assertIsInstance(d_abs._data, CDense)
         # Check if we have the same output in all cases
         self.assertTrue(self._test_multiple_eq([s_abs, d_abs]))
 
@@ -1795,8 +1832,8 @@ class TestCArray(CUnitTest):
         s_abs = -self.array_sparse
         d_abs = -self.array_dense
         # Check if method returned correct datatypes
-        self.assertIsInstance(s_abs._data, Csparse)
-        self.assertIsInstance(d_abs._data, Cdense)
+        self.assertIsInstance(s_abs._data, CSparse)
+        self.assertIsInstance(d_abs._data, CDense)
         # Check if we have the same output in all cases
         self.assertTrue(self._test_multiple_eq([s_abs, d_abs]))
 
@@ -1805,10 +1842,10 @@ class TestCArray(CUnitTest):
 
         # ARRAY +,* SCALAR, SCALAR +,* ARRAY
         operators = [op.add, op.mul]
-        expected_result = [Cdense, Cdense,
-                           Cdense, Cdense,
-                           Cdense, Cdense,
-                           Cdense, Cdense]
+        expected_result = [CDense, CDense,
+                           CDense, CDense,
+                           CDense, CDense,
+                           CDense, CDense]
         items = [(self.array_dense, 2), (2, self.array_dense),
                  (self.array_dense, np.ravel(2)[0]),
                  (np.ravel(2)[0], self.array_dense),
@@ -1820,10 +1857,10 @@ class TestCArray(CUnitTest):
 
         # ARRAY * SCALAR, SCALAR * ARRAY
         operators = [op.mul]
-        expected_result = [Csparse, Csparse,
-                           Csparse, Csparse,
-                           Csparse, Csparse,
-                           Csparse, Csparse]
+        expected_result = [CSparse, CSparse,
+                           CSparse, CSparse,
+                           CSparse, CSparse,
+                           CSparse, CSparse]
         items = [(self.array_sparse, 2),
                  (2, self.array_sparse),
                  (self.array_sparse, np.ravel(2)[0]),
@@ -1835,8 +1872,8 @@ class TestCArray(CUnitTest):
         self._test_cycle(operators, items, expected_result)
 
         # ARRAY / SCALAR
-        operators = [op.div]
-        expected_result = [Csparse, Csparse, Csparse, Csparse]
+        operators = [op.div, op.floordiv]
+        expected_result = [CSparse, CSparse, CSparse, CSparse]
         items = [(self.array_sparse, 2),
                  (self.array_sparse, np.ravel(2)[0]),
                  (self.array_sparse, np.ravel(2.0)[0]),
@@ -1844,8 +1881,8 @@ class TestCArray(CUnitTest):
         self._test_cycle(operators, items, expected_result)
 
         # ARRAY -,/ SCALAR
-        operators = [op.sub, op.div]
-        expected_result = [Cdense, Cdense, Cdense, Cdense]
+        operators = [op.sub, op.div, op.floordiv]
+        expected_result = [CDense, CDense, CDense, CDense]
         items = [(self.array_dense, 2),
                  (self.array_dense, np.ravel(2)[0]),
                  (self.array_dense, np.ravel(2.0)[0]),
@@ -1853,8 +1890,8 @@ class TestCArray(CUnitTest):
         self._test_cycle(operators, items, expected_result)
 
         # SCALAR -,/ ARRAY
-        operators = [op.sub, op.div]
-        expected_result = [Cdense, Cdense, Cdense, Cdense]
+        operators = [op.sub, op.div, op.floordiv]
+        expected_result = [CDense, CDense, CDense, CDense]
         items = [(2, self.array_dense),
                  (np.ravel(2)[0], self.array_dense),
                  (np.ravel(2.0)[0], self.array_dense),
@@ -1863,10 +1900,10 @@ class TestCArray(CUnitTest):
 
         # ARRAY ** SCALAR
         operators = [op.pow, CArray.pow]
-        expected_result = [Csparse, Cdense,
-                           Csparse, Cdense,
-                           Csparse, Cdense,
-                           Csparse, Cdense]
+        expected_result = [CSparse, CDense,
+                           CSparse, CDense,
+                           CSparse, CDense,
+                           CSparse, CDense]
         items = [(self.array_sparse, 2), (self.array_dense, 2),
                  (self.array_sparse, np.ravel(2)[0]),
                  (self.array_dense, np.ravel(2)[0]),
@@ -1878,7 +1915,7 @@ class TestCArray(CUnitTest):
 
         # SCALAR ** ARRAY
         operators = [op.pow]
-        expected_result = [Cdense, Cdense, Cdense, Cdense]
+        expected_result = [CDense, CDense, CDense, CDense]
         items = [(2, self.array_dense),
                  (np.ravel(2)[0], self.array_dense),
                  (np.ravel(2.0)[0], self.array_dense),
@@ -1909,7 +1946,8 @@ class TestCArray(CUnitTest):
         """Test for mathematical operators array vs unsupported types."""
 
         def test_unsupported(x):
-            for operator in [op.add, op.sub, op.mul, op.div, op.pow]:
+            for operator in [op.add, op.sub, op.mul,
+                             op.div, op.floordiv, op.pow]:
                 with self.assertRaises(TypeError):
                     self.logger.info("Testing {:} dense vs '{:}'".format(
                         operator.__name__, type(x).__name__))
@@ -1939,7 +1977,8 @@ class TestCArray(CUnitTest):
         """Test for mathematical operators unsupported types vs array."""
 
         def test_unsupported(x):
-            for operator in [op.add, op.sub, op.mul, op.div, op.pow]:
+            for operator in [op.add, op.sub, op.mul,
+                             op.div, op.floordiv, op.pow]:
                 with self.assertRaises(TypeError):
                     self.logger.info("Testing {:} '{:}' vs dense".format(
                         operator.__name__, type(x).__name__))
@@ -1971,7 +2010,7 @@ class TestCArray(CUnitTest):
     def test_comparison_array_vs_array(self):
         """Test for comparison operators array vs array."""
         operators = [op.eq, op.lt, op.le, op.gt, op.ge, op.ne]
-        expected_result = [Csparse, Cdense, Cdense, Cdense]
+        expected_result = [CSparse, CDense, CDense, CDense]
         items = [(self.array_sparse, self.array_sparse),
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
@@ -1981,7 +2020,7 @@ class TestCArray(CUnitTest):
     def test_comparison_array_vs_scalar(self):
         """Test for comparison operators array vs scalar."""
         operators = [op.eq, op.lt, op.le, op.gt, op.ge, op.ne]
-        expected_result = [Csparse, Cdense, Csparse, Cdense]
+        expected_result = [CSparse, CDense, CSparse, CDense]
         items = [(self.array_sparse, 2),
                  (self.array_dense, 2),
                  (self.array_sparse, np.ravel(2)[0]),
@@ -2210,7 +2249,7 @@ class TestCArray(CUnitTest):
                          "Saved and loaded arrays (sparse) are not equal!")
 
         self.logger.info(
-            "UNITTEST - Csparse - Testing save/load for dense matrix")
+            "UNITTEST - CSparse - Testing save/load for dense matrix")
 
         self.array_dense.save(test_file, overwrite=True)
 
@@ -2514,70 +2553,54 @@ class TestCArray(CUnitTest):
         """Test for CArray.cumsum() method."""
         self.logger.info("Test for CArray.cumsum() method.")
 
-        def _check_cumsum(array, expected):
+        def _check_cumsum(array):
             self.logger.info("Array:\n{:}".format(array))
 
             for res_idx, axis in enumerate([None, 0, 1]):
+                for dtype in (None, float, int):
 
-                res = array.cumsum(axis=axis)
-                self.logger.info("array.cumsum(axis={:}):\n{:}".format(axis, res))
+                    res = array.cumsum(axis=axis, dtype=dtype)
+                    self.logger.info("array.cumsum(axis={:}, dtype={:}):"
+                                     "\n{:}".format(axis, dtype, res))
 
-                res_expected = expected[res_idx]
-                if not isinstance(res_expected, CArray):
-                    self.assertNotIsInstance(res, CArray)
-                else:
+                    res_np = np.cumsum(array.atleast_2d().tondarray(),
+                                       axis=axis, dtype=dtype)
+
+                    if array.ndim == 1:
+                        # We pass to numpy 2D arrays but result
+                        # for vectors will be flat
+                        res_np = res_np.ravel()
+
                     self.assertIsInstance(res, CArray)
-                    self.assertEqual(res.isdense, res_expected.isdense)
-                    self.assertEqual(res.issparse, res_expected.issparse)
-                    self.assertEqual(res.shape, res_expected.shape)
-                self.assertFalse((res != res_expected).any())
+                    self.assertTrue(res.isdense)
+                    self.assertEqual(res.shape, res_np.shape)
+                    self.assertEqual(res.dtype, res_np.dtype)
+                    self.assertFalse((res != CArray(res_np)).any())
 
         # array_dense = CArray([[1, 0, 0, 5], [2, 4, 0, 0], [3, 6, 0, 0]])
         # row_flat_dense = CArray([4, 0, 6])
 
         self.logger.info("Testing CArray.cumsum()")
 
-        _check_cumsum(self.array_dense,
-                      (CArray([1, 1, 1, 6, 8, 12, 12, 12, 15, 21, 21, 21]),
-                       CArray([[1, 0, 0, 5], [3, 4, 0, 5], [6, 10, 0, 5]]),
-                       CArray([[1, 1, 1, 6], [2, 6, 6, 6], [3, 9, 9, 9]])))
+        _check_cumsum(self.array_dense)
 
-        _check_cumsum(self.array_dense_bool,
-                      (CArray([1, 1, 2, 3, 3, 3, 3, 3, 4, 5, 6, 7]),
-                       CArray([[1, 0, 1, 1], [1, 0, 1, 1], [2, 1, 2, 2]]),
-                       CArray([[1, 1, 2, 3], [0, 0, 0, 0], [1, 2, 3, 4]])))
+        _check_cumsum(self.row_flat_dense)
+        _check_cumsum(self.row_dense)
+        _check_cumsum(self.column_dense)
 
-        _check_cumsum(self.row_flat_dense,
-                      (CArray([4, 4, 10]),
-                       CArray([4, 0, 6]),
-                       CArray([4, 4, 10])))
-        _check_cumsum(self.row_dense,
-                      (CArray([4, 4, 10]),
-                       CArray([[4, 0, 6]]),
-                       CArray([[4, 4, 10]])))
+        _check_cumsum(self.single_flat_dense)
+        _check_cumsum(self.single_dense)
 
-        _check_cumsum(self.column_dense,
-                      (CArray([4, 4, 10]),
-                       CArray([[4], [4], [10]]),
-                       CArray([[4], [0], [6]])))
+        _check_cumsum(self.array_dense_bool)
 
-        _check_cumsum(self.single_flat_dense,
-                      (CArray([4]), CArray([4]), CArray([4])))
-        _check_cumsum(self.single_dense,
-                      (CArray([4]), CArray([[4]]), CArray([[4]])))
+        _check_cumsum(self.single_bool_flat_dense)
+        _check_cumsum(self.single_bool_dense)
 
-        _check_cumsum(self.single_bool_flat_dense,
-                      (CArray([1]), CArray([1]), CArray([1])))
-        _check_cumsum(self.single_bool_dense,
-                      (CArray([1]), CArray([[1]]), CArray([[1]])))
-
-        _check_cumsum(self.empty_flat_dense,
-                      (CArray([]), CArray([]), CArray([])))
-        _check_cumsum(self.empty_dense,
-                      (CArray([]), CArray([[]]), CArray([[]])))
+        _check_cumsum(self.empty_flat_dense)
+        _check_cumsum(self.empty_dense)
 
         with self.assertRaises(NotImplementedError):
-            _check_cumsum(self.array_sparse, ())
+            _check_cumsum(self.array_sparse)
 
     def test_prod(self):
         """Test for CArray.prod() method."""
@@ -2879,7 +2902,7 @@ class TestCArray(CUnitTest):
             res = array.bincount()
             self.logger.info("array.bincount():\n{:}".format(res))
 
-            self.assertEqual(res.ndim, 1)
+            self.assertTrue(res.is_vector_like)
             self.assertEqual(res.size, array.max()+1)
             self.assertFalse((res != expected).any())
 
@@ -2888,9 +2911,9 @@ class TestCArray(CUnitTest):
         with self.assertRaises(ValueError):
             self.array_dense.bincount()
         with self.assertRaises(ValueError):
-            # NotImplementedError is not raised as ValueError is raised first
             self.array_sparse.bincount()
 
+        _check_bincount(self.row_sparse, CArray([1, 0, 0, 0, 1, 0, 1]))
         _check_bincount(self.row_flat_dense, CArray([1, 0, 0, 0, 1, 0, 1]))
         _check_bincount(self.single_flat_dense, CArray([0, 0, 0, 0, 1]))
         _check_bincount(self.single_bool_flat_dense, CArray([0, 1]))
@@ -3075,11 +3098,12 @@ class TestCArray(CUnitTest):
 
         _check_binary_search(CArray([1, 2.4, 3, 4.3]))
         _check_binary_search(CArray([[1, 2.4, 3, 4.3]]))
-        _check_binary_search(CArray([[1, 2.4, 3, 4.3]], tosparse=True))
         _check_binary_search(CArray([[1], [2.4], [3], [4.3]]))
-        _check_binary_search(CArray([[1], [2.4], [3], [4.3]], tosparse=True))
         _check_binary_search(CArray([[1, 2.4], [3, 4.3]]))
-        _check_binary_search(CArray([[1, 2.4], [3, 4.3]], tosparse=True))
+
+        # Sparse arrays are not supported
+        with self.assertRaises(NotImplementedError):
+            self.array_sparse.binary_search(3)
 
     def test_todense(self):
         """Test for CArray.todense() method."""
@@ -4166,28 +4190,28 @@ class TestCArray(CUnitTest):
         def _check_norm(array):
             self.logger.info("array:\n{:}".format(array))
 
-            for ord_idx, ord in enumerate((None, 'fro', np.inf, -np.inf,
+            for ord_idx, order in enumerate((None, 'fro', np.inf, -np.inf,
                                            0, 1, -1, 2, -2, 3, -3)):
 
-                if ord == 'fro':  # Frobenius is a matrix norm
+                if order == 'fro':  # Frobenius is a matrix norm
                     self.logger.info(
-                        "array.norm(ord={:}): ValueError".format(ord))
+                        "array.norm(order={:}): ValueError".format(order))
                     with self.assertRaises(ValueError):
-                        array.norm(ord=ord)
+                        array.norm(order=order)
                     continue
 
                 # Scipy does not supports negative norms
-                if array.issparse is True and is_int(ord) and ord < 0:
+                if array.issparse is True and is_int(order) and order < 0:
                     self.logger.info(
-                        "array.norm(ord={:}): ValueError".format(ord))
+                        "array.norm(order={:}): ValueError".format(order))
                     with self.assertRaises(NotImplementedError):
-                        array.norm(ord=ord)
+                        array.norm(order=order)
                     continue
 
-                res = array.norm(ord=ord)
+                res = array.norm(order=order)
 
-                self.logger.info("array.norm(ord={:}):\n{:}"
-                                 "".format(ord, res))
+                self.logger.info("array.norm(order={:}):\n{:}"
+                                 "".format(order, res))
 
                 # Special handle of empty arrays
                 if array.size == 0:
@@ -4197,7 +4221,7 @@ class TestCArray(CUnitTest):
                     continue
 
                 res_np = np.linalg.norm(
-                    array.tondarray().ravel(), ord=ord).round(4)
+                    array.tondarray().ravel(), ord=order).round(4)
 
                 res = round(res, 4)
                 self.assertTrue(is_scalar(res))
@@ -4233,49 +4257,49 @@ class TestCArray(CUnitTest):
             self.logger.info("array:\n{:}".format(array))
 
             for axis_idx, axis in enumerate((None, 0, 1)):
-                for ord_idx, ord in enumerate(
+                for ord_idx, order in enumerate(
                         (None, 'fro', np.inf, -np.inf, 1, -1, 2, -2, 3, -3)):
 
-                    if axis is None and ord in (2, -2):
+                    if axis is None and order in (2, -2):
                         self.logger.info(
-                            "array.norm_2d(ord={:}, axis={:}): "
-                            "NotImplementedError".format(ord, axis))
+                            "array.norm_2d(order={:}, axis={:}): "
+                            "NotImplementedError".format(order, axis))
                         # Norms not implemented for matrices
                         with self.assertRaises(NotImplementedError):
-                            array.norm_2d(ord=ord, axis=axis)
+                            array.norm_2d(order=order, axis=axis)
                         continue
 
-                    if axis is None and ord in (3, -3):
+                    if axis is None and order in (3, -3):
                         self.logger.info(
-                            "array.norm_2d(ord={:}, axis={:}): "
-                            "ValueError".format(ord, axis))
+                            "array.norm_2d(order={:}, axis={:}): "
+                            "ValueError".format(order, axis))
                         # Invalid norm order for matrices
                         with self.assertRaises(ValueError):
-                            array.norm_2d(ord=ord, axis=axis)
+                            array.norm_2d(order=order, axis=axis)
                         continue
 
-                    if axis is not None and ord == 'fro':
+                    if axis is not None and order == 'fro':
                         self.logger.info(
-                            "array.norm_2d(ord={:}, axis={:}): "
-                            "ValueError".format(ord, axis))
+                            "array.norm_2d(order={:}, axis={:}): "
+                            "ValueError".format(order, axis))
                         # fro-norm is a matrix norm
                         with self.assertRaises(ValueError):
-                            array.norm_2d(ord=ord, axis=axis)
+                            array.norm_2d(order=order, axis=axis)
                         continue
 
                     if array.issparse is True and axis is not None and \
-                            (is_int(ord) and ord < 0):
+                            (is_int(order) and order < 0):
                         self.logger.info(
-                            "array.norm_2d(ord={:}, axis={:}): "
-                            "NotImplementedError".format(ord, axis))
+                            "array.norm_2d(order={:}, axis={:}): "
+                            "NotImplementedError".format(order, axis))
                         # Negative vector norms not implemented for sparse
                         with self.assertRaises(NotImplementedError):
-                            array.norm_2d(ord=ord, axis=axis)
+                            array.norm_2d(order=order, axis=axis)
                         continue
 
-                    res = array.norm_2d(ord=ord, axis=axis)
-                    self.logger.info("array.norm_2d(ord={:}, axis={:}):"
-                                     "\n{:}".format(ord, axis, res))
+                    res = array.norm_2d(order=order, axis=axis)
+                    self.logger.info("array.norm_2d(order={:}, axis={:}):"
+                                     "\n{:}".format(order, axis, res))
 
                     # Special handle of empty arrays
                     if array.size == 0:
@@ -4290,7 +4314,7 @@ class TestCArray(CUnitTest):
                         continue
 
                     res_np = np.linalg.norm(array.atleast_2d().tondarray(),
-                                            ord=ord, axis=axis,
+                                            ord=order, axis=axis,
                                             keepdims=True).round(4)
 
                     if axis is None:
@@ -4321,9 +4345,9 @@ class TestCArray(CUnitTest):
                         self.assertFalse((res_np != res.tondarray()).any())
 
                 with self.assertRaises(ValueError):
-                    self.logger.info("array.norm_2d(ord={:}): "
+                    self.logger.info("array.norm_2d(order={:}): "
                                      "NotImplementedError".format(0))
-                    array.norm_2d(ord=0)  # Norm 0 not implemented
+                    array.norm_2d(order=0)  # Norm 0 not implemented
 
         # Sparse arrays
         _check_norm_2d(self.array_sparse)
