@@ -292,7 +292,7 @@ class _CArrayInterface(object):
         raise NotImplementedError
 
     @abstractmethod
-    def reshape(self, shape):
+    def reshape(self, newshape):
         """Gives a new shape to an array without changing its data."""
         raise NotImplementedError
 

@@ -1696,12 +1696,12 @@ class CArray(_CArrayInterface):
         else:
             return self._instance_array(self._data.dot(array._data))
 
-    def reshape(self, shape):
+    def reshape(self, newshape):
         """Gives a new shape to an array without changing its data.
 
         Parameters
         ----------
-        shape : int or sequence of ints
+        newshape : int or sequence of ints
             Desired shape for output array.
             If an integer or a tuple of length 1, resulting array
             will have shape (n,) if dense, (1,n) if sparse.
@@ -1734,7 +1734,7 @@ class CArray(_CArrayInterface):
         ValueError: cannot reshape array of size 3 into shape (4,)
 
         """
-        return self.__class__(self._data.reshape(shape))
+        return self.__class__(self._data.reshape(newshape))
 
     def resize(self, newshape, constant=0):
         """Return a new array with the specified shape.

@@ -2720,9 +2720,9 @@ class TestCArray(CUnitTest):
         def _check_reshape(array, shape):
             self.logger.info("Array:\n{:}".format(array))
 
-            res = array.reshape(shape=shape)
+            res = array.reshape(newshape=shape)
             self.logger.info(
-                "array.reshape(shape={:}):\n{:}".format(shape, res))
+                "array.reshape(newshape={:}):\n{:}".format(shape, res))
 
             # Transforming input shape to appropriate tuple
             if not isinstance(shape, tuple):

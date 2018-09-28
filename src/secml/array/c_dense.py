@@ -952,9 +952,9 @@ class CDense(_CArrayInterface):
         """Wrapper for numpy flatten."""
         return self.__class__(self.tondarray().flatten(order))
 
-    def reshape(self, shape):
+    def reshape(self, newshape):
         """Reshape array."""
-        return self.__class__(self.tondarray().reshape(shape))
+        return self.__class__(self.tondarray().reshape(newshape))
 
     def resize(self, newshape, constant=0):
         """Return a new array with the specified shape."""
