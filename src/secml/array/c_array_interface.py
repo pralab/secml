@@ -446,7 +446,6 @@ class _CArrayInterface(object):
         """Array norm."""
         raise NotImplementedError
 
-    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def sum(self, axis=None, keepdims=True):
         """Sum of array elements over a given axis."""

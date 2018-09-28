@@ -68,7 +68,7 @@ class CDense(_CArrayInterface):
     @property
     def nnz(self):
         """Return the number of non zero elements."""
-        return (self != 0).sum().tolist()[0]
+        return (self != 0).sum(keepdims=False).tolist()[0]
 
     @property
     def nnz_indices(self):
@@ -1283,14 +1283,13 @@ class CDense(_CArrayInterface):
         """Wrapper for numpy norm on 2-D arrays."""
         return self.norm(order, axis, keepdims)
 
-    def sum(self, axis=None, keepdims=False):
+    def sum(self, axis=None, keepdims=True):
         """Wrapper for numpy sum"""
         if self.size == 0:
             out = self.__class__([[0.0]])
         else:
             out = np.sum(
-                self.atleast_2d().tondarray(), axis=axis,
-                keepdims=keepdims)
+                self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 
