@@ -1355,14 +1355,14 @@ class CDense(_CArrayInterface):
         return out_max if axis is None or self.ndim <= 1 else \
             (out_max.atleast_2d() if axis == 0 else out_max.atleast_2d().T)
 
-    def nanmax(self, axis=None, keepdims=False):
+    def nanmax(self, axis=None, keepdims=True):
         """Wrapper for numpy nanmax."""
         out = np.nanmax(
             self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 
-    def nanmin(self, axis=None, keepdims=False):
+    def nanmin(self, axis=None, keepdims=True):
         """Wrapper for numpy nanmin."""
         out = np.nanmin(
             self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)

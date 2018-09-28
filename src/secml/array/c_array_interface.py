@@ -491,13 +491,11 @@ class _CArrayInterface(object):
         """Indices of the minimum values along an axis."""
         raise NotImplementedError
 
-    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def nanmax(self, axis=None, keepdims=True):
         """Return the maximum ignoring Nans."""
         raise NotImplementedError
 
-    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def nanmin(self, axis=None, keepdims=True):
         """Return the minimum ignoring Nans."""
