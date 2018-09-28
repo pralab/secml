@@ -2837,7 +2837,6 @@ class CArray(_CArrayInterface):
 
         return self._instance_array(array._data.norm(order))
 
-    # TODO: CHECK KEEPDIMS
     def norm_2d(self, order=None, axis=None, keepdims=True):
         """Matrix norm or vector norm along axis.
 

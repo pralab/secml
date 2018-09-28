@@ -440,7 +440,6 @@ class _CArrayInterface(object):
         """Array norm."""
         raise NotImplementedError
 
-    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def norm_2d(self, order=None, axis=None, keepdims=True):
         """Array norm."""

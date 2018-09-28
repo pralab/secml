@@ -1308,7 +1308,7 @@ class CSparse(_CArrayInterface):
 
         return CDense(norm(self.tocsr(), ord=order, axis=1)).astype(float)
 
-    def norm_2d(self, order=None, axis=None, keepdims=False):
+    def norm_2d(self, order=None, axis=None, keepdims=True):
         """Return the matrix norm of store data."""
         if axis is not None and (is_int(order) and order < 0):
             # Scipy does not supports negative norms along axis
