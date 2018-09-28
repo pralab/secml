@@ -1666,13 +1666,13 @@ class CDense(_CArrayInterface):
         return cls(np.zeros(shape, dtype))
 
     @classmethod
-    def ones(cls, *shape, **dtype):
+    def ones(cls, shape, dtype=float):
         """Return an array of desired shape with ones.
         See numpy.ones for more informations.
 
         Parameters
         ----------
-        shape : shape of array, integer or sequence of integers.
+        shape : shape of array, integer or tuple
         dtype : datatype of array data.
 
         Returns
@@ -1688,7 +1688,7 @@ class CDense(_CArrayInterface):
         >>> print array.shape
         (2,)
 
-        >>> array = CDense.ones(2, 1, dtype=int)
+        >>> array = CDense.ones((2, 1), dtype=int)
         >>> print array
         [[1]
          [1]]
@@ -1696,7 +1696,7 @@ class CDense(_CArrayInterface):
         (2, 1)
 
         """
-        return cls(np.ones(shape, **dtype))
+        return cls(np.ones(shape, dtype=dtype))
 
     @classmethod
     def eye(cls, n_rows, n_cols=None, k=0, dtype=float):

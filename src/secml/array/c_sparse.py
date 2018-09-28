@@ -1183,7 +1183,7 @@ class CSparse(_CArrayInterface):
         old_nnz_column_indices = self.nnz_column_indices.tolist()
 
         # Create an array full of Trues (VERY expensive!)
-        new_not = self.__class__(CDense.ones(*self.shape)).astype(bool)
+        new_not = self.__class__(CDense.ones(self.shape)).astype(bool)
         # All old nonzeros should be zeros!
         new_not[[old_nnz_row_indices, old_nnz_column_indices]] = False
         # Eliminate newly created zeros from internal csr_matrix structures
@@ -1729,6 +1729,11 @@ class CSparse(_CArrayInterface):
     def zeros(cls, shape, dtype=float):
         """Return a new array of given shape and type, without filling it."""
         return cls(scs.csr_matrix(shape, dtype=dtype))
+
+    @classmethod
+    def ones(cls, shape, dtype=float):
+        """Return a new array of given shape and type, filled with ones."""
+        raise NotImplementedError
 
     @classmethod
     def eye(cls, n_rows, n_cols=None, k=0, dtype=float):

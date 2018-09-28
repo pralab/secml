@@ -4491,9 +4491,9 @@ class CArray(_CArrayInterface):
 
         Parameters
         ----------
-        shape : int or tuple of ints
+        shape : int or tuple
             Shape of the new array, e.g., 2 or (2,3).
-        dtype : str or dtypw, optional
+        dtype : str or dtype, optional
             The desired data-type for the array. Default is float.
         sparse : bool, optional
             If False (default) a dense array will be returned. Otherwise,
@@ -4504,12 +4504,11 @@ class CArray(_CArrayInterface):
         CArray
             Array of ones with the given properties.
 
-        Notes
-        -----
-        When sparse is True, array is converted to sparse format
-        after ones generation under dense environment. Consequently,
-        for large distributions, performance is not comparable to
-        classical sparse array creation routines.
+        Warnings
+        --------
+        When sparse is True, array is created as dense and then converted
+        to sparse format. Consequently, the performance of this method
+        is not comparable to other sparse array creation routines.
 
         Examples
         --------
@@ -4523,10 +4522,10 @@ class CArray(_CArrayInterface):
           (1, 0)	1)
 
         """
-        if isinstance(shape, tuple):
-            return cls(CDense.ones(*shape, dtype=dtype), tosparse=sparse)
-        else:
-            return cls(CDense.ones(shape, dtype=dtype), tosparse=sparse)
+        # Converting integer "shape" to actual shape
+        shape = (shape,) if not isinstance(shape, tuple) else shape
+        ones = CDense.ones(shape, dtype=dtype)
+        return cls(ones, tosparse=sparse)  # Convert to sparse if necessary
 
     @classmethod
     def eye(cls, n_rows, n_cols=None, k=0, dtype=float, sparse=False):
