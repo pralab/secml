@@ -37,15 +37,6 @@ class CSparse(_CArrayInterface):
         if new_shape is not None and new_shape != self.shape:
             self._data = self.reshape(new_shape)._data
 
-    def _buffer_to_builtin(self, data):
-        """Convert data buffer to built-in arrays"""
-        if isinstance(data, CDense):  # Extract np.ndarray
-            return data.tondarray()
-        elif isinstance(data, self.__class__):  # Extract scs.csr_matrix
-            return data.tocsr()
-        else:
-            return data
-
     # ------------------------------ #
     # # # # # # PROPERTIES # # # # # #
     # -------------------------------#
@@ -113,13 +104,22 @@ class CSparse(_CArrayInterface):
         """Convert to csr_matrix."""
         return self._data
 
+    def tolist(self):
+        """Convert to list."""
+        return self.todense().tolist()
+
     def todense(self, order=None):
         """Convert to CDense."""
         return CDense(self.tondarray(order))
 
-    def tolist(self):
-        """Convert to list."""
-        return self.todense().tolist()
+    def _buffer_to_builtin(self, data):
+        """Convert data buffer to built-in arrays"""
+        if isinstance(data, CDense):  # Extract np.ndarray
+            return data.tondarray()
+        elif isinstance(data, self.__class__):  # Extract scs.csr_matrix
+            return data.tocsr()
+        else:
+            return data
 
     # ---------------------------- #
     # # # # # # INDEXING # # # # # #
@@ -758,17 +758,17 @@ class CSparse(_CArrayInterface):
 
     __nonzero__ = __bool__  # Compatibility with python < 3
 
-    def __str__(self):
-        return str(self._data)
-
-    def __repr__(self):
-        return repr(self._data)
-
     def __iter__(self):
         """Yields array elements in raster-scan order."""
         for row_id in xrange(self.shape[0]):
             for column_id in xrange(self.shape[1]):
                 yield self[row_id, column_id]
+
+    def __str__(self):
+        return str(self._data)
+
+    def __repr__(self):
+        return repr(self._data)
 
     # ------------------------------ #
     # # # # # # COPY UTILS # # # # # #
@@ -880,36 +880,26 @@ class CSparse(_CArrayInterface):
     # # # # # # UTILITIES # # # # # #
     # ------------------------------#
 
+    # ---------------- #
+    # SHAPE ALTERATION #
+    # ---------------- #
+
     def transpose(self):
         return self.__class__(self._data.transpose())
 
-    def astype(self, dtype):
-        return self.__class__(self._data.astype(dtype))
+    def ravel(self):
+        """Reshape sparse matrix to 1 x size array."""
+        return self.reshape((1, self.size))
 
-    def eliminate_zeros(self):
-        self._data.eliminate_zeros()
+    def flatten(self):
+        """Return a flattened copy of array."""
+        return self.ravel().deepcopy()
 
-    def dot(self, array):
-        # Only matrix multiplication is supported for sparse arrays
-        if len(array.shape) == 1:  # We work with 2D arrays
-            array = array.atleast_2d()
-        return self.__class__(self._data.dot(self._buffer_to_builtin(array)))
-
-    def all(self, axis=None, keepdims=None):
-        """Return True if all array elements are boolean True."""
-        if axis is not None or keepdims is not None:
-            raise NotImplementedError(
-                "`axis` and `keepdims` are currently not supported")
-
-        return bool(self.size == self.nnz and self._data.data.all())
-
-    def any(self, axis=None, keepdims=None):
-        """Return True if any array element is boolean True."""
-        if axis is not None or keepdims is not None:
-            raise NotImplementedError(
-                "`axis` and `keepdims` are currently not supported")
-
-        return bool(self._data.data.any())
+    def atleast_2d(self):
+        """Force array to have 2 dimensions.
+        Sparse arrays are always 2 dimensional, so original array is returned.
+        """
+        return self.__class__(self)
 
     def reshape(self, newshape):
         """Reshape the matrix using input shape (int or tuple of ints)."""
@@ -940,62 +930,105 @@ class CSparse(_CArrayInterface):
         """Return a new array with the specified shape."""
         raise NotImplementedError
 
-    def ravel(self):
-        """Reshape sparse matrix to 1 x size array."""
-        return self.reshape((1, self.size))
+    # --------------- #
+    # DATA ALTERATION #
+    # --------------- #
 
-    def flatten(self):
-        """Return a flattened copy of array."""
-        return self.ravel().deepcopy()
+    def astype(self, dtype):
+        return self.__class__(self._data.astype(dtype))
 
-    def inv(self):
-        """Compute the (multiplicative) inverse of a square matrix."""
-        return self.__class__(inv(self._data))
+    def nan_to_num(self):
+        """Replace nan with zero and inf with finite numbers."""
+        self._data.data = np.nan_to_num(self._data.data)
 
-    def pinv(self, rcond=1e-15):
-        """Compute the (Moore-Penrose) pseudo-inverse of a matrix."""
+    def round(self, decimals=0):
+        """Evenly round to the given number of decimals."""
+        data = np.round(self._data.data, decimals=decimals)
+        return self.__class__(
+            (data, self._data.indices, self._data.indptr),
+            shape=self.shape)
+
+    def ceil(self):
+        """Return the ceiling of the input, element-wise."""
+        return self.__class__(self._data.ceil())
+
+    def floor(self):
+        """Return the floor of the input, element-wise."""
+        return self.__class__(self._data.floor())
+
+    def clip(self, c_min, c_max):
+        """Clip (limit) the values in an array."""
         raise NotImplementedError
 
-    def norm(self, order=None):
-        """Return the matrix norm of store data."""
-        if is_int(order) and order < 0:
-            # Scipy does not supports negative norms along axis
-            raise NotImplementedError
+    def eliminate_zeros(self):
+        self._data.eliminate_zeros()
 
-        if self.size == 0:
-            # Special handle as few norms raise error for empty arrays
-            if order == 'fro':
-                raise ValueError("Invalid norm order {:}.".format(order))
-            return self.__class__([0.0])
+    def sort(self, axis=-1, kind='quicksort', inplace=False):
+        """sort array in places"""
+        if kind != 'quicksort':
+            raise ValueError("only `quicksort` algorithm is supported")
 
-        return CDense(norm(self.tocsr(), ord=order, axis=1)).astype(float)
+        tosort = self if inplace is True else self.deepcopy()
 
-    def norm_2d(self, order=None, axis=None, keepdims=False):
-        """Return the matrix norm of store data."""
-        if axis is not None and (is_int(order) and order < 0):
-            # Scipy does not supports negative norms along axis
-            raise NotImplementedError
-
-        if axis is not None and order == 'fro':
-            # 'fro' is a matrix norm
-            raise ValueError("Invalid norm order {:}.".format(order))
-
-        if self.size == 0:
-            # Special handle as few norms raise error for empty arrays
-            if axis is None and order in (2, -2):
-                # Return an error consistent with scipy
-                raise NotImplementedError
-            if axis is None and order not in (
-                    None, 'fro', np.inf, -np.inf, 1, -1):
-                raise ValueError("Invalid norm order {:}.".format(order))
-            return self.__class__([0.0])
-
-        out = CDense(norm(self.tocsr(), ord=order, axis=axis)).astype(float)
-
-        if axis is not None or keepdims is True:
-            return out.atleast_2d().T if axis == 1 else out.atleast_2d()
+        if axis == 1 or axis == -1:
+            for i in xrange(tosort.shape[0]):
+                row = tosort[i, :].todense()
+                row.sort(axis=1, inplace=True)
+                tosort[i, :] = row
+        elif axis == 0:
+            for i in xrange(tosort.shape[1]):
+                column = tosort[:, i].todense()
+                column.sort(axis=0, inplace=True)
+                tosort[:, i] = column
         else:
-            return out  # out is already a vector, so nothing to do
+            raise ValueError("wrong sorting axis.")
+
+        return tosort
+
+    def argsort(self, axis=-1, kind='quicksort'):
+        """
+        Returns the indices that would sort an array.
+        If possible is better if you use sort function
+        axis= -1 order based on last axis (which in sparse matrix is 1 horizontal)
+        """
+        if kind != 'quicksort':
+            raise ValueError("only `quicksort` algorithm is supported")
+
+        # for all element of chosen axis
+        if axis is None:
+            array = self.ravel()
+            axis_elem_num = 1  # order for column
+        else:
+            array = self
+            if axis == 1 or axis == -1:
+                axis = 1
+                axis_elem_num = array.shape[0]  # order for row
+            elif axis == 0:
+                axis_elem_num = array.shape[1]  # order for column
+            else:
+                raise ValueError(
+                    "wrong axis parameter in argsort function for sparse data")
+
+        index_matrix = CDense().zeros(array.shape, dtype=int)
+
+        axis_element = None
+        for i in xrange(axis_elem_num):
+
+            if axis == 1 or axis == -1 or axis is None:
+                axis_element = array[i, :]  # order for row
+            elif axis == 0:
+                axis_element = array[:, i]  # order for column
+
+            # argsort of current axis element
+            sorted_data_idx = CDense(
+                axis_element.todense()).argsort(axis=axis, kind='quicksort')
+
+            if axis == 1 or axis == -1 or axis is None:
+                index_matrix[i, :] = sorted_data_idx[0, :]  # order for row
+            elif axis == 0:
+                index_matrix[:, i] = sorted_data_idx[:, 0]  # order for column
+
+        return index_matrix.ravel() if axis is None else index_matrix
 
     def shuffle(self):
         """Shuffle array data in-place."""
@@ -1007,39 +1040,185 @@ class CSparse(_CArrayInterface):
                 shuffle_idx = CDense.randsample(self.shape[1], self.shape[1])
                 self[:, :] = self[0, shuffle_idx]
 
-    def sin(self):
-        """Trigonometric sine, element-wise."""
-        return self.__class__(self.tocsr().sin())
+    # ------------ #
+    # APPEND/MERGE #
+    # ------------ #
 
-    def cos(self):
-        """Trigonometric cosine, element-wise."""
-        raise NotImplementedError("`cos` is not available for sparse arrays!")
+    def append(self, array, axis=None):
+        """Append an  arrays along the given axis."""
+        # If axis is None we simulate numpy flattening
+        if axis is None:
+            return self.__class__.concatenate(self.ravel(),
+                                              array.ravel(), axis=1)
+        else:
+            return self.__class__.concatenate(self, array, axis)
 
-    def exp(self):
-        """Exponential, element-wise."""
-        raise NotImplementedError("`exp` is not available for sparse arrays!")
+    def repmat(self, m, n):
+        """Wrapper for repmat
+        m: the number of times that we want repeat a alog axis 0 (vertical)
+        n: the number of times that we want repeat a alog axis 1 (orizontal)
+        """
+        self_csr = self.tocsr()
+        rows = [self_csr for _ in xrange(n)]
+        blocks = [rows for _ in xrange(m)]
+        if len(blocks) == 0:  # To manage the m = 0 case
+            blocks = [[]]
+        return self.__class__(scs.bmat(blocks, format='csr', dtype=self.dtype))
 
-    def log(self):
-        """Natural logarithm, element-wise."""
-        raise NotImplementedError("`exp` is not available for sparse arrays!")
+    def repeat(self, repeats, axis=None):
+        """Repeat elements of an array."""
+        raise NotImplementedError
 
-    def log10(self):
-        """Base 10 logarithm, element-wise."""
-        raise NotImplementedError("`log10` is not available for sparse arrays!")
+    # ---------- #
+    # COMPARISON #
+    # ---------- #
 
-    def normpdf(self, mu=0.0, sigma=1.0):
-        """Return normal distribution function."""
+    def logical_and(self, array):
+        """Element-wise logical AND of array elements.
+
+        Compare two arrays and returns a new array containing
+        the element-wise logical AND.
+
+        Parameters
+        ----------
+        array : CSparse or array_like
+            The array like object holding the elements to compare
+            current array with. Must have the same shape of first
+            array.
+
+        Returns
+        -------
+        out_and : CSparse or bool
+            The element-wise logical AND between the two arrays.
+
+        Examples
+        --------
+        >>> from secml.array.c_sparse import CSparse
+
+        >>> CSparse([[-1,0],[2,0]]).logical_and(CSparse([[2,-1],[2,-1]])).todense()
+        CDense([[ True, False],
+               [ True, False]], dtype=bool)
+
+        >>> CSparse([-1]).logical_and(CSparse([2])).todense()
+        CDense([[ True]], dtype=bool)
+
+        >>> array = CSparse([1,0,2,-1])
+        >>> (array > 0).logical_and(array < 2).todense()
+        CDense([[ True, False, False, False]], dtype=bool)
+
+        """
+        if self.shape != array.shape:
+            raise ValueError("array to compare must be {:}".format(self.shape))
+
+        and_result = self.__class__(self.shape, dtype=bool)
+
+        for el_idx, el in enumerate(self._data.data):
+            # Get indices of current element
+            this_elem_row = self.nnz_row_indices[0, el_idx]
+            this_elem_col = self.nnz_column_indices[0, el_idx]
+            # Check is second array has an element in the same position
+            y_same_bool = (array.nnz_row_indices == this_elem_row).logical_and(
+                array.nnz_column_indices == this_elem_col)
+            if y_same_bool.any() == True:  # found an element in same position!
+                same_position_val = int(
+                    array._data.data[y_same_bool.tondarray()])
+                if np.logical_and(el, same_position_val):
+                    and_result[this_elem_row, this_elem_col] = True
+
+        return and_result
+
+    def logical_or(self, array):
+        """Element-wise logical OR of array elements.
+
+        Compare two arrays and returns a new array containing
+        the element-wise logical OR.
+
+        Parameters
+        ----------
+        array : CSparse or array_like
+            The array like object holding the elements to compare
+            current array with. Must have the same shape of first
+            array.
+
+        Returns
+        -------
+        out_and : CSparse or bool
+            The element-wise logical OR between the two arrays.
+
+
+        Examples
+        --------
+        >>> from secml.array.c_sparse import CSparse
+
+        >>> CSparse([[-1,0],[2,0]]).logical_or(CSparse([[2,0],[2,-1]])).todense()
+        CDense([[ True, False],
+               [ True,  True]], dtype=bool)
+
+        >>> CSparse([False]).logical_and(CSparse([False])).todense()
+        CDense([[False]], dtype=bool)
+
+        >>> array = CSparse([1,0,2,-1])
+        >>> (array > 0).logical_or(array < 2).todense()
+        CDense([[ True,  True,  True,  True]], dtype=bool)
+
+        """
+        if self.shape != array.shape:
+            raise ValueError("array to compare must be {:}".format(self.shape))
+
+        or_matrix = self.astype(bool)
+        # Be sure there are only non-zeros in 2nd array
+        array.eliminate_zeros()
+        # add True for each non-zero element of second array
+        or_matrix[[array.nnz_row_indices.tolist(),
+                   array.nnz_column_indices.tolist()]] = True
+
+        return or_matrix
+
+    def logical_not(self):
+        """Element-wise logical NOT of array elements."""
+        # Be sure there are only non-zeros in array
+        self.eliminate_zeros()
+        # Storing indices of elements will be zeros
+        old_nnz_row_indices = self.nnz_row_indices.tolist()
+        old_nnz_column_indices = self.nnz_column_indices.tolist()
+
+        # Create an array full of Trues (VERY expensive!)
+        new_not = self.__class__(CDense.ones(*self.shape)).astype(bool)
+        # All old nonzeros should be zeros!
+        new_not[[old_nnz_row_indices, old_nnz_column_indices]] = False
+        # Eliminate newly created zeros from internal csr_matrix structures
+        new_not.eliminate_zeros()
+
+        return new_not
+
+    def maximum(self, array):
+        """Element-wise maximum."""
+        return self.__class__(
+            self._data.maximum(self._buffer_to_builtin(array)))
+
+    def minimum(self, array):
+        """Element-wise minimum."""
+        return self.__class__(
+            self._data.minimum(self._buffer_to_builtin(array)))
+
+    # ------ #
+    # SEARCH #
+    # ------ #
+
+    def find(self, condition):
+        """Indices of current array with True condition."""
+        # size instead of shape as we just need one condition for each element
+        if condition.size != self.size:
+            raise ValueError("condition size must be {:}".format(self.size))
+        return map(list, scs.find(condition.tocsr()))[:2]
+
+    def binary_search(self, value):
         raise NotImplementedError(
-            "`normpdf` is not available for sparse arrays!")
+            "`binary_search` is not implemented for sparse arrays!")
 
-    def interp(self, x_data, y_data, return_left=None, return_right=None):
-        """One-dimensional linear interpolation."""
-        raise NotImplementedError(
-            "`interp` is not available for sparse arrays!")
-
-    def nan_to_num(self):
-        """Replace nan with zero and inf with finite numbers."""
-        self._data.data = np.nan_to_num(self._data.data)
+    # ------------- #
+    # DATA ANALYSIS #
+    # ------------- #
 
     def unique(self, return_index=False,
                return_inverse=False, return_counts=False):
@@ -1107,19 +1286,54 @@ class CSparse(_CArrayInterface):
 
         return tuple(outputs)
 
-    def atleast_2d(self):
-        """Force array to have 2 dimensions.
-        Sparse arrays are always 2 dimensional, so original array is returned.
-        """
-        return self.__class__(self)
+    def bincount(self):
+        """Count the number of occurrences of each value in array of non-negative ints."""
+        n_zeros = self.size - self.nnz
+        nnz_bincount = np.bincount(self._data.data)
+        # The number of zeros must be replaced (no zeros in nnz_data)
+        nnz_bincount[0] = n_zeros
+        return CDense(nnz_bincount)
 
-    def diag(self, k=0):
-        """Extract a diagonal or construct a diagonal array."""
-        if self.shape[0] == 1:
-            return self.__class__(scs.diags(
-                self.tondarray(), offsets=[k], format='csr', dtype=self.dtype))
+    def norm(self, order=None):
+        """Return the matrix norm of store data."""
+        if is_int(order) and order < 0:
+            # Scipy does not supports negative norms along axis
+            raise NotImplementedError
+
+        if self.size == 0:
+            # Special handle as few norms raise error for empty arrays
+            if order == 'fro':
+                raise ValueError("Invalid norm order {:}.".format(order))
+            return self.__class__([0.0])
+
+        return CDense(norm(self.tocsr(), ord=order, axis=1)).astype(float)
+
+    def norm_2d(self, order=None, axis=None, keepdims=False):
+        """Return the matrix norm of store data."""
+        if axis is not None and (is_int(order) and order < 0):
+            # Scipy does not supports negative norms along axis
+            raise NotImplementedError
+
+        if axis is not None and order == 'fro':
+            # 'fro' is a matrix norm
+            raise ValueError("Invalid norm order {:}.".format(order))
+
+        if self.size == 0:
+            # Special handle as few norms raise error for empty arrays
+            if axis is None and order in (2, -2):
+                # Return an error consistent with scipy
+                raise NotImplementedError
+            if axis is None and order not in (
+                    None, 'fro', np.inf, -np.inf, 1, -1):
+                raise ValueError("Invalid norm order {:}.".format(order))
+            return self.__class__([0.0])
+
+        out = CDense(norm(self.tocsr(), ord=order, axis=axis)).astype(float)
+
+        if axis is not None or keepdims is True:
+            return out.atleast_2d().T if axis == 1 else out.atleast_2d()
         else:
-            return CDense(self.tocsr().diagonal(k=k))
+            return out  # out is already a vector, so nothing to do
 
     def sum(self, axis=None, keepdims=True):
         """Sum of array elements over a given axis."""
@@ -1166,9 +1380,21 @@ class CSparse(_CArrayInterface):
 
         return out.ravel() if axis is None or keepdims is False else out
 
-    def repeat(self, repeats, axis=None):
-        """Repeat elements of an array."""
-        raise NotImplementedError
+    def all(self, axis=None, keepdims=None):
+        """Return True if all array elements are boolean True."""
+        if axis is not None or keepdims is not None:
+            raise NotImplementedError(
+                "`axis` and `keepdims` are currently not supported")
+
+        return bool(self.size == self.nnz and self._data.data.all())
+
+    def any(self, axis=None, keepdims=None):
+        """Return True if any array element is boolean True."""
+        if axis is not None or keepdims is not None:
+            raise NotImplementedError(
+                "`axis` and `keepdims` are currently not supported")
+
+        return bool(self._data.data.any())
 
     def max(self, axis=None, keepdims=True):
         """Max of array elements over a given axis."""
@@ -1181,290 +1407,6 @@ class CSparse(_CArrayInterface):
         out_min = self.__class__(self._data.min(axis=axis))
         return \
             out_min.ravel() if axis is None or keepdims is False else out_min
-
-    def nanmax(self, axis=None, keepdims=True):
-        raise NotImplementedError
-
-    def nanmin(self, axis=None, keepdims=True):
-        raise NotImplementedError
-
-    def mean(self, axis=None, keepdims=True):
-        """Mean of array elements over a given axis."""
-        out_mean = CDense(self._data.mean(axis))
-        return \
-            out_mean.ravel() if axis is None or keepdims is False else out_mean
-
-    def maximum(self, array):
-        """Element-wise maximum."""
-        return self.__class__(
-            self._data.maximum(self._buffer_to_builtin(array)))
-
-    def minimum(self, array):
-        """Element-wise minimum."""
-        return self.__class__(
-            self._data.minimum(self._buffer_to_builtin(array)))
-
-    def median(self, axis=None, keepdims=True):
-        """Median of array elements over a given axis."""
-        raise NotImplementedError
-
-    def clip(self, c_min, c_max):
-        """Clip (limit) the values in an array."""
-        raise NotImplementedError
-
-    def round(self, decimals=0):
-        """Evenly round to the given number of decimals."""
-        data = np.round(self._data.data, decimals=decimals)
-        return self.__class__(
-            (data, self._data.indices, self._data.indptr), shape=self.shape)
-
-    def ceil(self):
-        """Return the ceiling of the input, element-wise."""
-        return self.__class__(self._data.ceil())
-
-    def floor(self):
-        """Return the floor of the input, element-wise."""
-        return self.__class__(self._data.floor())
-
-    def sqrt(self):
-        """Return the element-wise square root of array."""
-        return self.__class__(self._data.sqrt())
-
-    def sign(self):
-        """Return the element-wise sign of array."""
-        return self.__class__(self._data.sign())
-
-    def std(self, axis=None, ddof=0, keepdims=True):
-        """Standard deviation of matrix over the given axis."""
-        array_mean = self.mean(axis=axis).atleast_2d()
-
-        centered_array = self - array_mean.repmat(
-            [1 if array_mean.shape[0] == self.shape[0] else self.shape[0]][0],
-            [1 if array_mean.shape[1] == self.shape[1] else self.shape[1]][0])
-        # n is array size for axis == None or
-        # the number of rows/columns of specified axis
-        n = self.size if axis is None else self.shape[axis]
-        variance = (1.0 / (float(n) - ddof)) * (centered_array ** 2)
-
-        return CDense(variance.sum(axis=axis, keepdims=keepdims).sqrt())
-
-    def pow(self, exp):
-        """Array elements raised to powers from input exponent, element-wise.
-
-        Equivalent to standard ``**`` operator.
-
-        Parameters
-        ----------
-        exp : scalar
-            Exponent of power, single scalar.
-
-        Returns
-        -------
-        pow_array : CSparse
-            New array with the power of current data using
-            input exponents.
-
-        """
-        return self.__pow__(exp)
-
-    def append(self, array, axis=None):
-        """Append an  arrays along the given axis."""
-        # If axis is None we simulate numpy flattening
-        if axis is None:
-            return self.__class__.concatenate(self.ravel(),
-                                              array.ravel(), axis=1)
-        else:
-            return self.__class__.concatenate(self, array, axis)
-
-    def repmat(self, m, n):
-        """Wrapper for repmat
-        m: the number of times that we want repeat a alog axis 0 (vertical)
-        n: the number of times that we want repeat a alog axis 1 (orizontal)
-        """
-        self_csr = self.tocsr()
-        rows = [self_csr for _ in xrange(n)]
-        blocks = [rows for _ in xrange(m)]
-        if len(blocks) == 0:  # To manage the m = 0 case
-            blocks = [[]]
-        return self.__class__(scs.bmat(blocks, format='csr', dtype=self.dtype))
-
-    def find(self, condition):
-        """Indices of current array with True condition."""
-        # size instead of shape as we just need one condition for each element
-        if condition.size != self.size:
-            raise ValueError("condition size must be {:}".format(self.size))
-        return map(list, scs.find(condition.tocsr()))[:2]
-
-    def bincount(self):
-        """Count the number of occurrences of each value in array of non-negative ints."""
-        n_zeros = self.size - self.nnz
-        nnz_bincount = np.bincount(self._data.data)
-        # The number of zeros must be replaced (no zeros in nnz_data)
-        nnz_bincount[0] = n_zeros
-        return CDense(nnz_bincount)
-
-    def binary_search(self, value):
-        raise NotImplementedError(
-            "`binary_search` is not implemented for sparse arrays!")
-
-    def sort(self, axis=-1, kind='quicksort', inplace=False):
-        """sort array in places"""
-        if kind != 'quicksort':
-            raise ValueError("only `quicksort` algorithm is supported")
-
-        tosort = self if inplace is True else self.deepcopy()
-
-        if axis == 1 or axis == -1:
-            for i in xrange(tosort.shape[0]):
-                row = tosort[i, :].todense()
-                row.sort(axis=1, inplace=True)
-                tosort[i, :] = row
-        elif axis == 0:
-            for i in xrange(tosort.shape[1]):
-                column = tosort[:, i].todense()
-                column.sort(axis=0, inplace=True)
-                tosort[:, i] = column
-        else:
-            raise ValueError("wrong sorting axis.")
-        
-        return tosort
-
-    def argsort(self, axis=-1, kind='quicksort'):
-        """
-        Returns the indices that would sort an array.
-        If possible is better if you use sort function 
-        axis= -1 order based on last axis (which in sparse matrix is 1 horizontal)
-        """
-        if kind != 'quicksort':
-            raise ValueError("only `quicksort` algorithm is supported")
-
-        # for all element of chosen axis
-        if axis is None:
-            array = self.ravel()
-            axis_elem_num = 1  # order for column
-        else:
-            array = self
-            if axis == 1 or axis == -1:
-                axis = 1
-                axis_elem_num = array.shape[0]  # order for row
-            elif axis == 0:
-                axis_elem_num = array.shape[1]  # order for column
-            else:
-                raise ValueError(
-                    "wrong axis parameter in argsort function for sparse data")
-
-        index_matrix = CDense().zeros(array.shape, dtype=int)
-
-        axis_element = None
-        for i in xrange(axis_elem_num):
-
-            if axis == 1 or axis == -1 or axis is None:
-                axis_element = array[i, :]  # order for row
-            elif axis == 0:
-                axis_element = array[:, i]  # order for column
-
-            # argsort of current axis element
-            sorted_data_idx = CDense(
-                axis_element.todense()).argsort(axis=axis, kind='quicksort')
-
-            if axis == 1 or axis == -1 or axis is None:
-                index_matrix[i, :] = sorted_data_idx[0, :]  # order for row
-            elif axis == 0:
-                index_matrix[:, i] = sorted_data_idx[:, 0]  # order for column
-
-        return index_matrix.ravel() if axis is None else index_matrix
-
-    def argmin(self, axis=None):
-        """Indices of the minimum values along an axis.
-
-        Parameters
-        ----------
-        axis : int, None, optional
-            If None (default), array is flattened before computing
-            index, otherwise the specified axis is used.
-
-        Returns
-        -------
-        index : int, CDense
-            Scalar with index of the minimum value for flattened array or
-            CDense with indices along the given axis.
-
-        Notes
-        -----
-        In case of multiple occurrences of the minimum values, the
-        indices corresponding to the first occurrence are returned.
-
-        Examples
-        --------
-        >>> from secml.array.c_sparse import CSparse
-
-        >>> CSparse([-1, 0, 3]).argmin()
-        CDense([0])
-
-        >>> CSparse([[-1, 0],[4, 3]]).argmin(axis=0)  # We return the index of minimum for each row
-        CDense([[0, 0]])
-
-        >>> CSparse([[-1, 0],[4, 3]]).argmin(axis=1)  # We return the index of maximum for each column
-        CDense([[0],
-               [1]])
-
-        """
-        if self.size == 0:
-            raise ValueError("attempt to get argmin of an empty sequence")
-
-        # Preparing data
-        if axis is None or axis == 1 or axis == -1:
-            array = self.ravel() if axis is None else self
-            axis_elem_num = array.shape[0]  # min for row
-            this_indices = array.nnz_row_indices
-            other_axis_indices = array.nnz_column_indices
-        elif axis == 0:
-            array = self
-            axis_elem_num = array.shape[1]  # min for column
-            this_indices = array.nnz_column_indices
-            other_axis_indices = array.nnz_row_indices
-        else:
-            raise ValueError("{:} is not a valid axis.")
-
-        index_matrix = CDense.zeros(axis_elem_num, dtype=array.dtype)
-
-        for i in xrange(axis_elem_num):
-
-            # search minimum between non zero element for current row/column
-            i_indices = this_indices.find(this_indices == i)[1]
-
-            if len(i_indices) != 0:
-                # there is at least one element different from zero
-                current_elem = array._data.data[i_indices]
-                elem_min_idx = current_elem.argmin()
-                nnz_min = current_elem[elem_min_idx]
-                nnz_min_idx = other_axis_indices[0, i_indices][0, elem_min_idx]
-            else:
-                nnz_min = 0
-                nnz_min_idx = 0
-
-            # if min found is greater than zero...
-            if nnz_min > 0:
-
-                use_axis = 1 if axis is None or axis == 1 or axis == -1 else 0
-
-                # ...at least a zero in current row/column, zero is the min
-                if len(i_indices) < array.shape[use_axis]:
-
-                    if use_axis == 1:  # order for row
-                        all_i_element = array[i, :].todense()
-                    elif use_axis == 0:  # order for column
-                        all_i_element = array.T[i, :].todense()
-                    else:
-                        raise ValueError("{:} is not a valid axis.")
-
-                    nnz_min_idx = all_i_element.find(all_i_element == 0)[1][0]
-
-            index_matrix[0, i] = nnz_min_idx
-
-        return index_matrix.ravel()[0, 0] if axis is None else \
-            [index_matrix.atleast_2d() if axis == 0 else
-             index_matrix.atleast_2d().T][0]
 
     def argmax(self, axis=None):
         """Indices of the maximum values along an axis.
@@ -1558,128 +1500,221 @@ class CSparse(_CArrayInterface):
             [index_matrix.atleast_2d() if axis == 0 else
              index_matrix.atleast_2d().T][0]
 
+    def argmin(self, axis=None):
+        """Indices of the minimum values along an axis.
+
+        Parameters
+        ----------
+        axis : int, None, optional
+            If None (default), array is flattened before computing
+            index, otherwise the specified axis is used.
+
+        Returns
+        -------
+        index : int, CDense
+            Scalar with index of the minimum value for flattened array or
+            CDense with indices along the given axis.
+
+        Notes
+        -----
+        In case of multiple occurrences of the minimum values, the
+        indices corresponding to the first occurrence are returned.
+
+        Examples
+        --------
+        >>> from secml.array.c_sparse import CSparse
+
+        >>> CSparse([-1, 0, 3]).argmin()
+        CDense([0])
+
+        >>> CSparse([[-1, 0],[4, 3]]).argmin(axis=0)  # We return the index of minimum for each row
+        CDense([[0, 0]])
+
+        >>> CSparse([[-1, 0],[4, 3]]).argmin(axis=1)  # We return the index of maximum for each column
+        CDense([[0],
+               [1]])
+
+        """
+        if self.size == 0:
+            raise ValueError("attempt to get argmin of an empty sequence")
+
+        # Preparing data
+        if axis is None or axis == 1 or axis == -1:
+            array = self.ravel() if axis is None else self
+            axis_elem_num = array.shape[0]  # min for row
+            this_indices = array.nnz_row_indices
+            other_axis_indices = array.nnz_column_indices
+        elif axis == 0:
+            array = self
+            axis_elem_num = array.shape[1]  # min for column
+            this_indices = array.nnz_column_indices
+            other_axis_indices = array.nnz_row_indices
+        else:
+            raise ValueError("{:} is not a valid axis.")
+
+        index_matrix = CDense.zeros(axis_elem_num, dtype=array.dtype)
+
+        for i in xrange(axis_elem_num):
+
+            # search minimum between non zero element for current row/column
+            i_indices = this_indices.find(this_indices == i)[1]
+
+            if len(i_indices) != 0:
+                # there is at least one element different from zero
+                current_elem = array._data.data[i_indices]
+                elem_min_idx = current_elem.argmin()
+                nnz_min = current_elem[elem_min_idx]
+                nnz_min_idx = other_axis_indices[0, i_indices][0, elem_min_idx]
+            else:
+                nnz_min = 0
+                nnz_min_idx = 0
+
+            # if min found is greater than zero...
+            if nnz_min > 0:
+
+                use_axis = 1 if axis is None or axis == 1 or axis == -1 else 0
+
+                # ...at least a zero in current row/column, zero is the min
+                if len(i_indices) < array.shape[use_axis]:
+
+                    if use_axis == 1:  # order for row
+                        all_i_element = array[i, :].todense()
+                    elif use_axis == 0:  # order for column
+                        all_i_element = array.T[i, :].todense()
+                    else:
+                        raise ValueError("{:} is not a valid axis.")
+
+                    nnz_min_idx = all_i_element.find(all_i_element == 0)[1][0]
+
+            index_matrix[0, i] = nnz_min_idx
+
+        return index_matrix.ravel()[0, 0] if axis is None else \
+            [index_matrix.atleast_2d() if axis == 0 else
+             index_matrix.atleast_2d().T][0]
+
+    def nanmax(self, axis=None, keepdims=True):
+        raise NotImplementedError
+
+    def nanmin(self, axis=None, keepdims=True):
+        raise NotImplementedError
+
     def nanargmax(self, axis=None):
         raise NotImplementedError
 
     def nanargmin(self, axis=None):
         raise NotImplementedError
 
-    def logical_and(self, array):
-        """Element-wise logical AND of array elements.
+    def mean(self, axis=None, keepdims=True):
+        """Mean of array elements over a given axis."""
+        out_mean = CDense(self._data.mean(axis))
+        return \
+            out_mean.ravel() if axis is None or keepdims is False else out_mean
 
-        Compare two arrays and returns a new array containing
-        the element-wise logical AND.
+    def median(self, axis=None, keepdims=True):
+        """Median of array elements over a given axis."""
+        raise NotImplementedError
+
+    def std(self, axis=None, ddof=0, keepdims=True):
+        """Standard deviation of matrix over the given axis."""
+        array_mean = self.mean(axis=axis).atleast_2d()
+
+        centered_array = self - array_mean.repmat(
+            [1 if array_mean.shape[0] == self.shape[0] else self.shape[0]][0],
+            [1 if array_mean.shape[1] == self.shape[1] else self.shape[1]][0])
+        # n is array size for axis == None or
+        # the number of rows/columns of specified axis
+        n = self.size if axis is None else self.shape[axis]
+        variance = (1.0 / (float(n) - ddof)) * (centered_array ** 2)
+
+        return CDense(variance.sum(axis=axis, keepdims=keepdims).sqrt())
+
+    # ----------------- #
+    # MATH ELEMENT-WISE #
+    # ----------------- #
+
+    def sqrt(self):
+        """Return the element-wise square root of array."""
+        return self.__class__(self._data.sqrt())
+
+    def sin(self):
+        """Trigonometric sine, element-wise."""
+        return self.__class__(self.tocsr().sin())
+
+    def cos(self):
+        """Trigonometric cosine, element-wise."""
+        raise NotImplementedError("`cos` is not available for sparse arrays!")
+
+    def exp(self):
+        """Exponential, element-wise."""
+        raise NotImplementedError("`exp` is not available for sparse arrays!")
+
+    def log(self):
+        """Natural logarithm, element-wise."""
+        raise NotImplementedError("`exp` is not available for sparse arrays!")
+
+    def log10(self):
+        """Base 10 logarithm, element-wise."""
+        raise NotImplementedError(
+            "`log10` is not available for sparse arrays!")
+
+    def pow(self, exp):
+        """Array elements raised to powers from input exponent, element-wise.
+
+        Equivalent to standard ``**`` operator.
 
         Parameters
         ----------
-        array : CSparse or array_like
-            The array like object holding the elements to compare
-            current array with. Must have the same shape of first
-            array.
+        exp : scalar
+            Exponent of power, single scalar.
 
         Returns
         -------
-        out_and : CSparse or bool
-            The element-wise logical AND between the two arrays.
-
-        Examples
-        --------
-        >>> from secml.array.c_sparse import CSparse
-
-        >>> CSparse([[-1,0],[2,0]]).logical_and(CSparse([[2,-1],[2,-1]])).todense()
-        CDense([[ True, False],
-               [ True, False]], dtype=bool)
-
-        >>> CSparse([-1]).logical_and(CSparse([2])).todense()
-        CDense([[ True]], dtype=bool)
-
-        >>> array = CSparse([1,0,2,-1])
-        >>> (array > 0).logical_and(array < 2).todense()
-        CDense([[ True, False, False, False]], dtype=bool)
+        pow_array : CSparse
+            New array with the power of current data using
+            input exponents.
 
         """
-        if self.shape != array.shape:
-            raise ValueError("array to compare must be {:}".format(self.shape))
+        return self.__pow__(exp)
 
-        and_result = self.__class__(self.shape, dtype=bool)
+    def normpdf(self, mu=0.0, sigma=1.0):
+        """Return normal distribution function."""
+        raise NotImplementedError(
+            "`normpdf` is not available for sparse arrays!")
 
-        for el_idx, el in enumerate(self._data.data):
-            # Get indices of current element
-            this_elem_row = self.nnz_row_indices[0, el_idx]
-            this_elem_col = self.nnz_column_indices[0, el_idx]
-            # Check is second array has an element in the same position
-            y_same_bool = (array.nnz_row_indices == this_elem_row).logical_and(
-                array.nnz_column_indices == this_elem_col)
-            if y_same_bool.any() == True:  # found an element in same position!
-                same_position_val = int(array._data.data[y_same_bool.tondarray()])
-                if np.logical_and(el, same_position_val):
-                    and_result[this_elem_row, this_elem_col] = True
+    # ----- #
+    # MIXED #
+    # ----- #
 
-        return and_result
+    def sign(self):
+        """Return the element-wise sign of array."""
+        return self.__class__(self._data.sign())
 
-    def logical_or(self, array):
-        """Element-wise logical OR of array elements.
+    def diag(self, k=0):
+        """Extract a diagonal or construct a diagonal array."""
+        if self.shape[0] == 1:
+            return self.__class__(scs.diags(
+                self.tondarray(), offsets=[k], format='csr', dtype=self.dtype))
+        else:
+            return CDense(self.tocsr().diagonal(k=k))
 
-        Compare two arrays and returns a new array containing
-        the element-wise logical OR.
+    def dot(self, array):
+        # Only matrix multiplication is supported for sparse arrays
+        if len(array.shape) == 1:  # We work with 2D arrays
+            array = array.atleast_2d()
+        return self.__class__(self._data.dot(self._buffer_to_builtin(array)))
 
-        Parameters
-        ----------
-        array : CSparse or array_like
-            The array like object holding the elements to compare
-            current array with. Must have the same shape of first
-            array.
+    def interp(self, x_data, y_data, return_left=None, return_right=None):
+        """One-dimensional linear interpolation."""
+        raise NotImplementedError(
+            "`interp` is not available for sparse arrays!")
 
-        Returns
-        -------
-        out_and : CSparse or bool
-            The element-wise logical OR between the two arrays.
-         
+    def inv(self):
+        """Compute the (multiplicative) inverse of a square matrix."""
+        return self.__class__(inv(self._data))
 
-        Examples
-        --------
-        >>> from secml.array.c_sparse import CSparse
-
-        >>> CSparse([[-1,0],[2,0]]).logical_or(CSparse([[2,0],[2,-1]])).todense()
-        CDense([[ True, False],
-               [ True,  True]], dtype=bool)
-
-        >>> CSparse([False]).logical_and(CSparse([False])).todense()
-        CDense([[False]], dtype=bool)
-
-        >>> array = CSparse([1,0,2,-1])
-        >>> (array > 0).logical_or(array < 2).todense()
-        CDense([[ True,  True,  True,  True]], dtype=bool)
-
-        """
-        if self.shape != array.shape:
-            raise ValueError("array to compare must be {:}".format(self.shape))
-
-        or_matrix = self.astype(bool)
-        # Be sure there are only non-zeros in 2nd array
-        array.eliminate_zeros()
-        # add True for each non-zero element of second array
-        or_matrix[[array.nnz_row_indices.tolist(),
-                   array.nnz_column_indices.tolist()]] = True
-
-        return or_matrix
-
-    def logical_not(self):
-        """Element-wise logical NOT of array elements."""
-        # Be sure there are only non-zeros in array
-        self.eliminate_zeros()
-        # Storing indices of elements will be zeros
-        old_nnz_row_indices = self.nnz_row_indices.tolist()
-        old_nnz_column_indices = self.nnz_column_indices.tolist()
-
-        # Create an array full of Trues (VERY expensive!)
-        new_not = self.__class__(CDense.ones(*self.shape)).astype(bool)
-        # All old nonzeros should be zeros!
-        new_not[[old_nnz_row_indices, old_nnz_column_indices]] = False
-        # Eliminate newly created zeros from internal csr_matrix structures
-        new_not.eliminate_zeros()
-
-        return new_not
+    def pinv(self, rcond=1e-15):
+        """Compute the (Moore-Penrose) pseudo-inverse of a matrix."""
+        raise NotImplementedError
 
     # -------------------------------- #
     # # # # # # CLASSMETHODS # # # # # #

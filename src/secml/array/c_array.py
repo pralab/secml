@@ -96,23 +96,6 @@ class CArray(_CArrayInterface):
         else:
             self._data = CDense(data, dtype, copy, shape)
 
-    def get_data(self):
-        """Return stored data as a standard array type.
-
-        Returns
-        -------
-        np.ndarray or scipy.sparse.csr_matrix
-            If array is dense, a np.ndarray is returned.
-            If array is sparse, a scipy.sparse.csr_matrix is returned.
-
-        See Also
-        --------
-        `.tondarray()` : returns a np.ndarray, regardless of array format.
-        `.tocsr()` : returns a scipy.sparse.csr_matrix, regardless of array format.
-
-        """
-        return self.tondarray() if self.isdense is True else self.tocsr()
-
     def _instance_array(self, data):
         """Returns input data with correct shape.
 
@@ -160,41 +143,6 @@ class CArray(_CArrayInterface):
     # ------------------------------ #
     # # # # # # PROPERTIES # # # # # #
     # -------------------------------#
-
-    @property
-    def isdense(self):
-        """True if data is stored in DENSE form, False otherwise.
-
-        Returns
-        -------
-        bool
-            True if data is stored in DENSE form, False otherwise.
-
-        """
-        return True if isinstance(self._data, CDense) else False
-
-    @property
-    def issparse(self):
-        """True if data is stored in SPARSE form, False otherwise.
-
-        Returns
-        -------
-        bool
-            True if data is stored in SPARSE form, False otherwise.
-
-        """
-        return True if isinstance(self._data, CSparse) else False
-
-    @property
-    def T(self):
-        """Transposed array data.
-
-        See Also
-        --------
-        .CArray.transpose : bound method to transpose an array.
-
-        """
-        return self.__class__(self._data.T)
 
     @property
     def shape(self):
@@ -294,6 +242,41 @@ class CArray(_CArrayInterface):
         return self._instance_array(self._data.nnz_data)
 
     @property
+    def T(self):
+        """Transposed array data.
+
+        See Also
+        --------
+        .CArray.transpose : bound method to transpose an array.
+
+        """
+        return self.__class__(self._data.T)
+
+    @property
+    def isdense(self):
+        """True if data is stored in DENSE form, False otherwise.
+
+        Returns
+        -------
+        bool
+            True if data is stored in DENSE form, False otherwise.
+
+        """
+        return True if isinstance(self._data, CDense) else False
+
+    @property
+    def issparse(self):
+        """True if data is stored in SPARSE form, False otherwise.
+
+        Returns
+        -------
+        bool
+            True if data is stored in SPARSE form, False otherwise.
+
+        """
+        return True if isinstance(self._data, CSparse) else False
+
+    @property
     def is_vector_like(self):
         """True if array is vector-like.
 
@@ -333,97 +316,22 @@ class CArray(_CArrayInterface):
     # # # # # # CASTING # # # # # #
     # ----------------------------#
 
-    def todense(self, dtype=None, shape=None):
-        """Converts array to dense format.
-
-        Return current array if it has already a dense format.
-
-        Parameters
-        ----------
-        dtype : str or dtype, optional
-            Typecode or data-type to which the array is cast.
-        shape : sequence of ints, optional
-            Shape of the new array, e.g., '(2, 3)'.
+    def get_data(self):
+        """Return stored data as a standard array type.
 
         Returns
         -------
-        CArray
-            Dense array with input data and desired dtype and/or shape.
+        np.ndarray or scipy.sparse.csr_matrix
+            If array is dense, a np.ndarray is returned.
+            If array is sparse, a scipy.sparse.csr_matrix is returned.
 
-        Notes
-        -----
-        If current array has already a dense format, `dtype` and `shape`
-        parameters will not be functional. Use `.astype()` or `.reshape()`
-        function to alter array shape/dtype.
-
-        Examples
+        See Also
         --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[2, 0], [3, 4]], tosparse=True).todense(dtype=float)
-        CArray([[ 2.  0.]
-         [ 3.  4.]])
-
-        >>> print CArray([[2, 0], [3, 4]], tosparse=True).todense(shape=(4,))
-        CArray([2 0 3 4])
+        `.tondarray()` : returns a np.ndarray, regardless of array format.
+        `.tocsr()` : returns a scipy.sparse.csr_matrix, regardless of array format.
 
         """
-        if self.issparse is False and (shape is not None or dtype is not None):
-            raise ValueError("array is already dense. Use astype() or "
-                             "reshape() function to alter array shape/dtype.")
-        elif self.issparse is True:
-            return self.__class__(
-                self._data.todense(), shape=shape, dtype=dtype)
-        else:
-            return self
-
-    def tosparse(self, dtype=None, shape=None):
-        """Converts array to sparse format.
-
-        Return current array if it has already a sparse format.
-
-        Parameters
-        ----------
-        dtype : str or dtype, optional
-            Typecode or data-type to which the array is cast.
-        shape : sequence of ints, optional
-            Shape of the new array, e.g., '(2, 3)'. Only 2-Dimensional
-            sparse arrays are supported.
-
-        Returns
-        -------
-        CArray
-            Sparse array with input data and desired dtype and/or shape.
-
-        Notes
-        -----
-        If current array has already a sparse format, `dtype` and `shape`
-        parameters will not be functional. Use `.astype()` or `.reshape()`
-        function to alter array shape/dtype.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[2, 0], [3, 4]]).tosparse(dtype=float)  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	2.0
-          (1, 0)	3.0
-          (1, 1)	4.0)
-
-        >>> print CArray([[2, 0], [3, 4]]).tosparse(shape=(1, 4))  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	2
-          (0, 2)	3
-          (0, 3)	4)
-
-        """
-        if self.isdense is False and (shape is not None or dtype is not None):
-            raise ValueError("array is already sparse. Use astype() or "
-                             "reshape() unction to alter array shape/dtype.")
-        elif self.isdense is True:
-            return self.__class__(
-                self._data, tosparse=True, dtype=dtype, shape=shape)
-        else:
-            return self
+        return self.tondarray() if self.isdense is True else self.tocsr()
 
     def tondarray(self):
         """Return a dense numpy.ndarray representation of array.
@@ -519,6 +427,98 @@ class CArray(_CArrayInterface):
         """
         return self._data.tolist()
 
+    def todense(self, dtype=None, shape=None):
+        """Converts array to dense format.
+
+        Return current array if it has already a dense format.
+
+        Parameters
+        ----------
+        dtype : str or dtype, optional
+            Typecode or data-type to which the array is cast.
+        shape : sequence of ints, optional
+            Shape of the new array, e.g., '(2, 3)'.
+
+        Returns
+        -------
+        CArray
+            Dense array with input data and desired dtype and/or shape.
+
+        Notes
+        -----
+        If current array has already a dense format, `dtype` and `shape`
+        parameters will not be functional. Use `.astype()` or `.reshape()`
+        function to alter array shape/dtype.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([[2, 0], [3, 4]], tosparse=True).todense(dtype=float)
+        CArray([[ 2.  0.]
+         [ 3.  4.]])
+
+        >>> print CArray([[2, 0], [3, 4]], tosparse=True).todense(shape=(4,))
+        CArray([2 0 3 4])
+
+        """
+        if self.issparse is False and (shape is not None or dtype is not None):
+            raise ValueError("array is already dense. Use astype() or "
+                             "reshape() function to alter array shape/dtype.")
+        elif self.issparse is True:
+            return self.__class__(
+                self._data.todense(), shape=shape, dtype=dtype)
+        else:
+            return self
+
+    def tosparse(self, dtype=None, shape=None):
+        """Converts array to sparse format.
+
+        Return current array if it has already a sparse format.
+
+        Parameters
+        ----------
+        dtype : str or dtype, optional
+            Typecode or data-type to which the array is cast.
+        shape : sequence of ints, optional
+            Shape of the new array, e.g., '(2, 3)'. Only 2-Dimensional
+            sparse arrays are supported.
+
+        Returns
+        -------
+        CArray
+            Sparse array with input data and desired dtype and/or shape.
+
+        Notes
+        -----
+        If current array has already a sparse format, `dtype` and `shape`
+        parameters will not be functional. Use `.astype()` or `.reshape()`
+        function to alter array shape/dtype.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([[2, 0], [3, 4]]).tosparse(dtype=float)  # doctest: +NORMALIZE_WHITESPACE
+        CArray(  (0, 0)	2.0
+          (1, 0)	3.0
+          (1, 1)	4.0)
+
+        >>> print CArray([[2, 0], [3, 4]]).tosparse(shape=(1, 4))  # doctest: +NORMALIZE_WHITESPACE
+        CArray(  (0, 0)	2
+          (0, 2)	3
+          (0, 3)	4)
+
+        """
+        if self.isdense is False and (shape is not None or dtype is not None):
+            raise ValueError("array is already sparse. Use astype() or "
+                             "reshape() unction to alter array shape/dtype.")
+        elif self.isdense is True:
+            return self.__class__(
+                self._data, tosparse=True, dtype=dtype, shape=shape)
+        else:
+            return self
+
     # ---------------------------- #
     # # # # # # INDEXING # # # # # #
     # -----------------------------#
@@ -610,6 +610,47 @@ class CArray(_CArrayInterface):
 
         # Calling setitem of data buffer
         self._data.__setitem__(idx_data, value)
+
+    def has_compatible_shape(self, other):
+        """Return True if input CArray has a compatible shape.
+
+        Two CArrays can be considered compatible if
+        both have the same shape or both are vector-like.
+
+        Parameters
+        ----------
+        other : CArray
+            Array to check for shape compatibility
+
+        Return
+        ------
+        bool
+            True if input array has compatible shape with current array.
+
+        See Also
+        --------
+        .is_vector_like : check if an array is vector-like.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([[1,2]]).has_compatible_shape(CArray([[1],[2]]))
+        False
+
+        >>> print CArray([1,2]).has_compatible_shape(CArray([1,2,3]))
+        False
+
+        >>> print CArray([[1,2]], tosparse=True).has_compatible_shape(CArray([1,2]))
+        True
+
+        """
+        if self.shape == other.shape:  # Standard case: same shape
+            return True
+        # 2 flats, 1-flat and 1 with (1, x) shape, 2 with (1, x) shape
+        elif self.is_vector_like is True:
+            return other.is_vector_like is True and self.size == other.size
+        return False
 
     # ------------------------------------ #
     # # # # # # SYSTEM OVERLOADS # # # # # #
@@ -1448,46 +1489,9 @@ class CArray(_CArrayInterface):
     # # # # # # UTILITIES # # # # # #
     # ------------------------------#
 
-    def has_compatible_shape(self, other):
-        """Return True if input CArray has a compatible shape.
-
-        Two CArrays can be considered compatible if
-        both have the same shape or both are vector-like.
-
-        Parameters
-        ----------
-        other : CArray
-            Array to check for shape compatibility
-
-        Return
-        ------
-        bool
-            True if input array has compatible shape with current array.
-
-        See Also
-        --------
-        .is_vector_like : check if an array is vector-like.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[1,2]]).has_compatible_shape(CArray([[1],[2]]))
-        False
-
-        >>> print CArray([1,2]).has_compatible_shape(CArray([1,2,3]))
-        False
-
-        >>> print CArray([[1,2]], tosparse=True).has_compatible_shape(CArray([1,2]))
-        True
-
-        """
-        if self.shape == other.shape:  # Standard case: same shape
-            return True
-        # 2 flats, 1-flat and 1 with (1, x) shape, 2 with (1, x) shape
-        elif self.is_vector_like is True:
-            return other.is_vector_like is True and self.size == other.size
-        return False
+    # ---------------- #
+    # SHAPE ALTERATION #
+    # ---------------- #
 
     def transpose(self):
         """Returns current array with axes transposed.
@@ -1515,186 +1519,90 @@ class CArray(_CArrayInterface):
         # TODO: ADD SUPPORT FOR COPY PARAMETER
         return self.__class__(self._data.transpose())
 
-    def unique(self, return_index=False,
-               return_inverse=False, return_counts=False):
-        """Find the unique elements of an array.
+    def ravel(self):
+        """Return a flattened array.
 
-         There are three optional outputs in addition to the unique elements:
-         - the indices of the input array that give the unique values
-         - the indices of the unique array that reconstruct the input array
-         - the number of times each unique value comes up in the input array
+        For dense format a 1-D array, containing the
+        elements of the input, is returned. For sparse
+        format a (1 x array.size) array will be returned.
 
-        Parameters
-        ----------
-        return_index : bool, optional
-            If True, also return the indices of array that result
-            in the unique array (default False).
-        return_inverse : bool, optional, dense only
-            If True, also return the indices of the unique array
-            that can be used to reconstruct the original array
-            (default False).
-        return_counts : bool, optional
-            If True, also return the number of times each unique item appears.
-
-        Returns
-        -------
-        unique : CArray
-            Dense array with the sorted unique values of the array.
-        unique_index : CArray, optional
-            The indices of the first occurrences of the unique values
-            in the (flattened) original array. Only provided if
-            return_index is True.
-        unique_counts : CArray, optional
-            The number of times each unique item appears in the original array.
-            Only provided if return_counts is True.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[1,0,2],[2,0,3]]).unique()
-        CArray([0 1 2 3])
-
-        >>> print CArray([1,2,2,3,3], tosparse=True).unique()
-        CArray([1 2 3])
-
-        >>> u, u_idx, u_inv = CArray([[2,2,3,3]]).unique(return_index=True, return_inverse=True)
-        >>> print u, u_idx  # unique and unique_indices
-        CArray([2 3]) CArray([0 2])
-        >>> print u[u_inv]  # original (flattened) array reconstructed from unique_inverse
-        CArray([2 2 3 3])
-
-        >>> u, u_counts = CArray([[2,2,2,3,3]]).unique(return_counts=True)
-        >>> print u_counts  # The number of times each unique item appears
-        CArray([3 2])
-
-        """
-        out = self._data.unique(
-            return_index, return_inverse, return_counts)
-        if isinstance(out, tuple):  # unique returned multiple elements
-            return tuple([self.__class__(elem) for elem in out])
-        else:
-            return self.__class__(out)
-
-    def append(self, array, axis=None):
-        """Append values to the end of an array.
-
-        Parameters
-        ----------
-        array : CArray or array_like
-            Second array.
-        axis : int or None, optional
-            The axis along which values are appended.
-            If axis is None, both arrays are flattened before use.
+        A copy is made only if needed.
 
         Returns
         -------
         CArray
-            A copy of array with values appended to axis. Note that append
-            does not occur in-place: a new array is allocated and filled.
-            If axis is None, out is a flattened array. Always return an
-            array with the same format of the first array.
-
-        Notes
-        -----
-        Differently from numpy, we manage flat vectors as 2-Dimensional of
-        shape (1, array.size). Consequently, result of appending a flat
-        array to a flat array is 1-Dimensional only if axis=1. Appending
-        a flat array to a 2-Dimensional array, or vice versa, always results
-        in a 2-Dimensional array.
+            Flattened view (if possible) of the array with
+            shape (array.size,) for dense format or
+            (1, array.size) for sparse format.
 
         Examples
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1,2],[3,4]]).append([[11],[22]])
-        CArray([ 1  2  3  4 11 22])
-        >>> print CArray([[1,2],[3,4]]).append([[11,22]], axis=0)
-        CArray([[ 1  2]
-         [ 3  4]
-         [11 22]])
+        >>> print CArray([[1,2],[3,4]]).ravel()
+        CArray([1 2 3 4])
 
-        >>> print CArray([[1,2],[3,4]]).append(CArray([[11],[22]], tosparse=True))
-        CArray([ 1  2  3  4 11 22])
-        >>> array = CArray([[1,2],[3,4]], tosparse=True).append([[11],[22]])
-        >>> print array  # doctest: +NORMALIZE_WHITESPACE
+        >>> print CArray([[1],[2],[3]], tosparse=True).ravel()  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	2
-          (0, 2)	3
-          (0, 3)	4
-          (0, 4)	11
-          (0, 5)	22)
-
-        >>> print CArray([1,2]).append([11,22])
-        CArray([ 1  2 11 22])
-
-        >>> print CArray([1,2]).append([11,22], axis=0)
-        CArray([[ 1  2]
-         [11 22]])
-        >>> print CArray([1,2]).append([11,22], axis=1)
-        CArray([ 1  2 11 22])
+          (0, 2)	3)
 
         """
-        if self.issparse:  # Return sparse if first array is sparse
-            array = CArray(array, tosparse=True)
-        else:
-            array = CArray(array).todense()
+        return self.__class__(self._data.ravel())
 
-        return self.__class__(self._data.append(array._data, axis=axis))
+    def flatten(self):
+        """Return a flattened copy of array.
 
-    def dot(self, array):
-        """Dot product of two arrays.
-
-        For 2-D arrays it is equivalent to matrix multiplication.
-        If both arrays are dense flat (rows), it is equivalent to the
-        inner product of vectors (without complex conjugation).
-
-        Format of output array is the same of the first product argument.
-
-        Parameters
-        ----------
-        array : CArray
-            Second argument of dot product.
+        For dense format a 1-dim array, containing the
+        elements of the input, is returned. For sparse
+        format a (1 x array.size) array will be returned.
 
         Returns
         -------
-        scalar or CArray
-            Result of dot product.
-            A CArray with the same format of first argument or
-            scalar if out.size == 1.
+        CArray
+            Output of the same dtype as a, of shape (array.size,)
+            for dense format or (1,array.size) for sparse format.
 
         Examples
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1,1],[2,2]]).dot(CArray([[1,1],[0,0]], tosparse=True))
-        CArray([[1 1]
-         [2 2]])
+        >>> print CArray([[1,2],[3,4]]).flatten()
+        CArray([1 2 3 4])
 
-        >>> print CArray([10,20]).dot(CArray([[1],[0]], tosparse=True))
-        10
-
-        # OUTER PRODUCT
-        >>> print CArray([[10],[20]]).dot(CArray([1,0], tosparse=True))
-        CArray([[10  0]
-         [20  0]])
-
-        # INNER PRODUCT BETWEEN VECTORS
-        >>> print CArray([10,20]).dot(CArray([1,0]))
-        10
-
-        # Inner product between vector-like arrays is a matrix multiplication
-        >>> print CArray([10,20]).dot(CArray([1,0], tosparse=True).T)
-        10
-        >>> print CArray([10,20], tosparse=True).dot(CArray([1,0]).T)
-        10
+        >>> print CArray([[1],[2],[3]], tosparse=True).flatten()  # doctest: +NORMALIZE_WHITESPACE
+        CArray(  (0, 0)	1
+          (0, 1)	2
+          (0, 2)	3)
 
         """
-        # We have to handle only one problematic case: dense vs sparse dot
-        if self.isdense is True and array.issparse is True:
-            return self._instance_array(self._data.dot(array.todense()._data))
-        else:
-            return self._instance_array(self._data.dot(array._data))
+        return self.__class__(
+            CArray(self.ravel(), tosparse=self.issparse).deepcopy())
+
+    def atleast_2d(self):
+        """View original array with at least two dimensions.
+
+        A copy is made only if needed.
+
+        Returns
+        -------
+        out : CArray
+            Array with array.ndim >= 2.
+
+        Notes
+        -----
+        Sparse arrays are always 2 dimensional so this method returns
+        a view (if possible) of the original array without any changes.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([1,2,3]).atleast_2d()
+        CArray([[1 2 3]])
+
+        """
+        return self.__class__(self._data.atleast_2d())
 
     def reshape(self, newshape):
         """Gives a new shape to an array without changing its data.
@@ -1797,6 +1705,10 @@ class CArray(_CArrayInterface):
         """
         return self.__class__(self._data.resize(newshape, constant=constant))
 
+    # --------------- #
+    # DATA ALTERATION #
+    # --------------- #
+
     def astype(self, dtype):
         """Copy of the array, casted to a specified type.
 
@@ -1825,232 +1737,1204 @@ class CArray(_CArrayInterface):
         """
         return self.__class__(self._data.astype(dtype))
 
-    def diag(self, k=0):
-        """Extract a diagonal from array or construct a diagonal array.
+    def nan_to_num(self):
+        """Replace nan with zero and inf with finite numbers.
+
+        Replace array elements if Not a Number (NaN) with zero,
+        if (positive or negative) infinity with the largest
+        (smallest or most negative) floating point value that
+        fits in the array dtype. All finite numbers are upcast
+        to the output dtype (default float64).
+
+        Notes
+        -----
+        We use the IEEE Standard for Binary Floating-Point for
+        Arithmetic (IEEE 754). This means that Not a Number
+        is not equivalent to infinity.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+        >>> import numpy as np
+        >>> np.set_printoptions(precision=1)
+
+        >>> array = CArray([-1,0,1,np.nan,np.inf,-np.inf])
+        >>> array.nan_to_num()
+        >>> print array
+        CArray([ -1.000000e+000   0.000000e+000   1.000000e+000   0.000000e+000
+           1.797693e+308  -1.797693e+308])
+
+        >>> # Restoring default print precision
+        >>> np.set_printoptions(precision=8)
+
+        """
+        self._data.nan_to_num()
+
+    def round(self, decimals=0):
+        """Evenly round to the given number of decimals.
 
         Parameters
         ----------
-        k : int, optional
-            Diagonal index. Default is 0.
-            Use k > 0 for diagonals above the main diagonal,
-            k < 0 for diagonals below the main diagonal.
+        decimals : int, optional
+            Number of decimal places to round to (default: 0).
+            If decimals is negative, it specifies the number of
+            positions to round to the left of the decimal point.
+
+        Returns
+        -------
+        out_rounded : CArray
+            An new array containing the rounded values. The real and
+            imaginary parts of complex numbers are rounded separately.
+            The result of rounding a float is a float.
+
+        Notes
+        -----
+        For values exactly halfway between rounded decimal values,
+        we rounds to the nearest even value. Thus 1.5 and 2.5
+        round to 2.0, -0.5 and 0.5 round to 0.0, etc. Results may
+        also be surprising due to the inexact representation of
+        decimal fractions in the IEEE floating point standard [1]_
+        and errors introduced when scaling by powers of ten.
+
+        References
+        ----------
+        .. [1] "Lecture Notes on the Status of  IEEE 754", William Kahan,
+               http://www.cs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF
+        .. [2] "How Futile are Mindless Assessments of
+               Roundoff in Floating-Point Computation?", William Kahan,
+               http://www.cs.berkeley.edu/~wkahan/Mindless.pdf
+
+        See Also
+        --------
+        .CArray.ceil : Return the ceiling of the input, element-wise.
+        .CArray.floor : Return the floor of the input, element-wise.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([1.28,5.62]).round()
+        CArray([ 1.  6.])
+
+        >>> print CArray([1.28,5.62],tosparse=True).round(decimals=1)  # doctest: +NORMALIZE_WHITESPACE
+        CArray(  (0, 0)	1.3
+          (0, 1)	5.6)
+
+        >>> print CArray([.5, 1.5, 2.5, 3.5, 4.5]).round() # rounds to nearest even value
+        CArray([ 0.  2.  2.  4.  4.])
+
+        >>> print CArray([1,5,6,11]).round(decimals=-1)
+        CArray([ 0  0 10 10])
+
+        """
+        return self.__class__(self._data.round(decimals))
+
+    def ceil(self):
+        """Return the ceiling of the input, element-wise.
+
+        The ceil of the scalar x is the smallest integer i, such that i >= x.
+
+
+        Returns
+        -------
+        out_ceil : CArray
+            The ceiling of each element in x, with float dtype.
+
+        See Also
+        --------
+        .CArray.round : Evenly round to the given number of decimals.
+        .CArray.floor : Return the floor of the input, element-wise.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([-1.7, -1.5, -0.2, 0.2, 1.5, 1.7, 2.0]).ceil()
+        CArray([-1. -1. -0.  1.  2.  2.  2.])
+
+        >>> # Array with dtype == int is upcasted to float before ceiling
+        >>> print CArray([[-2, -1], [1, 1]], tosparse=True).ceil()  # doctest: +NORMALIZE_WHITESPACE
+        CArray(  (0, 0)	-2.0
+          (0, 1)	-1.0
+          (1, 0)	1.0
+          (1, 1)	1.0)
+
+        """
+        return self.__class__(self._data.ceil())
+
+    def floor(self):
+        """Return the floor of the input, element-wise.
+
+        The floor of the scalar x is the largest integer i, such that i <= x.
+
+        Returns
+        -------
+        out_floor : CArray
+            The floor of each element in x, with float dtype.
+
+        Notes
+        -----
+        Some spreadsheet programs calculate the "floor-towards-zero",
+        in other words floor(-2.5) == -2. We instead uses the
+        definition of floor where floor(-2.5) == -3.
+
+        See Also
+        --------
+        .CArray.round : Evenly round to the given number of decimals.
+        .CArray.ceil : Return the ceiling of the input, element-wise.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([-1.7, -1.5, -0.2, 0.2, 1.5, 1.7, 2.0]).floor()
+        CArray([-2. -2. -1.  0.  1.  1.  2.])
+
+        >>> # Array with dtype == int is upcasted to float before flooring
+        >>> print CArray([[-2, -1], [1, 1]], tosparse=True).floor()  # doctest: +NORMALIZE_WHITESPACE
+        CArray(  (0, 0)	-2.0
+          (0, 1)	-1.0
+          (1, 0)	1.0
+          (1, 1)	1.0)
+
+        """
+        return self.__class__(self._data.floor())
+
+    def clip(self, c_min, c_max):
+        """Clip (limit) the values in an array.
+
+        DENSE FORMAT ONLY
+
+        Given an interval, values outside the interval are clipped
+        to the interval edges. For example, if an interval of [0, 1]
+        is specified, values smaller than 0 become 0, and values
+        larger than 1 become 1.
+
+        Parameters
+        ----------
+        c_min, c_max : int
+            Clipping intervals.
 
         Returns
         -------
         CArray
-            The extracted diagonal or constructed diagonal dense array.
-            If array is 2-Dimensional, returns its k-th diagonal.
-             Depending on numpy version resulting array can be read-only
-             or a view of the original array's diagonal. To make output
-             array writable, use deepcopy().
-            If array is vector_like, return a 2-D array with
-             the array on the k-th diagonal.
+            Returns a new array containing the clipped array elements.
+            Dtype of the output array depends on the dtype of original array
+            and on the dtype of the clipping limits.
 
         Examples
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1, 2, 3], [10, 20, 30]]).diag(k=1)
-        CArray([ 2 30])
+        >>> print CArray([[1,2],[3,4]]).clip(2, 4)
+        CArray([[2 2]
+         [3 4]])
 
-        >>> print CArray([[2, 1]], tosparse=True).diag()  # doctest: +NORMALIZE_WHITESPACE
+        >>> from secml.core.constants import inf
+
+        >>> # inf is a float, array will be casted accordingly
+        >>> print CArray([[1,2],[3,4]]).clip(-inf, 2)
+        CArray([[ 1.  2.]
+         [ 2.  2.]])
+
+        """
+        if c_min > c_max:
+            raise ValueError("c_min ({:}) must be lower than "
+                             "c_max ({:})".format(c_min, c_max))
+        return self.__class__(self._data.clip(c_min, c_max))
+
+    def sort(self, axis=-1, kind='quicksort', inplace=False):
+        """Sort an array, in-place.
+
+        Parameters
+        ----------
+        axis : int, optional
+            Axis along which to sort. The default is -1 (the last axis).
+        kind : {'quicksort', 'mergesort', 'heapsort'}, optional
+            Sorting algorithm to use. Default 'quicksort'.
+            For sparse arrays, only 'quicksort' is available.
+        inplace : bool, optional
+            If True, array will be sorted in-place. Default False.
+
+        Returns
+        -------
+        CArray
+            Sorted array. This will be a new array only if inplace is False.
+
+        Notes
+        -----
+        Differently from numpy, we manage flat vectors as 2-Dimensional of
+        shape (1, array.size). This means that when axis=0, flat array is
+        returned as is (see examples).
+
+        For large sparse arrays is actually faster to convert to dense first.
+
+        See Also
+        --------
+        numpy.sort : Description of different sorting algorithms.
+        .CArray.argsort : Indirect sort.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> array = CArray([5,-1,0,-3])
+        >>> print array.sort()
+        CArray([-3 -1  0  5])
+
+        >>> array = CArray([5,-1,0,-3])
+        >>> print array.sort(axis=0)
+        CArray([ 5 -1  0 -3])
+
+        >>> array = CArray([5,-1,0,-3])
+        >>> print array.sort(axis=1)
+        CArray([-3 -1  0  5])
+
+        >>> array = CArray([5,-1,0,-3])
+        >>> out = array.sort(inplace=True)
+        >>> print out
+        CArray([-3 -1  0  5])
+        >>> array[0] = 100
+        >>> print out
+        CArray([100  -1   0   5])
+
+        """
+        data_sorted = self._data.sort(axis=axis, kind=kind, inplace=inplace)
+        # We return ourselves for inplace sort otherwise a new object
+        return self if inplace is True else self.__class__(data_sorted)
+
+    def argsort(self, axis=None, kind='quicksort'):
+        """Returns the indices that would sort an array.
+
+        Perform an indirect sort along the given axis using
+        the algorithm specified by the kind keyword. It returns
+        an array of indices of the same shape as a that index
+        data along the given axis in sorted order.
+
+        Parameters
+        ----------
+        axis : int or None, optional
+            Axis along which to sort.
+            If None (default), the flattened array is used.
+        kind : {'quicksort', 'mergesort', 'heapsort'}, optional
+            Sorting algorithm to use. Default 'quicksort'.
+            For sparse arrays, only 'quicksort' is available.
+
+        Returns
+        -------
+        CArray
+            Array of indices that sort the array along the specified axis.
+            In other words, array[index_array] yields a sorted array.
+
+        See Also
+        --------
+        numpy.sort : Description of different sorting algorithms.
+        .CArray.sort : In-Place sorting of array.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([0,-3,5]).argsort()
+        CArray([1 0 2])
+
+        >>> print CArray([[0,-3],[5,1]]).argsort(axis=1)  # Sorting of each row
+        CArray([[1 0]
+         [1 0]])
+
+        >>> print CArray([[0,-3],[5,1]]).argsort()  # Sorting the flattened array
+        CArray([1 0 3 2])
+
+        """
+        return self.__class__(self._data.argsort(axis=axis, kind=kind))
+
+    def shuffle(self):
+        """Modify array in-place by shuffling its contents.
+
+        This function only shuffles the array along the first
+        index of a not vector-like, multi-dimensional array.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> array = CArray([2,3,0,1])
+        >>> array.shuffle()
+        >>> print array  # doctest: +SKIP
+        CArray([0 2 1 3])  # random result
+
+        >>> array = CArray([[2,3],[0,1]])
+        >>> array.shuffle()
+        >>> print array  # doctest: +SKIP
+        CArray([[0 1]
+         [2 3]])
+
+        """
+        self._data.shuffle()
+
+    def apply_along_axis(self, func, axis, *args, **kwargs):
+        """Apply function to 1-D slices along the given axis.
+
+        `func` should accept 1-D arrays and return a single scalar or
+        a 1-D array.
+
+        Only 1-D and 2-D arrays are currently supported.
+
+        Parameters
+        ----------
+        func : function
+            Function object to apply along the given axis.
+            Must return a single scalar or a 1-D array.
+        axis : int
+            Axis along which to apply the function.
+        *args, **kwargs : optional
+            Any other input value for `func`.
+
+        Returns
+        -------
+        CArray
+            1-Dimensional array of size `data.shape[0]` with the
+            output of `func` for each row in data. Datatype of
+            output array is always float.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> a = CArray([[1,2],[10,20],[100,200]])
+
+        >>> def return_sum(x):
+        ...     return x.sum()
+
+        >>> print a.apply_along_axis(return_sum, axis=0)  # Column-wise
+        CArray([ 111.  222.])
+
+        >>> print a.apply_along_axis(return_sum, axis=1)  # Row-wise
+        CArray([   3.   30.  300.])
+
+        """
+        data_2d = self.atleast_2d()
+        # Preallocate output array
+        if axis == 0:
+            out = CArray.zeros(self.shape[1])
+            for i in xrange(self.shape[1]):
+                out[i] = func(data_2d[:, i], *args, **kwargs)
+        elif axis == 1:
+            out = CArray.zeros(self.shape[0])
+            for i in xrange(self.shape[0]):
+                out[i] = func(data_2d[i, :], *args, **kwargs)
+        else:
+            raise ValueError("`apply_along_axis` currently available "
+                             "for 1-D and 2-D arrays only.")
+
+        return out
+
+    # ------------ #
+    # APPEND/MERGE #
+    # ------------ #
+
+    def append(self, array, axis=None):
+        """Append values to the end of an array.
+
+        Parameters
+        ----------
+        array : CArray or array_like
+            Second array.
+        axis : int or None, optional
+            The axis along which values are appended.
+            If axis is None, both arrays are flattened before use.
+
+        Returns
+        -------
+        CArray
+            A copy of array with values appended to axis. Note that append
+            does not occur in-place: a new array is allocated and filled.
+            If axis is None, out is a flattened array. Always return an
+            array with the same format of the first array.
+
+        Notes
+        -----
+        Differently from numpy, we manage flat vectors as 2-Dimensional of
+        shape (1, array.size). Consequently, result of appending a flat
+        array to a flat array is 1-Dimensional only if axis=1. Appending
+        a flat array to a 2-Dimensional array, or vice versa, always results
+        in a 2-Dimensional array.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([[1,2],[3,4]]).append([[11],[22]])
+        CArray([ 1  2  3  4 11 22])
+        >>> print CArray([[1,2],[3,4]]).append([[11,22]], axis=0)
+        CArray([[ 1  2]
+         [ 3  4]
+         [11 22]])
+
+        >>> print CArray([[1,2],[3,4]]).append(CArray([[11],[22]], tosparse=True))
+        CArray([ 1  2  3  4 11 22])
+        >>> array = CArray([[1,2],[3,4]], tosparse=True).append([[11],[22]])
+        >>> print array  # doctest: +NORMALIZE_WHITESPACE
+        CArray(  (0, 0)	1
+          (0, 1)	2
+          (0, 2)	3
+          (0, 3)	4
+          (0, 4)	11
+          (0, 5)	22)
+
+        >>> print CArray([1,2]).append([11,22])
+        CArray([ 1  2 11 22])
+
+        >>> print CArray([1,2]).append([11,22], axis=0)
+        CArray([[ 1  2]
+         [11 22]])
+        >>> print CArray([1,2]).append([11,22], axis=1)
+        CArray([ 1  2 11 22])
+
+        """
+        if self.issparse:  # Return sparse if first array is sparse
+            array = CArray(array, tosparse=True)
+        else:
+            array = CArray(array).todense()
+
+        return self.__class__(self._data.append(array._data, axis=axis))
+
+    def repmat(self, m, n):
+        """Repeat an array M x N times.
+
+        Parameters
+        ----------
+        m, n : int
+            The number of times the array is repeated along
+            the first and second axes.
+
+        Returns
+        -------
+        CArray
+            The result of repeating array m X n times.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([[1,2]],tosparse=True).repmat(2,2)  # doctest: +NORMALIZE_WHITESPACE
+        CArray(  (0, 0)	1
+          (0, 1)	2
+          (0, 2)	1
+          (0, 3)	2
+          (1, 0)	1
+          (1, 1)	2
+          (1, 2)	1
+          (1, 3)	2)
+
+        >>> print CArray([1,2]).repmat(2,2)
+        CArray([[1 2 1 2]
+         [1 2 1 2]])
+        >>> print CArray([1,2]).repmat(1,2)
+        CArray([[1 2 1 2]])
+        >>> print CArray([1,2]).repmat(2,1)
+        CArray([[1 2]
+         [1 2]])
+
+        """
+        return self.__class__(self._data.repmat(m, n))
+
+    def repeat(self, repeats, axis=None):
+        """Repeat elements of an array.
+
+        DENSE FORMAT ONLY
+
+        Parameters
+        ----------
+        repeats : int, list or CArray
+            The number of repetitions for each element. If this is
+            an array_like object, will be broadcasted to fit the
+            shape of the given axis.
+        axis : int, optional
+            The axis along which to repeat values. By default, array
+            is flattened before use.
+
+        Returns
+        -------
+        CArray
+            Output array which has the same shape as original array,
+            except along the given axis. If axis is None, a flat array
+            is returned.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> x = CArray([[1,2],[3,4]])
+
+        >>> print x.repeat(2)
+        CArray([1 1 2 2 3 3 4 4])
+
+        >>> print x.repeat(2, axis=1)  # Repeat the columns on the right
+        CArray([[1 1 2 2]
+         [3 3 4 4]])
+        >>> print x.repeat(2, axis=0)  # Repeat the rows on the right
+        CArray([[1 2]
+         [1 2]
+         [3 4]
+         [3 4]])
+
+        >>> print x.repeat([1, 2], axis=0)
+        CArray([[1 2]
+         [3 4]
+         [3 4]])
+
+        >>> x.repeat([1, 2])  # repeats size must be consistent with axis
+        Traceback (most recent call last):
+            ...
+        ValueError: operands could not be broadcast together with shape (4,) (2,)
+
+        >>> x = CArray([1,2,3])
+        >>> print x.repeat(2, axis=0)  # Repeat the (only) row on the right
+        CArray([1 1 2 2 3 3])
+        >>> print x.repeat(2, axis=1)  # No columns to repeat
+        Traceback (most recent call last):
+          ...
+        AxisError: axis 1 is out of bounds for array of dimension 1
+
+        """
+        if isinstance(repeats, (self.__class__, list)):
+            repeats = CArray(repeats).todense()._data
+        elif not is_int(repeats):
+            raise TypeError("`repeats` must be int, list or CArray")
+        return self.__class__(self._data.repeat(repeats, axis))
+
+    # ---------- #
+    # COMPARISON #
+    # ---------- #
+
+    def logical_and(self, array):
+        """Element-wise logical AND of array elements.
+
+        Compare two arrays and returns a new array containing
+        the element-wise logical AND.
+
+        Parameters
+        ----------
+        array : CArray or array_like
+            The array like object holding the elements to compare
+            current array with. Must have the same shape of first
+            array.
+
+        Returns
+        -------
+        CArray
+            The element-wise logical AND between the two arrays.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([[-1,0],[2,0]]).logical_and(CArray([[2,-1],[2,-1]]))
+        CArray([[ True False]
+         [ True False]])
+
+        >>> print CArray([-1]).logical_and(CArray([2]))
+        CArray([ True])
+
+        >>> array = CArray([1,0,2,-1])
+        >>> print (array > 0).logical_and(array < 2)
+        CArray([ True False False False])
+
+        """
+        if self.issparse:
+            array = self.__class__(array, tosparse=True)
+        else:
+            array = self.__class__(array).todense()
+
+        return self.__class__(self._data.logical_and(array._data))
+
+    def logical_or(self, array):
+        """Element-wise logical OR of array elements.
+
+        Compare two arrays and returns a new array containing
+        the element-wise logical OR.
+
+        Parameters
+        ----------
+        array : CArray or array_like
+            The array like object holding the elements to compare
+            current array with. Must have the same shape of first
+            array.
+
+        Returns
+        -------
+        out_and : CArray
+            The element-wise logical OR between the two arrays.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([[-1,0],[2,0]]).logical_or(CArray([[2,0],[2,-1]]))
+        CArray([[ True False]
+         [ True  True]])
+
+        >>> print CArray([True]).logical_or(CArray([False]))
+        CArray([ True])
+
+        >>> array = CArray([1,0,2,-1])
+        >>> print (array > 0).logical_or(array < 2)
+        CArray([ True  True  True  True])
+
+        """
+        if self.issparse:
+            array = self.__class__(array, tosparse=True)
+        else:
+            array = self.__class__(array).todense()
+
+        return self.__class__(self._data.logical_or(array._data))
+
+    def logical_not(self):
+        """Element-wise logical NOT of array elements.
+
+        Returns
+        -------
+        CArray
+            The element-wise logical NOT.
+
+        Notes
+        -----
+        For sparse arrays this operation is usually really expensive as
+        the number of zero elements is higher than the number of non-zeros.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([[-1,0],[2,0]]).logical_not()
+        CArray([[False  True]
+         [False  True]])
+
+        >>> print CArray([True]).logical_not()
+        CArray([False])
+
+        >>> array = CArray([1,0,2,-1])
+        >>> print (array > 0).logical_not()
+        CArray([False  True False  True])
+
+        """
+        return self.__class__(self._data.logical_not())
+
+    def maximum(self, array):
+        """Element-wise maximum of array elements.
+
+        Compare two arrays and returns a new array containing
+        the element-wise maximum. If one of the elements being
+        compared is a NaN, then that element is returned.
+        If both elements are NaNs then the first is returned.
+        The latter distinction is important for complex NaNs,
+        which are defined as at least one of the real or
+        imaginary parts being a NaN. The net effect is that
+        NaNs are propagated.
+
+        Parameters
+        ----------
+        array : CArray or array_like
+            The array like object holding the elements to compare
+            current array with. Must have the same shape of first
+            array.
+
+        Returns
+        -------
+        CArray
+            The element-wise maximum between the two arrays.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([[-1,0],[2,0]]).maximum(CArray([[2,-1],[2,-1]]))
+        CArray([[2 0]
+         [2 0]])
+
+        >>> print CArray([[-1,0],[2,0]], tosparse=True).maximum(CArray([[2,-1],[2,-1]]))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	2
-          (1, 1)	1)
+          (1, 0)	2)
 
-        >>> print CArray([1, 2, 3]).diag(k=1)
-        CArray([[0 1 0 0]
-         [0 0 2 0]
-         [0 0 0 3]
-         [0 0 0 0]])
-         
+        >>> print CArray([-1]).maximum(CArray([2]))
+        CArray([2])
+
         """
-        if self.size == 0:
-            raise ValueError("cannot use diag() on empty arrays.")
+        other_carray = self.__class__(array)
+        if not self.has_compatible_shape(other_carray):
+            raise ValueError("arrays to compare must have the same shape. "
+                             "{:} different from {:}."
+                             "".format(self.shape, other_carray.shape))
 
-        # Avoid extracting diagonal of a 2-D dense array with shape[0] == 1
-        data = self._data.ravel() if self.is_vector_like else self._data
+        if self.issparse:
+            other_carray = other_carray.tosparse()
+        else:
+            other_carray = other_carray.todense()
 
-        return self.__class__(data.diag(k=k))
+        return self.__class__(self._data.maximum(other_carray._data))
 
-    def argmax(self, axis=None):
-        """Indices of the maximum values along an axis.
+    def minimum(self, array):
+        """Element-wise minimum of array elements.
+
+        Compare two arrays and returns a new array containing
+        the element-wise minimum. If one of the elements being
+        compared is a NaN, then that element is returned.
+        If both elements are NaNs then the first is returned.
+        The latter distinction is important for complex NaNs,
+        which are defined as at least one of the real or
+        imaginary parts being a NaN. The net effect is that
+        NaNs are propagated.
 
         Parameters
         ----------
-        axis : int, None, optional
-            If None (default), array is flattened before computing
-            index, otherwise the specified axis is used.
+        array : CArray or array_like
+            The array like object holding the elements to compare
+            current array with. Must have the same shape of first
+            array.
 
-        Returns
+                Returns
         -------
-        int or CArray
-            Scalar with index of the maximum value for flattened array or
-            CArray with indices along the given axis.
-
-        Notes
-        -----
-        In case of multiple occurrences of the maximum values, the
-        indices corresponding to the first occurrence are returned.
+        CArray
+            The element-wise minimum between the two arrays.
 
         Examples
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([-1, 0, 3]).argmax()
-        2
+        >>> print CArray([[-1,0],[2,0]]).minimum(CArray([[2,-1],[2,-1]]))
+        CArray([[-1 -1]
+         [ 2 -1]])
 
-        >>> print CArray([[-1, 0],[4, 3]]).argmax(axis=0)  # We return the index of maximum for each column
-        CArray([[1 1]])
-        
-        >>> print CArray([[-1, 0],[4, 3]]).argmax(axis=1)  # We return the index of maximum for each row
-        CArray([[1]
-         [0]])
+        >>> print CArray([[-1,0],[2,0]], tosparse=True).minimum(CArray([[2,-1],[2,-1]]))  # doctest: +NORMALIZE_WHITESPACE
+        CArray(  (0, 0)	-1
+          (0, 1)	-1
+          (1, 0)	2
+          (1, 1)	-1)
 
-        >>> print CArray([-3,0,1,2]).argmax(axis=0)
-        CArray([0 0 0 0])
-        >>> print CArray([-3,0,1,2]).argmax(axis=1)
-        3
+        >>> print CArray([-1]).minimum(CArray([2]))
+        CArray([-1])
 
         """
-        return self._instance_array(self._data.argmax(axis=axis))
+        other_carray = self.__class__(array)
+        if not self.has_compatible_shape(other_carray):
+            raise ValueError("arrays to compare must have the same shape. "
+                             "{:} different from {:}."
+                             "".format(self.shape, other_carray.shape))
 
-    def argmin(self, axis=None):
-        """Indices of the minimum values along an axis.
+        if self.issparse:
+            other_carray = other_carray.tosparse()
+        else:
+            other_carray = other_carray.todense()
+
+        return self.__class__(self._data.minimum(other_carray._data))
+
+    # ------ #
+    # SEARCH #
+    # ------ #
+
+    def find(self, condition):
+        """Returns vector-like array elements indices depending on condition.
 
         Parameters
         ----------
-        axis : int, None, optional
-            If None (default), array is flattened before computing
-            index, otherwise the specified axis is used.
+        condition : CArray
+            Array with booleans representing desired condition.
 
         Returns
         -------
-        int or CArray
-            Scalar with index of the minimum value for flattened array or
-            CArray with indices along the given axis.
+        list
+            List with indices corresponding to array elements
+            where condition is True.
 
-        Notes
-        -----
-        In case of multiple occurrences of the minimum values, the
-        indices corresponding to the first occurrence are returned.
+        See Also
+        --------
+        .find_2d : find method for arrays of generic shape.
 
         Examples
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([-1, 0, 3]).argmin()
-        0
+        >>> array = CArray([1,0,-6,2,0])
+        >>> array_find = array.find(array > 0)
+        >>> print array_find
+        [0, 3]
+        >>> print array[array_find]
+        CArray([1 2])
 
-        >>> print CArray([[-1, 0],[4, 3]]).argmin(axis=0)  # We return the index of minimum for each column
-        CArray([[0 0]])
+        >>> array = CArray([[1,0,-6,2,0]])
+        >>> array_find = array.find(array == 0)
+        >>> print array_find
+        [1, 4]
+        >>> print array[array_find].shape
+        (1, 2)
 
-        >>> print CArray([[-1, 0],[4, 3]]).argmin(axis=1)  # We return the index of maximum for each row
-        CArray([[0]
-         [1]])
-
-        >>> print CArray([-3,0,1,2]).argmin(axis=0)
-        CArray([0 0 0 0])
-        >>> print CArray([-3,0,1,2]).argmin(axis=1)
-        0
+        >>> array = CArray([[1,0,-6,2,0]], tosparse=True)
+        >>> array_find = array.find(array == 0)
+        >>> print array_find
+        [1, 4]
+        >>> print array[array_find].shape
+        (1, 2)
 
         """
-        return self._instance_array(self._data.argmin(axis=axis))
+        if not self.is_vector_like:
+            raise ValueError("array is 2D, use find_2d() instead.")
 
-    def nanargmax(self, axis=None):
-        """Indices of the maximum values along an axis ignoring Nans.
+        return self._data.find(self.__class__(condition)._data)[1]
 
-        For all-NaN slices ValueError is raised.
-        Warning: the results cannot be trusted if a slice
-        contains only NaNs and infs.
+    def find_2d(self, condition):
+        """Returns array elements indices depending on condition.
+
+        Parameters
+        ----------
+        condition : CArray
+            Array with booleans representing desired condition.
+
+        Returns
+        -------
+        list
+            List of len(out_find) == ndim with indices corresponding to
+            array elements where condition is True. Es. for matrices,
+            out_find[0] holds the indices of rows, out_find[1] the
+            indices of columns.
+
+        Notes
+        -----
+        Using .find_2d() output for indexing original array always result in
+        a ravelled array with elements which corresponding condition was True.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> array = CArray([[1,0],[-6,3],[2,7]])
+        >>> array_find = array.find_2d(array > 0)
+        >>> print array_find
+        [[0, 1, 2, 2], [0, 1, 0, 1]]
+        >>> print array[array_find]
+        CArray([1 3 2 7])
+
+        >>> array = CArray([[1,0],[-6,0],[2,0]], tosparse=True)
+        >>> array_find = array.find_2d(array == 0)
+        >>> print array_find
+        [[0, 1, 2], [1, 1, 1]]
+        >>> print array[array_find].shape
+        (1, 3)
+
+        >>> array = CArray([1,0,2])
+        >>> array_find = array.find_2d(array > 0)
+        >>> print array_find
+        [[0, 0], [0, 2]]
+        >>> print array[array_find]
+        CArray([1 2])
+
+        """
+        return self._data.find(self.__class__(condition)._data)
+
+    def binary_search(self, value):
+        """Returns the index of each input value inside the array.
 
         DENSE ARRAYS ONLY
 
+        If value is not found inside the array, the index
+        of the closest value will be returned.
+        Array will be flattened before search.
+
         Parameters
         ----------
-        axis : int, None, optional
-            If None (default), array is flattened before computing
-            index, otherwise the specified axis is used.
+        value : scalar or CArray
+            Element or array of elements to search inside
+            the flattened array.
 
         Returns
         -------
         int or CArray
-            Scalar with index of the maximum value for flattened array or
-            CArray with indices along the given axis.
-
-        Notes
-        -----
-        In case of multiple occurrences of the maximum values, the
-        indices corresponding to the first occurrence are returned.
+            Position of input value, or the closest one, inside
+            flattened array. If `value` is an array, a CArray
+            with the position of each `value` element is returned.
 
         Examples
         --------
         >>> from secml.array import CArray
 
-        >>> import numpy as np
-        >>> print CArray([5, np.nan]).argmax()
-        1
+        >>> print CArray([[0,0.1],[0.4,1.0]]).binary_search(0.3)
+        2
 
-        >>> print CArray([5, np.nan]).nanargmax()
-        0
-
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmax()
+        >>> print CArray([1,2,3,4]).binary_search(10)
         3
 
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmax(axis=0)
-        CArray([[0 1]])
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmax(axis=1)
-        CArray([[0]
-         [1]])
+        >>> print CArray([1,2,3,4]).binary_search(CArray([-10,1,2.2,10]))
+        CArray([0 0 1 3])
 
         """
-        return self._instance_array(self._data.nanargmax(axis=axis))
+        return self._instance_array(
+            self._data.binary_search(self.__class__(value)._data))
 
-    def nanargmin(self, axis=None):
-        """Indices of the minimum values along an axis ignoring Nans
+    # ------------- #
+    # DATA ANALYSIS #
+    # ------------- #
 
-        For all-NaN slices ValueError is raised.
-        Warning: the results cannot be trusted if a slice
-        contains only NaNs and infs.
+    def unique(self, return_index=False,
+               return_inverse=False, return_counts=False):
+        """Find the unique elements of an array.
+
+         There are three optional outputs in addition to the unique elements:
+         - the indices of the input array that give the unique values
+         - the indices of the unique array that reconstruct the input array
+         - the number of times each unique value comes up in the input array
 
         Parameters
         ----------
-        axis : int, None, optional
-            If None (default), array is flattened before computing
-            index, otherwise the specified axis is used.
+        return_index : bool, optional
+            If True, also return the indices of array that result
+            in the unique array (default False).
+        return_inverse : bool, optional, dense only
+            If True, also return the indices of the unique array
+            that can be used to reconstruct the original array
+            (default False).
+        return_counts : bool, optional
+            If True, also return the number of times each unique item appears.
 
         Returns
         -------
-        int or CArray
-            Scalar with index of the minimum value for flattened array or
-            CArray with indices along the given axis.
-
-        Notes
-        -----
-        In case of multiple occurrences of the minimum values, the
-        indices corresponding to the first occurrence are returned.
+        unique : CArray
+            Dense array with the sorted unique values of the array.
+        unique_index : CArray, optional
+            The indices of the first occurrences of the unique values
+            in the (flattened) original array. Only provided if
+            return_index is True.
+        unique_counts : CArray, optional
+            The number of times each unique item appears in the original array.
+            Only provided if return_counts is True.
 
         Examples
         --------
         >>> from secml.array import CArray
 
-        >>> import numpy as np
-        >>> print CArray([5, np.nan]).argmin()
-        1
+        >>> print CArray([[1,0,2],[2,0,3]]).unique()
+        CArray([0 1 2 3])
 
-        >>> print CArray([5, np.nan]).nanargmin()
-        0
+        >>> print CArray([1,2,2,3,3], tosparse=True).unique()
+        CArray([1 2 3])
 
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmin()
-        0
+        >>> u, u_idx, u_inv = CArray([[2,2,3,3]]).unique(return_index=True, return_inverse=True)
+        >>> print u, u_idx  # unique and unique_indices
+        CArray([2 3]) CArray([0 2])
+        >>> print u[u_inv]  # original (flattened) array reconstructed from unique_inverse
+        CArray([2 2 3 3])
 
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmin(axis=0)
-        CArray([[0 1]])
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmin(axis=1)
-        CArray([[0]
-         [1]])
+        >>> u, u_counts = CArray([[2,2,2,3,3]]).unique(return_counts=True)
+        >>> print u_counts  # The number of times each unique item appears
+        CArray([3 2])
 
         """
-        return self._instance_array(self._data.nanargmin(axis=axis))
+        out = self._data.unique(
+            return_index, return_inverse, return_counts)
+        if isinstance(out, tuple):  # unique returned multiple elements
+            return tuple([self.__class__(elem) for elem in out])
+        else:
+            return self.__class__(out)
+
+    def bincount(self):
+        """Count the number of occurrences of each value in array of non-negative ints.
+
+        Only vector like arrays of integer dtype are supported.
+
+        Returns
+        -------
+        CArray
+            The occurrence number for every different element of array.
+            The length of output array is equal to a.max()+1.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> a = CArray([1, 2, 3, 1, 6], tosparse=True)
+        >>> print a.bincount()
+        CArray([0 2 1 1 0 0 1])
+
+        """
+        if (self.isdense and self.ndim > 1) or \
+                (self.issparse and not self.is_vector_like):
+            raise ValueError("array must be 1-Dimensional")
+        return self.__class__(self._data.bincount())
+
+    def norm(self, order=None):
+        """Entrywise vector norm.
+
+        This function provides vector norms on vector-like arrays.
+
+        This function is able to return one of an infinite number
+        of vector norms (described below), depending on the value
+        of the order parameter.
+
+        Parameters
+        ----------
+        order : {int, np.inf, -np.inf}, optional
+            Order of the norm (see table under Notes).
+
+        Returns
+        -------
+        float
+            Norm of the array.
+
+        Notes
+        -----
+        For integer order parameter, norm is computed as
+        norm = sum(abs(array)**order)**(1./order). For other norm types,
+        see np.norm description.
+
+        Negative vector norms are only supported for dense arrays.
+
+        Differently from numpy, we consider flat vectors as 2-Dimensional
+        with shape (1,array.size).
+
+        If input 2-Dimensional array is NOT vector-like,
+        ValueError will be raised.
+
+        See Also
+        --------
+        numpy.norm : Full description of different norms.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+        >>> import numpy as np
+
+        >>> print round(CArray([1,2,3]).norm(), 5)
+        3.74166
+        >>> print round(CArray([[1,2,3]]).norm(2), 5)
+        3.74166
+
+        >>> print CArray([1,2,3]).norm(1)
+        6.0
+        >>> print CArray([1,2,3]).tosparse().norm(1)
+        6.0
+
+        >>> print CArray([1,2,3]).norm(np.inf)
+        3.0
+        >>> print CArray([1,2,3]).norm(-np.inf)
+        1.0
+
+        >>> print CArray([[1,2],[2,4]]).norm()
+        Traceback (most recent call last):
+            ...
+        ValueError: Array has shape (2, 2). Call .norm_2d() to compute matricial norm or vector norm along axis.
+
+        """
+        if self.is_vector_like is False:
+            raise ValueError(
+                "Array has shape {:}. Call .norm_2d() to compute "
+                "matricial norm or vector norm along axis.".format(self.shape))
+
+        # Flat array to simplify dense case
+        array = self.ravel()
+
+        # 'fro' is a matrix-norm. We can exit...
+        if order == 'fro':
+            raise ValueError('Invalid norm order for vectors.')
+
+        return self._instance_array(array._data.norm(order))
+
+    # TODO: CHECK KEEPDIMS
+    def norm_2d(self, order=None, axis=None, keepdims=True):
+        """Matrix norm or vector norm along axis.
+
+        This function provides matrix norm or vector norm along axis
+        of 2D arrays. Flat arrays will be converted to 2D before
+        computing the norms.
+
+        This function is able to return one of seven different
+        matrix norms, or one of an infinite number of vector norms
+        (described below), depending on the value of the order parameter.
+
+        Parameters
+        ----------
+        order : {'fro', non-zero int, np.inf, -np.inf}, optional
+            Order of the norm (see table under Notes).
+            'fro' stands for Frobenius norm.
+        axis : int or None, optional
+            If axis is an integer, it specifies the axis of array along
+            which to compute the vector norms.
+            If axis is None then the matrix norm is returned.
+        keepdims : bool, optional
+            If this is set to True (default), the result will
+            broadcast correctly against the original array.
+            Otherwise resulting array is flattened.
+
+        Returns
+        -------
+        float or CArray
+            Norm of the array. If axis is None, float is returned. Otherwise,
+            a CArray with shape and number of dimensions consistent with the
+            original array and the axis parameter is returned.
+
+        Notes
+        -----
+        For integer order parameter, norm is computed as
+        norm = sum(abs(array)**order)**(1./order). For other norm types,
+        see np.norm description.
+        Negative vector norms along axis are only supported for dense arrays.
+
+        See Also
+        --------
+        numpy.norm : Full description of different norms.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+        >>> import numpy as np
+
+        >>> print round(CArray([1,2,3]).norm_2d(), 5)
+        3.74166
+
+        >>> print CArray([1,2,3]).norm_2d(1)  # max(sum(abs(x), axis=0))
+        3.0
+        >>> print CArray([[1,2,3]]).norm_2d(1)
+        3.0
+
+        >>> print CArray([1,2,3]).norm_2d(np.inf)  # max(sum(abs(x), axis=1))
+        6.0
+        >>> print CArray([1,2,3]).norm_2d(-np.inf)  # min(sum(abs(x), axis=1))
+        6.0
+
+        >>> print CArray([[1,2],[2,4]], tosparse=True).norm_2d()
+        5.0
+
+        >>> print CArray([[1,2],[2,4]]).norm_2d(axis=0).round(5)
+        CArray([[ 2.23607  4.47214]])
+        >>> print CArray([[1,2],[2,4]]).norm_2d(axis=1).round(5)
+        CArray([[ 2.23607]
+         [ 4.47214]])
+
+        >>> print CArray([1,2,3]).norm_2d(2, axis=0)
+        CArray([[ 1.  2.  3.]])
+        >>> print CArray([1,2,3]).norm_2d(2, axis=1).round(5)
+        CArray([[ 3.74166]])
+
+        >>> print CArray([1,0,3], tosparse=True).norm_2d(axis=0)  # Norm is dense
+        CArray([[ 1.  0.  3.]])
+        >>> print CArray([1,0,3], tosparse=True).norm_2d(axis=1).round(5)
+        CArray([[ 3.16228]])
+
+        """
+        if axis is None and order in (2, -2):
+            # For consistency between sparse and dense case, we block (2, -2)
+            raise NotImplementedError
+
+        if self.issparse is True:
+            out = self._instance_array(self.atleast_2d()._data.norm_2d(
+                order, axis=axis, keepdims=keepdims))
+        else:
+            out = self._instance_array(self.atleast_2d()._data.norm(
+                order, axis=axis, keepdims=keepdims))
+
+        # Return float if axis is None, else CArray
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(CArray(out).atleast_2d())
 
     def sum(self, axis=None, keepdims=True):
         """Sum of array elements over a given axis.
@@ -2193,400 +3077,6 @@ class CArray(_CArrayInterface):
         return self._instance_array(
             self._data.prod(axis=axis, dtype=dtype, keepdims=keepdims))
 
-    def clip(self, c_min, c_max):
-        """Clip (limit) the values in an array.
-
-        DENSE FORMAT ONLY
-
-        Given an interval, values outside the interval are clipped
-        to the interval edges. For example, if an interval of [0, 1]
-        is specified, values smaller than 0 become 0, and values
-        larger than 1 become 1.
-
-        Parameters
-        ----------
-        c_min, c_max : int
-            Clipping intervals.
-
-        Returns
-        -------
-        CArray
-            Returns a new array containing the clipped array elements.
-            Dtype of the output array depends on the dtype of original array
-            and on the dtype of the clipping limits.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[1,2],[3,4]]).clip(2, 4)
-        CArray([[2 2]
-         [3 4]])
-
-        >>> from secml.core.constants import inf
-
-        >>> # inf is a float, array will be casted accordingly
-        >>> print CArray([[1,2],[3,4]]).clip(-inf, 2)
-        CArray([[ 1.  2.]
-         [ 2.  2.]])
-
-        """
-        if c_min > c_max:
-            raise ValueError("c_min ({:}) must be lower than "
-                             "c_max ({:})".format(c_min, c_max))
-        return self.__class__(self._data.clip(c_min, c_max))
-
-    def find(self, condition):
-        """Returns vector-like array elements indices depending on condition.
-
-        Parameters
-        ----------
-        condition : CArray
-            Array with booleans representing desired condition.
-
-        Returns
-        -------
-        list
-            List with indices corresponding to array elements
-            where condition is True.
-
-        See Also
-        --------
-        .find_2d : find method for arrays of generic shape.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> array = CArray([1,0,-6,2,0])
-        >>> array_find = array.find(array > 0)
-        >>> print array_find
-        [0, 3]
-        >>> print array[array_find]
-        CArray([1 2])
-
-        >>> array = CArray([[1,0,-6,2,0]])
-        >>> array_find = array.find(array == 0)
-        >>> print array_find
-        [1, 4]
-        >>> print array[array_find].shape
-        (1, 2)
-
-        >>> array = CArray([[1,0,-6,2,0]], tosparse=True)
-        >>> array_find = array.find(array == 0)
-        >>> print array_find
-        [1, 4]
-        >>> print array[array_find].shape
-        (1, 2)
-
-        """
-        if not self.is_vector_like:
-            raise ValueError("array is 2D, use find_2d() instead.")
-
-        return self._data.find(self.__class__(condition)._data)[1]
-
-    def find_2d(self, condition):
-        """Returns array elements indices depending on condition.
-
-        Parameters
-        ----------
-        condition : CArray
-            Array with booleans representing desired condition.
-
-        Returns
-        -------
-        list
-            List of len(out_find) == ndim with indices corresponding to
-            array elements where condition is True. Es. for matrices,
-            out_find[0] holds the indices of rows, out_find[1] the
-            indices of columns.
-
-        Notes
-        -----
-        Using .find_2d() output for indexing original array always result in
-        a ravelled array with elements which corresponding condition was True.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> array = CArray([[1,0],[-6,3],[2,7]])
-        >>> array_find = array.find_2d(array > 0)
-        >>> print array_find
-        [[0, 1, 2, 2], [0, 1, 0, 1]]
-        >>> print array[array_find]
-        CArray([1 3 2 7])
-
-        >>> array = CArray([[1,0],[-6,0],[2,0]], tosparse=True)
-        >>> array_find = array.find_2d(array == 0)
-        >>> print array_find
-        [[0, 1, 2], [1, 1, 1]]
-        >>> print array[array_find].shape
-        (1, 3)
-
-        >>> array = CArray([1,0,2])
-        >>> array_find = array.find_2d(array > 0)
-        >>> print array_find
-        [[0, 0], [0, 2]]
-        >>> print array[array_find]
-        CArray([1 2])
-
-        """
-        return self._data.find(self.__class__(condition)._data)
-
-    def bincount(self):
-        """Count the number of occurrences of each value in array of non-negative ints.
-
-        Only vector like arrays of integer dtype are supported.
-
-        Returns
-        -------
-        CArray
-            The occurrence number for every different element of array.
-            The length of output array is equal to a.max()+1.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> a = CArray([1, 2, 3, 1, 6], tosparse=True)
-        >>> print a.bincount()
-        CArray([0 2 1 1 0 0 1])
-
-        """
-        if (self.isdense and self.ndim > 1) or \
-                (self.issparse and not self.is_vector_like):
-            raise ValueError("array must be 1-Dimensional")
-        return self.__class__(self._data.bincount())
-
-    def binary_search(self, value):
-        """Returns the index of each input value inside the array.
-
-        DENSE ARRAYS ONLY
-
-        If value is not found inside the array, the index
-        of the closest value will be returned.
-        Array will be flattened before search.
-
-        Parameters
-        ----------
-        value : scalar or CArray
-            Element or array of elements to search inside
-            the flattened array.
-
-        Returns
-        -------
-        int or CArray
-            Position of input value, or the closest one, inside
-            flattened array. If `value` is an array, a CArray
-            with the position of each `value` element is returned.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[0,0.1],[0.4,1.0]]).binary_search(0.3)
-        2
-
-        >>> print CArray([1,2,3,4]).binary_search(10)
-        3
-
-        >>> print CArray([1,2,3,4]).binary_search(CArray([-10,1,2.2,10]))
-        CArray([0 0 1 3])
-
-        """
-        return self._instance_array(
-            self._data.binary_search(self.__class__(value)._data))
-
-    def sign(self):
-        """Returns element-wise sign of the array.
-
-        The sign function returns -1 if x < 0, 0 if x == 0, 1 if x > 0.
-
-        Returns
-        -------
-        CArray
-            Array with sign of each element.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[-2,0,2]]).sign()
-        CArray([[-1  0  1]])
-
-        >>> print CArray([-2,0,2], tosparse=True).sign()  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	-1
-          (0, 2)	1)
-
-        """
-        return self.__class__(self._data.sign())
-
-    def repmat(self, m, n):
-        """Repeat an array M x N times.
-
-        Parameters
-        ----------
-        m, n : int
-            The number of times the array is repeated along
-            the first and second axes.
-
-        Returns
-        -------
-        CArray
-            The result of repeating array m X n times.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[1,2]],tosparse=True).repmat(2,2)  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	1
-          (0, 1)	2
-          (0, 2)	1
-          (0, 3)	2
-          (1, 0)	1
-          (1, 1)	2
-          (1, 2)	1
-          (1, 3)	2)
-
-        >>> print CArray([1,2]).repmat(2,2)
-        CArray([[1 2 1 2]
-         [1 2 1 2]])
-        >>> print CArray([1,2]).repmat(1,2)
-        CArray([[1 2 1 2]])
-        >>> print CArray([1,2]).repmat(2,1)
-        CArray([[1 2]
-         [1 2]])
-
-        """
-        return self.__class__(self._data.repmat(m, n))
-
-    def repeat(self, repeats, axis=None):
-        """Repeat elements of an array.
-        
-        DENSE FORMAT ONLY
-
-        Parameters
-        ----------
-        repeats : int, list or CArray
-            The number of repetitions for each element. If this is
-            an array_like object, will be broadcasted to fit the
-            shape of the given axis.
-        axis : int, optional
-            The axis along which to repeat values. By default, array
-            is flattened before use.
-
-        Returns
-        -------
-        CArray
-            Output array which has the same shape as original array,
-            except along the given axis. If axis is None, a flat array
-            is returned.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> x = CArray([[1,2],[3,4]])
-        
-        >>> print x.repeat(2)
-        CArray([1 1 2 2 3 3 4 4])
-
-        >>> print x.repeat(2, axis=1)  # Repeat the columns on the right
-        CArray([[1 1 2 2]
-         [3 3 4 4]])
-        >>> print x.repeat(2, axis=0)  # Repeat the rows on the right
-        CArray([[1 2]
-         [1 2]
-         [3 4]
-         [3 4]])
-
-        >>> print x.repeat([1, 2], axis=0)
-        CArray([[1 2]
-         [3 4]
-         [3 4]])
-
-        >>> x.repeat([1, 2])  # repeats size must be consistent with axis
-        Traceback (most recent call last):
-            ...
-        ValueError: operands could not be broadcast together with shape (4,) (2,)
-
-        >>> x = CArray([1,2,3])
-        >>> print x.repeat(2, axis=0)  # Repeat the (only) row on the right
-        CArray([1 1 2 2 3 3])
-        >>> print x.repeat(2, axis=1)  # No columns to repeat
-        Traceback (most recent call last):
-          ...
-        AxisError: axis 1 is out of bounds for array of dimension 1
-
-        """
-        if isinstance(repeats, (self.__class__, list)):
-            repeats = CArray(repeats).todense()._data
-        elif not is_int(repeats):
-            raise TypeError("`repeats` must be int, list or CArray")
-        return self.__class__(self._data.repeat(repeats, axis))
-
-    def ravel(self):
-        """Return a flattened array.
-
-        For dense format a 1-D array, containing the
-        elements of the input, is returned. For sparse
-        format a (1 x array.size) array will be returned.
-
-        A copy is made only if needed.
-
-        Returns
-        -------
-        CArray
-            Flattened view (if possible) of the array with
-            shape (array.size,) for dense format or
-            (1, array.size) for sparse format.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[1,2],[3,4]]).ravel()
-        CArray([1 2 3 4])
-
-        >>> print CArray([[1],[2],[3]], tosparse=True).ravel()  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	1
-          (0, 1)	2
-          (0, 2)	3)
-
-        """
-        return self.__class__(self._data.ravel())
-
-    def flatten(self):
-        """Return a flattened copy of array.
-
-        For dense format a 1-dim array, containing the
-        elements of the input, is returned. For sparse
-        format a (1 x array.size) array will be returned.
-
-        Returns
-        -------
-        CArray
-            Output of the same dtype as a, of shape (array.size,)
-            for dense format or (1,array.size) for sparse format.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[1,2],[3,4]]).flatten()
-        CArray([1 2 3 4])
-
-        >>> print CArray([[1],[2],[3]], tosparse=True).flatten()  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	1
-          (0, 1)	2
-          (0, 2)	3)
-
-        """
-        return self.__class__(
-            CArray(self.ravel(), tosparse=self.issparse).deepcopy())
-
     def all(self, axis=None, keepdims=True):
         """Test whether all array elements along a given axis evaluate to True.
 
@@ -2696,144 +3186,6 @@ class CArray(_CArrayInterface):
         out_any = self._data.any(axis=axis, keepdims=keepdims) \
             if self.isdense is True else self._data.any()
         return self._instance_array(out_any)
-
-    def sort(self, axis=-1, kind='quicksort', inplace=False):
-        """Sort an array, in-place.
-
-        Parameters
-        ----------
-        axis : int, optional
-            Axis along which to sort. The default is -1 (the last axis).
-        kind : {'quicksort', 'mergesort', 'heapsort'}, optional
-            Sorting algorithm to use. Default 'quicksort'.
-            For sparse arrays, only 'quicksort' is available.
-        inplace : bool, optional
-            If True, array will be sorted in-place. Default False.
-
-        Returns
-        -------
-        CArray
-            Sorted array. This will be a new array only if inplace is False.
-
-        Notes
-        -----
-        Differently from numpy, we manage flat vectors as 2-Dimensional of
-        shape (1, array.size). This means that when axis=0, flat array is
-        returned as is (see examples).
-
-        For large sparse arrays is actually faster to convert to dense first.
-
-        See Also
-        --------
-        numpy.sort : Description of different sorting algorithms.
-        .CArray.argsort : Indirect sort.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> array = CArray([5,-1,0,-3])
-        >>> print array.sort()
-        CArray([-3 -1  0  5])
-
-        >>> array = CArray([5,-1,0,-3])
-        >>> print array.sort(axis=0)
-        CArray([ 5 -1  0 -3])
-
-        >>> array = CArray([5,-1,0,-3])
-        >>> print array.sort(axis=1)
-        CArray([-3 -1  0  5])
-
-        >>> array = CArray([5,-1,0,-3])
-        >>> out = array.sort(inplace=True)
-        >>> print out
-        CArray([-3 -1  0  5])
-        >>> array[0] = 100
-        >>> print out
-        CArray([100  -1   0   5])
-
-        """
-        data_sorted = self._data.sort(axis=axis, kind=kind, inplace=inplace)
-        # We return ourselves for inplace sort otherwise a new object
-        return self if inplace is True else self.__class__(data_sorted)
-
-    def argsort(self, axis=None, kind='quicksort'):
-        """Returns the indices that would sort an array.
-
-        Perform an indirect sort along the given axis using
-        the algorithm specified by the kind keyword. It returns
-        an array of indices of the same shape as a that index
-        data along the given axis in sorted order.
-
-        Parameters
-        ----------
-        axis : int or None, optional
-            Axis along which to sort.
-            If None (default), the flattened array is used.
-        kind : {'quicksort', 'mergesort', 'heapsort'}, optional
-            Sorting algorithm to use. Default 'quicksort'.
-            For sparse arrays, only 'quicksort' is available.
-
-        Returns
-        -------
-        CArray
-            Array of indices that sort the array along the specified axis.
-            In other words, array[index_array] yields a sorted array.
-
-        See Also
-        --------
-        numpy.sort : Description of different sorting algorithms.
-        .CArray.sort : In-Place sorting of array.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([0,-3,5]).argsort()
-        CArray([1 0 2])
-
-        >>> print CArray([[0,-3],[5,1]]).argsort(axis=1)  # Sorting of each row
-        CArray([[1 0]
-         [1 0]])
-
-        >>> print CArray([[0,-3],[5,1]]).argsort()  # Sorting the flattened array
-        CArray([1 0 3 2])
-
-        """
-        return self.__class__(self._data.argsort(axis=axis, kind=kind))
-
-    def nan_to_num(self):
-        """Replace nan with zero and inf with finite numbers.
-
-        Replace array elements if Not a Number (NaN) with zero,
-        if (positive or negative) infinity with the largest
-        (smallest or most negative) floating point value that
-        fits in the array dtype. All finite numbers are upcast
-        to the output dtype (default float64).
-
-        Notes
-        -----
-        We use the IEEE Standard for Binary Floating-Point for
-        Arithmetic (IEEE 754). This means that Not a Number
-        is not equivalent to infinity.
-        
-        Examples
-        --------
-        >>> from secml.array import CArray
-        >>> import numpy as np
-        >>> np.set_printoptions(precision=1)
-
-        >>> array = CArray([-1,0,1,np.nan,np.inf,-np.inf])
-        >>> array.nan_to_num()
-        >>> print array
-        CArray([ -1.000000e+000   0.000000e+000   1.000000e+000   0.000000e+000
-           1.797693e+308  -1.797693e+308])
-
-        >>> # Restoring default print precision
-        >>> np.set_printoptions(precision=8)
-
-        """
-        self._data.nan_to_num()
 
     def max(self, axis=None, keepdims=True):
         """Return the maximum of an array or maximum along an axis.
@@ -2948,6 +3300,90 @@ class CArray(_CArrayInterface):
         return self._instance_array(
             self._data.min(axis=axis, keepdims=keepdims))
 
+    def argmax(self, axis=None):
+        """Indices of the maximum values along an axis.
+
+        Parameters
+        ----------
+        axis : int, None, optional
+            If None (default), array is flattened before computing
+            index, otherwise the specified axis is used.
+
+        Returns
+        -------
+        int or CArray
+            Scalar with index of the maximum value for flattened array or
+            CArray with indices along the given axis.
+
+        Notes
+        -----
+        In case of multiple occurrences of the maximum values, the
+        indices corresponding to the first occurrence are returned.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([-1, 0, 3]).argmax()
+        2
+
+        >>> print CArray([[-1, 0],[4, 3]]).argmax(axis=0)  # We return the index of maximum for each column
+        CArray([[1 1]])
+
+        >>> print CArray([[-1, 0],[4, 3]]).argmax(axis=1)  # We return the index of maximum for each row
+        CArray([[1]
+         [0]])
+
+        >>> print CArray([-3,0,1,2]).argmax(axis=0)
+        CArray([0 0 0 0])
+        >>> print CArray([-3,0,1,2]).argmax(axis=1)
+        3
+
+        """
+        return self._instance_array(self._data.argmax(axis=axis))
+
+    def argmin(self, axis=None):
+        """Indices of the minimum values along an axis.
+
+        Parameters
+        ----------
+        axis : int, None, optional
+            If None (default), array is flattened before computing
+            index, otherwise the specified axis is used.
+
+        Returns
+        -------
+        int or CArray
+            Scalar with index of the minimum value for flattened array or
+            CArray with indices along the given axis.
+
+        Notes
+        -----
+        In case of multiple occurrences of the minimum values, the
+        indices corresponding to the first occurrence are returned.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([-1, 0, 3]).argmin()
+        0
+
+        >>> print CArray([[-1, 0],[4, 3]]).argmin(axis=0)  # We return the index of minimum for each column
+        CArray([[0 0]])
+
+        >>> print CArray([[-1, 0],[4, 3]]).argmin(axis=1)  # We return the index of maximum for each row
+        CArray([[0]
+         [1]])
+
+        >>> print CArray([-3,0,1,2]).argmin(axis=0)
+        CArray([0 0 0 0])
+        >>> print CArray([-3,0,1,2]).argmin(axis=1)
+        0
+
+        """
+        return self._instance_array(self._data.argmin(axis=axis))
+
     def nanmax(self, axis=None, keepdims=True):
         """Return the maximum of an array or maximum along an axis ignoring Nans.
 
@@ -3058,243 +3494,101 @@ class CArray(_CArrayInterface):
         return self._instance_array(
             self._data.nanmin(axis=axis, keepdims=keepdims))
 
-    def maximum(self, array):
-        """Element-wise maximum of array elements.
+    def nanargmax(self, axis=None):
+        """Indices of the maximum values along an axis ignoring Nans.
 
-        Compare two arrays and returns a new array containing
-        the element-wise maximum. If one of the elements being
-        compared is a NaN, then that element is returned.
-        If both elements are NaNs then the first is returned.
-        The latter distinction is important for complex NaNs,
-        which are defined as at least one of the real or
-        imaginary parts being a NaN. The net effect is that
-        NaNs are propagated.
+        For all-NaN slices ValueError is raised.
+        Warning: the results cannot be trusted if a slice
+        contains only NaNs and infs.
+
+        DENSE ARRAYS ONLY
 
         Parameters
         ----------
-        array : CArray or array_like
-            The array like object holding the elements to compare
-            current array with. Must have the same shape of first
-            array.
+        axis : int, None, optional
+            If None (default), array is flattened before computing
+            index, otherwise the specified axis is used.
 
         Returns
         -------
-        CArray
-            The element-wise maximum between the two arrays.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[-1,0],[2,0]]).maximum(CArray([[2,-1],[2,-1]]))
-        CArray([[2 0]
-         [2 0]])
-
-        >>> print CArray([[-1,0],[2,0]], tosparse=True).maximum(CArray([[2,-1],[2,-1]]))  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	2
-          (1, 0)	2)
-
-        >>> print CArray([-1]).maximum(CArray([2]))
-        CArray([2])
-
-        """
-        other_carray = self.__class__(array)
-        if not self.has_compatible_shape(other_carray):
-            raise ValueError("arrays to compare must have the same shape. "
-                             "{:} different from {:}."
-                             "".format(self.shape, other_carray.shape))
-
-        if self.issparse:
-            other_carray = other_carray.tosparse()
-        else:
-            other_carray = other_carray.todense()
-
-        return self.__class__(self._data.maximum(other_carray._data))
-
-    def minimum(self, array):
-        """Element-wise minimum of array elements.
-
-        Compare two arrays and returns a new array containing
-        the element-wise minimum. If one of the elements being
-        compared is a NaN, then that element is returned.
-        If both elements are NaNs then the first is returned.
-        The latter distinction is important for complex NaNs,
-        which are defined as at least one of the real or
-        imaginary parts being a NaN. The net effect is that
-        NaNs are propagated.
-
-        Parameters
-        ----------
-        array : CArray or array_like
-            The array like object holding the elements to compare
-            current array with. Must have the same shape of first
-            array.
-
-                Returns
-        -------
-        CArray
-            The element-wise minimum between the two arrays.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[-1,0],[2,0]]).minimum(CArray([[2,-1],[2,-1]]))
-        CArray([[-1 -1]
-         [ 2 -1]])
-
-        >>> print CArray([[-1,0],[2,0]], tosparse=True).minimum(CArray([[2,-1],[2,-1]]))  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	-1
-          (0, 1)	-1
-          (1, 0)	2
-          (1, 1)	-1)
-
-        >>> print CArray([-1]).minimum(CArray([2]))
-        CArray([-1])
-
-        """
-        other_carray = self.__class__(array)
-        if not self.has_compatible_shape(other_carray):
-            raise ValueError("arrays to compare must have the same shape. "
-                             "{:} different from {:}."
-                             "".format(self.shape, other_carray.shape))
-
-        if self.issparse:
-            other_carray = other_carray.tosparse()
-        else:
-            other_carray = other_carray.todense()
-
-        return self.__class__(self._data.minimum(other_carray._data))
-
-    def round(self, decimals=0):
-        """Evenly round to the given number of decimals.
-
-        Parameters
-        ----------
-        decimals : int, optional
-            Number of decimal places to round to (default: 0).
-            If decimals is negative, it specifies the number of
-            positions to round to the left of the decimal point.
-
-        Returns
-        -------
-        out_rounded : CArray
-            An new array containing the rounded values. The real and
-            imaginary parts of complex numbers are rounded separately.
-            The result of rounding a float is a float.
+        int or CArray
+            Scalar with index of the maximum value for flattened array or
+            CArray with indices along the given axis.
 
         Notes
         -----
-        For values exactly halfway between rounded decimal values,
-        we rounds to the nearest even value. Thus 1.5 and 2.5
-        round to 2.0, -0.5 and 0.5 round to 0.0, etc. Results may
-        also be surprising due to the inexact representation of
-        decimal fractions in the IEEE floating point standard [1]_
-        and errors introduced when scaling by powers of ten.
+        In case of multiple occurrences of the maximum values, the
+        indices corresponding to the first occurrence are returned.
 
-        References
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> import numpy as np
+        >>> print CArray([5, np.nan]).argmax()
+        1
+
+        >>> print CArray([5, np.nan]).nanargmax()
+        0
+
+        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmax()
+        3
+
+        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmax(axis=0)
+        CArray([[0 1]])
+        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmax(axis=1)
+        CArray([[0]
+         [1]])
+
+        """
+        return self._instance_array(self._data.nanargmax(axis=axis))
+
+    def nanargmin(self, axis=None):
+        """Indices of the minimum values along an axis ignoring Nans
+
+        For all-NaN slices ValueError is raised.
+        Warning: the results cannot be trusted if a slice
+        contains only NaNs and infs.
+
+        Parameters
         ----------
-        .. [1] "Lecture Notes on the Status of  IEEE 754", William Kahan,
-               http://www.cs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF
-        .. [2] "How Futile are Mindless Assessments of
-               Roundoff in Floating-Point Computation?", William Kahan,
-               http://www.cs.berkeley.edu/~wkahan/Mindless.pdf
-
-        See Also
-        --------
-        .CArray.ceil : Return the ceiling of the input, element-wise.
-        .CArray.floor : Return the floor of the input, element-wise.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([1.28,5.62]).round()
-        CArray([ 1.  6.])
-
-        >>> print CArray([1.28,5.62],tosparse=True).round(decimals=1)  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	1.3
-          (0, 1)	5.6)
-
-        >>> print CArray([.5, 1.5, 2.5, 3.5, 4.5]).round() # rounds to nearest even value
-        CArray([ 0.  2.  2.  4.  4.])
-
-        >>> print CArray([1,5,6,11]).round(decimals=-1)
-        CArray([ 0  0 10 10])
-
-        """
-        return self.__class__(self._data.round(decimals))
-
-    def ceil(self):
-        """Return the ceiling of the input, element-wise.
-
-        The ceil of the scalar x is the smallest integer i, such that i >= x.
-
+        axis : int, None, optional
+            If None (default), array is flattened before computing
+            index, otherwise the specified axis is used.
 
         Returns
         -------
-        out_ceil : CArray
-            The ceiling of each element in x, with float dtype.
-
-        See Also
-        --------
-        .CArray.round : Evenly round to the given number of decimals.
-        .CArray.floor : Return the floor of the input, element-wise.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([-1.7, -1.5, -0.2, 0.2, 1.5, 1.7, 2.0]).ceil()
-        CArray([-1. -1. -0.  1.  2.  2.  2.])
-
-        >>> # Array with dtype == int is upcasted to float before ceiling
-        >>> print CArray([[-2, -1], [1, 1]], tosparse=True).ceil()  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	-2.0
-          (0, 1)	-1.0
-          (1, 0)	1.0
-          (1, 1)	1.0)
-
-        """
-        return self.__class__(self._data.ceil())
-
-    def floor(self):
-        """Return the floor of the input, element-wise.
-        
-        The floor of the scalar x is the largest integer i, such that i <= x.
-
-        Returns
-        -------
-        out_floor : CArray
-            The floor of each element in x, with float dtype.
+        int or CArray
+            Scalar with index of the minimum value for flattened array or
+            CArray with indices along the given axis.
 
         Notes
         -----
-        Some spreadsheet programs calculate the "floor-towards-zero",
-        in other words floor(-2.5) == -2. We instead uses the
-        definition of floor where floor(-2.5) == -3.
-
-        See Also
-        --------
-        .CArray.round : Evenly round to the given number of decimals.
-        .CArray.ceil : Return the ceiling of the input, element-wise.
+        In case of multiple occurrences of the minimum values, the
+        indices corresponding to the first occurrence are returned.
 
         Examples
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([-1.7, -1.5, -0.2, 0.2, 1.5, 1.7, 2.0]).floor()
-        CArray([-2. -2. -1.  0.  1.  1.  2.])
+        >>> import numpy as np
+        >>> print CArray([5, np.nan]).argmin()
+        1
 
-        >>> # Array with dtype == int is upcasted to float before flooring
-        >>> print CArray([[-2, -1], [1, 1]], tosparse=True).floor()  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	-2.0
-          (0, 1)	-1.0
-          (1, 0)	1.0
-          (1, 1)	1.0)
+        >>> print CArray([5, np.nan]).nanargmin()
+        0
+
+        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmin()
+        0
+
+        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmin(axis=0)
+        CArray([[0 1]])
+        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmin(axis=1)
+        CArray([[0]
+         [1]])
 
         """
-        return self.__class__(self._data.floor())
+        return self._instance_array(self._data.nanargmin(axis=axis))
 
     def mean(self, axis=None, keepdims=True):
         """Compute the arithmetic mean along the specified axis.
@@ -3476,6 +3770,10 @@ class CArray(_CArrayInterface):
         return self._instance_array(self._data.std(axis=axis, ddof=ddof,
                                                    keepdims=keepdims))
 
+    # ----------------- #
+    # MATH ELEMENT-WISE #
+    # ----------------- #
+
     def sqrt(self):
         """Compute the positive square-root of an array, element-wise.
 
@@ -3518,452 +3816,6 @@ class CArray(_CArrayInterface):
 
         """
         return self.__class__(self._data.sqrt())
-
-    def logical_and(self, array):
-        """Element-wise logical AND of array elements.
-
-        Compare two arrays and returns a new array containing
-        the element-wise logical AND.
-
-        Parameters
-        ----------
-        array : CArray or array_like
-            The array like object holding the elements to compare
-            current array with. Must have the same shape of first
-            array.
-
-        Returns
-        -------
-        CArray
-            The element-wise logical AND between the two arrays.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[-1,0],[2,0]]).logical_and(CArray([[2,-1],[2,-1]]))
-        CArray([[ True False]
-         [ True False]])
-
-        >>> print CArray([-1]).logical_and(CArray([2]))
-        CArray([ True])
-
-        >>> array = CArray([1,0,2,-1])
-        >>> print (array > 0).logical_and(array < 2)
-        CArray([ True False False False])
-
-        """
-        if self.issparse:
-            array = self.__class__(array, tosparse=True)
-        else:
-            array = self.__class__(array).todense()
-
-        return self.__class__(self._data.logical_and(array._data))
-
-    def logical_or(self, array):
-        """Element-wise logical OR of array elements.
-
-        Compare two arrays and returns a new array containing
-        the element-wise logical OR.
-
-        Parameters
-        ----------
-        array : CArray or array_like
-            The array like object holding the elements to compare
-            current array with. Must have the same shape of first
-            array.
-
-        Returns
-        -------
-        out_and : CArray
-            The element-wise logical OR between the two arrays.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[-1,0],[2,0]]).logical_or(CArray([[2,0],[2,-1]]))
-        CArray([[ True False]
-         [ True  True]])
-
-        >>> print CArray([True]).logical_or(CArray([False]))
-        CArray([ True])
-
-        >>> array = CArray([1,0,2,-1])
-        >>> print (array > 0).logical_or(array < 2)
-        CArray([ True  True  True  True])
-
-        """
-        if self.issparse:
-            array = self.__class__(array, tosparse=True)
-        else:
-            array = self.__class__(array).todense()
-
-        return self.__class__(self._data.logical_or(array._data))
-
-    def logical_not(self):
-        """Element-wise logical NOT of array elements.
-
-        Returns
-        -------
-        CArray
-            The element-wise logical NOT.
-
-        Notes
-        -----
-        For sparse arrays this operation is usually really expensive as
-        the number of zero elements is higher than the number of non-zeros.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([[-1,0],[2,0]]).logical_not()
-        CArray([[False  True]
-         [False  True]])
-
-        >>> print CArray([True]).logical_not()
-        CArray([False])
-
-        >>> array = CArray([1,0,2,-1])
-        >>> print (array > 0).logical_not()
-        CArray([False  True False  True])
-
-        """
-        return self.__class__(self._data.logical_not())
-
-    def inv(self):
-        """Compute the (multiplicative) inverse of a square matrix.
-
-        Given a square matrix a, return the matrix inv satisfying
-        dot(array, array_inv) = dot(array_inv, array) = eye(array.shape[0]).
-
-        Returns
-        -------
-        array_inv : CArray
-            (Multiplicative) inverse of the square matrix.
-
-        Raises
-        ------
-        LinAlgError : dense only
-            If array is not square or inversion fails.
-        ValueError : sparse only
-            If array is not square or inversion fails
-
-        Notes
-        -----
-        If the inverse of a sparse array is expected to be non-sparse,
-        it will likely be faster to convert array to dense first.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> array = CArray([[1., 2.], [3., 4.]])
-        >>> array_inv = array.inv()
-        >>> (array.dot(array_inv).round() == CArray.eye(2)).all()
-        True
-        >>> (array_inv.dot(array).round() == CArray.eye(2)).all()
-        True
-
-        >>> print CArray([[1., 2.], [3., 4.]], tosparse=True).inv()  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	-2.0
-          (0, 1)	1.0
-          (1, 0)	1.5
-          (1, 1)	-0.5)
-
-        >>> CArray([[1.,2.,3.], [4., 5.,6.]]).inv()
-        Traceback (most recent call last):
-            ...
-        LinAlgError: Last 2 dimensions of the array must be square
-
-        """
-        return self.__class__(self._data.inv())
-
-    def pinv(self, rcond=1e-15):
-        """Compute the (Moore-Penrose) pseudo-inverse of a matrix.
-
-        DENSE FORMAT ONLY
-
-        Calculate the generalized inverse of a matrix using its
-        singular-value decomposition (SVD) and including all
-        large singular values.
-
-        Parameters
-        ----------
-        rcond : float
-            Cutoff for small singular values. Singular values smaller
-            (in modulus) than rcond * largest_singular_value
-            (again, in modulus) are set to zero.
-
-        Returns
-        -------
-        array_pinv : CArray
-            The pseudo-inverse of array. Resulting array have
-            shape (array.shape[1], array.shape[0]).
-
-        Raises
-        ------
-        LinAlgError : dense only
-            If array is not square or inversion fails.
-
-        Notes
-        -----
-        The pseudo-inverse of a matrix A, denoted :math:`A^+`, is defined as:
-        "the matrix that 'solves' [the least-squares problem] :math:`Ax = b`,"
-        i.e., if :math:`\\bar{x}` is said solution, then :math:`A^+` is that
-        matrix such that :math:'\\bar{x} = A^+b'. It can be shown that if
-        :math:`Q_1 \\Sigma Q_2^T = A` is the singular value decomposition of A,
-        then :math:`A^+ = Q_2 \\Sigma^+ Q_1^T`, where :math:`Q_{1,2}` are
-        orthogonal matrices, :math:`\\Sigma` is a diagonal matrix consisting of
-        A's so-called singular values, (followed, typically, by zeros), and
-        then :math:`\\Sigma^+` is simply the diagonal matrix consisting of
-        the reciprocals of A's singular values (again, followed by zeros). [1]_
-            
-        References
-        ----------
-        .. [1] G. Strang, *Linear Algebra and Its Applications*, 2nd Ed., Orlando,
-               FL, Academic Press, Inc., 1980, pp. 139-142.
-               
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        The following example checks that:
-            array * array_pinv * array == array and array_pinv * array * array_pinv == array_pinv
-        >>> array = CArray([[1,3],[0,5],[8,2]])
-        >>> array_pinv = array.pinv()
-        >>> (array == array.dot(array_pinv.dot(array)).round()).all()
-        True
-        >>> (array_pinv.round(2) == array_pinv.dot(array.dot(array_pinv)).round(2)).all()
-        True
-
-        """
-        return self.__class__(self._data.pinv(rcond))
-
-    def norm(self, order=None):
-        """Entrywise vector norm.
-
-        This function provides vector norms on vector-like arrays.
-
-        This function is able to return one of an infinite number
-        of vector norms (described below), depending on the value
-        of the order parameter.
-
-        Parameters
-        ----------
-        order : {int, np.inf, -np.inf}, optional
-            Order of the norm (see table under Notes).
-
-        Returns
-        -------
-        float
-            Norm of the array.
-
-        Notes
-        -----
-        For integer order parameter, norm is computed as
-        norm = sum(abs(array)**order)**(1./order). For other norm types,
-        see np.norm description.
-
-        Negative vector norms are only supported for dense arrays.
-
-        Differently from numpy, we consider flat vectors as 2-Dimensional
-        with shape (1,array.size).
-
-        If input 2-Dimensional array is NOT vector-like,
-        ValueError will be raised.
-
-        See Also
-        --------
-        numpy.norm : Full description of different norms.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-        >>> import numpy as np
-
-        >>> print round(CArray([1,2,3]).norm(), 5)
-        3.74166
-        >>> print round(CArray([[1,2,3]]).norm(2), 5)
-        3.74166
-
-        >>> print CArray([1,2,3]).norm(1)
-        6.0
-        >>> print CArray([1,2,3]).tosparse().norm(1)
-        6.0
-
-        >>> print CArray([1,2,3]).norm(np.inf)
-        3.0
-        >>> print CArray([1,2,3]).norm(-np.inf)
-        1.0
-
-        >>> print CArray([[1,2],[2,4]]).norm()
-        Traceback (most recent call last):
-            ...
-        ValueError: Array has shape (2, 2). Call .norm_2d() to compute matricial norm or vector norm along axis.
-
-        """
-        if self.is_vector_like is False:
-            raise ValueError(
-                "Array has shape {:}. Call .norm_2d() to compute "
-                "matricial norm or vector norm along axis.".format(self.shape))
-
-        # Flat array to simplify dense case
-        array = self.ravel()
-
-        # 'fro' is a matrix-norm. We can exit...
-        if order == 'fro':
-            raise ValueError('Invalid norm order for vectors.')
-
-        return self._instance_array(array._data.norm(order))
-
-    def norm_2d(self, order=None, axis=None, keepdims=True):
-        """Matrix norm or vector norm along axis.
-
-        This function provides matrix norm or vector norm along axis
-        of 2D arrays. Flat arrays will be converted to 2D before
-        computing the norms.
-
-        This function is able to return one of seven different
-        matrix norms, or one of an infinite number of vector norms
-        (described below), depending on the value of the order parameter.
-
-        Parameters
-        ----------
-        order : {'fro', non-zero int, np.inf, -np.inf}, optional
-            Order of the norm (see table under Notes).
-            'fro' stands for Frobenius norm.
-        axis : int or None, optional
-            If axis is an integer, it specifies the axis of array along
-            which to compute the vector norms.
-            If axis is None then the matrix norm is returned.
-        keepdims : bool, optional
-            If this is set to True (default), the result will
-            broadcast correctly against the original array.
-            Otherwise resulting array is flattened.
-
-        Returns
-        -------
-        float or CArray
-            Norm of the array. If axis is None, float is returned. Otherwise,
-            a CArray with shape and number of dimensions consistent with the
-            original array and the axis parameter is returned.
-
-        Notes
-        -----
-        For integer order parameter, norm is computed as
-        norm = sum(abs(array)**order)**(1./order). For other norm types,
-        see np.norm description.
-        Negative vector norms along axis are only supported for dense arrays.
-
-        See Also
-        --------
-        numpy.norm : Full description of different norms.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-        >>> import numpy as np
-
-        >>> print round(CArray([1,2,3]).norm_2d(), 5)
-        3.74166
-
-        >>> print CArray([1,2,3]).norm_2d(1)  # max(sum(abs(x), axis=0))
-        3.0
-        >>> print CArray([[1,2,3]]).norm_2d(1)
-        3.0
-
-        >>> print CArray([1,2,3]).norm_2d(np.inf)  # max(sum(abs(x), axis=1))
-        6.0
-        >>> print CArray([1,2,3]).norm_2d(-np.inf)  # min(sum(abs(x), axis=1))
-        6.0
-
-        >>> print CArray([[1,2],[2,4]], tosparse=True).norm_2d()
-        5.0
-
-        >>> print CArray([[1,2],[2,4]]).norm_2d(axis=0).round(5)
-        CArray([[ 2.23607  4.47214]])
-        >>> print CArray([[1,2],[2,4]]).norm_2d(axis=1).round(5)
-        CArray([[ 2.23607]
-         [ 4.47214]])
-
-        >>> print CArray([1,2,3]).norm_2d(2, axis=0)
-        CArray([[ 1.  2.  3.]])
-        >>> print CArray([1,2,3]).norm_2d(2, axis=1).round(5)
-        CArray([[ 3.74166]])
-
-        >>> print CArray([1,0,3], tosparse=True).norm_2d(axis=0)  # Norm is dense
-        CArray([[ 1.  0.  3.]])
-        >>> print CArray([1,0,3], tosparse=True).norm_2d(axis=1).round(5)
-        CArray([[ 3.16228]])
-
-        """
-        if axis is None and order in (2, -2):
-            # For consistency between sparse and dense case, we block (2, -2)
-            raise NotImplementedError
-
-        if self.issparse is True:
-            out = self._instance_array(self.atleast_2d()._data.norm_2d(
-                order, axis=axis, keepdims=keepdims))
-        else:
-            out = self._instance_array(self.atleast_2d()._data.norm(
-                order, axis=axis, keepdims=keepdims))
-
-        # Return float if axis is None, else CArray
-        if axis is None:
-            return self._instance_array(out)
-        else:
-            return self.__class__(CArray(out).atleast_2d())
-
-    def shuffle(self):
-        """Modify array in-place by shuffling its contents.
-
-        This function only shuffles the array along the first
-        index of a not vector-like, multi-dimensional array.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> array = CArray([2,3,0,1])
-        >>> array.shuffle()
-        >>> print array  # doctest: +SKIP
-        CArray([0 2 1 3])  # random result
-
-        >>> array = CArray([[2,3],[0,1]])
-        >>> array.shuffle()
-        >>> print array  # doctest: +SKIP
-        CArray([[0 1]
-         [2 3]])
-
-        """
-        self._data.shuffle()
-
-    def atleast_2d(self):
-        """View original array with at least two dimensions.
-
-        A copy is made only if needed.
-        
-        Returns
-        -------
-        out : CArray
-            Array with array.ndim >= 2.
-
-        Notes
-        -----
-        Sparse arrays are always 2 dimensional so this method returns
-        a view (if possible) of the original array without any changes.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-
-        >>> print CArray([1,2,3]).atleast_2d()
-        CArray([[1 2 3]])
-
-        """
-        return self.__class__(self._data.atleast_2d())
 
     def sin(self):
         """Trigonometric sine, element-wise.
@@ -4229,6 +4081,135 @@ class CArray(_CArrayInterface):
         """
         return self.__class__(self._data.normpdf(float(mu), float(sigma)))
 
+    # ----- #
+    # MIXED #
+    # ----- #
+
+    def sign(self):
+        """Returns element-wise sign of the array.
+
+        The sign function returns -1 if x < 0, 0 if x == 0, 1 if x > 0.
+
+        Returns
+        -------
+        CArray
+            Array with sign of each element.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([[-2,0,2]]).sign()
+        CArray([[-1  0  1]])
+
+        >>> print CArray([-2,0,2], tosparse=True).sign()  # doctest: +NORMALIZE_WHITESPACE
+        CArray(  (0, 0)	-1
+          (0, 2)	1)
+
+        """
+        return self.__class__(self._data.sign())
+
+    def diag(self, k=0):
+        """Extract a diagonal from array or construct a diagonal array.
+
+        Parameters
+        ----------
+        k : int, optional
+            Diagonal index. Default is 0.
+            Use k > 0 for diagonals above the main diagonal,
+            k < 0 for diagonals below the main diagonal.
+
+        Returns
+        -------
+        CArray
+            The extracted diagonal or constructed diagonal dense array.
+            If array is 2-Dimensional, returns its k-th diagonal.
+             Depending on numpy version resulting array can be read-only
+             or a view of the original array's diagonal. To make output
+             array writable, use deepcopy().
+            If array is vector_like, return a 2-D array with
+             the array on the k-th diagonal.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([[1, 2, 3], [10, 20, 30]]).diag(k=1)
+        CArray([ 2 30])
+
+        >>> print CArray([[2, 1]], tosparse=True).diag()  # doctest: +NORMALIZE_WHITESPACE
+        CArray(  (0, 0)	2
+          (1, 1)	1)
+
+        >>> print CArray([1, 2, 3]).diag(k=1)
+        CArray([[0 1 0 0]
+         [0 0 2 0]
+         [0 0 0 3]
+         [0 0 0 0]])
+
+        """
+        if self.size == 0:
+            raise ValueError("cannot use diag() on empty arrays.")
+
+        # Avoid extracting diagonal of a 2-D dense array with shape[0] == 1
+        data = self._data.ravel() if self.is_vector_like else self._data
+
+        return self.__class__(data.diag(k=k))
+
+    def dot(self, array):
+        """Dot product of two arrays.
+
+        For 2-D arrays it is equivalent to matrix multiplication.
+        If both arrays are dense flat (rows), it is equivalent to the
+        inner product of vectors (without complex conjugation).
+
+        Format of output array is the same of the first product argument.
+
+        Parameters
+        ----------
+        array : CArray
+            Second argument of dot product.
+
+        Returns
+        -------
+        scalar or CArray
+            Result of dot product.
+            A CArray with the same format of first argument or
+            scalar if out.size == 1.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([[1,1],[2,2]]).dot(CArray([[1,1],[0,0]], tosparse=True))
+        CArray([[1 1]
+         [2 2]])
+
+        >>> print CArray([10,20]).dot(CArray([[1],[0]], tosparse=True))
+        10
+
+        # OUTER PRODUCT
+        >>> print CArray([[10],[20]]).dot(CArray([1,0], tosparse=True))
+        CArray([[10  0]
+         [20  0]])
+
+        # INNER PRODUCT BETWEEN VECTORS
+        >>> print CArray([10,20]).dot(CArray([1,0]))
+        10
+
+        # Inner product between vector-like arrays is a matrix multiplication
+        >>> print CArray([10,20]).dot(CArray([1,0], tosparse=True).T)
+        10
+        >>> print CArray([10,20], tosparse=True).dot(CArray([1,0]).T)
+        10
+
+        """
+        # We have to handle only one problematic case: dense vs sparse dot
+        if self.isdense is True and array.issparse is True:
+            return self._instance_array(self._data.dot(array.todense()._data))
+        else:
+            return self._instance_array(self._data.dot(array._data))
+
     def interp(self, x_data, y_data, return_left=None, return_right=None):
         """One-dimensional linear interpolation.
 
@@ -4285,62 +4266,114 @@ class CArray(_CArrayInterface):
                               CArray(y_data).astype(float)._data,
                               return_left, return_right))
 
-    def apply_along_axis(self, func, axis, *args, **kwargs):
-        """Apply function to 1-D slices along the given axis.
+    def inv(self):
+        """Compute the (multiplicative) inverse of a square matrix.
 
-        `func` should accept 1-D arrays and return a single scalar or
-        a 1-D array.
-
-        Only 1-D and 2-D arrays are currently supported.
-
-        Parameters
-        ----------
-        func : function
-            Function object to apply along the given axis.
-            Must return a single scalar or a 1-D array.
-        axis : int
-            Axis along which to apply the function.
-        *args, **kwargs : optional
-            Any other input value for `func`.
+        Given a square matrix a, return the matrix inv satisfying
+        dot(array, array_inv) = dot(array_inv, array) = eye(array.shape[0]).
 
         Returns
         -------
-        CArray
-            1-Dimensional array of size `data.shape[0]` with the
-            output of `func` for each row in data. Datatype of
-            output array is always float.
+        array_inv : CArray
+            (Multiplicative) inverse of the square matrix.
+
+        Raises
+        ------
+        LinAlgError : dense only
+            If array is not square or inversion fails.
+        ValueError : sparse only
+            If array is not square or inversion fails
+
+        Notes
+        -----
+        If the inverse of a sparse array is expected to be non-sparse,
+        it will likely be faster to convert array to dense first.
 
         Examples
         --------
         >>> from secml.array import CArray
 
-        >>> a = CArray([[1,2],[10,20],[100,200]])
+        >>> array = CArray([[1., 2.], [3., 4.]])
+        >>> array_inv = array.inv()
+        >>> (array.dot(array_inv).round() == CArray.eye(2)).all()
+        True
+        >>> (array_inv.dot(array).round() == CArray.eye(2)).all()
+        True
 
-        >>> def return_sum(x):
-        ...     return x.sum()
+        >>> print CArray([[1., 2.], [3., 4.]], tosparse=True).inv()  # doctest: +NORMALIZE_WHITESPACE
+        CArray(  (0, 0)	-2.0
+          (0, 1)	1.0
+          (1, 0)	1.5
+          (1, 1)	-0.5)
 
-        >>> print a.apply_along_axis(return_sum, axis=0)  # Column-wise
-        CArray([ 111.  222.])
-
-        >>> print a.apply_along_axis(return_sum, axis=1)  # Row-wise
-        CArray([   3.   30.  300.])
+        >>> CArray([[1.,2.,3.], [4., 5.,6.]]).inv()
+        Traceback (most recent call last):
+            ...
+        LinAlgError: Last 2 dimensions of the array must be square
 
         """
-        data_2d = self.atleast_2d()
-        # Preallocate output array
-        if axis == 0:
-            out = CArray.zeros(self.shape[1])
-            for i in xrange(self.shape[1]):
-                out[i] = func(data_2d[:, i], *args, **kwargs)
-        elif axis == 1:
-            out = CArray.zeros(self.shape[0])
-            for i in xrange(self.shape[0]):
-                out[i] = func(data_2d[i, :], *args, **kwargs)
-        else:
-            raise ValueError("`apply_along_axis` currently available "
-                             "for 1-D and 2-D arrays only.")
+        return self.__class__(self._data.inv())
 
-        return out
+    def pinv(self, rcond=1e-15):
+        """Compute the (Moore-Penrose) pseudo-inverse of a matrix.
+
+        DENSE FORMAT ONLY
+
+        Calculate the generalized inverse of a matrix using its
+        singular-value decomposition (SVD) and including all
+        large singular values.
+
+        Parameters
+        ----------
+        rcond : float
+            Cutoff for small singular values. Singular values smaller
+            (in modulus) than rcond * largest_singular_value
+            (again, in modulus) are set to zero.
+
+        Returns
+        -------
+        array_pinv : CArray
+            The pseudo-inverse of array. Resulting array have
+            shape (array.shape[1], array.shape[0]).
+
+        Raises
+        ------
+        LinAlgError : dense only
+            If array is not square or inversion fails.
+
+        Notes
+        -----
+        The pseudo-inverse of a matrix A, denoted :math:`A^+`, is defined as:
+        "the matrix that 'solves' [the least-squares problem] :math:`Ax = b`,"
+        i.e., if :math:`\\bar{x}` is said solution, then :math:`A^+` is that
+        matrix such that :math:'\\bar{x} = A^+b'. It can be shown that if
+        :math:`Q_1 \\Sigma Q_2^T = A` is the singular value decomposition of A,
+        then :math:`A^+ = Q_2 \\Sigma^+ Q_1^T`, where :math:`Q_{1,2}` are
+        orthogonal matrices, :math:`\\Sigma` is a diagonal matrix consisting of
+        A's so-called singular values, (followed, typically, by zeros), and
+        then :math:`\\Sigma^+` is simply the diagonal matrix consisting of
+        the reciprocals of A's singular values (again, followed by zeros). [1]_
+
+        References
+        ----------
+        .. [1] G. Strang, *Linear Algebra and Its Applications*, 2nd Ed., Orlando,
+               FL, Academic Press, Inc., 1980, pp. 139-142.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        The following example checks that:
+            array * array_pinv * array == array and array_pinv * array * array_pinv == array_pinv
+        >>> array = CArray([[1,3],[0,5],[8,2]])
+        >>> array_pinv = array.pinv()
+        >>> (array == array.dot(array_pinv.dot(array)).round()).all()
+        True
+        >>> (array_pinv.round(2) == array_pinv.dot(array.dot(array_pinv)).round(2)).all()
+        True
+
+        """
+        return self.__class__(self._data.pinv(rcond))
 
     # -------------------------------- #
     # # # # # # CLASSMETHODS # # # # # #
@@ -5066,8 +5099,3 @@ class CArray(_CArrayInterface):
         """
         import itertools
         return CArray(list(itertools.chain.from_iterable(iterables_list)))
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
