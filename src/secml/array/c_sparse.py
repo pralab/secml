@@ -1604,9 +1604,9 @@ class CSparse(_CArrayInterface):
     def nanargmin(self, axis=None):
         raise NotImplementedError
 
-    def mean(self, axis=None, keepdims=True):
+    def mean(self, axis=None, dtype=None, keepdims=True):
         """Mean of array elements over a given axis."""
-        out_mean = CDense(self._data.mean(axis))
+        out_mean = CDense(self._data.mean(axis=axis, dtype=dtype))
         return \
             out_mean.ravel() if axis is None or keepdims is False else out_mean
 

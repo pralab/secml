@@ -1387,7 +1387,7 @@ class CDense(_CArrayInterface):
         return out_max if axis is None or self.ndim <= 1 else \
             (out_max.atleast_2d() if axis == 0 else out_max.atleast_2d().T)
 
-    def mean(self, axis=None, dtype=float, keepdims=False):
+    def mean(self, axis=None, dtype=None, keepdims=True):
         """Wrapper for mean"""
         out = np.mean(self.atleast_2d().tondarray(),
                       axis=axis, dtype=dtype, keepdims=keepdims)

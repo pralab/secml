@@ -511,10 +511,8 @@ class _CArrayInterface(object):
         """Indices of the minimum values along an axis ignoring Nans."""
         raise NotImplementedError
 
-    # TODO: CHECK KEEPDIMS
-    # TODO: CHECK DTYPE
     @abstractmethod
-    def mean(self, axis=None, keepdims=True):
+    def mean(self, axis=None, dtype=None, keepdims=True):
         """Compute the arithmetic mean along the specified axis."""
         raise NotImplementedError
 

@@ -3594,7 +3594,7 @@ class CArray(_CArrayInterface):
         """
         return self._instance_array(self._data.nanargmin(axis=axis))
 
-    def mean(self, axis=None, keepdims=True):
+    def mean(self, axis=None, dtype=None, keepdims=True):
         """Compute the arithmetic mean along the specified axis.
 
         Returns the average of the array elements. The average is
@@ -3606,6 +3606,10 @@ class CArray(_CArrayInterface):
         axis : int, optional
             Axis along which the means are computed.
             The default is to compute the mean of the flattened array.
+        dtype : data-type, optional
+            Type to use in computing the mean. For integer inputs,
+            the default is float64; for floating point inputs,
+            it is the same as the input dtype.
         keepdims : bool, optional
             If this is set to True (default), the result will
             broadcast correctly against the original array.
@@ -3619,12 +3623,17 @@ class CArray(_CArrayInterface):
         Notes
         -----
         The arithmetic mean is the sum of the elements along
-        the axis divided by the number of elements.
+         the axis divided by the number of elements.
 
         Note that for floating-point input, the mean is computed
-        using default float precision. Depending on the input
-        data, this can cause the results to be inaccurate,
-        especially for 32-bit machines (float32).
+         using the same precision the input has. Depending on
+         the input data, this can cause the results to be inaccurate,
+         especially for float32 (see example below). Specifying a
+         higher-precision accumulator using the dtype keyword can
+         alleviate this issue.
+
+        By default, float16 results are computed using float32
+         intermediates for extra precision.
 
         Examples
         --------
@@ -3642,8 +3651,8 @@ class CArray(_CArrayInterface):
         3.0
 
         """
-        return self._instance_array(self._data.mean(axis=axis,
-                                                    keepdims=keepdims))
+        return self._instance_array(
+            self._data.mean(axis=axis, dtype=None, keepdims=keepdims))
 
     def median(self, axis=None, keepdims=True):
         """Compute the median along the specified axis.
