@@ -320,6 +320,10 @@ class _CArrayInterface(object):
         """Evenly round to the given number of decimals."""
         raise NotImplementedError
 
+    def rint(self):
+        """Round elements of the array to the nearest integer."""
+        return self.round(decimals=0)
+
     @abstractmethod
     def ceil(self):
         """Return the ceiling of the input, element-wise."""

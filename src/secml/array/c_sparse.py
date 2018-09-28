@@ -1218,10 +1218,6 @@ class CSparse(_CArrayInterface):
         return self.__class__(
             (data, self._data.indices, self._data.indptr), shape=self.shape)
 
-    def rint(self):
-        """Round elements of the array to the nearest integer."""
-        return self.round(decimals=0)
-
     def ceil(self):
         """Return the ceiling of the input, element-wise."""
         return self.__class__(self._data.ceil())

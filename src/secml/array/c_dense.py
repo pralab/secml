@@ -1273,10 +1273,6 @@ class CDense(_CArrayInterface):
         """Return a copy of your array rounded"""
         return self.__class__(np.around(self.tondarray(), decimals=decimals))
 
-    def rint(self):
-        """Round elements of the array to the nearest integer."""
-        return self.round(decimals=0)
-
     def ceil(self):
         """Return the ceiling of the input, element-wise."""
         return self.__class__(np.ceil(self.tondarray()))
