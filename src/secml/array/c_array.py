@@ -2335,7 +2335,7 @@ class CArray(_CArrayInterface):
         return self._data.find(self.__class__(condition)._data)
 
     def bincount(self):
-        """Count number of occurrences of each value in array of non-negative ints.
+        """Count the number of occurrences of each value in array of non-negative ints.
 
         Only vector like arrays of integer dtype are supported.
 

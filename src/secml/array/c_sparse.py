@@ -1300,7 +1300,7 @@ class CSparse(_CArrayInterface):
         return map(list, scs.find(condition.tocsr()))[:2]
 
     def bincount(self):
-        """Count number of occurrences of each value in array of non-negative ints."""
+        """Count the number of occurrences of each value in array of non-negative ints."""
         n_zeros = self.size - self.nnz
         nnz_bincount = np.bincount(self._data.data)
         # The number of zeros must be replaced (no zeros in nnz_data)

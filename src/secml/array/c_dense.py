@@ -1316,7 +1316,7 @@ class CDense(_CArrayInterface):
         return self.__class__(np.sign(self.tondarray()))
 
     def bincount(self):
-        """Count number of occurrences of each non-negative int."""
+        """Count the number of occurrences of each non-negative int."""
         return self.__class__(np.bincount(self.tondarray()))
 
     def binary_search(self, value):
