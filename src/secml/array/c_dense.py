@@ -1394,17 +1394,17 @@ class CDense(_CArrayInterface):
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 
-    def median(self, axis=None, keepdims=False):
+    def median(self, axis=None, keepdims=True):
         """Wrapper for median"""
         out = np.median(
             self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 
-    def std(self, axis=None, dtype=float, ddof=0, keepdims=False):
+    def std(self, axis=None, ddof=0, keepdims=True):
         """Wrapper for mean"""
         out = np.std(self.atleast_2d().tondarray(),
-                     axis=axis, dtype=dtype, ddof=ddof, keepdims=keepdims)
+                     axis=axis, dtype=np.float64, ddof=ddof, keepdims=keepdims)
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 

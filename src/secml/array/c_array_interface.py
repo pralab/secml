@@ -518,14 +518,11 @@ class _CArrayInterface(object):
         """Compute the arithmetic mean along the specified axis."""
         raise NotImplementedError
 
-    # TODO: CHECK KEEPDIMS
     @abstractmethod
     def median(self, axis=None, keepdims=True):
         """Compute the median along the specified axis."""
         raise NotImplementedError
 
-    # TODO: CHECK KEEPDIMS
-    # TODO: CHECK DTYPE
     @abstractmethod
     def std(self, axis=None, ddof=0, keepdims=True):
         """Compute the standard deviation along the specified axis."""
