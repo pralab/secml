@@ -4587,7 +4587,7 @@ class CArray(_CArrayInterface):
 
         Parameters
         ----------
-        shape : tuple of ints
+        shape : int or tuple
             Shape of the new array.
         random_state : int or None, optional
             If int, random_state is the seed used by the
@@ -4609,6 +4609,10 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
+        >>> array_dense = CArray.randn(shape=2)
+        >>> print array_dense  # doctest: +SKIP
+        CArray([-0.170139  0.445385])
+
         >>> array_dense = CArray.rand(shape=(2, 3))
         >>> print array_dense  # doctest: +SKIP
         [[ 0.68588225  0.88371576  0.3958642 ]
@@ -4620,8 +4624,11 @@ class CArray(_CArrayInterface):
           (1, 1)	0.521906773406)
 
         """
+        # Converting integer "shape" to actual shape
+        shape = (shape,) if not isinstance(shape, tuple) else shape
         if sparse is True:
-            shape = (1, shape[0]) if len(shape) <= 1 else shape
+            # We fake the shape to create a sparse "vector"
+            shape = (1, shape[0]) if len(shape) == 1 else shape
             return cls(CSparse.rand(
                 shape, random_state=random_state, density=density))
         else:
@@ -4638,7 +4645,7 @@ class CArray(_CArrayInterface):
 
         Parameters
         ----------
-        shape : tuple of ints
+        shape : int or tuple
             Shape of the new array.
         random_state : int or None, optional
             If int, random_state is the seed used by the
@@ -4655,12 +4662,18 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
+        >>> array_dense = CArray.randn(shape=2)
+        >>> print array_dense  # doctest: +SKIP
+        CArray([-0.739091  1.201532])
+
         >>> array_dense = CArray.randn(shape=(2, 3))
         >>> print array_dense  # doctest: +SKIP
         CArray([[ 0.2848132  -0.02965108  1.41184901]
          [-1.3842878   0.2673215   0.18978747]])
 
         """
+        # Converting integer "shape" to actual shape
+        shape = (shape,) if not isinstance(shape, tuple) else shape
         return cls(CDense.randn(shape, random_state=random_state))
 
     @classmethod

@@ -1762,7 +1762,7 @@ class CDense(_CArrayInterface):
 
         """
         np.random.seed(random_state)  # Setting the random seed
-        return cls(np.random.randn(*shape))
+        return cls(np.random.randn(*shape))  # randn only accepts sequences
 
     @classmethod
     def randint(cls, low, high=None, shape=None, random_state=None):
