@@ -35,12 +35,12 @@ class CTorchDataset(Dataset):
         if isinstance(data, CDataset):
             if labels is not None:
                 raise TypeError("labels must be defined inside the dataset")
-            self.samples = data.X.atleast_2d()
+            self.X = data.X.atleast_2d()
             # Labels inside a CDataset are always stored as flat arrays
-            self.labels = data.Y if data.Y is not None else None
+            self.Y = data.Y if data.Y is not None else None
         else:
-            self.samples = data.atleast_2d()
-            self.labels = labels  # 1-D, 2-D or None
+            self.X = data.atleast_2d()
+            self.Y = labels  # 1-D, 2-D or None
 
         self.transform = transform
         if hasattr(data, 'transform'):
@@ -50,11 +50,11 @@ class CTorchDataset(Dataset):
 
     def __len__(self):
         """Returns dataset size."""
-        return self.samples.shape[0]
+        return self.X.shape[0]
 
     def __getitem__(self, i):
         """Return desired pair (sample, label) from the dataset."""
-        sample = np.array(CArray(self.samples[i, :]).tondarray())
+        sample = np.array(CArray(self.X[i, :]).tondarray())
 
         if self.transform is not None:
             sample = self.transform(sample)
@@ -63,11 +63,11 @@ class CTorchDataset(Dataset):
         if not isinstance(sample, torch.Tensor):
             sample = torch.from_numpy(sample)
 
-        if self.labels is not None:
-            if self.labels.ndim == 1:  # (num_samples, )
-                label = torch.tensor(self.labels[i])
+        if self.Y is not None:
+            if self.Y.ndim == 1:  # (num_samples, )
+                label = torch.tensor(self.Y[i])
             else:  # (num_samples, num_classes)
-                label = np.array(CArray(self.labels[i, :]).tondarray())
+                label = np.array(CArray(self.Y[i, :]).tondarray())
                 if not isinstance(label, torch.Tensor):
                     label = torch.from_numpy(label)
         else:
