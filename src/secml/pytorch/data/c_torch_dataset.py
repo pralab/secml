@@ -11,6 +11,7 @@ from torch.utils.data import Dataset
 
 from secml.array import CArray
 from secml.data import CDataset
+from secml.core.type_utils import is_int
 
 
 class CTorchDataset(Dataset):
@@ -54,6 +55,9 @@ class CTorchDataset(Dataset):
 
     def __getitem__(self, i):
         """Return desired pair (sample, label) from the dataset."""
+        if not is_int(i):
+            raise ValueError("only integer indexing is supported")
+
         sample = np.array(CArray(self.X[i, :]).tondarray())
 
         if self.transform is not None:
