@@ -9,6 +9,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
+from secml.array import CArray
 from secml.data import CDataset
 
 
@@ -22,7 +23,8 @@ class CTorchDataset(Dataset):
          this case the labels can be passed using the `labels` parameter.
     labels : None or CArray
         Labels of the dataset. Can be defined if the samples have been
-        passed to the `data` parameter.
+        passed to the `data` parameter. Input must be a flat array of shape
+        (num_samples, ) or a 2-D array with shape (num_samples, num_classes).
     transform : torchvision.transforms or None, optional
         Transformation(s) to be applied to each ds sample.
 
@@ -34,10 +36,11 @@ class CTorchDataset(Dataset):
             if labels is not None:
                 raise TypeError("labels must be defined inside the dataset")
             self.samples = data.X.atleast_2d()
-            self.labels = data.Y.atleast_2d() if data.Y is not None else None
+            # Labels inside a CDataset are always stored as flat arrays
+            self.labels = data.Y if data.Y is not None else None
         else:
             self.samples = data.atleast_2d()
-            self.labels = labels.atleast_2d() if labels is not None else None
+            self.labels = labels  # 1-D, 2-D or None
 
         self.transform = transform
         if hasattr(data, 'transform'):
@@ -51,7 +54,7 @@ class CTorchDataset(Dataset):
 
     def __getitem__(self, i):
         """Return desired pair (sample, label) from the dataset."""
-        sample = np.array(self.samples[i, :].tondarray())
+        sample = np.array(CArray(self.samples[i, :]).tondarray())
 
         if self.transform is not None:
             sample = self.transform(sample)
@@ -61,11 +64,14 @@ class CTorchDataset(Dataset):
             sample = torch.from_numpy(sample)
 
         if self.labels is not None:
-            label = np.array(self.labels[i, :].tondarray())
-            if not isinstance(label, torch.Tensor):
-                label = torch.from_numpy(label)
+            if self.labels.ndim == 1:  # (num_samples, )
+                label = torch.tensor(self.labels[i])
+            else:  # (num_samples, num_classes)
+                label = np.array(CArray(self.labels[i, :]).tondarray())
+                if not isinstance(label, torch.Tensor):
+                    label = torch.from_numpy(label)
         else:
-            label = torch.Tensor([-1])  # Tensor with null label
+            label = torch.tensor(-1)  # Tensor with null label
 
         return sample.float(), label
 
