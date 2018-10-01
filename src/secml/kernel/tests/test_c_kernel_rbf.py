@@ -6,7 +6,7 @@ Class to test CKernelRBF
 
 """
 from secml.core import settings
-settings.USE_NUMBA = True
+settings.SECML_USE_NUMBA = True
 
 import unittest
 from secml.utils import CUnitTest

@@ -14,7 +14,7 @@ from secml.data.loader import CDataLoader
 from secml.data import CDataset
 from secml.utils import fm
 from secml.utils.download_utils import dl_file, md5
-from secml.core.settings import DATA_DIR
+from secml.core.settings import SECML_DS_DIR
 
 
 CIFAR10_URL_PYTHON = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
@@ -22,7 +22,7 @@ CIFAR10_MD5 = 'c58f30108f718f92721af3b95e74349a'
 CIFAR100_URL_PYTHON = 'https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz'
 CIFAR100_MD5 = 'eb9058c3a382ffc7106e4002c42a8d85'
 
-CIFAR_PATH = fm.join(DATA_DIR, 'cifar')
+CIFAR_PATH = fm.join(SECML_DS_DIR, 'cifar')
 CIFAR10_PATH = fm.join(CIFAR_PATH, 'cifar-10-batches-py')
 CIFAR100_PATH = fm.join(CIFAR_PATH, 'cifar-100-python')
 

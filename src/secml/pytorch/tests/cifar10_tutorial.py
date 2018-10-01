@@ -59,7 +59,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 
-from secml.core.settings import PYTORCH_DATA_DIR
+from secml.core.settings import SECML_PYTORCH_DATA_DIR
 from secml.utils import fm
 from secml.data.loader import CDataLoaderCIFAR10
 from secml.pytorch.data import CTorchDataset
@@ -79,7 +79,7 @@ transform = transforms.Compose(
 trainset = CTorchDataset(tr, transform=transform)
 
 # trainset = torchvision.datasets.CIFAR10(
-#     root=fm.join(PYTORCH_DATA_DIR, 'data'),
+#     root=fm.join(SECML_PYTORCH_DATA_DIR, 'data'),
 #     train=True, download=True, transform=transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
                                           shuffle=True, num_workers=2)
@@ -87,7 +87,7 @@ trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
 testset = CTorchDataset(ts, transform=transform)
 
 # testset = torchvision.datasets.CIFAR10(
-#     root=fm.join(PYTORCH_DATA_DIR, 'data'),
+#     root=fm.join(SECML_PYTORCH_DATA_DIR, 'data'),
 #     train=False, download=True, transform=transform)
 testloader = torch.utils.data.DataLoader(testset, batch_size=4,
                                          shuffle=False, num_workers=2)

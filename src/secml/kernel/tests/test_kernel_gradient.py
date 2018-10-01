@@ -9,7 +9,7 @@ If you find any BUGs, please notify authors first.
 
 """
 from secml.core import settings
-settings.USE_NUMBA = True
+settings.SECML_USE_NUMBA = True
 
 import unittest
 from secml.utils import CUnitTest

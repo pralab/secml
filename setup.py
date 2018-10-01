@@ -1,6 +1,4 @@
-from distutils.core import setup
-from setuptools import find_packages
-import os
+from setuptools import setup, find_packages
 
 setup(
     name='SecML-Lib',
@@ -13,7 +11,5 @@ setup(
     author='PRALab',
     author_email='pralab@diee.unica.it',
     description='A library for Secure Machine Learning',
-    data_files=[
-        (os.path.join(os.path.expanduser('~'), 'pralib'), ['settings.txt'])
-    ]
+    include_package_data=True
 )

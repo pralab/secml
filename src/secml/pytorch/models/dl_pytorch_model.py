@@ -6,7 +6,7 @@
 
 """
 import torch
-from secml.core.settings import PYTORCH_MODELS_DIR
+from secml.core.settings import SECML_PYTORCH_MODELS_DIR
 from secml.utils import fm
 from secml.utils.download_utils import dl_file
 
@@ -36,12 +36,13 @@ def dl_pytorch_model(model_id):
         Dictionary of the state of the model.
 
     """
-    data_path = fm.join(PYTORCH_MODELS_DIR, model_id, PYTORCH_MODELS_FILENAME)
+    data_path = fm.join(
+        SECML_PYTORCH_MODELS_DIR, model_id, PYTORCH_MODELS_FILENAME)
     model_info = PYTORCH_MODELS[model_id]
     # Download (if needed) data and extract it
     if not fm.file_exist(data_path):
         f_dl = dl_file(PYTORCH_MODELS_URL,
-                       fm.join(PYTORCH_MODELS_DIR, model_id),
+                       fm.join(SECML_PYTORCH_MODELS_DIR, model_id),
                        user=model_info[0], md5_digest=model_info[1])
         # Copy downloaded file to the expected place and remove temp file
         fm.copy_file(f_dl, data_path)
@@ -72,7 +73,8 @@ class CTestDLPytorchModel(CUnitTest):
 
         # Check if the model file has been downloaded in the correct location
         self.assertTrue(fm.file_exist(
-            fm.join(PYTORCH_MODELS_DIR, model_id, PYTORCH_MODELS_FILENAME)))
+            fm.join(SECML_PYTORCH_MODELS_DIR, model_id,
+                    PYTORCH_MODELS_FILENAME)))
         # Check if the returned state has the required keys
         self.assertIn('state_dict', model_state)
 
