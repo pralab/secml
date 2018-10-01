@@ -23,7 +23,7 @@ DREBIN_URL = 'https://nue.diee.unica.it/public.php/webdav'
 DREBIN_USER = 'd74ffeaf5d14d3fb2d0bc621d38ef09d'
 DREBIN_MD5 = 'ab73d749f2a8f51b30601ca7ed7c321b'
 
-DREBIN_PATH = fm.join(settings.DATA_DIR, 'drebin')
+DREBIN_PATH = fm.join(settings.SECML_DS_DIR, 'drebin')
 
 OBFUSCATION_MAPPING = {
     'ORIGINAL': 'ORIGINAL',
@@ -162,8 +162,8 @@ class CDataLoaderDrebin(CDataLoader):
             Path to the folder where to store the downloaded file.
 
         """
-        user = DREBIN_USER + ':' + settings.parse_setting(
-            settings.PRLIB_SETTINGS, 'drebin', 'dl_password')
+        user = DREBIN_USER + ':' + settings.parse_config(
+            settings.SECML_CONFIG, 'drebin', 'dl_password')
         # Generate the full path to the downloaded file
         f_dl = dl_file(file_url, dl_folder, user=user, md5_digest=DREBIN_MD5)
         # Extract the content of downloaded file

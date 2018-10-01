@@ -5,7 +5,7 @@ import torch
 import torchvision.transforms as transforms
 
 from secml.utils import fm
-from secml.core.settings import PYTORCH_MODELS_DIR
+from secml.core.settings import SECML_PYTORCH_MODELS_DIR
 
 from secml.data.loader import CDataLoaderCIFAR10
 from secml.pytorch.classifiers import CTorchClassifierDenseNet

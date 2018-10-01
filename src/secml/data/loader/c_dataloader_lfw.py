@@ -9,7 +9,7 @@ from secml.data.loader import CDataLoader
 from secml.data import CDataset
 from secml.array import CArray
 from secml.utils import fm
-from secml.core.settings import DATA_DIR
+from secml.core.settings import SECML_DS_DIR
 
 from sklearn.datasets import fetch_lfw_people
 
@@ -61,7 +61,7 @@ class CDataLoaderLFW(CDataLoader):
 
         """
         lfw_people = fetch_lfw_people(
-            data_home=DATA_DIR, funneled=funneled, resize=1,
+            data_home=SECML_DS_DIR, funneled=funneled, resize=1,
             min_faces_per_person=min_faces_per_person, color=color,
             slice_=None, download_if_missing=True)
 
@@ -85,6 +85,6 @@ class CDataLoaderLFW(CDataLoader):
         Does not delete the downloaded database archive.
 
         """
-        jl_tmp_folder = fm.join(DATA_DIR, 'lfw_home', 'joblib')
+        jl_tmp_folder = fm.join(SECML_DS_DIR, 'lfw_home', 'joblib')
         if fm.folder_exist(jl_tmp_folder):
             fm.remove_folder(jl_tmp_folder, force=True)

@@ -1,11 +1,13 @@
 variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    SECML_HOME_DIR: "$CI_PROJECT_DIR/secml-lib-data"
 
 cache:
   key: "$CI_JOB_NAME"
   paths:
     - "$CI_PROJECT_DIR/.cache/pip"
     - "$CI_PROJECT_DIR/.vendor/apt"
+    - "$CI_PROJECT_DIR/secml-lib-data"
 
 stages:
   - test
@@ -19,8 +21,6 @@ test:xenial:
     - pip install numpy==1.13.*
     - pip install enum34
     - LLVM_CONFIG=/usr/bin/llvm-config-3.7 pip install -r requirements.txt
-    - mkdir /root/pralib/
-    - cp settings.txt /root/pralib/
     - cd src
     - PYTHONPATH=. py.test --cov-config ../.coveragerc secml --cov=secml
 
@@ -33,8 +33,6 @@ test:xenial:
     - pip install numpy==1.13.*
     - pip install enum34
     - LLVM_CONFIG=/usr/bin/llvm-config-3.7 pip install -r requirements.txt
-    - mkdir /root/pralib/
-    - cp settings.txt /root/pralib/
     - cd src
     - PYTHONPATH=. py.test --cov-config ../.coveragerc secml --cov=secml
 

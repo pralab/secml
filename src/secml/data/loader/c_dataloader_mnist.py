@@ -10,7 +10,7 @@ from secml.data import CDataset
 from secml.array import CArray
 from secml.utils import fm
 from secml.utils.download_utils import dl_file, md5
-from secml.core.settings import DATA_DIR
+from secml.core.settings import SECML_DS_DIR
 
 import gzip
 import struct
@@ -27,7 +27,7 @@ TEST_DATA_MD5 = '2646ac647ad5339dbf082846283269ea'
 TEST_LABELS_URL = 'http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz'
 TEST_LABELS_MD5 = '27ae3e4e09519cfbb04c329615203637'
 
-MNIST_PATH = fm.join(DATA_DIR, 'mnist')
+MNIST_PATH = fm.join(SECML_DS_DIR, 'mnist')
 
 
 class CDataLoaderMNIST(CDataLoader):

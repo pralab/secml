@@ -19,7 +19,7 @@ import torch.utils.data as data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
-from secml.core.settings import PYTORCH_DATA_DIR, PYTORCH_MODELS_DIR
+from secml.core.settings import SECML_PYTORCH_DATA_DIR, SECML_PYTORCH_MODELS_DIR
 from secml.utils import fm
 
 from secml.data.loader import CDataLoaderCIFAR10
@@ -87,7 +87,7 @@ def main():
 
     trainset = CTorchDataset(tr, transform=transform)
 
-    # trainset = datasets.CIFAR10(root=fm.join(PYTORCH_DATA_DIR, 'data'),
+    # trainset = datasets.CIFAR10(root=fm.join(SECML_PYTORCH_DATA_DIR, 'data'),
     #                             train=True, download=True,
     #                             transform=transform)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=25,
@@ -95,7 +95,7 @@ def main():
 
     testset = CTorchDataset(ts, transform=transform)
 
-    # testset = datasets.CIFAR10(root=fm.join(PYTORCH_DATA_DIR, 'data'),
+    # testset = datasets.CIFAR10(root=fm.join(SECML_PYTORCH_DATA_DIR, 'data'),
     #                            train=False, download=True,
     #                            transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=25,

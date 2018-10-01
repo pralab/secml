@@ -56,19 +56,22 @@ class CLog(object):
 
     Parameters
     ----------
-    logger_id : str or None (optional)
+    level : LOG_LEVEL, int or None, optional
+        Initial logging level. Default is None, meaning that the current
+        logging level will be preserved if the logger has already been created.
+    logger_id : str or None, optional
         Identifier of the logger. Default None.
         If None, creates a logger which is the root of the hierarchy
-    add_stream : bool (optional)
+    add_stream : bool, optional
         If True, attach a stream handler to the logger. Default True.
         A stream handler prints to stdout the logged messages.
-    file_handler : str or None (optional)
+    file_handler : str or None, optional
         If a string, attach a file handler to the logger. Default None.
         A file handler stores to the specified path the logged messages.
-    propagate : bool (optional)
+    propagate : bool, optional
         If True, messages logged to this logger will be passed to the
         handlers of higher level (ancestor) loggers, in addition to any
-        handlers attached to this logger. Default True.
+        handler attached to this logger. Default False.
 
     Notes
     -----
@@ -84,14 +87,13 @@ class CLog(object):
     >>> from secml.array import CArray
     >>> from secml.utils import CLog
 
-    >>> log = CLog()
-    >>> log.info("{:}".format(CArray([1,2,3])))  # doctest: +SKIP
-     .. - CLog - INFO - CArray([1 2 3])
+    >>> log = CLog().warning("{:}".format(CArray([1,2,3])))  # doctest: +SKIP
+    ... - WARNING - CArray([1 2 3])
 
     """
 
-    def __init__(self, logger_id=None, add_stream=True,
-                 file_handler=None, propagate=True):
+    def __init__(self, level=None, logger_id=None, add_stream=True,
+                 file_handler=None, propagate=False):
         # Setting up logger with default logging level (WARNING)
         self._logger_id = None if logger_id is None else str(logger_id)
         self._propagate = propagate
@@ -101,6 +103,8 @@ class CLog(object):
             self.attach_stream()
         if file_handler is not None:  # Attach a file handler
             self.attach_file(file_handler)
+        if level is not None:
+            self.set_level(level)  # Setting initial logging level
 
     @property
     def logger_id(self):
@@ -198,7 +202,8 @@ class CLog(object):
         # Stream and/or file handler are set for
         # ancestors only (to avoid output duplication)
         return self.__class__(logger_id=parent_id + str(name),
-                              add_stream=False, file_handler=None)
+                              add_stream=False, file_handler=None,
+                              propagate=True)  # This is a child, so propagate
 
     def log(self, level, msg, *args, **kwargs):
         """Logs a message with specified level on this logger.
@@ -368,7 +373,7 @@ class CTimer(object):
     >>> from secml.utils import CLog
     >>> logger = CLog()
     >>> logger.set_level(10)
-    >>> with CTimer(CLog()) as t:
+    >>> with CTimer(logger) as t:
     ...     a = CArray([1,2,3])  # doctest: +ELLIPSIS
     2... - root - DEBUG - Entering timed block...
     2... - root - DEBUG - Elapsed time: ... ms
@@ -469,9 +474,10 @@ class CTestLogging(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.logger = CLog(logger_id=cls.__name__, add_stream=True,
-                          file_handler='unittest.log', propagate=False)
-        cls.logger.set_level('DEBUG')
+        cls.logger = CLog(logger_id=cls.__name__,
+                          add_stream=True,
+                          file_handler='unittest.log',
+                          level='DEBUG')
 
     def test_timed_nologging(self):
 
