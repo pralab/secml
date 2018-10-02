@@ -38,7 +38,7 @@ class TestCSecEvalEvasion(CSecEvalTestCases.TestCSecEval):
             "lb": self.lb,
             "ub": self.ub,
             "discrete": False,
-           # "eta": 1.0,
+            # "eta": 1.0,
             #"eta_min": 120.0,
             #"eta_max": None,
             "y_target": self.y_target,
@@ -49,11 +49,11 @@ class TestCSecEvalEvasion(CSecEvalTestCases.TestCSecEval):
 
         # sec eval params
         self.param_name = 'dmax'
-        dmax = 5 # 10000
-        dmax_step = 0.5 # 1000
+        dmax = 2
+        dmax_step = 0.25
         self.param_values = CArray.arange(
             start=0, step=dmax_step,
-            stop=dmax + 1)
+            stop=dmax + dmax_step)
 
 
 if __name__ == '__main__':

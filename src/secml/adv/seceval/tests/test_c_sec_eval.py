@@ -73,8 +73,8 @@ class CSecEvalTestCases(object):
             # dataset generation:
 
             self.n_tr = 20 #100 # 50
-            self.n_val = 500
-            self.n_ts = 200 # 2000
+            self.n_val = 20
+            self.n_ts = 40
             self.n_features = 2
             self.n_clusters = 2
 
