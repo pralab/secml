@@ -29,7 +29,7 @@ if use_cuda:
     torch.cuda.manual_seed_all(999)
 
 
-# fixme: inner normalizer not manage yet
+# FIXME: inner normalizer not manage yet for training phase
 class CTorchClassifier(CClassifier):
     """
     A fully-connected ReLU network with one hidden layer, trained to predict y from x
@@ -45,7 +45,7 @@ class CTorchClassifier(CClassifier):
 
     def __init__(self, learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
                  n_epoch=100, gamma=0.1, lr_schedule=(50, 75), batch_size=5,
-                 train_transform=None, test_transform=None, normalizer=None):
+                 train_transform=None, normalizer=None):
 
         self._learning_rate = learning_rate
         self._momentum = momentum
@@ -56,7 +56,6 @@ class CTorchClassifier(CClassifier):
         self._start_epoch = 0
         self._batch_size = batch_size
         self._train_transform = train_transform
-        self._test_transform = test_transform
 
         self._init_params = {'learning_rate': learning_rate,
                              'momentum': momentum,
@@ -65,8 +64,7 @@ class CTorchClassifier(CClassifier):
                              'gamma': gamma,
                              'lr_schedule': lr_schedule,
                              'batch_size': batch_size,
-                             'train_transform': train_transform,
-                             'test_transform': test_transform}
+                             'train_transform': train_transform}
 
         # PyTorch NeuralNetwork model
         self._model = None
@@ -256,18 +254,13 @@ class CTorchClassifier(CClassifier):
         x = x.type(torch.FloatTensor)
         return x
 
-    def _get_input_loader(self, x, n_jobs=1):
-        """Return a loader for input data.
-
-        Test transformation will be applied if defined.
-
-        """
+    def _get_test_input_loader(self, x, n_jobs=1):
+        """Return a loader for input test data."""
         # Convert to CTorchDataset and use a dataloader that returns batches
-        return DataLoader(
-            CTorchDataset(x, transform=self._test_transform),
-            batch_size=self._batch_size,
-            shuffle=False,
-            num_workers=n_jobs)
+        return DataLoader(CTorchDataset(x),
+                          batch_size=self._batch_size,
+                          shuffle=False,
+                          num_workers=n_jobs)
 
     def load_state(self, state_dict, dataparallel=False):
         """Load PyTorch objects state from dictionary.
@@ -423,7 +416,7 @@ class CTorchClassifier(CClassifier):
 
         return self
 
-    def discriminant_function(self, x, label):
+    def discriminant_function(self, x, label, n_jobs=1):
 
         x_carray = CArray(x).atleast_2d()
 
@@ -431,10 +424,11 @@ class CTorchClassifier(CClassifier):
         if self.normalizer is not None:
             x_carray = self.normalizer.normalize(x_carray)
 
-        return self._discriminant_function(x_carray, label)
+        return self._discriminant_function(x_carray, label, n_jobs=n_jobs)
 
-    def _discriminant_function(self, x, label):
-        x_loader = self._get_input_loader(x.atleast_2d())
+    def _discriminant_function(self, x, label, n_jobs=1):
+
+        x_loader = self._get_test_input_loader(x, n_jobs=n_jobs)
 
         # Switch to evaluation mode
         self._model.eval()
@@ -473,7 +467,7 @@ class CTorchClassifier(CClassifier):
         if self.normalizer is not None:
             x_carray = self.normalizer.normalize(x_carray)
 
-        x_loader = self._get_input_loader(x_carray, n_jobs=n_jobs)
+        x_loader = self._get_test_input_loader(x_carray, n_jobs=n_jobs)
 
         # Switch to evaluation mode
         self._model.eval()
@@ -504,26 +498,29 @@ class CTorchClassifier(CClassifier):
 
         return scores.argmax(axis=1).ravel(), scores
 
-    def _gradient_x(self, x, y):
-        """Compute the loss gradient wrt input.
+    def _gradient_f(self, x, y):
+        """Computes the gradient of the classifier's decision function
+         wrt decision function input.
 
         Parameters
         ----------
         x : CArray
-            Patterns with respect to which the gradient will be computed.
-        y : int, optional
+            The gradient is computed in the neighborhood of x.
+        y : int
             Index of the class wrt the gradient must be computed.
 
         Returns
         -------
         gradient : CArray
-            Array with the gradient wrt input pattern.
+            Gradient of the classifier's df wrt its input. Vector-like array.
 
         """
-        x = x.atleast_2d()
-        if x.shape[0] > 1:
+        if x.is_vector_like is False:
             raise ValueError("gradient can be computed on one sample only.")
-        x, l = CTorchDataset(x, transform=self._test_transform)[0]
+
+        dl = self._get_test_input_loader(x)
+
+        x = dl.dataset[0][0]  # Get the single and only point from the dl
 
         if use_cuda is True:
             x = x.cuda()
@@ -541,59 +538,6 @@ class CTorchClassifier(CClassifier):
         if use_cuda is True:
             mask = mask.cuda()
         logits.backward(mask)
-
-        # FIXME: GRADIENT OF THE TRANSFORMATION?
-
-        return CArray(x.grad.data.cpu().numpy().ravel())
-
-    def gradient_w_out_x(self, x, w, layer=None):
-        """Compute the loss gradient multiplied by w wrt input.
-
-        Parameters
-        ----------
-        x : CArray
-            Patterns with respect to which the gradient will be computed.
-        w : CArray
-            Array that will be multiplied to the loss output.
-        layer : str or None, optional
-            Layer from which the gradient should be computed.
-
-        Returns
-        -------
-        gradient : CArray
-            Array with the gradient wrt input pattern.
-
-        """
-        x = x.atleast_2d()
-        if x.shape[0] > 1:
-            raise ValueError("gradient can be computed on one sample only.")
-        x, l = CTorchDataset(x, transform=self._test_transform)[0]
-
-        w = self._to_tensor(w)
-
-        if use_cuda is True:
-            x, w = x.cuda(), w.cuda()
-        x = x.unsqueeze(0)  # Get a [1,...] tensor similar to atleast_2d
-        x = Variable(x, requires_grad=True)
-
-        # Switch to evaluation mode
-        self._model.eval()
-
-        logits = x
-        # Manual iterate the network and stop at desired layer
-        # Use _model to iterate over first level modules only
-        for m_k, m in self._model._modules.iteritems():
-            logits = m(logits)  # Forward input trough module
-            if m_k == layer:
-                # We found the desired layer
-                break
-        else:
-            if layer is not None:
-                raise ValueError("No layer `{:}` found!".format(layer))
-
-        logits.backward(w)
-
-        # FIXME: GRADIENT OF THE TRANSFORMATION?
 
         return CArray(x.grad.data.cpu().numpy().ravel())
 
@@ -614,7 +558,7 @@ class CTorchClassifier(CClassifier):
             Output of the desired layer.
 
         """
-        x_loader = self._get_input_loader(x)
+        x_loader = self._get_test_input_loader(x)
 
         # Switch to evaluation mode
         self._model.eval()

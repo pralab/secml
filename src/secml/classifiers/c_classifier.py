@@ -13,6 +13,7 @@ from secml.array import CArray
 from secml.data import CDataset
 from secml.features.normalization import CNormalizer
 from secml.optimization import COptimizer
+from secml.core.type_utils import is_str
 from secml.parallel import parfor2
 
 
@@ -359,99 +360,96 @@ class CClassifier(CCreator):
 
         return best_params
 
-    def has_gradient(self, variable=None):
-        """Returns True if the classifier's discriminant function is
-        differentiable with respect to the given variable."""
-        return hasattr(self, '_gradient_' + variable)
-
-    def gradient(self, variable, value, **kwargs):
-        """Computes the gradient of the classifier's discriminant function
-        with respect to variable, in the neighborhood of 'value'.
-
-        We assumes that subclasses will implement `_gradient_variable`
-        function. If not, a numerical approximation will be used.
-
-        If a normalizer has been specified,
-        it returns clf_gradient * clf_normalizer.
+    def gradient_f_x(self, x, **kwargs):
+        """Computes the gradient of the classifier's output wrt input.
 
         Parameters
         ----------
-        variable : str
-            Name of the property to be considered for computing the gradient.
-        value : scalar
-            The gradient is computed in the neighborhood of variable = value.
-        kwargs: dictionary
-            Optional parameters to `gradient' function.
+        x : CArray
+            The gradient is computed in the neighborhood of x.
+        **kwargs
+            Optional parameters for the function that computes the
+            gradient of the decision function. See the description of
+            each classifier for a complete list of optional parameters.
 
         Returns
         -------
         gradient : CArray
-            Gradient of the classifier's decision function
-            for the given variable in the neighborhood of variable == value.
+            Gradient of the classifier's output wrt input. Vector-like array.
 
         """
         # Get the derivative of the normalizer (if defined)
-        grad_norm = CArray([1])  # Return clf's gradient if normalizer is None
         if self.normalizer is not None:
-            grad_norm = self.normalizer.gradient(value)
-            if self.normalizer.is_linear():
-                # Gradient of linear normalizers is an 'I * w' array
-                # To avoid returning all the zeros, extract the main diagonal
-                grad_norm = grad_norm.diag()
-
+            grad_norm = self._gradient_n(x)
             # Normalize data before compute the classifier gradient
-            value = self.normalizer.normalize(value)
+            x = self.normalizer.normalize(x)
+        else:  # Normalizer not defined, use a "neutral" value
+            grad_norm = CArray([1])
 
-        # The following code assumes that derived classes will implement
-        # _gradient_variable, being 'variable' the one to derive against
-        if self.has_gradient(variable):
-            func = getattr(self, '_gradient_' + variable)
-        else:
-            # Looking for a generic 'x' variable
-            if variable == 'x':
-                func = getattr(self, '_gradient_numerical_x')
-            else:
-                raise NameError(
-                    "Function _gradient_{:} not found in class {:}."
-                    "".format(variable, self.__class__.__name__))
+        # Get the derivative of discriminant_function
+        try:
+            grad_f = self._gradient_f(x, **kwargs)
+        except NotImplementedError:
+            raise NotImplementedError("{:} does not implement `gradient_f_x`"
+                                      "".format(self.__class__.__name__))
 
-        # Compute classifier gradient
-        grad_func = func(value, **kwargs)
+        return (grad_f * grad_norm).ravel()
 
-        # If normalizer gradient is a matrix, use dot product
-        if not grad_norm.is_vector_like:
-            return CArray(grad_func.dot(grad_norm)).ravel()
-        else:
-            return CArray(grad_func * grad_norm).ravel()
-
-    def _gradient_numerical_x(self, value, label=1):
-        """Return the numerical gradient of the classifier's
-        discriminant function.
-
-        This computes the derivative of discriminant_function for
-        class = label using a numerical approximation. The function will
-        be called if no analytical gradient is implemented.
+    def gradient_loss_params(self, **kwargs):
+        """Computed the gradient of the classifier's loss wrt train parameters.
 
         Parameters
         ----------
-        value : CArray or array_like
-            The gradient is computed in the neighborhood of value.
-        label : scalar
-            The label of the class with respect to which the discriminant
-            function should be calculated. Default 1.
+        **kwargs
+            Optional parameters. See the description of each
+            classifier for a complete list of optional parameters.
 
         Returns
         -------
-        grad : CArray or scalar
-            Gradient of the classifier's discriminant function computed
-            using input data and wrt specified class.
-
-        See Also
-        --------
-        .COptimizer : functions for optimization and approximation
+        gradient : CArray
+            Gradient of the classifier's loss wrt train parameters.
 
         """
-        from secml.optimization.function import CFunction
-        return COptimizer(
-            CFunction(fun=self.discriminant_function)).approx_fprime(
-            value, 1e-6, label)
+        raise NotImplementedError(
+            "{:} does not implement `gradient_loss_params`"
+            "".format(self.__class__.__name__))
+
+    def _gradient_f(self, x, y):
+        """Computes the gradient of the classifier's decision function
+         wrt decision function input.
+
+        Parameters
+        ----------
+        x : CArray
+            The gradient is computed in the neighborhood of x.
+        y : int
+            Index of the class wrt the gradient must be computed.
+
+        Returns
+        -------
+        gradient : CArray
+            Gradient of the classifier's df wrt its input. Vector-like array.
+
+        """
+        raise NotImplementedError
+
+    def _gradient_n(self, x):
+        """Computes the gradient of the normalizer wrt normalizer input.
+
+        Parameters
+        ----------
+        x : CArray
+            The gradient is computed in the neighborhood of x.
+
+        Returns
+        -------
+        gradient : CArray
+            Gradient of the normalizer wrt its input. Vector-like array.
+
+        """
+        grad_norm = self.normalizer.gradient(x)
+        if self.normalizer.is_linear():
+            # Gradient of linear normalizers is an 'I * w' array
+            # To avoid returning all the zeros, extract the main diagonal
+            grad_norm = grad_norm.diag()
+        return grad_norm.ravel()

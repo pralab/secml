@@ -7,6 +7,7 @@
 """
 from secml.array import CArray
 from secml.classifiers import CClassifier
+from secml.classifiers.clf_utils import extend_binary_labels
 from secml.kernel import CKernel
 
 
@@ -136,24 +137,25 @@ class CClassifierKDE(CClassifier):
             return CArray(
                 self.kernel.k(x, self._training_samples)).mean(keepdims=False)
 
-    def _gradient_x(self, x, y=1):
-        """Computes the gradient of the linear classifier's discriminant function wrt 'x'.
-
-        For the linear classifier this is equal to simply
-        return the weights vector w.
-
-        The input point x can be in fact ignored.
+    def _gradient_f(self, x, y=1):
+        """Computes the gradient of the KDE classifier's decision function
+         wrt decision function input.
 
         Returns
         -------
-        grad : CArray or scalar
-            The gradient of the linear classifier's decision function.
-            This is equal to the vector with each feature's weight.
-            Format (dense or sparse) depends on training data.
+        x : CArray or None, optional
+            The gradient is computed in the neighborhood of x.
         y : int, optional
-            Index of the class wrt the gradient must be computed.
+            Binary index of the class wrt the gradient must be computed.
             Default is 1, corresponding to the positive class.
+
+        Returns
+        -------
+        gradient : CArray
+            The gradient of the linear classifier's decision function
+            wrt decision function input. Vector-like array.
 
         """
         k = self.kernel.gradient(self._training_samples, x)
-        return - (2 * y - 1) * k.mean(axis=0)
+        # Gradient sign depends on input label (0/1)
+        return - extend_binary_labels(y) * k.mean(axis=0)

@@ -155,7 +155,7 @@ class TestEvasionMNIST(CCreator):
     def run(self):
         print "Run..."
         y_pred, scores, p_opt = self._evasion_obj.run(self._x0, self._y0)[:3]
-        self._show_adv(self._x0, self._y0, p_opt.X, y_pred)
+        self._show_adv(self._x0, self._y0, p_opt.X, y_pred[0])
 
 
 if __name__ == '__main__':

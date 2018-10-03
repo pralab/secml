@@ -13,7 +13,7 @@ from ..models.cifar import densenet
 from secml.utils.dict_utils import merge_dicts
 
 
-class CTorchClassifierDenseNet(CTorchClassifier):
+class CTorchClassifierDenseNetCifar(CTorchClassifier):
     """"""
     class_type = 'nn_densenet'
 
@@ -27,10 +27,7 @@ class CTorchClassifierDenseNet(CTorchClassifier):
         self._depth = depth
         self._growthRate = growthRate
 
-        test_transform = transforms.Compose(
-            [transforms.Lambda(lambda x: x.reshape([3, 32, 32]))])
-
-        super(CTorchClassifierDenseNet, self).__init__(
+        super(CTorchClassifierDenseNetCifar, self).__init__(
             learning_rate=learning_rate,
             momentum=momentum,
             weight_decay=weight_decay,
@@ -39,7 +36,6 @@ class CTorchClassifierDenseNet(CTorchClassifier):
             lr_schedule=lr_schedule,
             batch_size=batch_size,
             train_transform=train_transform,
-            test_transform=test_transform,
             normalizer=normalizer
         )
 
@@ -57,6 +53,18 @@ class CTorchClassifierDenseNet(CTorchClassifier):
             compressionRate=2,
             dropRate=0,
         )
+
+    def _get_test_input_loader(self, x, n_jobs=1):
+        """Return a loader for input test data."""
+        # Convert to CTorchDataset and use a dataloader that returns batches
+        dl = super(CTorchClassifierDenseNetCifar, self)._get_test_input_loader(
+            x, n_jobs=n_jobs)
+
+        # Add a transformation that reshape samples to (C x H x W)
+        dl.dataset.transform = transforms.Lambda(
+            lambda p: p.reshape([3, 32, 32]))
+
+        return dl
 
     def loss(self, x, target):
         """Return the loss function computed on input."""

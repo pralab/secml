@@ -8,14 +8,34 @@
 from secml.array import CArray
 
 
-def extend_binary_labels(labels):
-    """Returns input binary labels to -1/+1.
+def check_binary_labels(labels):
+    """Check if input labels are binary {0, +1}.
 
     Parameters
     ----------
     labels : CArray
         Binary labels to be converted.
-        As of PRALib convention, binary labels are in 0/+1 interval.
+        As of PRALib convention, binary labels are {0, +1}.
+
+    Raises
+    ------
+    ValueError
+        If input labels are not binary.
+
+
+    """
+    if CArray(CArray(labels != 0).logical_and(labels != 1)).any():
+        raise ValueError("input labels should be binary in 0/1 interval.")
+
+
+def extend_binary_labels(labels):
+    """Convert input binary labels to {-1, +1}.
+
+    Parameters
+    ----------
+    labels : CArray
+        Binary labels to be converted.
+        As of PRALib convention, binary labels are {0, +1}.
 
     Returns
     -------
@@ -31,7 +51,5 @@ def extend_binary_labels(labels):
     CArray([-1  1  1  1 -1 -1])
 
     """
-    if CArray(CArray(labels != 0).logical_and(labels != 1)).any():
-        raise ValueError("input labels should be binary in 0/1 interval.")
-
+    check_binary_labels(labels)
     return 2 * labels - 1

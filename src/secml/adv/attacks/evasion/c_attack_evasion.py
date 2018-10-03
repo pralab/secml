@@ -151,8 +151,8 @@ class CAttackEvasion(CAttack):
 
         scores[:, k] = nan
         c = scores.nanargmax(axis=1)
-        grad = self._solver_clf.gradient('x', x, y=k) - \
-               self._solver_clf.gradient('x', x, y=c)
+        grad = self._solver_clf.gradient_f_x(x, y=k) - \
+               self._solver_clf.gradient_f_x(x, y=c)
 
         return grad if self.y_target is None else -grad
 
