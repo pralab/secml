@@ -315,8 +315,9 @@ class CClassifierMulticlass(CClassifier):
             # Unbound method: First argument is the instance to apply method to
             method(clf, *args, **kwargs)
 
-    def _gradient_x(self, x, y):
-        """Computes the gradient of the linear classifier's discriminant function wrt 'x'.
+    def _gradient_f(self, x, y):
+        """Computes the gradient of the classifier's decision function
+         wrt decision function input.
 
         For a multiclass classifier, the gradient of the y^th
         binary classifier is returned.
@@ -324,16 +325,15 @@ class CClassifierMulticlass(CClassifier):
         Parameters
         ----------
         x : CArray
-            Pattern with respect to which the gradient will be computed.
-            Shape (1, n_features) or (n_features,).
+            The gradient is computed in the neighborhood of x.
         y : int
             Index of the binary classifier of which the gradient
-            should be returned.
+            of the decision function should be returned.
 
         Returns
         -------
         gradient : CArray
-            Flat array with the gradient of SVM wrt input pattern.
+            Gradient of the classifier's df wrt its input. Vector-like array.
 
         """
-        return CArray(self.binary_classifiers[y].gradient('x', x)).ravel()
+        return CArray(self.binary_classifiers[y].gradient_f_x(x)).ravel()

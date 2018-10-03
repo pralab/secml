@@ -4,11 +4,8 @@ import random
 import torch
 import torchvision.transforms as transforms
 
-from secml.utils import fm
-from secml.core.settings import SECML_PYTORCH_MODELS_DIR
-
 from secml.data.loader import CDataLoaderCIFAR10
-from secml.pytorch.classifiers import CTorchClassifierDenseNet
+from secml.pytorch.classifiers import CTorchClassifierDenseNetCifar
 
 from secml.pytorch.normalizers import CNormalizerMeanSTD
 
@@ -26,7 +23,7 @@ if use_cuda:
     torch.cuda.manual_seed_all(999)
 
 
-class TestCClassifier(CUnitTest):
+class TestCTorchClassifierDenseNetCifar(CUnitTest):
 
     def setUp(self):
         self._run_train = False  # Training is a long process for dnn, skip
@@ -59,8 +56,8 @@ class TestCClassifier(CUnitTest):
 
         tr, ts, transform_tr = self._load_cifar10()
 
-        clf = CTorchClassifierDenseNet(batch_size=25, n_epoch=2,
-                                       train_transform=transform_tr)
+        clf = CTorchClassifierDenseNetCifar(n_epoch=2, batch_size=25,
+                                            train_transform=transform_tr)
         clf.verbose = 2
 
         clf.train(tr, warm_start=False, n_jobs=2)
@@ -69,9 +66,9 @@ class TestCClassifier(CUnitTest):
         """Test classify of the CIFAR10 dataset."""
         tr, ts, transform_tr = self._load_cifar10()
 
-        clf = CTorchClassifierDenseNet(batch_size=25, n_epoch=1,
-                                       train_transform=transform_tr,
-                                       normalizer=CNormalizerMeanSTD(
+        clf = CTorchClassifierDenseNetCifar(n_epoch=1, batch_size=25,
+                                            train_transform=transform_tr,
+                                            normalizer=CNormalizerMeanSTD(
                                            mean=(0.4914, 0.4822, 0.4465),
                                            std=(0.2023, 0.1994, 0.2010)))
         clf.verbose = 2
@@ -91,15 +88,15 @@ class TestCClassifier(CUnitTest):
         """Test gradient of the CIFAR10 dataset."""
         tr, ts, transform_tr = self._load_cifar10()
 
-        clf = CTorchClassifierDenseNet(batch_size=25, n_epoch=1,
-                                       train_transform=transform_tr)
+        clf = CTorchClassifierDenseNetCifar(n_epoch=1, batch_size=25,
+                                            train_transform=transform_tr)
         clf.verbose = 2
 
         state = dl_pytorch_model('densenet-bc-L100-K12')
 
         clf.load_state(state, dataparallel=True)
 
-        grad = clf.gradient('x', ts.X[100, :], y=3)
+        grad = clf.gradient_f_x(ts.X[100, :], y=3)
 
         self.logger.info("Gradient:\n{:}".format(grad))
         self.logger.info("Shape: {:}".format(grad.shape))

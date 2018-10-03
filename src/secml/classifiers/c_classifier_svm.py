@@ -354,11 +354,15 @@ class CClassifierSVM(CClassifierLinear):
             m = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
             return CArray(m).todense().ravel() + self.b
 
-    def _gradient_x(self, x, y=1):
-        """Computes the gradient of the linear classifier's discriminant function wrt 'x'.
+    def _gradient_f(self, x=None, y=1):
+        """Computes the gradient of the SVM classifier's decision function
+         wrt decision function input.
 
-        For the linear SVM this simply return the weights vector w.
-        Otherwise compute gradient in dual representation:
+        If the SVM classifier is linear, the gradient wrt input is equal
+        to the weights vector w. The point x can be in fact ignored.
+
+        Otherwise, for non-linear SVM, the gradient is computed
+        in the dual representation:
 
         .. math::
 
@@ -366,30 +370,33 @@ class CClassifierSVM(CClassifierLinear):
 
         Parameters
         ----------
-        x : CArray
-            Pattern with respect to which the gradient will be computed.
-            Shape (1, n_features) or (n_features,).
+        x : CArray or None, optional
+            The gradient is computed in the neighborhood of x.
+            For non-linear classifiers, x is required.
         y : int, optional
-            Index of the class wrt the gradient must be computed.
+            Binary index of the class wrt the gradient must be computed.
             Default is 1, corresponding to the positive class.
 
         Returns
         -------
         gradient : CArray
-            Flat array with the gradient of SVM wrt input pattern.
+            The gradient of the SVM classifier's decision function
+            wrt decision function input. Vector-like array.
 
         """
-        x_carray = CArray(x)
-        # Simply return w for a linear SVM
-        if self.is_kernel_linear():
-            return CClassifierLinear._gradient_x(self, x_carray, y=y)
+        if self.is_kernel_linear():  # Simply return w for a linear SVM
+            return CClassifierLinear._gradient_f(self, y=y)
+
+        # Point is required in the case of non-linear SVM
+        if x is None:
+            raise ValueError("point 'x' is required to compute the gradient")
 
         # TODO: ADD OPTION FOR RANDOM SUBSAMPLING OF SVs
         # Gradient in dual representation: \sum_i y_i alpha_i \diff{K(x,xi)}{x}
         m = int(self.grad_sampling * self.n_sv.sum())  # Equivalent to floor
         idx = CArray.randsample(self.alpha.size, m)  # adding some randomness
 
-        gradient = self.kernel.gradient(self.sv[idx, :], x_carray).atleast_2d()
+        gradient = self.kernel.gradient(self.sv[idx, :], x).atleast_2d()
 
         # Few shape check to ensure broadcasting works correctly
         if gradient.shape != (idx.size, self.n_features):
@@ -405,5 +412,5 @@ class CClassifierSVM(CClassifierLinear):
 
         gradient = alpha_2d.dot(gradient)
 
-        sign = 2 * y - 1  # Sign depends on input label (0/1)
-        return sign * gradient.ravel()
+        # Gradient sign depends on input label (0/1)
+        return extend_binary_labels(y) * gradient.ravel()

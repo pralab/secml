@@ -156,9 +156,9 @@ class TestMulticlass(CUnitTest):
         sample_label = multiclass.classify(pattern)[0]
         # Return the gradient of the label^th sub-classifier
         ova_grad = multiclass.binary_classifiers[
-            sample_label].gradient('x', pattern)
+            sample_label].gradient_f_x(pattern)
 
-        gradient = multiclass.gradient('x', pattern, y=sample_label)
+        gradient = multiclass.gradient_f_x(pattern, y=sample_label)
         self.logger.info("Gradient:\n%s", str(gradient))
 
         self.assertEquals(gradient.dtype, float)
@@ -168,9 +168,9 @@ class TestMulticlass(CUnitTest):
         # Check if we can return the i_th classifier
         for i in xrange(multiclass.num_classifiers):
 
-            ova_grad = multiclass.binary_classifiers[i].gradient('x', pattern)
+            ova_grad = multiclass.binary_classifiers[i].gradient_f_x(pattern)
 
-            gradient = multiclass.gradient('x', pattern, y=i)
+            gradient = multiclass.gradient_f_x(pattern, y=i)
             self.logger.info(
                 "Gradient of {:}^th sub-clf is:\n{:}".format(i, gradient))
 

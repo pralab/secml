@@ -7,6 +7,7 @@
 
 """
 from secml.classifiers import CClassifier
+from secml.classifiers.clf_utils import extend_binary_labels
 from secml.array import CArray
 from secml.data import CDataset
 
@@ -202,24 +203,27 @@ class CClassifierLinear(CClassifier):
 
         return labels, score
 
-    def _gradient_x(self, x, y=1):
-        """Computes the gradient of the linear classifier's discriminant function wrt 'x'.
+    def _gradient_f(self, x=None, y=1):
+        """Computes the gradient of the linear classifier's decision function
+         wrt decision function input.
 
-        For the linear classifier this is equal to simply
-        return the weights vector w.
+        For linear classifiers, the gradient wrt input is equal
+        to the weights vector w. The point x can be in fact ignored.
 
-        The input point x can be in fact ignored.
+        Parameters
+        ----------
+        x : CArray or None, optional
+            The gradient is computed in the neighborhood of x.
+        y : int, optional
+            Binary index of the class wrt the gradient must be computed.
+            Default is 1, corresponding to the positive class.
 
         Returns
         -------
-        grad : CArray or scalar
-            The gradient of the linear classifier's decision function.
-            This is equal to the vector with each feature's weight.
-            Format (dense or sparse) depends on training data.
-        y : int, optional
-            Index of the class wrt the gradient must be computed.
-            Default is 1, corresponding to the positive class.
+        gradient : CArray
+            The gradient of the linear classifier's decision function
+            wrt decision function input. Vector-like array.
 
         """
-        sign = 2 * y - 1  # Sign depends on input label (0/1)
-        return sign * self.w
+        # Gradient sign depends on input label (0/1)
+        return extend_binary_labels(y) * self.w

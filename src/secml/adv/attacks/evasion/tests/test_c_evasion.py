@@ -64,8 +64,6 @@ class CEvasionTestCases(object):
             self.x0 = self.dataset.X[malicious_idxs[target_idx], :].ravel()
             self.y0 = +1
 
-            # print self.classifier.gradient('x', self.x0)
-
             self.logger.info("Malicious sample: " + str(self.x0))
 
             self.solver_type = 'descent-direction'
@@ -216,7 +214,7 @@ class CEvasionTestCases(object):
             self._plot_grid_and_path(fig, x, self.x0)
 
         def clf_grad(self, x):
-            self.classifier.gradient('x', x)
+            self.classifier.gradient_f_x(x)
             return
 
         def _plot_clf_grad(self, fig):

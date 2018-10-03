@@ -432,14 +432,23 @@ class CAttack(CCreator):
         pass
 
     def _is_surrogate_clf_diff(self):
-        """
+        """Returns True if the surrogate classifiers implements `gradient_f_x`.
+
         Returns
         -------
-        True: If surrogate_classifier is differentiable,
-        False: Otherwise
+        bool
+            True if the surrogate classifiers implements `gradient_f_x`,
+            False otherwise.
 
         """
-        return self._surrogate_classifier.has_gradient('x')
+        try:  # Try to call gradient function with fake input
+            self._surrogate_classifier.gradient_f_x(CArray([]), y=None)
+        except NotImplementedError:
+            return False  # Classifier does not implement the gradient
+        except:  # Wildcard for any other error, gradient is implemented
+            return True
+        else:  # No error raised, gradient is implemented
+            return True
 
     def _set_surrogate_labels_and_scores(self):
         """

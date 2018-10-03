@@ -44,10 +44,6 @@ class CTorchDataset(Dataset):
             self.Y = labels  # 1-D, 2-D or None
 
         self.transform = transform
-        if hasattr(data, 'transform'):
-            if transform is not None:
-                ValueError("input dataset already defines transforms")
-            self.transform = data.transform
 
     def __len__(self):
         """Returns dataset size."""

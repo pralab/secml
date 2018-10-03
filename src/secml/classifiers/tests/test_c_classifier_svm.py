@@ -140,8 +140,7 @@ class TestSVM(CUnitTest):
             pred_y, pred_score = svm.classify(self.dataset.X)
             # chose random one pattern
             pattern = CArray(random.choice(self.dataset.X.get_data()))
-            gradient = svm.gradient('x', pattern)
-            grad_numerical = svm._gradient_numerical_x(pattern)
+            gradient = svm.gradient_f_x(pattern)
 
             if svm.is_kernel_linear():
                 _check_flattness(svm.w)
@@ -151,7 +150,6 @@ class TestSVM(CUnitTest):
 
             _check_flattness(pred_y)
             _check_flattness(gradient)
-            _check_flattness(grad_numerical)
 
     def test_sparse(self):
         """Performs tests on sparse dataset."""
@@ -214,11 +212,11 @@ class TestSVM(CUnitTest):
                 self.logger.info("P {:}: {:}".format(i, pattern))
 
                 # Compare the analytical grad with the numerical grad
-                gradient = svm.gradient('x', pattern, y=1)
+                gradient = svm.gradient_f_x(pattern, y=1)
                 self.logger.info("Gradient: %s", str(gradient))
                 check_grad_val = COptimizer(
                     CFunction(svm.discriminant_function,
-                              svm._gradient_x)).check_grad(pattern)
+                              svm._gradient_f)).check_grad(pattern)
                 self.logger.info(
                     "norm(grad - num_grad): %s", str(check_grad_val))
                 self.assertLess(check_grad_val, 1e-3,
@@ -287,8 +285,8 @@ class TestSVM(CUnitTest):
         self.assertTrue((y1 == y2).all())
         self.assertTrue((score1[:, 0] == score2[:, 0]).all())
 
-        svm1_grad = svm1.gradient('x', data.X[0, :])
-        svm2_grad = svm2.gradient('x', data_norm[0, :]) * norm.gradient(
+        svm1_grad = svm1.gradient_f_x(data.X[0, :])
+        svm2_grad = svm2.gradient_f_x(data_norm[0, :]) * norm.gradient(
             data_norm[0, :]).diag()
 
         self.assertTrue((svm1_grad == svm2_grad).all())
