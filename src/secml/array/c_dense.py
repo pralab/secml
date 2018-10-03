@@ -962,9 +962,31 @@ class CDense(_CArrayInterface):
         # All other not-empty arrays
         return self.__class__(np.atleast_2d(self.tondarray()))
 
-    def reshape(self, newshape):
-        """Reshape array."""
-        return self.__class__(self.tondarray().reshape(newshape))
+    def reshape(self, newshape, order='C'):
+        """Reshape the matrix using input shape (int or tuple of ints).
+
+        Parameters
+        ----------
+        newshape : int or sequence of ints
+            The new shape should be compatible with the original shape.
+        order : {'C', 'F', 'A'}, optional
+            Read the elements of a using this index order, and place
+            the elements into the reshaped array using this index order.
+            'C' means to read / write the elements using C-like index order,
+             with the last axis index changing fastest, back to the first axis
+             index changing slowest.
+            'F' means to read / write the elements using Fortran-like
+             index order, with the first index changing fastest,
+             and the last index changing slowest.
+            Note that the 'C' and 'F' options take no account of the
+             memory layout of the underlying array, and only refer to
+             the order of indexing.
+            'A' means to read / write the elements in Fortran-like
+             index order if a is Fortran contiguous in memory,
+             C-like order otherwise.
+
+        """
+        return self.__class__(self.tondarray().reshape(newshape, order=order))
 
     def resize(self, newshape, constant=0):
         """Return a new array with the specified shape."""

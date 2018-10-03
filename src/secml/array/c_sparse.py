@@ -901,9 +901,27 @@ class CSparse(_CArrayInterface):
         """
         return self.__class__(self)
 
-    def reshape(self, newshape):
-        """Reshape the matrix using input shape (int or tuple of ints)."""
-        return self.__class__(self.tocsr().reshape(newshape))
+    def reshape(self, newshape, order='C', copy=False):
+        """Reshape the matrix using input shape (int or tuple of ints).
+
+        Parameters
+        ----------
+        newshape : int or sequence of ints
+            The new shape should be compatible with the original shape.
+        order : {'C', 'F'}, optional
+            Read the elements using this index order.
+            'C' means to read and write the elements using C-like index order;
+             e.g. read entire first row, then second row, etc.
+            'F' means to read and write the elements using Fortran-like index
+             order; e.g. read entire first column, then second column, etc.
+        copy : bool, optional
+            Indicates whether or not attributes of self should be copied
+            whenever possible. The degree to which attributes are copied
+            varies depending on the type of sparse matrix being used.
+
+        """
+        return self.__class__(
+            self.tocsr().reshape(newshape, order=order, copy=copy))
 
     def resize(self, newshape, constant=0):
         """Return a new array with the specified shape."""
