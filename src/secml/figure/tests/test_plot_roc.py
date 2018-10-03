@@ -144,7 +144,7 @@ class TestCRoc(CUnitTest):
             mean_tpr += interp(mean_fpr, fpr, tpr)
             mean_tpr[0] = 0.0
             roc_auc = auc(fpr, tpr)
-            roc_fig.sp.plot(fpr, tpr, lw=1,
+            roc_fig.sp.plot(fpr, tpr, linewidth=1,
                             label='ROC fold %d (area = %0.2f)' % (i, roc_auc))
 
         roc_fig.sp.plot([0, 1], [0, 1], '--', color=(0.6, 0.6, 0.6),
@@ -155,7 +155,8 @@ class TestCRoc(CUnitTest):
         mean_auc = auc(mean_fpr, mean_tpr)
 
         roc_fig.sp.plot(mean_fpr, mean_tpr, 'k--',
-                        label='Mean ROC (area = %0.2f)' % mean_auc, lw=2)
+                        label='Mean ROC (area = %0.2f)' % mean_auc,
+                        linewidth=2)
 
         roc_fig.sp.xlim([-0.05, 1.05])
         roc_fig.sp.ylim([-0.05, 1.05])
