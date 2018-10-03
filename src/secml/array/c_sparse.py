@@ -901,30 +901,27 @@ class CSparse(_CArrayInterface):
         """
         return self.__class__(self)
 
-    def reshape(self, newshape):
-        """Reshape the matrix using input shape (int or tuple of ints)."""
-        if isinstance(newshape, (int, np.integer)):
-            newshape = (1, newshape)
-        elif len(newshape) < 2:
-            newshape = (1, newshape[0])
-        elif len(newshape) > 2:
-            raise ValueError("'newshape' must be an integer "
-                             "or a sequence of one/two integers")
+    def reshape(self, newshape, order='C', copy=False):
+        """Reshape the matrix using input shape (int or tuple of ints).
 
-        # Coo sparse matrices have reshape method
-        array_coo = self._data.tocoo()
-        n_rows, n_cols = array_coo.shape
-        size = n_rows * n_cols
+        Parameters
+        ----------
+        newshape : int or sequence of ints
+            The new shape should be compatible with the original shape.
+        order : {'C', 'F'}, optional
+            Read the elements using this index order.
+            'C' means to read and write the elements using C-like index order;
+             e.g. read entire first row, then second row, etc.
+            'F' means to read and write the elements using Fortran-like index
+             order; e.g. read entire first column, then second column, etc.
+        copy : bool, optional
+            Indicates whether or not attributes of self should be copied
+            whenever possible. The degree to which attributes are copied
+            varies depending on the type of sparse matrix being used.
 
-        new_size = newshape[0] * newshape[1]
-        if new_size != size:
-            raise ValueError('total size of new array must be unchanged')
-
-        flat_indices = n_cols * array_coo.row + array_coo.col
-        new_row, new_col = divmod(flat_indices, newshape[1])
-
-        return self.__class__(scs.coo_matrix(
-            (array_coo.data, (new_row, new_col)), shape=newshape))
+        """
+        return self.__class__(
+            self.tocsr().reshape(newshape, order=order, copy=copy))
 
     def resize(self, newshape, constant=0):
         """Return a new array with the specified shape."""

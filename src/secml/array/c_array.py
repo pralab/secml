@@ -1631,7 +1631,7 @@ class CArray(_CArrayInterface):
          [2]
          [3]])
 
-        >>> print CArray([[1],[2],[3]], tosparse=True).reshape((3,))  # doctest: +NORMALIZE_WHITESPACE
+        >>> print CArray([[1],[2],[3]], tosparse=True).reshape(3)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	2
           (0, 2)	3)
