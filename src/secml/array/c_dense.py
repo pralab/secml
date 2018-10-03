@@ -12,7 +12,6 @@ import numpy.matlib
 from numpy.linalg import inv, pinv
 from scipy import interp as sc_interp
 import scipy.sparse as scs
-import matplotlib.mlab as mlab
 
 from copy import deepcopy
 
@@ -1540,8 +1539,9 @@ class CDense(_CArrayInterface):
             Normal distribution values
 
         """
+        from scipy.stats import norm
         return self.__class__(
-            mlab.normpdf(self.tondarray(), float(mu), float(sigma)))
+            norm.pdf(self.tondarray(), float(mu), float(sigma)))
 
     # ----- #
     # MIXED #
