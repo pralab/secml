@@ -1,11 +1,5 @@
-"""
-Created on 3/may/2015
-Class to test CStochasticGradientDescentClassifier
+import numpy as np
 
-@author: Paolo Russu
-If you find any BUG, please notify authors first.
-"""
-import unittest
 from secml.utils import CUnitTest
 from secml.classifiers import CClassifierSGD, CClassifierSVM
 from secml.classifiers.regularizer import *
@@ -14,7 +8,7 @@ from secml.array import CArray
 from secml.data.loader import CDLRandom, CDLRandomBlobs
 from secml.features.normalization import CNormalizerMinMax
 from secml.peval.metrics import CMetric
-from secml.figure.c_figure import CFigure
+from secml.figure import CFigure
 
 
 class TestSGDClassifier(CUnitTest):
@@ -31,8 +25,7 @@ class TestSGDClassifier(CUnitTest):
 
         self.logger.info("Testing classifier creation ")
         self.sgd = CClassifierSGD(regularizer=CRegularizerL2(),
-                                  loss=CLossHinge(),
-                                  n_iter=5000)
+                                  loss=CLossHinge())
 
         self.logger.info("Testing SGD classifier training ")
 
@@ -108,17 +101,15 @@ class TestSGDClassifier(CUnitTest):
 
     def test_margin(self):
 
-        self.logger.info("Testing margin separation of PRASGD...")
-
-        import numpy as np
+        self.logger.info("Testing margin separation of SGD...")
 
         # we create 50 separable points
         dataset = CDLRandomBlobs(n_samples=50, centers=2, random_state=0,
                                  cluster_std=0.60).load()
 
         # fit the model
-        clf = CClassifierSGD(loss=CLossHinge(), n_iter=200,
-                             regularizer=CRegularizerL2(), alpha=0.01)
+        clf = CClassifierSGD(loss=CLossHinge(), regularizer=CRegularizerL2(),
+                             alpha=0.01, max_iter=200)
         clf.train(dataset)
 
         # plot the line, the points, and the nearest vectors to the plane
@@ -142,4 +133,4 @@ class TestSGDClassifier(CUnitTest):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()
