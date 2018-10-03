@@ -903,28 +903,7 @@ class CSparse(_CArrayInterface):
 
     def reshape(self, newshape):
         """Reshape the matrix using input shape (int or tuple of ints)."""
-        if isinstance(newshape, (int, np.integer)):
-            newshape = (1, newshape)
-        elif len(newshape) < 2:
-            newshape = (1, newshape[0])
-        elif len(newshape) > 2:
-            raise ValueError("'newshape' must be an integer "
-                             "or a sequence of one/two integers")
-
-        # Coo sparse matrices have reshape method
-        array_coo = self._data.tocoo()
-        n_rows, n_cols = array_coo.shape
-        size = n_rows * n_cols
-
-        new_size = newshape[0] * newshape[1]
-        if new_size != size:
-            raise ValueError('total size of new array must be unchanged')
-
-        flat_indices = n_cols * array_coo.row + array_coo.col
-        new_row, new_col = divmod(flat_indices, newshape[1])
-
-        return self.__class__(scs.coo_matrix(
-            (array_coo.data, (new_row, new_col)), shape=newshape))
+        return self.__class__(self.tocsr().reshape(newshape))
 
     def resize(self, newshape, constant=0):
         """Return a new array with the specified shape."""
