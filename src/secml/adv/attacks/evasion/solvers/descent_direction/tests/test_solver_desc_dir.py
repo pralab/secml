@@ -40,7 +40,8 @@ class TestCSolverDescDir(CUnitTest):
                          grid_limits=grid_limits, levels=[0], colorbar=False)
 
         # Plot global minimum
-        fig.sp.plot(g_min[0], g_min[1], 'wx', ms=15, mew=2)
+        fig.sp.plot(g_min[0], g_min[1], 'wx',
+                    markersize=15, markeredgewidth=2)
 
         # Plot optimization trace
         fig.sp.plot_path(solver.x_seq)

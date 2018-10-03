@@ -264,8 +264,6 @@ class CPlotSecEval(CPlot):
         """
         metric = CMetric.create(metric)
 
-        print "label ", label
-
         # create security evaluation plot
         if not isinstance(sec_eval_data, list):
             sec_eval_data = [sec_eval_data]
@@ -275,7 +273,6 @@ class CPlotSecEval(CPlot):
         if not self._ylabel:
             self._ylabel = metric.class_type
 
-        print sec_eval_data[0]
         samples_idx = CArray.arange(sec_eval_data[0].Y.size)
 
         perf, perf_std = self._compute_sec_eval_curve(
@@ -298,7 +295,8 @@ class CPlotSecEval(CPlot):
                               interpolate=False, alpha=0.2, facecolor=color,
                               linestyle='None')
 
-        self.legend(loc=4, labelspacing=0.4, handletextpad=0.3)
+        if label is not None:
+            self.legend(loc=4, labelspacing=0.4, handletextpad=0.3)
 
         self._apply_params()
 

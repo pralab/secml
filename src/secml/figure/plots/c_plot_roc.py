@@ -243,7 +243,7 @@ class CPlotRoc(CPlot):
         return fp.binary_search(self._sp.get_xticks()).tolist()
 
     # TODO: REMOVE STYLE
-    def plot_roc(self, fp, tp, label='', style=None, logx=True):
+    def plot_roc(self, fp, tp, label=None, style=None, logx=True):
         """Plot a ROC curve given input fp and tp.
 
         Curves will be plotted inside the active figure or
@@ -255,7 +255,7 @@ class CPlotRoc(CPlot):
             Array with False Positives.
         tp : CArray
             Array with False Positives.
-        label : str
+        label : str or None, optional
             Label to assign to the roc.
         logx : bool, optional
             If True (default), logarithmic scale will be used for fp axis.
@@ -278,13 +278,14 @@ class CPlotRoc(CPlot):
                   styles[self.n_lines % len(styles)] if style is None else style,
                   label=label, markevery=self._markers_idx(fp * 100))
 
-        # Legend on the lower right
-        self.legend(loc=1, labelspacing=0.4, handletextpad=0.3)
+        if label is not None:
+            # Legend on the lower right
+            self.legend(loc=1, labelspacing=0.4, handletextpad=0.3)
         # Customizing figure
         self._apply_params()
 
     # TODO: REMOVE STYLE
-    def plot_mean(self, roc, label='', invert_tp=False,
+    def plot_mean(self, roc, label=None, invert_tp=False,
                   style=None, plot_std=False, logx=True):
         """Plot the mean of ROC curves.
 
@@ -295,7 +296,7 @@ class CPlotRoc(CPlot):
         ----------
         roc : CRoc
             Roc curves to plot.
-        label : str
+        label : str or None, optional
             Label to assign to the roc.
         invert_tp : bool
             True if 1 - tp (false negatives) should be plotted
@@ -339,13 +340,14 @@ class CPlotRoc(CPlot):
                           ecolor=styles[n_lines % len(styles)][0] if style is None else style,
                           fmt='None', yerr=roc.std_dev_tp[mkrs_idx] * 100)
 
-        # Legend on the lower right
-        self.legend(loc=4 if invert_tp is False else 1,
-                    labelspacing=0.4, handletextpad=0.3)
+        if label is not None:
+            # Legend on the lower right
+            self.legend(loc=4 if invert_tp is False else 1,
+                        labelspacing=0.4, handletextpad=0.3)
         # Customizing figure
         self._apply_params()
 
-    def plot_repetitions(self, roc, label='', invert_tp=False, logx=True):
+    def plot_repetitions(self, roc, label=None, invert_tp=False, logx=True):
         """Plot all input ROC curves.
 
         Curves will be plotted inside the active figure or
@@ -355,12 +357,12 @@ class CPlotRoc(CPlot):
         ----------
         roc : CRoc
             Roc curves to plot.
-        label : str
+        label : str or None, optional
             Label to assign to the roc.
             Repetition number will be appended using the
             following convention:
-             - If label is '' -> "rep 'i'"
-             - If label is not '' -> "`label` (rep `i`)"
+             - If label is None -> "rep 'i'"
+             - If label is not None -> "`label` (rep `i`)"
         invert_tp : bool
             True if 1 - tp (false negatives) should be plotted
             on y axis. Default False.
@@ -392,7 +394,7 @@ class CPlotRoc(CPlot):
 
             """
             i_label = 'rep {:}'.format(i)
-            if l_str != '':
+            if l_str is not None:
                 i_label = l_str + ' (' + i_label + ')'
 
             return i_label
@@ -416,9 +418,11 @@ class CPlotRoc(CPlot):
                       label=label_w_rep(label, rep_i),
                       markevery=self._markers_idx(roc.fp[rep_i] * 100))
 
-        # Legend on the lower right
-        self.legend(loc=4 if invert_tp is False else 1,
-                    labelspacing=0.4, handletextpad=0.3)
+        if label is not None:
+            # Legend on the lower right
+            self.legend(loc=4 if invert_tp is False else 1,
+                        labelspacing=0.4, handletextpad=0.3)
+
         # Customizing figure
         self._apply_params()
 
