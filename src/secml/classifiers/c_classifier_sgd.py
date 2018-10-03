@@ -6,6 +6,7 @@
 .. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
 
 """
+import numpy as np
 from sklearn import linear_model
 
 from secml.classifiers import CClassifierLinear
@@ -20,9 +21,10 @@ class CClassifierSGD(CClassifierLinear):
     class_type = 'sgd'
 
     def __init__(self, loss, regularizer, kernel=None, alpha=0.01,
-                 n_iter=5, shuffle=True, class_weight=None, average=False,
-                 fit_intercept=True, warm_start=False, normalizer=None,
-                 learning_rate='optimal', eta0=10.0, power_t=0.5):
+                 fit_intercept=True, max_iter=1000, tol=-np.inf,
+                 shuffle=True, learning_rate='optimal',
+                 eta0=10.0, power_t=0.5, class_weight=None,
+                 warm_start=False, average=False, normalizer=None):
 
         # Calling the superclass init
         CClassifierLinear.__init__(self, normalizer=normalizer)
@@ -34,14 +36,15 @@ class CClassifierSGD(CClassifierLinear):
 
         # Classifier parameters
         self.alpha = alpha
-        self.n_iter = n_iter
-        self.shuffle = shuffle
-        self.class_weight = class_weight
         self.fit_intercept = fit_intercept
-        self.warm_start = warm_start
+        self.max_iter = max_iter
+        self.tol = tol  # TODO: from sklearn 0.21 default for tol will change
+        self.shuffle = shuffle
         self.learning_rate = learning_rate
         self.eta0 = eta0
         self.power_t = power_t
+        self.class_weight = class_weight
+        self.warm_start = warm_start
         self.average = average
 
         # Similarity function (bound) to use for computing features
@@ -168,7 +171,8 @@ class CClassifierSGD(CClassifierLinear):
             penalty=self.regularizer.class_type,
             alpha=self.alpha,
             fit_intercept=self.fit_intercept,
-            n_iter=self.n_iter,
+            max_iter=self.max_iter,
+            tol=self.tol,
             shuffle=self.shuffle,
             learning_rate=self.learning_rate,
             eta0=self.eta0,
@@ -200,7 +204,7 @@ class CClassifierSGD(CClassifierLinear):
         if self.fit_intercept is True:
             self._b = CArray(sgd.intercept_)[0]
         else:
-            self._b = 0
+            self._b = None
 
         return sgd
 
