@@ -1,6 +1,6 @@
 """
-.. module:: ClassifierMulticlassOVA
-   :synopsis: One-Vs-All Multiclass Classifier
+.. module:: CClassifierMulticlassOVA
+   :synopsis: One-Vs-All multiclass classifier
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
@@ -115,27 +115,28 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
             dataset.X, dataset.get_labels_asbinary(dataset.classes[class_idx]))
 
     def _discriminant_function(self, x, label):
-        """Compute the discriminant function against class `label`.
+        """Computes the discriminant function for each pattern in x.
 
-        For OVA, this is the output of the label^th classifier.
+        For One-Vs-All (OVA) multiclass scheme,
+         this is the output of the `label`^th classifier.
 
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
         label : int
-            The label of the class with respect to which the function
-            should be calculated.
+            The label of the class wrt the function should be calculated.
 
         Returns
         -------
-        score : CArray or scalar
-            Flat array of shape (n_patterns,) with discriminant function
-            value of each test pattern or scalar if n_patterns == 1.
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
 
         """
         self.logger.info(
             "Getting discriminant function against class: {:}".format(label))
-        # Getting predicted score for current class classifier
+        # Getting predicted scores for classifier associated with label
+        # The discriminant function is always computed wrt positive class (1)
         return self.binary_classifiers[label].discriminant_function(x, label=1)

@@ -1,6 +1,6 @@
 """
-.. module:: ClassifierLinear
-   :synopsis: Interface and common functions for Linear Classifiers
+.. module:: CClassifierLinear
+   :synopsis: Interface and common functions for linear classification
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
@@ -99,21 +99,22 @@ class CClassifierLinear(CClassifier):
         return super(CClassifierLinear, self).train(dataset, n_jobs=n_jobs)
 
     def _discriminant_function(self, x, label=1):
-        """Compute the distance of the samples in x from the separating hyperplane.
-
-        Discriminant function is always computed wrt positive class.
+        """Computes the distance from the separating hyperplane for each pattern in x.
 
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
+        label : {1}
+            The label of the class wrt the function should be calculated.
+            Discriminant function is always computed wrt positive class (1).
 
         Returns
         -------
-        score : CArray or scalar
-            Flat array of shape (n_patterns,) with discriminant function
-            value of each test pattern or scalar if n_patterns == 1.
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
 
         """
         if self.is_clear():
@@ -127,44 +128,39 @@ class CClassifierLinear(CClassifier):
     def discriminant_function(self, x, label=1):
         """Computes the discriminant function for each pattern in x.
 
+        For a linear classifier the discriminant function is given by::
+
+            .. math:: f[i] =  (x[i] * w^T) + b
+
         If a normalizer has been specified, input is normalized
         before computing the discriminant function.
 
-        For a linear classifier the discriminant function is given by::
-
-            f[i] =  (x[i] * w^T) + b
-
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : int
-            The label of the class with respect to which the function
-            should be calculated. Default 1.
+        label : {0, 1}, optional
+            The label of the class wrt the function should be calculated.
+            Default is 1.
 
         Returns
         -------
-        score : CArray or scalar
-            Flat array of shape (n_patterns,) or scalar if
-            `n_patterns == 1` with the value of the discriminant
-            function for each test pattern.
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
 
         """
         if self.is_clear():
             raise ValueError("make sure the classifier is trained first.")
-        x_carray = CArray(x).atleast_2d()
 
         # Normalizing data if a normalizer is defined
         if self.normalizer is not None:
-            x_carray = self.normalizer.normalize(x_carray)
+            x = self.normalizer.normalize(x)
 
-        # We have a binary classifier
-        sign = 2 * label - 1  # Sign depends on input label (0/1)
+        sign = extend_binary_labels(label)  # Sign depends on input label (0/1)
 
-        # Return a scalar if n_patterns == 1
-        score = sign * self._discriminant_function(x_carray).ravel()
-        return score[0] if score.size == 1 else score
+        return sign * self._discriminant_function(x)
 
     def classify(self, x):
         """Perform classification on samples in x.

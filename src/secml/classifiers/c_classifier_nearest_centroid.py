@@ -1,14 +1,14 @@
 """
-cambiare con _params 
-
 .. module:: CClassifierNearestCentroid
    :synopsis: Nearest Centroid Classifier
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
 from secml.array import CArray
 from secml.classifiers import CClassifier
+from secml.classifiers.clf_utils import check_binary_labels
 from sklearn.neighbors import NearestCentroid
 from sklearn.metrics import pairwise_distances
 
@@ -76,32 +76,72 @@ class CClassifierNearestCentroid(CClassifier):
 
         return self._nc
 
-    def _discriminant_function(self, x, label):
-        """Compute the probability of samples to being in class with specified label.
+    def discriminant_function(self, x, label=1):
+        """Computes the discriminant function for each pattern in x.
 
-        Score is the distance from the pattern with label x centroid 
+        The score is the distance of each pattern
+         from the centroid of class `label`
+
+        If a normalizer has been specified, input is normalized
+         before computing the discriminant function.
 
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : int
-            The label of the class with respect to which the function
-            should be calculated.
+        label : {0, 1}, optional
+            The label of the class wrt the function should be calculated.
+            Default is 1.
 
         Returns
         -------
-        score : CArray or scalar
-            Probability for patterns to be in class with specified label
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
 
         """
+        if self.is_clear():
+            raise ValueError("make sure the classifier is trained first.")
+
+        # Normalizing data if a normalizer is defined
+        if self.normalizer is not None:
+            x = self.normalizer.normalize(x)
+
+        return self._discriminant_function(x, label=label)
+
+    def _discriminant_function(self, x, label=1):
+        """Computes the discriminant function for each pattern in x.
+
+        The score is the distance of each pattern
+         from the centroid of class `label`
+
+        Parameters
+        ----------
+        x : CArray
+            Array with new patterns to classify, 2-Dimensional of shape
+            (n_patterns, n_features).
+        label : {0, 1}, optional
+            The label of the class wrt the function should be calculated.
+            Default is 1.
+
+        Returns
+        -------
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
+
+        """
+        check_binary_labels(label)  # Label should be in {0, 1}
+
         dist_from_ben_centroid = pairwise_distances(
             x.atleast_2d().get_data(),
-            self.centroids[0, :].atleast_2d().get_data(), metric=self.metric)
+            self.centroids[0, :].atleast_2d().get_data(),
+            metric=self.metric)
         dis_from_mal_centroid = pairwise_distances(
             x.atleast_2d().get_data(),
-            self.centroids[1, :].atleast_2d().get_data(), metric=self.metric)
+            self.centroids[1, :].atleast_2d().get_data(),
+            metric=self.metric)
 
         if label == 1:
             return CArray(

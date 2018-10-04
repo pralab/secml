@@ -1,5 +1,5 @@
 """
-.. module:: PyTorchClassifier
+.. module:: CTorchClassifier
    :synopsis: Classifier with PyTorch Neural Network
 
 .. moduleauthor:: Ambra Demontis <marco.melis@diee.unica.it>
@@ -417,17 +417,56 @@ class CTorchClassifier(CClassifier):
         return self
 
     def discriminant_function(self, x, label, n_jobs=1):
+        """Computes the discriminant function for each pattern in x.
 
-        x_carray = CArray(x).atleast_2d()
+        If a normalizer has been specified, input is normalized
+        before computing the discriminant function.
 
+        Parameters
+        ----------
+        x : CArray
+            Array with new patterns to classify, 2-Dimensional of shape
+            (n_patterns, n_features).
+        label : int
+            The label of the class wrt the function should be calculated.
+        n_jobs : int
+            Number of parallel workers to use. Default 1.
+            Cannot be higher than processor's number of cores.
+
+        Returns
+        -------
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
+
+        """
         # Normalizing data if a normalizer is defined
         if self.normalizer is not None:
-            x_carray = self.normalizer.normalize(x_carray)
+            x = self.normalizer.normalize(x)
 
-        return self._discriminant_function(x_carray, label, n_jobs=n_jobs)
+        return self._discriminant_function(x, label, n_jobs=n_jobs)
 
     def _discriminant_function(self, x, label, n_jobs=1):
+        """Computes the discriminant function for each pattern in x.
 
+        Parameters
+        ----------
+        x : CArray
+            Array with new patterns to classify, 2-Dimensional of shape
+            (n_patterns, n_features).
+        label : int
+            The label of the class wrt the function should be calculated.
+        n_jobs : int
+            Number of parallel workers to use. Default 1.
+            Cannot be higher than processor's number of cores.
+
+        Returns
+        -------
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
+
+        """
         x_loader = self._get_test_input_loader(x, n_jobs=n_jobs)
 
         # Switch to evaluation mode

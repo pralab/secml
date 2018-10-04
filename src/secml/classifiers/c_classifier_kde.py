@@ -1,13 +1,14 @@
 """
-.. module:: CClassifierKernelDensityEstimator
+.. module:: ClassifierKernelDensityEstimator
    :synopsis: Kernel Density Estimator
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
 from secml.array import CArray
 from secml.classifiers import CClassifier
-from secml.classifiers.clf_utils import extend_binary_labels
+from secml.classifiers.clf_utils import check_binary_labels, extend_binary_labels
 from secml.kernel import CKernel
 
 
@@ -112,24 +113,58 @@ class CClassifierKDE(CClassifier):
 
         return self
 
-    def _discriminant_function(self, x, label):
-        """Compute the probability of samples to being in class with specified label 
+    def discriminant_function(self, x, label=1):
+        """Computes the discriminant function for each pattern in x.
+
+        If a normalizer has been specified, input is normalized
+         before computing the discriminant function.
 
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : int
-            The label of the class with respect to which the function
-            should be calculated.
+        label : {0, 1}, optional
+            The label of the class wrt the function should be calculated.
+            Default is 1.
 
         Returns
         -------
-        score : CArray or scalar
-            Probability for patterns to be in class with specified label
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
 
         """
+        if self.is_clear():
+            raise ValueError("make sure the classifier is trained first.")
+
+        # Normalizing data if a normalizer is defined
+        if self.normalizer is not None:
+            x = self.normalizer.normalize(x)
+
+        return self._discriminant_function(x, label=label)
+
+    def _discriminant_function(self, x, label=1):
+        """Computes the discriminant function for each pattern in x.
+
+        Parameters
+        ----------
+        x : CArray
+            Array with new patterns to classify, 2-Dimensional of shape
+            (n_patterns, n_features).
+        label : {0, 1}, optional
+            The label of the class wrt the function should be calculated.
+            Default is 1.
+
+        Returns
+        -------
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
+
+        """
+        check_binary_labels(label)  # Label should be in {0, 1}
+
         if label == 1:
             return 1 - CArray(
                 self.kernel.k(x, self._training_samples)).mean(keepdims=False)

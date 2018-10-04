@@ -1,6 +1,6 @@
 """
-.. module:: ClassifierMulticlass
-   :synopsis: Interface for Multiclass Classifiers
+.. module:: CClassifierMulticlass
+   :synopsis: Interface for multiclass classifiers
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
@@ -274,32 +274,27 @@ class CClassifierMulticlass(CClassifier):
 
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : int, optional
-            The label of the class with respect to which the function
-            should be calculated. Default 1.
+        label : int
+            The label of the class wrt the function should be calculated.
 
         Returns
         -------
-        score : CArray or scalar
+        score : CArray
             Value of the discriminant function for each test pattern.
-            Flat array of shape (n_patterns,) or scalar if the number
-            of patterns in `x` is 1.
+            Dense flat array of shape (n_patterns,).
 
         """
         if self.is_clear():
             raise ValueError("make sure the classifier is trained first.")
-        x_carray = CArray(x).atleast_2d()
 
         # Normalizing data if a normalizer is defined
         if self.normalizer is not None:
-            x_carray = self.normalizer.normalize(x_carray)
+            x = self.normalizer.normalize(x)
 
-        # Return a scalar if n_patterns == 1
-        score = CArray(self._discriminant_function(x_carray, label)).ravel()
-        return score[0] if score.size == 1 else score
+        return self._discriminant_function(x, label)
 
     def apply_method(self, method, *args, **kwargs):
         """Apply input method to all trained classifers.

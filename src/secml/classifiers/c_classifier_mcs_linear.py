@@ -1,5 +1,5 @@
 """
-.. module:: ClassifierMCSLinear
+.. module:: CClassifierMCSLinear
    :synopsis: Multiple Linear Classifier System
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

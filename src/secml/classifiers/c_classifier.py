@@ -1,6 +1,6 @@
 """
-.. module:: Classifier
-   :synopsis: Interface and common functions for Classifiers
+.. module:: CClassifier
+   :synopsis: Interface and common functions for classification
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
@@ -178,23 +178,23 @@ class CClassifier(CCreator):
 
     @abstractmethod
     def _discriminant_function(self, x, label):
-        """Private method that compute the discriminant function.
-        Must be reimplemented by subclasses.
+        """Private method that computes the discriminant function.
+
+        .. warning:: Must be reimplemented by a subclass of `.CClassifier`.
 
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
         label : int
-            The label of the class with respect to which the function
-            should be calculated.
+            The label of the class wrt the function should be calculated.
 
         Returns
         -------
-        score : CArray or scalar
-            Flat array of shape (n_patterns,) with discriminant function
-            value of each test pattern or scalar if n_patterns == 1.
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
 
         """
         raise NotImplementedError()
@@ -210,44 +210,40 @@ class CClassifier(CCreator):
             The actual discriminant function should be implemented
             case by case inside :meth:`_discriminant_function` method.
 
-        .. note::
-
-            This method implements a generic formulation where the
-            discriminant function is computed for each pattern in
-            the input array. It's useful to override this when
-            the function can be computed for all patterns at once.
-
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
         label : int
-            The label of the class with respect to which the function
-            should be calculated.
+            The label of the class wrt the function should be calculated.
 
         Returns
         -------
-        score : CArray or scalar
+        score : CArray
             Value of the discriminant function for each test pattern.
-            Flat array of shape (n_patterns,) or scalar if the number
-            of patterns in `x` is 1.
+            Dense flat array of shape (n_patterns,).
+
+        Warnings
+        --------
+        This method implements a generic formulation where the
+         discriminant function is computed separately for each pattern.
+         It's useful to override this when the function can be computed
+         for all patterns at once to improve performance.
 
         """
         if self.is_clear():
             raise ValueError("make sure the classifier is trained first.")
-        x_carray = CArray(x).atleast_2d()
 
         # Normalizing data if a normalizer is defined
         if self.normalizer is not None:
-            x_carray = self.normalizer.normalize(x_carray)
+            x = self.normalizer.normalize(x)
 
-        score = CArray.ones(shape=x_carray.shape[0])
-        for i in xrange(x_carray.shape[0]):
-            score[i] = self._discriminant_function(x_carray[i, :], label)
+        score = CArray.ones(shape=x.shape[0])
+        for i in xrange(x.shape[0]):
+            score[i] = self._discriminant_function(x[i, :], label)
 
-        # Return a scalar if n_patterns == 1
-        return score[0] if score.size == 1 else score.ravel()
+        return score
 
     def classify(self, x, n_jobs=1):
         """Perform classification on samples in x.

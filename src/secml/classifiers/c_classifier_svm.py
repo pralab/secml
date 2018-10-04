@@ -1,5 +1,5 @@
 """
-.. module:: ClassifierSVM
+.. module:: CClassifierSVM
    :synopsis: Support Vector Machine (SVM) classifier
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -322,37 +322,41 @@ class CClassifierSVM(CClassifierLinear):
         return classifier
 
     def _discriminant_function(self, x, label=1):
-        """Compute the distance of the samples in x from the separating hyperplane.
+        """Computes the distance from the separating hyperplane for each pattern in x.
 
-        Discriminant function is always computed wrt positive class.
-
-        For non linear SVM, the kernel between input patterns and Support
-        Vectors is computed and then the inner product of the resulting
-        array with the alphas is calculated.
+        For non linear SVM, the kernel between input patterns and
+         Support Vectors is computed and then the inner product of
+         the resulting array with the alphas is calculated.
 
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : int
-            The label of the class with respect to which the function
-            should be calculated.
+        label : {1}
+            The label of the class wrt the function should be calculated.
+            Discriminant function is always computed wrt positive class (1).
 
         Returns
         -------
-        score : CArray or scalar
-            Flat array of shape (n_patterns,) with discriminant function
-            value of each test pattern or scalar if n_patterns == 1.
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
 
         """
-        if self.is_kernel_linear():  # Score are given by the linear model
-            return CClassifierLinear._discriminant_function(self, x)
-        else:
-            if self.is_clear():
-                raise ValueError("Untrained classifier.")
-            m = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
-            return CArray(m).todense().ravel() + self.b
+        if self.is_kernel_linear():  # Scores are given by the linear model
+            return CClassifierLinear._discriminant_function(
+                self, x, label=label)
+
+        # Non-linear SVM
+        if self.is_clear():
+            raise ValueError("make sure the classifier is trained first.")
+        if label != 1:
+            raise ValueError(
+                "discriminant function is always computed wrt positive class.")
+
+        m = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
+        return CArray(m).todense().ravel() + self.b
 
     def _gradient_f(self, x=None, y=1):
         """Computes the gradient of the SVM classifier's decision function

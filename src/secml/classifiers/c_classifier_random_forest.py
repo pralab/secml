@@ -1,5 +1,5 @@
 """
-.. module:: ClassifierRandomForest
+.. module:: CClassifierRandomForest
    :synopsis: Random Forest classifier
 
 .. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
@@ -78,11 +78,21 @@ class CClassifierRandomForest(CClassifier):
         return self._rf
 
     def _discriminant_function(self, x, label):
-        """Compute the discriminant function for pattern 'x'."""
-        x_carray = CArray(x)
-        if x_carray.issparse is True and sklearn.__version__ < '0.16':
-            raise ValueError(
-                "sparse input is not supported if sklearn version < 0.16.")
+        """Computes the discriminant function (probability estimates) for each pattern in x.
 
-        return CArray(
-            self._rf.predict_proba(x.get_data())[:, label]).ravel()
+        Parameters
+        ----------
+        x : CArray
+            Array with new patterns to classify, 2-Dimensional of shape
+            (n_patterns, n_features).
+        label : int
+            The label of the class wrt the function should be calculated.
+
+        Returns
+        -------
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
+
+        """
+        return CArray(self._rf.predict_proba(x.get_data())[:, label]).ravel()
