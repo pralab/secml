@@ -355,6 +355,8 @@ class CClassifierSVM(CClassifierLinear):
             raise ValueError(
                 "discriminant function is always computed wrt positive class.")
 
+        x = x.atleast_2d()  # Ensuring input is 2-D
+
         m = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
         return CArray(m).todense().ravel() + self.b
 

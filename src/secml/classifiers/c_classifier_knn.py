@@ -153,6 +153,7 @@ class CClassifierKNN(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
+        x = x.atleast_2d()  # Ensuring input is 2-D
         return CArray(self._KNC.predict_proba(x.get_data())[:, label]).ravel()
 
     def kneighbors(self, x, num_samples, return_distance=True):

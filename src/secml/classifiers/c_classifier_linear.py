@@ -122,6 +122,7 @@ class CClassifierLinear(CClassifier):
         if label != 1:
             raise ValueError(
                 "discriminant function is always computed wrt positive class.")
+        x = x.atleast_2d()  # Ensuring input is 2-D
         # Computing: `x * w^T`
         return CArray(x.dot(self.w.T)).todense().ravel() + self.b
 
@@ -153,6 +154,8 @@ class CClassifierLinear(CClassifier):
         """
         if self.is_clear():
             raise ValueError("make sure the classifier is trained first.")
+
+        x = x.atleast_2d()  # Ensuring input is 2-D
 
         # Normalizing data if a normalizer is defined
         if self.normalizer is not None:

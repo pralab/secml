@@ -95,4 +95,5 @@ class CClassifierRandomForest(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
+        x = x.atleast_2d()  # Ensuring input is 2-D
         return CArray(self._rf.predict_proba(x.get_data())[:, label]).ravel()

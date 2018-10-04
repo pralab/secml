@@ -138,6 +138,8 @@ class CClassifierKDE(CClassifier):
         if self.is_clear():
             raise ValueError("make sure the classifier is trained first.")
 
+        x = x.atleast_2d()  # Ensuring input is 2-D
+
         # Normalizing data if a normalizer is defined
         if self.normalizer is not None:
             x = self.normalizer.normalize(x)
@@ -164,6 +166,8 @@ class CClassifierKDE(CClassifier):
 
         """
         check_binary_labels(label)  # Label should be in {0, 1}
+
+        x = x.atleast_2d()  # Ensuring input is 2-D
 
         if label == 1:
             return 1 - CArray(

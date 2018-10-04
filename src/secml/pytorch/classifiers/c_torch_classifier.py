@@ -440,6 +440,8 @@ class CTorchClassifier(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
+        x = x.atleast_2d()  # Ensuring input is 2-D
+
         # Normalizing data if a normalizer is defined
         if self.normalizer is not None:
             x = self.normalizer.normalize(x)
@@ -467,6 +469,8 @@ class CTorchClassifier(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
+        x = x.atleast_2d()  # Ensuring input is 2-D
+
         x_loader = self._get_test_input_loader(x, n_jobs=n_jobs)
 
         # Switch to evaluation mode

@@ -150,6 +150,7 @@ class CClassifierRidge(CClassifierLinear):
             Dense flat array of shape (n_patterns,).
 
         """
+        x = x.atleast_2d()  # Ensuring input is 2-D
         # Compute discriminant function in kernel space if necessary
         k = x if self.kernel is None else CArray(self.kernel.k(x, self._tr))
         # Scores are given by the linear model

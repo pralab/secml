@@ -104,6 +104,8 @@ class CClassifierNearestCentroid(CClassifier):
         if self.is_clear():
             raise ValueError("make sure the classifier is trained first.")
 
+        x = x.atleast_2d()  # Ensuring input is 2-D
+
         # Normalizing data if a normalizer is defined
         if self.normalizer is not None:
             x = self.normalizer.normalize(x)
@@ -134,13 +136,13 @@ class CClassifierNearestCentroid(CClassifier):
         """
         check_binary_labels(label)  # Label should be in {0, 1}
 
+        x = x.atleast_2d()  # Ensuring input is 2-D
+
         dist_from_ben_centroid = pairwise_distances(
-            x.atleast_2d().get_data(),
-            self.centroids[0, :].atleast_2d().get_data(),
+            x.get_data(), self.centroids[0, :].atleast_2d().get_data(),
             metric=self.metric)
         dis_from_mal_centroid = pairwise_distances(
-            x.atleast_2d().get_data(),
-            self.centroids[1, :].atleast_2d().get_data(),
+            x.get_data(), self.centroids[1, :].atleast_2d().get_data(),
             metric=self.metric)
 
         if label == 1:
