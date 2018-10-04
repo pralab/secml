@@ -153,7 +153,7 @@ class TestMulticlass(CUnitTest):
         self.logger.info("Randomly selected pattern:\n%s", str(pattern))
 
         # Get predicted label
-        sample_label = multiclass.classify(pattern)[0]
+        sample_label = multiclass.classify(pattern)[0][0]
         # Return the gradient of the label^th sub-classifier
         ova_grad = multiclass.binary_classifiers[
             sample_label].gradient_f_x(pattern)

@@ -121,7 +121,7 @@ class TestSGDClassifier(CUnitTest):
         for (i, j), val in np.ndenumerate(X1):
             x1 = val
             x2 = X2[i, j]
-            Z[i, j] = clf.discriminant_function([[x1, x2]])
+            Z[i, j] = clf.discriminant_function(CArray([x1, x2]))
         levels = [-1.0, 0.0, 1.0]
         linestyles = ['dashed', 'solid', 'dashed']
         colors = 'k'
