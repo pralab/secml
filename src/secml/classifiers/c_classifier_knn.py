@@ -135,7 +135,7 @@ class CClassifierKNN(CClassifier):
 
         return self._KNC
 
-    def _discriminant_function(self, x, label=1):
+    def _discriminant_function(self, x, label):
         """Compute the discriminant function for pattern 'x'."""
         return CArray(self._KNC.predict_proba(x.get_data())[:, label])
 
