@@ -66,7 +66,7 @@ class CClassifierDecisionTree(CClassifier):
 
         return self._dt
 
-    def _discriminant_function(self, x, label=1):
+    def _discriminant_function(self, x, label):
         """Compute the discriminant function for pattern 'x'."""
         x_carray = CArray(x)
         if x_carray.issparse is True and sklearn.__version__ < '0.16':
