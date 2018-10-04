@@ -77,7 +77,7 @@ class CClassifierRandomForest(CClassifier):
 
         return self._rf
 
-    def _discriminant_function(self, x, label=1):
+    def _discriminant_function(self, x, label):
         """Compute the discriminant function for pattern 'x'."""
         x_carray = CArray(x)
         if x_carray.issparse is True and sklearn.__version__ < '0.16':
@@ -85,4 +85,4 @@ class CClassifierRandomForest(CClassifier):
                 "sparse input is not supported if sklearn version < 0.16.")
 
         return CArray(
-            self._rf.predict_proba(x_carray.get_data())[:, label]).ravel()
+            self._rf.predict_proba(x.get_data())[:, label]).ravel()
