@@ -228,7 +228,7 @@ class CClassifier(CCreator):
         --------
         This method implements a generic formulation where the
          discriminant function is computed separately for each pattern.
-         It's useful to override this when the function can be computed
+         It's convenient to override this when the function can be computed
          for all patterns at once to improve performance.
 
         """
