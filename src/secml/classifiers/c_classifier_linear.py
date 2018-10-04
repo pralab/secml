@@ -10,6 +10,7 @@ from secml.classifiers import CClassifier
 from secml.classifiers.clf_utils import extend_binary_labels
 from secml.array import CArray
 from secml.data import CDataset
+from secml import _NoValue
 
 
 class CClassifierLinear(CClassifier):
@@ -165,42 +166,41 @@ class CClassifierLinear(CClassifier):
 
         return sign * self._discriminant_function(x)
 
-    def classify(self, x):
-        """Perform classification on samples in x.
+    def classify(self, x, n_jobs=_NoValue):
+        """Perform classification of each pattern in x.
 
         If a normalizer has been specified,
         input is normalized before classification.
 
-        Classification is performed once wrt class 1, as
-        the scores for class 0 just have inverted sign.
-
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
 
         Returns
         -------
-        y : CArray or scalar
-            Flat dense array of shape (n_patterns,) with label assigned
-            to each test pattern or a single scalar if n_patterns == 1.
-        score : CArray
-            Array of shape (n_patterns, 2) with classification
-            score of each test pattern with respect to both classes.
+        labels : CArray
+            Flat dense array of shape (n_patterns,) with the label assigned
+             to each test pattern. The classification label is the label of
+             the class associated with the highest score.
+        scores : CArray
+            Array of shape (n_patterns, 1) with classification
+             score of each test pattern with respect to {0, +1} classes.
 
         """
+        if n_jobs is not _NoValue:
+            raise ValueError("`n_jobs` not supported")
+
         # Discriminant function is called once (2 classes)
         s_tmp = CArray(
             self.discriminant_function(CArray(x).atleast_2d(), label=1))
         # Assembling scores for positive and negative class
-        score = CArray([[-elem, elem] for elem in s_tmp])
+        scores = CArray([[-elem, elem] for elem in s_tmp])
 
-        # Return a scalar if n_patterns == 1
-        labels = CArray(score.argmax(axis=1)).ravel()
-        labels = labels[0] if labels.size == 1 else labels
-
-        return labels, score
+        # The classification label is the label of the class
+        # associated with the highest score
+        return CArray(scores.argmax(axis=1)).ravel(), scores
 
     def _gradient_f(self, x=None, y=1):
         """Computes the gradient of the linear classifier's decision function

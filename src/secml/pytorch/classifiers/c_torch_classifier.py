@@ -503,7 +503,31 @@ class CTorchClassifier(CClassifier):
         return scores.ravel()
 
     def classify(self, x, n_jobs=1):
+        """Perform classification of each pattern in x.
 
+        If a normalizer has been specified,
+         input is normalized before classification.
+
+        Parameters
+        ----------
+        x : CArray
+            Array with new patterns to classify, 2-Dimensional of shape
+            (n_patterns, n_features).
+        n_jobs : int, optional
+            Number of parallel workers to use for classification.
+            Default 1. Cannot be higher than processor's number of cores.
+
+        Returns
+        -------
+        labels : CArray
+            Flat dense array of shape (n_patterns,) with the label assigned
+             to each test pattern. The classification label is the label of
+             the class associated with the highest score.
+        scores : CArray
+            Array of shape (n_patterns, n_classes) with classification
+             score of each test pattern with respect to each training class.
+
+        """
         x_carray = CArray(x).atleast_2d()
 
         # Normalizing data if a normalizer is defined
@@ -539,7 +563,10 @@ class CTorchClassifier(CClassifier):
             else:
                 scores = logits
 
-        return scores.argmax(axis=1).ravel(), scores
+        # TODO: WE SHOULD USE SOFTMAX TO COMPUTE LABELS?
+        # The classification label is the label of the class
+        # associated with the highest score
+        return CArray(scores.argmax(axis=1)).ravel(), scores
 
     def _gradient_f(self, x, y):
         """Computes the gradient of the classifier's decision function
