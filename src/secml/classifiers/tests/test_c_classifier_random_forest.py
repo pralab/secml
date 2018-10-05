@@ -50,8 +50,8 @@ class TestCClassifierRandomForest(CUnitTest):
             self.assertEqual(type(s), CArray)
             self.assertTrue(s.isdense)
             self.assertEqual(1, s.ndim)
-            self.assertEqual((n_samples,), df_scores_0.shape)
-            self.assertEqual(df_scores_0.dtype, float)
+            self.assertEqual((n_samples,), s.shape)
+            self.assertEqual(float, s.dtype)
 
         def _check_classify_scores(l, s, n_samples, n_classes):
             self.assertEqual(type(l), CArray)
@@ -62,8 +62,8 @@ class TestCClassifierRandomForest(CUnitTest):
             self.assertEqual(2, s.ndim)
             self.assertEqual((n_samples,), l.shape)
             self.assertEqual((n_samples, n_classes), s.shape)
-            self.assertEqual(l.dtype, int)
-            self.assertEqual(s.dtype, float)
+            self.assertEqual(int, l.dtype)
+            self.assertEqual(float, s.dtype)
 
         self.rnd_forest.train(self.dataset)
 
