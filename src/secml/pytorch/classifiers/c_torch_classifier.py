@@ -493,7 +493,8 @@ class CTorchClassifier(CClassifier):
             with torch.no_grad():
                 logits = self._model(x)
                 logits = logits.view(logits.size(0), -1)
-                logits = CArray(logits.data.cpu().numpy()[:, label])
+                logits = CArray(
+                    logits.data.cpu().numpy()[:, label]).astype(float)
 
             if scores is not None:
                 scores = scores.append(logits, axis=0)
@@ -556,7 +557,7 @@ class CTorchClassifier(CClassifier):
             with torch.no_grad():
                 logits = self._model(x)
                 logits = logits.view(logits.size(0), -1)
-                logits = CArray(logits.data.cpu().numpy())
+                logits = CArray(logits.data.cpu().numpy()).astype(float)
 
             if scores is not None:
                 scores = scores.append(logits, axis=0)
