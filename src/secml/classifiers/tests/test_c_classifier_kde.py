@@ -8,7 +8,7 @@ from secml.features.normalization import CNormalizerMinMax
 from secml.figure import CFigure
 
 
-class TestCClassifierKernelDensityEstimator(CUnitTest):
+class TestCClassifierKDE(CUnitTest):
     """Unit test for CClassifierKDE."""
 
     def setUp(self):
