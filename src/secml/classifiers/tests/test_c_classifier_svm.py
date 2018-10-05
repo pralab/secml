@@ -15,7 +15,7 @@ from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
 
 
-class TestSVM(CUnitTest):
+class TestCClassifierSVM(CUnitTest):
 
     def setUp(self):
 

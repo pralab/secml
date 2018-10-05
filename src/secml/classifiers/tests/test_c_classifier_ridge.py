@@ -9,7 +9,7 @@ from secml.peval.metrics import CMetric
 from secml.figure import CFigure
 
 
-class TestRidgeClassifier(CUnitTest):
+class TestCClassifierRidge(CUnitTest):
     """Unit test for Ridge Classifier."""
 
     def setUp(self):

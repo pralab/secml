@@ -13,7 +13,7 @@ from secml.peval.metrics import CMetric
 from secml.figure import CFigure
 
 
-class TestSGDClassifier(CUnitTest):
+class TestCClassifierSGD(CUnitTest):
     """Unit test for SGD Classifier."""
 
     def setUp(self):
