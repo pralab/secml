@@ -79,7 +79,7 @@ class CNormalizerRow(CNormalizer):
         """Returns the norm of each training array's patterns."""
         return self._norm
 
-    def train(self, data):
+    def train(self, x):
         """Train the normalizer. Does reset only.
 
         For the Row normalizer, no training routine is needed, so using
@@ -88,33 +88,32 @@ class CNormalizerRow(CNormalizer):
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Array to be used as training set.
             Each row must correspond to one different pattern.
 
         Returns
         -------
-        trained_normalizer : CRowNormalizer
-            Reset normalizer.
+        CNormalizerRow
+            Trained normalizer.
 
         """
         self.clear()  # Reset trained normalizer
 
         return self
 
-    def normalize(self, data):
+    def normalize(self, x):
         """Scales array patterns to have unit norm.
 
         Parameters
         ----------
-        data : CArray
-            Array to be normalized.
+        x : CArray
+            Array to be normalized, 2-Dimensional.
 
         Returns
         -------
         scaled_array : CArray
             Array with patterns normalized to have unit norm.
-            Shape of returned array is the same of the original array.
 
         Examples
         --------
@@ -137,32 +136,32 @@ class CNormalizerRow(CNormalizer):
          [ 1.]])
 
         """
-        data_array = CArray(data)  # working on CArrays
+        x = x.atleast_2d()
 
         # Computing and storing norm (can be used for revert)
-        self._norm = CArray(data_array.norm_2d(order=self.order, axis=1))
+        self._norm = CArray(x.norm_2d(order=self.order, axis=1))
 
-        if data_array.issparse:  # Avoid conversion to dense
-            data_array = data_array.deepcopy().astype(float)
+        if x.issparse:  # Avoid conversion to dense
+            x = x.deepcopy().astype(float)
             # Fixes setting floats to int array (result will be float anyway)
             for e_idx, e in enumerate(self._norm):
-                res = CArray(data_array[e_idx, :]) / e
-                data_array[e_idx, :] = res
+                res = CArray(x[e_idx, :]) / e
+                x[e_idx, :] = res
         else:
             # Normalizing array and removing any 'nan'
-            data_array /= self.norm  # This creates a copy
+            x /= self.norm  # This creates a copy
 
-        data_array.nan_to_num()  # Avoid storing nans/inf
+        x.nan_to_num()  # Avoid storing nans/inf
 
-        return data_array
+        return x
 
-    def revert(self, data):
+    def revert(self, x):
         """Undo the normalization of data according to training data.
 
         Parameters
         ----------
-        data : CArray
-            Array to be reverted. Must have been normalized by the same
+        x : CArray
+            Array to be reverted, 2-D. Must have been normalized by the same
             calling instance of CNormalizerRow or by a normalizer trained
             with the same data.
 
@@ -196,12 +195,14 @@ class CNormalizerRow(CNormalizer):
           (2, 2)	-1.0)
 
         """
-        data_array = CArray(data)  # working on CArrays
+        x = x.atleast_2d()
+
         # Training first!
         if self.norm is None:
             raise ValueError("train the normalizer first.")
-        if data_array.atleast_2d().shape[0] != self.norm.size:
+
+        if x.shape[0] != self.norm.size:
             raise ValueError("array to revert must have {:} patterns (rows)."
                              "".format(self.norm.size))
 
-        return data_array * self.norm
+        return x * self.norm

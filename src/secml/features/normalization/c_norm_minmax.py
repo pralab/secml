@@ -162,21 +162,19 @@ class CNormalizerMinMax(CNormalizerLinear):
             self._n = self.feature_range[1] - self.feature_range[0]
             self._v = self.feature_range[0]
 
-    def train(self, data):
+    def train(self, x):
         """Compute the minimum and maximum to be used for scaling.
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Array to be used as training set. Each row must correspond to
             one single patterns, so each column is a different feature.
-            Flat array are considered as row array (One single sample with
-            feature number equal to the array size).
 
         Returns
         -------
-        trained_scaler : CMinMaxScaler
-            Scaler trained using input array.
+        CNormalizerMinMax
+            Normalizer trained using input data.
 
         Examples
         --------
@@ -194,14 +192,14 @@ class CNormalizerMinMax(CNormalizerLinear):
 
         """
         self.clear()  # Reset trained normalizer
-        # Working with CArrays only
-        data_array = CArray(data)
-        if data_array.issparse:
+
+        if x.issparse:
             raise NotImplementedError(
                 "normalization of sparse arrays is not yet supported!")
 
-        self._data_min = data_array.min(axis=0, keepdims=False)
-        self._data_max = data_array.max(axis=0, keepdims=False)
+        self._data_min = x.min(axis=0, keepdims=False)
+        self._data_max = x.max(axis=0, keepdims=False)
+
         # Setting the linear normalization properties
         # y = m * x + q
         r = CArray(self.max - self.min)
@@ -212,22 +210,20 @@ class CNormalizerMinMax(CNormalizerLinear):
 
         return self
 
-    def normalize(self, data):
+    def normalize(self, x):
         """Scales array features according to feature_range.
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Array to be scaled. Must have the same number of features
             (i.e. the number of columns) of training array. If this is
             not the training array, resulting features can be outside
             feature_range interval.
-            Flat array are considered as row array (One single sample with
-            feature number equal to the array size).
 
         Returns
         -------
-        scaled_array : CArray
+        CArray
             Array with features scaled according to feature_range and
             training data. Shape of returned array is the same of the
             original array.
@@ -252,14 +248,14 @@ class CNormalizerMinMax(CNormalizerLinear):
         ValueError: array to normalize must have 3 features (columns).
 
         """
-        data_scaled = super(CNormalizerMinMax, self).normalize(data)
+        data_scaled = super(CNormalizerMinMax, self).normalize(x)
 
         # replacing any nan
         data_scaled.nan_to_num()
 
         return data_scaled
 
-    def gradient(self, data):
+    def gradient(self, x):
         """Returns the gradient wrt data.
 
         Gradient of the min-max scaler wrt each row `i` in data is given by:
@@ -269,7 +265,7 @@ class CNormalizerMinMax(CNormalizerLinear):
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Data array, 2-Dimensional or ravel.
 
         Returns
@@ -288,7 +284,7 @@ class CNormalizerMinMax(CNormalizerLinear):
         CArray([ 0.5         0.5         0.33333333])
 
         """
-        data_gradient = super(CNormalizerMinMax, self).gradient(data)
+        data_gradient = super(CNormalizerMinMax, self).gradient(x)
 
         # Replacing any inf with proper values
         data_gradient[data_gradient == -inf] = self.feature_range[0]

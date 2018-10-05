@@ -31,18 +31,18 @@ class CNormalizer(CCreator):
         return False
 
     @abstractmethod
-    def train(self, data):
+    def train(self, x):
         """Train normalization algorithm using data.
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Array to be used for training normalization algorithm.
             Shape of input array depends on the algorithm itself.
 
         Returns
         -------
-        self_trained : CNormalizer
+        CNormalizer
             Instance of the normalization algorithm trained using
             input data.
 
@@ -51,25 +51,25 @@ class CNormalizer(CCreator):
             "this is an abstract method. Must be overridden in subclass.")
 
     @abstractmethod
-    def normalize(self, data):
+    def normalize(self, x):
         """Apply the normalization algorithm on data.
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Array to be normalized using normalization algorithm.
             Shape of input array depends on the algorithm itself.
 
         Returns
         -------
-        data_transformed : CArray
+        x_transformed : CArray
             Input data normalized using normalization algorithm.
 
         """
         raise NotImplementedError(
             "this is an abstract method. Must be overridden in subclass.")
 
-    def train_normalize(self, data):
+    def train_normalize(self, x):
         """Train normalizer using data and then normalize data.
 
         This method is equivalent to call train(data) and normalize(data)
@@ -78,14 +78,14 @@ class CNormalizer(CCreator):
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Array to be normalized using normalization algorithm.
             Each row must correspond to one single patterns, so each
             column is a different feature.
 
         Returns
         -------
-        data_normalized : CArray
+        x_normalized : CArray
             Input data normalized using normalization algorithm.
 
         See Also
@@ -94,21 +94,21 @@ class CNormalizer(CCreator):
         normalize : normalize input data according training data.
 
         """
-        self.train(data)  # training normalizer first
-        return self.normalize(data)
+        self.train(x)  # training normalizer first
+        return self.normalize(x)
 
-    def revert(self, data):
+    def revert(self, x):
         """Revert array to original form.
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Normalized array to be reverted to original form.
             Shape of input array depends on the algorithm itself.
 
         Returns
         -------
-        data_original : CArray
+        x_original : CArray
             Original input data.
 
         Notes
@@ -121,12 +121,12 @@ class CNormalizer(CCreator):
         raise NotImplementedError(
             "this is a placeholder method. Override if necessary.")
 
-    def gradient(self, data):
+    def gradient(self, x):
         """Returns the normalizer gradient wrt data.
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Data array, 2-Dimensional or ravel.
 
         Returns

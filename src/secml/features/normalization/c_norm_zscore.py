@@ -65,16 +65,16 @@ class CNormalizerZScore(CNormalizerLinear):
         """Class constructor"""
         self._with_std = with_std
 
-        self._data_mean = None
-        self._data_std = None
+        self._x_mean = None
+        self._x_std = None
         # Properties of the linear normalizer
         self._w = None
         self._b = None
 
     def __clear(self):
         """Reset the object."""
-        self._data_mean = None
-        self._data_std = None
+        self._x_mean = None
+        self._x_std = None
         # Properties of the linear normalizer
         self._w = None
         self._b = None
@@ -106,7 +106,7 @@ class CNormalizerZScore(CNormalizerLinear):
             trained yet, returns None.
 
         """
-        return self._data_mean
+        return self._x_mean
 
     @property
     def with_std(self):
@@ -126,23 +126,23 @@ class CNormalizerZScore(CNormalizerLinear):
             None.
 
         """
-        return self._data_std
+        return self._x_std
 
-    def train(self, data):
+    def train(self, x):
         """Compute the mean and standard deviation to be used for scaling.
 
         If with_std parameter is set to False, only the mean is calculated.
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Array to be used as training set. Each row must correspond to
             one single patterns, so each column is a different feature.
 
         Returns
         -------
-        trained_scaler : CZScoreScaler
-            Scaler trained using input array.
+        CNormalizerZScore
+            Normalizer trained using input array.
 
         Examples
         --------
@@ -158,30 +158,30 @@ class CNormalizerZScore(CNormalizerLinear):
 
         """
         self.clear()  # Reset trained normalizer
-        # Working with CArrays only
-        data_array = CArray(data)
-        self._data_mean = data_array.mean(axis=0, keepdims=False)
+
+        self._x_mean = x.mean(axis=0, keepdims=False)
+
         # Updating linear normalizer parameters
-        self._w = CArray.ones(data_array.shape[1])
-        self._b = -self._data_mean
+        self._w = CArray.ones(x.shape[1])
+        self._b = -self._x_mean
 
         # Updating std deviation parameters only if needed
         if self.with_std is True:
-            self._data_std = data_array.std(axis=0, keepdims=False)
+            self._x_std = x.std(axis=0, keepdims=False)
             # Updating linear normalizer parameters
             self._w /= self.std
             self._b /= self.std
 
         return self
 
-    def normalize(self, data):
+    def normalize(self, x):
         """Scales array features to have zero mean and unit variance.
 
         If with_std parameter is set to False, only the mean is removed.
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Array to be scaled. Must have the same number of features
             (i.e. the number of columns) of training array. If this
             is not the training array, resulting features are not
@@ -191,8 +191,7 @@ class CNormalizerZScore(CNormalizerLinear):
         -------
         scaled_array : CArray
             Array with features scaled according to training data.
-            Shape of returned array is the same of the original
-            array.
+            Shape of returned array is the same of the original array.
 
         Notes
         -----
@@ -225,14 +224,14 @@ class CNormalizerZScore(CNormalizerLinear):
         ValueError: array to normalize must have 3 features (columns).
 
         """
-        data_scaled = super(CNormalizerZScore, self).normalize(data)
+        data_scaled = super(CNormalizerZScore, self).normalize(x)
 
         if self.with_std is not False:
             data_scaled.nan_to_num()  # replacing any nan/inf
 
         return data_scaled
 
-    def gradient(self, data):
+    def gradient(self, x):
         """Returns the gradient wrt data.
 
         Gradient of the z-score scaler wrt each row `i` in data is given by:
@@ -244,13 +243,13 @@ class CNormalizerZScore(CNormalizerLinear):
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Data array, 2-Dimensional or ravel.
 
         Returns
         -------
         gradient : CArray
-            Gradient of min-max normalizer wrt input data.
+            Gradient of z-score normalizer wrt input data.
 
         Notes
         -----
@@ -269,7 +268,7 @@ class CNormalizerZScore(CNormalizerLinear):
         CArray([ 1.22474487  1.22474487  0.80178373])
 
         """
-        data_gradient = super(CNormalizerZScore, self).gradient(data)
+        data_gradient = super(CNormalizerZScore, self).gradient(x)
 
         if self.with_std is not False:
             data_gradient.nan_to_num()  # replacing any nan/inf

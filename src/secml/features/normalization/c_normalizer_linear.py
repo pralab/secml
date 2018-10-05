@@ -53,12 +53,12 @@ class CNormalizerLinear(CNormalizer):
         # b must be a CArray
         raise NotImplementedError("Linear normalizer should define the bias.")
 
-    def normalize(self, data):
+    def normalize(self, x):
         """Linearly scales array features.
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Array to be scaled. Must have the same number of features
             (i.e. the number of columns) of training array.
 
@@ -69,22 +69,22 @@ class CNormalizerLinear(CNormalizer):
             Shape of returned array is the same of the original array.
 
         """
-        data_array = CArray(data)  # working with CArrays
         # Training first!
         if self.is_clear():
             raise ValueError("train the normalizer first.")
-        if data_array.atleast_2d().shape[1] != self.w.size:
+
+        if x.atleast_2d().shape[1] != self.w.size:
             raise ValueError("array to normalize must have {:} "
                              "features (columns).".format(self.w.size))
 
-        return self.w * data_array + self.b
+        return self.w * x + self.b
 
-    def revert(self, data):
+    def revert(self, x):
         """Undo the linear normalization of input data.
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Array to be reverted. Must have been normalized by the same
             calling instance of the CNormalizerLinear.
 
@@ -94,29 +94,31 @@ class CNormalizerLinear(CNormalizer):
             Array with features scaled back to original values.
 
         """
-        data_array = CArray(data)  # working with CArrays
         # Training first!
         if self.is_clear():
             raise ValueError("train the normalizer first.")
-        if data_array.atleast_2d().shape[1] != self.w.size:
+        if x.atleast_2d().shape[1] != self.w.size:
             raise ValueError("array to revert must have {:} "
                              "features (columns).".format(self.w.size))
 
-        v = (data_array - self.b) / self.w
+        v = (x - self.b) / self.w
 
         # set nan/inf to zero
         zeros_feats = self.w.find(self.w == 0)
         if len(zeros_feats) > 0:
-            v[:, zeros_feats] = 0
+            if v.ndim == 1:
+                v[zeros_feats] = 0
+            else:
+                v[:, zeros_feats] = 0
 
         return v
 
-    def gradient(self, data):
+    def gradient(self, x):
         """Returns the gradient wrt data.
 
         Parameters
         ----------
-        data : CArray
+        x : CArray
             Pattern with respect to which the gradient will be computed.
             Shape (1, n_features) or (n_features, ).
 
@@ -127,12 +129,11 @@ class CNormalizerLinear(CNormalizer):
             Diagonal matrix of shape (self.w.size, self.w.size).
 
         """
-        data_array = CArray(data)  # working with CArrays
-
         # Training first!
         if self.is_clear():
             raise ValueError("train the normalizer first.")
-        if data_array.atleast_2d().shape[1] != self.w.size:
+
+        if x.atleast_2d().shape[1] != self.w.size:
             raise ValueError("input data must have {:} features (columns)."
                              "".format(self.w.size))
 
