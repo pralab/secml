@@ -128,17 +128,17 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
 
         df_scores_0 = self.clf.discriminant_function(x, label=0)
         self.logger.info(
-            "discriminant_function(x, label=0:\n{:}".format(df_scores_0))
+            "discriminant_function(x, label=0):\n{:}".format(df_scores_0))
         _check_df_scores(df_scores_0, 5)
 
         df_scores_1 = self.clf.discriminant_function(x, label=1)
         self.logger.info(
-            "discriminant_function(x, label=1:\n{:}".format(df_scores_1))
+            "discriminant_function(x, label=1):\n{:}".format(df_scores_1))
         _check_df_scores(df_scores_1, 5)
 
         df_scores_2 = self.clf.discriminant_function(x, label=2)
         self.logger.info(
-            "discriminant_function(x, label=2:\n{:}".format(df_scores_2))
+            "discriminant_function(x, label=2):\n{:}".format(df_scores_2))
         _check_df_scores(df_scores_2, 5)
 
         # Testing _discriminant_function on multiple points
@@ -167,8 +167,8 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
         # Testing classify on multiple points
 
         labels, scores = self.clf.classify(x)
-        self.logger.info("classify(x:\nlabels: {:}"
-                         "\nscores:{:}".format(labels, scores))
+        self.logger.info(
+            "classify(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 5, self.clf.n_classes)
 
         # Comparing output of discriminant_function and classify
@@ -181,33 +181,33 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
 
         df_scores_0 = self.clf.discriminant_function(p, label=0)
         self.logger.info(
-            "discriminant_function(p, label=0:\n{:}".format(df_scores_0))
+            "discriminant_function(p, label=0):\n{:}".format(df_scores_0))
         _check_df_scores(df_scores_0, 1)
 
         df_scores_1 = self.clf.discriminant_function(p, label=1)
         self.logger.info(
-            "discriminant_function(p, label=1:\n{:}".format(df_scores_1))
+            "discriminant_function(p, label=1):\n{:}".format(df_scores_1))
         _check_df_scores(df_scores_1, 1)
 
         df_scores_2 = self.clf.discriminant_function(p, label=2)
         self.logger.info(
-            "discriminant_function(p, label=2:\n{:}".format(df_scores_2))
+            "discriminant_function(p, label=2):\n{:}".format(df_scores_2))
         _check_df_scores(df_scores_2, 1)
 
         # Testing _discriminant_function on single point
 
         df_priv_scores_0 = self.clf._discriminant_function(p_norm, label=0)
-        self.logger.info("_discriminant_function(p_norm, label=0:\n{:}"
+        self.logger.info("_discriminant_function(p_norm, label=0):\n{:}"
                          "".format(df_priv_scores_0))
         _check_df_scores(df_priv_scores_0, 1)
 
         df_priv_scores_1 = self.clf._discriminant_function(p_norm, label=1)
-        self.logger.info("_discriminant_function(p_norm, label=1:\n{:}"
+        self.logger.info("_discriminant_function(p_norm, label=1):\n{:}"
                          "".format(df_priv_scores_1))
         _check_df_scores(df_priv_scores_1, 1)
 
         df_priv_scores_2 = self.clf._discriminant_function(p_norm, label=2)
-        self.logger.info("_discriminant_function(p_norm, label=2:\n"
+        self.logger.info("_discriminant_function(p_norm, label=2):\n"
                          "{:}".format(df_priv_scores_2))
         _check_df_scores(df_priv_scores_2, 1)
 
@@ -220,8 +220,8 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
         self.logger.info("Testing classify on single point")
 
         labels, scores = self.clf.classify(p)
-        self.logger.info("classify(p):\nlabels: "
-                         "{:}\nscores:{:}".format(labels, scores))
+        self.logger.info(
+            "classify(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 1, self.clf.n_classes)
 
         # Comparing output of discriminant_function and classify

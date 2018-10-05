@@ -64,29 +64,34 @@ class TestCClassifierNearestCentroid(CUnitTest):
 
         self.nc.train(self.dataset)
 
+        x = x_norm = self.dataset.X
+        p = p_norm = self.dataset.X[0, :].ravel()
+
+        # Normalizing data if a normalizer is defined
+        if self.nc.normalizer is not None:
+            x_norm = self.nc.normalizer.normalize(x)
+            p_norm = self.nc.normalizer.normalize(p)
+
         # Testing discriminant_function on multiple points
 
-        df_scores_pos = self.nc.discriminant_function(
-            self.dataset.X, label=1)
-        self.logger.info("discriminant_function("
-                         "dataset.X, label=1:\n{:}".format(df_scores_pos))
-        _check_df_scores(df_scores_pos, self.dataset.num_samples)
-
-        df_scores_neg = self.nc.discriminant_function(
-            self.dataset.X, label=0)
-        self.logger.info("discriminant_function("
-                         "dataset.X, label=0:\n{:}".format(df_scores_neg))
+        df_scores_neg = self.nc.discriminant_function(x, label=0)
+        self.logger.info(
+            "discriminant_function(x, label=0):\n{:}".format(df_scores_neg))
         _check_df_scores(df_scores_neg, self.dataset.num_samples)
+
+        df_scores_pos = self.nc.discriminant_function(x, label=1)
+        self.logger.info(
+            "discriminant_function(x, label=1):\n{:}".format(df_scores_pos))
+        _check_df_scores(df_scores_pos, self.dataset.num_samples)
 
         self.assertFalse(
             ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
 
         # Testing _discriminant_function on multiple points
 
-        ds_priv_scores = self.nc._discriminant_function(
-            self.dataset.X, label=1)
-        self.logger.info("_discriminant_function("
-                         "dataset.X, label=1:\n{:}".format(ds_priv_scores))
+        ds_priv_scores = self.nc._discriminant_function(x_norm, label=1)
+        self.logger.info("_discriminant_function(x_norm, label=1):\n"
+                         "{:}".format(ds_priv_scores))
         _check_df_scores(ds_priv_scores, self.dataset.num_samples)
 
         # Comparing output of public and private
@@ -95,9 +100,9 @@ class TestCClassifierNearestCentroid(CUnitTest):
 
         # Testing classify on multiple points
 
-        labels, scores = self.nc.classify(self.dataset.X)
-        self.logger.info("classify(dataset.X:\nlabels: {:}"
-                         "\nscores:{:}".format(labels, scores))
+        labels, scores = self.nc.classify(x)
+        self.logger.info(
+            "classify(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(
             labels, scores, self.dataset.num_samples, self.nc.n_classes)
 
@@ -108,46 +113,35 @@ class TestCClassifierNearestCentroid(CUnitTest):
 
         # Testing discriminant_function on single point
 
-        df_scores_pos = self.nc.discriminant_function(
-            self.dataset.X[0, :].ravel(), label=1)
-        self.logger.info("discriminant_function(dataset.X[0, :].ravel(), "
-                         "label=1:\n{:}".format(df_scores_pos))
-        _check_df_scores(df_scores_pos, 1)
-
-        df_scores_neg = self.nc.discriminant_function(
-            self.dataset.X[0, :].ravel(), label=0)
-        self.logger.info("discriminant_function(dataset.X[0, :].ravel(), "
-                         "label=0:\n{:}".format(df_scores_neg))
+        df_scores_neg = self.nc.discriminant_function(p, label=0)
+        self.logger.info(
+            "discriminant_function(p, label=0):\n{:}".format(df_scores_neg))
         _check_df_scores(df_scores_neg, 1)
+
+        df_scores_pos = self.nc.discriminant_function(p, label=1)
+        self.logger.info(
+            "discriminant_function(p, label=1):\n{:}".format(df_scores_pos))
+        _check_df_scores(df_scores_pos, 1)
 
         self.assertFalse(
             ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
 
         # Testing _discriminant_function on single point
 
-        df_priv_scores = self.nc._discriminant_function(
-            self.dataset.X[0, :].ravel(), label=1)
-        self.logger.info("_discriminant_function(dataset.X[0, :].ravel(), "
-                         "label=1:\n{:}".format(df_priv_scores))
+        df_priv_scores = self.nc._discriminant_function(p_norm, label=1)
+        self.logger.info("_discriminant_function(p_norm, label=1):\n"
+                         "{:}".format(df_priv_scores))
         _check_df_scores(df_priv_scores, 1)
 
         # Comparing output of public and private
 
         self.assertFalse((df_scores_pos != df_priv_scores).any())
 
-        # Testing error raising
-
-        with self.assertRaises(ValueError):
-            self.nc._discriminant_function(self.dataset.X, label=0)
-        with self.assertRaises(ValueError):
-            self.nc._discriminant_function(
-                self.dataset.X[0, :].ravel(), label=0)
-
         self.logger.info("Testing classify on single point")
 
-        labels, scores = self.nc.classify(self.dataset.X[0, :].ravel())
-        self.logger.info("classify(self.dataset.X[0, :].ravel():\nlabels: "
-                         "{:}\nscores:{:}".format(labels, scores))
+        labels, scores = self.nc.classify(p)
+        self.logger.info(
+            "classify(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 1, self.nc.n_classes)
 
         # Comparing output of discriminant_function and classify
@@ -156,6 +150,13 @@ class TestCClassifierNearestCentroid(CUnitTest):
             (df_scores_neg != CArray(scores[:, 0]).ravel()).any())
         self.assertFalse(
             (df_scores_pos != CArray(scores[:, 1]).ravel()).any())
+
+        # Testing error raising
+
+        with self.assertRaises(ValueError):
+            self.nc._discriminant_function(x_norm, label=0)
+        with self.assertRaises(ValueError):
+            self.nc._discriminant_function(p_norm, label=0)
 
 
 if __name__ == '__main__':

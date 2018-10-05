@@ -67,44 +67,46 @@ class TestCClassifierDecisionTree(CUnitTest):
 
         self.dec_tree.train(self.dataset)
 
+        x = x_norm = self.dataset.X
+        p = p_norm = self.dataset.X[0, :].ravel()
+
+        # Normalizing data if a normalizer is defined
+        if self.dec_tree.normalizer is not None:
+            x_norm = self.dec_tree.normalizer.normalize(x)
+            p_norm = self.dec_tree.normalizer.normalize(p)
+
         # Testing discriminant_function on multiple points
 
-        df_scores_0 = self.dec_tree.discriminant_function(
-            self.dataset.X, label=0)
-        self.logger.info("discriminant_function("
-                         "dataset.X, label=0:\n{:}".format(df_scores_0))
+        df_scores_0 = self.dec_tree.discriminant_function(x, label=0)
+        self.logger.info(
+            "discriminant_function(x, label=0):\n{:}".format(df_scores_0))
         _check_df_scores(df_scores_0, self.dataset.num_samples)
 
-        df_scores_1 = self.dec_tree.discriminant_function(
-            self.dataset.X, label=1)
-        self.logger.info("discriminant_function("
-                         "dataset.X, label=1:\n{:}".format(df_scores_1))
+        df_scores_1 = self.dec_tree.discriminant_function(x, label=1)
+        self.logger.info(
+            "discriminant_function(x, label=1):\n{:}".format(df_scores_1))
         _check_df_scores(df_scores_1, self.dataset.num_samples)
 
-        df_scores_2 = self.dec_tree.discriminant_function(
-            self.dataset.X, label=2)
-        self.logger.info("discriminant_function("
-                         "dataset.X, label=2:\n{:}".format(df_scores_2))
+        df_scores_2 = self.dec_tree.discriminant_function(x, label=2)
+        self.logger.info(
+            "discriminant_function(x, label=2):\n{:}".format(df_scores_2))
         _check_df_scores(df_scores_2, self.dataset.num_samples)
 
         # Testing _discriminant_function on multiple points
 
-        ds_priv_scores_0 = self.dec_tree._discriminant_function(
-            self.dataset.X, label=0)
-        self.logger.info("_discriminant_function("
-                         "dataset.X, label=0:\n{:}".format(ds_priv_scores_0))
+        ds_priv_scores_0 = self.dec_tree._discriminant_function(x_norm, label=0)
+        self.logger.info("_discriminant_function(x_norm, label=0):\n"
+                         "{:}".format(ds_priv_scores_0))
         _check_df_scores(ds_priv_scores_0, self.dataset.num_samples)
 
-        ds_priv_scores_1 = self.dec_tree._discriminant_function(
-            self.dataset.X, label=1)
-        self.logger.info("_discriminant_function("
-                         "dataset.X, label=1:\n{:}".format(ds_priv_scores_1))
+        ds_priv_scores_1 = self.dec_tree._discriminant_function(x_norm, label=1)
+        self.logger.info("_discriminant_function(x_norm, label=1):\n"
+                         "{:}".format(ds_priv_scores_1))
         _check_df_scores(ds_priv_scores_1, self.dataset.num_samples)
 
-        ds_priv_scores_2 = self.dec_tree._discriminant_function(
-            self.dataset.X, label=2)
-        self.logger.info("_discriminant_function("
-                         "dataset.X, label=2:\n{:}".format(ds_priv_scores_2))
+        ds_priv_scores_2 = self.dec_tree._discriminant_function(x_norm, label=2)
+        self.logger.info("_discriminant_function(x_norm, label=2):\n"
+                         "{:}".format(ds_priv_scores_2))
         _check_df_scores(ds_priv_scores_2, self.dataset.num_samples)
 
         # Comparing output of public and private
@@ -115,9 +117,9 @@ class TestCClassifierDecisionTree(CUnitTest):
 
         # Testing classify on multiple points
 
-        labels, scores = self.dec_tree.classify(self.dataset.X)
-        self.logger.info("classify(dataset.X:\nlabels: {:}"
-                         "\nscores:{:}".format(labels, scores))
+        labels, scores = self.dec_tree.classify(x)
+        self.logger.info(
+            "classify(x):\nlabels: {:}\nscores:{:}".format(labels, scores))
         _check_classify_scores(
             labels, scores, self.dataset.num_samples, self.dec_tree.n_classes)
 
@@ -129,42 +131,36 @@ class TestCClassifierDecisionTree(CUnitTest):
 
         # Testing discriminant_function on single point
 
-        df_scores_0 = self.dec_tree.discriminant_function(
-            self.dataset.X[0, :].ravel(), label=0)
-        self.logger.info("discriminant_function(dataset.X[0, :].ravel(), "
-                         "label=0:\n{:}".format(df_scores_0))
+        df_scores_0 = self.dec_tree.discriminant_function(p, label=0)
+        self.logger.info(
+            "discriminant_function(p, label=0):\n{:}".format(df_scores_0))
         _check_df_scores(df_scores_0, 1)
 
-        df_scores_1 = self.dec_tree.discriminant_function(
-            self.dataset.X[0, :].ravel(), label=1)
-        self.logger.info("discriminant_function(dataset.X[0, :].ravel(), "
-                         "label=1:\n{:}".format(df_scores_1))
+        df_scores_1 = self.dec_tree.discriminant_function(p, label=1)
+        self.logger.info(
+            "discriminant_function(p, label=1):\n{:}".format(df_scores_1))
         _check_df_scores(df_scores_1, 1)
 
-        df_scores_2 = self.dec_tree.discriminant_function(
-            self.dataset.X[0, :].ravel(), label=2)
-        self.logger.info("discriminant_function(dataset.X[0, :].ravel(), "
-                         "label=2:\n{:}".format(df_scores_2))
+        df_scores_2 = self.dec_tree.discriminant_function(p, label=2)
+        self.logger.info(
+            "discriminant_function(p, label=2):\n{:}".format(df_scores_2))
         _check_df_scores(df_scores_2, 1)
 
         # Testing _discriminant_function on single point
 
-        df_priv_scores_0 = self.dec_tree._discriminant_function(
-            self.dataset.X[0, :].ravel(), label=0)
-        self.logger.info("_discriminant_function(dataset.X[0, :].ravel(), "
-                         "label=0:\n{:}".format(df_priv_scores_0))
+        df_priv_scores_0 = self.dec_tree._discriminant_function(p_norm, label=0)
+        self.logger.info("_discriminant_function(p_norm, label=0):\n"
+                         "{:}".format(df_priv_scores_0))
         _check_df_scores(df_priv_scores_0, 1)
 
-        df_priv_scores_1 = self.dec_tree._discriminant_function(
-            self.dataset.X[0, :].ravel(), label=1)
-        self.logger.info("_discriminant_function(dataset.X[0, :].ravel(), "
-                         "label=1:\n{:}".format(df_priv_scores_1))
+        df_priv_scores_1 = self.dec_tree._discriminant_function(p_norm, label=1)
+        self.logger.info("_discriminant_function(p_norm, label=1):\n"
+                         "{:}".format(df_priv_scores_1))
         _check_df_scores(df_priv_scores_1, 1)
 
-        df_priv_scores_2 = self.dec_tree._discriminant_function(
-            self.dataset.X[0, :].ravel(), label=2)
-        self.logger.info("_discriminant_function(dataset.X[0, :].ravel(), "
-                         "label=2:\n{:}".format(df_priv_scores_2))
+        df_priv_scores_2 = self.dec_tree._discriminant_function(p_norm, label=2)
+        self.logger.info("_discriminant_function(p_norm, label=2):\n"
+                         "{:}".format(df_priv_scores_2))
         _check_df_scores(df_priv_scores_2, 1)
 
         # Comparing output of public and private
@@ -175,9 +171,9 @@ class TestCClassifierDecisionTree(CUnitTest):
 
         self.logger.info("Testing classify on single point")
 
-        labels, scores = self.dec_tree.classify(self.dataset.X[0, :].ravel())
-        self.logger.info("classify(self.dataset.X[0, :].ravel():\nlabels: "
-                         "{:}\nscores:{:}".format(labels, scores))
+        labels, scores = self.dec_tree.classify(p)
+        self.logger.info(
+            "classify(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 1, self.dec_tree.n_classes)
 
         # Comparing output of discriminant_function and classify
