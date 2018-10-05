@@ -8,7 +8,7 @@
 """
 from secml.array import CArray
 from secml.classifiers import CClassifier
-from secml.classifiers.clf_utils import check_binary_labels
+from secml.classifiers.clf_utils import extend_binary_labels
 from sklearn.neighbors import NearestCentroid
 from sklearn.metrics import pairwise_distances
 
@@ -110,7 +110,9 @@ class CClassifierNearestCentroid(CClassifier):
         if self.normalizer is not None:
             x = self.normalizer.normalize(x)
 
-        return self._discriminant_function(x, label=label)
+        sign = extend_binary_labels(label)  # Sign depends on input label (0/1)
+
+        return sign * self._discriminant_function(x)
 
     def _discriminant_function(self, x, label=1):
         """Computes the discriminant function for each pattern in x.
@@ -123,9 +125,9 @@ class CClassifierNearestCentroid(CClassifier):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : {0, 1}, optional
+        label : {1}
             The label of the class wrt the function should be calculated.
-            Default is 1.
+            Discriminant function is always computed wrt positive class (1).
 
         Returns
         -------
@@ -134,7 +136,9 @@ class CClassifierNearestCentroid(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
-        check_binary_labels(label)  # Label should be in {0, 1}
+        if label != 1:
+            raise ValueError(
+                "discriminant function is always computed wrt positive class.")
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
@@ -145,9 +149,5 @@ class CClassifierNearestCentroid(CClassifier):
             x.get_data(), self.centroids[1, :].atleast_2d().get_data(),
             metric=self.metric)
 
-        if label == 1:
-            return CArray(
+        return CArray(
                 dist_from_ben_centroid - dis_from_mal_centroid).ravel()
-        else:
-            return CArray(
-                dis_from_mal_centroid - dist_from_ben_centroid).ravel()
