@@ -1,11 +1,3 @@
-"""
-Created on 27/apr/2015
-
-This class tests the CClassifierSVM
-@author: Davide Maiorca
-If you find any BUG, please notify authors first.
-"""
-import unittest
 from secml.utils import CUnitTest
 
 import numpy as np
@@ -23,7 +15,7 @@ from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
 
 
-class TestSVM(CUnitTest):
+class TestCClassifierSVM(CUnitTest):
 
     def setUp(self):
 
@@ -33,9 +25,12 @@ class TestSVM(CUnitTest):
 
         self.dataset_sparse = self.dataset.tosparse()
 
-        kernel_types = (CKernelLinear, CKernelRBF, CKernelPoly)
-        self.svms = [CClassifierSVM(kernel=kernel()) for kernel in kernel_types]
-        self.logger.info("Testing SVM with similarity functions: %s", str(kernel_types))
+        kernel_types = (None, CKernelLinear, CKernelRBF, CKernelPoly)
+        self.svms = [CClassifierSVM(
+            kernel=kernel() if kernel is not None else None)
+                for kernel in kernel_types]
+        self.logger.info(
+            "Testing SVM with kernel functions: %s", str(kernel_types))
 
         for svm in self.svms:  # Enabling debug output for each classifier
             svm.verbose = 2
@@ -340,6 +335,130 @@ class TestSVM(CUnitTest):
         with self.assertRaises(ValueError):
             svm.store_dual_vars = False
 
+    def test_fun(self):
+        """Test for discriminant_function() and classify() methods."""
+        self.logger.info(
+            "Test for discriminant_function() and classify() methods.")
+
+        def _check_df_scores(s, n_samples):
+            self.assertEqual(type(s), CArray)
+            self.assertTrue(s.isdense)
+            self.assertEqual(1, s.ndim)
+            self.assertEqual((n_samples,), s.shape)
+            self.assertEqual(float, s.dtype)
+
+        def _check_classify_scores(l, s, n_samples, n_classes):
+            self.assertEqual(type(l), CArray)
+            self.assertEqual(type(s), CArray)
+            self.assertTrue(l.isdense)
+            self.assertTrue(s.isdense)
+            self.assertEqual(1, l.ndim)
+            self.assertEqual(2, s.ndim)
+            self.assertEqual((n_samples,), l.shape)
+            self.assertEqual((n_samples, n_classes), s.shape)
+            self.assertEqual(int, l.dtype)
+            self.assertEqual(float, s.dtype)
+
+        for svm in self.svms:
+
+            self.logger.info("SVM kernel: {:}".format(svm.kernel))
+
+            svm.train(self.dataset)
+
+            x = x_norm = self.dataset.X
+            p = p_norm = self.dataset.X[0, :].ravel()
+
+            # Normalizing data if a normalizer is defined
+            if svm.normalizer is not None:
+                x_norm = svm.normalizer.normalize(x)
+                p_norm = svm.normalizer.normalize(p)
+
+            # Testing discriminant_function on multiple points
+
+            df_scores_neg = svm.discriminant_function(x, label=0)
+            self.logger.info("discriminant_function(x, label=0):\n"
+                             "{:}".format(df_scores_neg))
+            _check_df_scores(df_scores_neg, self.dataset.num_samples)
+
+            df_scores_pos = svm.discriminant_function(x, label=1)
+            self.logger.info("discriminant_function(x, label=1):\n"
+                             "{:}".format(df_scores_pos))
+            _check_df_scores(df_scores_pos, self.dataset.num_samples)
+
+            self.assertFalse(
+                ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
+
+            # Testing _discriminant_function on multiple points
+
+            ds_priv_scores = svm._discriminant_function(x_norm, label=1)
+            self.logger.info("_discriminant_function(x_norm, label=1):\n"
+                             "{:}".format(ds_priv_scores))
+            _check_df_scores(ds_priv_scores, self.dataset.num_samples)
+
+            # Comparing output of public and private
+
+            self.assertFalse((df_scores_pos != ds_priv_scores).any())
+
+            # Testing classify on multiple points
+
+            labels, scores = svm.classify(self.dataset.X)
+            self.logger.info("classify(x):\nlabels: {:}\n"
+                             "scores: {:}".format(labels, scores))
+            _check_classify_scores(
+                labels, scores, self.dataset.num_samples, svm.n_classes)
+
+            # Comparing output of discriminant_function and classify
+
+            self.assertFalse((df_scores_neg != scores[:, 0].ravel()).any())
+            self.assertFalse((df_scores_pos != scores[:, 1].ravel()).any())
+
+            # Testing discriminant_function on single point
+
+            df_scores_neg = svm.discriminant_function(p, label=0)
+            self.logger.info("discriminant_function(p, label=0):\n"
+                             "{:}".format(df_scores_neg))
+            _check_df_scores(df_scores_neg, 1)
+
+            df_scores_pos = svm.discriminant_function(p, label=1)
+            self.logger.info("discriminant_function(p, label=1):\n"
+                             "{:}".format(df_scores_pos))
+            _check_df_scores(df_scores_pos, 1)
+
+            self.assertFalse(
+                ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
+
+            # Testing _discriminant_function on single point
+
+            df_priv_scores = svm._discriminant_function(p_norm, label=1)
+            self.logger.info("_discriminant_function(p_norm, label=1):\n"
+                             "{:}".format(df_priv_scores))
+            _check_df_scores(df_priv_scores, 1)
+
+            # Comparing output of public and private
+
+            self.assertFalse((df_scores_pos != df_priv_scores).any())
+
+            self.logger.info("Testing classify on single point")
+
+            labels, scores = svm.classify(p)
+            self.logger.info("classify(p):\nlabels: {:}\n"
+                             "scores: {:}".format(labels, scores))
+            _check_classify_scores(labels, scores, 1, svm.n_classes)
+
+            # Comparing output of discriminant_function and classify
+
+            self.assertFalse(
+                (df_scores_neg != CArray(scores[:, 0]).ravel()).any())
+            self.assertFalse(
+                (df_scores_pos != CArray(scores[:, 1]).ravel()).any())
+
+            # Testing error raising
+
+            with self.assertRaises(ValueError):
+                svm._discriminant_function(x_norm, label=0)
+            with self.assertRaises(ValueError):
+                svm._discriminant_function(p_norm, label=0)
+
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

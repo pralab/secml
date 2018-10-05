@@ -1,6 +1,6 @@
 """
-.. module:: Classifier
-   :synopsis: Interface and common functions for Classifiers
+.. module:: CClassifier
+   :synopsis: Interface and common functions for classification
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
@@ -18,7 +18,7 @@ from secml.parallel import parfor2
 
 
 def _classify_one(tr_class_idx, clf, test_x, verbose):
-    """Train a classifier.
+    """Performs classification wrt class of label `tr_class_idx`.
 
     Parameters
     ----------
@@ -178,23 +178,23 @@ class CClassifier(CCreator):
 
     @abstractmethod
     def _discriminant_function(self, x, label):
-        """Private method that compute the discriminant function.
-        Must be reimplemented by subclasses.
+        """Private method that computes the discriminant function.
+
+        .. warning:: Must be reimplemented by a subclass of `.CClassifier`.
 
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
         label : int
-            The label of the class with respect to which the function
-            should be calculated.
+            The label of the class wrt the function should be calculated.
 
         Returns
         -------
-        score : CArray or scalar
-            Flat array of shape (n_patterns,) with discriminant function
-            value of each test pattern or scalar if n_patterns == 1.
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
 
         """
         raise NotImplementedError()
@@ -210,94 +210,93 @@ class CClassifier(CCreator):
             The actual discriminant function should be implemented
             case by case inside :meth:`_discriminant_function` method.
 
-        .. note::
-
-            This method implements a generic formulation where the
-            discriminant function is computed for each pattern in
-            the input array. It's useful to override this when
-            the function can be computed for all patterns at once.
-
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
         label : int
-            The label of the class with respect to which the function
-            should be calculated.
+            The label of the class wrt the function should be calculated.
 
         Returns
         -------
-        score : CArray or scalar
+        score : CArray
             Value of the discriminant function for each test pattern.
-            Flat array of shape (n_patterns,) or scalar if the number
-            of patterns in `x` is 1.
+            Dense flat array of shape (n_patterns,).
+
+        Warnings
+        --------
+        This method implements a generic formulation where the
+         discriminant function is computed separately for each pattern.
+         It's convenient to override this when the function can be computed
+         for all patterns at once to improve performance.
 
         """
         if self.is_clear():
             raise ValueError("make sure the classifier is trained first.")
-        x_carray = CArray(x).atleast_2d()
+
+        x = x.atleast_2d()  # Ensuring input is 2-D
 
         # Normalizing data if a normalizer is defined
         if self.normalizer is not None:
-            x_carray = self.normalizer.normalize(x_carray)
+            x = self.normalizer.normalize(x)
 
-        score = CArray.ones(shape=x_carray.shape[0])
-        for i in xrange(x_carray.shape[0]):
-            score[i] = self._discriminant_function(x_carray[i, :], label)
+        score = CArray.ones(shape=x.shape[0])
+        for i in xrange(x.shape[0]):
+            score[i] = self._discriminant_function(x[i, :], label)
 
-        # Return a scalar if n_patterns == 1
-        return score[0] if score.size == 1 else score.ravel()
+        return score
 
     def classify(self, x, n_jobs=1):
-        """Perform classification on samples in x.
+        """Perform classification of each pattern in x.
 
         If a normalizer has been specified,
-        input is normalized before classification.
+         input is normalized before classification.
 
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        n_jobs : int
+        n_jobs : int, optional
             Number of parallel workers to use for classification.
             Default 1. Cannot be higher than processor's number of cores.
 
         Returns
         -------
-        y : CArray or scalar
-            Flat dense array of shape (n_patterns,) with label assigned
-            to each test pattern or a single scalar if n_patterns == 1.
+        labels : CArray
+            Flat dense array of shape (n_patterns,) with the label assigned
+             to each test pattern. The classification label is the label of
+             the class associated with the highest score.
         scores : CArray
             Array of shape (n_patterns, n_classes) with classification
-            score of each test pattern with respect to each trained class.
+             score of each test pattern with respect to each training class.
 
-        Notes
-        -----
-        For a two-class classifier (e.g., labels 0,+1) is useful to
-        override this method to avoid classifying data twice. The score
-        for the positive/negative class is commonly the negative of the
-        score of the other class.
+        Warnings
+        --------
+        This method implements a generic formulation where the
+         classification score is computed separately for training class.
+         It's convenient to override this when the score can be computed
+         for one of the classes only, e.g. for binary classifiers the score
+         for the positive/negative class is commonly the negative of the
+         score of the other class.
 
         """
-        x_carray = CArray(x).atleast_2d()
+        x = x.atleast_2d()  # Ensuring input is 2-D
 
-        scores = CArray.ones(shape=(x_carray.shape[0], self.n_classes))
+        scores = CArray.ones(shape=(x.shape[0], self.n_classes))
 
-        # Discriminant function is now called for each different class
+        # Compute the discriminant function for each training class in parallel
         res = parfor2(_classify_one, self.n_classes,
-                      n_jobs, self, x_carray, self.verbose)
+                      n_jobs, self, x, self.verbose)
 
-        # Building results array
+        # Build results array by extracting the scores for each training class
         for i in xrange(self.n_classes):
             scores[:, i] = CArray(res[i]).T
 
-        # Return a scalar if n_patterns == 1
-        labels = CArray(scores.argmax(axis=1)).ravel()
-        labels = labels[0] if labels.size == 1 else labels
-
-        return labels, scores
+        # The classification label is the label of the class
+        # associated with the highest score
+        return CArray(scores.argmax(axis=1)).ravel(), scores
 
     def estimate_parameters(self, dataset, parameters, splitter, metric,
                             pick='first', perf_evaluator='xval', n_jobs=1):

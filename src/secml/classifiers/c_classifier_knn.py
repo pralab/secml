@@ -1,6 +1,6 @@
 """
-.. module:: CKNeighborsClassifier
-   :synopsis: Random Forest classifier
+.. module:: KNeighborsClassifier
+   :synopsis: K-Neighbors classifier
 
 .. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
 
@@ -135,9 +135,26 @@ class CClassifierKNN(CClassifier):
 
         return self._KNC
 
-    def _discriminant_function(self, x, label=1):
-        """Compute the discriminant function for pattern 'x'."""
-        return CArray(self._KNC.predict_proba(x.get_data())[:, label])
+    def _discriminant_function(self, x, label):
+        """Computes the discriminant function (probability estimates) for each pattern in x.
+
+        Parameters
+        ----------
+        x : CArray
+            Array with new patterns to classify, 2-Dimensional of shape
+            (n_patterns, n_features).
+        label : int
+            The label of the class wrt the function should be calculated.
+
+        Returns
+        -------
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
+
+        """
+        x = x.atleast_2d()  # Ensuring input is 2-D
+        return CArray(self._KNC.predict_proba(x.get_data())[:, label]).ravel()
 
     def kneighbors(self, x, num_samples, return_distance=True):
         '''

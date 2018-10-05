@@ -1,5 +1,5 @@
 """
-.. module:: ClassifierSGD
+.. module:: CClassifierSGD
    :synopsis: Stochastic Gradient Descent (SGD) classifier
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -209,26 +209,28 @@ class CClassifierSGD(CClassifierLinear):
         return sgd
 
     def _discriminant_function(self, x, label=1):
-        """Compute the distance of the samples in x from the separating hyperplane.
+        """Computes the distance from the separating hyperplane for each pattern in x.
 
-        Discriminant function is always computed wrt positive class.
+        The scores are computed in kernel space if kernel is defined.
 
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : int
-            The label of the class with respect to which the function
-            should be calculated.
+        label : {1}
+            The label of the class wrt the function should be calculated.
+            Discriminant function is always computed wrt positive class (1).
 
         Returns
         -------
-        score : CArray or scalar
-            Flat array of shape (n_patterns,) with discriminant function
-            value of each test pattern or scalar if n_patterns == 1.
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
 
         """
-        # Scores are given by the linear model
+        x = x.atleast_2d()  # Ensuring input is 2-D
+        # Compute discriminant function in kernel space if necessary
         k = x if self.kernel is None else CArray(self.kernel.k(x, self._tr))
-        return CClassifierLinear._discriminant_function(self, k)
+        # Scores are given by the linear model
+        return CClassifierLinear._discriminant_function(self, k, label=label)

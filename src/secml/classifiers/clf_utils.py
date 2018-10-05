@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from secml.core.type_utils import is_int
 from secml.array import CArray
 
 
@@ -13,7 +14,7 @@ def check_binary_labels(labels):
 
     Parameters
     ----------
-    labels : CArray
+    labels : CArray or int
         Binary labels to be converted.
         As of PRALib convention, binary labels are {0, +1}.
 
@@ -24,8 +25,9 @@ def check_binary_labels(labels):
 
 
     """
-    if CArray(CArray(labels != 0).logical_and(labels != 1)).any():
-        raise ValueError("input labels should be binary in 0/1 interval.")
+    if (is_int(labels) and not (labels == 0 or labels == 1)) or \
+            CArray(CArray(labels != 0).logical_and(labels != 1)).any():
+        raise ValueError("input labels should be binary in {0, +1} interval.")
 
 
 def extend_binary_labels(labels):
@@ -33,19 +35,22 @@ def extend_binary_labels(labels):
 
     Parameters
     ----------
-    labels : CArray
+    labels : CArray or int
         Binary labels to be converted.
         As of PRALib convention, binary labels are {0, +1}.
 
     Returns
     -------
-    converted_labels : CArray
+    converted_labels : CArray or int
         Binary labels converted to -1/+1.
 
     Examples
     --------
     >>> from secml.classifiers.clf_utils import extend_binary_labels
     >>> from secml.array import CArray
+
+    >>> print extend_binary_labels(2)
+    -1
 
     >>> print extend_binary_labels(CArray([0,1,1,1,0,0]))
     CArray([-1  1  1  1 -1 -1])

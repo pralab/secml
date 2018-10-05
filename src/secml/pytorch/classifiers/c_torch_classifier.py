@@ -1,5 +1,5 @@
 """
-.. module:: PyTorchClassifier
+.. module:: CTorchClassifier
    :synopsis: Classifier with PyTorch Neural Network
 
 .. moduleauthor:: Ambra Demontis <marco.melis@diee.unica.it>
@@ -15,6 +15,7 @@ import torch.optim as optim
 from torch.autograd import Variable
 
 from secml.array import CArray
+from secml.data import CDataset
 from secml.classifiers import CClassifier
 
 from secml.core.settings import SECML_PYTORCH_USE_CUDA
@@ -342,14 +343,29 @@ class CTorchClassifier(CClassifier):
             Instance of the classifier trained using input dataset.
 
         """
+        if not isinstance(dataset, CDataset):
+            raise TypeError(
+                "training set should be provided as a CDataset object.")
+
+        if self.normalizer is not None:
+            self.logger.warning(
+                "normalizer is not applied to training data. "
+                "Use `train_transform` parameter if necessary.")
+
         if warm_start is False:
+            # Resetting the classifier
+            self.clear()
+            # Storing dataset classes
+            self._classes = dataset.classes
+            self._n_features = dataset.num_features
             # Reinitialize the model as we are starting clean
             self.init_model()
             # Reinitialize count of epochs
             self._start_epoch = 0
             # Reinitialize the optimizer as we are starting clean
             self.init_optimizer()
-        return super(CTorchClassifier, self).train(dataset, n_jobs=n_jobs)
+
+        return self._train(dataset, n_jobs=n_jobs)
 
     def _train(self, dataset, n_jobs=1):
         """At each training the weight are setted equal to the random weight
@@ -399,7 +415,7 @@ class CTorchClassifier(CClassifier):
                 loss.backward()
                 self._optimizer.step()
 
-                losses.update(loss.data[0], x.size(0))
+                losses.update(loss.item(), x.size(0))
                 acc.update(accuracy(logits.data, y.data)[0], x.size(0))
 
                 # Log progress
@@ -417,16 +433,59 @@ class CTorchClassifier(CClassifier):
         return self
 
     def discriminant_function(self, x, label, n_jobs=1):
+        """Computes the discriminant function for each pattern in x.
 
-        x_carray = CArray(x).atleast_2d()
+        If a normalizer has been specified, input is normalized
+        before computing the discriminant function.
+
+        Parameters
+        ----------
+        x : CArray
+            Array with new patterns to classify, 2-Dimensional of shape
+            (n_patterns, n_features).
+        label : int
+            The label of the class wrt the function should be calculated.
+        n_jobs : int
+            Number of parallel workers to use. Default 1.
+            Cannot be higher than processor's number of cores.
+
+        Returns
+        -------
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
+
+        """
+        x = x.atleast_2d()  # Ensuring input is 2-D
 
         # Normalizing data if a normalizer is defined
         if self.normalizer is not None:
-            x_carray = self.normalizer.normalize(x_carray)
+            x = self.normalizer.normalize(x)
 
-        return self._discriminant_function(x_carray, label, n_jobs=n_jobs)
+        return self._discriminant_function(x, label, n_jobs=n_jobs)
 
     def _discriminant_function(self, x, label, n_jobs=1):
+        """Computes the discriminant function for each pattern in x.
+
+        Parameters
+        ----------
+        x : CArray
+            Array with new patterns to classify, 2-Dimensional of shape
+            (n_patterns, n_features).
+        label : int
+            The label of the class wrt the function should be calculated.
+        n_jobs : int
+            Number of parallel workers to use. Default 1.
+            Cannot be higher than processor's number of cores.
+
+        Returns
+        -------
+        score : CArray
+            Value of the discriminant function for each test pattern.
+            Dense flat array of shape (n_patterns,).
+
+        """
+        x = x.atleast_2d()  # Ensuring input is 2-D
 
         x_loader = self._get_test_input_loader(x, n_jobs=n_jobs)
 
@@ -450,7 +509,8 @@ class CTorchClassifier(CClassifier):
             with torch.no_grad():
                 logits = self._model(x)
                 logits = logits.view(logits.size(0), -1)
-                logits = CArray(logits.data.cpu().numpy()[:, label])
+                logits = CArray(
+                    logits.data.cpu().numpy()[:, label]).astype(float)
 
             if scores is not None:
                 scores = scores.append(logits, axis=0)
@@ -460,7 +520,31 @@ class CTorchClassifier(CClassifier):
         return scores.ravel()
 
     def classify(self, x, n_jobs=1):
+        """Perform classification of each pattern in x.
 
+        If a normalizer has been specified,
+         input is normalized before classification.
+
+        Parameters
+        ----------
+        x : CArray
+            Array with new patterns to classify, 2-Dimensional of shape
+            (n_patterns, n_features).
+        n_jobs : int, optional
+            Number of parallel workers to use for classification.
+            Default 1. Cannot be higher than processor's number of cores.
+
+        Returns
+        -------
+        labels : CArray
+            Flat dense array of shape (n_patterns,) with the label assigned
+             to each test pattern. The classification label is the label of
+             the class associated with the highest score.
+        scores : CArray
+            Array of shape (n_patterns, n_classes) with classification
+             score of each test pattern with respect to each training class.
+
+        """
         x_carray = CArray(x).atleast_2d()
 
         # Normalizing data if a normalizer is defined
@@ -489,14 +573,17 @@ class CTorchClassifier(CClassifier):
             with torch.no_grad():
                 logits = self._model(x)
                 logits = logits.view(logits.size(0), -1)
-                logits = CArray(logits.data.cpu().numpy())
+                logits = CArray(logits.data.cpu().numpy()).astype(float)
 
             if scores is not None:
                 scores = scores.append(logits, axis=0)
             else:
                 scores = logits
 
-        return scores.argmax(axis=1).ravel(), scores
+        # TODO: WE SHOULD USE SOFTMAX TO COMPUTE LABELS?
+        # The classification label is the label of the class
+        # associated with the highest score
+        return CArray(scores.argmax(axis=1)).ravel(), scores
 
     def _gradient_f(self, x, y):
         """Computes the gradient of the classifier's decision function
