@@ -1,5 +1,5 @@
 """
-.. module:: CRowNormalizer
+.. module:: CNormalizerUnitNorm
    :synopsis: Normalize patterns individually to unit norm.
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -9,7 +9,7 @@ from secml.array import CArray
 from secml.features.normalization import CNormalizer
 
 
-class CNormalizerRow(CNormalizer):
+class CNormalizerUnitNorm(CNormalizer):
     """Normalize patterns individually to unit norm.
 
     Each pattern (i.e. each row of the data matrix) with at least
@@ -37,22 +37,22 @@ class CNormalizerRow(CNormalizer):
     Examples
     --------
     >>> from secml.array import CArray
-    >>> from secml.features.normalization import CNormalizerRow
+    >>> from secml.features.normalization import CNormalizerUnitNorm
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-    >>> dense_normalized = CNormalizerRow().train_normalize(array)
+    >>> dense_normalized = CNormalizerUnitNorm().train_normalize(array)
     >>> print dense_normalized
-    CArray([[ 0.40824829 -0.40824829  0.81649658]
-     [ 1.          0.          0.        ]
-     [ 0.          0.70710678 -0.70710678]])
+    CArray([[ 0.408248 -0.408248  0.816497]
+     [ 1.        0.        0.      ]
+     [ 0.        0.707107 -0.707107]])
 
-    >>> print CNormalizerRow(order=1).train_normalize(array)
+    >>> print CNormalizerUnitNorm(order=1).train_normalize(array)
     CArray([[ 0.25 -0.25  0.5 ]
      [ 1.    0.    0.  ]
      [ 0.    0.5  -0.5 ]])
 
     """
-    class_type = 'rownorm'
+    class_type = 'unitnorm'
 
     def __init__(self, order=2):
         """Class constructor"""
@@ -119,10 +119,10 @@ class CNormalizerRow(CNormalizer):
         Examples
         --------
         >>> from secml.array import CArray
-        >>> from secml.features.normalization import CNormalizerRow
+        >>> from secml.features.normalization import CNormalizerUnitNorm
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]], tosparse=True)
 
-        >>> normalizer = CNormalizerRow().train(array)
+        >>> normalizer = CNormalizerUnitNorm().train(array)
         >>> array_normalized = normalizer.normalize(array)
         >>> print array_normalized  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	0.408248290464
@@ -182,10 +182,10 @@ class CNormalizerRow(CNormalizer):
         Examples
         --------
         >>> from secml.array import CArray
-        >>> from secml.features.normalization import CNormalizerRow
+        >>> from secml.features.normalization import CNormalizerUnitNorm
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]], tosparse=True)
 
-        >>> normalizer = CNormalizerRow().train(array)
+        >>> normalizer = CNormalizerUnitNorm().train(array)
         >>> array_normalized = normalizer.normalize(array)
         >>> print normalizer.revert(array_normalized)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1.0

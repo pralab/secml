@@ -1,7 +1,5 @@
-
-
 """
-.. module:: NormalizerMinMax
+.. module:: CNormalizerMinMax
    :synopsis: Scales input array features to a given range.
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -56,14 +54,14 @@ class CNormalizerMinMax(CNormalizerLinear):
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
     >>> print CNormalizerMinMax().train_normalize(array)
-    CArray([[ 0.5         0.          1.        ]
-     [ 1.          0.5         0.33333333]
-     [ 0.          1.          0.        ]])
+    CArray([[ 0.5       0.        1.      ]
+     [ 1.        0.5       0.333333]
+     [ 0.        1.        0.      ]])
 
     >>> print CNormalizerMinMax(feature_range=(-1,1)).train_normalize(array)
-    CArray([[ 0.         -1.          1.        ]
-     [ 1.          0.         -0.33333333]
-     [-1.          1.         -1.        ]])
+    CArray([[ 0.       -1.        1.      ]
+     [ 1.        0.       -0.333333]
+     [-1.        1.       -1.      ]])
 
     """
     class_type = 'minmax'
@@ -240,9 +238,9 @@ class CNormalizerMinMax(CNormalizerLinear):
 
         >>> normalizer = CNormalizerMinMax().train(array)
         >>> print normalizer.normalize(array)
-        CArray([[ 0.5         0.          1.        ]
-         [ 1.          0.5         0.33333333]
-         [ 0.          1.          0.        ]])
+        CArray([[ 0.5       0.        1.      ]
+         [ 1.        0.5       0.333333]
+         [ 0.        1.        0.      ]])
 
         >>> print normalizer.normalize(CArray([-1,5,1]))
         CArray([-0.5         3.          0.66666667])
@@ -285,7 +283,9 @@ class CNormalizerMinMax(CNormalizerLinear):
 
         >>> normalizer = CNormalizerMinMax().train(array)
         >>> print normalizer.gradient(array)
-        CArray([ 0.5         0.5         0.33333333])
+        CArray([[ 0.5       0.        0.      ]
+         [ 0.        0.5       0.      ]
+         [ 0.        0.        0.333333]])
 
         """
         data_gradient = super(CNormalizerMinMax, self).gradient(data)

@@ -11,7 +11,7 @@ import unittest
 
 from secml.utils import CUnitTest
 from secml.array import CArray
-from secml.features.normalization import CNormalizerMinMax, CNormalizerZScore, CNormalizerRow
+from secml.features.normalization import CNormalizerMinMax, CNormalizerZScore, CNormalizerUnitNorm
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, Normalizer
 
 
@@ -54,8 +54,8 @@ class TestArrayNormalizers(CUnitTest):
         sklearn_comp(self.column_dense)
         sklearn_comp(self.column_sparse)
 
-    def test_rownormalizer(self):
-        """Test for RowNormalizer. This compares sklearn equivalent to our normalizer."""
+    def test_norm_unitnorm(self):
+        """Test for CNormalizerUnitNorm. This compares sklearn equivalent to our normalizer."""
 
         def sklearn_comp(array):
 
@@ -64,7 +64,7 @@ class TestArrayNormalizers(CUnitTest):
             # Sklearn normalizer (requires float dtype input)
             target = CArray(Normalizer().fit_transform(array.astype(float).get_data())).round(4)
             # Our normalizer
-            result = CNormalizerRow().train_normalize(array).round(4)
+            result = CNormalizerUnitNorm().train_normalize(array).round(4)
 
             self.assertFalse((target != result).any(), "\n{:}\nis different from target\n{:}".format(result, target))
 
