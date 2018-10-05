@@ -1,5 +1,5 @@
 """
-.. module:: ZScoreScaler
+.. module:: CNormalizerZScore
    :synopsis: Scales input array features to have zero mean and unit variance.
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -49,14 +49,14 @@ class CNormalizerZScore(CNormalizerLinear):
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
     >>> print CNormalizerZScore().train_normalize(array)
-    CArray([[ 0.         -1.22474487  1.33630621]
-     [ 1.22474487  0.         -0.26726124]
-     [-1.22474487  1.22474487 -1.06904497]])
+    CArray([[ 0.       -1.224745  1.336306]
+     [ 1.224745  0.       -0.267261]
+     [-1.224745  1.224745 -1.069045]])
 
     >>> print CNormalizerZScore(with_std=False).train_normalize(array.tosparse())  # works with sparse arrays too
-    CArray([[ 0.         -1.          1.66666667]
-     [ 1.          0.         -0.33333333]
-     [-1.          1.         -1.33333333]])
+    CArray([[ 0.       -1.        1.666667]
+     [ 1.        0.       -0.333333]
+     [-1.        1.       -1.333333]])
 
     """
     class_type = 'zscore'
@@ -152,9 +152,9 @@ class CNormalizerZScore(CNormalizerLinear):
 
         >>> normalizer = CNormalizerZScore().train(array)
         >>> print normalizer.mean
-        CArray([ 1.          0.          0.33333333])
+        CArray([ 1.        0.        0.333333])
         >>> print normalizer.std
-        CArray([ 0.81649658  0.81649658  1.24721913])
+        CArray([ 0.816497  0.816497  1.247219])
 
         """
         self.clear()  # Reset trained normalizer
@@ -209,16 +209,16 @@ class CNormalizerZScore(CNormalizerLinear):
         >>> normalizer = CNormalizerZScore().train(array)
         >>> array_normalized = normalizer.normalize(array)
         >>> print array_normalized
-        CArray([[ 0.         -1.22474487  1.33630621]
-         [ 1.22474487  0.         -0.26726124]
-         [-1.22474487  1.22474487 -1.06904497]])
+        CArray([[ 0.       -1.224745  1.336306]
+         [ 1.224745  0.       -0.267261]
+         [-1.224745  1.224745 -1.069045]])
         >>> print array_normalized.mean(axis=0)
         CArray([[ 0.  0.  0.]])
         >>> print array_normalized.std(axis=0)
         CArray([[ 1.  1.  1.]])
 
         >>> print normalizer.normalize(CArray([-1,5,1]))
-        CArray([-2.44948974  6.12372436  0.53452248])
+        CArray([-2.44949   6.123724  0.534522])
         >>> normalizer.normalize(CArray([-1,5,1]).T)  # We trained on 3 features
         Traceback (most recent call last):
             ...
@@ -266,7 +266,9 @@ class CNormalizerZScore(CNormalizerLinear):
 
         >>> normalizer = CNormalizerZScore().train(array)
         >>> print normalizer.gradient(array)
-        CArray([ 1.22474487  1.22474487  0.80178373])
+        CArray([[ 1.224745  0.        0.      ]
+         [ 0.        1.224745  0.      ]
+         [ 0.        0.        0.801784]])
 
         """
         data_gradient = super(CNormalizerZScore, self).gradient(data)
