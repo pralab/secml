@@ -31,7 +31,7 @@ class TestCClassifierSGD(CUnitTest):
 
         kernel_types = (None, CKernelLinear, CKernelRBF, CKernelPoly)
         self.sgds = [CClassifierSGD(
-            regularizer=CRegularizerL2(), loss=CLossHinge(),
+            regularizer=CRegularizerL2(), loss=CLossHinge(), max_iter=5000,
             kernel=kernel() if kernel is not None else None)
                 for kernel in kernel_types]
         self.logger.info(
