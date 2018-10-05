@@ -1,18 +1,11 @@
-"""
-Created on 19/oct/2015
-Class to test CClassifierKernelDensityEstimator
-
-@author: Ambra Demontis
-If you find any BUG, please notify authors first.
-"""
-import unittest
 from secml.utils import CUnitTest
 
 from secml.data.loader import CDLRandom
 from secml.classifiers import CClassifierKDE
-from secml.figure import CFigure
+from secml.array import CArray
 from secml.kernel import CKernelRBF
 from secml.features.normalization import CNormalizerMinMax
+from secml.figure import CFigure
 
 
 class TestCClassifierKernelDensityEstimator(CUnitTest):
@@ -51,6 +44,131 @@ class TestCClassifierKernelDensityEstimator(CUnitTest):
 
         fig.show()
 
+    def test_fun(self):
+        """Test for discriminant_function() and classify() methods."""
+        self.logger.info(
+            "Test for discriminant_function() and classify() methods.")
+
+        def _check_df_scores(s, n_samples):
+            self.assertEqual(type(s), CArray)
+            self.assertTrue(s.isdense)
+            self.assertEqual(1, s.ndim)
+            self.assertEqual((n_samples,), df_scores_pos.shape)
+            self.assertEqual(df_scores_pos.dtype, float)
+
+        def _check_classify_scores(l, s, n_samples, n_classes):
+            self.assertEqual(type(l), CArray)
+            self.assertEqual(type(s), CArray)
+            self.assertTrue(l.isdense)
+            self.assertTrue(s.isdense)
+            self.assertEqual(1, l.ndim)
+            self.assertEqual(2, s.ndim)
+            self.assertEqual((n_samples,), l.shape)
+            self.assertEqual((n_samples, n_classes), s.shape)
+            self.assertEqual(l.dtype, int)
+            self.assertEqual(s.dtype, float)
+
+        self.kde.train(self.dataset)
+
+        # Testing discriminant_function on multiple points
+
+        df_scores_pos = self.kde.discriminant_function(
+            self.dataset.X, label=1)
+        self.logger.info("discriminant_function("
+                         "dataset.X, label=1:\n{:}".format(df_scores_pos))
+        _check_df_scores(df_scores_pos, self.dataset.num_samples)
+
+        df_scores_neg = self.kde.discriminant_function(
+            self.dataset.X, label=0)
+        self.logger.info("discriminant_function("
+                         "dataset.X, label=0:\n{:}".format(df_scores_neg))
+        _check_df_scores(df_scores_neg, self.dataset.num_samples)
+
+        self.assertFalse(((1 - df_scores_neg) != df_scores_pos).any())
+
+        # Testing _discriminant_function on multiple points
+
+        ds_priv_scores_pos = self.kde._discriminant_function(
+            self.dataset.X, label=1)
+        self.logger.info("_discriminant_function("
+                         "dataset.X, label=1:\n{:}".format(ds_priv_scores_pos))
+        _check_df_scores(ds_priv_scores_pos, self.dataset.num_samples)
+
+        ds_priv_scores_neg = self.kde._discriminant_function(
+            self.dataset.X, label=0)
+        self.logger.info("_discriminant_function("
+                         "dataset.X, label=0:\n{:}".format(ds_priv_scores_neg))
+        _check_df_scores(ds_priv_scores_neg, self.dataset.num_samples)
+
+        # Comparing output of public and private
+
+        self.assertFalse((df_scores_pos != ds_priv_scores_pos).any())
+        self.assertFalse((df_scores_neg != ds_priv_scores_neg).any())
+
+        # Testing classify on multiple points
+
+        labels, scores = self.kde.classify(self.dataset.X)
+        self.logger.info("classify(dataset.X:"
+                         "\nlabels: {:}\nscores:{:}".format(labels,
+                                                            scores))
+        _check_classify_scores(
+            labels, scores, self.dataset.num_samples, self.kde.n_classes)
+
+        # Comparing output of discriminant_function and classify
+
+        self.assertFalse((df_scores_neg != scores[:, 0].ravel()).any())
+        self.assertFalse((df_scores_pos != scores[:, 1].ravel()).any())
+
+        # Testing discriminant_function on single point
+
+        df_scores_pos = self.kde.discriminant_function(
+            self.dataset.X[0, :].ravel(), label=1)
+        self.logger.info("discriminant_function(dataset.X[0, :].ravel(), "
+                         "label=1:\n{:}".format(df_scores_pos))
+        _check_df_scores(df_scores_pos, 1)
+
+        df_scores_neg = self.kde.discriminant_function(
+            self.dataset.X[0, :].ravel(), label=0)
+        self.logger.info("discriminant_function(dataset.X[0, :].ravel(), "
+                         "label=0:\n{:}".format(df_scores_neg))
+        _check_df_scores(df_scores_neg, 1)
+
+        self.assertFalse(((1 - df_scores_neg) != df_scores_pos).any())
+
+        # Testing _discriminant_function on single point
+
+        df_priv_scores_pos = self.kde._discriminant_function(
+            self.dataset.X[0, :].ravel(), label=1)
+        self.logger.info("_discriminant_function(dataset.X[0, :].ravel(), "
+                         "label=1:\n{:}".format(df_priv_scores_pos))
+        _check_df_scores(df_priv_scores_pos, 1)
+
+        df_priv_scores_neg = self.kde._discriminant_function(
+            self.dataset.X[0, :].ravel(), label=0)
+        self.logger.info("_discriminant_function(dataset.X[0, :].ravel(), "
+                         "label=0:\n{:}".format(df_priv_scores_neg))
+        _check_df_scores(df_priv_scores_neg, 1)
+
+        # Comparing output of public and private
+
+        self.assertFalse((df_scores_pos != df_priv_scores_pos).any())
+        self.assertFalse((df_scores_neg != df_priv_scores_neg).any())
+
+        self.logger.info("Testing classify on single point")
+
+        labels, scores = self.kde.classify(self.dataset.X[0, :].ravel())
+        self.logger.info("classify(self.dataset.X[0, :].ravel():"
+                         "\nlabels: {:}\nscores:{:}".format(labels,
+                                                            scores))
+        _check_classify_scores(labels, scores, 1, self.kde.n_classes)
+
+        # Comparing output of discriminant_function and classify
+
+        self.assertFalse(
+            (df_scores_neg != CArray(scores[:, 0]).ravel()).any())
+        self.assertFalse(
+            (df_scores_pos != CArray(scores[:, 1]).ravel()).any())
+
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()
