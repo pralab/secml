@@ -15,6 +15,7 @@ import torch.optim as optim
 from torch.autograd import Variable
 
 from secml.array import CArray
+from secml.data import CDataset
 from secml.classifiers import CClassifier
 
 from secml.core.settings import SECML_PYTORCH_USE_CUDA
@@ -342,14 +343,29 @@ class CTorchClassifier(CClassifier):
             Instance of the classifier trained using input dataset.
 
         """
+        if not isinstance(dataset, CDataset):
+            raise TypeError(
+                "training set should be provided as a CDataset object.")
+
+        if self.normalizer is not None:
+            self.logger.warning(
+                "normalizer is not applied to training data. "
+                "Use `train_transform` parameter if necessary.")
+
         if warm_start is False:
+            # Resetting the classifier
+            self.clear()
+            # Storing dataset classes
+            self._classes = dataset.classes
+            self._n_features = dataset.num_features
             # Reinitialize the model as we are starting clean
             self.init_model()
             # Reinitialize count of epochs
             self._start_epoch = 0
             # Reinitialize the optimizer as we are starting clean
             self.init_optimizer()
-        return super(CTorchClassifier, self).train(dataset, n_jobs=n_jobs)
+
+        return self._train(dataset, n_jobs=n_jobs)
 
     def _train(self, dataset, n_jobs=1):
         """At each training the weight are setted equal to the random weight
