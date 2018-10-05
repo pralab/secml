@@ -399,7 +399,7 @@ class CTorchClassifier(CClassifier):
                 loss.backward()
                 self._optimizer.step()
 
-                losses.update(loss.data[0], x.size(0))
+                losses.update(loss.item(), x.size(0))
                 acc.update(accuracy(logits.data, y.data)[0], x.size(0))
 
                 # Log progress
