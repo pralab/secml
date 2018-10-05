@@ -23,7 +23,8 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
                  train_transform=None, normalizer=None):
 
         # Specific parameters of the classifier
-        self._num_classes = num_classes
+        self._classes = None  # TODO: MANAGE LIST OF CLASSES
+        self._n_classes = num_classes
         self._depth = depth
         self._growthRate = growthRate
 
@@ -44,10 +45,19 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
                                          'depth': depth,
                                          'growthRate': growthRate})
 
+    @property
+    def n_classes(self):
+        """Number of classes of training dataset."""
+        if self.classes is not None:
+            self._n_classes = self.classes.size  # Override the internal param
+            return self.classes.size
+        else:  # Use the internal parameter
+            return self._n_classes
+
     def _init_model(self):
         """Initialize the PyTorch Neural Network model."""
         self._model = densenet(
-            num_classes=self._num_classes,
+            num_classes=self.n_classes,
             depth=self._depth,
             growthRate=self._growthRate,
             compressionRate=2,
