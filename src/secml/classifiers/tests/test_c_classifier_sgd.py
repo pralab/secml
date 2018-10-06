@@ -21,7 +21,8 @@ class TestCClassifierSGD(CUnitTest):
         # generate synthetic data
         self.dataset = CDLRandom(n_features=1000, n_redundant=200,
                                  n_informative=250,
-                                 n_clusters_per_class=2).load()
+                                 n_clusters_per_class=2,
+                                 random_state=0).load()
 
         self.dataset.X = CNormalizerMinMax().train_normalize(self.dataset.X)
 
