@@ -179,7 +179,8 @@ class CClassifierSGD(CClassifierLinear):
             power_t=self.power_t,
             class_weight=self.class_weight,
             average=self.average,
-            warm_start=self.warm_start)
+            warm_start=self.warm_start,
+            random_state=0)
 
         # Pass loss function parameters to classifier
         sgd.set_params(**self.loss.get_params())
