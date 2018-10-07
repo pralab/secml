@@ -1,17 +1,6 @@
-"""
-Created on 27/apr/2015
-Class to test kernels'gradient precision.
-
-@author: Davide Maiorca
-@author: Marco Melis
-
-If you find any BUGs, please notify authors first.
-
-"""
 from secml.core import settings
-settings.SECML_USE_NUMBA = True
+settings.SECML_USE_NUMBA = False
 
-import unittest
 from secml.utils import CUnitTest
 
 from secml.kernel import *
@@ -77,4 +66,4 @@ class TestKernelGradient(CUnitTest):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()
