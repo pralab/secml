@@ -1,14 +1,14 @@
-import unittest
 from secml.utils import CUnitTest
+CUnitTest.importskip("numba")
 
 from secml.array import CArray
-from secml.kernel.numba_kernel.numba_utils import *
 
 
 class TestNumbaUtils(CUnitTest):
     """Unit test for Numba utilities collection."""
 
     def setUp(self):
+
         # Creating different arrays to use for the tests
 
         self.v1_dense = CArray([1, 0, 2, 4])
@@ -24,6 +24,9 @@ class TestNumbaUtils(CUnitTest):
         self.m2_sparse = self.m2_dense.tosparse()
 
     def test_dist(self):
+
+        from secml.kernel.numba_kernel.numba_utils import \
+            manh_dense, sqrd_eucl_dense
 
         self.logger.info("Manhattan Distance - Dense")
 
@@ -44,6 +47,9 @@ class TestNumbaUtils(CUnitTest):
         self.assertEqual(sqrd_eucl_dist, 13.0)
 
     def test_dot(self):
+
+        from secml.kernel.numba_kernel.numba_utils import \
+            dot_dense, dot_sparse, dot_sparse2
 
         self.logger.info("Numpy Dot Product - Dense")
         with self.timer():
@@ -96,4 +102,4 @@ class TestNumbaUtils(CUnitTest):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

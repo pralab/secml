@@ -2,6 +2,7 @@ from secml.core import settings
 settings.SECML_USE_NUMBA = True
 
 from secml.utils import CUnitTest
+CUnitTest.importskip("numba")
 
 from secml.array import CArray
 from secml.core.type_utils import is_scalar
@@ -17,12 +18,6 @@ class TestCKernelHistIntersectNumba(CUnitTest):
     """
 
     def setUp(self):
-
-        try:
-            import numba
-        except ImportError:
-            raise ImportError(
-                "Unittest only available if `Numba` library is installed")
         
         self.d_dense = CDLRandom(n_samples=10, n_features=5,
                                  n_redundant=0, n_informative=3,
