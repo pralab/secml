@@ -1,6 +1,3 @@
-from secml.core import settings
-settings.SECML_USE_NUMBA = False
-
 from secml.utils import CUnitTest
 
 from secml.array import CArray
@@ -9,11 +6,7 @@ from secml.data.loader import CDLRandom
 
 
 class TestCKernelPoly(CUnitTest):
-    """Unit test for CKernelPoly.
-
-    NOTE: FOLLOWING TESTS WORKS ONLY IF NUMBA LIBRARY IS AVAILABLE.
-
-    """
+    """Unit test for CKernelPoly."""
 
     def setUp(self):
 

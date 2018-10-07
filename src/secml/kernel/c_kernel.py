@@ -23,32 +23,14 @@ class CKernel(CCreator):
     "more similar" than objects a and c.
     A kernel must also be positive semi-definite.
 
-    .. note::
-
-       Kernels optimized with Numba library will fallback
-       automatically to standard kernels when no function
-       supporting sparse data is available.
-       As importing directly from `secml.kernel` package
-
-       >>> from secml.kernel import CKernelRBF  # doctest: +SKIP
-
-       will load the Numba version automatically (if Numba is available
-       on the system) its sometimes useful to import both kernel versions
-       and use them differently when necessary:
-
-       >>> from secml.kernel.c_kernel_rbf import CKernelRBF as RBF  # doctest: +SKIP
-       >>> from secml.kernel.numba_kernel.c_kernel_rbf_numba import CKernelRBFNumba as RBFNumba  # doctest: +SKIP
-
     Attributes
     ----------
-    usenumba : True if the loaded kernel uses Numba for optimization.
     cache_size : int, size of the cache used for kernel computation. Default 100.
 
     """
     __metaclass__ = ABCMeta
     __super__ = 'CKernel'
 
-    usenumba = False
     cache_size = 100
 
     def __init__(self, cache_size=100):

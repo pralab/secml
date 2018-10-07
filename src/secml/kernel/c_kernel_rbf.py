@@ -23,7 +23,6 @@ class CKernelRBF(CKernel):
 
     Attributes
     ----------
-    usenumba : False as current kernel does not use Numba for optimization.
     cache_size : int, size of the cache used for kernel computation. Default 100.
 
     Parameters
@@ -48,7 +47,6 @@ class CKernelRBF(CKernel):
 
     """
     class_type = 'rbf'
-    usenumba = False
 
     def __init__(self, gamma=1.0, **kwargs):
         # Calling CKernel constructor

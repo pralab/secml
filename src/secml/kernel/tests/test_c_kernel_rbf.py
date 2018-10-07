@@ -1,6 +1,3 @@
-from secml.core import settings
-settings.SECML_USE_NUMBA = False
-
 from secml.utils import CUnitTest
 
 from secml.array import CArray
@@ -9,19 +6,9 @@ from secml.data.loader import CDLRandom
 
 
 class TestCKernelRBF(CUnitTest):
-    """Unit test for CKernelRBF.
-
-    NOTE: FOLLOWING TESTS WORKS ONLY IF NUMBA LIBRARY IS AVAILABLE.
-
-    """
+    """Unit test for CKernelRBF."""
 
     def setUp(self):
-
-        try:
-            import numba
-        except ImportError:
-            raise ImportError(
-                "Unittest only available if `Numba` library is installed")
 
         self.d_dense = CDLRandom(n_samples=10, n_features=5,
                                  n_redundant=0, n_informative=3,

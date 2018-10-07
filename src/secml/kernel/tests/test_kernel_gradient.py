@@ -1,6 +1,3 @@
-from secml.core import settings
-settings.SECML_USE_NUMBA = False
-
 from secml.utils import CUnitTest
 
 from secml.kernel import *
