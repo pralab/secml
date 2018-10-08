@@ -1,12 +1,14 @@
 variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
     SECML_HOME_DIR: "$CI_PROJECT_DIR/secml-lib-data"
+    TOX_WORK_DIR: "$CI_PROJECT_DIR/.tox"
 
 cache:
   key: "$CI_JOB_NAME"
   paths:
     - "$CI_PROJECT_DIR/.cache/pip"
     - "$CI_PROJECT_DIR/.vendor/apt"
+    - "$CI_PROJECT_DIR/.tox"
     - "$CI_PROJECT_DIR/secml-lib-data"
 
 stages:
@@ -18,55 +20,30 @@ before_script:
   - sh .gitlab-ci-extra.sh > /dev/null
   - pip install tox
 
-test:py27-n13-sk19:
-  image: python:2.7
+test:py27-n13:
+  image: ubuntu:xenial
   stage: test
-  script: tox -e py27-n13-sk19
+  script: tox --workdir $TOX_WORK_DIR -e py27-n13
 
-test:py27-n14-sk19:
-  image: python:2.7
+test:py27-n14:
+  image: ubuntu:xenial
   stage: test
-  script: tox -e py27-n14-sk19
+  script: tox --workdir $TOX_WORK_DIR -e py27-n14
 
-test:py27-n14-sk20:
-  image: python:2.7
+test:py27-n15:
+  image: ubuntu:xenial
   stage: test
-  script: tox -e py27-n14-sk20
+  script: tox --workdir $TOX_WORK_DIR -e py27-n15
 
-test:py27-n15-sk19:
-  image: python:2.7
+test:py27-sk19:
+  image: ubuntu:xenial
   stage: test
-  script: tox -e py27-n15-sk19
+  script: tox --workdir $TOX_WORK_DIR -e py27-sk19
 
-test:py27-n15-sk20:
-  image: python:2.7
+test:py27-sk20:
+  image: ubuntu:xenial
   stage: test
-  script: tox -e py27-n15-sk20
-
-test:py34-n13-sk19:
-  image: python:3.4
-  stage: test
-  allow_failure: true
-  script: tox -e py34-n13-sk19
-
-test:py35-n13-sk19:
-  image: python:3.5
-  stage: test
-  allow_failure: true
-  script: tox -e py35-n13-sk19
-
-test:py36-n13-sk19:
-  image: python:3.6
-  stage: test
-  allow_failure: true
-  script: tox -e py36-n13-sk19
-
-test:py37-n13-sk19:
-  image: python:3.7
-  stage: test
-  allow_failure: true
-  script: tox -e py37-n13-sk19
-
+  script: tox --workdir $TOX_WORK_DIR -e py27-sk20
 
 deploy:xenial:
   image: ubuntu:xenial
