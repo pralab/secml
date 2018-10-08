@@ -1,7 +1,7 @@
 numpy >= 1.13.*
 scipy >= 1.1.*
 matplotlib == 2.2.*
-scikit-learn >= 0.19.*
+scikit-learn >= 0.19.*, < 0.21
 joblib
 Pillow
 requests
