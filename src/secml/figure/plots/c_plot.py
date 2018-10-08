@@ -348,12 +348,13 @@ class CPlot(CCreator):
         c : color or sequence of color, optional, default 'b'
             c can be a single color format string, or a sequence
             of color specifications of length N, or a sequence of
-            N numbers to be mapped to colors using the cmap and
-            norm specified via kwargs (see below). Note that c
-            should not be a single numeric RGB or RGBA sequence
-            because that is indistinguishable from an array of
-            values to be colormapped. c can be a 2-D array in
-            which the rows are RGB or RGBA, however.
+            numbers with the same shape of x,y to be mapped to
+            colors using the cmap and norm specified via kwargs
+            (see below). Note that c should not be a single
+            numeric RGB or RGBA sequence because that is
+            indistinguishable from an array of values to be
+            colormapped. c can be a 2-D array in which the rows
+            are RGB or RGBA, however.
         marker : MarkerStyle, optional, default: 'o'
             See markers for more information on the different
             styles of markers scatter supports.
