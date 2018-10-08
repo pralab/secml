@@ -15,10 +15,6 @@ from secml.kernel import CKernel
 class CKernelHamming(CKernel):
     """Hamming distance kernel.
 
-    Attributes
-    ----------
-    usenumba : False as current kernel does not use Numba for optimization.
-
     Examples
     --------
     >>> from secml.array import CArray
@@ -34,7 +30,6 @@ class CKernelHamming(CKernel):
 
     """
     class_type = 'hamming'
-    usenumba = False
 
     def __init__(self, cache_size=100):
 

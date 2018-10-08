@@ -13,7 +13,7 @@ from secml.utils import fm, CLog
 
 __all__ = ['SECML_HOME_DIR', 'SECML_CONFIG',
            'SECML_EXP_DIR', 'SECML_DS_DIR',
-           'SECML_USE_NUMBA', 'SECML_PYTORCH_USE_CUDA',
+           'SECML_PYTORCH_USE_CUDA',
            'SECML_PYTORCH_DATA_DIR', 'SECML_PYTORCH_MODELS_DIR']
 
 
@@ -243,21 +243,6 @@ SECML_EXP_DIR = _parse_env_config(
     'SECML_EXP_DIR', SECML_CONFIG, 'secml-lib', 'exp_dir',
     dtype=str, default=os.path.join(SECML_HOME_DIR, 'experiments')
 )
-
-"""True if functions optimized with Numba library should be used.
-
-This can be globally set inside params file or per-script.
-To be effective, use in the head of your script. Example:
->>> from secml.core import settings
->>> settings.SECML_USE_NUMBA = True
->>>
->>> **OTHER IMPORTS**
->>> **REST OF CODE**
-
-"""
-SECML_USE_NUMBA = _parse_env_config(
-    'SECML_USE_NUMBA', SECML_CONFIG, 'secml-lib', 'use_numba',
-    dtype=bool, default=True)
 
 
 # --------- #

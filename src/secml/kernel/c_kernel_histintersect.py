@@ -23,7 +23,6 @@ class CKernelHistIntersect(CKernel):
 
     Attributes
     ----------
-    usenumba : False as current kernel does not use Numba for optimization.
     cache_size : int, size of the cache used for kernel computation. Default 100.
 
     Examples
@@ -41,7 +40,6 @@ class CKernelHistIntersect(CKernel):
 
     """
     class_type = 'hist_intersect'
-    usenumba = False
 
     # TODO: ADD SPARSE SUPPORT
     def _k(self, x, y):
