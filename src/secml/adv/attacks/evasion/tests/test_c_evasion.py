@@ -154,7 +154,7 @@ class CEvasionTestCases(object):
             return x
 
         def _plot_evasion(self):
-            """Plot evasion results for openopt, explorer and warm start"""
+            """Plot evasion results"""
             fig = CFigure(height=6, width=6)
 
             fig.subplot(n_rows=1, n_cols=1, grid_slot=1)
