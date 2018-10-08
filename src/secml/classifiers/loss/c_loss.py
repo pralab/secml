@@ -11,17 +11,9 @@ from secml.core import CCreator
 
 
 class CLoss(CCreator):
-    """Abstract class that defines basic methods for loss functions.
-
-    Attributes
-    ----------
-    usenumba : True if class uses Numba for optimization.
-
-    """
+    """Abstract class that defines basic methods for loss functions."""
     __metaclass__ = ABCMeta
     __super__ = 'CLoss'
-
-    usenumba = False
 
     @abstractproperty
     def class_type(self):

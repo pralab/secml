@@ -7,6 +7,7 @@
 
 """
 import unittest
+import pytest
 from secml.utils import CLog
 
 
@@ -34,6 +35,15 @@ class CUnitTest(unittest.TestCase):
     def timer(self):
         """Returns a CTimer to be used as context manager."""
         return self.logger.timer()
+
+    # Skip something
+    skip = pytest.mark.skip
+
+    # Skip something conditionally
+    skipif = pytest.mark.skipif
+
+    # Skipping on a missing import dependency
+    importskip = staticmethod(pytest.importorskip)
 
     # Wrapper to use "if __name__ == '__main__': CUnitTest.main()"
     main = unittest.main

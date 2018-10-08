@@ -1,31 +1,15 @@
 #!/bin/bash
 
-apt_llvm_trusty()
-{
-  apt-get install -qq -y wget software-properties-common
-  wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key|apt-key add -
-  apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.7 main"
-  apt-get update -qq
-}
-
-# Ubuntu trusty reps don't have llvm-3.7 package. Need to get them from developers
-apt-get update -qq
-apt-get install -qq -y lsb-release
-if [ "$(lsb_release -cs)" = "trusty" ]; then
-  echo "Adding llvm repository for ubuntu:trusty"
-  apt_llvm_trusty
-fi
-
 # Cache directory for apt-get packages
 mkdir -p ".vendor/apt"
 
-apt-get -o dir::cache::archives=".vendor/apt" install -y -qq wget build-essential pkg-config gfortran libatlas-base-dev python-dev python-pip libffi-dev libssl-dev
-# Numba dependencies
-apt-get -o dir::cache::archives=".vendor/apt" install -y -qq m4 zlib1g zlib1g-dev libedit2 libedit-dev llvm-3.7 llvm-3.7-dev llvm-dev
+apt-get update -yq
+
+apt-get -o dir::cache::archives=".vendor/apt" install -yq wget build-essential pkg-config gfortran libatlas-base-dev python-dev python-pip libffi-dev libssl-dev
 # Matplotlib dependencies
-apt-get -o dir::cache::archives=".vendor/apt" install -y -qq python-tk libpng-dev libgif-dev libjpeg8-dev libtiff5-dev libpng12-dev libfreetype6-dev
+apt-get -o dir::cache::archives=".vendor/apt" install -yq python-tk libpng-dev libgif-dev libjpeg8-dev libtiff5-dev libpng12-dev libfreetype6-dev
 # OpenOpt dependencies
-apt-get -o dir::cache::archives=".vendor/apt" install -y -qq libgmp3-dev libglpk-dev python-cvxopt
+apt-get -o dir::cache::archives=".vendor/apt" install -yq libgmp3-dev libglpk-dev python-cvxopt
 # Update to latest pip version
 pip install -U pip
 
