@@ -8,7 +8,6 @@ cache:
   paths:
     - "$CI_PROJECT_DIR/.cache/pip"
     - "$CI_PROJECT_DIR/.vendor/apt"
-    - "$CI_PROJECT_DIR/.tox"
     - "$CI_PROJECT_DIR/secml-lib-data"
 
 stages:
