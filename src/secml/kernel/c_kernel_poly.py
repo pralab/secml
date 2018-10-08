@@ -23,7 +23,6 @@ class CKernelPoly(CKernel):
 
     Attributes
     ----------
-    usenumba : False as current kernel does not use Numba for optimization.
     cache_size : int, size of the cache used for kernel computation. Default 100.
 
     Parameters
@@ -51,7 +50,6 @@ class CKernelPoly(CKernel):
 
     """
     class_type = 'poly'
-    usenumba = False
     
     def __init__(self, degree=2, gamma=1.0, coef0=1.0, **kwargs):
         # Calling CKernel constructor

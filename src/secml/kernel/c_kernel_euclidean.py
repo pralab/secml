@@ -20,10 +20,6 @@ class CKernelEuclidean(CKernel):
 
     for each pair of rows in X and in Y.
 
-    Attributes
-    ----------
-    usenumba : False as current kernel does not use Numba for optimization.
-
     Examples
     --------
     >>> from secml.array import CArray
@@ -39,7 +35,6 @@ class CKernelEuclidean(CKernel):
 
     """
     class_type = 'euclidean'
-    usenumba = False
 
     def __init__(self, cache_size=100):
 

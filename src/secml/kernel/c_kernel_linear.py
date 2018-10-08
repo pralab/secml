@@ -23,7 +23,6 @@ class CKernelLinear(CKernel):
 
     Attributes
     ----------
-    usenumba : False as current kernel does not use Numba for optimization.
     cache_size : int, size of the cache used for kernel computation. Default 100.
 
     Examples
@@ -41,7 +40,6 @@ class CKernelLinear(CKernel):
 
     """
     class_type = 'linear'
-    usenumba = False
 
     def _k(self, x, y):
         """Compute the linear kernel between x and y.

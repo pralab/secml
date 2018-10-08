@@ -24,7 +24,6 @@ class CKernelMax(CKernel):
 
     Attributes
     ----------
-    usenumba : False as current kernel does not use Numba for optimization.
     cache_size : int, size of the cache used for kernel computation. Default 100.
 
     Parameters
@@ -36,7 +35,6 @@ class CKernelMax(CKernel):
 
     """
     class_type = 'max'
-    usenumba = False
 
     def __init__(self, gamma=1.0, cache_size=100):
         # Calling CKernel constructor
