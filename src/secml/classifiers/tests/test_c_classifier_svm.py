@@ -255,7 +255,7 @@ class TestCClassifierSVM(CUnitTest):
         fig = CFigure(linewidth=1)
         fig.sp.plot(xx, yy, 'k-', label='no weights')
         fig.sp.plot(xx, wyy, 'k--', label='with weights')
-        fig.sp.scatter(X[:, 0], X[:, 1], c=y)
+        fig.sp.scatter(X[:, 0].ravel(), X[:, 1].ravel(), c=y)
         fig.sp.legend()
 
         fig.show()
