@@ -35,7 +35,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
 	'sphinx.ext.autosummary',
-    'sphinx.ext.pngmath',
+    'sphinx.ext.imgmath',
 	'numpydoc',
 ]
 
