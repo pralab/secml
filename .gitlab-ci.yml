@@ -15,29 +15,38 @@ stages:
 
 before_script:
   - echo $CI_PROJECT_DIR
+  - sh .gitlab-ci-extra.sh > /dev/null
+  - pip install tox
 
-test:xenial:
-  image: ubuntu:xenial
+test:python2:
+  image: python:2.7
   stage: test
-  script:
-    - sh .gitlab-ci-extra.sh > /dev/null
-    - pip install numpy==1.13.*
-    - pip install enum34
-    - pip install -r requirements.txt
-    - cd src
-    - PYTHONPATH=. py.test --cov-config ../.coveragerc secml --cov=secml
+  script: tox -e py27
 
-.test:trusty:
-  image: ubuntu:trusty
+test:python34:
+  image: python:3.4
   stage: test
-  script:
-    - sh .gitlab-ci-extra.sh > /dev/null
-    - pip install pyOpenSSL ndg-httpsclient pyasn1
-    - pip install numpy==1.13.*
-    - pip install enum34
-    - pip install -r requirements.txt
-    - cd src
-    - PYTHONPATH=. py.test --cov-config ../.coveragerc secml --cov=secml
+  allow_failure: true
+  script: tox -e py34
+
+test:python35:
+  image: python:3.5
+  stage: test
+  allow_failure: true
+  script: tox -e py35
+
+test:python36:
+  image: python:3.6
+  stage: test
+  allow_failure: true
+  script: tox -e py36
+
+test:python37:
+  image: python:3.7
+  stage: test
+  allow_failure: true
+  script: tox -e py37
+
 
 deploy:xenial:
   image: ubuntu:xenial
