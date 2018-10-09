@@ -1,5 +1,5 @@
 """
-.. module:: Loss
+.. module:: CLoss
    :synopsis: Interface for Loss Functions
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -7,33 +7,166 @@
 
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
+
 from secml.core import CCreator
+from secml.array import CArray
 
 
 class CLoss(CCreator):
-    """Abstract class that defines basic methods for loss functions."""
+    """Interface for loss functions."""
     __metaclass__ = ABCMeta
     __super__ = 'CLoss'
 
     @abstractproperty
     def class_type(self):
-        """Defines the name of the inherited loss function class
-           to dynamically instantiate it.
-           Example: CLoss.create('hinge')."""
+        """Defines loss function type."""
         raise NotImplementedError()
 
     @abstractproperty
-    def loss_type(self):
-        """Defines whether the loss is suitable for
-           classification or regression problems."""
+    def suitable_for(self):
+        """Defines which problem the loss is suitable for.
+
+        Accepted values:
+        - classification
+        - regression
+
+        """
         raise NotImplementedError()
 
     @abstractmethod
-    def loss(self, y, score):
-        """Computes the value of the loss function loss(y,f(x))."""
+    def loss(self, y_true, score):
+        """Computes the value of the loss function.
+
+        Parameters
+        ----------
+        y_true : CArray
+            Ground truth (correct), targets. Vector-like array.
+        score : CArray
+            Outputs (predicted), targets.
+
+        Returns
+        -------
+        CArray
+            Loss function. Vector-like array.
+
+        """
         raise NotImplementedError()
 
-    def dloss(self, y, score):
-        """Computes the derivative of the loss function l(y,f(x))
-           with respect to the value of f(x)."""
+    def dloss(self, y_true, score):
+        """Computes the derivative of the loss function with respect to `score`.
+
+        Parameters
+        ----------
+        y_true : CArray
+            Ground truth (correct), targets. Vector-like array.
+        score : CArray
+            Outputs (predicted), targets.
+
+        Returns
+        -------
+        CArray
+            Derivative of the loss function. Vector-like array.
+
+        """
+        raise NotImplementedError()
+
+
+class CLossRegression(CLoss):
+    """Interface for loss functions suitable for regression problems."""
+    suitable_for = 'regression'
+
+    @abstractmethod
+    def loss(self, y_true, score):
+        """Computes the value of the loss function.
+
+        Parameters
+        ----------
+        y_true : CArray
+            Ground truth (correct), targets. Vector-like array.
+        score : CArray
+            Outputs (predicted), targets.
+            Vector-like array of shape (n_samples,).
+
+        Returns
+        -------
+        CArray
+            Loss function. Vector-like array.
+
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def dloss(self, y_true, score):
+        """Computes the derivative of the loss function with respect to `score`.
+
+        Parameters
+        ----------
+        y_true : CArray
+            Ground truth (correct), targets. Vector-like array.
+        score : CArray
+            Outputs (predicted), targets.
+            Vector-like array of shape (n_samples,).
+
+        Returns
+        -------
+        CArray
+            Derivative of the loss function. Vector-like array.
+
+        """
+        raise NotImplementedError()
+
+
+class CLossClassification(CLoss):
+    """Interface for loss functions suitable for classification problems."""
+    suitable_for = 'classification'
+
+    @abstractmethod
+    def loss(self, y_true, score, pos_label=None):
+        """Computes the value of the loss function.
+
+        Parameters
+        ----------
+        y_true : CArray
+            Ground truth (correct), targets. Vector-like array.
+        score : CArray
+            Outputs (predicted), targets.
+            2-D array of shape (n_samples, n_classes) or vector-like
+             array of shape (n_samples,).
+        pos_label : int or None, optional
+            Default None, meaning that the function is computed
+             for each sample wrt the corresponding true label.
+            Otherwise, this is the class wrt compute the loss function.
+            If `score` is vector-like, this parameter is ignored.
+
+        Returns
+        -------
+        CArray
+            Loss function. Vector-like array.
+
+        """
+        raise NotImplementedError()
+
+    def dloss(self, y_true, score, pos_label=None):
+        """Computes the derivative of the loss function with respect to `score`.
+
+        Parameters
+        ----------
+        y_true : CArray
+            Ground truth (correct), targets. Vector-like array.
+        score : CArray
+            Outputs (predicted), targets.
+            2-D array of shape (n_samples, n_classes) or vector-like
+             array of shape (n_samples,).
+        pos_label : int or None, optional
+            Default None, meaning that the function derivative is computed
+             for each sample wrt the corresponding true label.
+            Otherwise, this is the class wrt compute the derivative.
+            If `score` is vector-like, this parameter is ignored.
+
+        Returns
+        -------
+        CArray
+            Derivative of the loss function. Vector-like array.
+
+        """
         raise NotImplementedError()

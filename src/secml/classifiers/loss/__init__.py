@@ -1,6 +1,7 @@
-from c_loss import CLoss
-from c_loss_epsilon_insensitive import CLossEpsilonInsensitive, CLossSquaredEpsilonInsensitive
-from c_loss_hinge import CLossHinge, CLossSquaredHinge
-from c_loss_squared import CLossSquared
-from c_loss_softmax import CLossSoftMax
+from c_loss import CLoss, CLossRegression, CLossClassification
+from c_loss_epsilon_insensitive import \
+    CLossEpsilonInsensitive, CLossEpsilonInsensitiveSquared
+from c_loss_hinge import CLossHinge, CLossHingeSquared
+from c_loss_squared import CLossQuadratic
+from c_loss_cross_entropy import softmax, CLossCrossEntropy
 from c_loss_logistic import CLossLogistic
