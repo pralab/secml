@@ -36,5 +36,5 @@ setup(
                                            "tests.*", "tests"]),
     package_dir={'': 'src'},
     include_package_data=True,
-    python_requires='==2.7'
+    python_requires='==2.7.*'
 )
