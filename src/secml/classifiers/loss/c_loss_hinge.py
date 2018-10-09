@@ -6,7 +6,7 @@
 
 """
 from secml.classifiers.loss import CLoss
-from secml.classifiers.clf_utils import extend_binary_labels
+from secml.classifiers.clf_utils import convert_binary_labels
 from secml.array import CArray
 
 
@@ -31,7 +31,7 @@ class CLossHinge(CLoss):
             Vector-like array.
 
         """
-        y = extend_binary_labels(y)
+        y = convert_binary_labels(y)
         h = CArray(1.0 - y * score)
         h[h < 0] = 0.0
         return h
@@ -47,7 +47,7 @@ class CLossHinge(CLoss):
             Vector-like array.
 
         """
-        y = extend_binary_labels(y)
+        y = convert_binary_labels(y)
         h = 1.0 - y * score
         d = CArray(-y.astype(float))
         d[h < 0] = 0.0
@@ -75,7 +75,7 @@ class CLossSquaredHinge(CLoss):
             Vector-like array.
 
         """
-        y = extend_binary_labels(y)
+        y = convert_binary_labels(y)
         h = 1.0 - y * score
         h[h < 0] = 0.0
         return h ** 2
@@ -91,7 +91,7 @@ class CLossSquaredHinge(CLoss):
             Vector-like array.
 
         """
-        y = extend_binary_labels(y)
+        y = convert_binary_labels(y)
         d = -2 * (y - score)
         d[1 - y * score < 0] = 0.0
         return d.astype(float)

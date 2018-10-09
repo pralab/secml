@@ -8,7 +8,7 @@
 """
 from secml.array import CArray
 from secml.classifiers import CClassifier
-from secml.classifiers.clf_utils import extend_binary_labels
+from secml.classifiers.clf_utils import convert_binary_labels
 from sklearn.neighbors import NearestCentroid
 from sklearn.metrics import pairwise_distances
 
@@ -110,7 +110,7 @@ class CClassifierNearestCentroid(CClassifier):
         if self.normalizer is not None:
             x = self.normalizer.normalize(x)
 
-        sign = extend_binary_labels(label)  # Sign depends on input label (0/1)
+        sign = convert_binary_labels(label)  # Sign depends on input label (0/1)
 
         return sign * self._discriminant_function(x)
 

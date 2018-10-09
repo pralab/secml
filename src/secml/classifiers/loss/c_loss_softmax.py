@@ -6,7 +6,7 @@
 
 """
 from secml.classifiers.loss import CLoss
-from secml.classifiers.clf_utils import extend_binary_labels
+from secml.classifiers.clf_utils import convert_binary_labels
 from secml.array import CArray
 
 

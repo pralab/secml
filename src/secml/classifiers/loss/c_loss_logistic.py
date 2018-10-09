@@ -6,7 +6,7 @@
 
 """
 from secml.classifiers.loss import CLoss
-from secml.classifiers.clf_utils import extend_binary_labels
+from secml.classifiers.clf_utils import convert_binary_labels
 from secml.array import CArray
 
 
@@ -44,7 +44,7 @@ class CLossLogistic(CLoss):
 
         """
         if self._extend_binary_labels:
-            y = extend_binary_labels(y)
+            y = convert_binary_labels(y)
 
         v = CArray(- y * score).astype(float)
 
@@ -71,7 +71,7 @@ class CLossLogistic(CLoss):
         """
 
         if self._extend_binary_labels:
-            y = extend_binary_labels(y)
+            y = convert_binary_labels(y)
 
         v = CArray(- y * score).astype(float)
 

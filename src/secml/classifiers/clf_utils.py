@@ -30,29 +30,28 @@ def check_binary_labels(labels):
         raise ValueError("input labels should be binary in {0, +1} interval.")
 
 
-def extend_binary_labels(labels):
+def convert_binary_labels(labels):
     """Convert input binary labels to {-1, +1}.
 
     Parameters
     ----------
     labels : CArray or int
-        Binary labels to be converted.
-        As of PRALib convention, binary labels are {0, +1}.
+        Binary labels in {0, +1} to be converted to {-1, +1}.
 
     Returns
     -------
     converted_labels : CArray or int
-        Binary labels converted to -1/+1.
+        Binary labels converted to {-1, +1}.
 
     Examples
     --------
-    >>> from secml.classifiers.clf_utils import extend_binary_labels
+    >>> from secml.classifiers.clf_utils import convert_binary_labels
     >>> from secml.array import CArray
 
-    >>> print extend_binary_labels(2)
+    >>> print convert_binary_labels(2)
     -1
 
-    >>> print extend_binary_labels(CArray([0,1,1,1,0,0]))
+    >>> print convert_binary_labels(CArray([0,1,1,1,0,0]))
     CArray([-1  1  1  1 -1 -1])
 
     """
