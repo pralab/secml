@@ -1,2 +1,3 @@
-include VERSION
-include secml-lib.conf
+include README.md
+include src/secml/VERSION
+include src/secml/secml-lib.conf
