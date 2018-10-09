@@ -1,6 +1,7 @@
 variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
     SECML_HOME_DIR: "$CI_PROJECT_DIR/secml-lib-data"
+    TOX_WORK_DIR: "$CI_PROJECT_DIR/.tox"
 
 cache:
   key: "$CI_JOB_NAME"
@@ -15,29 +16,33 @@ stages:
 
 before_script:
   - echo $CI_PROJECT_DIR
+  - sh .gitlab-ci-extra.sh > /dev/null
+  - pip install tox
 
-test:xenial:
+test:py27-n13:
   image: ubuntu:xenial
   stage: test
-  script:
-    - sh .gitlab-ci-extra.sh > /dev/null
-    - pip install numpy==1.13.*
-    - pip install enum34
-    - pip install -r requirements.txt
-    - cd src
-    - PYTHONPATH=. py.test --cov-config ../.coveragerc secml --cov=secml
+  script: tox --workdir $TOX_WORK_DIR -e py27-n13
 
-.test:trusty:
-  image: ubuntu:trusty
+test:py27-n14:
+  image: ubuntu:xenial
   stage: test
-  script:
-    - sh .gitlab-ci-extra.sh > /dev/null
-    - pip install pyOpenSSL ndg-httpsclient pyasn1
-    - pip install numpy==1.13.*
-    - pip install enum34
-    - pip install -r requirements.txt
-    - cd src
-    - PYTHONPATH=. py.test --cov-config ../.coveragerc secml --cov=secml
+  script: tox --workdir $TOX_WORK_DIR -e py27-n14
+
+test:py27-n15:
+  image: ubuntu:xenial
+  stage: test
+  script: tox --workdir $TOX_WORK_DIR -e py27-n15
+
+test:py27-sk19:
+  image: ubuntu:xenial
+  stage: test
+  script: tox --workdir $TOX_WORK_DIR -e py27-sk19
+
+test:py27-sk20:
+  image: ubuntu:xenial
+  stage: test
+  script: tox --workdir $TOX_WORK_DIR -e py27-sk20
 
 deploy:xenial:
   image: ubuntu:xenial

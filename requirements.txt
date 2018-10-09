@@ -1,7 +1,7 @@
 numpy >= 1.13.*
 scipy >= 1.1.*
-matplotlib == 2.0.*
-scikit-learn >= 0.19.*
+matplotlib == 2.2.*
+scikit-learn >= 0.19.*, < 0.21
 joblib
 Pillow
 requests
@@ -11,5 +11,5 @@ torch == 0.4.*
 torchvision == 0.1.8
 
 # Unittests requirements
-pytest >= 2.9
+pytest >= 3.1
 pytest-cov >= 2.3

@@ -124,7 +124,9 @@ class TestArrayDecomposition(CUnitTest):
         red_dts = lda.train_transform(patterns, labels)
 
         fig = CFigure(width=10, markersize=8)
-        fig.sp.scatter(red_dts[:, 0], red_dts[:, 1], c=labels)
+        fig.sp.scatter(red_dts[:, 0].ravel(),
+                       red_dts[:, 1].ravel(),
+                       c=labels)
         fig.show()
 
         # revert transformation

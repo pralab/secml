@@ -150,7 +150,9 @@ class TestCClassifierSGD(CUnitTest):
         colors = 'k'
         fig = CFigure(linewidth=1)
         fig.sp.contour(X1, X2, Z, levels, colors=colors, linestyles=linestyles)
-        fig.sp.scatter(dataset.X[:, 0], dataset.X[:, 1], c=dataset.Y, s=40)
+        fig.sp.scatter(dataset.X[:, 0].ravel(),
+                       dataset.X[:, 1].ravel(),
+                       c=dataset.Y, s=40)
 
         fig.show()
 

@@ -210,7 +210,8 @@ class TestCClassifierMultiOVA(CUnitTest):
                             x_bounds[0], x_bounds[1], styles[c_idx],
                             'Boundary\nfor class {:}'.format(c))
 
-            fig.sp.scatter(ds.X[ds.Y == c, 0], ds.X[ds.Y == c, 1],
+            fig.sp.scatter(ds.X[ds.Y == c, 0],
+                           ds.X[ds.Y == c, 1],
                            s=40, c=styles[c_idx][0])
             fig.sp.scatter(ds.X[y_pred == c, 0], ds.X[y_pred == c, 1], s=160,
                            edgecolors=styles[c_idx][0],

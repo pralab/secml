@@ -58,8 +58,8 @@ class TestCClassifierKNN(CUnitTest):
         # cs = pl.contour(cs, levels=[0],colors = 'k', hold='on')
         pl.pcolormesh(xx, yy, Z_tree.get_data(), cmap=cmap_light)
 
-        pl.scatter(self.dataset.X.get_data()[:, 0],
-                   self.dataset.X.get_data()[:, 1],
+        pl.scatter(self.dataset.X.get_data()[:, 0].ravel(),
+                   self.dataset.X.get_data()[:, 1].ravel(),
                    c=self.dataset.Y.get_data(), marker='o', cmap=cmap_bold)
         pl.show()
 
