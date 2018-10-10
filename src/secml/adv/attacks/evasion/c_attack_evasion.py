@@ -15,7 +15,7 @@ from secml.data import CDataset
 from secml.core.constants import nan
 from secml.optimization.function import CFunction
 from secml.optimization.constraints import CConstraint
-from secml.classifiers.loss import CLossSoftMax
+from secml.classifiers.loss import CLossCrossEntropy
 
 
 class CAttackEvasion(CAttack):
@@ -398,6 +398,7 @@ class CAttackEvasion(CAttack):
                 first_eva.append(None)
 
         # Compute the attacker objective function
-        f_obj = CLossSoftMax().loss(y.ravel(), scores, c=self.y_target).mean()
+        f_obj = CLossCrossEntropy().loss(
+            y.ravel(), scores, pos_label=self.y_target).mean() / scores.shape[0]
 
         return y_pred, scores, adv_ds, f_obj, first_eva
