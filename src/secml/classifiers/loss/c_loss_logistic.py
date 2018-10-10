@@ -13,7 +13,14 @@ from secml.array import CArray
 
 
 class CLossLogistic(CLossClassification):
-    """Logistic loss function."""
+    """Logistic loss function.
+
+    Attributes
+    ----------
+    class_type : 'logistic'
+    suitable_for : 'classification'
+
+    """
     class_type = 'logistic'
 
     def loss(self, y_true, score, pos_label=1, bound=10):
