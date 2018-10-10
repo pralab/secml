@@ -33,7 +33,7 @@ def softmax(x):
     x = x.atleast_2d()  # Working with 2-D arrays only
     # this avoids numerical issues (rescaling score values to (-inf, 0])
     s_exp = (x - x.max()).exp()
-    s_exp_sum = CArray(s_exp.sum(axis=1))
+    s_exp_sum = s_exp.sum(axis=1)
 
     return s_exp / s_exp_sum
 
@@ -85,7 +85,7 @@ class CLossCrossEntropy(CLossClassification):
         # find-like indexing (list of lists)
         a = y_true.tolist() if pos_label is None else [pos_label]
 
-        return -CArray.log(p[[range(score.shape[0]), a]])
+        return -CArray(p[[range(score.shape[0]), a]]).log()
 
     def dloss(self, y_true, score, pos_label=None):
         """Computes the value of the Cross Entropy loss function.
@@ -115,6 +115,6 @@ class CLossCrossEntropy(CLossClassification):
         # find-like indexing (list of lists)
         a = y_true.tolist() if pos_label is None else [pos_label]
 
-        grad = grad[[range(score.shape[0]), a]]
+        grad = CArray(grad[[range(score.shape[0]), a]])
 
         return grad - 1.0
