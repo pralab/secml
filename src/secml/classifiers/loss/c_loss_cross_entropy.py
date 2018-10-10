@@ -29,6 +29,16 @@ def softmax(x):
     CArray
         SoftMax function. Same shape of input array.
 
+    Examples
+    --------
+    >>> from secml.array import CArray
+    >>> from secml.classifiers.loss import softmax
+
+    >>> a = CArray([[1, 2, 3], [2, 4, 5]])
+    >>> print softmax(a)
+    CArray([[ 0.090031  0.244728  0.665241]
+     [ 0.035119  0.259496  0.705385]])
+
     """
     x = x.atleast_2d()  # Working with 2-D arrays only
     # this avoids numerical issues (rescaling score values to (-inf, 0])
