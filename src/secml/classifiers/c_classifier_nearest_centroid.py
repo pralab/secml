@@ -76,11 +76,11 @@ class CClassifierNearestCentroid(CClassifier):
 
         return self._nc
 
-    def discriminant_function(self, x, label=1):
+    def discriminant_function(self, x, y=1):
         """Computes the discriminant function for each pattern in x.
 
         The score is the distance of each pattern
-         from the centroid of class `label`
+         from the centroid of class `y`
 
         If a normalizer has been specified, input is normalized
          before computing the discriminant function.
@@ -90,7 +90,7 @@ class CClassifierNearestCentroid(CClassifier):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : {0, 1}, optional
+        y : {0, 1}, optional
             The label of the class wrt the function should be calculated.
             Default is 1.
 
@@ -110,11 +110,11 @@ class CClassifierNearestCentroid(CClassifier):
         if self.normalizer is not None:
             x = self.normalizer.normalize(x)
 
-        sign = extend_binary_labels(label)  # Sign depends on input label (0/1)
+        sign = extend_binary_labels(y)  # Sign depends on input label (0/1)
 
         return sign * self._discriminant_function(x)
 
-    def _discriminant_function(self, x, label=1):
+    def _discriminant_function(self, x, y=1):
         """Computes the discriminant function for each pattern in x.
 
         The score is the distance of each pattern
@@ -125,7 +125,7 @@ class CClassifierNearestCentroid(CClassifier):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : {1}
+        y : {1}
             The label of the class wrt the function should be calculated.
             Discriminant function is always computed wrt positive class (1).
 
@@ -136,7 +136,7 @@ class CClassifierNearestCentroid(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
-        if label != 1:
+        if y != 1:
             raise ValueError(
                 "discriminant function is always computed wrt positive class.")
 

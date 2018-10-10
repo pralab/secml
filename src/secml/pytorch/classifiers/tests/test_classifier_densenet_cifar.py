@@ -126,35 +126,35 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
 
         # Testing discriminant_function on multiple points
 
-        df_scores_0 = self.clf.discriminant_function(x, label=0)
+        df_scores_0 = self.clf.discriminant_function(x, y=0)
         self.logger.info(
-            "discriminant_function(x, label=0):\n{:}".format(df_scores_0))
+            "discriminant_function(x, y=0):\n{:}".format(df_scores_0))
         _check_df_scores(df_scores_0, 5)
 
-        df_scores_1 = self.clf.discriminant_function(x, label=1)
+        df_scores_1 = self.clf.discriminant_function(x, y=1)
         self.logger.info(
-            "discriminant_function(x, label=1):\n{:}".format(df_scores_1))
+            "discriminant_function(x, y=1):\n{:}".format(df_scores_1))
         _check_df_scores(df_scores_1, 5)
 
-        df_scores_2 = self.clf.discriminant_function(x, label=2)
+        df_scores_2 = self.clf.discriminant_function(x, y=2)
         self.logger.info(
-            "discriminant_function(x, label=2):\n{:}".format(df_scores_2))
+            "discriminant_function(x, y=2):\n{:}".format(df_scores_2))
         _check_df_scores(df_scores_2, 5)
 
         # Testing _discriminant_function on multiple points
 
-        ds_priv_scores_0 = self.clf._discriminant_function(x_norm, label=0)
-        self.logger.info("_discriminant_function(x_norm, label=0):\n"
+        ds_priv_scores_0 = self.clf._discriminant_function(x_norm, y=0)
+        self.logger.info("_discriminant_function(x_norm, y=0):\n"
                          "{:}".format(ds_priv_scores_0))
         _check_df_scores(ds_priv_scores_0, 5)
 
-        ds_priv_scores_1 = self.clf._discriminant_function(x_norm, label=1)
-        self.logger.info("_discriminant_function(x_norm, label=1):\n"
+        ds_priv_scores_1 = self.clf._discriminant_function(x_norm, y=1)
+        self.logger.info("_discriminant_function(x_norm, y=1):\n"
                          "{:}".format(ds_priv_scores_1))
         _check_df_scores(ds_priv_scores_1, 5)
 
-        ds_priv_scores_2 = self.clf._discriminant_function(x_norm, label=2)
-        self.logger.info("_discriminant_function(x_norm, label=2):\n"
+        ds_priv_scores_2 = self.clf._discriminant_function(x_norm, y=2)
+        self.logger.info("_discriminant_function(x_norm, y=2):\n"
                          "{:}".format(ds_priv_scores_2))
         _check_df_scores(ds_priv_scores_2, 5)
 
@@ -179,35 +179,35 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
 
         # Testing discriminant_function on single point
 
-        df_scores_0 = self.clf.discriminant_function(p, label=0)
+        df_scores_0 = self.clf.discriminant_function(p, y=0)
         self.logger.info(
-            "discriminant_function(p, label=0):\n{:}".format(df_scores_0))
+            "discriminant_function(p, y=0):\n{:}".format(df_scores_0))
         _check_df_scores(df_scores_0, 1)
 
-        df_scores_1 = self.clf.discriminant_function(p, label=1)
+        df_scores_1 = self.clf.discriminant_function(p, y=1)
         self.logger.info(
-            "discriminant_function(p, label=1):\n{:}".format(df_scores_1))
+            "discriminant_function(p, y=1):\n{:}".format(df_scores_1))
         _check_df_scores(df_scores_1, 1)
 
-        df_scores_2 = self.clf.discriminant_function(p, label=2)
+        df_scores_2 = self.clf.discriminant_function(p, y=2)
         self.logger.info(
-            "discriminant_function(p, label=2):\n{:}".format(df_scores_2))
+            "discriminant_function(p, y=2):\n{:}".format(df_scores_2))
         _check_df_scores(df_scores_2, 1)
 
         # Testing _discriminant_function on single point
 
-        df_priv_scores_0 = self.clf._discriminant_function(p_norm, label=0)
-        self.logger.info("_discriminant_function(p_norm, label=0):\n{:}"
+        df_priv_scores_0 = self.clf._discriminant_function(p_norm, y=0)
+        self.logger.info("_discriminant_function(p_norm, y=0):\n{:}"
                          "".format(df_priv_scores_0))
         _check_df_scores(df_priv_scores_0, 1)
 
-        df_priv_scores_1 = self.clf._discriminant_function(p_norm, label=1)
-        self.logger.info("_discriminant_function(p_norm, label=1):\n{:}"
+        df_priv_scores_1 = self.clf._discriminant_function(p_norm, y=1)
+        self.logger.info("_discriminant_function(p_norm, y=1):\n{:}"
                          "".format(df_priv_scores_1))
         _check_df_scores(df_priv_scores_1, 1)
 
-        df_priv_scores_2 = self.clf._discriminant_function(p_norm, label=2)
-        self.logger.info("_discriminant_function(p_norm, label=2):\n"
+        df_priv_scores_2 = self.clf._discriminant_function(p_norm, y=2)
+        self.logger.info("_discriminant_function(p_norm, y=2):\n"
                          "{:}".format(df_priv_scores_2))
         _check_df_scores(df_priv_scores_2, 1)
 
