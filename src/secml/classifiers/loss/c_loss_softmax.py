@@ -51,7 +51,7 @@ class CLossSoftMax(CLoss):
         score = score - score.max(axis=1)  # broadcasting...
 
         score_exp = score.exp()
-        score_exp_sum = CArray(score_exp.sum(axis=1, keepdims=False))
+        score_exp_sum = score_exp.sum(axis=1, keepdims=False)
 
         if c is None:
             for class_label in y.unique():

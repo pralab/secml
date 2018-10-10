@@ -145,7 +145,7 @@ class CPca(CReducer):
                 raise ValueError("maximum number of components is {:}".format(n_samples))
 
         # Centering training data
-        self._mean = CArray(data_carray.mean(axis=0)).ravel()
+        self._mean = data_carray.mean(axis=0, keepdims=False)
         data_carray -= self.mean
 
         # Performing training of PCA (used by KernelPCA too)
@@ -350,7 +350,7 @@ class CKernelPca(CPca):
     # TODO: MOVE TO SPECIFIC CLASS CKernelCenterer
     def _centerer_fit(self, kernel):
         """Fit KernelCenterer."""
-        self._mean_row = CArray(kernel.sum(axis=0, keepdims=False)) / kernel.shape[0]
+        self._mean_row = kernel.sum(axis=0, keepdims=False) / kernel.shape[0]
         self._mean_all = self._mean_row.sum() / kernel.shape[0]
 
         return self
@@ -360,7 +360,7 @@ class CKernelPca(CPca):
         if self._mean_row is None or self._mean_all is None:
             raise ValueError("Centerer not trained...")
 
-        pred_cols = CArray(kernel.sum(axis=1, keepdims=False)) / self._mean_row.size
+        pred_cols = kernel.sum(axis=1, keepdims=False) / self._mean_row.size
 
         return kernel + self._mean_all - self._mean_row.T - pred_cols
 

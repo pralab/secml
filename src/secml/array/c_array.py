@@ -2865,9 +2865,10 @@ class CArray(_CArrayInterface):
         Returns
         -------
         float or CArray
-            Norm of the array. If axis is None, float is returned. Otherwise,
-            a CArray with shape and number of dimensions consistent with the
-            original array and the axis parameter is returned.
+            Norm of the array.
+            If axis is None, float is returned.
+            Otherwise, a CArray with shape and number of dimensions consistent
+             with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -2953,8 +2954,10 @@ class CArray(_CArrayInterface):
         Returns
         -------
         scalar or CArray
-            A 2-dim array with the elements sum along specified axis.
-            If axis is None, a scalar is returned.
+            Sum of the elements in the array.
+            If axis is None, float is returned.
+            Otherwise, a CArray with shape and number of dimensions consistent
+             with the original array and the axis parameter is returned.
 
         Examples
         --------
@@ -2970,11 +2973,14 @@ class CArray(_CArrayInterface):
         >>> print CArray([-3,0,1,2]).sum(axis=0)
         CArray([-3  0  1  2])
         >>> print CArray([-3,0,1,2]).sum(axis=1)
-        0
+        CArray([0])
 
         """
-        return self._instance_array(
-            self._data.sum(axis=axis, keepdims=keepdims))
+        out = self._data.sum(axis=axis, keepdims=keepdims)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     def cumsum(self, axis=None, dtype=None):
         """Return the cumulative sum of the array elements along a given axis.
@@ -3045,8 +3051,10 @@ class CArray(_CArrayInterface):
         Returns
         -------
         scalar or CArray
-            A 2-dim array with the elements product along specified axis.
-            If axis is None, a scalar is returned.
+            Product of the elements in the array.
+            If axis is None, scalar is returned.
+            Otherwise, a CArray with shape and number of dimensions consistent
+             with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -3076,11 +3084,14 @@ class CArray(_CArrayInterface):
         >>> print CArray([1,2,3]).prod(axis=0)
         CArray([1 2 3])
         >>> print CArray([1,2,3]).prod(axis=1)
-        6
+        CArray([6])
 
         """
-        return self._instance_array(
-            self._data.prod(axis=axis, dtype=dtype, keepdims=keepdims))
+        out = self._data.prod(axis=axis, dtype=dtype, keepdims=keepdims)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     def all(self, axis=None, keepdims=True):
         """Test whether all array elements along a given axis evaluate to True.
@@ -3105,13 +3116,16 @@ class CArray(_CArrayInterface):
         Returns
         -------
         bool or CArray
-            A new boolean or array with logical AND element-wise.
+            Logical AND element-wise.
+            If axis is None, bool is returned.
+            Otherwise, a CArray of booleans with shape and number of
+             dimensions consistent with the original array and the
+             axis parameter is returned.
 
         Notes
         -----
-        Not a Number (NaN), positive infinity and
-        negative infinity evaluate to True because
-        these are not equal to zero.
+        Not a Number (NaN), positive infinity and negative infinity 
+         evaluate to True because these are not equal to zero.
 
         Examples
         --------
@@ -3126,15 +3140,18 @@ class CArray(_CArrayInterface):
         >>> print CArray([-1,0,2,0]).all(axis=0)
         CArray([ True False  True False])
         >>> print CArray([-1,0,2,0]).all(axis=1)
-        False
+        CArray([False])
 
         >>> import numpy as np
         >>> print CArray([np.nan, np.inf, -np.inf]).all()
         True
 
         """
-        return self._instance_array(
-            self._data.all(axis=axis, keepdims=keepdims))
+        out = self._data.all(axis=axis, keepdims=keepdims)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     def any(self, axis=None, keepdims=True):
         """Test whether any array elements along a given axis evaluate to True.
@@ -3159,13 +3176,16 @@ class CArray(_CArrayInterface):
         Returns
         -------
         bool or CArray
-            A new boolean or array with logical OR element-wise.
+            Logical OR element-wise.
+            If axis is None, bool is returned.
+            Otherwise, a CArray of booleans with shape and number of
+             dimensions consistent with the original array and the
+             axis parameter is returned.
 
         Notes
         -----
-        Not a Number (NaN), positive infinity and
-        negative infinity evaluate to True because
-        these are not equal to zero.
+        Not a Number (NaN), positive infinity and negative infinity
+         evaluate to True because these are not equal to zero.
 
         Examples
         --------
@@ -3180,15 +3200,18 @@ class CArray(_CArrayInterface):
         >>> print CArray([-1,0,2,0]).any(axis=0)
         CArray([ True False  True False])
         >>> print CArray([-1,0,2,0]).any(axis=1)
-        True
+        CArray([ True])
 
         >>> import numpy as np
         >>> print CArray([np.nan, np.inf, -np.inf]).any()
         True
 
         """
-        return self._instance_array(
-            self._data.any(axis=axis, keepdims=keepdims))
+        out = self._data.any(axis=axis, keepdims=keepdims)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     def max(self, axis=None, keepdims=True):
         """Return the maximum of an array or maximum along an axis.
@@ -3206,10 +3229,10 @@ class CArray(_CArrayInterface):
         Returns
         -------
         scalar or CArray
-            Maximum of array.
-            If axis is None, the result is a scalar value.
-            If axis is given, the result will
-             broadcast correctly against the original array.
+            Maximum of the array.
+            If axis is None, scalar is returned.
+            Otherwise, a CArray with shape and number of dimensions consistent
+             with the original array and the axis parameter is returned.
 
 
         Notes
@@ -3218,8 +3241,6 @@ class CArray(_CArrayInterface):
            zeros and non-zeros).
         - NaN values are propagated, that is if at least one item is NaN,
            the corresponding max value will be NaN as well.
-        - Don't use max for element-wise comparison of 2 arrays; when
-           array.shape[0] is 2, maximum(a[0], a[1]) is faster than max(axis=0).
 
         Examples
         --------
@@ -3237,15 +3258,18 @@ class CArray(_CArrayInterface):
         >>> print CArray([-1,0,2,0]).max(axis=0)
         CArray([-1  0  2  0])
         >>> print CArray([-1,0,2,0]).max(axis=1)
-        2
+        CArray([2])
 
         >>> import numpy as np
         >>> print CArray([5,np.nan]).max()
         nan
 
         """
-        return self._instance_array(
-            self._data.max(axis=axis, keepdims=keepdims))
+        out = self._data.max(axis=axis, keepdims=keepdims)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     def min(self, axis=None, keepdims=True):
         """Return the minimum of an array or minimum along an axis.
@@ -3263,10 +3287,10 @@ class CArray(_CArrayInterface):
         Returns
         -------
         scalar or CArray
-            Minimum of array.
-            If axis is None, the result is a scalar value.
-            If axis is given, the result will
-             broadcast correctly against the original array.
+            Minimum of the array.
+            If axis is None, scalar is returned.
+            Otherwise, a CArray with shape and number of dimensions consistent
+             with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -3274,8 +3298,6 @@ class CArray(_CArrayInterface):
            zeros and non-zeros).
         - NaN values are propagated, that is if at least one item is NaN,
            the corresponding max value will be NaN as well.
-        - Don't use min for element-wise comparison of 2 arrays; when
-           array.shape[0] is 2, minimum(a[0], a[1]) is faster than min(axis=0).
 
         Examples
         --------
@@ -3293,15 +3315,18 @@ class CArray(_CArrayInterface):
         >>> print CArray([-1,0,2,0]).min(axis=0)
         CArray([-1  0  2  0])
         >>> print CArray([-1,0,2,0]).min(axis=1)
-        -1
+        CArray([-1])
 
         >>> import numpy as np
         >>> print CArray([5,np.nan]).min()
         nan
 
         """
-        return self._instance_array(
-            self._data.min(axis=axis, keepdims=keepdims))
+        out = self._data.min(axis=axis, keepdims=keepdims)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     def argmax(self, axis=None):
         """Indices of the maximum values along an axis.
@@ -3315,13 +3340,15 @@ class CArray(_CArrayInterface):
         Returns
         -------
         int or CArray
-            Scalar with index of the maximum value for flattened array or
-            CArray with indices along the given axis.
+            Index of the maximum of the array.
+            If axis is None, int is returned.
+            Otherwise, a CArray with shape and number of dimensions consistent
+             with the original array and the axis parameter is returned.
 
         Notes
         -----
         In case of multiple occurrences of the maximum values, the
-        indices corresponding to the first occurrence are returned.
+         indices corresponding to the first occurrence are returned.
 
         Examples
         --------
@@ -3340,10 +3367,14 @@ class CArray(_CArrayInterface):
         >>> print CArray([-3,0,1,2]).argmax(axis=0)
         CArray([0 0 0 0])
         >>> print CArray([-3,0,1,2]).argmax(axis=1)
-        3
+        CArray([3])
 
         """
-        return self._instance_array(self._data.argmax(axis=axis))
+        out = self._data.argmax(axis=axis)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     def argmin(self, axis=None):
         """Indices of the minimum values along an axis.
@@ -3357,13 +3388,15 @@ class CArray(_CArrayInterface):
         Returns
         -------
         int or CArray
-            Scalar with index of the minimum value for flattened array or
-            CArray with indices along the given axis.
+            Index of the minimum of the array.
+            If axis is None, int is returned.
+            Otherwise, a CArray with shape and number of dimensions consistent
+             with the original array and the axis parameter is returned.
 
         Notes
         -----
         In case of multiple occurrences of the minimum values, the
-        indices corresponding to the first occurrence are returned.
+         indices corresponding to the first occurrence are returned.
 
         Examples
         --------
@@ -3382,13 +3415,17 @@ class CArray(_CArrayInterface):
         >>> print CArray([-3,0,1,2]).argmin(axis=0)
         CArray([0 0 0 0])
         >>> print CArray([-3,0,1,2]).argmin(axis=1)
-        0
+        CArray([0])
 
         """
-        return self._instance_array(self._data.argmin(axis=axis))
+        out = self._data.argmin(axis=axis)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     def nanmax(self, axis=None, keepdims=True):
-        """Return the maximum of an array or maximum along an axis ignoring Nans.
+        """Return the maximum of an array or maximum along an axis ignoring NaNs.
 
         When all-NaN slices are encountered a RuntimeWarning is raised
         and Nan is returned for that slice.
@@ -3408,15 +3445,10 @@ class CArray(_CArrayInterface):
         Returns
         -------
         scalar or CArray
-            Maximum of array ignoring Nans.
-            If axis is None, the result is a scalar value.
-            If axis is given, the result is an array of
-            dimension array.ndim - 1.
-
-        Notes
-        -----
-        - Don't use max for element-wise comparison of 2 arrays; when
-            array.shape[0] is 2, maximum(a[0], a[1]) is faster than max(axis=0).
+            Maximum of the array ignoring NaNs.
+            If axis is None, scalar is returned.
+            Otherwise, a CArray with shape and number of dimensions consistent
+             with the original array and the axis parameter is returned.
 
         Examples
         --------
@@ -3439,11 +3471,14 @@ class CArray(_CArrayInterface):
          [ 0.]])
 
         """
-        return self._instance_array(
-            self._data.nanmax(axis=axis, keepdims=keepdims))
+        out = self._data.nanmax(axis=axis, keepdims=keepdims)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     def nanmin(self, axis=None, keepdims=True):
-        """Return the minimum of an array or minimum along an axis ignoring Nans.
+        """Return the minimum of an array or minimum along an axis ignoring NaNs.
 
         When all-NaN slices are encountered a RuntimeWarning is raised
         and Nan is returned for that slice.
@@ -3463,15 +3498,10 @@ class CArray(_CArrayInterface):
         Returns
         -------
         scalar or CArray
-            Minimum of array ignoring nans.
-            If axis is None, the result is a scalar value.
-            If axis is given, the result is an array of
-            dimension array.ndim - 1.
-
-        Notes
-        -----
-        - Don't use min for element-wise comparison of 2 arrays; when
-            array.shape[0] is 2, minimum(a[0], a[1]) is faster than min(axis=0).
+            Index of the minimum of the array ignoring NaNs.
+            If axis is None, scalar is returned.
+            Otherwise, a CArray with shape and number of dimensions consistent
+             with the original array and the axis parameter is returned.
 
         Examples
         --------
@@ -3494,11 +3524,14 @@ class CArray(_CArrayInterface):
          [ 0.]])
 
         """
-        return self._instance_array(
-            self._data.nanmin(axis=axis, keepdims=keepdims))
+        out = self._data.nanmin(axis=axis, keepdims=keepdims)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     def nanargmax(self, axis=None):
-        """Indices of the maximum values along an axis ignoring Nans.
+        """Indices of the maximum values along an axis ignoring NaNs.
 
         For all-NaN slices ValueError is raised.
         Warning: the results cannot be trusted if a slice
@@ -3515,13 +3548,15 @@ class CArray(_CArrayInterface):
         Returns
         -------
         int or CArray
-            Scalar with index of the maximum value for flattened array or
-            CArray with indices along the given axis.
+            Index of the maximum of the array ignoring NaNs.
+            If axis is None, int is returned.
+            Otherwise, a CArray with shape and number of dimensions consistent
+             with the original array and the axis parameter is returned.
 
         Notes
         -----
         In case of multiple occurrences of the maximum values, the
-        indices corresponding to the first occurrence are returned.
+         indices corresponding to the first occurrence are returned.
 
         Examples
         --------
@@ -3544,10 +3579,14 @@ class CArray(_CArrayInterface):
          [1]])
 
         """
-        return self._instance_array(self._data.nanargmax(axis=axis))
+        out = self._data.nanargmax(axis=axis)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     def nanargmin(self, axis=None):
-        """Indices of the minimum values along an axis ignoring Nans
+        """Indices of the minimum values along an axis ignoring NaNs
 
         For all-NaN slices ValueError is raised.
         Warning: the results cannot be trusted if a slice
@@ -3562,13 +3601,15 @@ class CArray(_CArrayInterface):
         Returns
         -------
         int or CArray
-            Scalar with index of the minimum value for flattened array or
-            CArray with indices along the given axis.
+            Index of the minimum of the array ignoring NaNs.
+            If axis is None, int is returned.
+            Otherwise, a CArray with shape and number of dimensions consistent
+             with the original array and the axis parameter is returned.
 
         Notes
         -----
         In case of multiple occurrences of the minimum values, the
-        indices corresponding to the first occurrence are returned.
+         indices corresponding to the first occurrence are returned.
 
         Examples
         --------
@@ -3591,7 +3632,11 @@ class CArray(_CArrayInterface):
          [1]])
 
         """
-        return self._instance_array(self._data.nanargmin(axis=axis))
+        out = self._data.nanargmin(axis=axis)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     def mean(self, axis=None, dtype=None, keepdims=True):
         """Compute the arithmetic mean along the specified axis.
@@ -3616,8 +3661,10 @@ class CArray(_CArrayInterface):
         Returns
         -------
         float or CArray
-            Returns a new dense array containing the mean for given axis.
-            If axis=None, returns a float scalar with global average of array.
+            Mean of the elements in the array.
+            If axis is None, float is returned.
+            Otherwise, a CArray with shape and number of dimensions consistent
+             with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -3647,11 +3694,14 @@ class CArray(_CArrayInterface):
         >>> print CArray([1,4,4,3]).mean(axis=0)
         CArray([ 1.  4.  4.  3.])
         >>> print CArray([1,4,4,3]).mean(axis=1)
-        3.0
+        CArray([ 3.])
 
         """
-        return self._instance_array(
-            self._data.mean(axis=axis, dtype=None, keepdims=keepdims))
+        out = self._data.mean(axis=axis, dtype=None, keepdims=keepdims)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     def median(self, axis=None, keepdims=True):
         """Compute the median along the specified axis.
@@ -3675,15 +3725,16 @@ class CArray(_CArrayInterface):
         Returns
         -------
         float or CArray
-            Returns a new array containing the median values for given
-            axis or, if axis=None, return a float scalar with global
-            median of array.
+            Median of the elements in the array.
+            If axis is None, float is returned.
+            Otherwise, a CArray with shape and number of dimensions consistent
+             with the original array and the axis parameter is returned.
 
         Notes
         -----
         If the input contains integers or floats smaller than float64,
-        then the output data-type is np.float64. Otherwise,
-        the data-type of the output is the same as that of the input.
+         then the output data-type is np.float64. Otherwise,
+         the data-type of the output is the same as that of the input.
 
         Examples
         --------
@@ -3701,11 +3752,14 @@ class CArray(_CArrayInterface):
         >>> print CArray([1,4,4,3]).median(axis=0)
         CArray([ 1.  4.  4.  3.])
         >>> print CArray([1,4,4,3]).median(axis=1)
-        3.5
+        CArray([ 3.5])
 
         """
-        return self._instance_array(
-            self._data.median(axis=axis, keepdims=keepdims))
+        out = self._data.median(axis=axis, keepdims=keepdims)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     def std(self, axis=None, ddof=0, keepdims=True):
         """Compute the standard deviation along the specified axis.
@@ -3732,9 +3786,10 @@ class CArray(_CArrayInterface):
         Returns
         -------
         float or CArray
-            Returns a new array containing the standard deviation
-            values for given axis or, if axis=None, return a float
-            scalar with global standard deviation of array.
+            Standard deviation of the elements in the array.
+            If axis is None, float is returned.
+            Otherwise, a CArray with shape and number of dimensions consistent
+             with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -3775,12 +3830,15 @@ class CArray(_CArrayInterface):
 
         >>> print CArray([1,4,4,3]).std(axis=0)
         CArray([ 0.  0.  0.  0.])
-        >>> print round(CArray([1,4,4,3]).std(axis=1), 2)
-        1.22
+        >>> print CArray([1,4,4,3]).std(axis=1).round(2)
+        CArray([ 1.22])
 
         """
-        return self._instance_array(self._data.std(axis=axis, ddof=ddof,
-                                                   keepdims=keepdims))
+        out = self._data.std(axis=axis, ddof=ddof, keepdims=keepdims)
+        if axis is None:
+            return self._instance_array(out)
+        else:
+            return self.__class__(out)
 
     # ----------------- #
     # MATH ELEMENT-WISE #

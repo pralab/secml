@@ -139,7 +139,7 @@ class CNormalizerUnitNorm(CNormalizer):
         x = x.atleast_2d()
 
         # Computing and storing norm (can be used for revert)
-        self._norm = CArray(x.norm_2d(order=self.order, axis=1))
+        self._norm = x.norm_2d(order=self.order, axis=1)
 
         if x.issparse:  # Avoid conversion to dense
             x = x.deepcopy().astype(float)

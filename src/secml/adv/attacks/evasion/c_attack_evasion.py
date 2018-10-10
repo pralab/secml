@@ -123,14 +123,20 @@ class CAttackEvasion(CAttack):
         scores[:, k] = nan
         f_obj = f_k - scores.nanmax(axis=1)
 
+        f_obj = f_obj.ravel()[0] if f_obj.size == 1 else f_obj
+
         return f_obj if self.y_target is None else -f_obj
 
     def _objective_function_gradient(self, x):
 
+        if x.is_vector_like is False:
+            raise ValueError("only one sample can be passed. "
+                             "x has shape {:}".format(x.shape))
+
         # Make classification in the sparse domain if possible
         x = x.tosparse() if self.issparse is True else x
 
-        y_pred, scores = self._solver_clf.classify(x)
+        y_pred, score = self._solver_clf.classify(x)
 
         if self.y_target is None:
             # indiscriminate evasion
@@ -142,15 +148,15 @@ class CAttackEvasion(CAttack):
             # to have the attack sample misclassified as a valid class.
             if hasattr(self._solver_clf, 'reject_option') and \
                     self._solver_clf.reject_option is True:
-                scores[:, -1] = nan
+                score[:, -1] = nan
         else:
             # targeted evasion
             # min -f_obj(x) =  -f_k(x) + argmax_{c != k} f_c(x),
             # where k is the target class
             k = self.y_target
 
-        scores[:, k] = nan
-        c = scores.nanargmax(axis=1)
+        score[:, k] = nan
+        c = score.nanargmax(axis=1)[0]
         grad = self._solver_clf.gradient_f_x(x, y=k) - \
                self._solver_clf.gradient_f_x(x, y=c)
 
