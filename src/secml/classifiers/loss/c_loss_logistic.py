@@ -55,18 +55,18 @@ class CLossLogistic(CLossClassification):
         y_true = convert_binary_labels(y_true).ravel()  # Convert to {-1, 1}
         score = _check_binary_score(score, pos_label)
 
-        # log(1 + exp(-y*s))
-        v = CArray(- y_true * score)
+        # log(1 + exp(-y*s)) / log(2)
+        v = CArray(- y_true * score).astype(float)
 
         if bound is None:
-            v = (1.0 + v.exp())
+            v = (1.0 + v.exp()).log()
 
         else:
             # linear approximation avoids numerical overflows
             # when -yf >> 1 : log ( 1+ exp(-yf)) ~= -yf
-            v[v < bound] = (1.0 + CArray(v[v < bound]).exp()).log()
+            v[v < bound] = (1.0 + v[v < bound].exp()).log()
 
-        return v
+        return v / CArray([2]).log()
 
     def dloss(self, y_true, score, pos_label=1, bound=10):
         """Computes the derivative of the hinge loss function with respect to `score`.
@@ -100,10 +100,10 @@ class CLossLogistic(CLossClassification):
         y_true = convert_binary_labels(y_true).ravel()  # Convert to {-1, 1}
         score = _check_binary_score(score, pos_label)
 
-        # d log ( 1+ exp(-yf)) / df =
-        #     1/( 1+ exp(-yf)) exp(-yf) -y
+        # d/df log ( 1+ exp(-yf)) / log(2)  =
+        #     1/ log(2) * ( 1+ exp(-yf)) exp(-yf) -y
 
-        v = CArray(- y_true * score)
+        v = CArray(- y_true * score).astype(float)
 
         if bound is None:
             h = -y_true * v.exp() / (1.0 + v.exp())
@@ -112,7 +112,7 @@ class CLossLogistic(CLossClassification):
             # linear approximation avoids numerical overflows
             # when -yf >> 1 : loss ~= -yf, and grad = -y
             h = -y_true
-            h[v < bound] = h[v < bound] * CArray(v[v < bound]).exp() / \
-                (1.0 + CArray(v[v < bound]).exp())
+            h[v < bound] = h[v < bound] * v[v < bound].exp() / \
+                                                    (1.0 + v[v < bound].exp())
 
-        return h
+        return h / CArray([2]).log()
