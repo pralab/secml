@@ -141,15 +141,18 @@ class CNormalizerUnitNorm(CNormalizer):
         # Computing and storing norm (can be used for revert)
         self._norm = x.norm_2d(order=self.order, axis=1)
 
+        # Makes sure that whenever scale is zero, we handle it correctly
+        scale = self._norm.deepcopy()
+        scale[scale == 0.0] = 1.0
+
         if x.issparse:  # Avoid conversion to dense
             x = x.deepcopy().astype(float)
             # Fixes setting floats to int array (result will be float anyway)
-            for e_idx, e in enumerate(self._norm):
-                res = CArray(x[e_idx, :]) / e
-                x[e_idx, :] = res
+            for e_idx, e in enumerate(scale):
+                x[e_idx, :] /= e
         else:
             # Normalizing array and removing any 'nan'
-            x /= self.norm  # This creates a copy
+            x /= scale  # This creates a copy
 
         x.nan_to_num()  # Avoid storing nans/inf
 

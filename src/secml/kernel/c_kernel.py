@@ -70,9 +70,9 @@ class CKernel(CCreator):
 
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             First array of shape (n_x, n_features).
-        y : CArray or array_like, optional
+        y : CArray, optional
             Second array of shape (n_y, n_features). If not specified,
             the kernel k(x,x) is computed.
 
@@ -116,12 +116,9 @@ class CKernel(CCreator):
         """
         y = x if y is None else y  # If y is not specified we compute k(x,x)
 
-        x_carray = CArray(x)
-        y_carray = CArray(y)
-
         # Converting separately to 2D as we need original shape later
-        x_carray_2d = x_carray.atleast_2d()
-        y_carray_2d = y_carray.atleast_2d()
+        x_carray_2d = x.atleast_2d()
+        y_carray_2d = y.atleast_2d()
 
         # Preallocating output array (without assigning values)
         kernel = CArray.empty(
@@ -135,8 +132,7 @@ class CKernel(CCreator):
                 patterns_done + self.cache_size, x_carray_2d.shape[0])
 
             # Subsampling patterns to improve memory usage
-            x_sel = CArray(
-                x_carray_2d[patterns_done:nxt_pattern_idx, :]).atleast_2d()
+            x_sel = x_carray_2d[patterns_done:nxt_pattern_idx, :].atleast_2d()
 
             # Result of kernel MUST be dense
             k_tmp = CArray(self._k(x_sel, y_carray_2d)).todense()
@@ -145,8 +141,8 @@ class CKernel(CCreator):
             kernel[patterns_done:nxt_pattern_idx, :] = k_tmp
 
         # If both x and y are vectors, return scalar
-        if x_carray.is_vector_like and y_carray.is_vector_like:
-            return kernel[0]
+        if x.is_vector_like and y.is_vector_like:
+            return kernel.item()
         else:
             return kernel
 
@@ -189,9 +185,9 @@ class CKernel(CCreator):
 
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             First array of shape (n_x, n_features).
-        v : CArray or array_like
+        v : CArray
             Second array of shape (n_features, ) or (1, n_features).
 
         Returns
@@ -217,8 +213,8 @@ class CKernel(CCreator):
 
         """
         # Recasting data for safety... cost-free for any CArray
-        x_carray = CArray(x).atleast_2d()
-        v_carray = CArray(v).atleast_2d()
+        x_carray = x.atleast_2d()
+        v_carray = v.atleast_2d()
         # Checking if second array is a vector
         if v_carray.ndim > 1 and v_carray.shape[0] > 1:
             raise ValueError(

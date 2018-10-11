@@ -168,9 +168,12 @@ class CNormalizerZScore(CNormalizerLinear):
         # Updating std deviation parameters only if needed
         if self.with_std is True:
             self._x_std = x.std(axis=0, keepdims=False)
+            # Makes sure that whenever scale is zero, we handle it correctly
+            scale = self._x_std.deepcopy()
+            scale[scale == 0.0] = 1.0
             # Updating linear normalizer parameters
-            self._w /= self.std
-            self._b /= self.std
+            self._w /= scale
+            self._b /= scale
 
         return self
 

@@ -44,7 +44,7 @@ def _evaluate_one(
     estimator_params = {}
     for par_idx, par in enumerate(params):
         # This works as params is an OrderedDict
-        value_id = params_matrix[row_id, par_idx]
+        value_id = params_matrix[row_id, par_idx].item()
         estimator_params[par] = params[par][value_id]
 
     # Set estimator parameters using current combination

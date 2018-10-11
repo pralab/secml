@@ -254,13 +254,17 @@ class TestCArray(CUnitTest):
                                  "{:} is different from {:}".format(selection, target_list[selector_idx]))
 
                 if isinstance(target_list[selector_idx], CArray):
+                    self.assertIsInstance(selection, CArray)
                     if selection.issparse:
-                        self.assertEqual(selection.shape,
-                                         target_list[
-                                             selector_idx].atleast_2d().shape)
+                        self.assertEqual(
+                            target_list[selector_idx].atleast_2d().shape,
+                            selection.shape)
                     else:
-                        self.assertEqual(selection.shape,
-                                         target_list[selector_idx].shape)
+                        self.assertEqual(target_list[selector_idx].shape,
+                                         selection.shape)
+                else:
+                    self.assertIsInstance(
+                        selection, type(target_list[selector_idx]))
 
         # 2D/1D INDEXING (MATRIX)
         arrays_list = [self.array_dense, self.array_sparse]
@@ -296,14 +300,17 @@ class TestCArray(CUnitTest):
                                 slice(1, 3), [False, True, True], CArray([False, True, True])]
             selectors = itertools.product(selectors_unique, repeat=2)
 
-            targets_a = [0, 0, CArray([[0, 0]]), CArray([[0, 0]]),  # 2
+            targets_a = [CArray([[0]]), CArray([[0]]),   # 2
+                         CArray([[0, 0]]), CArray([[0, 0]]),
                          CArray([[6, 0]]), CArray([[6, 0]]), CArray([[6, 0]])
                          ]
-            targets_b = [CArray([[0], [0]]), CArray([[0], [0]]), CArray([[0, 0], [0, 0]]),  # [2, 2]
+            targets_b = [CArray([[0], [0]]), CArray([[0], [0]]),   # [2, 2]
+                         CArray([[0, 0], [0, 0]]),
                          CArray([[0, 0], [0, 0]]), CArray([[6, 0], [6, 0]]),
                          CArray([[6, 0], [6, 0]]), CArray([[6, 0], [6, 0]])
                          ]
-            targets_c = [CArray([[6], [0]]), CArray([[6], [0]]), CArray([[6, 6], [0, 0]]),  # [False, True, True]
+            targets_c = [CArray([[6], [0]]), CArray([[6], [0]]),   # [False, True, True]
+                         CArray([[6, 6], [0, 0]]),
                          CArray([[6, 6], [0, 0]]), CArray([[4, 6], [6, 0]]),
                          CArray([[4, 6], [6, 0]]), CArray([[4, 6], [6, 0]])
                          ]
@@ -338,9 +345,9 @@ class TestCArray(CUnitTest):
             targets = 4 * targets_a + 2 * targets_b
             # Output always flat for flat arrays
             if array.ndim == 1:
-                targets += 12 * (2 * [4] + 2 * [CArray([6, 6])] + 3 * [CArray([0, 6])])
+                targets += 12 * (2 * [CArray([4])] + 2 * [CArray([6, 6])] + 3 * [CArray([0, 6])])
             else:
-                targets += 12 * (2 * [4] + 2 * [CArray([[6, 6]])] + 3 * [CArray([[0, 6]])])
+                targets += 12 * (2 * [CArray([[4]])] + 2 * [CArray([[6, 6]])] + 3 * [CArray([[0, 6]])])
 
             test_selectors(array, selectors, targets)
 
@@ -354,9 +361,9 @@ class TestCArray(CUnitTest):
 
             # Output always flat for flat arrays
             if array.ndim == 1:
-                targets = 2 * [4] + 2 * [CArray([6, 6])] + [CArray([0, 6])] + [CArray([4, 0, 6])]
+                targets = 2 * [CArray([4])] + 2 * [CArray([6, 6])] + [CArray([0, 6])] + [CArray([4, 0, 6])]
             else:
-                targets = 2 * [4] + 2 * [CArray([[6, 6]])] + [CArray([[0, 6]])] + [CArray([[4, 0, 6]])]
+                targets = 2 * [CArray([[4]])] + 2 * [CArray([[6, 6]])] + [CArray([[0, 6]])] + [CArray([[4, 0, 6]])]
 
             test_selectors(array, selectors, targets)
 
@@ -368,9 +375,12 @@ class TestCArray(CUnitTest):
 
             selectors = [0, np.ravel(0)[0], True, [True], CArray([True]), slice(0, 1), slice(None), CArray([0, 0])]
 
-            targets = 7 * [4]
-            # Output always flat for flat arrays
-            targets += [CArray([4, 4])] if array.ndim == 1 else [CArray([[4, 4]])]
+            # CArray([True]) is considered a boolean mask in this case,
+            # resulting selection is always flat
+            if array.ndim == 1:
+                targets = 4 * [CArray([4])] + [CArray([4])] + 2 * [CArray([4])] + [CArray([4, 4])]
+            else:
+                targets = 4 * [CArray([[4]])] + [CArray([4])] + 2 * [CArray([[4]])] +  [CArray([[4, 4]])]
 
             test_selectors(array, selectors, targets)
 
@@ -521,6 +531,37 @@ class TestCArray(CUnitTest):
                 targets = 7 * [targets_a.atleast_2d()]
 
             test_selectors(array, selectors, assignments, targets)
+
+    def test_item(self):
+        """Test for CArray.item() method."""
+        self.logger.info("Test for CArray.item() method")
+
+        def _item(a):
+            x = a.item()
+            self.logger.info("array:\n{:}\nextracted: {:}".format(a, x))
+            self.assertEqual(a.dtype, type(x))
+
+        _item(self.single_flat_dense.astype(int))
+        _item(self.single_dense.astype(int))
+        _item(self.single_sparse.astype(int))
+        _item(self.single_flat_dense.astype(float))
+        _item(self.single_dense.astype(float))
+        _item(self.single_sparse.astype(float))
+        _item(self.single_bool_flat_dense)
+        _item(self.single_bool_dense)
+        _item(self.single_bool_sparse)
+
+        with self.assertRaises(ValueError):
+            self.empty_flat_dense.item()
+        with self.assertRaises(ValueError):
+            self.empty_dense.item()
+        with self.assertRaises(ValueError):
+            self.empty_sparse.item()
+
+        with self.assertRaises(ValueError):
+            self.array_dense.item()
+        with self.assertRaises(ValueError):
+            self.array_sparse.item()
 
     def test_all(self):
         """Test for CArray.all() method."""

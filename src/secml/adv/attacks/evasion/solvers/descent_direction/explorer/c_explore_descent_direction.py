@@ -146,8 +146,8 @@ class CExploreDescentDirection(CCreator):
             self._idx_top_feat = CArray.randsample(x.size, x.size)
 
         # TODO: this may be not required now.
-        self._ff_idx_top_feat = CArray(
-            self._idx_top_feat[x_feas[self._idx_top_feat] == 1])
+        self._ff_idx_top_feat = self._idx_top_feat[
+            x_feas[self._idx_top_feat] == 1]
 
         self._ff_n_feat = self._ff_idx_top_feat.size
 
@@ -248,8 +248,8 @@ class CExploreDescentDirection(CCreator):
 
         self._idx_current = CArray.arange(0, self._idx_next, 1)
 
-        self._idx_current = CArray(
-            self._idx_current[self._idx_current < self._ff_n_feat])
+        self._idx_current = self._idx_current[
+            self._idx_current < self._ff_n_feat]
 
         self._idx_next = min(self._idx_next, self._ff_n_feat)
 
