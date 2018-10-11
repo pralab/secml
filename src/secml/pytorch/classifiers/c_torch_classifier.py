@@ -432,7 +432,7 @@ class CTorchClassifier(CClassifier):
 
         return self
 
-    def discriminant_function(self, x, label, n_jobs=1):
+    def discriminant_function(self, x, y, n_jobs=1):
         """Computes the discriminant function for each pattern in x.
 
         If a normalizer has been specified, input is normalized
@@ -443,7 +443,7 @@ class CTorchClassifier(CClassifier):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : int
+        y : int
             The label of the class wrt the function should be calculated.
         n_jobs : int
             Number of parallel workers to use. Default 1.
@@ -462,9 +462,9 @@ class CTorchClassifier(CClassifier):
         if self.normalizer is not None:
             x = self.normalizer.normalize(x)
 
-        return self._discriminant_function(x, label, n_jobs=n_jobs)
+        return self._discriminant_function(x, y, n_jobs=n_jobs)
 
-    def _discriminant_function(self, x, label, n_jobs=1):
+    def _discriminant_function(self, x, y, n_jobs=1):
         """Computes the discriminant function for each pattern in x.
 
         Parameters
@@ -472,7 +472,7 @@ class CTorchClassifier(CClassifier):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : int
+        y : int
             The label of the class wrt the function should be calculated.
         n_jobs : int
             Number of parallel workers to use. Default 1.
@@ -493,7 +493,7 @@ class CTorchClassifier(CClassifier):
         self._model.eval()
 
         scores = None
-        for batch_idx, (x, y) in enumerate(x_loader):
+        for batch_idx, (s, _) in enumerate(x_loader):
 
             # Log progress
             self.logger.info(
@@ -503,14 +503,14 @@ class CTorchClassifier(CClassifier):
                 ))
 
             if use_cuda is True:
-                x = x.cuda()
-            x = Variable(x, requires_grad=True)
+                s = s.cuda()
+            s = Variable(s, requires_grad=True)
 
             with torch.no_grad():
-                logits = self._model(x)
+                logits = self._model(s)
                 logits = logits.view(logits.size(0), -1)
                 logits = CArray(
-                    logits.data.cpu().numpy()[:, label]).astype(float)
+                    logits.data.cpu().numpy()[:, y]).astype(float)
 
             if scores is not None:
                 scores = scores.append(logits, axis=0)
@@ -557,7 +557,7 @@ class CTorchClassifier(CClassifier):
         self._model.eval()
 
         scores = None
-        for batch_idx, (x, y) in enumerate(x_loader):
+        for batch_idx, (s, _) in enumerate(x_loader):
 
             # Log progress
             self.logger.info(
@@ -567,11 +567,11 @@ class CTorchClassifier(CClassifier):
                 ))
 
             if use_cuda is True:
-                x = x.cuda()
-            x = Variable(x, requires_grad=True)
+                s = s.cuda()
+            s = Variable(s, requires_grad=True)
 
             with torch.no_grad():
-                logits = self._model(x)
+                logits = self._model(s)
                 logits = logits.view(logits.size(0), -1)
                 logits = CArray(logits.data.cpu().numpy()).astype(float)
 
@@ -607,26 +607,26 @@ class CTorchClassifier(CClassifier):
 
         dl = self._get_test_input_loader(x)
 
-        x = dl.dataset[0][0]  # Get the single and only point from the dl
+        s = dl.dataset[0][0]  # Get the single and only point from the dl
 
         if use_cuda is True:
-            x = x.cuda()
-        x = x.unsqueeze(0)  # Get a [1,h,w,c] tensor as required by the net
-        x = Variable(x, requires_grad=True)
+            s = s.cuda()
+        s = s.unsqueeze(0)  # Get a [1,h,w,c] tensor as required by the net
+        s = Variable(s, requires_grad=True)
 
         # Switch to evaluation mode
         self._model.eval()
 
-        logits = self._model(x)
+        logits = self._model(s)
 
-        mask = torch.FloatTensor(x.shape[0], logits.shape[-1])
+        mask = torch.FloatTensor(s.shape[0], logits.shape[-1])
         mask.zero_()
         mask[0, y] = 1  # grad wrt first class neuron out
         if use_cuda is True:
             mask = mask.cuda()
         logits.backward(mask)
 
-        return CArray(x.grad.data.cpu().numpy().ravel())
+        return CArray(s.grad.data.cpu().numpy().ravel())
 
     def get_layer_output(self, x, layer=None):
         """Returns the output of the desired net layer.
@@ -651,17 +651,17 @@ class CTorchClassifier(CClassifier):
         self._model.eval()
 
         out = None
-        for batch_idx, (x, y) in enumerate(x_loader):
+        for batch_idx, (s, _) in enumerate(x_loader):
 
             if use_cuda is True:
-                x = x.cuda()
-            x = Variable(x, requires_grad=True)
+                s = s.cuda()
+            s = Variable(s, requires_grad=True)
 
             with torch.no_grad():
                 # Manual iterate the network and stop at desired layer
                 # Use _model to iterate over first level modules only
                 for m_k, m in self._model._modules.iteritems():
-                    x = m(x)  # Forward input trough module
+                    s = m(s)  # Forward input trough module
                     if m_k == layer:
                         # We found the desired layer
                         break
@@ -670,11 +670,11 @@ class CTorchClassifier(CClassifier):
                         raise ValueError("No layer `{:}` found!".format(layer))
 
             # Convert to CArray
-            x = CArray(x.data.cpu().numpy())
+            s = CArray(s.data.cpu().numpy())
 
             if out is not None:
-                out = out.append(x, axis=0)
+                out = out.append(s, axis=0)
             else:
-                out = x
+                out = s
 
         return out

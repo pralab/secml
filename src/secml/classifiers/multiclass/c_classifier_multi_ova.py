@@ -114,7 +114,7 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
         return CDataset(
             dataset.X, dataset.get_labels_asbinary(dataset.classes[class_idx]))
 
-    def _discriminant_function(self, x, label):
+    def _discriminant_function(self, x, y):
         """Computes the discriminant function for each pattern in x.
 
         For One-Vs-All (OVA) multiclass scheme,
@@ -125,7 +125,7 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : int
+        y : int
             The label of the class wrt the function should be calculated.
 
         Returns
@@ -136,7 +136,7 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
 
         """
         self.logger.info(
-            "Getting discriminant function against class: {:}".format(label))
-        # Getting predicted scores for classifier associated with label
+            "Getting discriminant function against class: {:}".format(y))
+        # Getting predicted scores for classifier associated with y
         # The discriminant function is always computed wrt positive class (1)
-        return self.binary_classifiers[label].discriminant_function(x, label=1)
+        return self.binary_classifiers[y].discriminant_function(x, y=1)
