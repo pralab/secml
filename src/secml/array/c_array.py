@@ -569,12 +569,17 @@ class CArray(_CArrayInterface):
                 - Atomic built-in types (int, bool).
                 - Numpy atomic types (np.integer, np.bool_).
 
+        Returns
+        -------
+        CArray
+            Array with indexing result.
+
         """
         # Preparing input index for buffer __getitem__
         idx_data = self._prepare_idx(idx)
 
         # Calling getitem of data buffer
-        return _instance_data(self._data.__getitem__(idx_data))
+        return self.__class__(self._data.__getitem__(idx_data))
 
     def item(self):
         """Returns the single element in the array as built-in type.
