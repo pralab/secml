@@ -196,13 +196,13 @@ class TestCClassifierSGD(CUnitTest):
 
             # Testing discriminant_function on multiple points
 
-            df_scores_neg = sgd.discriminant_function(x, label=0)
-            self.logger.info("discriminant_function(x, label=0):\n"
+            df_scores_neg = sgd.discriminant_function(x, y=0)
+            self.logger.info("discriminant_function(x, y=0):\n"
                              "{:}".format(df_scores_neg))
             _check_df_scores(df_scores_neg, self.dataset.num_samples)
 
-            df_scores_pos = sgd.discriminant_function(x, label=1)
-            self.logger.info("discriminant_function(x, label=1):\n"
+            df_scores_pos = sgd.discriminant_function(x, y=1)
+            self.logger.info("discriminant_function(x, y=1):\n"
                              "{:}".format(df_scores_pos))
             _check_df_scores(df_scores_pos, self.dataset.num_samples)
 
@@ -211,8 +211,8 @@ class TestCClassifierSGD(CUnitTest):
 
             # Testing _discriminant_function on multiple points
 
-            ds_priv_scores = sgd._discriminant_function(x_norm, label=1)
-            self.logger.info("_discriminant_function(x_norm, label=1):\n"
+            ds_priv_scores = sgd._discriminant_function(x_norm, y=1)
+            self.logger.info("_discriminant_function(x_norm, y=1):\n"
                              "{:}".format(ds_priv_scores))
             _check_df_scores(ds_priv_scores, self.dataset.num_samples)
 
@@ -235,13 +235,13 @@ class TestCClassifierSGD(CUnitTest):
 
             # Testing discriminant_function on single point
 
-            df_scores_neg = sgd.discriminant_function(p, label=0)
-            self.logger.info("discriminant_function(p, label=0):\n"
+            df_scores_neg = sgd.discriminant_function(p, y=0)
+            self.logger.info("discriminant_function(p, y=0):\n"
                              "{:}".format(df_scores_neg))
             _check_df_scores(df_scores_neg, 1)
 
-            df_scores_pos = sgd.discriminant_function(p, label=1)
-            self.logger.info("discriminant_function(p, label=1):\n"
+            df_scores_pos = sgd.discriminant_function(p, y=1)
+            self.logger.info("discriminant_function(p, y=1):\n"
                              "{:}".format(df_scores_pos))
             _check_df_scores(df_scores_pos, 1)
 
@@ -250,8 +250,8 @@ class TestCClassifierSGD(CUnitTest):
 
             # Testing _discriminant_function on single point
 
-            df_priv_scores = sgd._discriminant_function(p_norm, label=1)
-            self.logger.info("_discriminant_function(p_norm, label=1):\n"
+            df_priv_scores = sgd._discriminant_function(p_norm, y=1)
+            self.logger.info("_discriminant_function(p_norm, y=1):\n"
                              "{:}".format(df_priv_scores))
             _check_df_scores(df_priv_scores, 1)
 
@@ -276,9 +276,9 @@ class TestCClassifierSGD(CUnitTest):
             # Testing error raising
 
             with self.assertRaises(ValueError):
-                sgd._discriminant_function(x_norm, label=0)
+                sgd._discriminant_function(x_norm, y=0)
             with self.assertRaises(ValueError):
-                sgd._discriminant_function(p_norm, label=0)
+                sgd._discriminant_function(p_norm, y=0)
 
 
 if __name__ == '__main__':

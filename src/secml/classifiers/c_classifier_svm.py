@@ -321,7 +321,7 @@ class CClassifierSVM(CClassifierLinear):
 
         return classifier
 
-    def _discriminant_function(self, x, label=1):
+    def _discriminant_function(self, x, y=1):
         """Computes the distance from the separating hyperplane for each pattern in x.
 
         For non linear SVM, the kernel between input patterns and
@@ -333,7 +333,7 @@ class CClassifierSVM(CClassifierLinear):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : {1}
+        y : {1}
             The label of the class wrt the function should be calculated.
             Discriminant function is always computed wrt positive class (1).
 
@@ -346,12 +346,12 @@ class CClassifierSVM(CClassifierLinear):
         """
         if self.is_kernel_linear():  # Scores are given by the linear model
             return CClassifierLinear._discriminant_function(
-                self, x, label=label)
+                self, x, y=y)
 
         # Non-linear SVM
         if self.is_clear():
             raise ValueError("make sure the classifier is trained first.")
-        if label != 1:
+        if y != 1:
             raise ValueError(
                 "discriminant function is always computed wrt positive class.")
 

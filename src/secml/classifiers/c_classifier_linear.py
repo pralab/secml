@@ -99,7 +99,7 @@ class CClassifierLinear(CClassifier):
 
         return super(CClassifierLinear, self).train(dataset, n_jobs=n_jobs)
 
-    def _discriminant_function(self, x, label=1):
+    def _discriminant_function(self, x, y=1):
         """Computes the distance from the separating hyperplane for each pattern in x.
 
         Parameters
@@ -107,7 +107,7 @@ class CClassifierLinear(CClassifier):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : {1}
+        y : {1}
             The label of the class wrt the function should be calculated.
             Discriminant function is always computed wrt positive class (1).
 
@@ -120,14 +120,14 @@ class CClassifierLinear(CClassifier):
         """
         if self.is_clear():
             raise ValueError("make sure the classifier is trained first.")
-        if label != 1:
+        if y != 1:
             raise ValueError(
                 "discriminant function is always computed wrt positive class.")
         x = x.atleast_2d()  # Ensuring input is 2-D
         # Computing: `x * w^T`
         return CArray(x.dot(self.w.T)).todense().ravel() + self.b
 
-    def discriminant_function(self, x, label=1):
+    def discriminant_function(self, x, y=1):
         """Computes the discriminant function for each pattern in x.
 
         For a linear classifier the discriminant function is given by::
@@ -142,7 +142,7 @@ class CClassifierLinear(CClassifier):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : {0, 1}, optional
+        y : {0, 1}, optional
             The label of the class wrt the function should be calculated.
             Default is 1.
 
@@ -162,7 +162,7 @@ class CClassifierLinear(CClassifier):
         if self.normalizer is not None:
             x = self.normalizer.normalize(x)
 
-        sign = extend_binary_labels(label)  # Sign depends on input label (0/1)
+        sign = extend_binary_labels(y)  # Sign depends on input label (0/1)
 
         return sign * self._discriminant_function(x)
 
@@ -194,7 +194,7 @@ class CClassifierLinear(CClassifier):
 
         # Discriminant function is called once (2 classes)
         s_tmp = CArray(
-            self.discriminant_function(CArray(x).atleast_2d(), label=1))
+            self.discriminant_function(CArray(x).atleast_2d(), y=1))
         # Assembling scores for positive and negative class
         scores = CArray([[-elem, elem] for elem in s_tmp])
 

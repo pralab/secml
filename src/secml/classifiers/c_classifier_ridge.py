@@ -129,7 +129,7 @@ class CClassifierRidge(CClassifierLinear):
         self._w = CArray(ridge.coef_, tosparse=dataset.issparse).ravel()
         self._b = CArray(ridge.intercept_)[0] if self.fit_intercept else 0
 
-    def _discriminant_function(self, x, label=1):
+    def _discriminant_function(self, x, y=1):
         """Computes the distance from the separating hyperplane for each pattern in x.
 
         The scores are computed in kernel space if kernel is defined.
@@ -139,7 +139,7 @@ class CClassifierRidge(CClassifierLinear):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : {1}
+        y : {1}
             The label of the class wrt the function should be calculated.
             Discriminant function is always computed wrt positive class (1).
 
@@ -154,4 +154,4 @@ class CClassifierRidge(CClassifierLinear):
         # Compute discriminant function in kernel space if necessary
         k = x if self.kernel is None else CArray(self.kernel.k(x, self._tr))
         # Scores are given by the linear model
-        return CClassifierLinear._discriminant_function(self, k, label=label)
+        return CClassifierLinear._discriminant_function(self, k, y=y)

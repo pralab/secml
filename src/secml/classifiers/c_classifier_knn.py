@@ -135,7 +135,7 @@ class CClassifierKNN(CClassifier):
 
         return self._KNC
 
-    def _discriminant_function(self, x, label):
+    def _discriminant_function(self, x, y):
         """Computes the discriminant function (probability estimates) for each pattern in x.
 
         Parameters
@@ -143,7 +143,7 @@ class CClassifierKNN(CClassifier):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : int
+        y : int
             The label of the class wrt the function should be calculated.
 
         Returns
@@ -154,7 +154,7 @@ class CClassifierKNN(CClassifier):
 
         """
         x = x.atleast_2d()  # Ensuring input is 2-D
-        return CArray(self._KNC.predict_proba(x.get_data())[:, label]).ravel()
+        return CArray(self._KNC.predict_proba(x.get_data())[:, y]).ravel()
 
     def kneighbors(self, x, num_samples, return_distance=True):
         '''

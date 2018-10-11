@@ -23,7 +23,7 @@ class TestCPlot(CUnitTest):
         fig.sp.plot_ds(self.dataset)
 
         fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(self.clf.discriminant_function, label=1)
+        fig.sp.plot_fobj(self.clf.discriminant_function, y=1)
         fig.show()
 
     def test_fgrads(self):
@@ -33,7 +33,7 @@ class TestCPlot(CUnitTest):
         fig.sp.plot_ds(self.dataset)
 
         fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(self.clf.discriminant_function, label=1)
+        fig.sp.plot_fobj(self.clf.discriminant_function, y=1)
         fig.sp.plot_fgrads(lambda x: self.clf.gradient_f_x(x))
         fig.show()
 

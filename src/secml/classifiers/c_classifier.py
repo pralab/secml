@@ -37,7 +37,7 @@ def _classify_one(tr_class_idx, clf, test_x, verbose):
     # level is stored per-object looking to id
     clf.verbose = verbose
     # Getting predicted data for current class classifier
-    return clf.discriminant_function(test_x, label=tr_class_idx)
+    return clf.discriminant_function(test_x, y=tr_class_idx)
 
 
 class CClassifier(CCreator):
@@ -177,7 +177,7 @@ class CClassifier(CCreator):
         return self
 
     @abstractmethod
-    def _discriminant_function(self, x, label):
+    def _discriminant_function(self, x, y):
         """Private method that computes the discriminant function.
 
         .. warning:: Must be reimplemented by a subclass of `.CClassifier`.
@@ -187,7 +187,7 @@ class CClassifier(CCreator):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : int
+        y : int
             The label of the class wrt the function should be calculated.
 
         Returns
@@ -199,7 +199,7 @@ class CClassifier(CCreator):
         """
         raise NotImplementedError()
 
-    def discriminant_function(self, x, label):
+    def discriminant_function(self, x, y):
         """Computes the discriminant function for each pattern in x.
 
         If a normalizer has been specified, input is normalized
@@ -215,7 +215,7 @@ class CClassifier(CCreator):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : int
+        y : int
             The label of the class wrt the function should be calculated.
 
         Returns
@@ -243,7 +243,7 @@ class CClassifier(CCreator):
 
         score = CArray.ones(shape=x.shape[0])
         for i in xrange(x.shape[0]):
-            score[i] = self._discriminant_function(x[i, :], label)
+            score[i] = self._discriminant_function(x[i, :], y)
 
         return score
 

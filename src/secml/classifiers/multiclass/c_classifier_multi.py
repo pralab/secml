@@ -261,7 +261,7 @@ class CClassifierMulticlass(CClassifier):
         """
         raise NotImplementedError
 
-    def discriminant_function(self, x, label):
+    def discriminant_function(self, x, y):
         """Computes the discriminant function for each pattern in x.
 
         If a normalizer has been specified, input is normalized
@@ -277,7 +277,7 @@ class CClassifierMulticlass(CClassifier):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        label : int
+        y : int
             The label of the class wrt the function should be calculated.
 
         Returns
@@ -296,7 +296,7 @@ class CClassifierMulticlass(CClassifier):
         if self.normalizer is not None:
             x = self.normalizer.normalize(x)
 
-        return self._discriminant_function(x, label)
+        return self._discriminant_function(x, y)
 
     def apply_method(self, method, *args, **kwargs):
         """Apply input method to all trained classifers.
