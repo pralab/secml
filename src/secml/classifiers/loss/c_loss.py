@@ -130,13 +130,13 @@ class CLossClassification(CLoss):
             Ground truth (correct), targets. Vector-like array.
         score : CArray
             Outputs (predicted), targets.
-            2-D array of shape (n_samples, n_classes) or vector-like
-             array of shape (n_samples,).
+            2-D array of shape (n_samples, n_classes) or
+             1-D flat array of shape (n_samples,).
         pos_label : int or None, optional
             Default None, meaning that the function is computed
              for each sample wrt the corresponding true label.
             Otherwise, this is the class wrt compute the loss function.
-            If `score` is vector-like, this parameter is ignored.
+            If `score` is a 1-D flat array, this parameter is ignored.
 
         Returns
         -------
@@ -155,13 +155,13 @@ class CLossClassification(CLoss):
             Ground truth (correct), targets. Vector-like array.
         score : CArray
             Outputs (predicted), targets.
-            2-D array of shape (n_samples, n_classes) or vector-like
-             array of shape (n_samples,).
+            2-D array of shape (n_samples, n_classes) or 1-D flat array
+             of shape (n_samples,).
         pos_label : int or None, optional
             Default None, meaning that the function derivative is computed
              for each sample wrt the corresponding true label.
             Otherwise, this is the class wrt compute the derivative.
-            If `score` is vector-like, this parameter is ignored.
+            If `score` is a 1-D flat array, this parameter is ignored.
 
         Returns
         -------
@@ -175,7 +175,7 @@ class CLossClassification(CLoss):
 def _check_binary_score(score, pos_label=1):
     """Check that input scores are binary and return desired column.
 
-    If score is a vector_like array, the probabilities are returned as is.
+    If score is a 1-D flat array, the probabilities are returned as is.
     If score is 2-D (n_samples, n_classes), it is checked to be
      binary (2-classes) and the column corresponding to pos_label is returned.
 
@@ -183,11 +183,11 @@ def _check_binary_score(score, pos_label=1):
     ----------
     score : CArray
         Outputs (predicted), targets.
-        2-D array of shape (n_samples, n_classes) or vector-like
-         array of shape (n_samples,).
+        2-D array of shape (n_samples, n_classes) or
+         1-D flat array of shape (n_samples,).
     pos_label : {0, 1}, optional
         The index of the column to return. Default 1.
-        If `score` is vector-like, this parameter is ignored.
+        If `score` is a 1-D flat array, this parameter is ignored.
 
     Returns
     -------
@@ -195,12 +195,12 @@ def _check_binary_score(score, pos_label=1):
         Scores. Vector-like array.
 
     """
-    if score.is_vector_like is False:
+    if score.ndim == 2:
         if score.shape[1] > 2:
             raise ValueError(
                 "only 2 classes are supported. "
                 "`score` has shape[1] = {:}".format(score.shape[1]))
         else:
-            score = CArray(score[:, pos_label])
+            score = score[:, pos_label].ravel()
 
-    return score.ravel()  # Manage 1-D/2-D case
+    return score  # Manage 1-D/2-D case

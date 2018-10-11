@@ -45,12 +45,12 @@ class CLossHinge(CLossClassification):
             Ground truth (correct), targets. Vector-like array.
         score : CArray
             Outputs (predicted), targets.
-            2-D array of shape (n_samples, n_classes) or vector-like
-             array of shape (n_samples,). If vector-like, the probabilities
+            2-D array of shape (n_samples, n_classes) or 1-D flat array
+             of shape (n_samples,). If 1-D array, the probabilities
              provided are assumed to be that of the positive class.
         pos_label : {0, 1}, optional
             The class wrt compute the loss function. Default 1.
-            If `score` is vector-like, this parameter is ignored.
+            If `score` is a 1-D flat array, this parameter is ignored.
 
         Returns
         -------
@@ -79,12 +79,12 @@ class CLossHinge(CLossClassification):
             Ground truth (correct), targets. Vector-like array.
         score : CArray
             Outputs (predicted), targets.
-            2-D array of shape (n_samples, n_classes) or vector-like
-             array of shape (n_samples,). If vector-like, the probabilities
+            2-D array of shape (n_samples, n_classes) or 1-D flat array
+             of shape (n_samples,). If 1-D array, the probabilities
              provided are assumed to be that of the positive class.
         pos_label : {0, 1}, optional
             The class wrt compute the loss function derivative. Default 1.
-            If `score` is vector-like, this parameter is ignored.
+            If `score` is a 1-D flat array, this parameter is ignored.
 
         Returns
         -------
@@ -138,12 +138,12 @@ class CLossHingeSquared(CLossClassification):
             Ground truth (correct), targets. Vector-like array.
         score : CArray
             Outputs (predicted), targets.
-            2-D array of shape (n_samples, n_classes) or vector-like
-             array of shape (n_samples,). If vector-like, the probabilities
+            2-D array of shape (n_samples, n_classes) or 1-D flat array
+             of shape (n_samples,). If 1-D array, the probabilities
              provided are assumed to be that of the positive class.
         pos_label : {0, 1}, optional
             The class wrt compute the loss function. Default 1.
-            If `score` is vector-like, this parameter is ignored.
+            If `score` is a 1-D flat array, this parameter is ignored.
 
         Returns
         -------
@@ -172,12 +172,12 @@ class CLossHingeSquared(CLossClassification):
             Ground truth (correct), targets. Vector-like array.
         score : CArray
             Outputs (predicted), targets.
-            2-D array of shape (n_samples, n_classes) or vector-like
-             array of shape (n_samples,). If vector-like, the probabilities
+            2-D array of shape (n_samples, n_classes) or 1-D flat array
+             of shape (n_samples,). If 1-D array, the probabilities
              provided are assumed to be that of the positive class.
         pos_label : {0, 1}, optional
             The class wrt compute the loss function derivative. Default 1.
-            If `score` is vector-like, this parameter is ignored.
+            If `score` is a 1-D flat array, this parameter is ignored.
 
         Returns
         -------
