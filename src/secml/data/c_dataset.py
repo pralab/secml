@@ -426,6 +426,6 @@ class CDataset(object):
         x_max = self.X.max(axis=0) + offset
         boundary = []
         for f_idx in xrange(self.num_features):
-            boundary.append((x_min[0, f_idx], x_max[0, f_idx]))
+            boundary.append((x_min[0, f_idx].item(), x_max[0, f_idx].item()))
         return boundary
 

@@ -51,9 +51,9 @@ class CFunctionMcCormick(CFunction):
                 "McCormick function available for 2 dimensions only")
 
         # Split into 3 parts
-        f1 = CArray(x[0] + x[1]).sin()
-        f2 = (x[0] - x[1]) ** 2
-        f3 = -1.5 * x[0] + 2.5 * x[1] + 1
+        f1 = (x[0] + x[1]).sin().item()
+        f2 = (x[0].item() - x[1].item()) ** 2
+        f3 = -1.5 * x[0].item() + 2.5 * x[1].item() + 1
 
         return f1 + f2 + f3
 
@@ -64,17 +64,17 @@ class CFunctionMcCormick(CFunction):
             raise ValueError("Gradient of McCormick function "
                              "only available for 2 dimensions")
         # Computing gradient of each dimension
-        grad1_1 = CArray(x[0] + x[1]).cos()
+        grad1_1 = (x[0] + x[1]).cos()
         grad1_2 = 2 * (x[0] - x[1])
         grad1_3 = -1.5
-        grad2_1 = CArray(x[0] + x[1]).cos()
+        grad2_1 = (x[0] + x[1]).cos()
         grad2_2 = -2 * (x[0] - x[1])
         grad2_3 = 2.5
 
-        grad1 = CArray(grad1_1 + grad1_2 + grad1_3)
-        grad2 = CArray(grad2_1 + grad2_2 + grad2_3)
+        grad1 = grad1_1 + grad1_2 + grad1_3
+        grad2 = grad2_1 + grad2_2 + grad2_3
 
-        return CArray.concatenate(grad1, grad2, axis=1)
+        return CArray.concatenate(grad1, grad2, axis=1).ravel()
 
     def global_min(self):
         """Value of the global minimum of the function.

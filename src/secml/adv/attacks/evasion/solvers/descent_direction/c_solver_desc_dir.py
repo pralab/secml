@@ -232,16 +232,16 @@ class CSolverDescDir(CSolver):
             self._grad_eval = self._fun.n_grad_eval
             self._f_eval = self._fun.n_fun_eval
 
-            diff = abs(self.f_seq[i] - self.f_seq[i - 1])
+            diff = abs(self.f_seq[i].item() - self.f_seq[i - 1].item())
 
             self.logger.debug('delta_f: {:}'.format(diff))
 
             if diff < self.eps:
                 self.logger.debug("Flat region, exiting... {:}  {:}".format(
-                    self._f_seq[i],
-                    self._f_seq[i - 1]))
+                    self._f_seq[i].item(),
+                    self._f_seq[i - 1].item()))
                 self._x_seq = self.x_seq[:i + 1, :]
-                self._f_seq = CArray(self.f_seq[:i + 1])
+                self._f_seq = self.f_seq[:i + 1]
                 return x
 
         self.logger.warning('Maximum iterations reached. Exiting.')

@@ -127,7 +127,7 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
             best_score.append(res_vect[condidates_idx[0], i])
 
             # Get the index of the corresponding parameters
-            best_params_idx = CArray(params_matrix[condidates_idx, :])
+            best_params_idx = params_matrix[condidates_idx, :]
 
             # Build the list of candidate parameters for binary clf
             clf_best_params_list = []
@@ -135,7 +135,7 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
                 # For each candidate get corresponding parameters
                 best_params_dict = dict()
                 for j, par in enumerate(params):
-                    par_idx = best_params_idx[c_idx, j]
+                    par_idx = best_params_idx[c_idx, j].item()
                     best_params_dict[par] = params[par][par_idx]
 
                 clf_best_params_list.append(best_params_dict)

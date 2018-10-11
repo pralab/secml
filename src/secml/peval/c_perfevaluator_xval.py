@@ -114,7 +114,7 @@ class CPerfEvaluatorXVal(CPerfEvaluator):
         best_score = res_vect[condidates_idx[0]]
 
         # Get the index of the corresponding parameters
-        best_params_idx = CArray(params_matrix[condidates_idx, :])
+        best_params_idx = params_matrix[condidates_idx, :]
 
         # Build the list of candidate parameters
         best_params_list = []
@@ -122,7 +122,8 @@ class CPerfEvaluatorXVal(CPerfEvaluator):
             # For each candidate get corresponding parameters
             best_params_dict = dict()
             for j, par in enumerate(params):
-                best_params_dict[par] = params[par][best_params_idx[c_idx, j]]
+                value_idx = best_params_idx[c_idx, j].item()
+                best_params_dict[par] = params[par][value_idx]
 
             best_params_list.append(best_params_dict)
 

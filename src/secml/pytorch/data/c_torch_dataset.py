@@ -65,7 +65,7 @@ class CTorchDataset(Dataset):
 
         if self.Y is not None:
             if self.Y.ndim == 1:  # (num_samples, )
-                label = torch.tensor(self.Y[i])
+                label = torch.tensor(self.Y[i].item())
             else:  # (num_samples, num_classes)
                 label = np.array(CArray(self.Y[i, :]).tondarray())
                 if not isinstance(label, torch.Tensor):

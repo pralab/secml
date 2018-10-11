@@ -52,8 +52,9 @@ class CFunctionThreeHumpCamel(CFunction):
                 "Three-Hump Camel function available for 2 dimensions only")
 
         # Split into 2 parts
-        f1 = 2 * x[0] ** 2 - 1.05 * x[0] ** 4
-        f2 = float(x[0] ** 6) / 6 + x[0] * x[1] + x[1] ** 2
+        f1 = 2 * x[0].item() ** 2 - 1.05 * x[0].item() ** 4
+        f2 = float(x[0].item() ** 6) / 6 + \
+             x[0].item() * x[1].item() + x[1].item() ** 2
 
         return f1 + f2
 
@@ -69,8 +70,8 @@ class CFunctionThreeHumpCamel(CFunction):
         grad2_1 = 0
         grad2_2 = x[0] + 2 * x[1]
 
-        grad1 = CArray(grad1_1 + grad1_2)
-        grad2 = CArray(grad2_1 + grad2_2)
+        grad1 = grad1_1 + grad1_2
+        grad2 = grad2_1 + grad2_2
 
         return CArray.concatenate(grad1, grad2, axis=1)
 

@@ -163,7 +163,7 @@ class CSolverGradDesc(CSolver):
                         self.f_seq[-6:-3].mean()
                     ))
                     self._x_seq = self.x_seq[:i-3, :]
-                    self._f_seq = CArray(self.f_seq[:i-3])
+                    self._f_seq = self.f_seq[:i-3]
                     self._x_opt = self._x_seq[-4, :]
                     return self._x_opt
 
@@ -186,8 +186,8 @@ class CSolverGradDesc(CSolver):
             self._f_eval = self._fun.n_fun_eval
             self._grad_eval = self._fun.n_grad_eval
 
-        #self.logger.warning('Maximum iterations reached. Exiting.')
+        # self.logger.warning('Maximum iterations reached. Exiting.')
         self._x_seq = self.x_seq[:self._max_iter - 1, :]
-        self._f_seq = CArray(self.f_seq[:self._max_iter - 1])
+        self._f_seq = self.f_seq[:self._max_iter - 1]
         self._x_opt = self._x_seq[-1, :]
         return self._x_opt

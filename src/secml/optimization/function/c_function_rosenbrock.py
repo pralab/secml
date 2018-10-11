@@ -60,7 +60,8 @@ class CFunctionRosenbrock(CFunction):
 
         f = 0  # Starting value
         for n in xrange(x.shape[1] - 1):
-            f += 100 * (x[n+1] - x[n] ** 2) ** 2 + (x[n] - 1) ** 2
+            f += 100 * (x[n+1].item() - x[n].item() ** 2) ** 2 + \
+                 (x[n].item() - 1) ** 2
 
         return f
 
@@ -75,11 +76,10 @@ class CFunctionRosenbrock(CFunction):
             raise ValueError("Gradient of Rosenbrock function "
                              "only available for 2 dimensions")
         # Computing gradient of each dimension
-        grad1 = CArray(-400 * (x[:, 1] - x[:, 0] ** 2) * x[:, 0] +
-                       2 * (x[:, 0] - 1))
-        grad2 = CArray(200 * (x[:, 1] - x[:, 0] ** 2))
+        grad1 = -400 * (x[1] - x[0] ** 2) * x[0] + 2 * (x[0] - 1)
+        grad2 = 200 * (x[1] - x[0] ** 2)
 
-        return CArray.concatenate(grad1, grad2, axis=1)
+        return CArray.concatenate(grad1, grad2, axis=1).ravel()
 
     def global_min(self):
         """Value of the global minimum of the function.
