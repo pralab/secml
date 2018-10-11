@@ -74,7 +74,7 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
 
             test_scores[split_idx, :] = CArray(split_scores)
 
-        return CArray(test_scores.mean(axis=0, keepdims=False)).tolist()
+        return test_scores.mean(axis=0, keepdims=False).tolist()
 
     def _get_best_params(self, res_vect, params, params_matrix, pick='first'):
         """Returns the best parameters given input performance scores.

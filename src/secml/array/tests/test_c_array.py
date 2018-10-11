@@ -527,30 +527,70 @@ class TestCArray(CUnitTest):
         self.logger.info("Test for CArray.all() method")
                  
         def _all(matrix, matrix_nozero, matrix_bool, matrix_bool_true):
-             
-            # all() on an array that contain also zeros gives False?
-            self.logger.info("matrix: \n" + str(matrix))
-            all_res = matrix.all()
-            self.logger.info("matrix.all() result is: \n" + str(all_res))
-            self.assertFalse(all_res)
- 
-            # all() on an array with no zeros gives True?
-            self.logger.info("matrix_nozero: \n" + str(matrix_nozero))
-            all_res = matrix_nozero.all()
-            self.logger.info("matrix_nozero.all(): \n" + str(all_res))
-            self.assertTrue(all_res)
 
-            # all() on boolean array
-            self.logger.info("matrix_bool: \n" + str(matrix_bool))
-            all_res = matrix_bool.all()
-            self.logger.info("matrix_bool.all(): \n" + str(all_res))
-            self.assertFalse(all_res)
- 
-            # all() on a boolean array with all True
-            self.logger.info("matrix_bool_true: \n" + str(matrix_bool_true))
-            all_res = matrix_bool_true.all()
-            self.logger.info("matrix_bool_true.all(): \n" + str(all_res))
-            self.assertTrue(all_res)
+            for axis in (None, 0, 1):
+
+                if matrix.issparse is True and axis is not None:
+                    with self.assertRaises(NotImplementedError):
+                        matrix.all(axis=axis)
+                else:
+                    # all() on an array that contain also zeros gives False?
+                    self.logger.info("matrix: \n" + str(matrix))
+                    all_res = matrix.all(axis=axis)
+                    self.logger.info("matrix.all(axis={:}) result is:\n"
+                                     "{:}".format(axis, all_res))
+                    if axis is None:
+                        self.assertIsInstance(all_res, bool)
+                        self.assertFalse(all_res)
+                    else:
+                        self.assertIsInstance(all_res, CArray)
+
+                if matrix_nozero.issparse is True and axis is not None:
+                    with self.assertRaises(NotImplementedError):
+                        matrix_nozero.all(axis=axis)
+                else:
+                    # all() on an array with no zeros gives True?
+                    self.logger.info("matrix_nozero: \n" + str(matrix_nozero))
+                    all_res = matrix_nozero.all(axis=axis)
+                    self.logger.info("matrix_nozero.all(axis={:}):\n"
+                                     "{:}".format(axis, all_res))
+                    if axis is None:
+                        self.assertIsInstance(all_res, bool)
+                        self.assertTrue(all_res)
+                    else:
+                        self.assertIsInstance(all_res, CArray)
+                        self.assertFalse((all_res != True).any())
+
+                if matrix_bool.issparse is True and axis is not None:
+                    with self.assertRaises(NotImplementedError):
+                        matrix_bool.all(axis=axis)
+                else:
+                    # all() on boolean array
+                    self.logger.info("matrix_bool: \n" + str(matrix_bool))
+                    all_res = matrix_bool.all(axis=axis)
+                    self.logger.info("matrix_bool.all(axis={:}):\n"
+                                     "{:}".format(axis, all_res))
+                    if axis is None:
+                        self.assertIsInstance(all_res, bool)
+                        self.assertFalse(all_res)
+                    else:
+                        self.assertIsInstance(all_res, CArray)
+
+                if matrix_bool_true.issparse is True and axis is not None:
+                    with self.assertRaises(NotImplementedError):
+                        matrix_bool_true.all(axis=axis)
+                else:
+                    # all() on a boolean array with all True
+                    self.logger.info("matrix_bool_true: \n" + str(matrix_bool_true))
+                    all_res = matrix_bool_true.all(axis=axis)
+                    self.logger.info("matrix_bool_true.all(axis={:}):\n"
+                                     "{:}".format(axis, all_res))
+                    if axis is None:
+                        self.assertIsInstance(all_res, bool)
+                        self.assertTrue(all_res)
+                    else:
+                        self.assertIsInstance(all_res, CArray)
+                        self.assertFalse((all_res != True).any())
 
         _all(self.array_sparse, self.array_sparse_nozero,
              self.array_sparse_bool, self.array_sparse_bool_true)
@@ -563,29 +603,69 @@ class TestCArray(CUnitTest):
 
         def _any(matrix, matrix_allzero, matrix_bool, matrix_bool_false):
 
-            # any() on an array that contain also zeros gives True?
-            self.logger.info("matrix: \n" + str(matrix))
-            any_res = matrix.any()
-            self.logger.info("matrix.any() result is: \n" + str(any_res))
-            self.assertTrue(any_res)
+            for axis in (None, 0, 1):
 
-            # any() on an array with all zeros gives False?
-            self.logger.info("matrix_allzero: \n" + str(matrix_allzero))
-            any_res = matrix_allzero.any()
-            self.logger.info("matrix_allzero.any(): \n" + str(any_res))
-            self.assertFalse(any_res)
+                if matrix.issparse is True and axis is not None:
+                    with self.assertRaises(NotImplementedError):
+                        matrix.any(axis=axis)
+                else:
+                    # any() on an array that contain also zeros gives True?
+                    self.logger.info("matrix: \n" + str(matrix))
+                    any_res = matrix.any(axis=axis)
+                    self.logger.info("matrix.any(axis={:}):\n"
+                                     "{:}".format(axis, any_res))
+                    if axis is None:
+                        self.assertIsInstance(any_res, bool)
+                        self.assertTrue(any_res)
+                    else:
+                        self.assertIsInstance(any_res, CArray)
 
-            # any() on boolean array
-            self.logger.info("matrix_bool: \n" + str(matrix_bool))
-            any_res = matrix_bool.any()
-            self.logger.info("matrix_bool.any(): \n" + str(any_res))
-            self.assertTrue(any_res)
+                if matrix_allzero.issparse is True and axis is not None:
+                    with self.assertRaises(NotImplementedError):
+                        matrix_allzero.any(axis=axis)
+                else:
+                    # any() on an array with all zeros gives False?
+                    self.logger.info("matrix_allzero: \n" + str(matrix_allzero))
+                    any_res = matrix_allzero.any(axis=axis)
+                    self.logger.info("matrix_allzero.any(axis={:}):\n"
+                                     "{:}".format(axis, any_res))
+                    if axis is None:
+                        self.assertIsInstance(any_res, bool)
+                        self.assertFalse(any_res)
+                    else:
+                        self.assertIsInstance(any_res, CArray)
+                        self.assertFalse((any_res != False).any())
 
-            # any() on a boolean array with all False
-            self.logger.info("matrix_bool_false: \n" + str(matrix_bool_false))
-            any_res = matrix_bool_false.any()
-            self.logger.info("matrix_bool_false.any(): \n" + str(any_res))
-            self.assertFalse(any_res)
+                if matrix_bool.issparse is True and axis is not None:
+                    with self.assertRaises(NotImplementedError):
+                        matrix_bool.any(axis=axis)
+                else:
+                    # any() on boolean array
+                    self.logger.info("matrix_bool: \n" + str(matrix_bool))
+                    any_res = matrix_bool.any(axis=axis)
+                    self.logger.info("matrix_bool.any(axis={:}):\n"
+                                     "{:}".format(axis, any_res))
+                    if axis is None:
+                        self.assertIsInstance(any_res, bool)
+                        self.assertTrue(any_res)
+                    else:
+                        self.assertIsInstance(any_res, CArray)
+
+                if matrix_bool_false.issparse is True and axis is not None:
+                    with self.assertRaises(NotImplementedError):
+                        matrix_bool_false.any(axis=axis)
+                else:
+                    # any() on a boolean array with all False
+                    self.logger.info("matrix_bool_false: \n" + str(matrix_bool_false))
+                    any_res = matrix_bool_false.any(axis=axis)
+                    self.logger.info("matrix_bool_false.any(axis={:}):\n"
+                                     "{:}".format(axis, any_res))
+                    if axis is None:
+                        self.assertIsInstance(any_res, bool)
+                        self.assertFalse(any_res)
+                    else:
+                        self.assertIsInstance(any_res, CArray)
+                        self.assertFalse((any_res != False).any())
 
         _any(self.array_sparse, self.array_sparse_allzero,
              self.array_sparse_bool, self.array_sparse_bool_false)
@@ -1010,27 +1090,25 @@ class TestCArray(CUnitTest):
             argmin_res = array.argmin(axis=0)
             self.logger.info("a.argmin(axis=0): \n{:}".format(argmin_res))
             min_res = array.min(axis=0)
-            if array.shape[1] > 1:  # One res for each column with keepdims
-                min_res = min_res.ravel()
-                # We create a find_2d-like mask to check result
-                argmin_res = [
-                    argmin_res.ravel().tolist(), range(array.shape[1])]
-                self.assertTrue((array[argmin_res] == min_res).all())
-            else:  # Result is a scalar
-                self.assertEqual(array.ravel()[argmin_res], min_res)
+            self.assertIsInstance(min_res, CArray)
+            # One res for each column with keepdims
+            min_res = min_res.ravel()
+            # We create a find_2d-like mask to check result
+            argmin_res = [
+                argmin_res.ravel().tolist(), range(array.shape[1])]
+            self.assertTrue((array[argmin_res] == min_res).all())
 
             self.logger.info("a: \n{:}".format(array))
             argmin_res = array.argmin(axis=1)
             self.logger.info("a.argmin(axis=1): \n{:}".format(argmin_res))
             min_res = array.min(axis=1)
-            if array.shape[0] > 1:  # One res for each row with keepdims
-                min_res = min_res.ravel()
-                # We create a find_2d-like mask to check result
-                argmin_res = [
-                    range(array.shape[0]), argmin_res.ravel().tolist()]
-                self.assertTrue((array[argmin_res] == min_res).all())
-            else:  # Result is a scalar
-                self.assertEqual(array.ravel()[argmin_res], min_res)
+            self.assertIsInstance(min_res, CArray)
+            # One res for each row with keepdims
+            min_res = min_res.ravel()
+            # We create a find_2d-like mask to check result
+            argmin_res = [
+                range(array.shape[0]), argmin_res.ravel().tolist()]
+            self.assertTrue((array[argmin_res] == min_res).all())
                 
         _argmin(self.array_sparse)
         _argmin(self.row_sparse)
@@ -1062,26 +1140,24 @@ class TestCArray(CUnitTest):
             argmax_res = array.argmax(axis=0)
             self.logger.info("a.argmax(axis=0): \n{:}".format(argmax_res))
             max_res = array.max(axis=0)
-            if array.shape[1] > 1:  # One res for each column with keepdims
-                max_res = max_res.ravel()
-                # We create a find_2d-like mask to check result
-                argmax_res = [argmax_res.ravel().tolist(), range(array.shape[1])]
-                self.assertTrue((array[argmax_res] == max_res).all())
-            else:  # Result is a scalar
-                self.assertEqual(array.ravel()[argmax_res], max_res)
+            self.assertIsInstance(max_res, CArray)
+            # One res for each column with keepdims
+            max_res = max_res.ravel()
+            # We create a find_2d-like mask to check result
+            argmax_res = [argmax_res.ravel().tolist(), range(array.shape[1])]
+            self.assertTrue((array[argmax_res] == max_res).all())
 
             self.logger.info("a: \n{:}".format(array))
             argmax_res = array.argmax(axis=1)
             self.logger.info("a.argmax(axis=1): \n{:}".format(argmax_res))
             max_res = array.max(axis=1)
-            if array.shape[0] > 1:  # One res for each row with keepdims
-                max_res = max_res.ravel()
-                # We create a find_2d-like mask to check result
-                argmax_res = [
-                    range(array.shape[0]), argmax_res.ravel().tolist()]
-                self.assertTrue((array[argmax_res] == max_res).all())
-            else:  # Result is a scalar
-                self.assertEqual(array.ravel()[argmax_res], max_res)
+            self.assertIsInstance(max_res, CArray)
+            # One res for each row with keepdims
+            max_res = max_res.ravel()
+            # We create a find_2d-like mask to check result
+            argmax_res = [
+                range(array.shape[0]), argmax_res.ravel().tolist()]
+            self.assertTrue((array[argmax_res] == max_res).all())
 
         _argmax(self.array_sparse)
         _argmax(self.row_sparse)
@@ -1127,19 +1203,16 @@ class TestCArray(CUnitTest):
                 argmin_res = array.nanargmin(axis=0)
                 self.logger.info(
                     "a.nanargmin(axis=0): \n{:}".format(argmin_res))
+                self.assertIsInstance(argmin_res, CArray)
                 min_res = array.nanmin(axis=0)
-                if array.shape[1] > 1:  # One res for each column with keepdims
-                    min_res = min_res.ravel()
-                    argmin_res = [
-                        argmin_res.ravel().tolist(), range(array.shape[1])]
-                    # use numpy.testing to proper compare arrays with nans
-                    np.testing.assert_equal(
-                        CArray(array[argmin_res]).tondarray(),
-                        CArray(min_res).tondarray())
-                else:  # Result is a scalar
-                    np.testing.assert_equal(
-                        CArray(array.ravel()[argmin_res]).tondarray(),
-                        CArray(min_res).tondarray())
+                # One res for each column with keepdims
+                min_res = min_res.ravel()
+                argmin_res = [
+                    argmin_res.ravel().tolist(), range(array.shape[1])]
+                # use numpy.testing to proper compare arrays with nans
+                np.testing.assert_equal(
+                    CArray(array[argmin_res]).tondarray(),
+                    CArray(min_res).tondarray())
 
             self.logger.info("a: \n{:}".format(array))
             if array.shape[1] == 1:
@@ -1148,21 +1221,18 @@ class TestCArray(CUnitTest):
                     array.nanargmin(axis=1)
             else:
                 argmin_res = array.nanargmin(axis=1)
+                self.assertIsInstance(argmin_res, CArray)
                 self.logger.info(
                     "a.nanargmin(axis=1): \n{:}".format(argmin_res))
                 min_res = array.nanmin(axis=1)
-                if array.shape[0] > 1:  # One res for each row with keepdims
-                    min_res = min_res.ravel()
-                    argmin_res = [
-                        range(array.shape[0]), argmin_res.ravel().tolist()]
-                    # use numpy.testing to proper compare arrays with nans
-                    np.testing.assert_equal(
-                        CArray(array[argmin_res]).tondarray(),
-                        CArray(min_res).tondarray())
-                else:  # Result is a scalar
-                    np.testing.assert_equal(
-                        CArray(array.ravel()[argmin_res]).tondarray(),
-                        CArray(min_res).tondarray())
+                # One res for each row with keepdims
+                min_res = min_res.ravel()
+                argmin_res = [
+                    range(array.shape[0]), argmin_res.ravel().tolist()]
+                # use numpy.testing to proper compare arrays with nans
+                np.testing.assert_equal(
+                    CArray(array[argmin_res]).tondarray(),
+                    CArray(min_res).tondarray())
 
         _check_nanargmin(self.array_dense)
         _check_nanargmin(self.row_dense)
@@ -1205,18 +1275,15 @@ class TestCArray(CUnitTest):
                 argmax_res = array.nanargmax(axis=0)
                 self.logger.info(
                     "a.nanargmax(axis=0): \n{:}".format(argmax_res))
+                self.assertIsInstance(argmax_res, CArray)
                 max_res = array.nanmax(axis=0)
-                if array.shape[1] > 1:  # One res for each column with keepdims
-                    max_res = max_res.ravel()
-                    argmax_res = [
-                        argmax_res.ravel().tolist(), range(array.shape[1])]
-                    np.testing.assert_equal(
-                        CArray(array[argmax_res]).tondarray(),
-                        CArray(max_res).tondarray())
-                else:  # Result is a scalar
-                    np.testing.assert_equal(
-                        CArray(array.ravel()[argmax_res]).tondarray(),
-                        CArray(max_res).tondarray())
+                # One res for each column with keepdims
+                max_res = max_res.ravel()
+                argmax_res = [
+                    argmax_res.ravel().tolist(), range(array.shape[1])]
+                np.testing.assert_equal(
+                    CArray(array[argmax_res]).tondarray(),
+                    CArray(max_res).tondarray())
 
             self.logger.info("a: \n{:}".format(array))
             if array.shape[1] == 1:
@@ -1227,18 +1294,15 @@ class TestCArray(CUnitTest):
                 argmax_res = array.nanargmax(axis=1)
                 self.logger.info(
                     "a.nanargmax(axis=1): \n{:}".format(argmax_res))
+                self.assertIsInstance(argmax_res, CArray)
                 max_res = array.nanmax(axis=1)
-                if array.shape[0] > 1:  # One res for each row with keepdims
-                    max_res = max_res.ravel()
-                    argmax_res = [
-                        range(array.shape[0]), argmax_res.ravel().tolist()]
-                    np.testing.assert_equal(
-                        CArray(array[argmax_res]).tondarray(),
-                        CArray(max_res).tondarray())
-                else:  # Result is a scalar
-                    np.testing.assert_equal(
-                        CArray(array.ravel()[argmax_res]).tondarray(),
-                        CArray(max_res).tondarray())
+                # One res for each row with keepdims
+                max_res = max_res.ravel()
+                argmax_res = [
+                    range(array.shape[0]), argmax_res.ravel().tolist()]
+                np.testing.assert_equal(
+                    CArray(array[argmax_res]).tondarray(),
+                    CArray(max_res).tondarray())
 
         _check_nanargmax(self.array_dense)
         _check_nanargmax(self.row_dense)
@@ -1423,13 +1487,16 @@ class TestCArray(CUnitTest):
                         "array.median(axis={:}, keepdims={:}):"
                         "\n{:}".format(axis, keepdims, res))
 
+                    if axis is None:
+                        self.assertTrue(is_scalar(res))
+                    else:
+                        self.assertIsInstance(res, CArray)
+
                     res_expected = expected[res_idx]
                     if not isinstance(res_expected, CArray):
-                        self.assertNotIsInstance(res, CArray)
                         res = CArray(res).round(2)[0]
                         self.assertEqual(res, res_expected)
                     else:
-                        self.assertIsInstance(res, CArray)
                         self.assertEqual(res.isdense, res_expected.isdense)
                         self.assertEqual(res.issparse,
                                          res_expected.issparse)
@@ -1445,14 +1512,17 @@ class TestCArray(CUnitTest):
         _check_median(self.array_dense, (0.5, CArray([[2, 4.0, 0, 0.]]),
                                          CArray([[0.5], [1.], [1.5]])))
 
-        _check_median(self.row_flat_dense, (4.0, CArray([4, 0, 6]), 4.0))
+        _check_median(self.row_flat_dense,
+                      (4.0, CArray([4, 0, 6]), CArray([4.0])))
 
-        _check_median(self.row_dense, (4.0, CArray([[4, 0, 6]]), 4.0))
+        _check_median(self.row_dense,
+                      (4.0, CArray([[4, 0, 6]]), CArray([[4.0]])))
 
-        _check_median(self.column_dense, (4.0, 4.0, CArray([[4], [0], [6]])))
+        _check_median(self.column_dense,
+                      (4.0, CArray([[4.0]]), CArray([[4], [0], [6]])))
 
-        _check_median(self.single_flat_dense, (4, 4, 4))
-        _check_median(self.single_dense, (4, 4, 4))
+        _check_median(self.single_flat_dense, (4, CArray([4]), CArray([4])))
+        _check_median(self.single_dense, (4, CArray([[4]]), CArray([[4]])))
 
         with self.assertRaises(NotImplementedError):
             self.array_sparse.median()
@@ -2299,13 +2369,16 @@ class TestCArray(CUnitTest):
                     else:
                         raise ValueError("func {:} unknown".format(func))
 
+                    if axis is None:
+                        self.assertTrue(is_scalar(res))
+                    else:
+                        self.assertIsInstance(res, CArray)
+
                     res_expected = expected[res_idx]
                     if not isinstance(res_expected, CArray):
-                        self.assertNotIsInstance(res, CArray)
                         res = CArray(res).round(2)[0]
                         self.assertEqual(res, res_expected)
                     else:
-                        self.assertIsInstance(res, CArray)
                         self.assertEqual(res.isdense, res_expected.isdense)
                         self.assertEqual(res.issparse, res_expected.issparse)
                         res = res.round(2)
@@ -2327,20 +2400,25 @@ class TestCArray(CUnitTest):
 
         _check_minmaxmean('min', self.row_flat_dense,
                           (0, CArray([4, 0, 6]), 0))
-
         _check_minmaxmean('min', self.row_sparse,
-                          (0, CArray([[4, 0, 6]], tosparse=True), 0))
+                          (0, CArray([[4, 0, 6]], tosparse=True),
+                           CArray([[0]], tosparse=True)))
         _check_minmaxmean('min', self.row_dense,
-                          (0, CArray([[4, 0, 6]]), 0))
+                          (0, CArray([[4, 0, 6]]), CArray([[0]])))
 
         _check_minmaxmean('min', self.column_sparse,
-                          (0, 0, CArray([[4], [0], [6]], tosparse=True)))
+                          (0, CArray([[0]], tosparse=True),
+                           CArray([[4], [0], [6]], tosparse=True)))
         _check_minmaxmean('min', self.column_dense,
-                          (0, 0, CArray([[4], [0], [6]])))
+                          (0, CArray([[0]]), CArray([[4], [0], [6]])))
 
-        _check_minmaxmean('min', self.single_flat_dense, (4, 4, 4))
-        _check_minmaxmean('min', self.single_dense, (4, 4, 4))
-        _check_minmaxmean('min', self.single_sparse, (4, 4, 4))
+        _check_minmaxmean('min', self.single_flat_dense,
+                          (4, CArray([4]), CArray([4])))
+        _check_minmaxmean('min', self.single_dense,
+                          (4, CArray([[4]]), CArray([[4]])))
+        _check_minmaxmean('min', self.single_sparse,
+                          (4, CArray([[4]], tosparse=True),
+                           CArray([[4]], tosparse=True)))
 
         self.logger.info("Testing CArray.max()")
 
@@ -2351,21 +2429,26 @@ class TestCArray(CUnitTest):
                           (6, CArray([[3, 6, 0, 5]]), CArray([[5], [4], [6]])))
 
         _check_minmaxmean('max', self.row_flat_dense,
-                          (6, CArray([4, 0, 6]), 6))
-
+                          (6, CArray([4, 0, 6]), CArray([6])))
         _check_minmaxmean('max', self.row_sparse,
-                          (6, CArray([[4, 0, 6]], tosparse=True), 6))
+                          (6, CArray([[4, 0, 6]], tosparse=True),
+                           CArray([[6]], tosparse=True)))
         _check_minmaxmean('max', self.row_dense,
-                          (6, CArray([[4, 0, 6]]), 6))
+                          (6, CArray([[4, 0, 6]]), CArray([[6]])))
 
         _check_minmaxmean('max', self.column_sparse,
-                          (6, 6, CArray([[4], [0], [6]], tosparse=True)))
+                          (6, CArray([[6]], tosparse=True),
+                           CArray([[4], [0], [6]], tosparse=True)))
         _check_minmaxmean('max', self.column_dense,
-                          (6, 6, CArray([[4], [0], [6]])))
+                          (6, CArray([[6]]), CArray([[4], [0], [6]])))
 
-        _check_minmaxmean('max', self.single_flat_dense, (4, 4, 4))
-        _check_minmaxmean('max', self.single_dense, (4, 4, 4))
-        _check_minmaxmean('max', self.single_sparse, (4, 4, 4))
+        _check_minmaxmean('max', self.single_flat_dense,
+                          (4, CArray([4]), CArray([4])))
+        _check_minmaxmean('max', self.single_dense,
+                          (4, CArray([[4]]), CArray([[4]])))
+        _check_minmaxmean('max', self.single_sparse,
+                          (4, CArray([[4]], tosparse=True),
+                           CArray([[4]], tosparse=True)))
 
         self.logger.info("Testing CArray.mean()")
 
@@ -2377,21 +2460,23 @@ class TestCArray(CUnitTest):
                            CArray([[1.5], [1.5], [2.25]])))
 
         _check_minmaxmean('mean', self.row_flat_dense,
-                          (3.33, CArray([4, 0, 6]), 3.33))
-
+                          (3.33, CArray([4, 0, 6]), CArray([3.33])))
         _check_minmaxmean('mean', self.row_sparse,
-                          (3.33, CArray([[4, 0, 6]]), 3.33))
+                          (3.33, CArray([[4, 0, 6]]), CArray([[3.33]])))
         _check_minmaxmean('mean', self.row_dense,
-                          (3.33, CArray([[4, 0, 6]]), 3.33))
+                          (3.33, CArray([[4, 0, 6]]), CArray([[3.33]])))
 
         _check_minmaxmean('mean', self.column_sparse,
-                          (3.33, 3.33, CArray([[4], [0], [6]])))
+                          (3.33, CArray([[3.33]]), CArray([[4], [0], [6]])))
         _check_minmaxmean('mean', self.column_dense,
-                          (3.33, 3.33, CArray([[4], [0], [6]])))
+                          (3.33, CArray([[3.33]]), CArray([[4], [0], [6]])))
 
-        _check_minmaxmean('mean', self.single_flat_dense, (4, 4, 4))
-        _check_minmaxmean('mean', self.single_dense, (4, 4, 4))
-        _check_minmaxmean('mean', self.single_sparse, (4, 4, 4))
+        _check_minmaxmean('mean', self.single_flat_dense,
+                          (4, CArray([4]), CArray([4])))
+        _check_minmaxmean('mean', self.single_dense,
+                          (4, CArray([[4]]), CArray([[4]])))
+        _check_minmaxmean('mean', self.single_sparse,
+                          (4, CArray([[4]]), CArray([[4]])))
 
     def test_nanmin_nanmax(self):
         """Test for CArray.nanmin(), CArray.nanmax() method."""
@@ -2421,12 +2506,15 @@ class TestCArray(CUnitTest):
                     else:
                         raise ValueError("func {:} unknown".format(func))
 
-                    res_expected = expected[res_idx]
-                    if not isinstance(res_expected, CArray):
-                        self.assertNotIsInstance(res, CArray)
-                        res = CArray(res).round(2)[0]
+                    if axis is None:
+                        self.assertTrue(is_scalar(res))
                     else:
                         self.assertIsInstance(res, CArray)
+
+                    res_expected = expected[res_idx]
+                    if not isinstance(res_expected, CArray):
+                        res = CArray(res).round(2)[0]
+                    else:
                         self.assertEqual(res.isdense, res_expected.isdense)
                         self.assertEqual(res.issparse,
                                          res_expected.issparse)
@@ -2448,18 +2536,18 @@ class TestCArray(CUnitTest):
                              CArray([[0], [0], [0]])))
 
         _check_nanminnanmax('nanmin', self.row_flat_dense,
-                            (0, CArray([np.nan, 0, 6]), 0))
+                            (0, CArray([np.nan, 0, 6]), CArray([0])))
 
         _check_nanminnanmax('nanmin', self.row_dense,
-                            (0, CArray([[np.nan, 0, 6]]), 0))
+                            (0, CArray([[np.nan, 0, 6]]), CArray([[0]])))
 
         _check_nanminnanmax('nanmin', self.column_dense,
-                            (0, 0, CArray([[np.nan], [0], [6]])))
+                            (0, CArray([[0]]), CArray([[np.nan], [0], [6]])))
 
         _check_nanminnanmax('nanmin', self.single_flat_dense,
-                            (np.nan, np.nan, np.nan))
+                            (np.nan, CArray([np.nan]), CArray([np.nan])))
         _check_nanminnanmax('nanmin', self.single_dense,
-                            (np.nan, np.nan, np.nan))
+                            (np.nan, CArray([[np.nan]]), CArray([[np.nan]])))
 
         self.logger.info("Testing CArray.nanmax()")
 
@@ -2468,18 +2556,18 @@ class TestCArray(CUnitTest):
                              CArray([[5], [4], [6]])))
 
         _check_nanminnanmax('nanmax', self.row_flat_dense,
-                            (6, CArray([np.nan, 0, 6]), 6))
+                            (6, CArray([np.nan, 0, 6]), CArray([6])))
 
         _check_nanminnanmax('nanmax', self.row_dense,
-                            (6, CArray([[np.nan, 0, 6]]), 6))
+                            (6, CArray([[np.nan, 0, 6]]), CArray([[6]])))
 
         _check_nanminnanmax('nanmax', self.column_dense,
-                            (6, 6, CArray([[np.nan], [0], [6]])))
+                            (6, CArray([[6]]), CArray([[np.nan], [0], [6]])))
 
         _check_nanminnanmax('nanmax', self.single_flat_dense,
-                            (np.nan, np.nan, np.nan))
+                            (np.nan, CArray([np.nan]), CArray([np.nan])))
         _check_nanminnanmax('nanmax', self.single_dense,
-                            (np.nan, np.nan, np.nan))
+                            (np.nan, CArray([[np.nan]]), CArray([[np.nan]])))
 
         with self.assertRaises(NotImplementedError):
             self.array_sparse.nanmin()
@@ -2500,13 +2588,16 @@ class TestCArray(CUnitTest):
                     self.logger.info("array.sum(axis={:}, keepdims={:}):"
                                      "\n{:}".format(axis, keepdims, res))
 
+                    if axis is None:
+                        self.assertTrue(is_scalar(res))
+                    else:
+                        self.assertIsInstance(res, CArray)
+
                     res_expected = expected[res_idx]
                     if not isinstance(res_expected, CArray):
-                        self.assertNotIsInstance(res, CArray)
                         self.assertIsInstance(res, type(res_expected))
                         self.assertEqual(res, res_expected)
                     else:
-                        self.assertIsInstance(res, CArray)
                         self.assertEqual(res.isdense, res_expected.isdense)
                         self.assertEqual(res.issparse, res_expected.issparse)
                         if keepdims is False:
@@ -2530,24 +2621,24 @@ class TestCArray(CUnitTest):
         _check_sum(self.array_sparse_bool,
                    (7, CArray([[2, 1, 2, 2]]), CArray([[3], [0], [4]])))
 
-        _check_sum(self.row_flat_dense, (10, CArray([4, 0, 6]), 10))
-        _check_sum(self.row_dense, (10, CArray([[4, 0, 6]]), 10))
-        _check_sum(self.row_sparse, (10, CArray([[4, 0, 6]]), 10))
+        _check_sum(self.row_flat_dense, (10, CArray([4, 0, 6]), CArray([10])))
+        _check_sum(self.row_dense, (10, CArray([[4, 0, 6]]), CArray([[10]])))
+        _check_sum(self.row_sparse, (10, CArray([[4, 0, 6]]), CArray([[10]])))
 
-        _check_sum(self.column_dense, (10, 10, CArray([[4], [0], [6]])))
-        _check_sum(self.column_sparse, (10, 10, CArray([[4], [0], [6]])))
+        _check_sum(self.column_dense, (10, CArray([[10]]), CArray([[4], [0], [6]])))
+        _check_sum(self.column_sparse, (10, CArray([[10]]), CArray([[4], [0], [6]])))
 
-        _check_sum(self.single_flat_dense, (4, 4, 4))
-        _check_sum(self.single_dense, (4, 4, 4))
-        _check_sum(self.single_sparse, (4, 4, 4))
+        _check_sum(self.single_flat_dense, (4, CArray([4]), CArray([4])))
+        _check_sum(self.single_dense, (4, CArray([[4]]), CArray([[4]])))
+        _check_sum(self.single_sparse, (4, CArray([[4]]), CArray([[4]])))
 
-        _check_sum(self.single_bool_flat_dense, (1, 1, 1))
-        _check_sum(self.single_bool_dense, (1, 1, 1))
-        _check_sum(self.single_bool_sparse, (1, 1, 1))
+        _check_sum(self.single_bool_flat_dense, (1, CArray([1]), CArray([1])))
+        _check_sum(self.single_bool_dense, (1, CArray([[1]]), CArray([[1]])))
+        _check_sum(self.single_bool_sparse, (1, CArray([[1]]), CArray([[1]])))
 
-        _check_sum(self.empty_flat_dense, (0.0, 0.0, 0.0))
-        _check_sum(self.empty_dense, (0.0, 0.0, 0.0))
-        _check_sum(self.empty_sparse, (0.0, 0.0, 0.0))
+        _check_sum(self.empty_flat_dense, (0.0, CArray([0.0]), CArray([0.0])))
+        _check_sum(self.empty_dense, (0.0, CArray([[0.0]]), CArray([[0.0]])))
+        _check_sum(self.empty_sparse, (0.0, CArray([[0.0]]), CArray([[0.0]])))
 
     def test_cusum(self):
         """Test for CArray.cumsum() method."""
@@ -2619,9 +2710,13 @@ class TestCArray(CUnitTest):
                             "array.prod(axis={:}, keepdims={:}, dtype={:}):"
                             "\n{:}".format(axis, keepdims, dtype, res))
 
+                        if axis is None:
+                            self.assertTrue(is_scalar(res))
+                        else:
+                            self.assertIsInstance(res, CArray)
+
                         res_expected = expected[res_idx]
                         if not isinstance(res_expected, CArray):
-                            self.assertNotIsInstance(res, CArray)
                             if dtype is None:
                                 if array.dtype.kind in ('i', 'u', 'b'):
                                     dtype_none = int
@@ -2637,7 +2732,6 @@ class TestCArray(CUnitTest):
                             self.assertEqual(res, res_expected)
 
                         else:
-                            self.assertIsInstance(res, CArray)
                             self.assertEqual(res.isdense,
                                              res_expected.isdense)
                             self.assertEqual(res.issparse,
@@ -2676,26 +2770,30 @@ class TestCArray(CUnitTest):
                     (0, CArray([[0, 0, 0, 0]], tosparse=True),
                      CArray([[0], [0], [1]], tosparse=True)))
 
-        _check_prod(self.row_flat_dense, (0, CArray([4, 0, 6]), 0))
-        _check_prod(self.row_dense, (0, CArray([[4, 0, 6]]), 0))
-        _check_prod(self.row_sparse,
-                    (0, CArray([[4, 0, 6]], tosparse=True), 0))
+        _check_prod(self.row_flat_dense, (0, CArray([4, 0, 6]), CArray([0])))
+        _check_prod(self.row_dense, (0, CArray([[4, 0, 6]]), CArray([[0]])))
+        _check_prod(self.row_sparse, (0, CArray([[4, 0, 6]], tosparse=True),
+                                      CArray([[0]], tosparse=True)))
 
-        _check_prod(self.column_dense, (0, 0, CArray([[4], [0], [6]])))
-        _check_prod(self.column_sparse,
-                    (0, 0, CArray([[4], [0], [6]], tosparse=True)))
+        _check_prod(self.column_dense,
+                    (0, CArray([[0]]), CArray([[4], [0], [6]])))
+        _check_prod(self.column_sparse,(0, CArray([[0]], tosparse=True),
+                                        CArray([[4], [0], [6]], tosparse=True)))
 
-        _check_prod(self.single_flat_dense, (4, 4, 4))
-        _check_prod(self.single_dense, (4, 4, 4))
-        _check_prod(self.single_sparse, (4, 4, 4))
+        _check_prod(self.single_flat_dense, (4, CArray([4]), CArray([4])))
+        _check_prod(self.single_dense, (4, CArray([[4]]), CArray([[4]])))
+        _check_prod(self.single_sparse, (4, CArray([[4]], tosparse=True),
+                                         CArray([[4]], tosparse=True)))
 
-        _check_prod(self.single_bool_flat_dense, (1, 1, 1))
-        _check_prod(self.single_bool_dense, (1, 1, 1))
-        _check_prod(self.single_bool_sparse, (1, 1, 1))
+        _check_prod(self.single_bool_flat_dense, (1, CArray([1]), CArray([1])))
+        _check_prod(self.single_bool_dense, (1, CArray([[1]]), CArray([[1]])))
+        _check_prod(self.single_bool_sparse, (1, CArray([[1]], tosparse=True),
+                                              CArray([[1]], tosparse=True)))
 
-        _check_prod(self.empty_flat_dense, (1.0, 1.0, 1.0))
-        _check_prod(self.empty_dense, (1.0, 1.0, 1.0))
-        _check_prod(self.empty_sparse, (1.0, 1.0, 1.0))
+        _check_prod(self.empty_flat_dense, (1.0, CArray([1.0]), CArray([1.0])))
+        _check_prod(self.empty_dense, (1.0, CArray([[1.0]]), CArray([[1.0]])))
+        _check_prod(self.empty_sparse, (1.0, CArray([[1.0]], tosparse=True),
+                                        CArray([[1.0]], tosparse=True)))
 
     def test_reshape(self):
         """Test for CArray.test_reshape() method."""

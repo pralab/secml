@@ -583,7 +583,7 @@ class CTorchClassifier(CClassifier):
         # TODO: WE SHOULD USE SOFTMAX TO COMPUTE LABELS?
         # The classification label is the label of the class
         # associated with the highest score
-        return CArray(scores.argmax(axis=1)).ravel(), scores
+        return scores.argmax(axis=1).ravel(), scores
 
     def _gradient_f(self, x, y):
         """Computes the gradient of the classifier's decision function

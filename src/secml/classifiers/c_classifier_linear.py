@@ -200,7 +200,7 @@ class CClassifierLinear(CClassifier):
 
         # The classification label is the label of the class
         # associated with the highest score
-        return CArray(scores.argmax(axis=1)).ravel(), scores
+        return scores.argmax(axis=1).ravel(), scores
 
     def _gradient_f(self, x=None, y=1):
         """Computes the gradient of the linear classifier's decision function

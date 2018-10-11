@@ -170,13 +170,11 @@ class CClassifierKDE(CClassifier):
         x = x.atleast_2d()  # Ensuring input is 2-D
 
         if label == 1:
-            return 1 - CArray(CArray(
-                self.kernel.k(x, self._training_samples)).mean(
-                keepdims=False, axis=1))
+            return 1 - CArray(self.kernel.k(x, self._training_samples)).mean(
+                                                        keepdims=False, axis=1)
         else:
-            return CArray(CArray(
-                self.kernel.k(x, self._training_samples)).mean(
-                keepdims=False, axis=1))
+            return CArray(self.kernel.k(x, self._training_samples)).mean(
+                                                        keepdims=False, axis=1)
 
     def _gradient_f(self, x, y=1):
         """Computes the gradient of the KDE classifier's decision function
