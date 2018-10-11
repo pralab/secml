@@ -1356,7 +1356,7 @@ class CArray(_CArrayInterface):
         n_columns = self.size if self.is_vector_like else self.shape[1]
         for row_id in xrange(n_rows):
             for column_id in xrange(n_columns):
-                yield self[row_id, column_id]
+                yield self[row_id, column_id].item()
 
     def __str__(self):
         """Define `print` (or `str`) behaviour.
