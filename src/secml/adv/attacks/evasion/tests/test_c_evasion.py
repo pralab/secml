@@ -143,7 +143,7 @@ class CEvasionTestCases(object):
             self.logger.info("Is sparse?: " + str(x.issparse))
             final_time = time.time() - start_time
             self.logger.info("Starting score: " + str(
-                self.classifier.discriminant_function(self.x0, label=1)))
+                self.classifier.discriminant_function(self.x0, y=1)))
             self.logger.info("Final score: " + str(evas.f_opt))
             self.logger.info("x*: " + str(evas.x_opt))
             self.logger.info("Point sequence: " + str(evas.x_seq))
@@ -179,7 +179,7 @@ class CEvasionTestCases(object):
             fig.switch_sptype(sp_type="function")
             fig.sp.plot_fobj(
                 func=evas.classifier.discriminant_function,
-                grid_limits=self.grid_limits, colorbar=False, label=1)
+                grid_limits=self.grid_limits, colorbar=False, y=1)
             # construct and plot box
             if self.lb == "x0":
                 self.lb = self.x0
