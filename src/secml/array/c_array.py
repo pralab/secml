@@ -96,11 +96,11 @@ class CArray(_CArrayInterface):
         else:
             self._data = CDense(data, dtype, copy, shape)
 
-    def _instance_array(self, data):
+    def _instance_data(self, data):
         """Returns input data with correct shape.
 
         For any one-element array, i.e. array of shape (1, ) or (1, 1)
-        returns the single object inside it with using a built-in type.
+         returns the single object inside it as a built-in type.
 
         Parameters
         ----------
@@ -239,7 +239,7 @@ class CArray(_CArrayInterface):
           (0, 1)	3)
 
         """
-        return self._instance_array(self._data.nnz_data)
+        return self._instance_data(self._data.nnz_data)
 
     @property
     def T(self):
@@ -568,7 +568,7 @@ class CArray(_CArrayInterface):
         idx_data = self._check_index(idx)
 
         # Calling getitem of data buffer
-        return self._instance_array(self._data.__getitem__(idx_data))
+        return self._instance_data(self._data.__getitem__(idx_data))
 
     def __setitem__(self, idx, value):
         """Set input data to slicing/indexing result.
@@ -2667,7 +2667,7 @@ class CArray(_CArrayInterface):
         CArray([0 0 1 3])
 
         """
-        return self._instance_array(
+        return self._instance_data(
             self._data.binary_search(self.__class__(value)._data))
 
     # ------------- #
@@ -2835,7 +2835,7 @@ class CArray(_CArrayInterface):
         if order == 'fro':
             raise ValueError('Invalid norm order for vectors.')
 
-        return self._instance_array(array._data.norm(order))
+        return self._instance_data(array._data.norm(order))
 
     def norm_2d(self, order=None, axis=None, keepdims=True):
         """Matrix norm or vector norm along axis.
@@ -2924,15 +2924,15 @@ class CArray(_CArrayInterface):
             raise NotImplementedError
 
         if self.issparse is True:
-            out = self._instance_array(self.atleast_2d()._data.norm_2d(
+            out = self._instance_data(self.atleast_2d()._data.norm_2d(
                 order, axis=axis, keepdims=keepdims))
         else:
-            out = self._instance_array(self.atleast_2d()._data.norm(
+            out = self._instance_data(self.atleast_2d()._data.norm(
                 order, axis=axis, keepdims=keepdims))
 
         # Return float if axis is None, else CArray
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(CArray(out).atleast_2d())
 
@@ -2978,7 +2978,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.sum(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3089,7 +3089,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.prod(axis=axis, dtype=dtype, keepdims=keepdims)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3149,7 +3149,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.all(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3209,7 +3209,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.any(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3267,7 +3267,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.max(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3324,7 +3324,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.min(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3372,7 +3372,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.argmax(axis=axis)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3420,7 +3420,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.argmin(axis=axis)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3473,7 +3473,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.nanmax(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3526,7 +3526,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.nanmin(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3581,7 +3581,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.nanargmax(axis=axis)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3634,7 +3634,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.nanargmin(axis=axis)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3699,7 +3699,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.mean(axis=axis, dtype=None, keepdims=keepdims)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3757,7 +3757,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.median(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3836,7 +3836,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.std(axis=axis, ddof=ddof, keepdims=keepdims)
         if axis is None:
-            return self._instance_array(out)
+            return self._instance_data(out)
         else:
             return self.__class__(out)
 
@@ -4276,9 +4276,9 @@ class CArray(_CArrayInterface):
         """
         # We have to handle only one problematic case: dense vs sparse dot
         if self.isdense is True and array.issparse is True:
-            return self._instance_array(self._data.dot(array.todense()._data))
+            return self._instance_data(self._data.dot(array.todense()._data))
         else:
-            return self._instance_array(self._data.dot(array._data))
+            return self._instance_data(self._data.dot(array._data))
 
     def interp(self, x_data, y_data, return_left=None, return_right=None):
         """One-dimensional linear interpolation.
