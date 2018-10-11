@@ -123,8 +123,8 @@ class CLossQuadratic(CLossRegression):
             Loss function. Vector-like array.
 
         """
-        if score.is_vector_like is not None:
-            raise ValueError("only vector-like score array is supported.")
+        if score.is_vector_like is False:
+            raise ValueError("only a vector-like `score` array is supported.")
 
         # Ensure we work with vector-like arrays
         y_true = y_true.ravel()
@@ -149,8 +149,8 @@ class CLossQuadratic(CLossRegression):
             Derivative of the loss function. Vector-like array.
 
         """
-        if score.is_vector_like is not None:
-            raise ValueError("only vector-like score array is supported.")
+        if score.is_vector_like is False:
+            raise ValueError("only a vector-like `score` array is supported.")
 
         # Ensure we work with vector-like arrays
         y_true = y_true.ravel()
