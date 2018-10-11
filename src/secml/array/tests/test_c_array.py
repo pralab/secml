@@ -522,6 +522,37 @@ class TestCArray(CUnitTest):
 
             test_selectors(array, selectors, assignments, targets)
 
+    def test_item(self):
+        """Test for CArray.item() method."""
+        self.logger.info("Test for CArray.item() method")
+
+        def _item(a):
+            x = a.item()
+            self.logger.info("array:\n{:}\nextracted: {:}".format(a, x))
+            self.assertEqual(a.dtype, type(x))
+
+        _item(self.single_flat_dense.astype(int))
+        _item(self.single_dense.astype(int))
+        _item(self.single_sparse.astype(int))
+        _item(self.single_flat_dense.astype(float))
+        _item(self.single_dense.astype(float))
+        _item(self.single_sparse.astype(float))
+        _item(self.single_bool_flat_dense)
+        _item(self.single_bool_dense)
+        _item(self.single_bool_sparse)
+
+        with self.assertRaises(ValueError):
+            self.empty_flat_dense.item()
+        with self.assertRaises(ValueError):
+            self.empty_dense.item()
+        with self.assertRaises(ValueError):
+            self.empty_sparse.item()
+
+        with self.assertRaises(ValueError):
+            self.array_dense.item()
+        with self.assertRaises(ValueError):
+            self.array_sparse.item()
+
     def test_all(self):
         """Test for CArray.all() method."""
         self.logger.info("Test for CArray.all() method")

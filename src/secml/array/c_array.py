@@ -570,6 +570,43 @@ class CArray(_CArrayInterface):
         # Calling getitem of data buffer
         return self._instance_data(self._data.__getitem__(idx_data))
 
+    def item(self):
+        """Returns the single element in the array as built-in type.
+
+        Returns
+        -------
+        int, float, bool, str
+            The single element in the array.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([1]).item()
+        1
+
+        >>> print CArray([[1.]]).item()
+        1.0
+
+        >>> print CArray([1], tosparse=True).item()
+        1
+
+        >>> print CArray([1,2,3]).item()
+        Traceback (most recent call last):
+            ...
+        RuntimeError: cannot use .item(). Array has size 3
+
+        >>> print CArray([]).item()
+        Traceback (most recent call last):
+            ...
+        RuntimeError: cannot use .item(). Array has size 0
+
+        """
+        if self.size != 1:
+            raise ValueError(
+                "cannot use .item(). Array has size {:}".format(self.size))
+        return to_builtin(self.tondarray().ravel()[0])
+
     def __setitem__(self, idx, value):
         """Set input data to slicing/indexing result.
 
