@@ -39,11 +39,14 @@ class TestArrayNormalizers(CUnitTest):
             self.logger.info("Original array is:\n{:}".format(array))
 
             # Sklearn normalizer
-            target = CArray(StandardScaler().fit_transform(array.tondarray())).round(4)
+            target = CArray(StandardScaler().fit_transform(
+                array.astype(float).tondarray())).round(4)
             # Our normalizer
             result = CNormalizerZScore().train_normalize(array).round(4)
 
-            self.assertFalse((target != result).any(), "\n{:}\nis different from target\n{:}".format(result, target))
+            self.assertFalse((target != result).any(),
+                             "\n{:}\nis different from target\n"
+                             "{:}".format(result, target))
 
             self.logger.info("Correct result is:\n{:}".format(result))
 

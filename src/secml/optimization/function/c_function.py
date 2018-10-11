@@ -1,13 +1,14 @@
 """
-.. module:: Function
+.. module:: CFunction
    :synopsis: Wrapper to manage a function and its gradient
 
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 .. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
 from secml.core import CCreator
+from secml.core.type_utils import is_scalar
 from secml.array import CArray
 
 
@@ -83,11 +84,22 @@ class CFunction(CCreator):
             Function output, single scalar.
 
         """
-        out_fun = CArray(self._fun(x, *args, **kwargs)).ravel()
-        if out_fun.size != 1:
-            raise ValueError("function must return a scalar!")
+        out_fun = self._fun(x, *args, **kwargs)
+
+        # Function can return a CArray of size 1 or a scalar
+        if isinstance(out_fun, CArray):
+            if out_fun.size != 1:
+                raise ValueError("`_fun` must return a CArray of size 1!")
+            out_fun = out_fun.item()
+        elif is_scalar(out_fun):
+            pass  # Returned a scalar, OK
+        else:
+            raise TypeError(
+                "`_fun` must return a scalar or a CArray of size 1. "
+                "Returned a {:}".format(type(out_fun)))
+
         self._n_fun_eval += 1
-        return out_fun[0]
+        return out_fun
 
     def fun_ndarray(self, x, *args, **kwargs):
         """Evaluates function at point x (ndarray).
@@ -123,7 +135,9 @@ class CFunction(CCreator):
             Array with gradient output.
 
         """
-        out_grad = CArray(self._gradient(x, *args, **kwargs))
+        out_grad = self._gradient(x, *args, **kwargs)
+        if not isinstance(out_grad, CArray):
+            raise TypeError("`_gradient` must return a CArray!")
         self._n_grad_eval += 1
         return out_grad
 

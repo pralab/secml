@@ -123,7 +123,7 @@ class CAttackEvasion(CAttack):
         scores[:, k] = nan
         f_obj = f_k - scores.nanmax(axis=1)
 
-        f_obj = f_obj.ravel()[0] if f_obj.size == 1 else f_obj
+        f_obj = f_obj.item() if f_obj.size == 1 else f_obj
 
         return f_obj if self.y_target is None else -f_obj
 
@@ -156,7 +156,7 @@ class CAttackEvasion(CAttack):
             k = self.y_target
 
         score[:, k] = nan
-        c = score.nanargmax(axis=1)[0]
+        c = score.nanargmax(axis=1).item()
         grad = self._solver_clf.gradient_f_x(x, y=k) - \
                self._solver_clf.gradient_f_x(x, y=c)
 
@@ -279,6 +279,10 @@ class CAttackEvasion(CAttack):
         """
         self._f_eval = 0
         self._grad_eval = 0
+
+        # x0 must 2-D, y0 scalar if a CArray of size 1
+        x0 = x0.atleast_2d()
+        y0 = y0.item() if isinstance(y0, CArray) and y0.size == 1 else y0
 
         # if data can not be modified by the attacker, exit
         if not self.is_attack_class(y0):

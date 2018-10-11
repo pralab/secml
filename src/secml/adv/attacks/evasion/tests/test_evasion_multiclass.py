@@ -99,7 +99,7 @@ class TestEvasionMulticlass(CUnitTest):
         # p_idx = 27  # Correctly classified point
 
         x0 = self.ds.X[p_idx, :]
-        y0 = self.ds.Y[p_idx]
+        y0 = self.ds.Y[p_idx].item()
 
         x_seq = None  # TODO: append from empty 2d arrays not supported
         scores = CArray([])

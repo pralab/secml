@@ -8,6 +8,8 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 from copy import deepcopy
 
+from secml.core.type_utils import to_builtin
+
 
 class _CArrayInterface(object):
     """Interface for array classes.
@@ -88,6 +90,13 @@ class _CArrayInterface(object):
     def __getitem__(self, idx):
         """Return a new array with slicing/indexing result."""
         raise NotImplementedError
+
+    def item(self):
+        """Returns the single element in the array as built-in type."""
+        if self.size != 1:
+            raise ValueError(
+                "cannot use .item(). Array has size {:}".format(self.size))
+        return to_builtin(self.tondarray().ravel()[0])
 
     @abstractmethod
     def __setitem__(self, idx, value):
