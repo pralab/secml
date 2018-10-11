@@ -16,6 +16,50 @@ from secml.core.type_utils import \
     is_int, is_scalar, is_bool, is_ndarray, is_scsarray, to_builtin
 
 
+def _instance_data(data):
+    """Returns input data with correct shape.
+
+    For any one-element array, i.e. array of shape (1, ) or (1, 1)
+     returns the single object inside it as a built-in type.
+
+    Parameters
+    ----------
+    data : array_like or scalar or NotImplemented
+        Data to be converted. Could be:
+         - NotImplemented (raised by not implemented built-in operators)
+         - CArray buffers (CDense, CSparse)
+         - scalar-like (int, float, str, bool and numpy equivalents)
+
+    Returns
+    -------
+    CArray or scalar or NotImplemented
+        A scalar-like data-type for any one-element array or scalar.
+         Built-in types will be returned (int, bool, float)
+        A CArray for any array of size > 1.
+        A NotImplemented object (equivalent to False).
+
+    """
+    try:
+        return to_builtin(data)
+    except TypeError:
+        # Probably the input is an array buffer or NotImplemented
+        pass
+
+    if isinstance(data, (CDense, CSparse)):  # CDense, CSparse
+        out = CArray(data)
+        if out.size == 1:  # For (1,) or (1, 1) arrays return the inside item
+            return out.item()
+        return out
+
+    elif data is NotImplemented:
+        # Returned if a standard operator (+, *, abs, ...) is not supported
+        return NotImplemented
+
+    else:  # Unknown object returned by the calling method, raise error
+        raise TypeError(
+            "objects of type {:} not supported.".format(type(data)))
+    
+    
 class CArray(_CArrayInterface):
     """Creates an array.
 
@@ -95,50 +139,6 @@ class CArray(_CArrayInterface):
             self._data = CSparse(data, dtype, copy, shape)
         else:
             self._data = CDense(data, dtype, copy, shape)
-
-    def _instance_data(self, data):
-        """Returns input data with correct shape.
-
-        For any one-element array, i.e. array of shape (1, ) or (1, 1)
-         returns the single object inside it as a built-in type.
-
-        Parameters
-        ----------
-        data : array_like or scalar or NotImplemented
-            Data to be converted. Could be:
-             - NotImplemented (raised by not implemented built-in operators)
-             - CArray buffers (CDense, CSparse)
-             - scalar-like (int, float, str, bool and numpy equivalents)
-
-        Returns
-        -------
-        CArray or scalar or NotImplemented
-            A scalar-like data-type for any one-element array or scalar.
-             Built-in types will be returned (int, bool, float)
-            A CArray for any array of size > 1.
-            A NotImplemented object (equivalent to False).
-
-        """
-        try:
-            return to_builtin(data)
-        except TypeError:
-            # Probably the input is an array buffer or NotImplemented
-            pass
-
-        if isinstance(data, (CDense, CSparse)):  # CDense, CSparse
-            out = self.__class__(data)
-            if out.size == 1:
-                # For (1,) or (1, 1) array return the contained scalar
-                return to_builtin(out.tondarray().ravel()[0])
-            return out
-
-        elif data is NotImplemented:
-            # Returned if a standard operator (+, *, abs, ...) is not supported
-            return NotImplemented
-
-        else:  # Unknown object returned by the calling method, raise error
-            raise TypeError(
-                "objects of type {:} not supported.".format(type(data)))
 
     # ------------------------------ #
     # # # # # # PROPERTIES # # # # # #
@@ -239,7 +239,7 @@ class CArray(_CArrayInterface):
           (0, 1)	3)
 
         """
-        return self._instance_data(self._data.nnz_data)
+        return _instance_data(self._data.nnz_data)
 
     @property
     def T(self):
@@ -568,7 +568,7 @@ class CArray(_CArrayInterface):
         idx_data = self._check_index(idx)
 
         # Calling getitem of data buffer
-        return self._instance_data(self._data.__getitem__(idx_data))
+        return _instance_data(self._data.__getitem__(idx_data))
 
     def item(self):
         """Returns the single element in the array as built-in type.
@@ -2704,7 +2704,7 @@ class CArray(_CArrayInterface):
         CArray([0 0 1 3])
 
         """
-        return self._instance_data(
+        return _instance_data(
             self._data.binary_search(self.__class__(value)._data))
 
     # ------------- #
@@ -2872,7 +2872,7 @@ class CArray(_CArrayInterface):
         if order == 'fro':
             raise ValueError('Invalid norm order for vectors.')
 
-        return self._instance_data(array._data.norm(order))
+        return _instance_data(array._data.norm(order))
 
     def norm_2d(self, order=None, axis=None, keepdims=True):
         """Matrix norm or vector norm along axis.
@@ -2961,15 +2961,15 @@ class CArray(_CArrayInterface):
             raise NotImplementedError
 
         if self.issparse is True:
-            out = self._instance_data(self.atleast_2d()._data.norm_2d(
+            out = _instance_data(self.atleast_2d()._data.norm_2d(
                 order, axis=axis, keepdims=keepdims))
         else:
-            out = self._instance_data(self.atleast_2d()._data.norm(
+            out = _instance_data(self.atleast_2d()._data.norm(
                 order, axis=axis, keepdims=keepdims))
 
         # Return float if axis is None, else CArray
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(CArray(out).atleast_2d())
 
@@ -3015,7 +3015,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.sum(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3126,7 +3126,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.prod(axis=axis, dtype=dtype, keepdims=keepdims)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3186,7 +3186,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.all(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3246,7 +3246,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.any(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3304,7 +3304,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.max(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3361,7 +3361,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.min(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3409,7 +3409,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.argmax(axis=axis)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3457,7 +3457,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.argmin(axis=axis)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3510,7 +3510,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.nanmax(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3563,7 +3563,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.nanmin(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3618,7 +3618,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.nanargmax(axis=axis)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3671,7 +3671,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.nanargmin(axis=axis)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3736,7 +3736,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.mean(axis=axis, dtype=None, keepdims=keepdims)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3794,7 +3794,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.median(axis=axis, keepdims=keepdims)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -3873,7 +3873,7 @@ class CArray(_CArrayInterface):
         """
         out = self._data.std(axis=axis, ddof=ddof, keepdims=keepdims)
         if axis is None:
-            return self._instance_data(out)
+            return _instance_data(out)
         else:
             return self.__class__(out)
 
@@ -4313,9 +4313,9 @@ class CArray(_CArrayInterface):
         """
         # We have to handle only one problematic case: dense vs sparse dot
         if self.isdense is True and array.issparse is True:
-            return self._instance_data(self._data.dot(array.todense()._data))
+            return _instance_data(self._data.dot(array.todense()._data))
         else:
-            return self._instance_data(self._data.dot(array._data))
+            return _instance_data(self._data.dot(array._data))
 
     def interp(self, x_data, y_data, return_left=None, return_right=None):
         """One-dimensional linear interpolation.
