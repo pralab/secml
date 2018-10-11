@@ -523,16 +523,22 @@ class CArray(_CArrayInterface):
     # # # # # # INDEXING # # # # # #
     # -----------------------------#
 
-    def _check_index(self, idx):
-        """Consistency checks for __getitem__ and __setitem__ functions."""
-        # This routine only transforms input CArrays into CDense/CSparse
-        # Object validity is checked by CDense/CSparse
+    def _prepare_idx(self, idx):
+        """Prepare input `idx` for __getitem__ and __setitem__ functions.
+
+        If input `idx` is:
+         - tuple, for each CArray in tuple extract buffer (CDense, CSparse)
+         - CArray, extract buffer (CDense, CSparse)
+
+        Otherwise return input as is.
+
+        """
         if isinstance(idx, tuple):
             # Extracting buffer from CArrays and rebuilding the tuple
-            idx_data = tuple(
-                dim._data if isinstance(dim, CArray) else dim for dim in idx)
+            idx_data = tuple(dim._data if isinstance(dim, self.__class__)
+                             else dim for dim in idx)
 
-        elif isinstance(idx, CArray):  # CArray list-like
+        elif isinstance(idx, self.__class__):  # CArray list-like
             idx_data = idx._data
 
         else:  # Nothing to convert
@@ -564,8 +570,8 @@ class CArray(_CArrayInterface):
                 - Numpy atomic types (np.integer, np.bool_).
 
         """
-        # Checking consistency and integrity of input index
-        idx_data = self._check_index(idx)
+        # Preparing input index for buffer __getitem__
+        idx_data = self._prepare_idx(idx)
 
         # Calling getitem of data buffer
         return _instance_data(self._data.__getitem__(idx_data))
@@ -635,8 +641,8 @@ class CArray(_CArrayInterface):
             - Numpy atomic types (np.integer, np.floating, np.bool_)
 
         """
-        # Checking consistency and integrity of input index
-        idx_data = self._check_index(idx)
+        # Preparing input index for buffer __getitem__
+        idx_data = self._prepare_idx(idx)
 
         if isinstance(value, CArray):
             # Dense arrays only accept setting dense values
