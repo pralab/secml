@@ -422,8 +422,8 @@ class CDataset(object):
         [(1.0, 4.0), (2.0, 5.0), (3.0, 6.0)]
 
         """
-        x_min = CArray(self.X.min(axis=0) - offset)
-        x_max = CArray(self.X.max(axis=0) + offset)
+        x_min = self.X.min(axis=0) - offset
+        x_max = self.X.max(axis=0) + offset
         boundary = []
         for f_idx in xrange(self.num_features):
             boundary.append((x_min[0, f_idx], x_max[0, f_idx]))

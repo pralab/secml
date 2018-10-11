@@ -296,7 +296,7 @@ class CClassifier(CCreator):
 
         # The classification label is the label of the class
         # associated with the highest score
-        return CArray(scores.argmax(axis=1)).ravel(), scores
+        return scores.argmax(axis=1).ravel(), scores
 
     def estimate_parameters(self, dataset, parameters, splitter, metric,
                             pick='first', perf_evaluator='xval', n_jobs=1):
