@@ -605,18 +605,15 @@ class CArray(_CArrayInterface):
         >>> print CArray([1,2,3]).item()
         Traceback (most recent call last):
             ...
-        RuntimeError: cannot use .item(). Array has size 3
+        ValueError: cannot use .item(). Array has size 3
 
         >>> print CArray([]).item()
         Traceback (most recent call last):
             ...
-        RuntimeError: cannot use .item(). Array has size 0
+        ValueError: cannot use .item(). Array has size 0
 
         """
-        if self.size != 1:
-            raise ValueError(
-                "cannot use .item(). Array has size {:}".format(self.size))
-        return to_builtin(self.tondarray().ravel()[0])
+        return super(CArray, self).item()
 
     def __setitem__(self, idx, value):
         """Set input data to slicing/indexing result.
