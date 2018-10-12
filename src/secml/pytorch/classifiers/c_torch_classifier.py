@@ -261,7 +261,7 @@ class CTorchClassifier(CClassifier):
         return DataLoader(CTorchDataset(x),
                           batch_size=self._batch_size,
                           shuffle=False,
-                          num_workers=n_jobs)
+                          num_workers=n_jobs-1)
 
     def load_state(self, state_dict, dataparallel=False):
         """Load PyTorch objects state from dictionary.
@@ -384,7 +384,7 @@ class CTorchClassifier(CClassifier):
                                              transform=self._train_transform),
                                batch_size=self._batch_size,
                                shuffle=True,
-                               num_workers=n_jobs)
+                               num_workers=n_jobs-1)
 
         # Switch to training mode
         self._model.train()

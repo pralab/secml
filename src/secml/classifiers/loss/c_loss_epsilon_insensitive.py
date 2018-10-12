@@ -1,135 +1,193 @@
 """
-.. module:: Epsilon-Insensitive
-   :synopsis: Epsilon-Insensitive Loss Function
+.. module:: CLossEpsilonInsensitive & CLossEpsilonInsensitiveSquared
+   :synopsis: Epsilon-Insensitive Loss Functions
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from secml.classifiers.loss import CLoss
+from secml.classifiers.loss import CLossRegression
 from secml.array import CArray
 
 
-class CLossEpsilonInsensitive(CLoss):
-    """Epsilon-Insensitive Loss Function (soft-margin).
+class CLossEpsilonInsensitive(CLossRegression):
+    """Epsilon-Insensitive Loss Function.
 
-    Useful to construct Support Vector Regression.
+    Any difference between the current prediction and
+     the ground truth is ignored if is less than the
+     `epsilon` threshold.
 
-    Any differences between the current prediction and
-    the correct label are ignored if they are less than
-    `epsilon` threshold.
+    Epsilon-Insensitive loss is used by support vector regression.
+
+    The Epsilon-Insensitive loss is defined as:
+
+    .. math::
+
+        L_{\epsilon-\text{insensitive}}(y, s) = \max\left\{|y - s| - \epsilon, 0\right\}
+
+    Attributes
+    ----------
+    class_type : 'epsilon_insensitive'
+    suitable_for : 'regression'
 
     """
-
     class_type = 'epsilon_insensitive'
-    loss_type = 'regression'
 
-    # TODO: extend binary labels
     def __init__(self, epsilon=0.1):
         self._epsilon = float(epsilon)
 
     @property
     def epsilon(self):
-        """Get Epsilon Parameter"""
+        """Threshold parameter epsilon."""
         return self._epsilon
 
     @epsilon.setter
     def epsilon(self, value):
-        """Set Epsilon Value"""
+        """Set the threshold parameter epsilon."""
         self._epsilon = float(value)
 
-    def loss(self, y, score):
-        """Compute Epsilon Insensitive Loss.
-
-        `loss = max(0, |y - p| - epsilon)`
+    def loss(self, y_true, score):
+        """Computes the value of the epsilon-insensitive loss function.
 
         Parameters
         ----------
-        y : CArray
-            Vector-like array.
+        y_true : CArray
+            Ground truth (correct), targets. Vector-like array.
         score : CArray
-            Vector-like array.
+            Outputs (predicted), targets.
+            Vector-like array of shape (n_samples,).
+
+        Returns
+        -------
+        CArray
+            Loss function. Vector-like array.
 
         """
-        l = abs(y - score) - self.epsilon
-        l[l < 0] = 0
-        return l
+        if score.is_vector_like is False:
+            raise ValueError("only a vector-like `score` array is supported.")
 
-    def dloss(self, y, score):
-        """Compute Epsilon Insensitive Loss Derivative.
+        # Ensure we work with vector-like arrays
+        y_true = y_true.ravel()
+        score = score.ravel()
+
+        # max(0, abs(y - s) - epsilon)
+        e = abs(y_true - score) - self.epsilon
+        e[e < 0] = 0.0
+
+        return e
+
+    def dloss(self, y_true, score):
+        """Computes the derivative of the epsilon-insensitive loss function
+         with respect to `score`.
 
         Parameters
         ----------
-        y : CArray
-            Vector-like array.
+        y_true : CArray
+            Ground truth (correct), targets. Vector-like array.
         score : CArray
-            Vector-like array.
+            Outputs (predicted), targets.
+            Vector-like array of shape (n_samples,).
+
+        Returns
+        -------
+        CArray
+            Derivative of the loss function. Vector-like array.
 
         """
-        d = CArray.zeros(shape=y.size, dtype=int)
-        d[y - score > self.epsilon] = -1
-        d[score - y > self.epsilon] = 1
+        if score.is_vector_like is False:
+            raise ValueError("only a vector-like `score` array is supported.")
+
+        # Ensure we work with vector-like arrays
+        y_true = y_true.ravel()
+        score = score.ravel()
+
+        # -1 if (y - s) > epsilon, 1 if (y - s) < -epsilon, 0 otherwise
+        d = CArray.zeros(shape=y_true.size, dtype=float)
+        d[y_true - score > self.epsilon] = -1
+        d[score - y_true > self.epsilon] = 1
+
         return d
 
 
-class CLossSquaredEpsilonInsensitive(CLoss):
-    """Squared Epsilon-Insensitive Loss Function (soft-margin).
+class CLossEpsilonInsensitiveSquared(CLossEpsilonInsensitive):
+    """Squared Epsilon-Insensitive Loss Function.
 
-    Useful to construct Support Vector Regression.
+    Any difference between the current prediction and
+     the ground truth is ignored if is less than the
+     `epsilon` threshold.
 
-    Any differences between the current prediction and
-    the correct label are ignored if they are less than
-    `epsilon` threshold.
+    The Squared Epsilon-Insensitive loss is defined as:
+
+    .. math::
+
+        L^2_{\epsilon-\text{insensitive}}(y, s) = \left\(\max\left\{|y - s| - \epsilon, 0\right\}\right\)^2
+
+    Attributes
+    ----------
+    class_type : 'epsilon_insensitive_squared'
+    suitable_for : 'regression'
 
     """
+    class_type = 'epsilon_insensitive_squared'
 
-    class_type = 'squared_epsilon_insensitive'
-    loss_type = 'regression'
-
-    def __init__(self, epsilon=0.1):
-        self._epsilon = float(epsilon)
-
-    @property
-    def epsilon(self):
-        """Get Epsilon Parameter"""
-        return self._epsilon
-
-    @epsilon.setter
-    def epsilon(self, value):
-        """Set Epsilon Value"""
-        self._epsilon = float(value)
-
-    def loss(self, y, score):
-        """Compute Squared Epsilon Insensitive Loss.
-
-        `loss = max(0, |y - p| - epsilon)^2`
+    def loss(self, y_true, score):
+        """Computes the value of the squared epsilon-insensitive loss function.
 
         Parameters
         ----------
-        y : CArray
-            Vector-like array.
+        y_true : CArray
+            Ground truth (correct), targets. Vector-like array.
         score : CArray
-            Vector-like array.
+            Outputs (predicted), targets.
+            Vector-like array of shape (n_samples,).
+
+        Returns
+        -------
+        CArray
+            Loss function. Vector-like array.
 
         """
-        l = abs(y - score) - self.epsilon
-        l2 = l ** 2
-        l2[l < 0] = 0
-        return l2
+        if score.is_vector_like is False:
+            raise ValueError("only a vector-like `score` array is supported.")
 
-    def dloss(self, y, score):
-        """Compute Squared Epsilon Insensitive Loss Derivative.
+        # Ensure we work with vector-like arrays
+        y_true = y_true.ravel()
+        score = score.ravel()
+
+        # (max(0, abs(y - s) - epsilon))^2
+        e = abs(y_true - score) - self.epsilon
+        e2 = e ** 2
+        e2[e < 0] = 0
+
+        return e2
+
+    def dloss(self, y_true, score):
+        """Computes the derivative of the squared epsilon-insensitive
+         loss function with respect to `score`.
 
         Parameters
         ----------
-        y : CArray
-            Vector-like array.
+        y_true : CArray
+            Ground truth (correct), targets. Vector-like array.
         score : CArray
-            Vector-like array.
+            Outputs (predicted), targets.
+            Vector-like array of shape (n_samples,).
+
+        Returns
+        -------
+        CArray
+            Derivative of the loss function. Vector-like array.
 
         """
-        d = CArray.zeros(shape=y.size, dtype=int)
-        z = y - score
+        if score.is_vector_like is False:
+            raise ValueError("only a vector-like `score` array is supported.")
+
+        # Ensure we work with vector-like arrays
+        y_true = y_true.ravel()
+        score = score.ravel()
+
+        d = CArray.zeros(shape=y_true.size, dtype=float)
+        z = y_true - score
         d[z > self.epsilon] = -2 * (z[z > self.epsilon] - self.epsilon)
         d[z < self.epsilon] = 2 * (-z[z < self.epsilon] - self.epsilon)
         return d

@@ -7,7 +7,7 @@
 
 """
 from secml.classifiers import CClassifier
-from secml.classifiers.clf_utils import extend_binary_labels
+from secml.classifiers.clf_utils import convert_binary_labels
 from secml.array import CArray
 from secml.data import CDataset
 from secml import _NoValue
@@ -162,7 +162,7 @@ class CClassifierLinear(CClassifier):
         if self.normalizer is not None:
             x = self.normalizer.normalize(x)
 
-        sign = extend_binary_labels(y)  # Sign depends on input label (0/1)
+        sign = convert_binary_labels(y)  # Sign depends on input label (0/1)
 
         return sign * self._discriminant_function(x)
 
@@ -225,4 +225,4 @@ class CClassifierLinear(CClassifier):
 
         """
         # Gradient sign depends on input label (0/1)
-        return extend_binary_labels(y) * self.w
+        return convert_binary_labels(y) * self.w

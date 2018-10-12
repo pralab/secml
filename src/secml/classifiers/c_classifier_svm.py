@@ -10,7 +10,7 @@ from sklearn.svm import SVC
 
 from secml.array import CArray
 from secml.classifiers import CClassifierLinear
-from secml.classifiers.clf_utils import extend_binary_labels
+from secml.classifiers.clf_utils import convert_binary_labels
 from secml.kernel import CKernel
 
 
@@ -313,7 +313,7 @@ class CClassifierSVM(CClassifierLinear):
             self._n_sv = CArray(classifier.n_support_)
             self._sv_idx = CArray(classifier.support_).ravel()
             # Compatibility fix for differences between sklearn versions
-            self._alpha = extend_binary_labels(dataset.Y[self.sv_idx]) * \
+            self._alpha = convert_binary_labels(dataset.Y[self.sv_idx]) * \
                 abs(CArray(classifier.dual_coef_).todense().ravel())
             self._sv = CArray(dataset.X[self.sv_idx, :])
             self.logger.debug("Classifier SVM dual weights (alphas): "
@@ -419,4 +419,4 @@ class CClassifierSVM(CClassifierLinear):
         gradient = alpha_2d.dot(gradient)
 
         # Gradient sign depends on input label (0/1)
-        return extend_binary_labels(y) * gradient.ravel()
+        return convert_binary_labels(y) * gradient.ravel()

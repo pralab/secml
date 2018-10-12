@@ -8,7 +8,8 @@
 """
 from secml.array import CArray
 from secml.classifiers import CClassifier
-from secml.classifiers.clf_utils import check_binary_labels, extend_binary_labels
+from secml.classifiers.clf_utils import \
+    check_binary_labels, convert_binary_labels
 from secml.kernel import CKernel
 
 
@@ -197,4 +198,4 @@ class CClassifierKDE(CClassifier):
         """
         k = self.kernel.gradient(self._training_samples, x)
         # Gradient sign depends on input label (0/1)
-        return - extend_binary_labels(y) * k.mean(axis=0)
+        return - convert_binary_labels(y) * k.mean(axis=0)
