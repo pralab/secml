@@ -8,7 +8,8 @@
 """
 from secml.array import CArray
 from secml.classifiers import CClassifier
-from secml.classifiers.clf_utils import check_binary_labels, convert_binary_labels
+from secml.classifiers.clf_utils import \
+    check_binary_labels, convert_binary_labels
 from secml.kernel import CKernel
 
 

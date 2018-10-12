@@ -162,7 +162,7 @@ class CClassifierLinear(CClassifier):
         if self.normalizer is not None:
             x = self.normalizer.normalize(x)
 
-        sign = extend_binary_labels(y)  # Sign depends on input label (0/1)
+        sign = convert_binary_labels(y)  # Sign depends on input label (0/1)
 
         return sign * self._discriminant_function(x)
 

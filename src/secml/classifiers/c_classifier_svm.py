@@ -314,7 +314,7 @@ class CClassifierSVM(CClassifierLinear):
             self._sv_idx = CArray(classifier.support_).ravel()
             # Compatibility fix for differences between sklearn versions
             self._alpha = convert_binary_labels(dataset.Y[self.sv_idx]) * \
-                          abs(CArray(classifier.dual_coef_).todense().ravel())
+                abs(CArray(classifier.dual_coef_).todense().ravel())
             self._sv = CArray(dataset.X[self.sv_idx, :])
             self.logger.debug("Classifier SVM dual weights (alphas): "
                               "\n{:}".format(self._alpha))
