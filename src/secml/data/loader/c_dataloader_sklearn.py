@@ -327,7 +327,7 @@ class CDLRandomBlobsRegression(CDataLoader):
 
     def _dts_function(self, X):
         """ TODO: Put a comment for this function. """
-        from secml.stats import CDistributionGaussian
+        from secml.ml.stats import CDistributionGaussian
         d = X.shape[1]  # number of features
         Y = self.bias
         for gauss_idx in xrange(len(self.centers)):

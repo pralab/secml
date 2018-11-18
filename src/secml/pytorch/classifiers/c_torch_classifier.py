@@ -16,7 +16,7 @@ from torch.autograd import Variable
 
 from secml.array import CArray
 from secml.data import CDataset
-from secml.classifiers import CClassifier
+from secml.ml.classifiers import CClassifier
 
 from secml.core.settings import SECML_PYTORCH_USE_CUDA
 from secml.pytorch.data import CTorchDataset

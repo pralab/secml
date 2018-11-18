@@ -1,16 +1,16 @@
 from secml.utils import CUnitTest
 
 from secml.array import CArray
-from secml.data.loader import CDLRandom, CDLRandomBlobs
-from secml.classifiers import CClassifierSVM
-from secml.classifiers.multiclass import CClassifierMulticlassOVA
-from secml.kernel import CKernelRBF
+from secml.data.loader import CDLRandom
+from secml.ml.classifiers import CClassifierSVM
+from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
+from secml.ml.kernel import CKernelRBF
 from secml.utils import fm
 
 from secml.figure import CFigure
 from secml.optimization.constraints import \
-    CConstraintBox, CConstraintL1, CConstraintL2
-from secml.features.normalization import CNormalizerMinMax
+    CConstraintL2
+from secml.ml.features.normalization import CNormalizerMinMax
 
 from secml.adv.attacks.evasion import CAttackEvasion
 

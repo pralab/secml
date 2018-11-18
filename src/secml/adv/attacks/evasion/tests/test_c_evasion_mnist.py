@@ -1,11 +1,11 @@
-from secml.classifiers import CClassifierSVM
-from secml.kernel import CKernel
+from secml.ml.classifiers import CClassifierSVM
+from secml.ml.kernel import CKernel
 from secml.adv.attacks.evasion import CAttackEvasion
 from secml.core import CCreator
 from secml.data.loader import CDataLoaderMNIST
 from secml.array import CArray
 from secml.figure import CFigure
-from secml.classifiers.multiclass import CClassifierMulticlassOVA
+from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 
 from numpy import random
 

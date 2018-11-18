@@ -2,9 +2,9 @@ import unittest
 from secml.utils import CUnitTest
 
 from secml.array import CArray
-from secml.peval.metrics import CRoc
+from secml.ml.peval.metrics import CRoc
 from secml.figure import CFigure
-from secml.classifiers import CClassifierSVM
+from secml.ml.classifiers import CClassifierSVM
 from secml.data.loader import CDLRandom
 
 

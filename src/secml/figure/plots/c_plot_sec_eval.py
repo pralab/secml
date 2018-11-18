@@ -1,8 +1,5 @@
-from sklearn.metrics import auc as sk_auc
-
 from secml.figure.plots import CPlot
-from secml.peval.metrics import CMetricConfusionMatrix
-from secml.peval.metrics import CMetric
+from secml.ml.peval.metrics import CMetric
 from secml.array import CArray
 
 #fixme: da pulire

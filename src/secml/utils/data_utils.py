@@ -6,13 +6,13 @@
  
 """
 from sklearn.model_selection import train_test_split
-from secml.data import CDataset
-from secml.array import CArray
-from httplib import ImproperConnectionState
-from secml.figure import CFigure
-from secml.peval.metrics import CRoc
 from sklearn.neighbors import KernelDensity
 from sklearn.metrics.pairwise import euclidean_distances, manhattan_distances
+
+from secml.data import CDataset
+from secml.array import CArray
+from secml.figure import CFigure
+from secml.ml.peval.metrics import CRoc
 
 __all__ = ['split_dataset', 'get_train_test_idx', 'density_estimation',
            'plot_roc_and_prob_density', 'density_estimation',
@@ -50,7 +50,6 @@ def split_dataset(dataset, num_train=None, num_test=None):
     set to None the other should be a float, representing a
     percentage, or an integer.
     """
-    import numpy as np
     print type(dataset)
     # X, y = np.arange(10).reshape((5, 2)), range(5)
     X_train, X_test, y_train, y_test = train_test_split(dataset.X.get_data(),
@@ -96,7 +95,6 @@ def get_train_test_idx(dataset, num_train=None, num_test=None):
 
 
     """
-    import numpy as np
 
     # TODO: THIS IS NOT OPTIMIZED, IT IS JUST FOR MAKE IT WORK. CHANGE IT.
     X = CArray.arange(start=0, stop=dataset.num_samples, step=1)

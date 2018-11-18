@@ -1,6 +1,6 @@
 from secml.array import CArray
 from secml.core.type_utils import is_scalar
-from secml.features.normalization import CNormalizerLinear
+from secml.ml.features.normalization import CNormalizerLinear
 
 
 # TODO: COMPLETE DOCSTRINGS. ADD UNITTESTS
@@ -83,7 +83,7 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         Examples
         --------
         >>> from secml.array import CArray
-        >>> from secml.features.normalization import CNormalizerMeanSTD
+        >>> from secml.ml.features.normalization import CNormalizerMeanSTD
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]],tosparse=True)
 
         >>> normalizer = CNormalizerMeanSTD(0.5, 0.2).train(array)
