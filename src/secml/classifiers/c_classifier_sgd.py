@@ -6,11 +6,11 @@
 .. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
 
 """
-import numpy as np
 from sklearn import linear_model
 
 from secml.classifiers import CClassifierLinear
 from secml.array import CArray
+from secml.core.constants import inf
 from secml.classifiers.regularizer import CRegularizer
 from secml.classifiers.loss import CLoss
 from secml.kernel import CKernel
@@ -21,7 +21,7 @@ class CClassifierSGD(CClassifierLinear):
     class_type = 'sgd'
 
     def __init__(self, loss, regularizer, kernel=None, alpha=0.01,
-                 fit_intercept=True, max_iter=1000, tol=-np.inf,
+                 fit_intercept=True, max_iter=1000, tol=-inf,
                  shuffle=True, learning_rate='optimal',
                  eta0=10.0, power_t=0.5, class_weight=None,
                  warm_start=False, average=False, normalizer=None):

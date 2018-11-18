@@ -1800,10 +1800,11 @@ class CArray(_CArrayInterface):
         Examples
         --------
         >>> from secml.array import CArray
+        >>> from secml.core.constants import nan, inf
         >>> import numpy as np
         >>> np.set_printoptions(precision=1)
 
-        >>> array = CArray([-1,0,1,np.nan,np.inf,-np.inf])
+        >>> array = CArray([-1,0,1,nan,inf,-inf])
         >>> array.nan_to_num()
         >>> print array
         CArray([ -1.000000e+000   0.000000e+000   1.000000e+000   0.000000e+000
@@ -2816,7 +2817,7 @@ class CArray(_CArrayInterface):
 
         Parameters
         ----------
-        order : {int, np.inf, -np.inf}, optional
+        order : {int, inf, -inf}, optional
             Order of the norm (see table under Notes).
 
         Returns
@@ -2845,7 +2846,7 @@ class CArray(_CArrayInterface):
         Examples
         --------
         >>> from secml.array import CArray
-        >>> import numpy as np
+        >>> from secml.core.constants import inf
 
         >>> print round(CArray([1,2,3]).norm(), 5)
         3.74166
@@ -2857,9 +2858,9 @@ class CArray(_CArrayInterface):
         >>> print CArray([1,2,3]).tosparse().norm(1)
         6.0
 
-        >>> print CArray([1,2,3]).norm(np.inf)
+        >>> print CArray([1,2,3]).norm(inf)
         3.0
-        >>> print CArray([1,2,3]).norm(-np.inf)
+        >>> print CArray([1,2,3]).norm(-inf)
         1.0
 
         >>> print CArray([[1,2],[2,4]]).norm()
@@ -2895,7 +2896,7 @@ class CArray(_CArrayInterface):
 
         Parameters
         ----------
-        order : {'fro', non-zero int, np.inf, -np.inf}, optional
+        order : {'fro', non-zero int, inf, -inf}, optional
             Order of the norm (see table under Notes).
             'fro' stands for Frobenius norm.
         axis : int or None, optional
@@ -2929,7 +2930,7 @@ class CArray(_CArrayInterface):
         Examples
         --------
         >>> from secml.array import CArray
-        >>> import numpy as np
+        >>> from secml.core.constants import inf
 
         >>> print round(CArray([1,2,3]).norm_2d(), 5)
         3.74166
@@ -2939,9 +2940,9 @@ class CArray(_CArrayInterface):
         >>> print CArray([[1,2,3]]).norm_2d(1)
         3.0
 
-        >>> print CArray([1,2,3]).norm_2d(np.inf)  # max(sum(abs(x), axis=1))
+        >>> print CArray([1,2,3]).norm_2d(inf)  # max(sum(abs(x), axis=1))
         6.0
-        >>> print CArray([1,2,3]).norm_2d(-np.inf)  # min(sum(abs(x), axis=1))
+        >>> print CArray([1,2,3]).norm_2d(-inf)  # min(sum(abs(x), axis=1))
         6.0
 
         >>> print CArray([[1,2],[2,4]], tosparse=True).norm_2d()
@@ -3187,8 +3188,8 @@ class CArray(_CArrayInterface):
         >>> print CArray([-1,0,2,0]).all(axis=1)
         CArray([False])
 
-        >>> import numpy as np
-        >>> print CArray([np.nan, np.inf, -np.inf]).all()
+        >>> from secml.core.constants import nan, inf
+        >>> print CArray([nan, inf, -inf]).all()
         True
 
         """
@@ -3247,8 +3248,8 @@ class CArray(_CArrayInterface):
         >>> print CArray([-1,0,2,0]).any(axis=1)
         CArray([ True])
 
-        >>> import numpy as np
-        >>> print CArray([np.nan, np.inf, -np.inf]).any()
+        >>> from secml.core.constants import nan, inf
+        >>> print CArray([nan, inf, -inf]).any()
         True
 
         """
@@ -3305,8 +3306,8 @@ class CArray(_CArrayInterface):
         >>> print CArray([-1,0,2,0]).max(axis=1)
         CArray([2])
 
-        >>> import numpy as np
-        >>> print CArray([5,np.nan]).max()
+        >>> from secml.core.constants import nan
+        >>> print CArray([5,nan]).max()
         nan
 
         """
@@ -3362,8 +3363,8 @@ class CArray(_CArrayInterface):
         >>> print CArray([-1,0,2,0]).min(axis=1)
         CArray([-1])
 
-        >>> import numpy as np
-        >>> print CArray([5,np.nan]).min()
+        >>> from secml.core.constants import nan
+        >>> print CArray([5,nan]).min()
         nan
 
         """
@@ -3499,19 +3500,19 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> import numpy as np
-        >>> print CArray([5, np.nan]).max()
+        >>> from secml.core.constants import nan
+        >>> print CArray([5, nan]).max()
         nan
 
-        >>> print CArray([5, np.nan]).nanmax()
+        >>> print CArray([5, nan]).nanmax()
         5.0
 
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanmax()
+        >>> print CArray([[-1, nan], [nan, 0]]).nanmax()
         0.0
 
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanmax(axis=0)
+        >>> print CArray([[-1, nan], [nan, 0]]).nanmax(axis=0)
         CArray([[-1.  0.]])
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanmax(axis=1)
+        >>> print CArray([[-1, nan], [nan, 0]]).nanmax(axis=1)
         CArray([[-1.]
          [ 0.]])
 
@@ -3552,19 +3553,19 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> import numpy as np
-        >>> print CArray([5, np.nan]).min()
+        >>> from secml.core.constants import nan
+        >>> print CArray([5, nan]).min()
         nan
 
-        >>> print CArray([5, np.nan]).nanmin()
+        >>> print CArray([5, nan]).nanmin()
         5.0
 
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanmin()
+        >>> print CArray([[-1, nan], [nan, 0]]).nanmin()
         -1.0
 
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanmin(axis=0)
+        >>> print CArray([[-1, nan], [nan, 0]]).nanmin(axis=0)
         CArray([[-1.  0.]])
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanmin(axis=1)
+        >>> print CArray([[-1, nan], [nan, 0]]).nanmin(axis=1)
         CArray([[-1.]
          [ 0.]])
 
@@ -3607,19 +3608,19 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> import numpy as np
-        >>> print CArray([5, np.nan]).argmax()
+        >>> from secml.core.constants import nan
+        >>> print CArray([5, nan]).argmax()
         1
 
-        >>> print CArray([5, np.nan]).nanargmax()
+        >>> print CArray([5, nan]).nanargmax()
         0
 
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmax()
+        >>> print CArray([[-1, nan], [nan, 0]]).nanargmax()
         3
 
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmax(axis=0)
+        >>> print CArray([[-1, nan], [nan, 0]]).nanargmax(axis=0)
         CArray([[0 1]])
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmax(axis=1)
+        >>> print CArray([[-1, nan], [nan, 0]]).nanargmax(axis=1)
         CArray([[0]
          [1]])
 
@@ -3660,19 +3661,19 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> import numpy as np
-        >>> print CArray([5, np.nan]).argmin()
+        >>> from secml.core.constants import nan
+        >>> print CArray([5, nan]).argmin()
         1
 
-        >>> print CArray([5, np.nan]).nanargmin()
+        >>> print CArray([5, nan]).nanargmin()
         0
 
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmin()
+        >>> print CArray([[-1, nan], [nan, 0]]).nanargmin()
         0
 
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmin(axis=0)
+        >>> print CArray([[-1, nan], [nan, 0]]).nanargmin(axis=0)
         CArray([[0 1]])
-        >>> print CArray([[-1, np.nan], [np.nan, 0]]).nanargmin(axis=1)
+        >>> print CArray([[-1, nan], [nan, 0]]).nanargmin(axis=1)
         CArray([[0]
          [1]])
 
