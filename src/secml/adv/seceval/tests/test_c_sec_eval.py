@@ -7,21 +7,16 @@ Created on 08 mar 2016
 This module tests the CSecEval class, which performs an attacks on
 a dataset w.r.t increasing attack power
 TODO: Add assertEquals statements to check the correctness of the test
-"""
-from secml.utils import CUnitTest
-from secml.array import CArray
-from secml.data.loader import CDataLoader
-from secml.adv.seceval import CSecEval
-from secml.figure import CFigure
-from secml.utils import data_utils
-from secml.peval.metrics import CRoc
-from secml.data.loader import CDataLoaderMNIST
-from abc import ABCMeta, abstractmethod
-from secml.classifiers import CClassifierSVM
 
-from numpy import random
+"""
+from abc import ABCMeta, abstractmethod
+
+from secml.utils import CUnitTest
+from secml.adv.seceval import CSecEval
 from secml.data.loader import CDLRandomBlobs
-from secml.features.normalization import CNormalizerMinMax
+from secml.figure import CFigure
+from secml.ml.classifiers import CClassifierSVM
+from secml.ml.features.normalization import CNormalizerMinMax
 
 
 class CSecEvalTestCases(object):

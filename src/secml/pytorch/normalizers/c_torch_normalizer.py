@@ -6,7 +6,7 @@
 
 """
 from secml.array import CArray
-from secml.features.normalization import CNormalizer
+from secml.ml.features.normalization import CNormalizer
 
 
 class CTorchNormalizer(CNormalizer):

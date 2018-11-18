@@ -10,7 +10,7 @@ Interface class for evasion and poisoning attacks.
 from secml.core import CCreator
 from secml.core.type_utils import is_int
 from secml.array import CArray
-from secml.classifiers import CClassifier, CClassifierSVM
+from secml.ml.classifiers import CClassifier, CClassifierSVM
 from secml.data import CDataset
 from secml.data.splitter import CDataSplitter
 # from secml.optimization.function import CFunction

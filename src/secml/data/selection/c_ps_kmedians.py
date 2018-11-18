@@ -7,7 +7,7 @@
 """
 from c_prototypes_selector import CPrototypesSelector
 from secml.array import CArray
-from secml.kernel import CKernelEuclidean
+from secml.ml.kernel import CKernelEuclidean
 
 
 class CPSKMedians(CPrototypesSelector):

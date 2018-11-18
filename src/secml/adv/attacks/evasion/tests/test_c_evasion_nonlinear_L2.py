@@ -1,9 +1,9 @@
 from secml.utils import CUnitTest
 from test_c_evasion import CEvasionTestCases
 
-from secml.classifiers import CClassifierSVM
-from secml.features.normalization import CNormalizerMinMax
-from secml.kernel import CKernel
+from secml.ml.classifiers import CClassifierSVM
+from secml.ml.features.normalization import CNormalizerMinMax
+from secml.ml.kernel import CKernel
 from secml.utils import fm
 
 

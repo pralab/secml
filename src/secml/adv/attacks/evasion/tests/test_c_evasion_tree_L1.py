@@ -1,7 +1,7 @@
 from secml.utils import CUnitTest
 from test_c_evasion import CEvasionTestCases
 
-from secml.classifiers import CClassifierDecisionTree
+from secml.ml.classifiers import CClassifierDecisionTree
 from secml.utils import fm
 
 

@@ -1,9 +1,9 @@
 import unittest
 from secml.utils import CUnitTest
 from secml.figure import CFigure
-from secml.classifiers import CClassifierSVM
+from secml.ml.classifiers import CClassifierSVM
 from secml.data.loader import CDLRandom
-from secml.features.normalization import CNormalizerMinMax
+from secml.ml.features.normalization import CNormalizerMinMax
 
 
 class TestCPlot(CUnitTest):

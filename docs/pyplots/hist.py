@@ -1,6 +1,5 @@
 from secml.array import CArray
 from secml.figure import CFigure
-from secml.stats import CDistributionGaussian
 
 fig = CFigure(fontsize=14)
 

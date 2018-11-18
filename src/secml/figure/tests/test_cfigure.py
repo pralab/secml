@@ -5,12 +5,12 @@ Class to test CFigure
 @author: Ambra Demontis
 
 """
-import unittest
+from secml.utils import CUnitTest
+
 from secml.array import CArray
 from secml.data import CDataset
 from secml.figure import CFigure
-from secml.classifiers import CClassifierSVM
-from secml.utils import CUnitTest
+from secml.ml.classifiers import CClassifierSVM
 from secml.core import constants
 
 
@@ -42,7 +42,7 @@ class TestCFigure(CUnitTest):
         """Set up method for tests."""
         self.logger.info("Starting Test...")
         self.logger.info("." * 50)
-        from secml.kernel import CKernelRBF
+        from secml.ml.kernel import CKernelRBF
         self.classifier = CClassifierSVM(kernel=CKernelRBF())
         self.classifier.train(self.dataset)
 
@@ -103,4 +103,4 @@ class TestCFigure(CUnitTest):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

@@ -15,7 +15,7 @@ from secml.data import CDataset
 from secml.core.constants import nan
 from secml.optimization.function import CFunction
 from secml.optimization.constraints import CConstraint
-from secml.classifiers.loss import CLossCrossEntropy
+from secml.ml.classifiers.loss import CLossCrossEntropy
 
 
 class CAttackEvasion(CAttack):

@@ -9,7 +9,7 @@ from secml.array import CArray
 from secml.pytorch.classifiers import CTorchClassifierDenseNetCifar
 from secml.pytorch.normalizers import CNormalizerMeanSTD
 from secml.pytorch.models import dl_pytorch_model
-from secml.peval.metrics import CMetricAccuracy
+from secml.ml.peval.metrics import CMetricAccuracy
 
 use_cuda = torch.cuda.is_available()
 print "Using CUDA: ", use_cuda
