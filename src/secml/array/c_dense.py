@@ -18,6 +18,7 @@ from copy import deepcopy
 from c_array_interface import _CArrayInterface
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_int, is_bool
+from secml.core.constants import inf
 from secml.array.array_utils import is_vector_index
 
 
@@ -1278,7 +1279,7 @@ class CDense(_CArrayInterface):
         if self.size == 0:
             # Special handle as few norms raise error for empty arrays
             if self.ndim == 2 and axis is None and order not in (
-                    None, 'fro', np.inf, -np.inf, 1, -1, 2, -2):
+                    None, 'fro', inf, -inf, 1, -1, 2, -2):
                 raise ValueError("Invalid norm order {:}.".format(order))
             return self.__class__([0.0])
 

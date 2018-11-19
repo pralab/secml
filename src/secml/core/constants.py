@@ -12,11 +12,11 @@ __all__ = ['inf', 'nan', 'eps', 'e', 'pi']
 
 
 """Positive infinity."""
-inf = float('inf')
+inf = np.inf
 
 
 """Not a number."""
-nan = float('nan')
+nan = np.nan
 
 
 """Machine epsilon.

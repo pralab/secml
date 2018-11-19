@@ -9,6 +9,7 @@ from secml.array.c_dense import CDense
 from secml.array.c_sparse import CSparse
 from secml.core.type_utils import \
     is_scalar, is_int, is_bool, is_list, is_list_of_lists
+from secml.core.constants import nan, inf
 
 from numpy import matlib
 
@@ -1222,7 +1223,7 @@ class TestCArray(CUnitTest):
 
             # Adding few nans to array
             array = array.astype(float)  # Arrays with nans have float dtype
-            array[0, 0] = np.nan
+            array[0, 0] = nan
 
             self.logger.info("a: \n{:}".format(array))
             argmin_res = array.nanargmin(axis=None)
@@ -1295,7 +1296,7 @@ class TestCArray(CUnitTest):
 
             # Adding few nans to array
             array = array.astype(float)  # Arrays with nans have float dtype
-            array[0, 0] = np.nan
+            array[0, 0] = nan
 
             self.logger.info("a: \n{:}".format(array))
             argmax_res = array.nanargmax(axis=None)
@@ -2527,7 +2528,7 @@ class TestCArray(CUnitTest):
         def _check_nanminnanmax(func, array, expected):
             # Adding few nans to array
             array = array.astype(float)  # Arrays with nans have float dtype
-            array[0, 0] = np.nan
+            array[0, 0] = nan
 
             self.logger.info("Array:\n{:}".format(array))
 
@@ -2577,18 +2578,18 @@ class TestCArray(CUnitTest):
                              CArray([[0], [0], [0]])))
 
         _check_nanminnanmax('nanmin', self.row_flat_dense,
-                            (0, CArray([np.nan, 0, 6]), CArray([0])))
+                            (0, CArray([nan, 0, 6]), CArray([0])))
 
         _check_nanminnanmax('nanmin', self.row_dense,
-                            (0, CArray([[np.nan, 0, 6]]), CArray([[0]])))
+                            (0, CArray([[nan, 0, 6]]), CArray([[0]])))
 
         _check_nanminnanmax('nanmin', self.column_dense,
-                            (0, CArray([[0]]), CArray([[np.nan], [0], [6]])))
+                            (0, CArray([[0]]), CArray([[nan], [0], [6]])))
 
         _check_nanminnanmax('nanmin', self.single_flat_dense,
-                            (np.nan, CArray([np.nan]), CArray([np.nan])))
+                            (nan, CArray([nan]), CArray([nan])))
         _check_nanminnanmax('nanmin', self.single_dense,
-                            (np.nan, CArray([[np.nan]]), CArray([[np.nan]])))
+                            (nan, CArray([[nan]]), CArray([[nan]])))
 
         self.logger.info("Testing CArray.nanmax()")
 
@@ -2597,18 +2598,18 @@ class TestCArray(CUnitTest):
                              CArray([[5], [4], [6]])))
 
         _check_nanminnanmax('nanmax', self.row_flat_dense,
-                            (6, CArray([np.nan, 0, 6]), CArray([6])))
+                            (6, CArray([nan, 0, 6]), CArray([6])))
 
         _check_nanminnanmax('nanmax', self.row_dense,
-                            (6, CArray([[np.nan, 0, 6]]), CArray([[6]])))
+                            (6, CArray([[nan, 0, 6]]), CArray([[6]])))
 
         _check_nanminnanmax('nanmax', self.column_dense,
-                            (6, CArray([[6]]), CArray([[np.nan], [0], [6]])))
+                            (6, CArray([[6]]), CArray([[nan], [0], [6]])))
 
         _check_nanminnanmax('nanmax', self.single_flat_dense,
-                            (np.nan, CArray([np.nan]), CArray([np.nan])))
+                            (nan, CArray([nan]), CArray([nan])))
         _check_nanminnanmax('nanmax', self.single_dense,
-                            (np.nan, CArray([[np.nan]]), CArray([[np.nan]])))
+                            (nan, CArray([[nan]]), CArray([[nan]])))
 
         with self.assertRaises(NotImplementedError):
             self.array_sparse.nanmin()
@@ -3776,7 +3777,7 @@ class TestCArray(CUnitTest):
         def _check_clip(array, expected):
             self.logger.info("Array:\n{:}".format(array))
 
-            intervals = [(0, 2), (0, np.inf), (-np.inf, 0)]
+            intervals = [(0, 2), (0, inf), (-inf, 0)]
 
             for c_limits_idx, c_limits in enumerate(intervals):
 
@@ -4008,12 +4009,12 @@ class TestCArray(CUnitTest):
         # row_flat_dense = CArray([4, 0, 6])
 
         _check_log(self.array_dense,
-                   CArray([[0., -np.inf, -np.inf, 1.6094],
-                           [0.6931, 1.3863, -np.inf, -np.inf],
-                           [1.0986, 1.7918, -np.inf, -np.inf]]))
-        _check_log(self.row_flat_dense, CArray([1.3863, -np.inf, 1.7918]))
-        _check_log(self.row_dense, CArray([[1.3863, -np.inf, 1.7918]]))
-        _check_log(self.column_dense, CArray([[1.3863], [-np.inf], [1.7918]]))
+                   CArray([[0., -inf, -inf, 1.6094],
+                           [0.6931, 1.3863, -inf, -inf],
+                           [1.0986, 1.7918, -inf, -inf]]))
+        _check_log(self.row_flat_dense, CArray([1.3863, -inf, 1.7918]))
+        _check_log(self.row_dense, CArray([[1.3863, -inf, 1.7918]]))
+        _check_log(self.column_dense, CArray([[1.3863], [-inf], [1.7918]]))
         _check_log(self.single_flat_dense, CArray([1.3863]))
         _check_log(self.single_dense, CArray([[1.3863]]))
 
@@ -4038,13 +4039,13 @@ class TestCArray(CUnitTest):
         # row_flat_dense = CArray([4, 0, 6])
 
         _check_log10(self.array_dense,
-                     CArray([[0., -np.inf, -np.inf, 0.6990],
-                             [0.3010, 0.6021, -np.inf, -np.inf],
-                             [0.4771, 0.7782, -np.inf, -np.inf]]))
-        _check_log10(self.row_flat_dense, CArray([0.6021, -np.inf, 0.7782]))
-        _check_log10(self.row_dense, CArray([[0.6021, -np.inf, 0.7782]]))
+                     CArray([[0., -inf, -inf, 0.6990],
+                             [0.3010, 0.6021, -inf, -inf],
+                             [0.4771, 0.7782, -inf, -inf]]))
+        _check_log10(self.row_flat_dense, CArray([0.6021, -inf, 0.7782]))
+        _check_log10(self.row_dense, CArray([[0.6021, -inf, 0.7782]]))
         _check_log10(self.column_dense,
-                     CArray([[0.6021], [-np.inf], [0.7782]]))
+                     CArray([[0.6021], [-inf], [0.7782]]))
         _check_log10(self.single_flat_dense, CArray([0.6021]))
         _check_log10(self.single_dense, CArray([[0.6021]]))
 
@@ -4078,12 +4079,12 @@ class TestCArray(CUnitTest):
                             [1.4142, 2., 0., 0.],
                             [1.7320, 2.4495, 0., 0.]], tosparse=True))
         _check_sqrt(self.row_flat_dense, CArray([2., 0., 2.4495]))
-        _check_sqrt(CArray([4., 0., -3.]), CArray([2., 0., np.nan]))
+        _check_sqrt(CArray([4., 0., -3.]), CArray([2., 0., nan]))
         _check_sqrt(self.row_dense, CArray([[2., 0., 2.4495]]))
         _check_sqrt(self.row_sparse, CArray([[2., 0., 2.4495]], tosparse=True))
-        _check_sqrt(CArray([[4., 0., -3.]]), CArray([[2., 0., np.nan]]))
+        _check_sqrt(CArray([[4., 0., -3.]]), CArray([[2., 0., nan]]))
         _check_sqrt(CArray([4., 0., -3.], tosparse=True),
-                    CArray([[2., 0., np.nan]], tosparse=True))
+                    CArray([[2., 0., nan]], tosparse=True))
         _check_sqrt(self.column_dense, CArray([[2.], [0.], [2.4495]]))
         _check_sqrt(self.column_sparse,
                     CArray([[2.], [0.], [2.4495]], tosparse=True))
@@ -4329,7 +4330,7 @@ class TestCArray(CUnitTest):
         def _check_norm(array):
             self.logger.info("array:\n{:}".format(array))
 
-            for ord_idx, order in enumerate((None, 'fro', np.inf, -np.inf,
+            for ord_idx, order in enumerate((None, 'fro', inf, -inf,
                                            0, 1, -1, 2, -2, 3, -3)):
 
                 if order == 'fro':  # Frobenius is a matrix norm
@@ -4397,7 +4398,7 @@ class TestCArray(CUnitTest):
 
             for axis_idx, axis in enumerate((None, 0, 1)):
                 for ord_idx, order in enumerate(
-                        (None, 'fro', np.inf, -np.inf, 1, -1, 2, -2, 3, -3)):
+                        (None, 'fro', inf, -inf, 1, -1, 2, -2, 3, -3)):
 
                     if axis is None and order in (2, -2):
                         self.logger.info(
