@@ -1,8 +1,9 @@
 """
-.. module:: KernelLaplacian
-   :synopsis: Laplacian kernel
+.. module:: KernelChebyshevDistance
+   :synopsis: Chebyshev distances kernel
 
-.. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
 
 """
@@ -13,12 +14,12 @@ from secml.ml.kernel import CKernel
 import numpy as np
 
 
-class CKernelMax(CKernel):
-    """Max-norm Kernel.
+class CKernelChebyshevDistance(CKernel):
+    """Chebyshev distances kernel.
 
-    Given matrices X and Y, this is computed by::
+    Given matrices X and Y, this is computed as::
 
-        K(x, y) = exp(-gamma max(|x-y|_\inf)
+        K(x, y) = max(|x - y|)
 
     for each pair of rows in X and in Y.
 
@@ -26,19 +27,25 @@ class CKernelMax(CKernel):
     ----------
     cache_size : int, size of the cache used for kernel computation. Default 100.
 
-    Parameters
-    ----------
-    gamma : float
-        Default is 1.0. Equals to `-0.5 * sigma^-2` in the standard
-        formulation of rbf kernel, it is a free parameter to be used
-        for balancing.
+    Examples
+    --------
+    >>> from secml.array import CArray
+    >>> from secml.ml.kernel.c_kernel_chebyshev_distance import CKernelChebyshevDistance
+
+    >>> print CKernelChebyshevDistance().k(CArray([[1,2],[3,4]]), CArray([[5,6],[7,8]]))
+    CArray([[ 4.  6.]
+     [ 2.  4.]])
+
+    >>> print CKernelChebyshevDistance().k(CArray([[1,2],[3,4]]))
+    CArray([[ 0.  2.]
+     [ 2.  0.]])
 
     """
     class_type = 'max'
 
     def __init__(self, gamma=1.0, cache_size=100):
         # Calling CKernel constructor
-        super(CKernelMax, self).__init__(cache_size=cache_size)
+        super(CKernelChebyshevDistance, self).__init__(cache_size=cache_size)
         # Using a float gamma to avoid dtype casting problems
         self.gamma = gamma
 
@@ -62,7 +69,7 @@ class CKernelMax(CKernel):
         self._gamma = float(gamma)
 
     def _k(self, x, y):
-        """Compute the laplacian kernel between x and y.
+        """Compute the Chebyshev distances kernel between x and y.
 
         Parameters
         ----------
@@ -81,21 +88,15 @@ class CKernelMax(CKernel):
         :meth:`.CKernel.k` : Main computation interface for kernels.
 
         """
-        # sklearn > 0.17 has the class pairwise.laplacian_kernel
-        # For compatibility reasons, we keep using pairwise_distances
-        K = metrics.pairwise.pairwise_distances(
-            CArray(x).get_data(), CArray(y).get_data(), metric=self._max_norm)
-        return CArray(np.exp(-self.gamma * K))
-
-    def _max_norm(self, x, y):
-        return np.max(abs(x-y))
+        return CArray(metrics.pairwise.pairwise_distances(
+            x.get_data(), y.get_data(), metric='chebyshev'))
 
     def _gradient(self, u, v):
-        """Calculate Max kernel gradient wrt vector 'v'.
+        """Calculate Chebyshev distances kernel gradient wrt vector 'v'.
 
-        The gradient of Laplacian kernel is given by::
+        The gradient of Chebyshev distances kernel is given by::
 
-            dK(u,v)/dv =  gamma * k(u,v) * sign(u - v)
+            dK(u,v)/dv =  k(u,v) * sign(u - v)
 
         Parameters
         ----------
@@ -121,11 +122,10 @@ class CKernelMax(CKernel):
             raise ValueError(
                 "Both input arrays must be 2-Dim of shape (1, n_features).")
 
-        g = u-v
+        g = u - v
         m = abs(g).max()
         g[abs(g) != m] = 0
         g[g == m] = 1
         g[g == -m] = -1
 
-        return CArray(self.gamma *
-                      self._k(u_carray, v_carray) * g)
+        return self._k(u_carray, v_carray) * g
