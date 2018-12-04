@@ -11,7 +11,6 @@ from sklearn import metrics
 
 from secml.array import CArray
 from secml.ml.kernel import CKernel
-import numpy as np
 
 
 class CKernelChebyshevDistance(CKernel):
