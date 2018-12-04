@@ -29,22 +29,20 @@ class CKernelLaplacian(CKernel):
     Parameters
     ----------
     gamma : float
-        Default is 1.0. Equals to `-0.5 * sigma^-2` in the standard
-        formulation of rbf kernel, it is a free parameter to be used
-        for balancing.
+        Default is 1.0.
 
     Examples
     --------
     >>> from secml.array import CArray
     >>> from secml.ml.kernel.c_kernel_laplacian import CKernelLaplacian
 
-    >>> print CKernelLaplacian(gamma=0.01).k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
-    CArray([[ 0.76337949  0.51170858]
-     [ 0.7945336   0.5325918 ]])
+    >>> print CKernelLaplacian(gamma=0.01).k(CArray([[1,2],[3,4]]), CArray([[10,0],[0,40]]))
+    CArray([[ 0.895834  0.677057]
+     [ 0.895834  0.677057]])
 
     >>> print CKernelLaplacian().k(CArray([[1,2],[3,4]]))
-    CArray([[ 1.          0.01831564]
-     [ 0.01831564  1.        ]])
+    CArray([[ 1.        0.018316]
+     [ 0.018316  1.      ]])
 
     """
     class_type = 'laplacian'
@@ -77,11 +75,15 @@ class CKernelLaplacian(CKernel):
     def _k(self, x, y):
         """Compute the laplacian kernel between x and y.
 
+        The gradient of laplacian kernel is given by::
+
+            dK(x,v)/dv = gamma * k(x,v) * sign(x - v)
+
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             First array of shape (n_x, n_features).
-        y : CArray or array_like
+        y : CArray
             Second array of shape (n_y, n_features).
 
         Returns
@@ -94,23 +96,67 @@ class CKernelLaplacian(CKernel):
         :meth:`.CKernel.k` : Main computation interface for kernels.
 
         """
-        # sklearn > 0.17 has the class pairwise.laplacian_kernel
-        # For compatibility reasons, we keep using pairwise_distances
-        K = metrics.pairwise.pairwise_distances(
-            CArray(x).get_data(), CArray(y).get_data(), metric='cityblock')
-        return CArray(np.exp(-self.gamma * K))
+        return CArray(metrics.pairwise.laplacian_kernel(
+            CArray(x).get_data(), CArray(y).get_data(), gamma=self.gamma))
 
-    def _gradient(self, u, v):
-        """Calculate Laplacian kernel gradient wrt vector 'v'.
+    def gradient(self, x, v):
+        """Calculates laplacian kernel gradient wrt vector 'v'.
 
-        The gradient of Laplacian kernel is given by::
+        The gradient of laplacian kernel is given by::
 
-            dK(u,v)/dv =  gamma * k(u,v) * sign(u - v)
+            dK(x,v)/dv =  gamma * k(x,v) * sign(x - v)
 
         Parameters
         ----------
-        u : CArray
-            First array of shape (1, n_features).
+        x : CArray
+            First array of shape (n_x, n_features).
+        v : CArray
+            Second array of shape (n_features, ) or (1, n_features).
+
+        Returns
+        -------
+        kernel_gradient : CArray
+            Kernel gradient of x with respect to vector v. Array of
+            shape (n_x, n_features) if n_x > 1, else a flattened
+            array of shape (n_features, ).
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+        >>> from secml.ml.kernel.c_kernel_laplacian import CKernelLaplacian
+
+        >>> array = CArray([[15,0], [0,55]])
+        >>> vector = CArray([2,5])
+        >>> print CKernelLaplacian(gamma=0.01).gradient(array, vector)
+        CArray([[ 0.008353 -0.008353]
+         [-0.005945  0.005945]])
+
+        >>> print CKernelLaplacian().gradient(vector, vector)
+        CArray([ 0.  0.])
+
+        """
+        # Checking if second array is a vector
+        if v.is_vector_like is False:
+            raise ValueError(
+                "kernel gradient can be computed only wrt vector-like arrays.")
+
+        x_2d = x.atleast_2d()
+        v_2d = v.atleast_2d()
+
+        grad = self._gradient(x_2d, v_2d)
+        return grad.ravel() if x_2d.shape[0] == 1 else grad
+
+    def _gradient(self, x, v):
+        """Calculate laplacian kernel gradient wrt vector 'v'.
+
+        The gradient of laplacian kernel is given by::
+
+            dK(x,v)/dv =  gamma * k(x,v) * sign(x - v)
+
+        Parameters
+        ----------
+        x : CArray
+            First array of shape (n_x, n_features).
         v : CArray
             Second array of shape (1, n_features).
 
@@ -125,12 +171,16 @@ class CKernelLaplacian(CKernel):
         :meth:`.CKernel.gradient` : Gradient computation interface for kernels.
 
         """
-        u_carray = CArray(u)
-        v_carray = CArray(v)
-        if u_carray.shape[0] + v_carray.shape[0] > 2:
+        if v.shape[0] > 1:
             raise ValueError(
-                "Both input arrays must be 2-Dim of shape (1, n_features).")
+                "2nd array must have shape shape (1, n_features).")
 
-        return CArray(self.gamma *
-                      self._k(u_carray, v_carray) *
-                      (u_carray - v_carray).sign())
+        if v.issparse is True:
+            # Broadcasting not supported for sparse arrays
+            v_broadcast = v.repmat(x.shape[0], 1)
+        else:  # Broadcasting is supported by design for dense arrays
+            v_broadcast = v
+
+        diff = (x - v_broadcast)
+
+        return self.gamma * self._k(x, v) * diff.sign()
