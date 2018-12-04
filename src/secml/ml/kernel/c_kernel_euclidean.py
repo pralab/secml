@@ -16,9 +16,10 @@ class CKernelEuclidean(CKernel):
 
     Given matrices X and Y, this is computed by::
 
-        K(x, y) = ||x-y||^2
+        K(x, y) = sqrt(dot(x, x) - 2 * dot(x, y) + dot(y, y))
 
     for each pair of rows in X and in Y.
+    If parameter squared is True (default False), sqrt() operation is avoided.
 
     Examples
     --------
@@ -26,12 +27,12 @@ class CKernelEuclidean(CKernel):
     >>> from secml.ml.kernel.c_kernel_euclidean import CKernelEuclidean
 
     >>> print CKernelEuclidean().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
-    CArray([[ 20.1246118   47.80167361]
-     [ 17.4642492   45.        ]])
+    CArray([[ 20.124612  47.801674]
+     [ 17.464249  45.      ]])
 
     >>> print CKernelEuclidean().k(CArray([[1,2],[3,4]]))
-    CArray([[ 0.          2.82842712]
-     [ 2.82842712  0.        ]])
+    CArray([[ 0.        2.828427]
+     [ 2.828427  0.      ]])
 
     """
     class_type = 'euclidean'
@@ -40,15 +41,22 @@ class CKernelEuclidean(CKernel):
 
         super(CKernelEuclidean, self).__init__(cache_size=cache_size)
 
-    def _k(self, x, y):
+    def _k(self, x, y, squared=False,
+           x_norm_squared=None, y_norm_squared=None):
         """Compute the euclidean kernel between x and y.
 
         Parameters
         ----------
-        x : CArray or array_like
+        x : CArray
             First array of shape (n_x, n_features).
-        y : CArray or array_like
+        y : CArray
             Second array of shape (n_y, n_features).
+        squared : bool, optional
+            If True, return squared Euclidean distances. Default False
+        x_norm_squared : CArray or None, optional
+            Pre-computed dot-products of vectors in x (e.g., (x**2).sum(axis=1)).
+        y_norm_squared : CArray or None, optional
+            Pre-computed dot-products of vectors in y (e.g., (y**2).sum(axis=1)).
 
         Returns
         -------
@@ -60,8 +68,9 @@ class CKernelEuclidean(CKernel):
         :meth:`.CKernel.k` : Main computation interface for kernels.
 
         """
-        return CArray(metrics.pairwise.pairwise_distances(
-            CArray(x).get_data(), CArray(y).get_data(), metric='euclidean'))
+        return CArray(metrics.pairwise.euclidean_distances(
+            x.get_data(), y.get_data(), squared=squared,
+            X_norm_squared=x_norm_squared, Y_norm_squared=y_norm_squared))
 
     def _gradient(self, u, v):
         """Calculate Euclidean kernel gradient wrt vector 'v'."""
