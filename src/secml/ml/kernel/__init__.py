@@ -6,4 +6,4 @@ from c_kernel_histintersect import CKernelHistIntersect
 from c_kernel_laplacian import CKernelLaplacian
 from c_kernel_hamming import CKernelHamming
 from c_kernel_euclidean import CKernelEuclidean
-from c_kernel_max import CKernelMax
+from c_kernel_chebyshev_distance import CKernelChebyshevDistance
