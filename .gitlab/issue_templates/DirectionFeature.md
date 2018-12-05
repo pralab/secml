@@ -9,9 +9,11 @@ filtered by the "direction" label.
 and verify the issue you're about to submit isn't a duplicate.
 --->
 
+ A direction feature is a **major feature** for the project. It is often a new feature (add ~"new feature" label in this case) or a features that need massive overhaul.)
+
 ### Summary
 
-(Summarize the direction feature to be developed. A direction feature is a **major feature** for the project.)
+(Summarize the direction feature to be developed.)
 
 ### List of *priority* issues
 
