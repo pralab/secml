@@ -15,13 +15,13 @@ and verify the issue you're about to submit isn't a duplicate.
 
 ### List of *priority* issues
 
-(After all issues in this list have been completed, the feature can be integrated into `develop`.)
+(After all issues in this list have been completed, the feature can be integrated into `develop` if has the ~"early integration" label. Priority list must include idea discussions, design discussions, integration problems, basic test cases and other critical issues that must be sorted out *asap*. All other issues must go to the *other issues* list.)
 
 * [ ] Priority Issue 1 title #ID
 
 ### List of other issues
 
-(After all issues in this list have been completed in addition to the priority issues, feature can be scheduled for release.)
+(After all issues in this list have been completed in addition to the priority issues, feature can be scheduled for release. Other issues often include extensive test cases and documentation.)
 
 * [ ] Issue 1 title #ID
 
