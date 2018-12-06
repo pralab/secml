@@ -111,7 +111,14 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         xc0 = xc.deepcopy()
 
         d = xc.size
-        C = clf.C
+
+        if hasattr(clf, 'C'):
+            C = clf.C
+        elif hasattr(clf, 'alpha'):
+            C = 1.0 / clf.alpha
+        else:
+            raise ValueError("Error: The classifier does not have neither C "
+                             "nor alpha")
 
         # change vector dimensions to match the mathematical formulation...
 
