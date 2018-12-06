@@ -8,9 +8,9 @@
 
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
+
 from secml.array import CArray
 from secml.core import CCreator
-from secml.data import CDataset
 
 
 class CDataLoader(CCreator):
@@ -20,8 +20,10 @@ class CDataLoader(CCreator):
 
     @abstractproperty
     def class_type(self):
-        """Type of the data loader (str). Will be used by `.create()`."""
-        raise NotImplementedError
+        """Defines class type."""
+        raise NotImplementedError("the class must define `class_type` "
+                                  "attribute to support `CCreator.create()` "
+                                  "function properly.")
 
     @abstractmethod
     def load(self, *args, **kwargs):

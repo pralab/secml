@@ -39,8 +39,10 @@ class CKernel(CCreator):
     
     @abstractproperty
     def class_type(self):
-        """Type of the kernel (str). Will be used by `.create()`."""
-        raise NotImplementedError
+        """Defines class type."""
+        raise NotImplementedError("the class must define `class_type` "
+                                  "attribute to support `CCreator.create()` "
+                                  "function properly.")
 
     @abstractmethod
     def _k(self, x, y):

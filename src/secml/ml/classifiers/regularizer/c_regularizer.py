@@ -7,6 +7,7 @@
 
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
+
 from secml.core import CCreator
 
 
@@ -17,8 +18,10 @@ class CRegularizer(CCreator):
 
     @abstractproperty
     def class_type(self):
-        """Defines regularizer type."""
-        raise NotImplementedError()
+        """Defines class type."""
+        raise NotImplementedError("the class must define `class_type` "
+                                  "attribute to support `CCreator.create()` "
+                                  "function properly.")
 
     @abstractmethod
     def regularizer(self, *args, **kwargs):

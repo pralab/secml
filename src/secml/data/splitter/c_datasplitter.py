@@ -38,8 +38,10 @@ class CDataSplitter(CCreator):
 
     @abstractproperty
     def class_type(self):
-        """Dataset splitting type. Must be reimplemented by subclasses."""
-        raise NotImplementedError()
+        """Defines class type."""
+        raise NotImplementedError("the class must define `class_type` "
+                                  "attribute to support `CCreator.create()` "
+                                  "function properly.")
 
     def __clear(self):
         """Reset the object."""

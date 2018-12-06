@@ -30,7 +30,8 @@ class CFunction(CCreator):
 
     """
     __super__ = 'CFunction'
-    class_type = 'function'
+
+    class_type = None
 
     def __init__(self, fun=None, gradient=None, n_dim=None):
 

@@ -7,11 +7,11 @@
     @author: Battista Biggio
 
 """
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 from secml.core import CCreator
 from secml.optimization.function import CFunction
 from secml.optimization.constraints import CConstraint
-from abc import ABCMeta, abstractmethod
 
 
 class CSolver(CCreator):
@@ -80,6 +80,13 @@ class CSolver(CCreator):
         self._x_seq = None  # sequence of x values at each iteration
         self._f_eval = 0
         self._grad_eval = 0
+
+    @abstractproperty
+    def class_type(self):
+        """Defines class type."""
+        raise NotImplementedError("the class must define `class_type` "
+                                  "attribute to support `CCreator.create()` "
+                                  "function properly.")
 
     ###########################################################################
     #                           READ-ONLY ATTRIBUTES

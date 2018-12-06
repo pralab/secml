@@ -6,6 +6,7 @@ Class CAttack
 Interface class for evasion and poisoning attacks.
 
 """
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 from secml.core import CCreator
 from secml.core.type_utils import is_int
@@ -16,7 +17,6 @@ from secml.data.splitter import CDataSplitter
 # from secml.optimization.function import CFunction
 # from secml.optimization.constraints import CConstraint
 # from secml.adv.attacks.evasion.solvers import CSolver
-from abc import ABCMeta, abstractmethod
 
 
 class CAttack(CCreator):
@@ -140,6 +140,13 @@ class CAttack(CCreator):
         # clear solver
         if self._solver is not None:
             self._solver.clear()
+
+    @abstractproperty
+    def class_type(self):
+        """Defines class type."""
+        raise NotImplementedError("the class must define `class_type` "
+                                  "attribute to support `CCreator.create()` "
+                                  "function properly.")
 
     @property
     def attack_classes(self):

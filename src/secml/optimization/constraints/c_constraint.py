@@ -1,13 +1,13 @@
-'''
-
+"""
 This module implements the generic constraint class
 Implements equality/inequality constraints in the canonic form
     c(x) <= 0
 
 @author: Battista Biggio
-'''
+"""
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
+
 from secml.core import CCreator
 from secml.array import CArray
 
@@ -17,11 +17,12 @@ class CConstraint(CCreator):
     __metaclass__ = ABCMeta
     __super__ = 'CConstraint'
 
-    @property
+    @abstractproperty
     def class_type(self):
-        """Defines constraint type."""
-        raise NotImplementedError(
-            "define `class_type` attribute to support `CCreator.create()`.")
+        """Defines class type."""
+        raise NotImplementedError("the class must define `class_type` "
+                                  "attribute to support `CCreator.create()` "
+                                  "function properly.")
 
     # This is not abstract as some constraints may not be differentiable
     def _gradient(self, x):
