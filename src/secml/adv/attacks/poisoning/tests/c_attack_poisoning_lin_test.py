@@ -114,7 +114,7 @@ class CAttackPoisoningLinTest(CCreator):
 
         grad = self._grads_computation(xc)
 
-        norm = grad.norm()
+        norm = grad.norm_2d()
         grad = grad / norm if norm > 0 else grad
 
         return grad[:, 0].ravel()
@@ -123,7 +123,7 @@ class CAttackPoisoningLinTest(CCreator):
 
         grad = self._grads_computation(xc)
 
-        norm = grad.norm()
+        norm = grad.norm_2d()
         grad = grad / norm if norm > 0 else grad
 
         return grad[:, 1].ravel()
@@ -132,7 +132,7 @@ class CAttackPoisoningLinTest(CCreator):
 
         grad = self._grads_computation(xc)
 
-        norm = grad.norm()
+        norm = grad.norm_2d()
         grad = grad / norm if norm > 0 else grad
 
         return grad[:, 2].ravel()
