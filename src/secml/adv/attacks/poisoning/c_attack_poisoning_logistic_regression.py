@@ -5,11 +5,10 @@
     @author: Ambra Demontis
 
 """
-from scipy import linalg
 
-from advlib.poisoning import CAttackPoisoning
-from prlib.array import CArray
-from prlib.classifiers.clf_utils import extend_binary_labels
+from secml.adv.attacks.poisoning import CAttackPoisoning
+from secml.array import CArray
+from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
 class CAttackPoisoningLogisticRegression(CAttackPoisoning):
@@ -26,7 +25,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
                  ub=1,
                  discrete=False,
                  y_target=None,
-                 attack_classes=-1,
+                 attack_classes='all',
                  solver_type=None,
                  solver_params=None,
                  init_type='random',
@@ -116,7 +115,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
 
         # change vector dimensions to match the mathematical formulation...
 
-        yc = extend_binary_labels(yc)
+        yc = convert_binary_labels(yc)
         xc = CArray(xc.ravel()).atleast_2d()  # xc is a row vector
 
         w = CArray(clf.w.ravel()).T  # column vector
@@ -126,7 +125,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         # training points
         x = tr.X.atleast_2d()
         y = tr.Y.ravel()
-        y = extend_binary_labels(y)
+        y = convert_binary_labels(y)
         y = CArray(y).astype(float).T  # column vector
         n = tr.num_samples
 

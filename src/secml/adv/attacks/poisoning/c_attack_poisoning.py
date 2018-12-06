@@ -9,15 +9,15 @@
 import warnings
 from abc import ABCMeta, abstractmethod
 
-from advlib import CAttack
-from advlib.evasion.solvers import CSolver
-from prlib.array import CArray
-from prlib.classifiers.loss import CLoss
-from prlib.data import CDataset
-from prlib.optimization.constraints import CConstraint
-from prlib.optimization.constraints import CConstraintL2
-from prlib.optimization.function import CFunction
-from prlib.peval.metrics import CMetric
+from secml.adv.attacks import CAttack
+from secml.adv.attacks.evasion.solvers import CSolver
+from secml.array import CArray
+from secml.ml.classifiers.loss import CLoss
+from secml.data import CDataset
+from secml.optimization.constraints import CConstraint
+from secml.optimization.constraints import CConstraintL2
+from secml.optimization.function import CFunction
+from secml.ml.peval.metrics import CMetric
 
 
 class CAttackPoisoning(CAttack):
@@ -37,7 +37,7 @@ class CAttackPoisoning(CAttack):
                  ub=1,
                  discrete=False,
                  y_target=None,
-                 attack_classes=-1,
+                 attack_classes='all',
                  solver_type=None,
                  solver_params=None,
                  init_type='random',
@@ -93,13 +93,13 @@ class CAttackPoisoning(CAttack):
                 loss_name = 'logistic'
             else:
                 print "POISONING ATTACK WITH QUADRATIC LOSS"
-                loss_name = 'squared_loss'
+                loss_name = 'square'
         elif classifier.class_type == 'logistic':
             print "POISONING ATTACK WITH LOGISTIC LOSS"
             loss_name = 'logistic'
         elif classifier.class_type == 'ridge':
             print "POISONING ATTACK WITH QUADRATIC LOSS"
-            loss_name = 'squared_loss'
+            loss_name = 'square'
             # loss_name = 'softmax'
         else:
             loss_name = 'logistic'
@@ -108,13 +108,14 @@ class CAttackPoisoning(CAttack):
         # loss_name = 'hinge'
 
         self._attacker_loss = CLoss.create(
-            loss_name, extend_binary_labels=True)
+            loss_name)
 
-        if loss_name == 'softmax':
-            self._init_loss = self._attacker_loss
-        else:
-            self._init_loss = CLoss.create('softmax',
-                                           extend_binary_labels=True)
+        # if loss_name == 'softmax':
+        #     self._init_loss = self._attacker_loss
+        # else:
+        #     self._init_loss = CLoss.create('softmax')
+
+        self._init_loss = self._attacker_loss
 
         # hashing xc to avoid re-training clf when xc does not change
         self._xc_hash = None
@@ -776,5 +777,3 @@ class CAttackPoisoning(CAttack):
         gt = -G.dot(v.T)
         return gt.ravel()
 
-#fixme: rimuovere loss-based init
-#aggiungere dei test con funzioni note

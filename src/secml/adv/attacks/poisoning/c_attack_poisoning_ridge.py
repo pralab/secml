@@ -7,13 +7,9 @@
 
 """
 
-from scipy import linalg
-from scipy.sparse import linalg as linalgsparse
-import warnings
-
-from advlib.poisoning import CAttackPoisoning
-from prlib.array import CArray
-from prlib.classifiers.clf_utils import extend_binary_labels
+from secml.adv.attacks.poisoning import CAttackPoisoning
+from secml.array import CArray
+from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
 class CAttackPoisoningRidge(CAttackPoisoning):
@@ -30,7 +26,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
                  ub=1,
                  discrete=False,
                  y_target=None,
-                 attack_classes=-1,
+                 attack_classes='all',
                  solver_type=None,
                  solver_params=None,
                  init_type=None,
@@ -102,7 +98,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         """
 
         # todo: bisognerebbe mettere un parametero per questo (nel caso l'attacco sia contro un regressore non ci va)
-        yc = extend_binary_labels(yc)
+        yc = convert_binary_labels(yc)
 
         xc0 = xc.deepcopy()
 

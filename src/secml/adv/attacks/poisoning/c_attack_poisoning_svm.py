@@ -6,8 +6,8 @@
 
 """
 
-from advlib.poisoning import CAttackPoisoning
-from prlib.array import CArray
+from secml.adv.attacks.poisoning import CAttackPoisoning
+from secml.array import CArray
 
 
 class CAttackPoisoningSVM(CAttackPoisoning):
@@ -26,7 +26,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
                  ub=1,
                  discrete=False,
                  y_target=None,
-                 attack_classes=-1,
+                 attack_classes='all',
                  solver_type=None,
                  solver_params=None,
                  init_type='random',
