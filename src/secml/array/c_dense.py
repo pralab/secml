@@ -20,7 +20,7 @@ from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_int, is_bool
 from secml.core.constants import inf
 from secml.array.array_utils import is_vector_index
-
+import hashlib
 
 class CDense(_CArrayInterface):
     """Dense array. Encapsulation for np.ndarray."""
@@ -2108,3 +2108,14 @@ class CDense(_CArrayInterface):
         """
         xi = list(x.tondarray() if isinstance(x, cls) else x for x in xi)
         return tuple(cls(elem) for elem in np.meshgrid(*xi, indexing=indexing))
+
+    def sha1(self):
+        """Calculate the array sha1 hash.
+
+        Returns
+        -------
+        hash_str : String
+            New array hash.
+
+        """
+        return hashlib.sha1(self.tondarray()).hexdigest()
