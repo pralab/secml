@@ -10,7 +10,7 @@ from secml.optimization.constraints import CConstraintBox
 from secml.optimization.function import CFunction
 from secml.optimization import COptimizer
 from secml.ml.peval.metrics import CMetric
-from secml.ml.classifiers import CClassifierSVM, CClassifierRidge
+from secml.ml.classifiers import CClassifierSVM, CClassifierRidge, CClassifierSGD
 from secml.adv.attacks.poisoning import CAttackPoisoningLogisticRegression, \
     CAttackPoisoningRidge, CAttackPoisoningSVM
 from secml.adv.attacks.poisoning.tests import CAttackPoisoningLinTest
@@ -63,15 +63,16 @@ class TestCPoisoning(CCreator):
 
         self._blob_dataset_creation()
 
-        #self.clf_idx = 'logistic'  # logistic | net
-        self.clf_idx = 'ridge'  # logistic | net
+        self.clf_idx = 'logistic'  # logistic | net
+        #self.clf_idx = 'ridge'  # logistic | net
 
         ######################
 
         if self.clf_idx == 'logistic':
-            self.classifier = CClassifierLogistic(C=100, normalizer=None,
-                                                  random_seed=self.seed)
+            #self.classifier = CClassifierLogistic(C=100, normalizer=None,
+             #                                     random_seed=self.seed)
 
+            self.classifier = CClassifierSGD(loss='logistic', regularizer='l2')
 
             self.pois_class = CAttackPoisoningLogisticRegression
 
