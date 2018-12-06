@@ -5,7 +5,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from prlib.core import CCreator
+from secml.core import CCreator
 
 
 class CAttackPoisoningLinTest(CCreator):
