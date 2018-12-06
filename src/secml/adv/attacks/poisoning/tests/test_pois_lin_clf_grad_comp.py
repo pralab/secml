@@ -72,7 +72,8 @@ class TestCPoisoning(CCreator):
             #self.classifier = CClassifierLogistic(C=100, normalizer=None,
              #                                     random_seed=self.seed)
 
-            self.classifier = CClassifierSGD(loss='logistic', regularizer='l2')
+            self.classifier = CClassifierSGD(loss='log', regularizer='l2')
+
 
             self.pois_class = CAttackPoisoningLogisticRegression
 
@@ -403,7 +404,3 @@ class TestCPoisoning(CCreator):
                          levels=[self.discr_f_level], colorbar=False)
 
 TestCPoisoning().test_poisoning()
-
-
-#ridge (aggiornare la fboj)
-#logistic provare con sgd ma poi importare il logistic regressor
