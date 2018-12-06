@@ -84,25 +84,31 @@ class CAttackPoisoning(CAttack):
         # self._attacker_loss = CLoss.create(
         #    'softmax', extend_binary_labels=True)
 
+        # fixme: aggiungere il softmax loss e usare quello per tutti
+
         if classifier.class_type == 'svm':
             print "POISONING ATTACK WITH HINGE LOSS"
             loss_name = 'hinge'
         elif classifier.class_type == 'pytorch-lin':
             if self.classifier._clf_type == 'logistic':
                 print "POISONING ATTACK WITH LOGISTIC LOSS"
-                loss_name = 'logistic'
+                loss_name = 'log'
             else:
                 print "POISONING ATTACK WITH QUADRATIC LOSS"
                 loss_name = 'square'
         elif classifier.class_type == 'logistic':
             print "POISONING ATTACK WITH LOGISTIC LOSS"
-            loss_name = 'logistic'
+            loss_name = 'log'
+        elif classifier.class_type == 'sgd' and \
+                        classifier.loss.class_type=='sgd':
+            print "POISONING ATTACK WITH LOGISTIC LOSS"
+            loss_name = 'log'
         elif classifier.class_type == 'ridge':
             print "POISONING ATTACK WITH QUADRATIC LOSS"
             loss_name = 'square'
             # loss_name = 'softmax'
         else:
-            loss_name = 'logistic'
+            loss_name = 'log'
             #raise NotImplementedError
 
         # loss_name = 'hinge'
