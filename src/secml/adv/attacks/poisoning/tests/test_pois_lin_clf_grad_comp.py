@@ -14,7 +14,6 @@ from secml.ml.classifiers import CClassifierSVM, CClassifierRidge, CClassifierSG
 from secml.adv.attacks.poisoning import CAttackPoisoningLogisticRegression, \
     CAttackPoisoningRidge, CAttackPoisoningSVM
 from secml.adv.attacks.poisoning.tests import CAttackPoisoningLinTest
-#from secml.ml.classifiers import CClassifierLogistic
 
 class TestCPoisoning(CCreator):
 
@@ -146,7 +145,7 @@ class TestCPoisoning(CCreator):
     #                             TESTED METHODS
     #####################################################################
 
-    def _grad_check(self, xc):
+    def grad_check(self, xc):
         # Compare analytical gradient with its numerical approximation
         check_grad_val = COptimizer(
             CFunction(self.poisoning._objective_function,
@@ -269,40 +268,36 @@ class TestCPoisoning(CCreator):
 
                 fig.subplot(n_rows, n_cols, grid_slot=1)
                 fig.sp.title('w1 wrt xc')
-                self._plot_func(fig, debug_pois_obj.w1)
-                self._plot_obj_grads(
-                    fig, debug_pois_obj.gradient_w1_xc)
-                self._plot_ds(fig, self.tr)
-                self._plot_clf(fig, pois_clf, self.tr, background=False)
-                self._plot_box(fig)
+                self._plot_param_sub(fig, debug_pois_obj.w1,
+                                     debug_pois_obj.gradient_w1_xc, pois_clf)
 
                 fig.subplot(n_rows, n_cols, grid_slot=2)
                 fig.sp.title('w2 wrt xc')
-                self._plot_func(fig, debug_pois_obj.w2)
-                self._plot_obj_grads(
-                    fig, debug_pois_obj.gradient_w2_xc)
-                self._plot_ds(fig, self.tr)
-                self._plot_clf(fig, pois_clf, self.tr, background=False)
-                self._plot_box(fig)
+                self._plot_param_sub(fig, debug_pois_obj.w2,
+                                     debug_pois_obj.gradient_w2_xc, pois_clf)
 
                 fig.subplot(n_rows, n_cols, grid_slot=3)
                 fig.sp.title('b wrt xc')
-                self._plot_func(fig, debug_pois_obj.b)
-                self._plot_obj_grads(
-                    fig, debug_pois_obj.gradient_b_xc)
-                self._plot_ds(fig, self.tr)
-                self._plot_clf(fig, pois_clf, self.tr, background=False)
-                self._plot_box(fig)
+                self._plot_param_sub(fig, debug_pois_obj.b,
+                                     debug_pois_obj.gradient_b_xc, pois_clf)
 
                 fig.show()
                 fig.savefig(self.name_file, file_format='pdf')
 
 
-                #####################################################
-
     #####################################################################
     #                             INTERNALS
     #####################################################################
+
+
+    def _plot_param_sub(self, fig, param_fun, grad_fun, clf):
+
+        self._plot_func(fig, param_fun)
+        self._plot_obj_grads(
+            fig, grad_fun)
+        self._plot_ds(fig, self.tr)
+        self._plot_clf(fig, clf, self.tr, background=False)
+        self._plot_box(fig)
 
     def _plot_func(self, fig, func, **func_kwargs):
         """Plot poisoning objective function"""
@@ -319,15 +314,6 @@ class TestCPoisoning(CCreator):
             func,
             grid_limits=self.grid_limits,
             n_grid_points=20, **func_kwargs)
-
-    # def _plot_clf(self, fig, clf, **func_kwargs):
-    #     """Plot dataset and box constraints"""
-    #     fig.switch_sptype(sp_type="function")
-    #     fig.sp.plot_fobj(
-    #         func=clf.discriminant_function,
-    #         plot_background=False,
-    #         grid_limits=self.grid_limits,
-    #         n_grid_points=20, levels=[self.discr_f_level], **func_kwargs)
 
     def _plot_clf(self, fig, clf, ds, background=True, line_color='gray'):
         """Plot the decision function of a multiclass classifier."""
@@ -356,10 +342,6 @@ class TestCPoisoning(CCreator):
         for c_idx, c in enumerate(ds.classes):
             # Plot boundary and predicted label for each OVA classifier
 
-            # plot_hyperplane(fig, clf.trained_classifiers[c_idx],
-            #                 x_bounds[0], x_bounds[1], styles[c_idx],
-            #                 'Boundary class {:}'.format(c))
-
             fig.sp.scatter(ds.X[ds.Y == c, 0],
                            ds.X[ds.Y == c, 1],
                            s=70, c=styles[c_idx][0], edgecolors='k',
@@ -371,7 +353,6 @@ class TestCPoisoning(CCreator):
         fig.sp.plot_fobj(lambda x: clf.classify(x)[0],
                          multipoint=True, cmap='Set2',
                          grid_limits=self.grid_limits,
-                         # grid_limits=ds.get_bounds(offset=3),
                          colorbar=False, n_grid_points=100, plot_levels=True,
                          plot_background=background, levels=[0, 1, 2],
                          levels_color=line_color, levels_style='--')
