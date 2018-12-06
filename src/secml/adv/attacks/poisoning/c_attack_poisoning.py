@@ -343,7 +343,7 @@ class CAttackPoisoning(CAttack):
 
         tr = tr.append(CDataset(self._xc, self._yc))
 
-        xc_hash = self._xc.hash()
+        xc_hash = self._xc.sha1()
 
         if self._xc_hash is None or self._xc_hash != xc_hash:
             # xc set has changed, retrain clf
