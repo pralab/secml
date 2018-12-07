@@ -17,11 +17,11 @@ class CLossLogistic(CLossClassification):
 
     Attributes
     ----------
-    class_type : 'logistic'
+    class_type : 'log'
     suitable_for : 'classification'
 
     """
-    class_type = 'logistic'
+    class_type = 'log'
 
     def loss(self, y_true, score, pos_label=1, bound=10):
         """Computes the value of the logistic loss function.
