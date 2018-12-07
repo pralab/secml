@@ -22,7 +22,7 @@ class TestCLossClassification(CUnitTest):
     def test_one_at_zero(self):
         """Testing that classification loss return 1 for input 0."""
 
-        for loss_id in ('hinge', 'hinge_squared', 'square', 'logistic'):
+        for loss_id in ('hinge', 'hinge_squared', 'square', 'log'):
 
             self.logger.info("Creating loss: {:}".format(loss_id))
             loss_class = CLoss.create(loss_id)
@@ -40,7 +40,7 @@ class TestCLossClassification(CUnitTest):
             self.assertEqual(n_samples, l.size)
             self.assertEqual(l.dtype, float)
 
-        for loss_id in ('hinge', 'hinge_squared', 'square', 'logistic'):
+        for loss_id in ('hinge', 'hinge_squared', 'square', 'log'):
 
             self.logger.info("Creating loss: {:}".format(loss_id))
             loss_class = CLoss.create(loss_id)
@@ -96,7 +96,7 @@ class TestCLossClassification(CUnitTest):
         fig.sp.plot(x, CArray([1 if i <= 0 else 0 for i in x]),
                     label='0-1 indicator')
 
-        for loss_id in ('hinge', 'hinge_squared', 'square', 'logistic'):
+        for loss_id in ('hinge', 'hinge_squared', 'square', 'log'):
 
             self.logger.info("Creating loss: {:}".format(loss_id))
             loss_class = CLoss.create(loss_id)
