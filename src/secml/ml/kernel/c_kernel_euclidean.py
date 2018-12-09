@@ -35,7 +35,7 @@ class CKernelEuclidean(CKernel):
      [ 2.828427  0.      ]])
 
     """
-    class_type = 'euclidean'
+    __class_type = 'euclidean'
 
     def __init__(self, cache_size=100):
 

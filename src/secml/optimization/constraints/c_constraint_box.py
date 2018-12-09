@@ -14,7 +14,7 @@ from secml.core.constants import inf
 
 class CConstraintBox(CConstraint):
     """Class that defines a box constraint."""
-    class_type = "box"
+    __class_type = "box"
 
     def __init__(self, lb=None, ub=None):
         self.lb = lb

@@ -82,13 +82,6 @@ class CClassifier(CCreator):
             (self.normalizer is None or
              self.normalizer is not None and self.normalizer.is_clear())
 
-    @abstractproperty
-    def class_type(self):
-        """Defines class type."""
-        raise NotImplementedError("the class must define `class_type` "
-                                  "attribute to support `CCreator.create()` "
-                                  "function properly.")
-
     @property
     def classes(self):
         """Return the list of classes on which training has been performed."""

@@ -19,7 +19,7 @@ class CNormalizerMeanSTD(CNormalizerLinear):
     std : scalar or tuple
 
     """
-    class_type = 'mean_std'
+    __class_type = 'mean_std'
 
     def __init__(self, mean, std):
 

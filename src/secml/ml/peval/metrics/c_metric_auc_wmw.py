@@ -30,7 +30,7 @@ class CMetricAUCWMW(CMetric):
     0.5
 
     """
-    class_type = 'auc_wmw'
+    __class_type = 'auc_wmw'
     best_value = 1.0
 
     def _performance_score(self, y_true, score):

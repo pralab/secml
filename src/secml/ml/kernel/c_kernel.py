@@ -36,13 +36,6 @@ class CKernel(CCreator):
     def __init__(self, cache_size=100):
         # cache_size is a class attribute
         self.cache_size = cache_size
-    
-    @abstractproperty
-    def class_type(self):
-        """Defines class type."""
-        raise NotImplementedError("the class must define `class_type` "
-                                  "attribute to support `CCreator.create()` "
-                                  "function properly.")
 
     @abstractmethod
     def _k(self, x, y):

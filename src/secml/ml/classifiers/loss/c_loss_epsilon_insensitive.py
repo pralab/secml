@@ -31,7 +31,7 @@ class CLossEpsilonInsensitive(CLossRegression):
     suitable_for : 'regression'
 
     """
-    class_type = 'epsilon_insensitive'
+    __class_type = 'epsilon_insensitive'
 
     def __init__(self, epsilon=0.1):
         self._epsilon = float(epsilon)
@@ -128,7 +128,7 @@ class CLossEpsilonInsensitiveSquared(CLossEpsilonInsensitive):
     suitable_for : 'regression'
 
     """
-    class_type = 'epsilon_insensitive_squared'
+    __class_type = 'epsilon_insensitive_squared'
 
     def loss(self, y_true, score):
         """Computes the value of the squared epsilon-insensitive loss function.

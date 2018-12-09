@@ -35,7 +35,7 @@ class CMetricAUC(CMetric):
     0.5
 
     """
-    class_type = 'auc'
+    __class_type = 'auc'
     best_value = 1.0
 
     def _performance_score(self, y_true, score):

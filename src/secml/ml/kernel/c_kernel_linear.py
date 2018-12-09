@@ -39,7 +39,7 @@ class CKernelLinear(CKernel):
      [ 11.  25.]])
 
     """
-    class_type = 'linear'
+    __class_type = 'linear'
 
     def _k(self, x, y):
         """Compute the linear kernel between x and y.

@@ -10,7 +10,7 @@ from secml.adv.seceval import CSecEvalData
 
 class CSecEvalDataEvasion(CSecEvalData):
     """Data computed during Classifier Security Evaluation."""
-    class_type = 'evasion'
+    __class_type = 'evasion'
 
     def __init__(self):
         """Class init."""

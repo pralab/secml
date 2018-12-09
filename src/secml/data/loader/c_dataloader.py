@@ -18,13 +18,6 @@ class CDataLoader(CCreator):
     __metaclass__ = ABCMeta
     __super__ = 'CDataLoader'
 
-    @abstractproperty
-    def class_type(self):
-        """Defines class type."""
-        raise NotImplementedError("the class must define `class_type` "
-                                  "attribute to support `CCreator.create()` "
-                                  "function properly.")
-
     @abstractmethod
     def load(self, *args, **kwargs):
         """Loads a dataset.

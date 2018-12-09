@@ -12,13 +12,6 @@ class CStep(CCreator):
         """Sets the initial value of step"""
         self._initial_step = initial_step_value
 
-    @abstractproperty
-    def class_type(self):
-        """Defines class type."""
-        raise NotImplementedError("the class must define `class_type` "
-                                  "attribute to support `CCreator.create()` "
-                                  "function properly.")
-
     @property
     def initial_step(self):
         return self._initial_step

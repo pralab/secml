@@ -90,13 +90,6 @@ class CTorchClassifier(CClassifier):
             return True
         return False
 
-    @abstractproperty
-    def class_type(self):
-        """Defines class type."""
-        raise NotImplementedError("the class must define `class_type` "
-                                  "attribute to support `CCreator.create()` "
-                                  "function properly.")
-
     @property
     def learning_rate(self):
         """Learning rate of the optimizer."""

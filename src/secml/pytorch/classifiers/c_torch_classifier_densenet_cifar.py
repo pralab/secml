@@ -15,7 +15,7 @@ from secml.utils.dict_utils import merge_dicts
 
 class CTorchClassifierDenseNetCifar(CTorchClassifier):
     """"""
-    class_type = 'nn_densenet'
+    __class_type = 'nn_densenet'
 
     def __init__(self, depth=100, growthRate=12, num_classes=10,
                  learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,

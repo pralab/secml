@@ -14,7 +14,7 @@ __all__ = ['CPca', 'CKernelPca']
 
 class CPca(CReducer):
     """Principal Component Analysis (PCA)"""
-    class_type = 'pca'
+    __class_type = 'pca'
 
     def __init__(self, n_components=None):
         """Principal Component Analysis (PCA)
@@ -277,7 +277,7 @@ class CPca(CReducer):
 # FIXME: THERE ARE STILL FEW DIFFERENCES WITH SKLEARN IMPLEMENTATION RESULTS
 class CKernelPca(CPca):
     """Kernel Principal component analysis (KPCA)"""
-    class_type = 'kpca'
+    __class_type = 'kpca'
 
     def __init__(self, kernel=None, n_components=None, whiten=True):
         """Kernel Principal component analysis (KPCA).[1]_

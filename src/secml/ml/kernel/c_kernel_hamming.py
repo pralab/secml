@@ -29,7 +29,7 @@ class CKernelHamming(CKernel):
      [ 1.  0.]])
 
     """
-    class_type = 'hamming'
+    __class_type = 'hamming'
 
     def __init__(self, cache_size=100):
 

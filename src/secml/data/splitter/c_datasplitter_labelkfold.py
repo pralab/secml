@@ -40,7 +40,7 @@ class CDataSplitterLabelKFold(CDataSplitter):
     [CArray(2,)(dense: [0 2]), CArray(1,)(dense: [3]), CArray(1,)(dense: [1])]
 
     """
-    class_type = 'label_kfold'
+    __class_type = 'label_kfold'
 
     def __init__(self, num_folds=3):
 

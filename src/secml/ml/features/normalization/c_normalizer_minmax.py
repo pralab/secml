@@ -64,7 +64,7 @@ class CNormalizerMinMax(CNormalizerLinear):
      [-1.        1.       -1.      ]])
 
     """
-    class_type = 'minmax'
+    __class_type = 'minmax'
 
     def __init__(self, feature_range=None):
         """Class constructor"""

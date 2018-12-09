@@ -30,7 +30,7 @@ class CFunctionRosenbrock(CFunction):
 
 
     """
-    class_type = 'rosenbrock'
+    __class_type = 'rosenbrock'
 
     def __init__(self):
 

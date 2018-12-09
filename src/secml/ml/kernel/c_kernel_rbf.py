@@ -46,7 +46,7 @@ class CKernelRBF(CKernel):
      [  3.35462628e-04   1.00000000e+00]])
 
     """
-    class_type = 'rbf'
+    __class_type = 'rbf'
 
     def __init__(self, gamma=1.0, **kwargs):
         # Calling CKernel constructor

@@ -13,7 +13,7 @@ class CLineSearchBisect(CLineSearch):
     """
     Implements binary and exponential line searches.
     """
-    class_type = 'bisect'
+    __class_type = 'bisect'
 
     def __init__(self, fun, constr=None, bounds=None,
                  eta=1e-4, eta_min=0.1, eta_max=None,

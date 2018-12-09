@@ -15,7 +15,7 @@ from secml.data import CDataset
 
 class CDataLoaderSvmLight(CDataLoader):
     """Loads and Saves data in svmlight / libsvm format."""
-    class_type = 'svmlight'
+    __class_type = 'svmlight'
 
     def __init__(self):
         # Does nothing...

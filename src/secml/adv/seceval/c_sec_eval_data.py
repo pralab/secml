@@ -16,8 +16,6 @@ class CSecEvalData(CCreator):
     """
     __super__ = 'CSecEvalData'
 
-    class_type = None
-
     def __init__(self):
         """
         Sec Eval Data initilization.

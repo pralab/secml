@@ -17,13 +17,6 @@ class CConstraint(CCreator):
     __metaclass__ = ABCMeta
     __super__ = 'CConstraint'
 
-    @abstractproperty
-    def class_type(self):
-        """Defines class type."""
-        raise NotImplementedError("the class must define `class_type` "
-                                  "attribute to support `CCreator.create()` "
-                                  "function properly.")
-
     # This is not abstract as some constraints may not be differentiable
     def _gradient(self, x):
         """Returns the gradient of c(x) at x

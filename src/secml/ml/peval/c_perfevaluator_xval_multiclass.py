@@ -22,7 +22,7 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
         Name of the metric that we want maximize / minimize.
 
     """
-    class_type = 'xval_multiclass'
+    __class_type = 'xval_multiclass'
 
     def compute_performance(self, estimator, dataset):
         """Split data in folds and return the mean estimator performance.

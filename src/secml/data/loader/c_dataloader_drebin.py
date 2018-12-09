@@ -62,7 +62,7 @@ class CDataLoaderDrebin(CDataLoader):
     Available at: https://www.sec.cs.tu-bs.de/~danarp/drebin/download.html
 
     """
-    class_type = 'drebin'
+    __class_type = 'drebin'
 
     def __init__(self):
 

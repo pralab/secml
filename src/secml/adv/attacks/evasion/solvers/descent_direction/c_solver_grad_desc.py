@@ -25,7 +25,7 @@ class CSolverGradDesc(CSolver):
     The solution algorithm is based on the classic gradient descent algorithm.
     """
 
-    class_type = 'gradient-descent'
+    __class_type = 'gradient-descent'
 
     def __init__(self, fun,
                  constr=None,

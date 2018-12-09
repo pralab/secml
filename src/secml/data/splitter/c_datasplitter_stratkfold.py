@@ -47,7 +47,7 @@ class CDataSplitterStratifiedKFold(CDataSplitter):
     [CArray(2,)(dense: [0 2]), CArray(2,)(dense: [1 3])]
 
     """
-    class_type = 'strat_kfold'
+    __class_type = 'strat_kfold'
 
     def __init__(self, num_folds=3, random_state=None):
 

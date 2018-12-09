@@ -4,7 +4,7 @@ import itertools
 
 
 class CPlotConfMatr(CPlot):
-    class_type = 'confusion_matrix'
+    __class_type = 'confusion_matrix'
 
     def __init__(self, sp, default_params=None):
         # Calling CPlot constructor

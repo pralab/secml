@@ -3,7 +3,7 @@ from secml.core.constants import nan
 
 
 class CMetricFirstNan(CMetric):
-    class_type = 'some_nan'
+    __class_type = 'some_nan'
     best_value = 1.0
 
     def _init_(self):

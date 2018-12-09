@@ -25,7 +25,7 @@ class CPSSpanning(CPrototypesSelector):
     Springer Berlin Heidelberg, 2006. 287-296.
 
     """
-    class_type = 'spanning'
+    __class_type = 'spanning'
 
     def select(self, dataset, n_prototypes):
         """Selects the prototypes from input dataset.

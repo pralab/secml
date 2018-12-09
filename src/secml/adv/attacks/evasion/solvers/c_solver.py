@@ -81,13 +81,6 @@ class CSolver(CCreator):
         self._f_eval = 0
         self._grad_eval = 0
 
-    @abstractproperty
-    def class_type(self):
-        """Defines class type."""
-        raise NotImplementedError("the class must define `class_type` "
-                                  "attribute to support `CCreator.create()` "
-                                  "function properly.")
-
     ###########################################################################
     #                           READ-ONLY ATTRIBUTES
     ###########################################################################

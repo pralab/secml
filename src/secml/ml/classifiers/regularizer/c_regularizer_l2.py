@@ -21,7 +21,7 @@ class CRegularizerL2(CRegularizer):
 
     """
 
-    class_type = 'l2'
+    __class_type = 'l2'
 
     def regularizer(self, w):
         """Returns Norm-L2.

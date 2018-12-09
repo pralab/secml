@@ -27,8 +27,6 @@ class CPlot(CCreator):
     """
     __super__ = 'CPlot'
 
-    class_type = None
-
     def __init__(self, sp, default_params):
 
         if not isinstance(sp, Axes):

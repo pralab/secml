@@ -23,7 +23,7 @@ class CFunctionMcCormick(CFunction):
 
 
     """
-    class_type = 'mc_cormick'
+    __class_type = 'mc_cormick'
 
     def __init__(self):
 

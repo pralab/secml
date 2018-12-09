@@ -31,7 +31,7 @@ class CMetricTestError(CMetric):
     0.25
 
     """
-    class_type = 'test_error'
+    __class_type = 'test_error'
     best_value = 0.0
 
     def _performance_score(self, y_true, y_pred):

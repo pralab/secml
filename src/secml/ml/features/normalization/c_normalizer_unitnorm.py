@@ -52,7 +52,7 @@ class CNormalizerUnitNorm(CNormalizer):
      [ 0.    0.5  -0.5 ]])
 
     """
-    class_type = 'unitnorm'
+    __class_type = 'unitnorm'
 
     def __init__(self, order=2):
         """Class constructor"""

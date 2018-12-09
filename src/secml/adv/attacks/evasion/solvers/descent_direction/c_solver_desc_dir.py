@@ -32,7 +32,7 @@ class CSolverDescDir(CSolver):
 
     """
 
-    class_type = 'descent-direction'
+    __class_type = 'descent-direction'
 
     def __init__(self, fun,
                  constr=None, bounds=None,

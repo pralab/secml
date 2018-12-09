@@ -46,7 +46,7 @@ class CDataSplitterKFold(CDataSplitter):
     [CArray(1,)(dense: [2]), CArray(1,)(dense: [1]), CArray(1,)(dense: [0])]
 
     """
-    class_type = 'kfold'
+    __class_type = 'kfold'
 
     def __init__(self, num_folds=3, random_state=None):
 
