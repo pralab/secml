@@ -35,7 +35,7 @@ class CPlotRoc(CPlot):
     .CFigure : creates and handle figures.
 
     """
-    class_type = 'roc'
+    __class_type = 'roc'
 
     def __init__(self, sp, default_params=None):
 

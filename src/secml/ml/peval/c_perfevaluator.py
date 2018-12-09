@@ -81,13 +81,6 @@ class CPerfEvaluator(CCreator):
         self.splitter = CDataSplitter.create(splitter)
         self.metric = CMetric.create(metric)
 
-    @abstractproperty
-    def class_type(self):
-        """Defines class type."""
-        raise NotImplementedError("the class must define `class_type` "
-                                  "attribute to support `CCreator.create()` "
-                                  "function properly.")
-
     def evaluate_params(
             self, estimator, dataset, parameters, pick='first', n_jobs=1):
         """Evaluate parameters for input estimator on input dataset.

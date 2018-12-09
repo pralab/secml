@@ -16,7 +16,7 @@ class CFunctionQuadratic(CFunction):
 
     """
 
-    class_type = 'quadratic'
+    __class_type = 'quadratic'
 
     def __init__(self, A, b, c):
 

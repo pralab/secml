@@ -17,7 +17,7 @@ class CTorchNormalizer(CNormalizer):
     CNN : Neural Network that is going to be used to normalize features
         NB: the CNN network must be already trained
     """
-    class_type = 'CNN'
+    __class_type = 'CNN'
 
     def __init__(self, CNN, out_layer=None):
         """Class constructor"""

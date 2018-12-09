@@ -56,7 +56,7 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
     [CArray(1,)(dense: [1]), CArray(1,)(dense: [0]), CArray(1,)(dense: [1])]
 
     """
-    class_type = 'open_world'
+    __class_type = 'open_world'
 
     def __init__(self, num_folds=3, n_train_samples=5,
                  n_train_classes=None, random_state=None):

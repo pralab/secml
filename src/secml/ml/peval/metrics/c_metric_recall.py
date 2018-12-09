@@ -33,7 +33,7 @@ class CMetricRecall(CMetric):
     0.75
 
     """
-    class_type = 'recall'
+    __class_type = 'recall'
     best_value = 1.0
 
     def _performance_score(self, y_true, y_pred):

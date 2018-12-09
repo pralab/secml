@@ -59,7 +59,7 @@ class CNormalizerZScore(CNormalizerLinear):
      [-1.        1.       -1.333333]])
 
     """
-    class_type = 'zscore'
+    __class_type = 'zscore'
 
     def __init__(self, with_std=True):
         """Class constructor"""

@@ -60,7 +60,7 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
         Any other construction parameter for each OVA classifier.
 
     """
-    class_type = 'ova'
+    __class_type = 'ova'
 
     def _train(self, dataset, n_jobs=1):
         """Trains the classifier.

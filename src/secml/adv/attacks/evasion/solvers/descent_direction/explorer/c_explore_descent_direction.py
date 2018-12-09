@@ -12,7 +12,7 @@ from secml.array import CArray
 
 
 class CExploreDescentDirection(CCreator):
-    class_type = 'explore-direction'
+    __class_type = 'explore-direction'
 
     def __init__(self, fun, constr=None, bounds=None,
                  n_dimensions=0, line_search='bisect',

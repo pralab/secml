@@ -45,7 +45,7 @@ class CKernelLaplacian(CKernel):
      [ 0.018316  1.      ]])
 
     """
-    class_type = 'laplacian'
+    __class_type = 'laplacian'
 
     def __init__(self, gamma=1.0, cache_size=100):
         # Calling CKernel constructor

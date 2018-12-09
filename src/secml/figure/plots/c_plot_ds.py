@@ -25,7 +25,7 @@ class CPlotDataset(CPlot):
     .CFigure : creates and handle figures.
 
     """
-    class_type = 'ds'
+    __class_type = 'ds'
 
     def __init__(self, sp, default_params=None):
 

@@ -12,7 +12,7 @@ from secml.optimization.constraints import CConstraint
 
 
 class CConstraintL1(CConstraint):
-    class_type = "l1"
+    __class_type = "l1"
 
     def __init__(self, center=0, radius=1):
 

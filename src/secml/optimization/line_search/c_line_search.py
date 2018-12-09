@@ -26,13 +26,6 @@ class CLineSearch(CCreator):
         self.eta = CArray(eta)
         self.max_iter = max_iter
 
-    @abstractproperty
-    def class_type(self):
-        """Defines class type."""
-        raise NotImplementedError("the class must define `class_type` "
-                                  "attribute to support `CCreator.create()` "
-                                  "function properly.")
-
     @abstractmethod
     def line_search(self, fun, x, d, constr, **kwargs):
         raise NotImplementedError()

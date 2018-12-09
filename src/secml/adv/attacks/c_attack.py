@@ -141,13 +141,6 @@ class CAttack(CCreator):
         if self._solver is not None:
             self._solver.clear()
 
-    @abstractproperty
-    def class_type(self):
-        """Defines class type."""
-        raise NotImplementedError("the class must define `class_type` "
-                                  "attribute to support `CCreator.create()` "
-                                  "function properly.")
-
     @property
     def attack_classes(self):
         return self._attack_classes

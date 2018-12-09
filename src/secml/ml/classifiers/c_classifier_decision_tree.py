@@ -15,7 +15,7 @@ from secml.ml.classifiers import CClassifier
 
 class CClassifierDecisionTree(CClassifier):
     """Decision Tree Classifier"""
-    class_type = 'tree'
+    __class_type = 'tree'
 
     def __init__(self, criterion='gini', splitter='best',
                  max_depth=None, min_samples_split=2, normalizer=None):

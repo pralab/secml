@@ -8,7 +8,7 @@ class CStepConstant(CStep):
     Implements static step
     '''
 
-    class_type = 'CCostantStep'
+    __class_type = 'CCostantStep'
 
     def __init__(self, initial_step_value):
         '''

@@ -24,7 +24,7 @@ class CRegularizerElasticNet(CRegularizer):
 
     """
 
-    class_type = 'elasticnet'
+    __class_type = 'elasticnet'
 
     def __init__(self, l1_ratio=0.15):
         self._l1_ratio = float(l1_ratio)

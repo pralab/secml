@@ -36,7 +36,7 @@ class CMetricTPatFP(CMetric):
     0.5
 
     """
-    class_type = 'tp_at_fp'
+    __class_type = 'tp_at_fp'
     best_value = 1.0
 
     def __init__(self, fp_rate=0.01):

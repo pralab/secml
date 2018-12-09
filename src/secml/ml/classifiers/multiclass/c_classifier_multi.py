@@ -53,13 +53,6 @@ class CClassifierMulticlass(CClassifier):
             return False
         return True
 
-    @abstractproperty
-    def class_type(self):
-        """Defines class type."""
-        raise NotImplementedError("the class must define `class_type` "
-                                  "attribute to support `CCreator.create()` "
-                                  "function properly.")
-
     @CClassifier.verbose.setter
     def verbose(self, level):
         """Set verbosity level and propagate to trained classifiers."""

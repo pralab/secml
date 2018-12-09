@@ -28,7 +28,7 @@ class CClassifierKDE(CClassifier):
     .CKernel : Pairwise kernels and metrics.
 
     """
-    class_type = 'kde'
+    __class_type = 'kde'
 
     def __init__(self, kernel=None, normalizer=None):
 

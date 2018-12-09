@@ -40,7 +40,7 @@ class CKernelChebyshevDistance(CKernel):
      [ 2.  0.]])
 
     """
-    class_type = 'max'
+    __class_type = 'max'
 
     def __init__(self, gamma=1.0, cache_size=100):
         # Calling CKernel constructor

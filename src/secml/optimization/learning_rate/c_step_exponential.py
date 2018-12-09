@@ -10,7 +10,7 @@ class CStepExponential(CStep):
             step^it
     in this case we have as constraint abs(step)<1
     '''
-    class_type = 'CStepExponential'
+    __class_type = 'CStepExponential'
 
     def __init__(self, initial_step_value):
         '''

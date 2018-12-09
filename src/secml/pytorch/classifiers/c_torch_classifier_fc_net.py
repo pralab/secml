@@ -16,7 +16,7 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
     which you can think of as a neural network layer that has produces output from
     input and may have some trainable weights or other state.
     """
-    class_type = 'nn_mlp'
+    __class_type = 'nn_mlp'
 
     def __init__(self, input_dims=1000, hidden_dims=100, output_dims=10,
                  learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,

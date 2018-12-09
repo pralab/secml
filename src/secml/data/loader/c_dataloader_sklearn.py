@@ -93,7 +93,7 @@ class CDLRandom(CDataLoader):
         If None, is the RandomState instance used by np.random.
 
     """
-    class_type = 'random'
+    __class_type = 'random'
 
     def __init__(self, n_samples=100, n_features=20, n_informative=2,
                  n_redundant=2, n_repeated=0, n_classes=2,
@@ -194,7 +194,7 @@ class CDLRandomRegression(CDataLoader):
         If None, is the RandomState instance used by np.random.
             
     """
-    class_type = 'random_regression'
+    __class_type = 'random_regression'
 
     def __init__(self, n_samples=100, n_features=100, n_informative=10,
                  n_targets=1, bias=0.0, effective_rank=None,
@@ -257,7 +257,7 @@ class CDLRandomBlobs(CDataLoader):
         If None, is the RandomState instance used by np.random.
 
     """
-    class_type = 'random_blobs'
+    __class_type = 'random_blobs'
 
     def __init__(self, n_samples=100, n_features=2, centers=3,
                  cluster_std=1.0, center_box=(-10.0, 10.0), random_state=None):
@@ -312,7 +312,7 @@ class CDLRandomBlobsRegression(CDataLoader):
         If None, is the RandomState instance used by np.random.
 
     """
-    class_type = 'random_blobs_regression'
+    __class_type = 'random_blobs_regression'
 
     def __init__(self, n_samples=100, cluster_std=(1.0, 1.0),
                  bias=1.0, w=(2.0, -1.0), centers=([0, 0], [-1, -1]),
@@ -370,7 +370,7 @@ class CDLRandomCircles(CDataLoader):
         If None, is the RandomState instance used by np.random.
 
     """
-    class_type = 'random_circles'
+    __class_type = 'random_circles'
 
     def __init__(self, n_samples=100, noise=None,
                  factor=0.8, random_state=None):
@@ -415,7 +415,7 @@ class CDLRandomCircleRegression(CDataLoader):
         If None, is the RandomState instance used by np.random.
 
     """
-    class_type = 'random_circles_regression'
+    __class_type = 'random_circles_regression'
 
     def __init__(self, n_samples=100, noise=None,
                  factor=0.8, random_state=None):
@@ -462,7 +462,7 @@ class CDLRandomMoons(CDataLoader):
         If None, is the RandomState instance used by np.random.
 
     """
-    class_type = 'random_moons'
+    __class_type = 'random_moons'
 
     def __init__(self, n_samples=100, noise=None, random_state=None):
 
@@ -503,7 +503,7 @@ class CDLRandomBinary(CDataLoader):
         The randomly generated dataset.
 
     """
-    class_type = 'random_binary'
+    __class_type = 'random_binary'
 
     def __init__(self, n_samples=100, n_features=2):
 
@@ -591,7 +591,7 @@ class CDLRandomToy(CDataLoader):
         assigned 0 at the label with lower value, 1 to the other.
 
     """
-    class_type = 'toy'
+    __class_type = 'toy'
 
     def __init__(self, toy, class_list=None, zero_one=False):
 

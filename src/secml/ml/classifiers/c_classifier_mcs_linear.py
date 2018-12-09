@@ -32,7 +32,7 @@ class CClassifierMCSLinear(CClassifierLinear):
         range [0, 1.0]. Default 1.0 (all the features.
 
     """
-    class_type = 'mcs_linear'
+    __class_type = 'mcs_linear'
     
     def __init__(self, classifier, num_classifiers=10,
                  max_samples=1.0, max_features=1.0, normalizer=None):

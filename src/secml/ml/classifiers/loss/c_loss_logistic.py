@@ -21,7 +21,7 @@ class CLossLogistic(CLossClassification):
     suitable_for : 'classification'
 
     """
-    class_type = 'log'
+    __class_type = 'log'
 
     def loss(self, y_true, score, pos_label=1, bound=10):
         """Computes the value of the logistic loss function.

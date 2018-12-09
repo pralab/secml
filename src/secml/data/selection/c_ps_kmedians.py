@@ -25,7 +25,7 @@ class CPSKMedians(CPrototypesSelector):
 
 
     """
-    class_type = 'k-medians'
+    __class_type = 'k-medians'
 
     def select(self, dataset, n_prototypes):
         """Selects the prototypes from input dataset.

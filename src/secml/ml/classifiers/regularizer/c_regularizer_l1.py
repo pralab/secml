@@ -22,7 +22,7 @@ class CRegularizerL1(CRegularizer):
 
     """
 
-    class_type = 'l1'
+    __class_type = 'l1'
 
     def regularizer(self, w):
         """Returns Norm-L1.

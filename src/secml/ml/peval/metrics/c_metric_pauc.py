@@ -46,7 +46,7 @@ class CMetricPartialAUC(CMetric):
     0.125
 
     """
-    class_type = 'pauc'
+    __class_type = 'pauc'
     best_value = 1.0
 
     def __init__(self, fp_rate=0.01, n_points=1000):

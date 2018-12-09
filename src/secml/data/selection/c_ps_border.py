@@ -23,7 +23,7 @@ class CPSBorder(CPrototypesSelector):
     Springer Berlin Heidelberg, 2006. 287-296.
 
     """
-    class_type = 'border'
+    __class_type = 'border'
 
     def select(self, dataset, n_prototypes):
         """Selects the prototypes from input dataset.

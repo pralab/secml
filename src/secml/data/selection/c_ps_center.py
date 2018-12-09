@@ -24,7 +24,7 @@ class CPSCenter(CPrototypesSelector):
 
 
     """
-    class_type = 'center'
+    __class_type = 'center'
 
     def select(self, dataset, n_prototypes):
         """Selects the prototypes from input dataset.

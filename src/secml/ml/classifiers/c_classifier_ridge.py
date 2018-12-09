@@ -15,7 +15,7 @@ from secml.ml.kernel import CKernel
 
 class CClassifierRidge(CClassifierLinear):
     """Ridge Classifier."""
-    class_type = 'ridge'
+    __class_type = 'ridge'
 
     def __init__(self, alpha=1.0, kernel=None,
                  max_iter=1e5, class_weight=None, tol=1e-4,

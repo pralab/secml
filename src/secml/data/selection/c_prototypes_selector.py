@@ -42,13 +42,6 @@ class CPrototypesSelector(CCreator):
 
         self._sel_idx = None
 
-    @abstractproperty
-    def class_type(self):
-        """Defines class type."""
-        raise NotImplementedError("the class must define `class_type` "
-                                  "attribute to support `CCreator.create()` "
-                                  "function properly.")
-
     @property
     def sel_idx(self):
         """Returns an array with the indices of the selected prototypes."""

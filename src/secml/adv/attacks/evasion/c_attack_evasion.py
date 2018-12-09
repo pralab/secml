@@ -22,7 +22,7 @@ class CAttackEvasion(CAttack):
     """
     Class that implements evasion attacks.
     """
-    class_type = 'evasion'
+    __class_type = 'evasion'
 
     def __init__(self, classifier,
                  surrogate_classifier,

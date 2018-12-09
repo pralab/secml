@@ -37,7 +37,7 @@ class CMetricF1(CMetric):
     0.666666666667
 
     """
-    class_type = 'f1'
+    __class_type = 'f1'
     best_value = 1.0
 
     def _performance_score(self, y_true, y_pred):

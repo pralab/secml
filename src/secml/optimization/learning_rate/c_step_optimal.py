@@ -11,7 +11,7 @@ class CStepOptimal(CStep):
     t: t-th iteration
     '''
 
-    class_type = 'CStepOptimal'
+    __class_type = 'CStepOptimal'
 
     def __init__(self, initial_step_value=0, alfa=1):
         '''

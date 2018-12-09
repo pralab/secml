@@ -46,13 +46,6 @@ class CMetric(CCreator):
 
     best_value = None
 
-    @abstractproperty
-    def class_type(self):
-        """Defines class type."""
-        raise NotImplementedError("the class must define `class_type` "
-                                  "attribute to support `CCreator.create()` "
-                                  "function properly.")
-
     def performance_score(
             self, y_true=None, y_pred=None, score=None, **kwargs):
         """Compute the performance metric.

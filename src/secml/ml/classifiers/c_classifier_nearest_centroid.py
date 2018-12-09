@@ -16,7 +16,7 @@ from sklearn.metrics import pairwise_distances
 # TODO: EXPAND CLASS DOCSTRING
 class CClassifierNearestCentroid(CClassifier):
     """CClassifierNearestCentroid."""
-    class_type = 'nrst_centroid'
+    __class_type = 'nrst_centroid'
 
     def __init__(self, metric='euclidean',
                  shrink_threshold=None, normalizer=None):

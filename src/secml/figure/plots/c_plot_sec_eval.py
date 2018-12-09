@@ -30,7 +30,7 @@ class CPlotSecEval(CPlot):
     .CFigure : creates and handle figures.
 
     """
-    class_type = 'sec_eval'
+    __class_type = 'sec_eval'
 
     # fixme: gestire i params di def ecc
     def __init__(self, sp, default_params=None):

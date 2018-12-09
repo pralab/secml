@@ -31,7 +31,7 @@ class CMetricMAE(CMetric):
     0.25
 
     """
-    class_type = 'mae'
+    __class_type = 'mae'
     best_value = 0.0
 
     def _performance_score(self, y_true, score):

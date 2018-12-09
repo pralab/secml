@@ -12,7 +12,7 @@ class CStepInvscaling(CStep):
     t: t-th iteration
     '''
 
-    class_type = 'CStepInvscaling'
+    __class_type = 'CStepInvscaling'
 
     def __init__(self, initial_step_value, power_t=1):
         '''

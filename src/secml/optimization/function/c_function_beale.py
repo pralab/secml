@@ -25,7 +25,7 @@ class CFunctionBeale(CFunction):
 
 
     """
-    class_type = 'beale'
+    __class_type = 'beale'
 
     def __init__(self):
 

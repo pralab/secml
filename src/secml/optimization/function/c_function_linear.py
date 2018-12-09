@@ -14,7 +14,7 @@ class CFunctionLinear(CFunction):
         b' x + c = 0
 
     """
-    class_type = 'linear'
+    __class_type = 'linear'
 
     def __init__(self, b, c):
 

@@ -24,7 +24,7 @@ class CFunctionThreeHumpCamel(CFunction):
 
 
     """
-    class_type = '3h_camel'
+    __class_type = '3h_camel'
 
     def __init__(self):
 

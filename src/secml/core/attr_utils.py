@@ -5,9 +5,10 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from secml import _NoValue
 from secml.core.type_utils import is_str
 
-__all__ = ['as_public', 'as_private',
+__all__ = ['as_public', 'as_private', 'has_private', 'get_private',
            'has_property', 'get_property', 'has_getter', 'has_setter',
            'is_public', 'is_protected', 'is_readonly', 'is_readwrite',
            'is_readable', 'is_writable', 'extract_attr']
@@ -44,14 +45,48 @@ def as_private(obj_class, attr):
 
     Parameters
     ----------
-    obj_class : any class
+    obj_class : class
         Target class (usually extracted using obj.__class__).
     attr : str
         Name of the target attribute.
 
     """
     _check_is_attr_name(attr)
-    return '_' + obj_class.__name__ + '__' + attr
+    attr = '__' + attr if attr.startswith('__') is False else attr
+    return '_' + obj_class.__name__ + attr
+
+
+def has_private(obj_class, attr):
+    """True if attribute is a private attribute of class.
+
+    Parameters
+    ----------
+    obj_class : class
+        Target class (usually extracted using obj.__class__).
+    attr : str
+        Name of the attribute to check.
+
+    """
+    return hasattr(obj_class, as_private(obj_class, attr))
+
+
+def get_private(obj_class, attr, default=_NoValue):
+    """Return the private attribute of class.
+
+    Parameters
+    ----------
+    obj_class : class
+        Target class (usually extracted using obj.__class__).
+    attr : str
+        Name of the attribute to return.
+    default : any, optional
+        Value that is returned when the named attribute is not found.
+
+    """
+    if default is not _NoValue:  # Pass default to getattr
+        return getattr(obj_class, as_private(obj_class, attr), default)
+    else:  # Standard getattr (error will be raise if attr is not found)
+        return getattr(obj_class, as_private(obj_class, attr))
 
 
 def has_property(obj, attr):

@@ -31,7 +31,7 @@ class CMetricAccuracy(CMetric):
     0.75
 
     """
-    class_type = 'accuracy'
+    __class_type = 'accuracy'
     best_value = 1.0
 
     def _performance_score(self, y_true, y_pred):

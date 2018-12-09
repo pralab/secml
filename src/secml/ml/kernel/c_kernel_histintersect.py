@@ -39,7 +39,7 @@ class CKernelHistIntersect(CKernel):
      [ 3.  7.]])
 
     """
-    class_type = 'hist_intersect'
+    __class_type = 'hist_intersect'
 
     # TODO: ADD SPARSE SUPPORT
     def _k(self, x, y):
