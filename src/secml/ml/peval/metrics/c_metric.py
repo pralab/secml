@@ -5,7 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 import inspect
 
 from secml.core import CCreator
@@ -45,6 +45,13 @@ class CMetric(CCreator):
     __super__ = 'CMetric'
 
     best_value = None
+
+    @abstractproperty
+    def class_type(self):
+        """Defines class type."""
+        raise NotImplementedError("the class must define `class_type` "
+                                  "attribute to support `CCreator.create()` "
+                                  "function properly.")
 
     def performance_score(
             self, y_true=None, y_pred=None, score=None, **kwargs):

@@ -94,7 +94,7 @@ class CCreator(object):
         return wrapper
 
     @classmethod
-    def create(cls, class_item, *args, **kwargs):
+    def create(cls, class_item=None, *args, **kwargs):
         """This method creates an instance of a class with given type.
 
         Calling superclass's package is looked for any subclass defining
@@ -104,16 +104,13 @@ class CCreator(object):
         Also a class instance can be passed as main argument.
         In this case the class instance is returned as is.
 
-        A good practise (not a requirement) is to make `class_type`
-        an abstractproperty of the class(es) which are required to
-        support the creator.
-
         Parameters
         ----------
-        class_item : str or class instance
+        class_item : str or class instance or None, optional
             Type of the class to instantiate.
-            If a class instance of cls is passed, instead,
-            it returns the instance directly.
+            If a class instance of cls is passed, instead, it returns
+             the instance directly.
+            If this is None, an instance of the classing superclass is created.
         args, kwargs : optional arguments
             Any other argument for the class to create.
             If a class instance is passed as `class_item`,
@@ -128,10 +125,16 @@ class CCreator(object):
         """
         if cls.__super__ != cls.__name__:
             raise TypeError("classes can be created from superclasses only.")
+
+        # Create an instance of the calling superclass
+        if class_item is None:
+            return cls(*args, **kwargs)  # Pycharm says are unexpected args
+
         # We accept strings and class instances only
         if isclass(class_item):  # Returns false for instances
             raise TypeError("creator only accepts a class type "
                             "as string or a class instance.")
+
         # CCreator cannot be created!
         if class_item.__class__ == CCreator:
             raise TypeError("class 'CCreator' is not callable.")

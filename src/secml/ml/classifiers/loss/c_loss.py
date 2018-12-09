@@ -19,8 +19,10 @@ class CLoss(CCreator):
 
     @abstractproperty
     def class_type(self):
-        """Defines loss function type."""
-        raise NotImplementedError()
+        """Defines class type."""
+        raise NotImplementedError("the class must define `class_type` "
+                                  "attribute to support `CCreator.create()` "
+                                  "function properly.")
 
     @abstractproperty
     def suitable_for(self):

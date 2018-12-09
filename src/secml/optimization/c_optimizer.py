@@ -5,8 +5,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta
-
 from scipy import optimize as sc_opt
 
 from secml.core import CCreator
@@ -27,9 +25,6 @@ class COptimizer(CCreator):
         Solver to use for optimization.
 
     """
-    __metaclass__ = ABCMeta
-    __super__ = 'COptimizer'
-    class_type = 'opt'
 
     def __init__(self, fun, solver=None):
         """Class initializer."""

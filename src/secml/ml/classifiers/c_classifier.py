@@ -84,8 +84,8 @@ class CClassifier(CCreator):
 
     @abstractproperty
     def class_type(self):
-        """Defines classifier type."""
-        raise NotImplementedError("the classifier must define `class_type` "
+        """Defines class type."""
+        raise NotImplementedError("the class must define `class_type` "
                                   "attribute to support `CCreator.create()` "
                                   "function properly.")
 

@@ -1,9 +1,8 @@
+from matplotlib.axes import Axes
 
 from secml.core import CCreator
 from secml.array import CArray
 from secml.array.array_utils import tuple_sequence_tondarray
-
-from matplotlib.axes import Axes
 
 
 class CPlot(CCreator):
@@ -26,8 +25,9 @@ class CPlot(CCreator):
     .CFigure : creates and handle figures.
 
     """
-    class_type = 'std_plot'
     __super__ = 'CPlot'
+
+    class_type = None
 
     def __init__(self, sp, default_params):
 
