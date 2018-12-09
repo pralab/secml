@@ -19,13 +19,11 @@ class CDataset(object):
 
         Parameters
         ----------
-        X : array_like
-            Dataset patterns, one for each row. Can be any array-like
-            object or a CArray of dense or sparse format. Data is
-            converted to 2-Dimensions before storing.
-        Y : array_like, optional
-            Dataset labels. Can be any 1-Dimensional array-like
-            object or any CArray. Data is converted to dense format
+        x : array_like or CArray
+            Dataset patterns, one for each row.
+            Array is converted to 2-Dimensions before storing.
+        y : array_like or CArray
+            Dataset labels. Array is converted to dense format
             and flattened before storing.
         kwargs : any, optional
             Any other attribute of the dataset.
@@ -33,15 +31,8 @@ class CDataset(object):
         Returns
         -------
         out_ds : CDataset
-            Dataset consting in a 2-Dimensional patterns array and
+            Dataset consisting in a 2-Dimensional patterns array and
             a dense flat vector of corresponding labels (if provided).
-
-        Notes
-        -----
-        Asymmetric data storing is available, meaning that we do not
-        control if the number of stored patters is equal to the
-        number of stored labels. However, quite a few functions will
-        not work properly if dataset.num_patterns != dataset.num_labels.
 
         Examples
         --------
@@ -70,6 +61,12 @@ class CDataset(object):
         >>> print ds.Y
         CArray([1 0 1])
 
+        # The number of labels must be equal to the number of samples
+        >>> ds = CDataset([[1,2],[3,4]],1)
+        Traceback (most recent call last):
+         ...
+        ValueError: number of labels (1) must be equal to the number of samples (2).
+
         >>> ds = CDataset([1,2,3],1, id='mydataset', age=34)  # 2 custom attributes
         >>> print ds.id
         mydataset
@@ -78,12 +75,15 @@ class CDataset(object):
 
         """
 
-    def __init__(self, X, Y=None, **kwargs):
-        # Data is forced to be 2-Dimensional (one row for each pattern)
-        self._X = CArray(X).atleast_2d()
-        # This double casting is to prevent storing a single scalar,
-        # should have minimal effect on performance
-        self._Y = None if Y is None else CArray(CArray(Y).todense().ravel())
+    def __init__(self, x, y, **kwargs):
+        # Default placeholders
+        self._X = None
+        self._Y = None
+        # Patterns are forced to be 2-D (one row for each pattern)
+        self.X = x
+        # Labels are 1-D (one label for each sample)
+        # This will also check patterns/labels size consistency
+        self.Y = y
         # Setting any other dataset attribute
         for key in kwargs:
             setattr(self, key, kwargs[key])
@@ -109,7 +109,7 @@ class CDataset(object):
         This can be actually different from dataset.num_patterns.
 
         """
-        return 0 if self.Y is None else self.Y.size
+        return self.Y.size
 
     @property
     def classes(self):
@@ -118,7 +118,7 @@ class CDataset(object):
         Each different labels vector element defines a class.
 
         """
-        return None if self.Y is None else self.Y.unique()
+        return self.Y.unique()
 
     @property
     def num_classes(self):
@@ -127,7 +127,7 @@ class CDataset(object):
         Each different labels vector element defines a class.
 
         """
-        return 0 if self.Y is None else self.classes.size
+        return self.classes.size
 
     @property
     def X(self):
@@ -140,13 +140,15 @@ class CDataset(object):
 
         Parameters
         ----------
-        value : array_like
-            Any array-like object or a CArray of dense or
-            sparse format. Data is converted to 2-Dimensions
+        value : array_like or CArray
+            Array containing patterns. Data is converted to 2-Dimensions
             before storing.
 
         """
-        self._X = CArray(value).atleast_2d()
+        x = CArray(value).atleast_2d()
+        if self.Y is not None:  # Checking number of samples/labels equality
+            self._check_samples_labels(x=x)
+        self._X = x
 
     @property
     def Y(self):
@@ -159,25 +161,37 @@ class CDataset(object):
 
         Parameters
         ----------
-        value : array_like
-            Any 1-Dimensional array-like object or any CArray.
-            Data is converted to dense format and flattened
-            before storing.
+        value : array_like or CArray
+            Array containing labels. Array is converted to dense format
+            and flattened before storing.
 
         """
         # This double casting is to prevent storing a single scalar,
         # should have minimal effect on performance
-        self._Y = CArray(CArray(value).todense().ravel())
+        y = CArray(value).todense().ravel()
+        if self._X is not None:  # Checking number of samples/labels equality
+            self._check_samples_labels(y=y)
+        self._Y = y
 
     @property
     def issparse(self):
-        """Return True if dataset's patterns are stored in sparse format, else False."""
+        """Return True if patterns are stored in sparse format, else False."""
         return self.X.issparse
 
     @property
     def isdense(self):
-        """Return True if dataset's patterns are stored in dense format, else False."""
+        """Return True if patterns are stored in dense format, else False."""
         return self.X.isdense
+
+    def _check_samples_labels(self, x=None, y=None):
+        """Raise ValueError if the number of labels is different to
+        the number of samples."""
+        x = self.X if x is None else x
+        y = self.Y if y is None else y
+        if x.shape[0] != y.size:
+            raise ValueError(
+                "number of labels ({:}) must be equal to the number "
+                "of samples ({:}).".format(y.size, x.shape[0]))
 
     def get_params(self):
         """Returns dataset's custom attributes dictionary."""
@@ -188,11 +202,10 @@ class CDataset(object):
     def __getitem__(self, idx):
         """Given an index, get the corresponding X and Y elements."""
         if not isinstance(idx, tuple) or len(idx) != self.X.ndim:
-            raise IndexError("{:} sequences are required for dataset indexing.".format(self.X.ndim))
-        ds = self.__class__(self.X.__getitem__(idx), **self.get_params())
-        # We now extract the labels corresponding to extracted patterns
-        if self.Y is not None:
-            ds.Y = self.Y.__getitem__([idx[0] if isinstance(idx, tuple) else idx][0])
+            raise IndexError(
+                "{:} sequences are required for indexing.".format(self.X.ndim))
+        y = self.Y.__getitem__([idx[0] if isinstance(idx, tuple) else idx][0])
+        ds = self.__class__(self.X.__getitem__(idx), y, **self.get_params())
         return ds
 
     # TODO: ADD DOCSTRING, EXAMPLES
@@ -201,13 +214,11 @@ class CDataset(object):
         if not isinstance(data, self.__class__):
             raise TypeError("dataset can be set only using another dataset.")
         if not isinstance(idx, tuple) or len(idx) != self.X.ndim:
-            raise IndexError("{:} sequences are required for dataset indexing.".format(self.X.ndim))
+            raise IndexError(
+                "{:} sequences are required for indexing.".format(self.X.ndim))
         self.X.__setitem__(idx, data.X)
         # We now set the labels corresponding to set patterns
-        if self.Y is None:
-            self.Y = data.Y
-        elif data.Y is not None:
-            self.Y.__setitem__([idx[0] if isinstance(idx, tuple) else idx][0], data.Y)
+        self.Y.__setitem__([idx[0] if isinstance(idx, tuple) else idx][0], data.Y)
 
     def append(self, dataset):
         """Append input dataset to current dataset.
@@ -266,10 +277,7 @@ class CDataset(object):
 
         """
         # Format conversion and error checking is managed by CArray.append()
-        if dataset.Y is None:
-            new_labels = self.Y.deepcopy()
-        else:
-            new_labels = self.Y.append(dataset.Y)
+        new_labels = self.Y.append(dataset.Y)
         return self.__class__(self.X.append(dataset.X, axis=0), new_labels)
 
     def deepcopy(self):
@@ -366,7 +374,6 @@ class CDataset(object):
             class label is equal to input positive class's label, else 0.
             If pos_class is None, returns a (num_samples, num_classes) array
             with the dataset labels extended using a one-vs-all scheme.
-            If the dataset as no labels set, return None.
 
         Examples
         --------
@@ -381,15 +388,10 @@ class CDataset(object):
          [0 0 1]
          [0 1 0]])
 
-        >>> ds = CDataset([[11,22],[44,55],[77,88]])
-        >>> none_labels = ds.get_labels_asbinary(2)
-        >>> none_labels is None
-        True
-
         """
         if pos_class is not None:
             # Assigning 1 for each label of positive class and 0 to all others
-            return CArray([1 if e == pos_class else 0 for e in self.Y]) if self.Y is not None else None
+            return CArray([1 if e == pos_class else 0 for e in self.Y])
         else:  # Return a (num_samples, num_classes) array with OVA labels
             new_labels = CArray.zeros((self.num_samples, self.num_classes),
                                       dtype=self.Y.dtype)
