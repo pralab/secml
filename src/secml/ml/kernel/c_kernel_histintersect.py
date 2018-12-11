@@ -23,7 +23,9 @@ class CKernelHistIntersect(CKernel):
 
     Attributes
     ----------
-    cache_size : int, size of the cache used for kernel computation. Default 100.
+    class_type : 'hist-intersect'
+    cache_size : int
+        Size of the cache used for kernel computation. Default 100.
 
     Examples
     --------
@@ -39,7 +41,7 @@ class CKernelHistIntersect(CKernel):
      [ 3.  7.]])
 
     """
-    __class_type = 'hist_intersect'
+    __class_type = 'hist-intersect'
 
     # TODO: ADD SPARSE SUPPORT
     def _k(self, x, y):

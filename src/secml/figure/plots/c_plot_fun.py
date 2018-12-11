@@ -18,6 +18,10 @@ class CPlotFunction(CPlot):
     default_params : dict
         Dictionary with default parameters.
 
+    Attributes
+    ----------
+    class_type : 'function'
+
     See Also
     --------
     .CPlot : basic subplot functions.

@@ -15,6 +15,11 @@ from secml.ml.kernel import CKernel
 class CKernelHamming(CKernel):
     """Hamming distance kernel.
 
+    Attributes
+    ----------
+    class_type : 'hamming'
+    cache_size : int, size of the cache used for kernel computation. Default 100.
+
     Examples
     --------
     >>> from secml.array import CArray

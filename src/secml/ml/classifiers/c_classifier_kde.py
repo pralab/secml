@@ -23,6 +23,10 @@ class CClassifierKDE(CClassifier):
         similarity between patterns. If None (default), a linear
         SVM will be created.
 
+    Attributes
+    ----------
+    class_type : 'kde'
+
     See Also
     --------
     .CKernel : Pairwise kernels and metrics.

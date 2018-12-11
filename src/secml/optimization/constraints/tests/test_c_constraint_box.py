@@ -21,7 +21,7 @@ class TestCConstraintBox(CUnitTest):
     def setUp(self):
         """Sets up the test."""
         self.logger.info("Generating training set... ")
-        loader = CDataLoader.create('random_blobs')
+        loader = CDataLoader.create('blobs')
         self.dataset = loader.load()
         # self.lb = -1
         self.lb = [-1, -0.5]

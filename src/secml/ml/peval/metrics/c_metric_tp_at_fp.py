@@ -19,6 +19,7 @@ class CMetricTPatFP(CMetric):
 
     Attributes
     ----------
+    class_type : 'tp-at-fp'
     fp_rate : float
         Desired False Positives rate in the interval [0,1]. Default 0.01 (1%)
 
@@ -36,7 +37,7 @@ class CMetricTPatFP(CMetric):
     0.5
 
     """
-    __class_type = 'tp_at_fp'
+    __class_type = 'tp-at-fp'
     best_value = 1.0
 
     def __init__(self, fp_rate=0.01):

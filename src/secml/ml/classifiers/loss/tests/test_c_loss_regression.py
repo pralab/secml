@@ -29,8 +29,8 @@ class TestCLossRegression(CUnitTest):
             self.assertEqual(n_samples, l.size)
             self.assertEqual(l.dtype, float)
 
-        for loss_id in ('epsilon_insensitive',
-                        'epsilon_insensitive_squared',
+        for loss_id in ('e-insensitive',
+                        'e-insensitive-squared',
                         'quadratic'):
 
             self.logger.info("Creating loss: {:}".format(loss_id))
@@ -62,8 +62,8 @@ class TestCLossRegression(CUnitTest):
         fig = CFigure()
         x = CArray.arange(-1, 3.01, 0.01)
 
-        for loss_id in ('epsilon_insensitive',
-                        'epsilon_insensitive_squared',
+        for loss_id in ('e-insensitive',
+                        'e-insensitive-squared',
                         'quadratic'):
 
             self.logger.info("Creating loss: {:}".format(loss_id))

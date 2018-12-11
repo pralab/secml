@@ -24,7 +24,9 @@ class CKernelLaplacian(CKernel):
 
     Attributes
     ----------
-    cache_size : int, size of the cache used for kernel computation. Default 100.
+    class_type : 'laplacian'
+    cache_size : int
+        Size of the cache used for kernel computation. Default 100.
 
     Parameters
     ----------

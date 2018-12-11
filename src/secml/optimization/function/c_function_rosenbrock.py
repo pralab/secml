@@ -22,12 +22,15 @@ class CFunctionRosenbrock(CFunction):
 
         f(x) = \sum^{n-1}_{i=1} [100 * {(x_{i+1} - x_i^2)}^2 + (x_i - 1)^2]
 
+    Attributes
+    ----------
+    class_type : 'rosenbrock'
+
     References
     ----------
     .. [1] Rosenbrock, HoHo. "An automatic method for finding
        the greatest or least value of a function." The Computer
        Journal 3.3 (1960): 175-184.
-
 
     """
     __class_type = 'rosenbrock'

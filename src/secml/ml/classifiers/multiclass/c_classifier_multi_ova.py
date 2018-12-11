@@ -59,6 +59,10 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
     kwargs : any
         Any other construction parameter for each OVA classifier.
 
+    Attributes
+    ----------
+    class_type : 'ova'
+
     """
     __class_type = 'ova'
 

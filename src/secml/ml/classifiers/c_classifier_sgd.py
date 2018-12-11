@@ -17,7 +17,13 @@ from secml.ml.kernel import CKernel
 
 
 class CClassifierSGD(CClassifierLinear):
-    """Stochastic Gradient Descent Classifier."""
+    """Stochastic Gradient Descent Classifier.
+
+    Attributes
+    ----------
+    class_type : 'sgd'
+
+    """
     __class_type = 'sgd'
 
     def __init__(self, loss, regularizer, kernel=None, alpha=0.01,

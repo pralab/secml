@@ -39,6 +39,10 @@ class CDataLoaderMNIST(CDataLoader):
 
     Available at: http://yann.lecun.com/exdb/mnist/
 
+    Attributes
+    ----------
+    class_type : 'mnist'
+
     """
     __class_type = 'mnist'
 

@@ -34,7 +34,6 @@ class CDataLoaderCIFAR(CDataLoader):
 
     """
     __metaclass__ = ABCMeta
-    __class_type = 'cifar'
 
     def __init__(self):
 
@@ -272,6 +271,10 @@ class CDataLoaderCIFAR10(CDataLoaderCIFAR):
 
     Available at: https://www.cs.toronto.edu/~kriz/cifar.html
 
+    Attributes
+    ----------
+    class_type : 'CIFAR-10'
+
     """
     __class_type = 'CIFAR-10'
 
@@ -339,6 +342,10 @@ class CDataLoaderCIFAR100(CDataLoaderCIFAR):
     (the superclass to which it belongs).
 
     Available at: https://www.cs.toronto.edu/~kriz/cifar.html
+
+    Attributes
+    ----------
+    class_type : 'CIFAR-100'
 
     """
     __class_type = 'CIFAR-100'

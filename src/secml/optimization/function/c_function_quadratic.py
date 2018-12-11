@@ -14,8 +14,11 @@ class CFunctionQuadratic(CFunction):
     """Implements quadratic functions of the form:
         x' A x + b' x + c = 0
 
-    """
+    Attributes
+    ----------
+    class_type : 'quadratic'
 
+    """
     __class_type = 'quadratic'
 
     def __init__(self, A, b, c):

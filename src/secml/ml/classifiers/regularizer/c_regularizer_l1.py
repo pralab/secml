@@ -20,8 +20,11 @@ class CRegularizerL1(CRegularizer):
 
         R(w) := \sum_{i=1}^{n} |w_i|
 
-    """
+    Attributes
+    ----------
+    class_type : 'l1'
 
+    """
     __class_type = 'l1'
 
     def regularizer(self, w):

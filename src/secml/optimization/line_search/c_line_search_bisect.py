@@ -10,8 +10,12 @@ from secml.array import CArray
 
 
 class CLineSearchBisect(CLineSearch):
-    """
-    Implements binary and exponential line searches.
+    """Implements binary line search.
+
+    Attributes
+    ----------
+    class_type : 'bisect'
+
     """
     __class_type = 'bisect'
 

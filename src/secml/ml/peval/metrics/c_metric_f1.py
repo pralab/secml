@@ -27,6 +27,10 @@ class CMetricF1(CMetric):
      - y_true (true ground labels)
      - y_pred (predicted labels)
 
+    Attributes
+    ----------
+    class_type : 'f1'
+
     Examples
     --------
     >>> from secml.ml.peval.metrics import CMetricF1

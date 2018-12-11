@@ -11,8 +11,7 @@ from secml.core.constants import nan, inf
 
 
 class CSolverGradDesc(CSolver):
-    """
-    This is an abstract class for optimizing:
+    """This is an abstract class for optimizing:
 
         min  f(x)
         s.t. d(x,x0) <= dmax
@@ -23,6 +22,11 @@ class CSolverGradDesc(CSolver):
     and x_lb <= x <= x_ub is a box constraint on x.
 
     The solution algorithm is based on the classic gradient descent algorithm.
+
+    Attributes
+    ----------
+    class_type : 'gradient-descent'
+
     """
 
     __class_type = 'gradient-descent'

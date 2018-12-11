@@ -92,8 +92,12 @@ class CDLRandom(CDataLoader):
         If RandomState instance, random_state is the random number generator;
         If None, is the RandomState instance used by np.random.
 
+    Attributes
+    ----------
+    class_type : 'classification'
+
     """
-    __class_type = 'random'
+    __class_type = 'classification'
 
     def __init__(self, n_samples=100, n_features=20, n_informative=2,
                  n_redundant=2, n_repeated=0, n_classes=2,
@@ -192,9 +196,13 @@ class CDLRandomRegression(CDataLoader):
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
         If None, is the RandomState instance used by np.random.
-            
+
+    Attributes
+    ----------
+    class_type : 'regression'
+
     """
-    __class_type = 'random_regression'
+    __class_type = 'regression'
 
     def __init__(self, n_samples=100, n_features=100, n_informative=10,
                  n_targets=1, bias=0.0, effective_rank=None,
@@ -256,8 +264,12 @@ class CDLRandomBlobs(CDataLoader):
         If RandomState instance, random_state is the random number generator;
         If None, is the RandomState instance used by np.random.
 
+    Attributes
+    ----------
+    class_type : 'blobs'
+
     """
-    __class_type = 'random_blobs'
+    __class_type = 'blobs'
 
     def __init__(self, n_samples=100, n_features=2, centers=3,
                  cluster_std=1.0, center_box=(-10.0, 10.0), random_state=None):
@@ -301,8 +313,8 @@ class CDLRandomBlobsRegression(CDataLoader):
         The number of centers to generate, or the fixed center locations.
     cluster_std: list of floats, optional (default=(1.0,1.0))
         The standard deviation of the clusters.
-    bias : bias that will summ to the function
-    w : the heigth of every gaussian
+    bias : bias that will sum to the function
+    w : the height of every gaussian
     centers: list of tuple optional (default=([1,1],[-1,-1]))
         The bounding box for each cluster center when centers are
         generated at random.
@@ -311,8 +323,12 @@ class CDLRandomBlobsRegression(CDataLoader):
         If RandomState instance, random_state is the random number generator;
         If None, is the RandomState instance used by np.random.
 
+    Attributes
+    ----------
+    class_type : 'blobs-regression'
+
     """
-    __class_type = 'random_blobs_regression'
+    __class_type = 'blobs-regression'
 
     def __init__(self, n_samples=100, cluster_std=(1.0, 1.0),
                  bias=1.0, w=(2.0, -1.0), centers=([0, 0], [-1, -1]),
@@ -369,8 +385,12 @@ class CDLRandomCircles(CDataLoader):
         If RandomState instance, random_state is the random number generator;
         If None, is the RandomState instance used by np.random.
 
+    Attributes
+    ----------
+    class_type : 'circles'
+
     """
-    __class_type = 'random_circles'
+    __class_type = 'circles'
 
     def __init__(self, n_samples=100, noise=None,
                  factor=0.8, random_state=None):
@@ -414,8 +434,12 @@ class CDLRandomCircleRegression(CDataLoader):
         If RandomState instance, random_state is the random number generator;
         If None, is the RandomState instance used by np.random.
 
+    Attributes
+    ----------
+    class_type : 'circles-regression'
+
     """
-    __class_type = 'random_circles_regression'
+    __class_type = 'circles-regression'
 
     def __init__(self, n_samples=100, noise=None,
                  factor=0.8, random_state=None):
@@ -461,8 +485,12 @@ class CDLRandomMoons(CDataLoader):
         If RandomState instance, random_state is the random number generator;
         If None, is the RandomState instance used by np.random.
 
+    Attributes
+    ----------
+    class_type : 'moons'
+
     """
-    __class_type = 'random_moons'
+    __class_type = 'moons'
 
     def __init__(self, n_samples=100, noise=None, random_state=None):
 
@@ -497,13 +525,12 @@ class CDLRandomBinary(CDataLoader):
     n_features : int, optional (default=2)
         The total number of features
 
-    Returns
-    -------
-    dataset : CDataset
-        The randomly generated dataset.
+    Attributes
+    ----------
+    class_type : 'binary'
 
     """
-    __class_type = 'random_binary'
+    __class_type = 'binary'
 
     def __init__(self, n_samples=100, n_features=2):
 
@@ -589,6 +616,10 @@ class CDLRandomToy(CDataLoader):
     zero_one : Boolean
         If is true, and class list is equal to two, will be
         assigned 0 at the label with lower value, 1 to the other.
+
+    Attributes
+    ----------
+    class_type : 'toy'
 
     """
     __class_type = 'toy'

@@ -21,6 +21,10 @@ class CMetricMSE(CMetric):
      - y_true (true ground labels)
      - score (estimated target values)
 
+    Attributes
+    ----------
+    class_type : 'mse'
+
     Examples
     --------
     >>> from secml.ml.peval.metrics import CMetricMSE

@@ -23,6 +23,9 @@ class CFunctionBeale(CFunction):
         f(x) = (1.5 - x_0 + x_0 * x_1)^2 + (2.25 - x_0 + x_0 * x_1^2)^2 +
          (2.625 - x_0 + x_0 * x_1^3)^2
 
+    Attributes
+    ----------
+    class_type : 'beale'
 
     """
     __class_type = 'beale'

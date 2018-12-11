@@ -23,6 +23,10 @@ class CMetricPrecision(CMetric):
      - y_true (true ground labels)
      - y_pred (predicted labels)
 
+    Attributes
+    ----------
+    class_type : 'precision'
+
     Examples
     --------
     >>> from secml.ml.peval.metrics import CMetricPrecision

@@ -5,6 +5,7 @@ from . import CTorchClassifier
 from secml.utils.dict_utils import merge_dicts
 
 
+# FIXME: UPDATE CLASS DOCSTRING
 class CTorchClassifierFullyConnected(CTorchClassifier):
     """
     A fully-connected ReLU network with one hidden layer, trained to predict y from x
@@ -15,8 +16,13 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
     this is where the nn package can help. The nn package defines a set of Modules,
     which you can think of as a neural network layer that has produces output from
     input and may have some trainable weights or other state.
+
+    Attributes
+    ----------
+    class_type : 'torch-fc'
+
     """
-    __class_type = 'nn_mlp'
+    __class_type = 'torch-fc'
 
     def __init__(self, input_dims=1000, hidden_dims=100, output_dims=10,
                  learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,

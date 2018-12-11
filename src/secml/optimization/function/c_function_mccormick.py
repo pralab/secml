@@ -21,9 +21,12 @@ class CFunctionMcCormick(CFunction):
 
         f(x) = sin(x_0 + x_1) + (x_0 - x_1)^2 - 1.5 * x_0 + 2.5 * x_1 + 1
 
+    Attributes
+    ----------
+    class_type : mc-cormick'
 
     """
-    __class_type = 'mc_cormick'
+    __class_type = 'mc-cormick'
 
     def __init__(self):
 

@@ -23,6 +23,10 @@ class CPlotSecEval(CPlot):
     default_params : dict
         Dictionary with default parameters.
 
+    Attributes
+    ----------
+    class_type : 'sec-eval'
+
     See Also
     --------
     .CRoc : computes the receiver operating characteristic curve, or ROC curve.
@@ -30,7 +34,7 @@ class CPlotSecEval(CPlot):
     .CFigure : creates and handle figures.
 
     """
-    __class_type = 'sec_eval'
+    __class_type = 'sec-eval'
 
     # fixme: gestire i params di def ecc
     def __init__(self, sp, default_params=None):

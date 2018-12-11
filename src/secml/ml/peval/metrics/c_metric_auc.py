@@ -21,6 +21,10 @@ class CMetricAUC(CMetric):
      - y_true (true ground labels)
      - score (estimated target values)
 
+    Attributes
+    ----------
+    class_type : 'auc'
+
     Notes
     -----
     This implementation is restricted to the binary classification task.

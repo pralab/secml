@@ -22,9 +22,12 @@ class CFunctionThreeHumpCamel(CFunction):
         f(x) = 2 * x_0 ** 2 - 1.05 * x_0 ** 4 +
          x_0 ** 6 / 6 + x_0 * x_1 + x_1 ^ 2
 
+    Attributes
+    ----------
+    class_type : '3h-camel'
 
     """
-    __class_type = '3h_camel'
+    __class_type = '3h-camel'
 
     def __init__(self):
 
