@@ -18,6 +18,10 @@ class CPlotDataset(CPlot):
     default_params : dict
         Dictionary with default parameters.
 
+    Attributes
+    ----------
+    class_type : 'ds'
+
     See Also
     --------
     .CDataset : store and manage a dataset.

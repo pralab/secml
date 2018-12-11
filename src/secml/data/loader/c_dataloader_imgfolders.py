@@ -16,9 +16,14 @@ import re
 
 
 class CDataLoaderImgFolders(CDataLoader):
-    """Loads a dataset of images where clients are specified as different folders."""
+    """Loads a dataset of images where clients are specified as different folders.
 
-    __class_type = 'imgfolders'
+    Attributes
+    ----------
+    class_type : 'img-folders'
+
+    """
+    __class_type = 'img-folders'
 
     def __init__(self):
         # Does nothing...

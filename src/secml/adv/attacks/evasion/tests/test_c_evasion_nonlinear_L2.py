@@ -24,7 +24,7 @@ class TestEvasionNonLinearL2(CEvasionTestCases.TestCEvasion):
 
         self.normalizer = CNormalizerMinMax(feature_range=(-1, 1))
         self.classifier = CClassifierSVM(
-            kernel=CKernel.create('max', gamma=1.0), C=1.0,
+            kernel=CKernel.create('chebyshev-dist', gamma=1.0), C=1.0,
             normalizer=self.normalizer)
         self.classifier.gamma = 0.01
         # self.classifier = CClassifierKDE(kernel='rbf', normalizer='minmax')

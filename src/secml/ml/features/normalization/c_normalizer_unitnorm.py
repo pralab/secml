@@ -27,6 +27,10 @@ class CNormalizerUnitNorm(CNormalizer):
         1 ('l1') and 2 ('l2') norm are supported. 2 ('l2') is default.
         For sparse arrays, only 2nd order norm is supported.
 
+    Attributes
+    ----------
+    class_type : 'unit-norm'
+
     Notes
     -----
     Differently from numpy, we manage flat vectors as 2-Dimensional of
@@ -52,7 +56,7 @@ class CNormalizerUnitNorm(CNormalizer):
      [ 0.    0.5  -0.5 ]])
 
     """
-    __class_type = 'unitnorm'
+    __class_type = 'unit-norm'
 
     def __init__(self, order=2):
         """Class constructor"""

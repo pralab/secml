@@ -31,8 +31,12 @@ class CClassifierMCSLinear(CClassifierLinear):
         Percentage of the features to use for training,
         range [0, 1.0]. Default 1.0 (all the features.
 
+    Attributes
+    ----------
+    class_type : 'mcs-linear'
+
     """
-    __class_type = 'mcs_linear'
+    __class_type = 'mcs-linear'
     
     def __init__(self, classifier, num_classifiers=10,
                  max_samples=1.0, max_features=1.0, normalizer=None):

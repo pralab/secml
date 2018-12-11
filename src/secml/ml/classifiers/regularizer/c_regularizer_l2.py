@@ -19,8 +19,11 @@ class CRegularizerL2(CRegularizer):
 
         R(w) := \frac{1}{2} \sum_{i=1}^{n} w_i^2
 
-    """
+    Attributes
+    ----------
+    class_type : 'l2'
 
+    """
     __class_type = 'l2'
 
     def regularizer(self, w):

@@ -14,7 +14,13 @@ from secml.ml.kernel import CKernel
 
 
 class CClassifierRidge(CClassifierLinear):
-    """Ridge Classifier."""
+    """Ridge Classifier.
+
+    Attributes
+    ----------
+    class_type : 'ridge'
+
+    """
     __class_type = 'ridge'
 
     def __init__(self, alpha=1.0, kernel=None,

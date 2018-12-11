@@ -23,6 +23,10 @@ class CMetricRecall(CMetric):
      - y_true (true ground labels)
      - y_pred (predicted labels)
 
+    Attributes
+    ----------
+    class_type : 'recall'
+
     Examples
     --------
     >>> from secml.ml.peval.metrics import CMetricRecall

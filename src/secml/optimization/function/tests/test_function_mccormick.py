@@ -12,7 +12,7 @@ class TestCFunctionMcCormick(CUnitTest):
 
     def setUp(self):
 
-        self.fun_obj = CFunction.create('mc_cormick')
+        self.fun_obj = CFunction.create('mc-cormick')
 
         self.logger.info("Global minimum: {:}".format(
             self.fun_obj.global_min()))

@@ -3,12 +3,14 @@ from secml.optimization.learning_rate import CStep
 
 
 class CStepConstant(CStep):
+    """Constant step.
 
-    '''
-    Implements static step
-    '''
+    Attributes
+    ----------
+    class_type : 'constant'
 
-    __class_type = 'CCostantStep'
+    """
+    __class_type = 'constant'
 
     def __init__(self, initial_step_value):
         '''

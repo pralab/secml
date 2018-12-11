@@ -21,7 +21,7 @@ class TestCConstraintL1(CUnitTest):
     def setUp(self):
         """Test setup."""
         self.logger.info("Generating training set... ")
-        loader = CDataLoader.create('random_blobs')
+        loader = CDataLoader.create('blobs')
         self.dataset = loader.load()
         self.center = 0
         self.radius = 1
@@ -52,9 +52,7 @@ class TestCConstraintL1(CUnitTest):
     def test_binary_projection(self):
         n_dim = 100
         radius = 20
-        loader = CDataLoader.create('random_binary',
-                                    n_samples=100,
-                                    n_features=n_dim)
+        loader = CDataLoader.create('binary', n_samples=100, n_features=n_dim)
         dataset = loader.load()
         center = dataset.X[0, :]
         point = dataset.X[50, :]

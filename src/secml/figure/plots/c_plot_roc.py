@@ -28,6 +28,10 @@ class CPlotRoc(CPlot):
     default_params : dict
         Dictionary with default parameters.
 
+    Attributes
+    ----------
+    class_type : 'roc'
+
     See Also
     --------
     .CRoc : computes the receiver operating characteristic curve, or ROC curve.

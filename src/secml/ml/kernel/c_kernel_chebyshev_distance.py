@@ -24,7 +24,9 @@ class CKernelChebyshevDistance(CKernel):
 
     Attributes
     ----------
-    cache_size : int, size of the cache used for kernel computation. Default 100.
+    class_type : 'chebyshev-dist'
+    cache_size : int
+        Size of the cache used for kernel computation. Default 100.
 
     Examples
     --------
@@ -40,7 +42,7 @@ class CKernelChebyshevDistance(CKernel):
      [ 2.  0.]])
 
     """
-    __class_type = 'max'
+    __class_type = 'chebyshev-dist'
 
     def __init__(self, gamma=1.0, cache_size=100):
         # Calling CKernel constructor

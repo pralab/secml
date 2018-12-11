@@ -23,6 +23,9 @@ class CPSKMedians(CPrototypesSelector):
     and Statistical Pattern Recognition.
     Springer Berlin Heidelberg, 2006. 287-296.
 
+    Attributes
+    ----------
+    class_type : 'k-medians'
 
     """
     __class_type = 'k-medians'

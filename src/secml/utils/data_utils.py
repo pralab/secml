@@ -231,7 +231,7 @@ def visualize_kernel_distance(data, kernel):
     """
     sorted_X, sorted_y = _sort_data(data)
 
-    if kernel.class_type == 'laplacian_2g':
+    if kernel.class_type == 'laplacian-2g':
         K = kernel.k(sorted_X, sorted_X, sorted_y)
     else:
         K = kernel.k(sorted_X, sorted_X, sorted_y)

@@ -31,6 +31,10 @@ class CNormalizerZScore(CNormalizerLinear):
     with_std : bool, optional
         If True (default), normalizer scales array to have unit variance.
 
+    Attributes
+    ----------
+    class_type : 'z-score'
+
     Notes
     -----
     Mean and standard deviation of sparse arrays are stored in dense form.
@@ -59,7 +63,7 @@ class CNormalizerZScore(CNormalizerLinear):
      [-1.        1.       -1.333333]])
 
     """
-    __class_type = 'zscore'
+    __class_type = 'z-score'
 
     def __init__(self, with_std=True):
         """Class constructor"""

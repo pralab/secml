@@ -11,7 +11,13 @@ from secml.array import CArray
 
 
 class CConstraintLinear(CConstraint):
-    """Class that defines a linear constraint in the form Ax <= b."""
+    """Class that defines a linear constraint in the form Ax <= b.
+
+    Attributes
+    ----------
+    class_type : 'linear'
+
+    """
     __class_type = 'linear'
 
     def __init__(self, A, b):

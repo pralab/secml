@@ -19,8 +19,12 @@ from secml.ml.classifiers.loss import CLossCrossEntropy
 
 
 class CAttackEvasion(CAttack):
-    """
-    Class that implements evasion attacks.
+    """Class that implements evasion attacks.
+
+    Attributes
+    ----------
+    class_type : 'evasion'
+
     """
     __class_type = 'evasion'
 

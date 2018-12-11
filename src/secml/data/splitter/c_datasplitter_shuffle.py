@@ -43,6 +43,10 @@ class CDataSplitterShuffle(CDataSplitter):
         If RandomState instance, random_state is the random number generator;
         If None, is the RandomState instance used by np.random.
 
+    Attributes
+    ----------
+    class_type : 'shuffle'
+
     Notes
     -----
     train_size and test_size could not be both None. If one is

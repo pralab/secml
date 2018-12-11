@@ -10,7 +10,7 @@ class TestCOptimizer(CUnitTest):
 
     def setUp(self):
 
-        avail_funcs = ['3h_camel', 'beale', 'mc_cormick', 'rosenbrock']
+        avail_funcs = ['3h-camel', 'beale', 'mc-cormick', 'rosenbrock']
 
         # Instancing the available functions to test optimizer
         self.funcs = {}

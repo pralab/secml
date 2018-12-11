@@ -24,6 +24,10 @@ class CPSSpanning(CPrototypesSelector):
     and Statistical Pattern Recognition.
     Springer Berlin Heidelberg, 2006. 287-296.
 
+    Attributes
+    ----------
+    class_type : 'spanning'
+
     """
     __class_type = 'spanning'
 

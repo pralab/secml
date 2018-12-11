@@ -39,6 +39,10 @@ class CClassifierSVM(CClassifierLinear):
         Percentage in (0.0, 1.0] of the alpha weights to be considered
         when computing the classifier gradient.
 
+    Attributes
+    ----------
+    class_type : 'svm'
+
     Notes
     -----
     Current implementation relies on :class:`sklearn.svm.SVC` for

@@ -32,6 +32,10 @@ class CDataSplitterStratifiedKFold(CDataSplitter):
         If RandomState instance, random_state is the random number generator;
         If None, is the RandomState instance used by np.random.
 
+    Attributes
+    ----------
+    class_type : 'strat-kfold'
+
     Examples
     --------
     >>> from secml.data import CDataset
@@ -47,7 +51,7 @@ class CDataSplitterStratifiedKFold(CDataSplitter):
     [CArray(2,)(dense: [0 2]), CArray(2,)(dense: [1 3])]
 
     """
-    __class_type = 'strat_kfold'
+    __class_type = 'strat-kfold'
 
     def __init__(self, num_folds=3, random_state=None):
 

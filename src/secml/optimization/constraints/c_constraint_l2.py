@@ -10,8 +10,14 @@ from secml.optimization.constraints import CConstraint
 
 
 class CConstraintL2(CConstraint):
+    """L2 Constraint.
 
-    __class_type = "l2"
+    Attributes
+    ----------
+    class_type : 'l2'
+
+    """
+    __class_type = 'l2'
 
     def __init__(self, center=0, radius=1):
         # Setting the value of the center (array or scalar)

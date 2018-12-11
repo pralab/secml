@@ -22,6 +22,9 @@ class CPSCenter(CPrototypesSelector):
     and Statistical Pattern Recognition.
     Springer Berlin Heidelberg, 2006. 287-296.
 
+    Attributes
+    ----------
+    class_type : 'center'
 
     """
     __class_type = 'center'

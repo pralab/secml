@@ -12,7 +12,7 @@ class TestCFunctionThreeHumpCamel(CUnitTest):
 
     def setUp(self):
 
-        self.fun_obj = CFunction.create('3h_camel')
+        self.fun_obj = CFunction.create('3h-camel')
 
         self.logger.info("Global minimum: {:}".format(
             self.fun_obj.global_min()))

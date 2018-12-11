@@ -25,6 +25,7 @@ class CMetricPartialAUC(CMetric):
 
     Attributes
     ----------
+    class_type : 'pauc'
     fp_rate : float
         Desired false positives rate in the interval [0,1]. Default 0.01 (1%)
     n_points : int

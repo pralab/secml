@@ -24,9 +24,9 @@ class CCreator(object):
 
     Attributes
     ----------
-    class_type : str or None
-        Class type or identification string.
-        Can be None to explicitly NOT support `.create()`.
+    class_type : str
+        Class type identification string. If not defined,
+         class will not be instantiable using `.create()`.
     __super__ : str or None
         String with superclass name.
         Can be None to explicitly NOT support `.create()` and `.load()`.
