@@ -15,7 +15,7 @@ from secml.ml.peval.metrics import CRoc
 class CMetricPartialAUC(CMetric):
     """Performance evaluation metric: Partial Area Under (ROC) Curve.
 
-    ROC is only considered between 0 and `fp_rate` false positives.
+    ROC is only considered between 0 and `fpr` False Positive Rate.
 
     AUC is computed using the trapezoidal rule.
 
@@ -26,8 +26,8 @@ class CMetricPartialAUC(CMetric):
     Attributes
     ----------
     class_type : 'pauc'
-    fp_rate : float
-        Desired false positives rate in the interval [0,1]. Default 0.01 (1%)
+    fpr : float
+        Desired False Positive Rate in the interval [0,1]. Default 0.01 (1%)
     n_points : int
         Number of points to be used when interpolating the partial ROC.
         Higher points means more accurate values but slower computation.
@@ -42,7 +42,7 @@ class CMetricPartialAUC(CMetric):
     >>> from secml.ml.peval.metrics import CMetricPartialAUC
     >>> from secml.array import CArray
 
-    >>> peval = CMetricPartialAUC(fp_rate=0.5)
+    >>> peval = CMetricPartialAUC(fpr=0.5)
     >>> print peval.performance_score(CArray([0, 1, 0, 0]), score=CArray([0, 0, 0, 0]))
     0.125
 
@@ -50,10 +50,10 @@ class CMetricPartialAUC(CMetric):
     __class_type = 'pauc'
     best_value = 1.0
 
-    def __init__(self, fp_rate=0.01, n_points=1000):
+    def __init__(self, fpr=0.01, n_points=1000):
 
-        # False positives rate @ which true positives should be computed
-        self.fp_rate = float(fp_rate)
+        # False Positive Rate @ which true positives should be computed
+        self.fpr = float(fpr)
         # Number of points to be used when interpolating ROC
         self.n_points = int(n_points)
 
@@ -80,9 +80,9 @@ class CMetricPartialAUC(CMetric):
 
         """
         fp_roc, tp_roc = CRoc().compute(y_true, score)[0:2]
-        # Interpolating the ROC between 0 and fp_rate FP
+        # Interpolating the ROC between 0 and fpr FP
         # Considering a number of points proportional to what used inside CRoc
-        fpr = CArray.linspace(0, self.fp_rate, self.n_points)
+        fpr = CArray.linspace(0, self.fpr, self.n_points)
         tpr = fpr.interp(fp_roc, tp_roc)
 
         return skm.auc(fpr.tondarray(), tpr.tondarray())
