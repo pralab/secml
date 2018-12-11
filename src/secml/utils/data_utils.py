@@ -131,7 +131,7 @@ def plot_roc_and_prob_density(ts_scores, ts):
     # plot roc and score probability density
     fig = CFigure(height=5, width=12)
     fig.subplot(1, 2, 1, sp_type='roc')
-    fig.sp.plot_roc(roc.fp, roc.tp)
+    fig.sp.plot_roc(roc.fpr, roc.tpr)
     fig.subplot(1, 2, 2)
     fig.sp.plot(xb, benign_pdf, label="ben pdf")
     fig.sp.plot(xm, malicious_pdf, label="mal pdf")

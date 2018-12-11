@@ -35,15 +35,15 @@ class TestCRoc(CUnitTest):
         self.roc.average()
 
         # Testing 3 and not 1 as roc is bounded (we add a first and last point)
-        self.assertEqual(self.roc.fp.size, 3)
-        self.assertEqual(self.roc.tp.size, 3)
+        self.assertEqual(self.roc.fpr.size, 3)
+        self.assertEqual(self.roc.tpr.size, 3)
 
     def test_compute(self):
 
         self.roc.compute(self.ds1.Y, self.s1[:, 1].ravel())
 
         fig = CFigure()
-        fig.sp.semilogx(self.roc.fp, self.roc.tp)
+        fig.sp.semilogx(self.roc.fpr, self.roc.tpr)
         fig.sp.grid()
         fig.show()
 
@@ -54,9 +54,9 @@ class TestCRoc(CUnitTest):
         mean_fp, mean_tp, mean_std = self.roc.average(return_std=True)
         fig = CFigure(linewidth=2)
         fig.sp.errorbar(
-            self.roc.mean_fp, self.roc.mean_tp, yerr=mean_std)
+            self.roc.mean_fpr, self.roc.mean_tpr, yerr=mean_std)
         for rep in xrange(self.roc.n_reps):
-            fig.sp.semilogx(self.roc.fp[rep], self.roc.tp[rep])
+            fig.sp.semilogx(self.roc.fpr[rep], self.roc.tpr[rep])
         fig.sp.semilogx(mean_fp, mean_tp)
         fig.sp.grid()
         fig.show()

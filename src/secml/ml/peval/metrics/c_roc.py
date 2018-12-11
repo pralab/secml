@@ -9,95 +9,95 @@
 from secml.array import CArray
 
 
-def refine_roc(tp, fp, th):
+def refine_roc(fpr, tpr, th):
     """Function to ensure the bounds of a ROC.
 
     The first and last points should be (0,0) and (1,1) respectively.
 
     Parameters
     ----------
-    tp : CArray
-        True Positives, as returned by `.BaseRoc.compute()`
-    fp : CArray
-        False Positives, as returned by `.BaseRoc.compute()`
+    fpr : CArray
+        False Positive Rates, as returned by `.BaseRoc.compute()`.
+    tpr : CArray
+        True Positive Rates, as returned by `.BaseRoc.compute()`.
     th : CArray
-        Thresholds, as returned by `.BaseRoc.compute()`
+        Thresholds, as returned by `.BaseRoc.compute()`.
 
     """
-    if tp[0] != fp[0] or tp[0] != 0 or fp[0] != 0:
-        fp = CArray(0).append(fp)
-        tp = CArray(0).append(tp)
+    if tpr[0] != fpr[0] or tpr[0] != 0 or fpr[0] != 0:
+        fpr = CArray(0).append(fpr)
+        tpr = CArray(0).append(tpr)
         th = CArray(th[0] + 1e-3).append(th)
-    if tp[-1] != fp[-1] or tp[-1] != 1 or fp[-1] != 1:
-        fp = fp.append(1)
-        tp = tp.append(1)
+    if tpr[-1] != fpr[-1] or tpr[-1] != 1 or fpr[-1] != 1:
+        fpr = fpr.append(1)
+        tpr = tpr.append(1)
         th = th.append(th[-1] - 1e-3)
-    return tp, fp, th
+    return fpr, tpr, th
 
 
-def average(fp, tp, n_points=1000):
-    """Compute the average of the input tp/fp pairs.
+def average(fpr, tpr, n_points=1000):
+    """Compute the average of the input tpr/fpr pairs.
 
     Parameters
     ----------
-    fp, tp : CArray or list of CArray
-        CArray or list of CArrays with false/true
-        positives as output of `.CRoc`.
+    fpr, tpr : CArray or list of CArray
+        CArray or list of CArrays with False/True Positive Rates
+        as output of `.CRoc`.
     n_points : int, optional
         Default 1000, is the number of points to be used for interpolation.
 
     Returns
     -------
-    mean_fp : CArray
-        Flat array with increasing false positive rates averaged over all
-        available repetitions. Element i is the false positive rate of
+    mean_fpr : CArray
+        Flat array with increasing False Positive Rates averaged over all
+        available repetitions. Element i is the False Positive Rate of
         predictions with score >= thresholds[i].
-    mean_tp : CArray
-        Flat array with increasing true positive rates averaged over all
-        available repetitions. Element i is the true positive rate of
+    mean_tpr : CArray
+        Flat array with increasing True Positive Rates averaged over all
+        available repetitions. Element i is the True Positive Rate of
         predictions with score >= thresholds[i].
-    std_dev_tp : CArray
-        Flat array with standard deviation of True Positives.
+    std_dev_tpr : CArray
+        Flat array with standard deviation of True Positive Rates.
 
     """
     # Working with lists
-    fp_list = [fp] if not isinstance(fp, list) else fp
-    tp_list = [tp] if not isinstance(tp, list) else tp
+    fpr_list = [fpr] if not isinstance(fpr, list) else fpr
+    tpr_list = [tpr] if not isinstance(tpr, list) else tpr
 
-    n_fp = len(fp_list)
-    n_tp = len(tp_list)
+    n_fpr = len(fpr_list)
+    n_tpr = len(tpr_list)
 
     # Checking consistency between input data
-    if n_fp == 0:
+    if n_fpr == 0:
         raise ValueError("At least 1 array with false/true "
                          "positives must be specified.")
-    if n_fp != n_tp:
-        raise ValueError("Number of true positives and false "
-                         "positives must be the same.")
+    if n_fpr != n_tpr:
+        raise ValueError("Number of True Positive Rates and "
+                         "False Positive Rates must be the same.")
 
     # Computing ROC for a single (labels, scores) pair
-    mean_fp = CArray.linspace(0, 1, n_points)
-    mean_tp = 0.0
+    mean_fpr = CArray.linspace(0, 1, n_points)
+    mean_tpr = 0.0
 
-    all_roc_tp = CArray.zeros(shape=(n_tp, n_points))
+    all_roc_tpr = CArray.zeros(shape=(n_tpr, n_points))
 
-    for i, data_i in enumerate(zip(fp_list, tp_list)):
+    for i, data_i in enumerate(zip(fpr_list, tpr_list)):
         # Interpolating over 'x' axis
-        i_tp = mean_fp.interp(*data_i)
+        i_tpr = mean_fpr.interp(*data_i)
         # Will be used later to compute std
-        all_roc_tp[i, :] = i_tp
-        # Adding current tp to mean_tp
-        mean_tp += i_tp
-        mean_tp[0] = 0.0  # First point should be (0,0) to prevent side effects
+        all_roc_tpr[i, :] = i_tpr
+        # Adding current tpr to mean_tpr
+        mean_tpr += i_tpr
+        mean_tpr[0] = 0.0  # First should be (0,0) to prevent side effects
 
-    mean_tp /= n_tp
-    mean_tp[-1] = 1.0  # Last point should be (1,1) to prevent side effects
+    mean_tpr /= n_tpr
+    mean_tpr[-1] = 1.0  # Last point should be (1,1) to prevent side effects
 
     # Computing standard deviation
-    std_dev_tp = all_roc_tp.std(axis=0, keepdims=False)
-    std_dev_tp[-1] = 0
+    std_dev_tpr = all_roc_tpr.std(axis=0, keepdims=False)
+    std_dev_tpr[-1] = 0
 
-    return mean_fp, mean_tp, std_dev_tp
+    return mean_fpr, mean_tpr, std_dev_tpr
 
 
 class CBaseRoc(object):
@@ -111,44 +111,44 @@ class CBaseRoc(object):
 
     """
     def __init__(self):
-        self._fp = None
-        self._tp = None
+        self._fpr = None
+        self._tpr = None
         self._th = None
 
     @property
-    def fp(self):
-        """False Positives.
+    def fpr(self):
+        """False Positive Rates.
 
-        Flat array with increasing false positive rates. Element i
-        is the false positive rate of predictions with score >= thresholds[i].
+        Flat array with increasing False Positive Rates. Element i
+         is the False Positive Rate of predictions with score >= thresholds[i].
 
         """
-        return self._fp
+        return self._fpr
 
     @property
-    def tp(self):
-        """True Positives.
+    def tpr(self):
+        """True Positive Rates.
 
-        Flat array with increasing true positive rates. Element i
-        is the true positive rate of predictions with score >= thresholds[i].
+        Flat array with increasing True Positive Rates. Element i
+         is the True Positive Rate of predictions with score >= thresholds[i].
 
         """
-        return self._tp
+        return self._tpr
 
     @property
     def th(self):
         """Thresholds.
 
         Flat array with decreasing thresholds on the decision function
-        used to compute fpr and tpr. `thresholds[0]` represents no
-        instances being predicted and is arbitrarily set to
-        `max(score) + 1e-3`.
+         used to compute fpr and tpr. `thresholds[0]` represents no
+         instances being predicted and is arbitrarily set to
+         `max(score) + 1e-3`.
 
         """
         return self._th
 
     def compute(self, y_true, score, positive_label=None):
-        """Compute TP/FP for classifier output.
+        """Compute TPR/FPR for classifier output.
 
         Parameters
         ----------
@@ -165,7 +165,7 @@ class CBaseRoc(object):
         Returns
         -------
         single_roc : CBaseRoc
-            Instance of the roc curve (tp, fp, th).
+            Instance of the roc curve (tpr, fpr, th).
 
         """
         th = score.unique()  # unique also sorts the values
@@ -173,7 +173,7 @@ class CBaseRoc(object):
         n = CArray(score[y_true == 0])
         p = CArray(score[y_true == 1])
 
-        # Counting the fp and the tp
+        # Counting the fpr and the tpr
         fp_list = []
         tp_list = []
         for i in xrange(th.size):
@@ -182,31 +182,31 @@ class CBaseRoc(object):
             fp_list.append(fp_i)
             tp_list.append(tp_i)
 
-        # Returning increasing fp, tp...
+        # Returning increasing fpr, tpr...
         fp_list.reverse()
         tp_list.reverse()
         # ...and th accordingly (decreasing)
         th = CArray(th[::-1])
 
         # Normalizing in 0-1
-        fp = CArray(fp_list) / float(n.size) if n.size != 0 else CArray([0])
-        tp = CArray(tp_list) / float(p.size) if p.size != 0 else CArray([0])
+        fpr = CArray(fp_list) / float(n.size) if n.size != 0 else CArray([0])
+        tpr = CArray(tp_list) / float(p.size) if p.size != 0 else CArray([0])
 
         # Ensure first and last points are (0,0) and (1,1) respectively
-        self._fp, self._tp, self._th = refine_roc(fp, tp, th)
+        self._fpr, self._tpr, self._th = refine_roc(fpr, tpr, th)
 
         return self
 
     def __iter__(self):
-        """Returns `fp`, `tp`, `th` always in this order."""
-        seq = ('fp', 'tp', 'th')  # Fixed order for consistency
+        """Returns `fpr`, `tpr`, `th` always in this order."""
+        seq = ('fpr', 'tpr', 'th')  # Fixed order for consistency
         for e in seq:
             yield getattr(self, e)
 
     def reset(self):
         """Reset stored data."""
-        self._fp = None
-        self._tp = None
+        self._fpr = None
+        self._tpr = None
         self._th = None
 
 
@@ -216,9 +216,9 @@ class CRoc(CBaseRoc):
         "A receiver operating characteristic (ROC), or simply ROC curve,
         is a graphical plot which illustrates the performance of a binary
         classifier system as its discrimination threshold is varied.
-        It is created by plotting the fraction of true positives out of
-        the positives (TPR = true positive rate) vs. the fraction of false
-        positives out of the negatives (FPR = false positive rate),
+        It is created by plotting the fraction of True Positive Rates out of
+        the Positives (TPR = True Positive Rate) vs. the fraction of False
+        Positives out of the Negatives (FPR = False Positive Rate),
         at various threshold settings. TPR is also known as sensitivity,
         and FPR is one minus the specificity or true negative rate."
 
@@ -232,42 +232,42 @@ class CRoc(CBaseRoc):
         # Output structures
         self._data = []
         self._data_average = CBaseRoc()
-        self._std_dev_tp = None
+        self._std_dev_tpr = None
 
     @property
-    def fp(self):
-        """False Positives.
+    def fpr(self):
+        """False Positive Rates.
 
-        Flat array with increasing false positive rates or a list with
-        one array for each repetition. Element i is the false positive
-        rate of predictions with score >= thresholds[i].
+        Flat array with increasing False Positive Rates or a list with
+         one array for each repetition. Element i is the False Positive
+         Rate of predictions with score >= thresholds[i].
 
         """
         # This returns a list or a single arrays if one rep is available
-        fp = map(list, zip(*self._data))[0]
-        return fp[0] if len(fp) == 1 else fp
+        fpr = map(list, zip(*self._data))[0]
+        return fpr[0] if len(fpr) == 1 else fpr
 
     @property
-    def tp(self):
-        """True Positives.
+    def tpr(self):
+        """True Positive Rates.
 
-        Flat array with increasing true positive rates or a list with
-        one array for each repetition. Element i is the true positive
-        rate of predictions with score >= thresholds[i].
+        Flat array with increasing True Positive Rates or a list with
+         one array for each repetition. Element i is the True Positive
+         Rate of predictions with score >= thresholds[i].
 
         """
         # This returns a list or a single arrays if one rep is available
-        tp = map(list, zip(*self._data))[1]
-        return tp[0] if len(tp) == 1 else tp
+        tpr = map(list, zip(*self._data))[1]
+        return tpr[0] if len(tpr) == 1 else tpr
 
     @property
     def th(self):
         """Thresholds.
 
         Flat array with decreasing thresholds on the decision function
-        used to compute fpr and tpr or a list with one array for each
-        repetition. `thresholds[0]` represents no instances being
-        predicted and is arbitrarily set to `max(score) + 1e-3`.
+         used to compute fpr and tpr or a list with one array for each
+         repetition. `thresholds[0]` represents no instances being
+         predicted and is arbitrarily set to `max(score) + 1e-3`.
 
         """
         # This returns a list or a single arrays if one rep is available
@@ -282,39 +282,39 @@ class CRoc(CBaseRoc):
     @property
     def has_mean(self):
         """True if average has been computed for all ROCs."""
-        return False if self.mean_fp is None or self.mean_tp is None else True
+        return False if self.mean_fpr is None or self.mean_tpr is None else True
 
     @property
     def has_std_dev(self):
         """True if standard deviation has been computed for all ROCs."""
-        return False if self._std_dev_tp is None else True
+        return False if self._std_dev_tpr is None else True
 
     @property
-    def mean_fp(self):
-        """Averaged False Positives.
+    def mean_fpr(self):
+        """Averaged False Positive Rates.
 
-        Flat array with increasing false positive rates averaged over all
-        available repetitions. Element i is the false positive rate of
-        predictions with score >= thresholds[i].
+        Flat array with increasing False Positive Rates averaged over all
+         available repetitions. Element i is the false positive rate of
+         predictions with score >= thresholds[i].
 
         """
-        return self._data_average.fp
+        return self._data_average.fpr
 
     @property
-    def mean_tp(self):
-        """Averaged True Positives.
+    def mean_tpr(self):
+        """Averaged True Positive Rates.
 
-        Flat array with increasing true positive rates averaged over all
-        available repetitions. Element i is the true positive rate of
-        predictions with score >= thresholds[i].
+        Flat array with increasing True Positive Rates averaged over all
+         available repetitions. Element i is the True Positive Rate of
+         predictions with score >= thresholds[i].
 
         """
-        return self._data_average.tp
+        return self._data_average.tpr
 
     @property
-    def std_dev_tp(self):
-        """Standard deviation of True Positives."""
-        return self._std_dev_tp
+    def std_dev_tpr(self):
+        """Standard deviation of True Positive Rates."""
+        return self._std_dev_tpr
 
     def compute(self, y_true, score, positive_label=None):
         """Compute ROC curve using input True labels and Classification Scores.
@@ -327,7 +327,7 @@ class CRoc(CBaseRoc):
         (y_true, score[i]) is returned.
 
         Each time the function is called, result is appended to
-        `tp`,`fp`, and `thr` class attributes.
+        `tpr`,`fpr`, and `thr` class attributes.
         Returned ROCs are the only associated with LATEST input data.
 
         Parameters
@@ -349,19 +349,19 @@ class CRoc(CBaseRoc):
 
         Returns
         -------
-        fp : CArray or list
-            Flat array with increasing false positive rates or a list with
-            one array for each repetition. Element i is the false positive
-            rate of predictions with score >= thresholds[i]
-        tp : CArray or list
-            Flat array with increasing true positive rates or a list with
-            one array for each repetition. Element i is the true positive
-            rate of predictions with score >= thresholds[i].
+        fpr : CArray or list
+            Flat array with increasing False Positive Rates or a list with
+             one array for each repetition. Element i is the False Positive
+             Rate of predictions with score >= thresholds[i]
+        tpr : CArray or list
+            Flat array with increasing True Positive Rates or a list with
+             one array for each repetition. Element i is the True Positive
+             Rate of predictions with score >= thresholds[i].
         th : CArray or list
             Flat array with decreasing thresholds on the decision function
-            used to compute fpr and tpr or a list with one array for each
-            repetition. `thresholds[0]` represents no instances being
-            predicted and is arbitrarily set to `max(score) + 1e-3`.
+             used to compute fpr and tpr or a list with one array for each
+             repetition. `thresholds[0]` represents no instances being
+             predicted and is arbitrarily set to `max(score) + 1e-3`.
 
         """
         # Working with lists
@@ -381,7 +381,7 @@ class CRoc(CBaseRoc):
 
         # Resetting any computed average ROC
         self._data_average.reset()
-        self._std_dev_tp = None
+        self._std_dev_tpr = None
 
         if n_ytrue == 1:  # Use the same true labels vs all scores
             for score_idx in xrange(n_score):
@@ -401,7 +401,7 @@ class CRoc(CBaseRoc):
 
         out = []
         # Some hardcore python next: this returns 3 separate lists
-        # (fp, tp, thr) or 3 single arrays if one repetition is available
+        # (fpr, tpr, thr) or 3 single arrays if one repetition is available
         for e in map(list, zip(*self._data[-n_score:])):
             out.append(e[0] if len(e) == 1 else e)
 
@@ -417,32 +417,32 @@ class CRoc(CBaseRoc):
         n_points : int, optional
             Default 1000, is the number of points to be used for interpolation.
         return_std : bool, optional
-            If True, standard deviation of True Positives will be returned.
+            If True, standard deviation of True Positive Rates will be returned.
 
         Returns
         -------
-        mean_fp : CArray
-            Flat array with increasing false positive rates averaged over all
-            available repetitions. Element i is the false positive rate of
-            predictions with score >= thresholds[i].
-        mean_tp : CArray
-            Flat array with increasing true positive rates averaged over all
-            available repetitions. Element i is the true positive rate of
-            predictions with score >= thresholds[i].
-        std_dev_tp : CArray
-            Flat array with standard deviation of True Positives.
+        mean_fpr : CArray
+            Flat array with increasing False Positive Rates averaged over all
+             available repetitions. Element i is the false positive rate of
+             predictions with score >= thresholds[i].
+        mean_tpr : CArray
+            Flat array with increasing True Positive Rates averaged over all
+             available repetitions. Element i is the true positive rate of
+             predictions with score >= thresholds[i].
+        std_dev_tpr : CArray
+            Flat array with standard deviation of True Positive Rates.
             Only if return_std is True.
 
         """
-        mean_fp, mean_tp, std_dev_tp = average(self.fp, self.tp,
-                                               n_points=n_points)
+        mean_fpr, mean_tpr, std_dev_tpr = average(
+            self.fpr, self.tpr, n_points=n_points)
 
         # Assigning final data
-        self._data_average._fp = mean_fp
-        self._data_average._tp = mean_tp
-        self._std_dev_tp = std_dev_tp
+        self._data_average._fpr = mean_fpr
+        self._data_average._tpr = mean_tpr
+        self._std_dev_tpr = std_dev_tpr
 
         out = tuple(self._data_average)[0:2]
         if return_std is True:  # Return standard deviation if needed
-            out += (self._std_dev_tp, )
+            out += (self._std_dev_tpr,)
         return out

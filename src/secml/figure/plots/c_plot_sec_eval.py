@@ -230,13 +230,13 @@ class CPlotSecEval(CPlot):
         if self._xlim:
             self.xlim(*self._xlim)
 
-    def _markers_idx(self, fp):
+    def _markers_idx(self, fpr):
         """Returns the position of markers to plot.
 
         Parameters
         ----------
-        fp : CArray
-            False Positives.
+        fpr : CArray
+            False Positive Rates.
 
         Returns
         -------
@@ -246,11 +246,11 @@ class CPlotSecEval(CPlot):
 
         Notes
         -----
-        If a given xtick is not available inside `fp` array,
+        If a given xtick is not available inside `fpr` array,
         the closest value's position will be returned.
 
         """
-        return fp.binary_search(self._sp.get_xticks()).tolist()
+        return fpr.binary_search(self._sp.get_xticks()).tolist()
 
     def plot_metric(self, sec_eval_data, consider_target=False,
                     metric="accuracy", label=None, auc=False,
