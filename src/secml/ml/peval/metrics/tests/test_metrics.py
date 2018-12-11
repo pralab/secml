@@ -34,7 +34,7 @@ class TestCMetrics(CUnitTest):
         pred = CArray([1, 0, 0, 0, 1, 1, 0, 0])
 
         res = peval.performance_score(y_true=true, y_pred=pred)
-        # tp: 0.5, fp: 0.25 -> 0.5 / (0.5 + 0.25) = 0.666...
+        # tpr: 0.5, fpr: 0.25 -> 0.5 / (0.5 + 0.25) = 0.666...
         self.assertAlmostEqual(res, 0.67, 2)
 
     def test_recall(self):
@@ -46,7 +46,7 @@ class TestCMetrics(CUnitTest):
         pred = CArray([1, 0, 0, 0, 1, 1, 0, 0])
 
         res = peval.performance_score(y_true=true, y_pred=pred)
-        # tp: 0.5, fn: 0.5 -> 0.5 / (0.5 + 0.5) = 0.5
+        # tpr: 0.5, fnr: 0.5 -> 0.5 / (0.5 + 0.5) = 0.5
         self.assertEquals(res, 0.5)
 
     def test_f1(self):

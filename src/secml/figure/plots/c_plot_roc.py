@@ -224,13 +224,13 @@ class CPlotRoc(CPlot):
         self.ylim(*self._ylim)
         self.xlim(*self._xlim)
 
-    def _markers_idx(self, fp):
+    def _markers_idx(self, fpr):
         """Returns the position of markers to plot.
 
         Parameters
         ----------
-        fp : CArray
-            False Positives.
+        fpr : CArray
+            False Positive Rates.
 
         Returns
         -------
@@ -240,29 +240,31 @@ class CPlotRoc(CPlot):
 
         Notes
         -----
-        If a given xtick is not available inside `fp` array,
+        If a given xtick is not available inside `fpr` array,
         the closest value's position will be returned.
 
         """
-        return fp.binary_search(self._sp.get_xticks()).tolist()
+        return fpr.binary_search(self._sp.get_xticks()).tolist()
 
     # TODO: REMOVE STYLE
-    def plot_roc(self, fp, tp, label=None, style=None, logx=True):
-        """Plot a ROC curve given input fp and tp.
+    def plot_roc(self, fpr, tpr, label=None, style=None, logx=True):
+        """Plot a ROC curve given input fpr and tpr.
 
         Curves will be plotted inside the active figure or
         a new figure will be created using default parameters.
 
         Parameters
         ----------
-        fp : CArray
-            Array with False Positives.
-        tp : CArray
-            Array with False Positives.
+        fpr : CArray
+            Array with False Positive Rats.
+        tpr : CArray
+            Array with False Positive Rates.
         label : str or None, optional
             Label to assign to the roc.
+        style : str or None, optional
+            Style of the roc plot.
         logx : bool, optional
-            If True (default), logarithmic scale will be used for fp axis.
+            If True (default), logarithmic scale will be used for fpr axis.
 
         Returns
         -------
@@ -270,17 +272,17 @@ class CPlotRoc(CPlot):
             Figure after this plot session.
 
         """
-        if fp.size != tp.size:
-            raise ValueError("input tp and fp arrays must have same length.")
+        if fpr.size != tpr.size:
+            raise ValueError("input tpr and fpr arrays must have same length.")
 
         # TODO: REMOVE AFTER COLORMAPS ARE IMPLEMENTED IN CFIGURE
         styles = ['go-', 'yp--', 'rs-.', 'bD--', 'c-.', 'm-', 'y-.']
 
         plot_func = self.semilogx if logx is True else self.plot
 
-        plot_func(fp * 100, tp * 100,
+        plot_func(fpr * 100, tpr * 100,
                   styles[self.n_lines % len(styles)] if style is None else style,
-                  label=label, markevery=self._markers_idx(fp * 100))
+                  label=label, markevery=self._markers_idx(fpr * 100))
 
         if label is not None:
             # Legend on the lower right
@@ -289,7 +291,7 @@ class CPlotRoc(CPlot):
         self._apply_params()
 
     # TODO: REMOVE STYLE
-    def plot_mean(self, roc, label=None, invert_tp=False,
+    def plot_mean(self, roc, label=None, invert_tpr=False,
                   style=None, plot_std=False, logx=True):
         """Plot the mean of ROC curves.
 
@@ -302,13 +304,15 @@ class CPlotRoc(CPlot):
             Roc curves to plot.
         label : str or None, optional
             Label to assign to the roc.
-        invert_tp : bool
-            True if 1 - tp (false negatives) should be plotted
+        invert_tpr : bool
+            True if 1 - tpr (False Negative Rates) should be plotted
             on y axis. Default False.
+        style : str or None, optional
+            Style of the roc plot.
         plot_std : bool (default False)
-            If True, standard deviation of True Positives will be plotted.
+            If True, standard deviation of True Positive Rates will be plotted.
         logx : bool, optional
-            If True (default), logarithmic scale will be used for fp axis.
+            If True (default), logarithmic scale will be used for fpr axis.
 
         Returns
         -------
@@ -328,30 +332,30 @@ class CPlotRoc(CPlot):
 
         # If std should be plotted each run plots 2 curvers
         n_lines = self.n_lines / 2 if plot_std is True else self.n_lines
-        # Get indices of fp @ xticks
-        mkrs_idx = self._markers_idx(roc.mean_fp * 100)
+        # Get indices of fpr @ xticks
+        mkrs_idx = self._markers_idx(roc.mean_fpr * 100)
 
-        mean_tp = roc.mean_tp if invert_tp is False else 1 - roc.mean_tp
+        mean_tpr = roc.mean_tpr if invert_tpr is False else 1 - roc.mean_tpr
         plot_func = self.semilogx if logx is True else self.plot
-        plot_func(roc.mean_fp * 100, mean_tp * 100,
+        plot_func(roc.mean_fpr * 100, mean_tpr * 100,
                   styles[n_lines % len(styles)] if style is None else style,
                   label=label, markevery=mkrs_idx)
 
         if plot_std is True:
             if roc.has_std_dev is False:
                 raise ValueError("roc object has no standard deviation for data.")
-            self.errorbar(roc.mean_fp[mkrs_idx] * 100, mean_tp[mkrs_idx] * 100,
+            self.errorbar(roc.mean_fpr[mkrs_idx] * 100, mean_tpr[mkrs_idx] * 100,
                           ecolor=styles[n_lines % len(styles)][0] if style is None else style,
-                          fmt='None', yerr=roc.std_dev_tp[mkrs_idx] * 100)
+                          fmt='None', yerr=roc.std_dev_tpr[mkrs_idx] * 100)
 
         if label is not None:
             # Legend on the lower right
-            self.legend(loc=4 if invert_tp is False else 1,
+            self.legend(loc=4 if invert_tpr is False else 1,
                         labelspacing=0.4, handletextpad=0.3)
         # Customizing figure
         self._apply_params()
 
-    def plot_repetitions(self, roc, label=None, invert_tp=False, logx=True):
+    def plot_repetitions(self, roc, label=None, invert_tpr=False, logx=True):
         """Plot all input ROC curves.
 
         Curves will be plotted inside the active figure or
@@ -367,11 +371,11 @@ class CPlotRoc(CPlot):
             following convention:
              - If label is None -> "rep 'i'"
              - If label is not None -> "`label` (rep `i`)"
-        invert_tp : bool
-            True if 1 - tp (false negatives) should be plotted
+        invert_tpr : bool
+            True if 1 - tpr (False Negative Rates) should be plotted
             on y axis. Default False.
         logx : bool, optional
-            If True (default), logarithmic scale will be used for fp axis.
+            If True (default), logarithmic scale will be used for fpr axis.
 
         Returns
         -------
@@ -415,16 +419,16 @@ class CPlotRoc(CPlot):
 
         for rep_i in xrange(roc.n_reps):
 
-            tp = roc.tp[rep_i] if invert_tp is False else 1 - roc.tp[rep_i]
+            tpr = roc.tpr[rep_i] if invert_tpr is False else 1 - roc.tpr[rep_i]
 
-            plot_func(roc.fp[rep_i] * 100, tp * 100,
+            plot_func(roc.fpr[rep_i] * 100, tpr * 100,
                       styles[(n_lines + rep_i) % len(styles)],
                       label=label_w_rep(label, rep_i),
-                      markevery=self._markers_idx(roc.fp[rep_i] * 100))
+                      markevery=self._markers_idx(roc.fpr[rep_i] * 100))
 
         if label is not None:
             # Legend on the lower right
-            self.legend(loc=4 if invert_tp is False else 1,
+            self.legend(loc=4 if invert_tpr is False else 1,
                         labelspacing=0.4, handletextpad=0.3)
 
         # Customizing figure
