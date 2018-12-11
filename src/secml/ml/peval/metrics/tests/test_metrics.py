@@ -1,8 +1,8 @@
-import unittest
 from secml.utils import CUnitTest
 
 from secml.ml.peval.metrics import CMetric
 from secml.array import CArray
+from secml.core.type_utils import is_float
 
 
 class TestCMetrics(CUnitTest):
@@ -24,6 +24,7 @@ class TestCMetrics(CUnitTest):
 
         res = peval.performance_score(y_true=y_true, y_pred=y_pred)
         self.assertEquals(res, 0.75)
+        self.assertTrue(is_float(res))
 
     def test_precision(self):
 
@@ -36,6 +37,7 @@ class TestCMetrics(CUnitTest):
         res = peval.performance_score(y_true=true, y_pred=pred)
         # tpr: 0.5, fpr: 0.25 -> 0.5 / (0.5 + 0.25) = 0.666...
         self.assertAlmostEqual(res, 0.67, 2)
+        self.assertTrue(is_float(res))
 
     def test_recall(self):
 
@@ -48,6 +50,7 @@ class TestCMetrics(CUnitTest):
         res = peval.performance_score(y_true=true, y_pred=pred)
         # tpr: 0.5, fnr: 0.5 -> 0.5 / (0.5 + 0.5) = 0.5
         self.assertEquals(res, 0.5)
+        self.assertTrue(is_float(res))
 
     def test_f1(self):
 
@@ -61,6 +64,7 @@ class TestCMetrics(CUnitTest):
         # precision: 0.67, recall: 0.5
         # 2 * (prec * rec) / (prec + rec) -> 2 * 0.335 / 1.17 = 0.57
         self.assertAlmostEqual(res, 0.57, 2)
+        self.assertTrue(is_float(res))
 
     def test_mae(self):
 
@@ -72,6 +76,7 @@ class TestCMetrics(CUnitTest):
 
         res = peval.performance_score(y_true=true, score=pred)
         self.assertEquals(res, 0.5)
+        self.assertTrue(is_float(res))
 
     def test_mse(self):
 
@@ -83,8 +88,9 @@ class TestCMetrics(CUnitTest):
 
         res = peval.performance_score(y_true=true, score=pred)
         self.assertEquals(res, 0.375)
+        self.assertTrue(is_float(res))
 
-    def test_tpatfp(self):
+    def test_tpratfpr(self):
 
         self.logger.info("Testing tpr_at_fpr score...")
         peval = CMetric.create('tpr-at-fpr', fpr=0.1)
@@ -94,6 +100,7 @@ class TestCMetrics(CUnitTest):
 
         res = peval.performance_score(y_true=true, score=pred)
         self.assertEquals(res, 0.5)
+        self.assertTrue(is_float(res))
 
     def test_auc(self):
 
@@ -105,6 +112,7 @@ class TestCMetrics(CUnitTest):
 
         res = peval.performance_score(y_true=true, score=pred)
         self.assertEquals(res, 0.75)
+        self.assertTrue(is_float(res))
 
         self.logger.info("Testing auc_wmw score...")
         peval = CMetric.create('auc-wmw')
@@ -114,6 +122,7 @@ class TestCMetrics(CUnitTest):
 
         res = peval.performance_score(y_true=true, score=pred)
         self.assertEquals(res, 0.75)
+        self.assertTrue(is_float(res))
 
         self.logger.info("Testing pauc score...")
         peval = CMetric.create('pauc', fpr=1.0, n_points=500)
@@ -123,7 +132,8 @@ class TestCMetrics(CUnitTest):
 
         res = peval.performance_score(y_true=true, score=pred)
         self.assertEquals(res, 0.75)
+        self.assertTrue(is_float(res))
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

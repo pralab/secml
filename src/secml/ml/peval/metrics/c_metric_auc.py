@@ -65,4 +65,4 @@ class CMetricAUC(CMetric):
 
         """
         fpr, tpr = CRoc().compute(y_true, score)[0:2]
-        return skm.auc(fpr.tondarray(), tpr.tondarray())
+        return float(skm.auc(fpr.tondarray(), tpr.tondarray()))

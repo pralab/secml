@@ -72,4 +72,4 @@ class CMetricTPRatFPR(CMetric):
 
         """
         return CArray(self.fpr).interp(
-            *CRoc().compute(y_true, score)[0:2]).ravel()
+            *CRoc().compute(y_true, score)[0:2]).item()
