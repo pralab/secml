@@ -86,8 +86,8 @@ class TestCMetrics(CUnitTest):
 
     def test_tpatfp(self):
 
-        self.logger.info("Testing tp_at_fp score...")
-        peval = CMetric.create('tp-at-fp', fp_rate=0.1)
+        self.logger.info("Testing tpr_at_fpr score...")
+        peval = CMetric.create('tpr-at-fpr', fpr=0.1)
 
         true = CArray([0, 0, 1, 1])
         pred = CArray([0.1, 0.4, 0.35, 0.8])
@@ -116,7 +116,7 @@ class TestCMetrics(CUnitTest):
         self.assertEquals(res, 0.75)
 
         self.logger.info("Testing pauc score...")
-        peval = CMetric.create('pauc', fp_rate=1.0, n_points=500)
+        peval = CMetric.create('pauc', fpr=1.0, n_points=500)
 
         true = CArray([0, 0, 1, 1])
         pred = CArray([0.1, 0.4, 0.35, 0.8])
