@@ -20,29 +20,36 @@ before_script:
   - sh .gitlab-ci-extra.sh > /dev/null
   - pip install tox
 
-test:py27-n13:
+.tests:
   image: ubuntu:xenial
   stage: test
+  only:
+    changes:
+      - src/secml/*
+      - pytest.ini
+      - tox.ini
+      - requirements.txt
+      - .gitlab-ci.yml
+      - .gitlab-ci-extra.sh
+
+test:py27-n13:
+  extends: .tests
   script: tox --workdir $TOX_WORK_DIR -e py27-n13
 
 test:py27-n14:
-  image: ubuntu:xenial
-  stage: test
+  extends: .tests
   script: tox --workdir $TOX_WORK_DIR -e py27-n14
 
 test:py27-n15:
-  image: ubuntu:xenial
-  stage: test
+  extends: .tests
   script: tox --workdir $TOX_WORK_DIR -e py27-n15
 
 test:py27-sk19:
-  image: ubuntu:xenial
-  stage: test
+  extends: .tests
   script: tox --workdir $TOX_WORK_DIR -e py27-sk19
 
 test:py27-sk20:
-  image: ubuntu:xenial
-  stage: test
+  extends: .tests
   script: tox --workdir $TOX_WORK_DIR -e py27-sk20
 
 deploy:xenial:
@@ -59,6 +66,11 @@ deploy:xenial:
     - cd SecML-Lib-*
     - python setup.py install
     - python -c "import secml"
+  except:
+    changes:
+      - docs/*
+      - .gitlab/*
+      - .gitignore
   artifacts:
     name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
     paths:
