@@ -62,8 +62,7 @@ class TestCPoisoning(CCreator):
 
         self._blob_dataset_creation()
 
-        self.clf_idx = 'logistic'  # logistic | net
-        #self.clf_idx = 'ridge'  # logistic | net
+        self.clf_idx = 'ridge'  # logistic | ridge | svm
 
         ######################
 
@@ -71,7 +70,8 @@ class TestCPoisoning(CCreator):
             #self.classifier = CClassifierLogistic(C=100, normalizer=None,
              #                                     random_seed=self.seed)
 
-            self.classifier = CClassifierSGD(loss='log', regularizer='l2')
+            self.classifier = CClassifierSGD(loss='log', regularizer='l2',
+                                             alpha=0.0001)
 
 
             self.pois_class = CAttackPoisoningLogisticRegression
@@ -215,8 +215,8 @@ class TestCPoisoning(CCreator):
         acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
         self.logger.info("Error on testing data (poisoned): " + str(1 - acc))
 
-        attacker_obj_plot = False
-        deriv_debug_plot = True
+        attacker_obj_plot = True
+        deriv_debug_plot = False
 
         if self.n_features == 2:
             if attacker_obj_plot:
@@ -383,5 +383,20 @@ class TestCPoisoning(CCreator):
                          n_grid_points=20,
                          grid_limits=self.grid_limits,
                          levels=[self.discr_f_level], colorbar=False)
+
+    def _grad_check(self, xc):
+        # Compare analytical gradient with its numerical approximation
+        check_grad_val = COptimizer(
+            CFunction(self.poisoning._objective_function,
+                      self.poisoning._objective_function_gradient)
+        ).check_grad(xc)
+        self.logger.info("Gradient difference between analytical svm "
+                         "gradient and numerical gradient: %s",
+                         str(check_grad_val))
+        self.assertLess(check_grad_val, 1e-3,
+                        "poisoning gradient is wrong {:}".format(
+                            check_grad_val))
+        for i, elm in enumerate(self.xc.size):
+            self.assertIsInstance(elm, float)
 
 TestCPoisoning().test_poisoning()
