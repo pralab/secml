@@ -56,28 +56,16 @@ class TestCPoisoning(CCreator):
         self.grid_limits = [(self.lb - 0.1, self.ub + 0.1),
                             (self.lb - 0.1, self.ub + 0.1)]
 
-    def param_setter(self):
-
-        self.verbose = 2
-
-        self._blob_dataset_creation()
-
-        self.clf_idx = 'ridge'  # logistic | ridge | svm
-
-        ######################
+    def _clf_creation(self):
 
         if self.clf_idx == 'logistic':
-            #self.classifier = CClassifierLogistic(C=100, normalizer=None,
-             #                                     random_seed=self.seed)
 
             self.classifier = CClassifierSGD(loss='log', regularizer='l2',
                                              alpha=0.0001)
 
-
             self.pois_class = CAttackPoisoningLogisticRegression
 
             self.discr_f_level = 0
-
 
         elif self.clf_idx == 'svm':
 
@@ -97,13 +85,7 @@ class TestCPoisoning(CCreator):
         else:
             raise ValueError("classifier idx not managed!")
 
-        start_training = time.time()
-        self.classifier.train(self.tr)
-        self.clf_orig = self.classifier.deepcopy()
-        end_training = time.time()
-        print "training time ", end_training - start_training
-
-        self._test_accuracy(self.classifier)
+    def _pois_obj_creation(self):
 
         # self.solver_type = 'gradient-descent'
         # self.solver_params = {'eta': 0.05, 'eps': 1e-9}
@@ -133,13 +115,32 @@ class TestCPoisoning(CCreator):
         self.logger.info('yc: ' + str(self.yc))
 
         self.name_file = 'poisoning.pdf'
-        return
+
+    def param_setter(self):
+
+        self.clf_idx = 'ridge'  # logistic | ridge | svm
 
     # def setUp(self):
     def __init__(self):
 
         # Setting all defined parameter
         self.param_setter()
+        self.verbose = 2
+
+        self._blob_dataset_creation()
+        self._clf_creation()
+
+        start_training = time.time()
+        self.classifier.train(self.tr)
+        self.clf_orig = self.classifier.deepcopy()
+        end_training = time.time()
+        print "training time ", end_training - start_training
+
+        self._test_accuracy(self.classifier)
+
+        self._pois_obj_creation()
+
+        return
 
     #####################################################################
     #                             TESTED METHODS
@@ -160,33 +161,14 @@ class TestCPoisoning(CCreator):
         for i, elm in enumerate(self.xc.size):
             self.assertIsInstance(elm, float)
 
-    def test_clf(self):
-        """
-        :return:
-        """
-        metric = CMetric.create('accuracy')
-        y_pred, scores = self.classifier.classify(self.ts.X)
-        print ("scores ", scores[:5, :])
-        acc = metric.performance_score(y_pred=y_pred, y_true=self.ts.Y)
-        print ("Classifier accuracy ", acc)
-        print ("original label ", self.ts.Y)
-        print ("predicted labels ", y_pred)
-
     def _test_accuracy(self, clf):
         metric = CMetric.create('accuracy')
         y_pred, scores = clf.classify(self.ts.X)
         acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
         self.logger.info("Error on testing data: " + str(1 - acc))
 
-        fig = CFigure()
-        self._plot_ds(fig, self.tr)
-        self._plot_func(fig, clf.discriminant_function)
-        self._plot_clf(fig, clf, self.tr)
-        # fig.show()
-
     def test_poisoning(self):
 
-        #        self.poisoning.set_backgd_params(self.xc, self.yc)
         print "self.yc before run ", self.yc
 
         # with self.logger.timer():
@@ -219,17 +201,13 @@ class TestCPoisoning(CCreator):
         deriv_debug_plot = False
 
         if self.n_features == 2:
+
             if attacker_obj_plot:
-                fig = CFigure(height=8, width=10)
-                n_rows = 2
+                fig = CFigure(height=4, width=10)
+                n_rows = 1
                 n_cols = 2
 
-                # fig.subplot(n_rows, n_cols, grid_slot=2)
-                # fig.sp.title('test_dataset')
-                # self._plot_ds(fig, self.ts)
-                # self._plot_clf(fig, self.classifier, self.tr)
-
-                # fig.subplot(n_rows, n_cols, grid_slot=3)
+                fig.subplot(n_rows, n_cols, grid_slot=1)
                 fig.sp.title('Attacker objective and gradients')
                 self._plot_func(fig, self.poisoning._objective_function)
                 self._plot_obj_grads(
@@ -242,16 +220,14 @@ class TestCPoisoning(CCreator):
                 fig.sp.plot_path(self.poisoning.x_seq,
                                  start_facecolor='r' if self.yc == 1 else 'b')
 
-                #             fig.subplot(n_rows, n_cols, grid_slot=4)
-                #             #fig.sp.title('Classification error on ts')
-                #             #self._plot_func(fig, self.poisoning._objective_function, acc=True)
-                #             fig.sp.title('Conditioning numb')
-                # #            self._plot_func(fig, self.poisoning.cond_numb)
-                #             self._plot_ds(fig, self.tr)
-                #             self._plot_clf(fig, pois_clf, self.tr, background=False)
-                #             self._plot_box(fig)
-                #             fig.sp.plot_path(self.poisoning.x_seq,
-                #                              start_facecolor='r' if self.yc == 1 else 'b')
+                fig.subplot(n_rows, n_cols, grid_slot=2)
+                fig.sp.title('Classification error on ts')
+                self._plot_func(fig, self.poisoning._objective_function, acc=True)
+                self._plot_ds(fig, self.tr)
+                self._plot_clf(fig, pois_clf, self.tr, background=False)
+                self._plot_box(fig)
+                fig.sp.plot_path(self.poisoning.x_seq,
+                                 start_facecolor='r' if self.yc == 1 else 'b')
 
                 fig.show()
                 fig.savefig(self.name_file, file_format='pdf')
