@@ -265,7 +265,6 @@ class TestCPoisoning(CCreator):
     #                             INTERNALS
     #####################################################################
 
-
     def _plot_param_sub(self, fig, param_fun, grad_fun, clf):
 
         self._plot_func(fig, param_fun)
