@@ -41,7 +41,11 @@ class CCreator(object):
     @property
     def class_type(self):
         """Defines class type."""
-        return get_private(self.__class__, 'class_type', None)
+        try:  # Convert the private attribute to public property
+            return get_private(self.__class__, 'class_type')
+        except AttributeError:
+            raise AttributeError("'class_type' not defined for '{:}'"
+                                 "".format(self.__class__.__name__))
 
     @property
     def logger(self):
