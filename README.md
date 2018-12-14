@@ -12,7 +12,7 @@ The setup process is managed by the python package `setuptools`. Be sure
 
 Once the environment is set up, SecML-Lib can installed and run by
  multiple means:
- 1. Install from remote GitLab repository:
+ 1. Install from local GitLab repository:
     - Clone the project repository in a directory of your choice
     - Run installation as: `python setup.py install`
  2. Install from remote GitLab repository. In this case, given
