@@ -17,7 +17,7 @@ Once the environment is set up, SecML-Lib can installed and run by
     - Run installation as: `python setup.py install`
  2. Install from remote GitLab repository. In this case, given
     `{repourl}` in the format, es., `pragit.diee.unica.it/secml/secml-lib`:
-    - `pip install -U git+ssh://git@{repourl}.git[@branch]#egg=secml-lib`
+    - `pip install git+ssh://git@{repourl}.git[@branch]#egg=secml-lib`
     A specific branch to install can be specified using `[@branch]` parameter.
     If omitted, the default branch will be installed.
  3. Install from zip/wheel package:
@@ -30,3 +30,6 @@ In case something goes wrong during the install process, try to install
  the dependencies **first** by calling: `pip install -r requirements.txt`
 
 SecML-Lib should now be importable in python via: `import secml`.
+
+To update a current installation using any of the previous methods, add the 
+ `-U` parameter after the `pip install` directive.
