@@ -97,7 +97,8 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         implementation to inherited classes.
         """
 
-        # todo: bisognerebbe mettere un parametero per questo (nel caso l'attacco sia contro un regressore non ci va)
+        # fixme: bisognerebbe mettere un parametero per questo (nel caso
+        # l'attacco sia contro un regressore non ci va)
         yc = convert_binary_labels(yc)
 
         xc0 = xc.deepcopy()
@@ -123,7 +124,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
             xc)  # xc is column, w is row (this is an outer product)
         M += (clf.w.dot(xc.T) + clf.b - yc) * CArray.eye(d)
         db_xc = clf.w.T
-        G = 2 * M.append(db_xc, axis=1)
+        G = M.append(db_xc, axis=1)
 
         # Hessian computation
         H = CArray.zeros(shape=(d + 1, d + 1))
@@ -134,7 +135,6 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         H[-1, -1] = n  # + clf.alpha
         H[-1, :-1] = dwb
         H[:-1, -1] = dwb.T
-        H *= 2.0
 
         # add diagonal noise to the matrix that we are gong to invert
         H += 1e-9 * (CArray.eye(d + 1))
