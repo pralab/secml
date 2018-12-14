@@ -12,12 +12,12 @@ from abc import ABCMeta, abstractmethod
 from secml.adv.attacks import CAttack
 from secml.adv.attacks.evasion.solvers import CSolver
 from secml.array import CArray
-from secml.ml.classifiers.loss import CLoss
 from secml.data import CDataset
+from secml.ml.classifiers.loss import CLoss
+from secml.ml.peval.metrics import CMetric
 from secml.optimization.constraints import CConstraint
 from secml.optimization.constraints import CConstraintL2
 from secml.optimization.function import CFunction
-from secml.ml.peval.metrics import CMetric
 
 
 class CAttackPoisoning(CAttack):
@@ -81,6 +81,10 @@ class CAttackPoisoning(CAttack):
                          solver_type=solver_type,
                          solver_params=solver_params)
 
+        if discrete:
+            raise ValueError(
+                "Poisoning in discrete space is not implemented yet!")
+
         # self._attacker_loss = CLoss.create(
         #    'softmax', extend_binary_labels=True)
 
@@ -100,7 +104,7 @@ class CAttackPoisoning(CAttack):
             print "POISONING ATTACK WITH LOGISTIC LOSS"
             loss_name = 'log'
         elif classifier.class_type == 'sgd' and \
-                        classifier.loss.class_type=='sgd':
+                classifier.loss.class_type == 'sgd':
             print "POISONING ATTACK WITH LOGISTIC LOSS"
             loss_name = 'log'
         elif classifier.class_type == 'ridge':
@@ -109,7 +113,7 @@ class CAttackPoisoning(CAttack):
             # loss_name = 'softmax'
         else:
             loss_name = 'log'
-            #raise NotImplementedError
+            # raise NotImplementedError
 
         # loss_name = 'hinge'
 
@@ -255,7 +259,7 @@ class CAttackPoisoning(CAttack):
         self._warm_start = None
 
     def _rnd_init_poisoning_points(self, n_points=None, init_from_val=True,
-                                   val = None):
+                                   val=None):
         """
         Returns a set of n_points poisoning points randomly drawn
         from surrogate_data with flipped labels.
@@ -280,7 +284,7 @@ class CAttackPoisoning(CAttack):
         idx = CArray.randsample(init_dataset.num_samples, n_points,
                                 random_state=self.random_seed)
 
-        #print "pois point idx ", idx
+        # print "pois point idx ", idx
 
         # taking xc and adding small noise to avoid singular matrix inversion
         # print "random point idx ", idx
@@ -782,4 +786,3 @@ class CAttackPoisoning(CAttack):
 
         gt = -G.dot(v.T)
         return gt.ravel()
-
