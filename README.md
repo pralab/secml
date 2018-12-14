@@ -21,7 +21,7 @@ Once the environment is set up, SecML-Lib can installed and run by
     A specific branch to install can be specified using `[@branch]` parameter.
     If omitted, the default branch will be installed.
  3. Install from zip/wheel package:
-    - `pip install {package}`
+    - `pip install {package-file}`
  4. Install from official PyPI repository **(not yet supported)**
     - `pip install secml-lib`
 
