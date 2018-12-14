@@ -25,7 +25,8 @@ class CPoisoningTestCases(object):
             if self.clf_idx == 'logistic':
 
                 self.classifier = CClassifierSGD(loss='log', regularizer='l2',
-                                                 alpha=0.0001)
+                                                 alpha=1)
+                                                 #alpha=0.0001)
 
                 self.pois_class = CAttackPoisoningLogisticRegression
 
@@ -156,6 +157,9 @@ class CPoisoningTestCases(object):
             acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
             self.logger.info(
                 "Error on testing data (poisoned): " + str(1 - acc))
+
+            #fixme: check, in quello calcolato dentro la classe di poisoning
+            # sembra ok invece qui a volte sembra che l'errore diminuisca
 
             return pois_clf, xc
 
