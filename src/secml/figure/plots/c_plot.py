@@ -20,12 +20,17 @@ class CPlot(CCreator):
     default_params : dict
         Dictionary with default parameters.
 
+    Attributes
+    ----------
+    class_type : 'standard'
+
     See Also
     --------
     .CFigure : creates and handle figures.
 
     """
     __super__ = 'CPlot'
+    __class_type = 'standard'
 
     def __init__(self, sp, default_params):
 

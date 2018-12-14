@@ -107,7 +107,7 @@ class CFigure(CCreator):
         return len(self._sp_data)
 
     def subplot(self, n_rows=1, n_cols=1, grid_slot=1,
-                sp_type=None, **kwargs):
+                sp_type='standard', **kwargs):
         """Create a new subplot into specific position.
 
         Creates a new subplot placing it in the n_plot position of the
@@ -131,7 +131,7 @@ class CFigure(CCreator):
             e.g. in a 3 x 3 subplot grid, grid_slot=(0, slice(1, 3))
             will create a subplot at row index 0 that spans between
             columns index 1 and 2.
-        sp_type : str or None, optional
+        sp_type : str, optional
             Type of the subplot to create.
             By default a standard subplot is created.
 
