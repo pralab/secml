@@ -16,7 +16,7 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
     """
 
     def param_setter(self):
-        self.clf_idx = 'logistic'  # logistic | ridge | svm
+        self.clf_idx = 'ridge'  # logistic | ridge | svm
 
     def _dataset_creation(self):
         self.n_features = 2  # Number of dataset features
@@ -59,7 +59,7 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
 
     def test_poisoning_2D_plot(self):
 
-        pois_clf = self._clf_poisoning()
+        pois_clf = self._clf_poisoning()[0]
 
         if self.n_features == 2:
 
@@ -103,13 +103,13 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
                          "gradient and numerical gradient: %s".format(
             param_name),
                          str(check_grad_val))
-        self.assertLess(check_grad_val, 1, # 1e-3,
+        self.assertLess(check_grad_val, 1,
                         "poisoning gradient is wrong {:}".format(
                             check_grad_val))
 
     def test_poisoning_grad_check(self):
 
-        pois_clf = self._clf_poisoning()
+        pois_clf = self._clf_poisoning()[0]
 
         xc = self.xc
 
