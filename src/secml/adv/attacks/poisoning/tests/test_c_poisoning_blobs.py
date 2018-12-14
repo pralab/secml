@@ -7,7 +7,7 @@ from test_c_poisoning import CPoisoningTestCases
 class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
 
     def param_setter(self):
-        self.clf_idx = 'ridge'  # logistic | ridge | svm
+        self.clf_idx = 'logistic'  # logistic | ridge | svm
 
     def _dataset_creation(self):
         self.n_features = 2  # Number of dataset features
