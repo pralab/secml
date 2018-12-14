@@ -3,10 +3,9 @@ from abc import ABCMeta
 
 from secml.adv.attacks.poisoning import CAttackPoisoningLogisticRegression, \
     CAttackPoisoningRidge, CAttackPoisoningSVM
-from secml.adv.attacks.poisoning.tests import CAttackPoisoningLinTest
-from secml.figure import CFigure
 from secml.array import CArray
 from secml.data import CDataset
+from secml.figure import CFigure
 from secml.ml.classifiers import CClassifierSVM, CClassifierRidge, \
     CClassifierSGD
 from secml.ml.peval.metrics import CMetric
@@ -42,7 +41,7 @@ class CPoisoningTestCases(object):
             elif self.clf_idx == 'ridge':
 
                 self.classifier = CClassifierRidge(fit_intercept=True,
-                                                   alpha=1) #0.01
+                                                   alpha=1)  # 0.01
 
                 self.pois_class = CAttackPoisoningRidge
 
@@ -127,7 +126,6 @@ class CPoisoningTestCases(object):
             acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
             self.logger.info("Error on testing data: " + str(1 - acc))
 
-
         def _clf_poisoning(self):
 
             print "self.yc before run ", self.yc
@@ -159,14 +157,13 @@ class CPoisoningTestCases(object):
             self.logger.info(
                 "Error on testing data (poisoned): " + str(1 - acc))
 
-            return pois_clf
+            return pois_clf, xc
 
         def test_poisoning_2D_plot(self):
 
-            pois_clf = self._clf_poisoning()
+            pois_clf = self._clf_poisoning()[0]
 
             if self.n_features == 2:
-
                 fig = CFigure(height=4, width=10)
                 n_rows = 1
                 n_cols = 2
@@ -196,6 +193,44 @@ class CPoisoningTestCases(object):
 
                 fig.show()
                 fig.savefig(self.name_file, file_format='pdf')
+
+        def test_poisoning_point_fobj_improvement(self):
+            """
+            This function check if the objective function of the original
+            classifier is higger when it is trained on the optimized
+            poisoning point than when it is trained on the starting
+            poisoning point.
+            """
+            x0 = self.xc  # starting poisoning point
+            xc = self._clf_poisoning()[1]
+
+            fobj_x0 = self.poisoning._objective_function(xc=x0)
+            fobj_xc = self.poisoning._objective_function(xc=xc)
+
+            self.assertLess(fobj_x0, fobj_xc,
+                            "The attack does not increase the objective "
+                            "function of the attacker. The fobj on the "
+                            "original poisoning point is {:} while "
+                            "on the optimized poisoning point is {:}.".format(
+                                fobj_x0, fobj_xc))
+
+        def test_acc_impact(self):
+            """
+            Check if the accuracy of the classifier decrease when it is
+            trained on the poisoning point.
+            """
+            x0 = self.xc  # starting poisoning point
+            xc = self._clf_poisoning()[1]
+
+            acc_tr_on_x0 = self.poisoning._objective_function(xc=x0, acc=True)
+            acc_tr_on_xc = self.poisoning._objective_function(xc=xc, acc=True)
+
+            self.assertLess(acc_tr_on_x0, acc_tr_on_xc,
+                            "The attack does not decrease the classifier "
+                            "accuracy. The accuracy of the classifier trained "
+                            "on the original poisoning point is {:} while "
+                            "on the optimized poisoning point is {:}.".format(
+                                acc_tr_on_x0, acc_tr_on_xc))
 
         #####################################################################
         #                             INTERNALS
@@ -298,15 +333,15 @@ class CPoisoningTestCases(object):
 
         def test_poisoning_grad_check(self):
 
-            pois_clf = self._clf_poisoning()
+            self._clf_poisoning()
 
-            xc = self.xc
+            x0 = self.xc
 
             # Compare analytical gradient with its numerical approximation
             check_grad_val = COptimizer(
                 CFunction(self.poisoning._objective_function,
                           self.poisoning._objective_function_gradient)
-            ).check_grad(xc)
+            ).check_grad(x0)
             self.logger.info("Gradient difference between analytical "
                              "poisoning "
                              "gradient and numerical gradient: %s",
