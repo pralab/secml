@@ -1,16 +1,14 @@
 import time
 from abc import ABCMeta
+
 from secml.adv.attacks.poisoning import CAttackPoisoningLogisticRegression, \
     CAttackPoisoningRidge, CAttackPoisoningSVM
 from secml.adv.attacks.poisoning.tests import CAttackPoisoningLinTest
+from secml.figure import CFigure
 from secml.array import CArray
 from secml.data import CDataset
-from secml.data.loader import CDLRandomBlobs
-from secml.data.splitter import CDataSplitterShuffle
-from secml.figure import CFigure
 from secml.ml.classifiers import CClassifierSVM, CClassifierRidge, \
     CClassifierSGD
-from secml.ml.features.normalization import CNormalizerMinMax
 from secml.ml.peval.metrics import CMetric
 from secml.optimization import COptimizer
 from secml.optimization.constraints import CConstraintBox
@@ -19,7 +17,6 @@ from secml.utils import CUnitTest
 
 
 class CPoisoningTestCases(object):
-
     class TestCPoisoning(CUnitTest):
         """Unit test for CAttackPoisoning."""
         __metaclass__ = ABCMeta
@@ -90,7 +87,7 @@ class CPoisoningTestCases(object):
             self.param_setter()
             self.verbose = 2
 
-            self._blob_dataset_creation()
+            self._dataset_creation()
             self._clf_creation()
 
             start_training = time.time()
@@ -130,7 +127,8 @@ class CPoisoningTestCases(object):
             acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
             self.logger.info("Error on testing data: " + str(1 - acc))
 
-        def test_poisoning(self):
+
+        def _clf_poisoning(self):
 
             print "self.yc before run ", self.yc
 
@@ -161,71 +159,43 @@ class CPoisoningTestCases(object):
             self.logger.info(
                 "Error on testing data (poisoned): " + str(1 - acc))
 
-            attacker_obj_plot = True
-            deriv_debug_plot = False
+            return pois_clf
+
+        def test_poisoning_2D_plot(self):
+
+            pois_clf = self._clf_poisoning()
 
             if self.n_features == 2:
 
-                if attacker_obj_plot:
-                    fig = CFigure(height=4, width=10)
-                    n_rows = 1
-                    n_cols = 2
+                fig = CFigure(height=4, width=10)
+                n_rows = 1
+                n_cols = 2
 
-                    fig.subplot(n_rows, n_cols, grid_slot=1)
-                    fig.sp.title('Attacker objective and gradients')
-                    self._plot_func(fig, self.poisoning._objective_function)
-                    self._plot_obj_grads(
-                        fig, self.poisoning._objective_function_gradient)
-                    self._plot_ds(fig, self.tr)
-                    self._plot_clf(fig, self.clf_orig, self.tr,
-                                   background=False, line_color='k')
-                    self._plot_clf(fig, pois_clf, self.tr, background=False)
-                    self._plot_box(fig)
-                    fig.sp.plot_path(self.poisoning.x_seq,
-                                     start_facecolor='r' if self.yc == 1 else 'b')
+                fig.subplot(n_rows, n_cols, grid_slot=1)
+                fig.sp.title('Attacker objective and gradients')
+                self._plot_func(fig, self.poisoning._objective_function)
+                self._plot_obj_grads(
+                    fig, self.poisoning._objective_function_gradient)
+                self._plot_ds(fig, self.tr)
+                self._plot_clf(fig, self.clf_orig, self.tr,
+                               background=False, line_color='k')
+                self._plot_clf(fig, pois_clf, self.tr, background=False)
+                self._plot_box(fig)
+                fig.sp.plot_path(self.poisoning.x_seq,
+                                 start_facecolor='r' if self.yc == 1 else 'b')
 
-                    fig.subplot(n_rows, n_cols, grid_slot=2)
-                    fig.sp.title('Classification error on ts')
-                    self._plot_func(fig, self.poisoning._objective_function,
-                                    acc=True)
-                    self._plot_ds(fig, self.tr)
-                    self._plot_clf(fig, pois_clf, self.tr, background=False)
-                    self._plot_box(fig)
-                    fig.sp.plot_path(self.poisoning.x_seq,
-                                     start_facecolor='r' if self.yc == 1 else 'b')
+                fig.subplot(n_rows, n_cols, grid_slot=2)
+                fig.sp.title('Classification error on ts')
+                self._plot_func(fig, self.poisoning._objective_function,
+                                acc=True)
+                self._plot_ds(fig, self.tr)
+                self._plot_clf(fig, pois_clf, self.tr, background=False)
+                self._plot_box(fig)
+                fig.sp.plot_path(self.poisoning.x_seq,
+                                 start_facecolor='r' if self.yc == 1 else 'b')
 
-                    fig.show()
-                    fig.savefig(self.name_file, file_format='pdf')
-
-                    self._grad_check(self.xc)
-
-                if deriv_debug_plot:
-                    debug_pois_obj = CAttackPoisoningLinTest(self.poisoning)
-
-                    fig = CFigure(height=8, width=10)
-                    n_rows = 2
-                    n_cols = 2
-
-                    fig.subplot(n_rows, n_cols, grid_slot=1)
-                    fig.sp.title('w1 wrt xc')
-                    self._plot_param_sub(fig, debug_pois_obj.w1,
-                                         debug_pois_obj.gradient_w1_xc,
-                                         pois_clf)
-
-                    fig.subplot(n_rows, n_cols, grid_slot=2)
-                    fig.sp.title('w2 wrt xc')
-                    self._plot_param_sub(fig, debug_pois_obj.w2,
-                                         debug_pois_obj.gradient_w2_xc,
-                                         pois_clf)
-
-                    fig.subplot(n_rows, n_cols, grid_slot=3)
-                    fig.sp.title('b wrt xc')
-                    self._plot_param_sub(fig, debug_pois_obj.b,
-                                         debug_pois_obj.gradient_b_xc,
-                                         pois_clf)
-
-                    fig.show()
-                    fig.savefig(self.name_file, file_format='pdf')
+                fig.show()
+                fig.savefig(self.name_file, file_format='pdf')
 
         #####################################################################
         #                             INTERNALS
@@ -326,13 +296,19 @@ class CPoisoningTestCases(object):
                              grid_limits=self.grid_limits,
                              levels=[self.discr_f_level], colorbar=False)
 
-        def _grad_check(self, xc):
+        def test_poisoning_grad_check(self):
+
+            pois_clf = self._clf_poisoning()
+
+            xc = self.xc
+
             # Compare analytical gradient with its numerical approximation
             check_grad_val = COptimizer(
                 CFunction(self.poisoning._objective_function,
                           self.poisoning._objective_function_gradient)
             ).check_grad(xc)
-            self.logger.info("Gradient difference between analytical svm "
+            self.logger.info("Gradient difference between analytical "
+                             "poisoning "
                              "gradient and numerical gradient: %s",
                              str(check_grad_val))
             self.assertLess(check_grad_val, 1e-3,

@@ -9,7 +9,7 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
     def param_setter(self):
         self.clf_idx = 'ridge'  # logistic | ridge | svm
 
-    def _blob_dataset_creation(self):
+    def _dataset_creation(self):
         self.n_features = 2  # Number of dataset features
 
         self.n_tr = 100
