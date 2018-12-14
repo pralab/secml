@@ -28,8 +28,13 @@ class CFunction(CCreator):
     n_dim : int or None
         Expected space dimensions.
 
+    Attributes
+    ----------
+    class_type : 'standard'
+
     """
     __super__ = 'CFunction'
+    __class_type = 'generic'
 
     def __init__(self, fun=None, gradient=None, n_dim=None):
 
