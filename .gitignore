@@ -180,3 +180,7 @@ devenv/
 [Ss]cripts
 pyvenv.cfg
 pip-selfcheck.json
+
+# Things specific to this project #
+###################################
+src/secml/VERSION_REV

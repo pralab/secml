@@ -57,14 +57,8 @@ deploy:xenial:
   stage: deploy
   script:
     - sh .gitlab-ci-extra.sh > /dev/null
-    - pip install numpy==1.13.*
-    - pip install enum34
-    - pip install -r requirements.txt
     - python setup.py sdist --formats=zip
-    - apt-get install -qq -y unzip > /dev/null
-    - unzip dist/SecML-Lib-*
-    - cd SecML-Lib-*
-    - python setup.py install
+    - pip install dist/SecML-Lib-*.zip
     - python -c "import secml"
   except:
     changes:
