@@ -12,8 +12,8 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
     def _dataset_creation(self):
         self.n_features = 2  # Number of dataset features
 
-        self.n_tr = 100
-        self.n_ts = 100
+        self.n_tr = 50
+        self.n_ts = 1000
         self.n_classes = 2
 
         # Random state generator for the dataset
