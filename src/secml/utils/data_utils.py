@@ -14,22 +14,9 @@ from secml.array import CArray
 from secml.figure import CFigure
 from secml.ml.peval.metrics import CRoc
 
-__all__ = ['density_estimation',
-           'plot_roc_and_prob_density', 'density_estimation',
+__all__ = ['plot_roc_and_prob_density',
            'plot_distance_dens', 'visualize_data_distance',
            'visualize_kernel_distance','plot_prob_density']
-
-
-def density_estimation(scores):
-    kde = KernelDensity(kernel='tophat', bandwidth=0.75).fit(
-        scores.atleast_2d().T.get_data())
-
-    x = CArray.linspace(-5.0 + scores.min(), 5.0 + scores.max(), 200)
-    x = x.atleast_2d().T
-
-    pdf = CArray(kde.score_samples(x.get_data()))
-    pdf = pdf.exp()
-    return x, pdf
 
 
 def plot_roc_and_prob_density(ts_scores, ts):
