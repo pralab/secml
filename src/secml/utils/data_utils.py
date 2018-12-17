@@ -14,95 +14,10 @@ from secml.array import CArray
 from secml.figure import CFigure
 from secml.ml.peval.metrics import CRoc
 
-__all__ = ['split_dataset', 'get_train_test_idx', 'density_estimation',
+__all__ = ['density_estimation',
            'plot_roc_and_prob_density', 'density_estimation',
            'plot_distance_dens', 'visualize_data_distance',
            'visualize_kernel_distance','plot_prob_density']
-
-
-def split_dataset(dataset, num_train=None, num_test=None):
-    """
-    Random train-test dataset split 
-
-    Yields indices to split data into training and test sets.
-
-    Note: contrary to other cross-validation strategies, random splits
-    do not guarantee that all folds will be different, although this is
-    still very likely for sizeable datasets.
-
-    Parameters
-    ----------
-    train_size : float, int, or None, optional  (default None) 
-        If float, should be between 0.0 and 1.0 and represent the proportion
-        of the dataset to include in the test split. If int, represents the 
-        absolute number of test samples. If None, the value is automatically
-         set to the complement of the train size. If train size is also None,
-        test size is set to 0.25.
-    test_size : float, int, or None, optional (default None) 
-        If float, should be between 0.0 and 1.0 and represent the proportion 
-        of the dataset to include in the train split. If int, represents the
-        absolute number of train samples. If None, the value is automatically
-        set to the complement of the test size.
-
-    Notes
-    -----
-    train_size and test_size could not be both None. If one is
-    set to None the other should be a float, representing a
-    percentage, or an integer.
-    """
-    print type(dataset)
-    # X, y = np.arange(10).reshape((5, 2)), range(5)
-    X_train, X_test, y_train, y_test = train_test_split(dataset.X.get_data(),
-                                                        dataset.Y.tondarray(),
-                                                        train_size=num_train,
-                                                        test_size=num_test)
-
-    train_data = CDataset(CArray(X_train), CArray(y_train))
-    test_data = CDataset(CArray(X_test), CArray(y_test))
-
-    return train_data, test_data
-
-
-def get_train_test_idx(dataset, num_train=None, num_test=None):
-    """
-    Random train-test dataset split 
-
-    Yields indices to split data into training and test sets.
-
-    Note: contrary to other cross-validation strategies, random splits
-    do not guarantee that all folds will be different, although this is
-    still very likely for sizeable datasets.
-
-    Parameters
-    ----------
-    train_size : float, int, or None, optional  (default None) 
-        If float, should be between 0.0 and 1.0 and represent the proportion
-        of the dataset to include in the test split. If int, represents the 
-        absolute number of test samples. If None, the value is automatically
-         set to the complement of the train size. If train size is also None,
-        test size is set to 0.25.
-    test_size : float, int, or None, optional (default None) 
-        If float, should be between 0.0 and 1.0 and represent the proportion 
-        of the dataset to include in the train split. If int, represents the
-        absolute number of train samples. If None, the value is automatically
-        set to the complement of the test size.
-
-    Notes
-    -----
-    train_size and test_size could not be both None. If one is
-    set to None the other should be a float, representing a
-    percentage, or an integer.
-
-
-    """
-
-    # TODO: THIS IS NOT OPTIMIZED, IT IS JUST FOR MAKE IT WORK. CHANGE IT.
-    X = CArray.arange(start=0, stop=dataset.num_samples, step=1)
-    train_data_idx, test_data_idx, y_train, y_test = train_test_split(
-        X.get_data(),
-        dataset.Y.tondarray(), train_size=num_train, test_size=num_test)
-
-    return train_data_idx.tolist(), test_data_idx.tolist()
 
 
 def density_estimation(scores):
