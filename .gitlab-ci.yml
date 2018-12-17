@@ -25,7 +25,7 @@ before_script:
   stage: test
   only:
     changes:
-      - src/secml/*
+      - src/secml/**/*
       - pytest.ini
       - tox.ini
       - requirements.txt
@@ -62,8 +62,8 @@ deploy:xenial:
     - python -c "import secml"
   except:
     changes:
-      - docs/*
-      - .gitlab/*
+      - docs/**/*
+      - .gitlab/**/*
       - .gitignore
   artifacts:
     name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
