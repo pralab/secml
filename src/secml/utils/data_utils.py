@@ -14,45 +14,8 @@ from secml.array import CArray
 from secml.figure import CFigure
 from secml.ml.peval.metrics import CRoc
 
-__all__ = ['plot_roc_and_prob_density',
-           'plot_distance_dens', 'visualize_data_distance',
-           'visualize_kernel_distance','plot_prob_density']
-
-
-def plot_roc_and_prob_density(ts_scores, ts):
-    """
-    plot roc and the probability density function of benign and malicious class 
-    """
-    xm, malicious_pdf = density_estimation(ts_scores[ts.Y == 1])
-    xb, benign_pdf = density_estimation(ts_scores[ts.Y == 0])
-
-    # compute roc 
-    roc = CRoc()
-    roc.compute(ts.Y, ts_scores)
-
-    # plot roc and score probability density
-    fig = CFigure(height=5, width=12)
-    fig.subplot(1, 2, 1, sp_type='roc')
-    fig.sp.plot_roc(roc.fpr, roc.tpr)
-    fig.subplot(1, 2, 2)
-    fig.sp.plot(xb, benign_pdf, label="ben pdf")
-    fig.sp.plot(xm, malicious_pdf, label="mal pdf")
-    fig.sp.legend()
-    return fig
-
-def plot_prob_density(ts_scores, ts):
-    """
-    plot probability density function of benign and malicious class 
-    """
-    xm, malicious_pdf = density_estimation(ts_scores[ts.Y == 1])
-    xb, benign_pdf = density_estimation(ts_scores[ts.Y == 0])
-
-    # plot roc and score probability density
-    fig = CFigure(height=5, width=5)
-    fig.sp.plot(xb, benign_pdf, label="ben pdf")
-    fig.sp.plot(xm, malicious_pdf, label="mal pdf")
-    fig.sp.legend()
-    return fig
+__all__ = ['plot_distance_dens', 'visualize_data_distance',
+           'visualize_kernel_distance',]
 
 def plot_distance_dens(data, distance):
     """
