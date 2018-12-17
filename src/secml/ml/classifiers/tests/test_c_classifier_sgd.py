@@ -132,7 +132,7 @@ class TestCClassifierSGD(CUnitTest):
 
         # fit the model
         clf = CClassifierSGD(loss=CLossHinge(), regularizer=CRegularizerL2(),
-                             alpha=0.01, max_iter=200)
+                             alpha=0.01, max_iter=200, random_state=0)
         clf.train(dataset)
 
         # plot the line, the points, and the nearest vectors to the plane
