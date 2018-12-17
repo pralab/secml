@@ -25,7 +25,7 @@ before_script:
   stage: test
   only:
     changes:
-      - src/secml/*
+      - src/secml/**
       - pytest.ini
       - tox.ini
       - requirements.txt
