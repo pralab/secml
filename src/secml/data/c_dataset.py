@@ -87,7 +87,6 @@ class CDataset(object):
         # Setting any other dataset attribute
         for key in kwargs:
             setattr(self, key, kwargs[key])
-            # TESTASS
 
     @property
     def num_samples(self):
