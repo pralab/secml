@@ -3,11 +3,13 @@ from secml.data.loader import CDLRandomBlobs
 from secml.data.splitter import CDataSplitterShuffle
 from secml.ml.features.normalization import CNormalizerMinMax
 from test_c_poisoning import CPoisoningTestCases
+from abc import abstractmethod
 
 class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
 
+    @abstractmethod
     def param_setter(self):
-        self.clf_idx = 'logistic'  # logistic | ridge | svm
+        raise NotImplemented
 
     def _dataset_creation(self):
         self.n_features = 2  # Number of dataset features
@@ -47,6 +49,14 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
 
         self.grid_limits = [(self.lb - 0.1, self.ub + 0.1),
                             (self.lb - 0.1, self.ub + 0.1)]
+
+class TestCPoisoningBlobRidge(TestCPoisoningBlob):
+    def param_setter(self):
+        self.clf_idx = 'ridge'
+
+class TestCPoisoningBlobLogistic(TestCPoisoningBlob):
+    def param_setter(self):
+        self.clf_idx = 'logistic'
 
 if __name__ == '__main__':
     CUnitTest.main()

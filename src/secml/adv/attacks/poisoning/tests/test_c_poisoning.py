@@ -16,6 +16,7 @@ from secml.utils import CUnitTest
 
 
 class CPoisoningTestCases(object):
+
     class TestCPoisoning(CUnitTest):
         """Unit test for CAttackPoisoning."""
         __metaclass__ = ABCMeta
@@ -25,7 +26,7 @@ class CPoisoningTestCases(object):
             if self.clf_idx == 'logistic':
 
                 self.classifier = CClassifierSGD(loss='log', regularizer='l2',
-                                                 alpha=1)
+                                                 alpha=1, random_state=0)
                                                  #alpha=0.0001)
 
                 self.pois_class = CAttackPoisoningLogisticRegression
