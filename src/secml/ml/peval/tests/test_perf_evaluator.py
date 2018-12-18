@@ -29,6 +29,17 @@ class CMetricFirstNan(CMetric):
             return 1
 
 
+class CMetricAllNan(CMetric):
+    """Test metric which returns all nans."""
+    best_value = 1.0
+
+    def __init__(self):
+        pass
+
+    def _performance_score(self, y_true, score):
+        return nan
+
+
 class TestCPerfEvaluator(CUnitTest):
     """Unit test for CKernel."""
 
@@ -135,8 +146,6 @@ class TestCPerfEvaluator(CUnitTest):
 
     def test_nan_metric_value(self):
 
-        some_nan_metric = CMetricFirstNan()
-
         # Changing default parameters to be sure are not used
         self.svm.set_params({'C': 25, 'kernel.gamma': 1e-1})
         xval_parameters = {'C': [1, 10, 100], 'kernel.gamma': [1, 50]}
@@ -145,19 +154,35 @@ class TestCPerfEvaluator(CUnitTest):
         xval_splitter = CDataSplitter.create(
             'kfold', num_folds=5, random_state=50000)
 
+        self.logger.info("Testing metric with some nan")
+
+        some_nan_metric = CMetricFirstNan()
+
         # Now we compare the parameters chosen before with a new evaluator
         perf_eval = CPerfEvaluatorXVal(
             xval_splitter, some_nan_metric)
         perf_eval.verbose = 1
 
         best_params, best_score = perf_eval.evaluate_params(
-            self.svm, self.training_dataset, xval_parameters, n_jobs=2,
-            pick='last')
+            self.svm, self.training_dataset, xval_parameters, pick='last')
 
         self.logger.info("best score : {:}".format(best_score))
 
         # The xval should select the only one actual value (others are nan)
         self.assertEqual(best_score, 1.)
+
+        self.logger.info("Testing metric with all nan")
+
+        all_nan_metric = CMetricAllNan()
+
+        # Now we compare the parameters chosen before with a new evaluator
+        perf_eval = CPerfEvaluatorXVal(
+            xval_splitter, all_nan_metric)
+        perf_eval.verbose = 1
+
+        with self.assertRaises(ValueError):
+            perf_eval.evaluate_params(
+                self.svm, self.training_dataset, xval_parameters, pick='last')
 
     def test_params_multiclass(self):
         """Parameter estimation for multiclass classifiers."""
