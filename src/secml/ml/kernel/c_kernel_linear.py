@@ -112,6 +112,9 @@ class CKernelLinear(CKernel):
             raise ValueError(
                 "Both input arrays must be 2-Dim of shape (1, n_features).")
 
+        # Format of output array should be the same as v
+        k_grad = k_grad.tosparse() if v_carray.issparse else k_grad.todense()
+
         if (k_grad - v_carray).norm() < 1e-8:
             return 2 * k_grad
         else:

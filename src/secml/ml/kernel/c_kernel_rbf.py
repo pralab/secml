@@ -182,6 +182,9 @@ class CKernelRBF(CKernel):
         else:  # Broadcasting is supported by design for dense arrays
             v_broadcast = v_carray
 
+        # Format of output array should be the same as v
+        u_carray = u_carray.tosparse() if v_carray.issparse else u_carray.todense()
+
         diff = (u_carray - v_broadcast)
 
         k_grad = self._k(u_carray, v_carray)

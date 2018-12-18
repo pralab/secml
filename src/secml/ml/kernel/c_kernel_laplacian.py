@@ -183,6 +183,14 @@ class CKernelLaplacian(CKernel):
         else:  # Broadcasting is supported by design for dense arrays
             v_broadcast = v
 
+        # Format of output array should be the same as v
+        x = x.tosparse() if v.issparse else x.todense()
+
         diff = (x - v_broadcast)
 
-        return self.gamma * self._k(x, v) * diff.sign()
+        k_grad = self._k(x, v)
+        # Casting the kernel to sparse if needed for efficient broadcasting
+        if diff.issparse is True:
+            k_grad = k_grad.tosparse()
+
+        return self.gamma * k_grad * diff.sign()
