@@ -42,6 +42,10 @@ class CClassifierMCSLinear(CClassifierLinear):
     ----------
     class_type : 'mcs-linear'
 
+    Attributes
+    ----------
+    class_type : 'mcs-linear'
+
     """
     __class_type = 'mcs-linear'
     
