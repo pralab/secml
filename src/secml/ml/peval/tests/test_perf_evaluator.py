@@ -150,12 +150,14 @@ class TestCPerfEvaluator(CUnitTest):
             xval_splitter, some_nan_metric)
         perf_eval.verbose = 1
 
-        with self.assertRaises(Exception):
-            best_params, best_score = perf_eval.evaluate_params(
-                self.svm, self.training_dataset, xval_parameters, n_jobs=2,
-                pick='last')
+        best_params, best_score = perf_eval.evaluate_params(
+            self.svm, self.training_dataset, xval_parameters, n_jobs=2,
+            pick='last')
 
-            self.logger.info("best score : {:}".format(best_score))
+        self.logger.info("best score : {:}".format(best_score))
+
+        # The xval should select the only one actual value (others are nan)
+        self.assertEqual(best_score, 1.)
 
     def test_params_multiclass(self):
         """Parameter estimation for multiclass classifiers."""
@@ -193,5 +195,6 @@ class TestCPerfEvaluator(CUnitTest):
             for param in best_params:
                 self.assertEqual(clf.get_params()[param], best_params[param])
 
+
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()
