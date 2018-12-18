@@ -419,12 +419,19 @@ class CPlotRoc(CPlot):
 
         for rep_i in xrange(roc.n_reps):
 
-            tpr = roc.tpr[rep_i] if invert_tpr is False else 1 - roc.tpr[rep_i]
+            if roc.n_reps <= 1:  # For one rep ROC is stored as CArray
+                tpr = roc.tpr
+                fpr = roc.fpr
+            else:  # For more than one rep ROC is stored as lists
+                tpr = roc.tpr[rep_i]
+                fpr = roc.fpr[rep_i]
 
-            plot_func(roc.fpr[rep_i] * 100, tpr * 100,
+            tpr = tpr if invert_tpr is False else 1 - tpr
+
+            plot_func(fpr * 100, tpr * 100,
                       styles[(n_lines + rep_i) % len(styles)],
                       label=label_w_rep(label, rep_i),
-                      markevery=self._markers_idx(roc.fpr[rep_i] * 100))
+                      markevery=self._markers_idx(fpr * 100))
 
         if label is not None:
             # Legend on the lower right
