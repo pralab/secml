@@ -12,7 +12,7 @@ class TestKernelGradient(CUnitTest):
 
     def setUp(self):
 
-        self.kernel_types = ('linear', 'rbf', 'poly', 'laplacian')
+        self.kernel_types = ('linear', 'rbf', 'poly', 'laplacian', 'euclidean')
         self.kernels = [
             CKernel.create(kernel_type) for kernel_type in self.kernel_types]
 
@@ -49,11 +49,14 @@ class TestKernelGradient(CUnitTest):
 
         for kernel in self.kernels:
             self.logger.info("kernel type: %s", kernel.class_type)
+
             grad_error = COptimizer(
                 CFunction(kern_f_for_test, kern_grad_for_test)).check_grad(
                     self.p2_dense, self.p1_dense, kernel)
+
             self.logger.info("error committed into own grad calc is {:}"
                              "".format(grad_error))
+
             self.assertTrue(grad_error < 1e-3)
 
     # TODO:
