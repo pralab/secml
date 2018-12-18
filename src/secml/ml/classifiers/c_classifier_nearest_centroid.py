@@ -41,10 +41,9 @@ class CClassifierNearestCentroid(CClassifier):
         self._nc = None
         self._centroids = None
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        return self._nc is None and self._centroids is None and \
-            super(CClassifierNearestCentroid, self).is_clear()
+        return self._nc is None and self._centroids is None
 
     @property
     def metric(self):

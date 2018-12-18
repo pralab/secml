@@ -33,8 +33,8 @@ class CTorchNormalizer(CNormalizer):
         """Reset the object."""
         pass
 
-    def is_clear(self):
-        """Return True if normalizer has not been trained."""
+    def __is_clear(self):
+        """Returns True if object is clear."""
         return self.CNN.is_clear()
 
     def train(self, X):

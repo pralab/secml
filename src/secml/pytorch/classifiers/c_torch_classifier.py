@@ -77,18 +77,10 @@ class CTorchClassifier(CClassifier):
         # Initialize the optimizer
         self.init_optimizer()
 
-        self._is_clear = True
-
         if use_cuda is True:
             self.logger.info("Using CUDA for PyTorch computations!")
 
         super(CTorchClassifier, self).__init__(normalizer=normalizer)
-
-    def is_clear(self):
-        """Returns True if object is clear."""
-        if self._is_clear:
-            return True
-        return False
 
     @property
     def learning_rate(self):

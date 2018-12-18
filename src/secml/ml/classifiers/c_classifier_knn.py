@@ -37,17 +37,26 @@ class CClassifierKNN(CClassifier):
         self._p = p
         self._metric = metric
         self._metric_params = metric_params
+
         self._n_samples_training = 0
         self._tr_dataset = None
         self._KNC = None
 
     def __clear(self):
         """Reset the object."""
+        self._n_samples_training = 0
+        self._tr_dataset = None
         self._KNC = None
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        return self._KNC is None and super(CClassifierKNN, self).is_clear()
+        if self._n_samples_training != 0:
+            return False
+        if self._tr_dataset is not None:
+            return False
+        if self._KNC is not None:
+            return False
+        return True
 
     @property
     def n_neighbors(self):

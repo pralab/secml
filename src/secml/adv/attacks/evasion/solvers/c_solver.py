@@ -33,7 +33,6 @@ class CSolver(CCreator):
     by manipulating one feature at a time.
 
     """
-
     __metaclass__ = ABCMeta
     __super__ = 'CSolver'
 
@@ -64,7 +63,7 @@ class CSolver(CCreator):
     #            INTERNALS
     ##########################################
     def __clear(self):
-
+        """Reset the object."""
         if self._f is not None:
             self._f.clear()
         if self._fun is not None:
@@ -80,6 +79,27 @@ class CSolver(CCreator):
         self._x_seq = None  # sequence of x values at each iteration
         self._f_eval = 0
         self._grad_eval = 0
+
+    def __is_clear(self):
+        """Returns True if object is clear."""
+        if self._f is not None and not self._f.is_clear():
+            return False
+        if self._fun is not None and not self._fun.is_clear():
+            return False
+        if self.constr is not None and not self.constr.is_clear():
+            return False
+        if self.bounds is not None and not self.bounds.is_clear():
+            return False
+
+        if self._x_opt is not None or self._f_opt is not None:
+            return False
+        if self._f_seq is not None or self._x_seq is not None:
+            return False
+
+        if self._f_eval + self._grad_eval != 0:
+            return False
+
+        return True
 
     ###########################################################################
     #                           READ-ONLY ATTRIBUTES

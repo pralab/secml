@@ -20,11 +20,17 @@ class CSecEvalDataEvasion(CSecEvalData):
 
     def __init__(self):
         """Class init."""
-
         super(CSecEvalDataEvasion, self).__init__()
 
-        # read-only variables (outputs)
         self._first_eva = None
+
+    def __clear(self):
+        """Reset the object."""
+        self._first_eva = None
+
+    def __is_clear(self):
+        """Returns True if object is clear."""
+        return self._first_eva is None
 
     ###########################################################################
     #                           READ-WRITE ATTRIBUTES
@@ -39,7 +45,3 @@ class CSecEvalDataEvasion(CSecEvalData):
     def first_eva(self, value):
         """Sets first_eva."""
         self._first_eva = value
-
-    def __clear(self):
-        """Clears run-time used class parameters."""
-        self._first_eva = None

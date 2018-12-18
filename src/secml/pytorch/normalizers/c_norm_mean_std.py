@@ -45,8 +45,8 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         self._w = None
         self._b = None
 
-    def is_clear(self):
-        """Return True if normalizer has not been trained."""
+    def __is_clear(self):
+        """Returns True if object is clear."""
         return self._w is None and self._b is None and \
             self._data_mean is None and self._data_std is None
 
@@ -87,7 +87,7 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         Examples
         --------
         >>> from secml.array import CArray
-        >>> from secml.ml.features.normalization import CNormalizerMeanSTD
+        >>> from secml.pytorch.normalizers import CNormalizerMeanSTD
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]],tosparse=True)
 
         >>> normalizer = CNormalizerMeanSTD(0.5, 0.2).train(array)

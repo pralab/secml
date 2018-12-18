@@ -266,6 +266,8 @@ class CCreator(object):
     def clear(self):
         """Resets internal attributes of all the hierarchy.
 
+        Notes
+        -----
         To properly support the clear framework, define a `__clear` method
         that executes the desired operations.
 
@@ -287,12 +289,19 @@ class CCreator(object):
 
         Notes
         -----
-        Override this method to correctly support the `clear` framework.
-        Otherwise, the class will be always considered NOT cleared and
-        thus the clear() method will be called.
+        To properly support the clear framework, define a `__is_clear` method
+        that executes the desired operations.
 
         """
-        return False
+        # __mro__ returns the class hierarchy (reverse order)
+        for base in self.__class__.__mro__:
+            try:
+                if get_private(base, 'is_clear')(self) is False:
+                    return False
+            except AttributeError:
+                # `__is_clear` is not defined
+                pass
+        return True
 
     def get_params(self):
         """Returns the dictionary of class parameters.

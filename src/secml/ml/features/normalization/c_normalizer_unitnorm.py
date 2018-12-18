@@ -63,14 +63,15 @@ class CNormalizerUnitNorm(CNormalizer):
         if order != 1 and order != 2:
             raise ValueError("Norm of order {:} is not supported.".format(order))
         self._order = order
+
         self._norm = None
 
     def __clear(self):
         """Reset the object."""
         self._norm = None
 
-    def is_clear(self):
-        """Return True if normalizer has not been trained."""
+    def __is_clear(self):
+        """Returns True if object is clear."""
         return self.norm is None
 
     @property

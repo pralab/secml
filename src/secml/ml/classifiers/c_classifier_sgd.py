@@ -59,16 +59,24 @@ class CClassifierSGD(CClassifierLinear):
         # Keep private (not a param of SGD)
         self._kernel = kernel if kernel is None else CKernel.create(kernel)
 
-        # After training attributes
         self._tr = None  # slot for the training data
 
     def __clear(self):
         """Reset the object."""
         self._tr = None
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        return self._tr is None and super(CClassifierSGD, self).is_clear()
+        if self._tr is not None:
+            return False
+
+        # Following are attributes from CClassifierLinear
+        if self._w is not None:
+            return False
+        if self.fit_intercept is True and self._b is not None:
+            return False
+
+        return True
 
     @property
     def loss(self):

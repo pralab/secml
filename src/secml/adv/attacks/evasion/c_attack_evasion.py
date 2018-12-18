@@ -79,9 +79,18 @@ class CAttackEvasion(CAttack):
                          solver_params=solver_params)
 
     def __clear(self):
+        """Reset the object."""
         self._x0 = None
         self._y0 = None
         self._xk = None
+
+    def __is_clear(self):
+        """Returns True if object is clear."""
+        if self._x0 is not None or self._y0 is not None:
+            return False
+        if self._xk is not None:
+            return False
+        return True
 
     ###########################################################################
     #                              PRIVATE METHODS

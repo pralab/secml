@@ -45,6 +45,8 @@ class CClassifierLinear(CClassifier):
         self._w = None
         self._b = None
 
+    # SPECIAL CASE: DELEGATE IS_CLEAR CHECK TO SUBCLASSES
+
     @property
     def w(self):
         """Vector with each feature's weight (dense or sparse)."""
@@ -61,11 +63,6 @@ class CClassifierLinear(CClassifier):
                 self.normalizer is not None and self.normalizer.is_linear():
             return True
         return False
-
-    def is_clear(self):
-        """Returns True if object is clear."""
-        return super(CClassifierLinear, self).is_clear() and \
-            self._w is None and self._b is None
 
     def train(self, dataset, n_jobs=1):
         """Trains the linear classifier.

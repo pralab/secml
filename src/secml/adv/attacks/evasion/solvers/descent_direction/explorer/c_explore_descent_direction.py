@@ -43,7 +43,49 @@ class CExploreDescentDirection(CCreator):
         self._line_search.verbose = 2
 
         CExploreDescentDirection.__clear(self)
-        return
+
+    def __clear(self):
+        """Reset the object."""
+        # descent direction (passed from outside)
+        self._descent_direction = None
+
+        # this is useful to check if exploration is finished
+        self._explored = False
+
+        # Indices of features that would sort the gradient
+        # in descending order of their absolute value
+        # (otherwise, for random direction, randomly set to +1 or -1)
+        self._idx_top_feat = None
+
+        # This index vector indexes _idx_top_feat,
+        # starting from 0 to n_neighbors-1.
+        # Features which do not generate useful candidates
+        # (e.g., constraint violations) are substitued with
+        # next candidate features, until all features are explored
+        self._idx_current = None
+
+        # index of next candidate feature
+        self._idx_next = None
+
+        # number of features
+        self._n_feat = None
+
+        # clear line search
+        self._line_search.clear()
+
+    def __is_clear(self):
+        """Returns True if object is clear."""
+        if self._descent_direction is not None:
+            return False
+        if self._explored is True:
+            return False
+        if self._idx_top_feat is not None or self._idx_current is not None:
+            return False
+        if self._idx_next is not None or self._n_feat is not None:
+            return False
+        if self._line_search.is_clear() is False:
+            return False
+        return True
 
     @property
     def n_dimensions(self):
@@ -76,40 +118,6 @@ class CExploreDescentDirection(CCreator):
     @property
     def bounds(self):
         return self._line_search.bounds
-
-    def __clear(self):
-        """
-        Re-initializes this class instance,
-        restoring its status right after
-        the __init__ call.
-        """
-
-        # descent direction (passed from outside)
-        self._descent_direction = None
-
-        # this is useful to check if exploration is finished
-        self._explored = False
-
-        # Indicies of features that would sort the gradient
-        # in descending order of their absolute value
-        # (otherwise, for random direction, randomly set to +1 or -1)
-        self._idx_top_feat = None
-
-        # This index vector indexes _idx_top_feat,
-        # starting from 0 to n_neighbors-1.
-        # Features which do not generate useful candidates
-        # (e.g., constraint violations) are substitued with
-        # next candidate features, until all features are explored
-        self._idx_current = None
-
-        # index of next candidate feature
-        self._idx_next = None
-
-        # number of features
-        self._n_feat = None
-
-        # clear line search
-        self._line_search.clear()
 
     def finished_exploration(self):
         """

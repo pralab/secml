@@ -41,8 +41,8 @@ class CDataSplitter(CCreator):
         self._tr_idx = []
         self._ts_idx = []
 
-    def is_clear(self):
-        """Return True if the XVal object is clear."""
+    def __is_clear(self):
+        """Returns True if object is clear."""
         return len(self._tr_idx) + len(self._ts_idx) == 0
 
     def __iter__(self):

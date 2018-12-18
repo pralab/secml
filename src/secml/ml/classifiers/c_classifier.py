@@ -76,11 +76,15 @@ class CClassifier(CCreator):
         if self.normalizer is not None:
             self.normalizer.clear()
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        return self._classes is None and self._n_features is None and \
-            (self.normalizer is None or
-             self.normalizer is not None and self.normalizer.is_clear())
+        if self._classes is not None:
+            return False
+        if self._n_features is not None:
+            return False
+        if self.normalizer is not None and not self.normalizer.is_clear():
+            return False
+        return True
 
     @property
     def classes(self):
