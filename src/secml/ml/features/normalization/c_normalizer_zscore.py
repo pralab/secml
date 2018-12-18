@@ -83,8 +83,8 @@ class CNormalizerZScore(CNormalizerLinear):
         self._w = None
         self._b = None
 
-    def is_clear(self):
-        """Return True if normalizer has not been trained."""
+    def __is_clear(self):
+        """Returns True if object is clear."""
         return self.mean is None and self.std is None and \
             self._w is None and self._b is None
 

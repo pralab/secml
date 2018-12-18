@@ -39,20 +39,18 @@ class CClassifierKDE(CClassifier):
         # Calling CClassifier init
         super(CClassifierKDE, self).__init__(normalizer=normalizer)
 
-        # After-training attributes
-        self._training_samples = None  # slot store training samples
-
         # Setting up the kernel function
         kernel_type = 'linear' if kernel is None else kernel
         self._kernel = CKernel.create(kernel_type)
 
+        self._training_samples = None  # slot store training samples
+
     def __clear(self):
         self._training_samples = None
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        return self._training_samples is None and \
-            super(CClassifierKDE, self).is_clear()
+        return self._training_samples is None
 
     def is_linear(self):
         """Return True if the classifier is linear."""

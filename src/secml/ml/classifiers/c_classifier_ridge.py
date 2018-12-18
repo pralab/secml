@@ -41,16 +41,22 @@ class CClassifierRidge(CClassifierLinear):
         # Keep private (not a param of SGD)
         self._kernel = kernel if kernel is None else CKernel.create(kernel)
 
-        # After training attributes
         self._tr = None  # slot for the training data
 
     def __clear(self):
         """Reset the object."""
         self._tr = None
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        return self._tr is None and super(CClassifierRidge, self).is_clear()
+        if self._tr is not None:
+            return False
+
+        # CClassifierLinear attributes
+        if self._w is not None or self._b is not None:
+            return False
+
+        return True
 
     @property
     def kernel(self):

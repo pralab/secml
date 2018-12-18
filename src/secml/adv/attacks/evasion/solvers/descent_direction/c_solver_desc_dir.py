@@ -64,11 +64,13 @@ class CSolverDescDir(CSolver):
 
         self._explorer = None
 
-        CSolverDescDir.__clear(self)
-
     def __clear(self):
-        if self._explorer is not None:
-            self._explorer.clear()
+        """Reset the object."""
+        self._explorer.clear()
+
+    def __is_clear(self):
+        """Returns True if object is clear."""
+        return self._explorer.is_clear()
 
     ###########################################################################
     #                           READ-WRITE ATTRIBUTES

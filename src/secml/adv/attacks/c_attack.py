@@ -120,7 +120,7 @@ class CAttack(CCreator):
         CAttack.__clear(self)
 
     def __clear(self):
-
+        """Reset the object."""
         # the attack point obtained after manipulation
         self._x_opt = None
 
@@ -140,6 +140,21 @@ class CAttack(CCreator):
         # clear solver
         if self._solver is not None:
             self._solver.clear()
+
+    def __is_clear(self):
+        """Returns True if object is clear."""
+        if self._x_opt is not None or self._f_opt is not None:
+            return False
+        if self._x_seq is not None or self._f_seq is not None:
+            return False
+
+        if self._solver is not None and not self._solver.is_clear():
+            return False
+
+        if self._f_eval + self._grad_eval != 0:
+            return False
+
+        return True
 
     @property
     def attack_classes(self):

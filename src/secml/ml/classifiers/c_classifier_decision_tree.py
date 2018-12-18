@@ -41,10 +41,9 @@ class CClassifierDecisionTree(CClassifier):
         """Reset the object."""
         self._dt = None
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        return self._dt is None and \
-            super(CClassifierDecisionTree, self).is_clear()
+        return self._dt is None
 
     @property
     def min_samples_split(self):

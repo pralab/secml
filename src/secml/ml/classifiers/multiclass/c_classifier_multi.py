@@ -44,13 +44,11 @@ class CClassifierMulticlass(CClassifier):
         for clf in self._binary_classifiers:
             clf.clear()
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
         for clf in self._binary_classifiers:
             if not clf.is_clear():
                 return False
-        if not super(CClassifierMulticlass, self).is_clear():
-            return False
         return True
 
     @CClassifier.verbose.setter

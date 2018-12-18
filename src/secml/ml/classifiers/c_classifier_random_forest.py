@@ -41,10 +41,9 @@ class CClassifierRandomForest(CClassifier):
         """Reset the object."""
         self._rf = None
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        return self._rf is None and \
-            super(CClassifierRandomForest, self).is_clear()
+        return self._rf is None
 
     @property
     def n_estimators(self):

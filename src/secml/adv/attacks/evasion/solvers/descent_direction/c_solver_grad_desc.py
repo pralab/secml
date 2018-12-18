@@ -56,11 +56,6 @@ class CSolverGradDesc(CSolver):
         self.max_iter = max_iter
         self.eps = eps
 
-        CSolverGradDesc.__clear(self)
-
-    def __clear(self):
-        pass
-
     ###########################################################################
     #                              SETTER-GETTER
     ###########################################################################

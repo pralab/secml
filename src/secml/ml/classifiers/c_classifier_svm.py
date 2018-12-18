@@ -82,28 +82,31 @@ class CClassifierSVM(CClassifierLinear):
         self._sv = None
 
         # slot for the computed kernel function (to speed up multiclass)
+        # DO NOT CLEAR
         self._k = None
 
     def __clear(self):
         """Reset the object."""
-        # SVM specific attributes
         self._n_sv = None
         self._sv_idx = None
         self._alpha = None
         self._sv = None
         self._k = None
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        # SVM is a special case, we cannot use a 'super' chain easily
-        cond_nl = self.n_sv is None and self.sv_idx is None and \
-            self.sv is None and self.alpha is None and self.b is None and \
-            self._classes is None and self._n_features is None and \
-            (self.normalizer is None or
-             self.normalizer is not None and self.normalizer.is_clear())
-        if self.is_kernel_linear():
-            return cond_nl and self.w is None
-        return cond_nl
+        if self.n_sv is not None or self.sv_idx is not None:
+            return False
+        if self.alpha is not None or self.sv is not None:
+            return False
+
+        # Following are special cases as SVM can be both linear and nonlinear
+        if self.b is not None:
+            return False
+        if self.is_kernel_linear() is True and self.w is not None:
+            return False
+
+        return True
 
     def is_linear(self):
         """Return True if the classifier is linear."""
