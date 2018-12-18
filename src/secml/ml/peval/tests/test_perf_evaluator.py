@@ -1,4 +1,3 @@
-import unittest
 from secml.utils import CUnitTest
 
 import sklearn.metrics as skm
@@ -12,6 +11,33 @@ from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.ml.peval import CPerfEvaluatorXVal
 from secml.ml.peval.metrics import CMetric
+from secml.core.constants import nan
+
+
+class CMetricFirstNan(CMetric):
+    """Test metric which returns some nans."""
+    best_value = 1.0
+
+    def __init__(self):
+        self._count = 0
+
+    def _performance_score(self, y_true, score):
+        if self._count == 0:
+            self._count += 1
+            return nan
+        else:
+            return 1
+
+
+class CMetricAllNan(CMetric):
+    """Test metric which returns all nans."""
+    best_value = 1.0
+
+    def __init__(self):
+        pass
+
+    def _performance_score(self, y_true, score):
+        return nan
 
 
 class TestCPerfEvaluator(CUnitTest):
@@ -119,10 +145,6 @@ class TestCPerfEvaluator(CUnitTest):
         self.assertEqual(better_param_comb[1], self.svm.kernel.gamma)
 
     def test_nan_metric_value(self):
-        from custom_test_metric import CMetricFirstNan
-        some_nan_metric = CMetricFirstNan()
-
-        print "metric created "
 
         # Changing default parameters to be sure are not used
         self.svm.set_params({'C': 25, 'kernel.gamma': 1e-1})
@@ -132,17 +154,35 @@ class TestCPerfEvaluator(CUnitTest):
         xval_splitter = CDataSplitter.create(
             'kfold', num_folds=5, random_state=50000)
 
+        self.logger.info("Testing metric with some nan")
+
+        some_nan_metric = CMetricFirstNan()
+
         # Now we compare the parameters chosen before with a new evaluator
         perf_eval = CPerfEvaluatorXVal(
             xval_splitter, some_nan_metric)
         perf_eval.verbose = 1
 
-        with self.assertRaises(Exception):
-            best_params, best_score = perf_eval.evaluate_params(
-                self.svm, self.training_dataset, xval_parameters, n_jobs=2,
-                pick='last')
+        best_params, best_score = perf_eval.evaluate_params(
+            self.svm, self.training_dataset, xval_parameters, pick='last')
 
-            self.logger.info("best score : {:}".format(best_score))
+        self.logger.info("best score : {:}".format(best_score))
+
+        # The xval should select the only one actual value (others are nan)
+        self.assertEqual(best_score, 1.)
+
+        self.logger.info("Testing metric with all nan")
+
+        all_nan_metric = CMetricAllNan()
+
+        # Now we compare the parameters chosen before with a new evaluator
+        perf_eval = CPerfEvaluatorXVal(
+            xval_splitter, all_nan_metric)
+        perf_eval.verbose = 1
+
+        with self.assertRaises(ValueError):
+            perf_eval.evaluate_params(
+                self.svm, self.training_dataset, xval_parameters, pick='last')
 
     def test_params_multiclass(self):
         """Parameter estimation for multiclass classifiers."""
@@ -180,5 +220,6 @@ class TestCPerfEvaluator(CUnitTest):
             for param in best_params:
                 self.assertEqual(clf.get_params()[param], best_params[param])
 
+
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()
