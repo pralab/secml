@@ -13,8 +13,12 @@ class CFunctionLinear(CFunction):
     """Implements linear functions of the form:
         b' x + c = 0
 
+    Attributes
+    ----------
+    class_type : 'linear'
+
     """
-    class_type = 'linear'
+    __class_type = 'linear'
 
     def __init__(self, b, c):
 

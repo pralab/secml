@@ -23,7 +23,9 @@ class CKernelPoly(CKernel):
 
     Attributes
     ----------
-    cache_size : int, size of the cache used for kernel computation. Default 100.
+    class_type : 'poly'
+    cache_size : int
+        Size of the cache used for kernel computation. Default 100.
 
     Parameters
     ----------
@@ -49,7 +51,7 @@ class CKernelPoly(CKernel):
      [ 144.  676.]])
 
     """
-    class_type = 'poly'
+    __class_type = 'poly'
     
     def __init__(self, degree=2, gamma=1.0, coef0=1.0, **kwargs):
         # Calling CKernel constructor

@@ -12,16 +12,21 @@ from secml.ml.peval.metrics import CMetric
 
 
 class CMetricRecall(CMetric):
-    """Performance evaluation metric: Recall.
+    """Performance evaluation metric: Recall (True Positive Rate).
 
     The recall is the ratio tp / (tp + fn) where tp is the
     number of true positives and fn the number of false negatives.
     The recall is intuitively the ability of the classifier
     to find all the positive samples.
+    This is equivalent to True Positive Rate.
 
     The metric uses:
      - y_true (true ground labels)
      - y_pred (predicted labels)
+
+    Attributes
+    ----------
+    class_type : 'recall'
 
     Examples
     --------
@@ -33,11 +38,11 @@ class CMetricRecall(CMetric):
     0.75
 
     """
-    class_type = 'recall'
+    __class_type = 'recall'
     best_value = 1.0
 
     def _performance_score(self, y_true, y_pred):
-        """Computes the Recall score.
+        """Computes the Recall score (True Positive Rate).
 
         Parameters
         ----------

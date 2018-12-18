@@ -8,23 +8,30 @@
 """
 from sklearn import linear_model
 
-from secml.ml.classifiers import CClassifierLinear
 from secml.array import CArray
 from secml.core.constants import inf
-from secml.ml.classifiers.regularizer import CRegularizer
+from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.loss import CLoss
+from secml.ml.classifiers.regularizer import CRegularizer
 from secml.ml.kernel import CKernel
 
 
 class CClassifierSGD(CClassifierLinear):
-    """Stochastic Gradient Descent Classifier."""
-    class_type = 'sgd'
+    """Stochastic Gradient Descent Classifier.
+
+    Attributes
+    ----------
+    class_type : 'sgd'
+
+    """
+    __class_type = 'sgd'
 
     def __init__(self, loss, regularizer, kernel=None, alpha=0.01,
                  fit_intercept=True, max_iter=1000, tol=-inf,
                  shuffle=True, learning_rate='optimal',
                  eta0=10.0, power_t=0.5, class_weight=None,
-                 warm_start=False, average=False, normalizer=None):
+                 warm_start=False, average=False, random_state=None,
+                 normalizer=None):
 
         # Calling the superclass init
         CClassifierLinear.__init__(self, normalizer=normalizer)
@@ -46,6 +53,7 @@ class CClassifierSGD(CClassifierLinear):
         self.class_weight = class_weight
         self.warm_start = warm_start
         self.average = average
+        self.random_state = random_state
 
         # Similarity function (bound) to use for computing features
         # Keep private (not a param of SGD)
@@ -180,7 +188,7 @@ class CClassifierSGD(CClassifierLinear):
             class_weight=self.class_weight,
             average=self.average,
             warm_start=self.warm_start,
-            random_state=0)
+            random_state=self.random_state)
 
         # Pass loss function parameters to classifier
         sgd.set_params(**self.loss.get_params())

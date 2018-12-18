@@ -6,6 +6,7 @@
 
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
+
 from secml.core import CCreator
 
 
@@ -18,13 +19,6 @@ class CNormalizer(CCreator):
     """
     __metaclass__ = ABCMeta
     __super__ = 'CNormalizer'
-
-    @abstractproperty
-    def class_type(self):
-        """Defines classifier type."""
-        raise NotImplementedError(
-            "`class_type` attribute must be defined to properly "
-            "support `CCreator.create()` function.")
 
     def is_linear(self):
         """Returns True for linear normalizers."""

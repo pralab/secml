@@ -24,7 +24,9 @@ class CKernelLaplacian(CKernel):
 
     Attributes
     ----------
-    cache_size : int, size of the cache used for kernel computation. Default 100.
+    class_type : 'laplacian'
+    cache_size : int
+        Size of the cache used for kernel computation. Default 100.
 
     Parameters
     ----------
@@ -45,7 +47,7 @@ class CKernelLaplacian(CKernel):
      [ 0.018316  1.      ]])
 
     """
-    class_type = 'laplacian'
+    __class_type = 'laplacian'
 
     def __init__(self, gamma=1.0, cache_size=100):
         # Calling CKernel constructor

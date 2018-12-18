@@ -12,8 +12,14 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 
 class CLda(CReducer):
-    """Linear Discriminant Analysis (LDA)"""
-    class_type = 'lda'
+    """Linear Discriminant Analysis (LDA).
+
+    Attributes
+    ----------
+    class_type : 'lda'
+
+    """
+    __class_type = 'lda'
 
     def __init__(self, n_components=None):
         """Linear Discriminant Analysis (LDA)

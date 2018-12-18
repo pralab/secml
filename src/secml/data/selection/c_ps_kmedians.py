@@ -23,9 +23,12 @@ class CPSKMedians(CPrototypesSelector):
     and Statistical Pattern Recognition.
     Springer Berlin Heidelberg, 2006. 287-296.
 
+    Attributes
+    ----------
+    class_type : 'k-medians'
 
     """
-    class_type = 'k-medians'
+    __class_type = 'k-medians'
 
     def select(self, dataset, n_prototypes):
         """Selects the prototypes from input dataset.

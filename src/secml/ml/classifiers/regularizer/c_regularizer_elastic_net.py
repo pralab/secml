@@ -22,9 +22,12 @@ class CRegularizerElasticNet(CRegularizer):
         R(w) := \frac{\rho}{2} \sum_{i=1}^{n} w_i^2
             + (1-\rho) \sum_{i=1}^{n} |w_i|
 
-    """
+    Attributes
+    ----------
+    class_type : 'elastic-net'
 
-    class_type = 'elasticnet'
+    """
+    __class_type = 'elastic-net'
 
     def __init__(self, l1_ratio=0.15):
         self._l1_ratio = float(l1_ratio)

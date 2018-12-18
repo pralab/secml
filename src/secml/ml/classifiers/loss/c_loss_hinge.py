@@ -34,7 +34,7 @@ class CLossHinge(CLossClassification):
     suitable_for : 'classification'
 
     """
-    class_type = 'hinge'
+    __class_type = 'hinge'
 
     def loss(self, y_true, score, pos_label=1):
         """Computes the value of the hinge loss function.
@@ -123,11 +123,11 @@ class CLossHingeSquared(CLossClassification):
 
     Attributes
     ----------
-    class_type : 'hinge_squared'
+    class_type : 'hinge-squared'
     suitable_for : 'classification'
 
     """
-    class_type = 'hinge_squared'
+    __class_type = 'hinge-squared'
 
     def loss(self, y_true, score, pos_label=1):
         """Computes the value of the squared hinge loss function.

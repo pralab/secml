@@ -18,11 +18,6 @@ class CLoss(CCreator):
     __super__ = 'CLoss'
 
     @abstractproperty
-    def class_type(self):
-        """Defines loss function type."""
-        raise NotImplementedError()
-
-    @abstractproperty
     def suitable_for(self):
         """Defines which problem the loss is suitable for.
 

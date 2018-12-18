@@ -5,7 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 from secml.ml.classifiers import CClassifier
 from secml.array import CArray
@@ -26,6 +26,7 @@ class CClassifierMulticlass(CClassifier):
         Any other construction parameter for the binary classifiers.
 
     """
+    __metaclass__ = ABCMeta
     __super__ = 'CClassifierMulticlass'
 
     def __init__(self, classifier, normalizer=None, **clf_params):

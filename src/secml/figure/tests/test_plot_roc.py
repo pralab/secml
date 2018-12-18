@@ -47,7 +47,7 @@ class TestCRoc(CUnitTest):
         roc_plot.sp.title('ROC Curve Standard')
         # Plotting 2 times (to show multiple curves)
         # add one curve for repetition and call it rep 0 and rep 1 of roc 1
-        roc_plot.sp.plot_roc(self.roc_wmean.mean_fp, self.roc_wmean.mean_tp)
+        roc_plot.sp.plot_roc(self.roc_wmean.mean_fpr, self.roc_wmean.mean_tpr)
 
         roc_plot.show()
 

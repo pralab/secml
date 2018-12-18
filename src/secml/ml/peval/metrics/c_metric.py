@@ -5,7 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 import inspect
 
 from secml.core import CCreator
@@ -36,7 +36,7 @@ class CMetric(CCreator):
     >>> print peval.performance_score(y_true=CArray([0, 1, 2, 3]), y_pred=CArray([0, 1, 1, 3]))
     0.75
 
-    >>> peval = CMetric.create('tp_at_fp', fp_rate=0.1)
+    >>> peval = CMetric.create('tpr-at-fpr', fpr=0.1)
     >>> print peval.performance_score(y_true=CArray([0, 1, 0, 0]), score=CArray([1, 1, 0, 0]))
     0.3
 

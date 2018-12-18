@@ -10,8 +10,14 @@ from secml.array import CArray
 
 
 class CPSRandom(CPrototypesSelector):
-    """Selection of Prototypes using random strategy."""
-    class_type = 'random'
+    """Selection of Prototypes using random strategy.
+
+    Attributes
+    ----------
+    class_type : 'random'
+
+    """
+    __class_type = 'random'
 
     def select(self, dataset, n_prototypes, random_state=None):
         """Selects the prototypes from input dataset.

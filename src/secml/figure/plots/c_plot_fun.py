@@ -18,13 +18,17 @@ class CPlotFunction(CPlot):
     default_params : dict
         Dictionary with default parameters.
 
+    Attributes
+    ----------
+    class_type : 'function'
+
     See Also
     --------
     .CPlot : basic subplot functions.
     .CFigure : creates and handle figures.
 
     """
-    class_type = 'function'
+    __class_type = 'function'
 
     def __init__(self, sp, default_params=None):
 

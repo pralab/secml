@@ -21,6 +21,10 @@ class CMetricMAE(CMetric):
      - y_true (true ground labels)
      - score (estimated target values)
 
+    Attributes
+    ----------
+    class_type : 'mae'
+
     Examples
     --------
     >>> from secml.ml.peval.metrics import CMetricMAE
@@ -31,7 +35,7 @@ class CMetricMAE(CMetric):
     0.25
 
     """
-    class_type = 'mae'
+    __class_type = 'mae'
     best_value = 0.0
 
     def _performance_score(self, y_true, score):

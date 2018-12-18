@@ -25,6 +25,10 @@ class CDataSplitterLabelKFold(CDataSplitter):
         Number of folds to create. Default 3.
         This correspond to the size of tr_idx and ts_idx lists.
 
+    Attributes
+    ----------
+    class_type : 'label-kfold'
+
     Examples
     --------
     >>> from secml.data import CDataset
@@ -40,7 +44,7 @@ class CDataSplitterLabelKFold(CDataSplitter):
     [CArray(2,)(dense: [0 2]), CArray(1,)(dense: [3]), CArray(1,)(dense: [1])]
 
     """
-    class_type = 'label_kfold'
+    __class_type = 'label-kfold'
 
     def __init__(self, num_folds=3):
 

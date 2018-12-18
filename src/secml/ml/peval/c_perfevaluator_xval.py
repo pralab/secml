@@ -22,8 +22,12 @@ class CPerfEvaluatorXVal(CPerfEvaluator):
     metric : CMetric or str
         Name of the metric that we want maximize / minimize.
 
+    Attributes
+    ----------
+    class_type : 'xval'
+
     """
-    class_type = 'xval'
+    __class_type = 'xval'
 
     def compute_performance(self, estimator, dataset):
         """Split data in folds and return the mean estimator performance.

@@ -11,7 +11,7 @@ from c_confusion_matrix import CMetricConfusionMatrix
 from c_metric_auc import CMetricAUC
 from c_metric_auc_wmw import CMetricAUCWMW
 from c_metric_pauc import CMetricPartialAUC
-from c_metric_tp_at_fp import CMetricTPatFP
+from c_metric_tpr_at_fpr import CMetricTPRatFPR
 # Regression Metrics
 from c_metric_mae import CMetricMAE
 from c_metric_mse import CMetricMSE

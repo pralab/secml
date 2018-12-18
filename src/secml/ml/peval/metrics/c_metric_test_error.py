@@ -21,6 +21,10 @@ class CMetricTestError(CMetric):
      - y_true (true ground labels)
      - y_pred (predicted labels)
 
+    Attributes
+    ----------
+    class_type : 'test-error'
+
     Examples
     --------
     >>> from secml.ml.peval.metrics import CMetricTestError
@@ -31,7 +35,7 @@ class CMetricTestError(CMetric):
     0.25
 
     """
-    class_type = 'test_error'
+    __class_type = 'test-error'
     best_value = 0.0
 
     def _performance_score(self, y_true, y_pred):

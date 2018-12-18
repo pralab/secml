@@ -15,9 +15,14 @@ from PIL import Image
 
 
 class CDataLoaderImgClients(CDataLoader):
-    """Loads a dataset of images and corresponding labels from 'clients.txt'."""
+    """Loads a dataset of images and corresponding labels from 'clients.txt'.
 
-    class_type = 'imgclients'
+    Attributes
+    ----------
+    class_type : 'img-clients'
+
+    """
+    __class_type = 'img-clients'
 
     def __init__(self):
         # Does nothing...

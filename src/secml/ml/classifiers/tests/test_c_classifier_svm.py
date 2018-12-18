@@ -268,7 +268,7 @@ class TestCClassifierSVM(CUnitTest):
         norm = CNormalizerMinMax()
         data_norm = norm.train_normalize(data.X)
 
-        svm1 = CClassifierSVM(normalizer='minmax')
+        svm1 = CClassifierSVM(normalizer='min-max')
         svm2 = CClassifierSVM()
 
         svm1.train(data)

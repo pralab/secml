@@ -1,6 +1,6 @@
 """
-.. module:: MetricTPatFP
-   :synopsis: Performance Metric: True Positives @ False Positives Ratio
+.. module:: MetricTPRatFPR
+   :synopsis: Performance Metric: True Positive Rate @ False Positive Rate
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
@@ -10,8 +10,8 @@ from secml.ml.peval.metrics import CMetric
 from secml.ml.peval.metrics import CRoc
 
 
-class CMetricTPatFP(CMetric):
-    """Performance evaluation metric: True Positives @ False Positives Ratio.
+class CMetricTPRatFPR(CMetric):
+    """Performance evaluation metric: True Positive Rate @ False Positive Rate.
 
     The metric uses:
      - y_true (true ground labels)
@@ -19,8 +19,9 @@ class CMetricTPatFP(CMetric):
 
     Attributes
     ----------
-    fp_rate : float
-        Desired False Positives rate in the interval [0,1]. Default 0.01 (1%)
+    class_type : 'tpr-at-fpr'
+    fpr : float
+        Desired False Positive Rate in the interval [0,1]. Default 0.01 (1%)
 
     Notes
     -----
@@ -28,24 +29,24 @@ class CMetricTPatFP(CMetric):
 
     Examples
     --------
-    >>> from secml.ml.peval.metrics import CMetricTPatFP
+    >>> from secml.ml.peval.metrics import CMetricTPRatFPR
     >>> from secml.array import CArray
 
-    >>> peval = CMetricTPatFP(fp_rate=0.5)
+    >>> peval = CMetricTPRatFPR(fpr=0.5)
     >>> print peval.performance_score(CArray([0, 1, 0, 0]), score=CArray([0, 0, 0, 0]))
     0.5
 
     """
-    class_type = 'tp_at_fp'
+    __class_type = 'tpr-at-fpr'
     best_value = 1.0
 
-    def __init__(self, fp_rate=0.01):
+    def __init__(self, fpr=0.01):
 
-        # False positives rate @ which true positives should be computed
-        self.fp_rate = float(fp_rate)
+        # False Positive Rate @ which True Positive Rate should be computed
+        self.fpr = float(fpr)
 
     def _performance_score(self, y_true, score):
-        """Computes the True Positives ratio at given False Positives ratio.
+        """Computes the True Positive Rate at given False Positive Rate.
 
         Parameters
         ----------
@@ -70,5 +71,5 @@ class CMetricTPatFP(CMetric):
         This implementation is restricted to the binary classification task.
 
         """
-        return CArray(self.fp_rate).interp(
-            *CRoc().compute(y_true, score)[0:2]).ravel()
+        return CArray(self.fpr).interp(
+            *CRoc().compute(y_true, score)[0:2]).item()

@@ -11,7 +11,8 @@ from importlib import import_module
 from inspect import isclass, getmembers
 from functools import wraps
 
-from secml.core.attr_utils import is_public, extract_attr, as_public, as_private
+from secml.core.attr_utils import is_public, extract_attr, \
+    as_public, as_private, get_private
 from secml.core.type_utils import is_str
 import secml.utils.pickle_utils as pck
 from secml.utils.list_utils import find_duplicates
@@ -23,19 +24,28 @@ class CCreator(object):
 
     Attributes
     ----------
-    class_type : str or None
-        Class type or identification string.
-        Can be None to explicitly NOT support `.create()`.
+    class_type : str
+        Class type identification string. If not defined,
+         class will not be instantiable using `.create()`.
     __super__ : str or None
         String with superclass name.
         Can be None to explicitly NOT support `.create()` and `.load()`.
 
     """
-    class_type = None  # Leaving this None will make `create` not supported
+    __class_type = None  # This attribute must be re-defined to support `.create()`
     __super__ = None  # Leaving this None will make `create` and `load` not supported
 
     # TODO: MAKE FILE PATH/NAME DYNAMIC
     _logger = CLog(add_stream=True, file_handler='logs.log')  # Ancestor logger, level 'WARNING' by default
+
+    @property
+    def class_type(self):
+        """Defines class type."""
+        try:  # Convert the private attribute to public property
+            return get_private(self.__class__, 'class_type')
+        except AttributeError:
+            raise AttributeError("'class_type' not defined for '{:}'"
+                                 "".format(self.__class__.__name__))
 
     @property
     def logger(self):
@@ -94,7 +104,7 @@ class CCreator(object):
         return wrapper
 
     @classmethod
-    def create(cls, class_item, *args, **kwargs):
+    def create(cls, class_item=None, *args, **kwargs):
         """This method creates an instance of a class with given type.
 
         Calling superclass's package is looked for any subclass defining
@@ -104,16 +114,13 @@ class CCreator(object):
         Also a class instance can be passed as main argument.
         In this case the class instance is returned as is.
 
-        A good practise (not a requirement) is to make `class_type`
-        an abstractproperty of the class(es) which are required to
-        support the creator.
-
         Parameters
         ----------
-        class_item : str or class instance
+        class_item : str or class instance or None, optional
             Type of the class to instantiate.
-            If a class instance of cls is passed, instead,
-            it returns the instance directly.
+            If a class instance of cls is passed, instead, it returns
+             the instance directly.
+            If this is None, an instance of the classing superclass is created.
         args, kwargs : optional arguments
             Any other argument for the class to create.
             If a class instance is passed as `class_item`,
@@ -128,10 +135,16 @@ class CCreator(object):
         """
         if cls.__super__ != cls.__name__:
             raise TypeError("classes can be created from superclasses only.")
+
+        # Create an instance of the calling superclass
+        if class_item is None:
+            return cls(*args, **kwargs)  # Pycharm says are unexpected args
+
         # We accept strings and class instances only
         if isclass(class_item):  # Returns false for instances
             raise TypeError("creator only accepts a class type "
                             "as string or a class instance.")
+
         # CCreator cannot be created!
         if class_item.__class__ == CCreator:
             raise TypeError("class 'CCreator' is not callable.")
@@ -157,7 +170,7 @@ class CCreator(object):
 
         # Everything seems fine now, look for desired class type
         for class_data in package_classes:
-            if getattr(class_data[1], 'class_type', None) == class_item:
+            if get_private(class_data[1], 'class_type', None) == class_item:
                 return class_data[1](*args, **kwargs)
 
         raise NameError("no class of type `{:}` found within the package "
@@ -220,7 +233,7 @@ class CCreator(object):
 
         # Look for desired class type
         for class_data in package_classes:
-            if getattr(class_data[1], 'class_type', None) == class_type:
+            if get_private(class_data[1], 'class_type', None) == class_type:
                 return class_data[1]
 
         raise NameError("no class of type `{:}` found within the package "
@@ -528,9 +541,9 @@ def import_package_types(package_classes):
     # Get all class types from the package (to check duplicates)
     # Leaving out the classes not defining a class_type
     package_types = map(
-        lambda class_file: class_file[1].class_type if
-        hasattr(class_file[1], 'class_type') else None, package_classes)
-    # skipping abstractproperties -> classes not supporting creator
+        lambda class_file: get_private(class_file[1], 'class_type', None),
+        package_classes)
+    # skipping non string class_types -> classes not supporting creator
     return [class_type for class_type in
             package_types if isinstance(class_type, str)]
 
@@ -540,8 +553,9 @@ def _check_package_types_duplicates(package_classes, package_types):
     # Check for duplicates
     duplicates = find_duplicates(package_types)
     if len(duplicates) != 0:
-        duplicates_classes = [(class_tuple[0], class_tuple[1].class_type)
-                              for class_tuple in package_classes if
-                              class_tuple[1].class_type in duplicates]
+        duplicates_classes = [
+            (class_tuple[0], get_private(class_tuple[1], 'class_type'))
+            for class_tuple in package_classes if
+            get_private(class_tuple[1], 'class_type', None) in duplicates]
         raise ValueError("following classes have the same class type. Fix "
                          "before continue. {:}".format(duplicates_classes))

@@ -3,14 +3,18 @@ from secml.optimization.learning_rate import CStep
 
 
 class CStepExponential(CStep):
+    """Exponential step.
 
-    '''
-    Implements optimal step.
-    For every iteration, the step is compute as
+    For every iteration, the step is compute as:
             step^it
-    in this case we have as constraint abs(step)<1
-    '''
-    class_type = 'CStepExponential'
+    in this case we have as constraint abs(step) < 1.
+
+    Attributes
+    ----------
+    class_type : 'exp'
+
+    """
+    __class_type = 'exp'
 
     def __init__(self, initial_step_value):
         '''

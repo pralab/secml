@@ -21,6 +21,12 @@ class CKernelEuclidean(CKernel):
     for each pair of rows in X and in Y.
     If parameter squared is True (default False), sqrt() operation is avoided.
 
+    Attributes
+    ----------
+    class_type : 'euclidean'
+    cache_size : int
+        Size of the cache used for kernel computation. Default 100.
+
     Examples
     --------
     >>> from secml.array import CArray
@@ -35,7 +41,7 @@ class CKernelEuclidean(CKernel):
      [ 2.828427  0.      ]])
 
     """
-    class_type = 'euclidean'
+    __class_type = 'euclidean'
 
     def __init__(self, cache_size=100):
 

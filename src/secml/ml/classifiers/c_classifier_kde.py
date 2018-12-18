@@ -23,12 +23,16 @@ class CClassifierKDE(CClassifier):
         similarity between patterns. If None (default), a linear
         SVM will be created.
 
+    Attributes
+    ----------
+    class_type : 'kde'
+
     See Also
     --------
     .CKernel : Pairwise kernels and metrics.
 
     """
-    class_type = 'kde'
+    __class_type = 'kde'
 
     def __init__(self, kernel=None, normalizer=None):
 

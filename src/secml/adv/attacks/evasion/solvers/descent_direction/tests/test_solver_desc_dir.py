@@ -79,7 +79,7 @@ class TestCSolverDescDir(CUnitTest):
 
     def test_mccormick(self):
         """Test solver on mccormick function."""
-        fun = CFunction.create('mc_cormick')
+        fun = CFunction.create('mc-cormick')
         g_min = CArray([-0.54719, -1.54719])
 
         # x_init = CArray([1, 2])  # FIXME: STOPS AT (LOCAL MINIMUM?)
@@ -132,7 +132,7 @@ class TestCSolverDescDir(CUnitTest):
 
     def test_3hcamel(self):
         """Test solver on 3HCamel function."""
-        fun = CFunction.create('3h_camel')
+        fun = CFunction.create('3h-camel')
         g_min = CArray([0, 0])
 
         # x_init = CArray([4, 4])  # FIXME: WRONG (STOPS AT LOCAL MINIMUM?)

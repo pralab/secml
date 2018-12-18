@@ -33,8 +33,12 @@ class CDataLoaderLFW(CDataLoader):
 
     This implementation uses `sklearn.datasets.fetch_lfw_people` module.
 
+    Attributes
+    ----------
+    class_type : 'lfw'
+
     """
-    class_type = 'lfw'
+    __class_type = 'lfw'
 
     def __init__(self):
         # Does nothing

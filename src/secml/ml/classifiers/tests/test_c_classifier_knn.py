@@ -48,8 +48,8 @@ class TestCClassifierKNN(CUnitTest):
         self.step = 0.08
         xx, yy = np.meshgrid(np.arange(x_min, x_max, self.step),
                              np.arange(y_min, y_max, self.step))
-        self.grid = CDataset(np.c_[xx.ravel(), yy.ravel()])
-        lab, Z_tree = self.knn.classify(self.grid.X)
+        grid = CArray(np.c_[xx.ravel(), yy.ravel()])
+        lab, Z_tree = self.knn.classify(grid)
         Z_tree = Z_tree[:, 1]
         Z_tree = Z_tree.reshape(xx.shape)
         cmap_light = ListedColormap(['#FFAAAA', '#AAFFAA', '#AAAAFF'])

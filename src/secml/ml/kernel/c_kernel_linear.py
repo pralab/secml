@@ -23,7 +23,9 @@ class CKernelLinear(CKernel):
 
     Attributes
     ----------
-    cache_size : int, size of the cache used for kernel computation. Default 100.
+    class_type : 'linear'
+    cache_size : int
+        Size of the cache used for kernel computation. Default 100.
 
     Examples
     --------
@@ -39,7 +41,7 @@ class CKernelLinear(CKernel):
      [ 11.  25.]])
 
     """
-    class_type = 'linear'
+    __class_type = 'linear'
 
     def _k(self, x, y):
         """Compute the linear kernel between x and y.

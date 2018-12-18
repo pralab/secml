@@ -14,8 +14,14 @@ from secml.ml.classifiers import CClassifier
 
 
 class CClassifierRandomForest(CClassifier):
-    """Random Forest classifier."""
-    class_type = 'random_forest'
+    """Random Forest classifier.
+
+    Attributes
+    ----------
+    class_type : 'random-forest'
+
+    """
+    __class_type = 'random-forest'
 
     def __init__(self, n_estimators=10, criterion='gini',
                  max_depth=None, min_samples_split=2, normalizer=None):

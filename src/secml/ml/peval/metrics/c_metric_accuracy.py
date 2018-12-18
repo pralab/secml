@@ -21,6 +21,10 @@ class CMetricAccuracy(CMetric):
      - y_true (true ground labels)
      - y_pred (predicted labels)
 
+    Attributes
+    ----------
+    class_type : 'accuracy'
+
     Examples
     --------
     >>> from secml.ml.peval.metrics import CMetricAccuracy
@@ -31,7 +35,7 @@ class CMetricAccuracy(CMetric):
     0.75
 
     """
-    class_type = 'accuracy'
+    __class_type = 'accuracy'
     best_value = 1.0
 
     def _performance_score(self, y_true, y_pred):

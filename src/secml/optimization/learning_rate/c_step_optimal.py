@@ -3,15 +3,18 @@ from secml.optimization.learning_rate import CStep
 
 
 class CStepOptimal(CStep):
+    """Optimal step.
 
-    '''
-    Implements optimal step.
     For every iteration, the step is compute as
             1/(alfa*t)
     t: t-th iteration
-    '''
 
-    class_type = 'CStepOptimal'
+    Attributes
+    ----------
+    class_type : 'optimal'
+
+    """
+    __class_type = 'optimal'
 
     def __init__(self, initial_step_value=0, alfa=1):
         '''

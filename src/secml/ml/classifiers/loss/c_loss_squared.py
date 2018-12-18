@@ -26,7 +26,7 @@ class CLossSquare(CLossClassification):
     suitable_for : 'classification'
 
     """
-    class_type = 'square'
+    __class_type = 'square'
 
     def loss(self, y_true, score, pos_label=1):
         """Computes the value of the squared epsilon-insensitive loss function.
@@ -104,7 +104,7 @@ class CLossQuadratic(CLossRegression):
     suitable_for : 'regression'
 
     """
-    class_type = 'quadratic'
+    __class_type = 'quadratic'
 
     def loss(self, y_true, score):
         """Computes the value of the quadratic loss function.

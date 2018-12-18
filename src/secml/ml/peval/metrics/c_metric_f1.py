@@ -27,6 +27,10 @@ class CMetricF1(CMetric):
      - y_true (true ground labels)
      - y_pred (predicted labels)
 
+    Attributes
+    ----------
+    class_type : 'f1'
+
     Examples
     --------
     >>> from secml.ml.peval.metrics import CMetricF1
@@ -37,7 +41,7 @@ class CMetricF1(CMetric):
     0.666666666667
 
     """
-    class_type = 'f1'
+    __class_type = 'f1'
     best_value = 1.0
 
     def _performance_score(self, y_true, y_pred):

@@ -1,6 +1,7 @@
+from abc import ABCMeta, abstractmethod, abstractproperty
+
 from secml.core import CCreator
 from secml.array import CArray
-from abc import ABCMeta, abstractmethod
 
 
 class CLineSearch(CCreator):

@@ -13,8 +13,14 @@ from secml.ml.classifiers import CClassifier
 
 
 class CClassifierKNN(CClassifier):
-    """K Neighbors Classifiers."""
-    class_type = 'knn'
+    """K Neighbors Classifiers.
+
+    Attributes
+    ----------
+    class_type : 'knn'
+
+    """
+    __class_type = 'knn'
 
     def __init__(self, n_neighbors=5, weights='uniform',
                  algorithm='auto', leaf_size=30, p=2,

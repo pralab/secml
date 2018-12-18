@@ -22,9 +22,12 @@ class CPSCenter(CPrototypesSelector):
     and Statistical Pattern Recognition.
     Springer Berlin Heidelberg, 2006. 287-296.
 
+    Attributes
+    ----------
+    class_type : 'center'
 
     """
-    class_type = 'center'
+    __class_type = 'center'
 
     def select(self, dataset, n_prototypes):
         """Selects the prototypes from input dataset.

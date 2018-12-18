@@ -16,6 +16,10 @@ class CMetricAUCWMW(CMetric):
      - y_true (true ground labels)
      - score (estimated target values)
 
+    Attributes
+    ----------
+    class_type : 'auc-wmw'
+
     Notes
     -----
     This implementation is restricted to the binary classification task.
@@ -30,7 +34,7 @@ class CMetricAUCWMW(CMetric):
     0.5
 
     """
-    class_type = 'auc_wmw'
+    __class_type = 'auc-wmw'
     best_value = 1.0
 
     def _performance_score(self, y_true, score):

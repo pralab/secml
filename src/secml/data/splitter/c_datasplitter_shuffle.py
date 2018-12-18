@@ -43,6 +43,10 @@ class CDataSplitterShuffle(CDataSplitter):
         If RandomState instance, random_state is the random number generator;
         If None, is the RandomState instance used by np.random.
 
+    Attributes
+    ----------
+    class_type : 'shuffle'
+
     Notes
     -----
     train_size and test_size could not be both None. If one is
@@ -73,7 +77,7 @@ class CDataSplitterShuffle(CDataSplitter):
     [CArray(3,)(dense: [2 1 0]), CArray(3,)(dense: [2 0 1]), CArray(3,)(dense: [0 2 1])]
 
     """
-    class_type = 'shuffle'
+    __class_type = 'shuffle'
 
     def __init__(self,  num_folds=3, train_size=None,
                  test_size=None, random_state=None):

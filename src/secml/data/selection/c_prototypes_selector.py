@@ -6,6 +6,7 @@
 
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
+
 from secml.core import CCreator
 
 
@@ -40,11 +41,6 @@ class CPrototypesSelector(CCreator):
     def __init__(self):
 
         self._sel_idx = None
-
-    @abstractproperty
-    def class_type(self):
-        """Type of the data loader (str). Will be used by `.create()`."""
-        raise NotImplementedError
 
     @property
     def sel_idx(self):

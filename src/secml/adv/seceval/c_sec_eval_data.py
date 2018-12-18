@@ -13,8 +13,14 @@ from secml.utils import pickle_utils as pk
 class CSecEvalData(CCreator):
     """
     This class is a container for data computed during Classifier Security Evaluation.
+
+    Attributes
+    ----------
+    class_type : 'standard'
+
     """
     __super__ = 'CSecEvalData'
+    __class_type = 'generic'
 
     def __init__(self):
         """

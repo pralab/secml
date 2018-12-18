@@ -7,7 +7,7 @@
 
 """
 from copy import deepcopy
-from abc import abstractproperty, abstractmethod
+from abc import ABCMeta, abstractproperty, abstractmethod
 
 import torch
 from torch.utils.data import DataLoader
@@ -42,6 +42,7 @@ class CTorchClassifier(CClassifier):
     which you can think of as a neural network layer that has produces output from
     input and may have some trainable weights or other state.
     """
+    __metaclass__ = ABCMeta
     __super__ = 'CTorchClassifier'
 
     def __init__(self, learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
@@ -88,13 +89,6 @@ class CTorchClassifier(CClassifier):
         if self._is_clear:
             return True
         return False
-
-    @abstractproperty
-    def class_type(self):
-        """Defines classifier type."""
-        raise NotImplementedError("the classifier must define `class_type` "
-                                  "attribute to support `CCreator.create()` "
-                                  "function properly.")
 
     @property
     def learning_rate(self):

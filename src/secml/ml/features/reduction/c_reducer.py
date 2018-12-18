@@ -6,6 +6,7 @@
 
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
+
 from secml.core import CCreator
 
 
@@ -18,12 +19,6 @@ class CReducer(CCreator):
     """
     __metaclass__ = ABCMeta
     __super__ = 'CReducer'
-
-    @abstractproperty
-    def class_type(self):
-        """Defines classifier type."""
-        raise NotImplementedError("`class_type` attribute must be defined to properly "
-                                  "support `CCreator.create()` function.")
 
     @abstractmethod
     def train(self, data, y):

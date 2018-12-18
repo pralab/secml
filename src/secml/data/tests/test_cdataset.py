@@ -38,18 +38,37 @@ class TestDataset(CUnitTest):
     def test_getters_and_setters(self):
         """Test for getters and setters of the class."""
         self.logger.info("Testing setters and getters for the dataset...")
-        self.assertEquals((self.dataset.X == self.X).all(), True, "Wrong pattern extraction")
-        self.assertEquals((self.dataset.Y == self.Y).all(), True, "Wrong labels extraction")
-        new_patterns = CArray([[1, 2, 3], [4, 5, 6]])
-        self.logger.info("Setting new patterns: \n" + str(new_patterns))
+        self.assertTrue(
+            (self.dataset.X == self.X).all(),  "Wrong pattern extraction")
+        self.assertTrue(
+            (self.dataset.Y == self.Y).all(), "Wrong labels extraction")
+
+        new_patterns = CArray([[1, 2], [3, 4], [5, 6]])
+        self.logger.info(
+            "Setting new patterns: \n" + str(new_patterns))
         self.dataset.X = new_patterns
         self.logger.info("Testing new patterns...")
-        self.assertEquals((self.dataset.X == new_patterns).all(), True, "Wrong patterns set!")
-        new_labels = CArray([1, 2])
+        self.assertTrue(
+            (self.dataset.X == new_patterns).all(), "Wrong patterns set!")
+
+        with self.assertRaises(ValueError):
+            new_patterns = CArray([[1, 2, 3], [4, 5, 6]])
+            self.logger.info(
+                "Setting less patterns than labels: \n" + str(new_patterns))
+            self.dataset.X = new_patterns
+
+        new_labels = CArray([11, 22, 33])
         self.logger.info("Setting new labels: \n" + str(new_labels))
         self.dataset.Y = new_labels
         self.logger.info("Testing new labels...")
-        self.assertEquals((self.dataset.Y == new_labels).all(), True, "Wrong labels extraction")
+        self.assertTrue(
+            (self.dataset.Y == new_labels).all(), "Wrong labels extraction")
+
+        with self.assertRaises(ValueError):
+            new_labels = CArray([1, 2])
+            self.logger.info(
+                "Setting less labels than patterns: \n" + str(new_labels))
+            self.dataset.Y = new_labels
 
     def test_select_patterns(self):
         """Tests for select patterns method."""

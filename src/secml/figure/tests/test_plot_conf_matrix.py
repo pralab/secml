@@ -13,7 +13,7 @@ class TestCPlotConfMatr(CUnitTest):
     def test_conf_matr(self):
         """Test for CPlotFunction.plot_fobj method."""
         fig = CFigure()
-        fig.switch_sptype(sp_type='confusion_matrix')
+        fig.switch_sptype(sp_type='conf-matrix')
         fig.sp.plot_confusion_matrix(self.conf_matr, ['one', 'two', 'three'])
 
         fig.show()

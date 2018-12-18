@@ -36,11 +36,6 @@ class CDataSplitter(CCreator):
         self._tr_idx = []  # Training set indices for each fold
         self._ts_idx = []  # Test set indices for each fold
 
-    @abstractproperty
-    def class_type(self):
-        """Dataset splitting type. Must be reimplemented by subclasses."""
-        raise NotImplementedError()
-
     def __clear(self):
         """Reset the object."""
         self._tr_idx = []

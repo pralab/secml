@@ -21,6 +21,10 @@ class CMetricAUC(CMetric):
      - y_true (true ground labels)
      - score (estimated target values)
 
+    Attributes
+    ----------
+    class_type : 'auc'
+
     Notes
     -----
     This implementation is restricted to the binary classification task.
@@ -35,7 +39,7 @@ class CMetricAUC(CMetric):
     0.5
 
     """
-    class_type = 'auc'
+    __class_type = 'auc'
     best_value = 1.0
 
     def _performance_score(self, y_true, score):
@@ -61,4 +65,4 @@ class CMetricAUC(CMetric):
 
         """
         fpr, tpr = CRoc().compute(y_true, score)[0:2]
-        return skm.auc(fpr.tondarray(), tpr.tondarray())
+        return float(skm.auc(fpr.tondarray(), tpr.tondarray()))

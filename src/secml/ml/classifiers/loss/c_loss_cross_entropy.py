@@ -61,11 +61,11 @@ class CLossCrossEntropy(CLossClassification):
 
     Attributes
     ----------
-    class_type : 'cross_entropy'
+    class_type : 'cross-entropy'
     suitable_for : 'classification'
 
     """
-    class_type = 'cross_entropy'
+    __class_type = 'cross-entropy'
 
     def loss(self, y_true, score, pos_label=None):
         """Computes the value of the Cross Entropy loss function.

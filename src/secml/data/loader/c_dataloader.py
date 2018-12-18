@@ -8,20 +8,15 @@
 
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
+
 from secml.array import CArray
 from secml.core import CCreator
-from secml.data import CDataset
 
 
 class CDataLoader(CCreator):
     """Interface for Dataset loaders."""
     __metaclass__ = ABCMeta
     __super__ = 'CDataLoader'
-
-    @abstractproperty
-    def class_type(self):
-        """Type of the data loader (str). Will be used by `.create()`."""
-        raise NotImplementedError
 
     @abstractmethod
     def load(self, *args, **kwargs):

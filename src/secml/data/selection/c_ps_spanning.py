@@ -24,8 +24,12 @@ class CPSSpanning(CPrototypesSelector):
     and Statistical Pattern Recognition.
     Springer Berlin Heidelberg, 2006. 287-296.
 
+    Attributes
+    ----------
+    class_type : 'spanning'
+
     """
-    class_type = 'spanning'
+    __class_type = 'spanning'
 
     def select(self, dataset, n_prototypes):
         """Selects the prototypes from input dataset.

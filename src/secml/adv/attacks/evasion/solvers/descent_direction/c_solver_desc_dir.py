@@ -13,8 +13,7 @@ from secml.adv.attacks.evasion.solvers import CSolver
 
 
 class CSolverDescDir(CSolver):
-    """
-    This is an abstract class for optimizing:
+    """This is an abstract class for optimizing:
 
         min  f(x)
         s.t. d(x,x0) <= dmax
@@ -30,9 +29,13 @@ class CSolverDescDir(CSolver):
     problems, where x is integer valued. In this case, exploration works
     by manipulating one feature at a time.
 
+    Attributes
+    ----------
+    class_type : 'descent-direction'
+
     """
 
-    class_type = 'descent-direction'
+    __class_type = 'descent-direction'
 
     def __init__(self, fun,
                  constr=None, bounds=None,

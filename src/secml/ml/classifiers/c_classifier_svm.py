@@ -39,6 +39,10 @@ class CClassifierSVM(CClassifierLinear):
         Percentage in (0.0, 1.0] of the alpha weights to be considered
         when computing the classifier gradient.
 
+    Attributes
+    ----------
+    class_type : 'svm'
+
     Notes
     -----
     Current implementation relies on :class:`sklearn.svm.SVC` for
@@ -50,7 +54,7 @@ class CClassifierSVM(CClassifierLinear):
     .CClassifierLinear : Common interface for linear classifiers.
 
     """
-    class_type = 'svm'
+    __class_type = 'svm'
 
     def __init__(self, kernel=None, C=1.0, class_weight=None,
                  normalizer=None, grad_sampling=1.0, store_dual_vars=None):

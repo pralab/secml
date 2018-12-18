@@ -40,6 +40,10 @@ class CNormalizerMinMax(CNormalizerLinear):
         the maximum value. If feature_range is None, features will be
         scaled using (0., 1.) range.
 
+    Attributes
+    ----------
+    class_type : 'min-max'
+
     Notes
     -----
     Differently from numpy, we manage flat vectors as 2-Dimensional of
@@ -64,7 +68,7 @@ class CNormalizerMinMax(CNormalizerLinear):
      [-1.        1.       -1.      ]])
 
     """
-    class_type = 'minmax'
+    __class_type = 'min-max'
 
     def __init__(self, feature_range=None):
         """Class constructor"""
