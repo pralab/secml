@@ -1,4 +1,3 @@
-import unittest
 from secml.utils import CUnitTest
 
 import sklearn.metrics as skm
@@ -12,6 +11,22 @@ from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.ml.peval import CPerfEvaluatorXVal
 from secml.ml.peval.metrics import CMetric
+from secml.core.constants import nan
+
+
+class CMetricFirstNan(CMetric):
+    """Test metric which returns some nans."""
+    best_value = 1.0
+
+    def __init__(self):
+        self._count = 0
+
+    def _performance_score(self, y_true, score):
+        if self._count == 0:
+            self._count += 1
+            return nan
+        else:
+            return 1
 
 
 class TestCPerfEvaluator(CUnitTest):
@@ -119,10 +134,8 @@ class TestCPerfEvaluator(CUnitTest):
         self.assertEqual(better_param_comb[1], self.svm.kernel.gamma)
 
     def test_nan_metric_value(self):
-        from custom_test_metric import CMetricFirstNan
-        some_nan_metric = CMetricFirstNan()
 
-        print "metric created "
+        some_nan_metric = CMetricFirstNan()
 
         # Changing default parameters to be sure are not used
         self.svm.set_params({'C': 25, 'kernel.gamma': 1e-1})
