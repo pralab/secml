@@ -1,10 +1,8 @@
 """
-.. module:: ClassCreator
-   :synopsis: Creates an instance of a supported class in a package
+.. module:: Creator
+   :synopsis: Superclass and factory for all the other classes
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Igino Corona <igino.corona@diee.unica.it>
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
 """
 from importlib import import_module
@@ -107,9 +105,8 @@ class CCreator(object):
     def create(cls, class_item=None, *args, **kwargs):
         """This method creates an instance of a class with given type.
 
-        Calling superclass's package is looked for any subclass defining
-        `class_item = 'value'`. If found, the class is instantiated and a
-        reference is returned.
+        The list of subclasses of calling superclass is looked for any class
+        defining `class_item = 'value'`. If found, the class type is listed.
 
         Also a class instance can be passed as main argument.
         In this case the class instance is returned as is.
@@ -159,29 +156,56 @@ class CCreator(object):
                                 "when a class instance is passed.")
             return class_item
 
-        # Get all the classes from the package
-        package_classes = import_package_classes(cls)
+        # Get all the subclasses of the superclass
+        subclasses = cls.get_subclasses()
 
-        # Get all class types from the package (to check duplicates)
-        package_types = import_package_types(package_classes)
+        # Get all class types from the list of subclasses (to check duplicates)
+        class_types = import_class_types(subclasses)
 
         # Check for duplicates
-        _check_package_types_duplicates(package_classes, package_types)
+        _check_class_types_duplicates(class_types, subclasses)
 
         # Everything seems fine now, look for desired class type
-        for class_data in package_classes:
+        for class_data in subclasses:
             if get_private(class_data[1], 'class_type', None) == class_item:
                 return class_data[1](*args, **kwargs)
 
-        raise NameError("no class of type `{:}` found within the package "
-                        "of class '{:}'".format(class_item, cls.__module__))
+        raise NameError("no class of type `{:}` is a subclass of '{:}' "
+                        "from module '{:}'".format(
+                            class_item, cls.__name__, cls.__module__))
+
+    @classmethod
+    def get_subclasses(cls):
+        """Get all the subclasses of the calling class.
+
+        Returns
+        -------
+        subclasses : list of tuple
+            The list containing a tuple (class.__name__, class) for
+            each subclass of calling class. Keep in mind that in Python
+            each class is a "subclass" of itself.
+
+        """
+        def get_subclasses(sup_cls):
+            subcls_list = []
+            for subclass in sup_cls.__subclasses__():
+                subcls_list.append((subclass.__name__, subclass))
+                subcls_list += get_subclasses(subclass)
+            return subcls_list
+
+        subclasses = get_subclasses(cls)
+
+        # the superclass is a "subclass" of itself (in Python)
+        subclasses.append((cls.__name__, cls))
+
+        return subclasses
 
     @classmethod
     def list_class_types(cls):
         """This method lists all types of available subclasses of calling one.
 
-        Calling superclass's package is looked for any subclass defining
-        `class_item = 'value'`. If found, the class type is listed.
+        The list of subclasses of calling superclass is looked for any class
+        defining `class_item = 'value'`. If found, the class type is listed.
 
         Returns
         -------
@@ -194,16 +218,16 @@ class CCreator(object):
         if cls.__super__ != cls.__name__:
             raise TypeError("only superclasses can be used.")
 
-        # Get all the classes from the package
-        package_classes = import_package_classes(cls)
+        # Get all the subclasses of the superclass
+        subclasses = cls.get_subclasses()
 
-        # Get all class types from the package (to check duplicates)
-        package_types = import_package_types(package_classes)
+        # Get all class types from the list of subclasses (to check duplicates)
+        class_types = import_class_types(subclasses)
 
         # Check for duplicates
-        _check_package_types_duplicates(package_classes, package_types)
+        _check_class_types_duplicates(class_types, subclasses)
 
-        return package_types
+        return class_types
 
     @classmethod
     def get_class_from_type(cls, class_type):
@@ -228,11 +252,11 @@ class CCreator(object):
         if cls.__super__ != cls.__name__:
             raise TypeError("only superclasses can be used.")
 
-        # Get all the classes from the package
-        package_classes = import_package_classes(cls)
+        # Get all the subclasses of the superclass
+        subclasses = cls.get_subclasses()
 
         # Look for desired class type
-        for class_data in package_classes:
+        for class_data in subclasses:
             if get_private(class_data[1], 'class_type', None) == class_type:
                 return class_data[1]
 
@@ -527,35 +551,34 @@ def import_package_classes(cls):
     return getmembers(package, isclass)
 
 
-def import_package_types(package_classes):
-    """Returns types associated with input list of package classes.
+def import_class_types(classes):
+    """Returns types associated with input list of classes.
 
     Abstract properties are ignored.
 
     Returns
     -------
     types : list
-        List of class types associated with input list of package classes.
+        List of class types associated with input list of classes.
 
     """
-    # Get all class types from the package (to check duplicates)
+    # Get all class types from the input list of classes (to check duplicates)
     # Leaving out the classes not defining a class_type
-    package_types = map(
+    class_types = map(
         lambda class_file: get_private(class_file[1], 'class_type', None),
-        package_classes)
+        classes)
     # skipping non string class_types -> classes not supporting creator
     return [class_type for class_type in
-            package_types if isinstance(class_type, str)]
+            class_types if isinstance(class_type, str)]
 
 
-def _check_package_types_duplicates(package_classes, package_types):
-    """Check duplicated types for input list of package classes."""
-    # Check for duplicates
-    duplicates = find_duplicates(package_types)
-    if len(duplicates) != 0:
+def _check_class_types_duplicates(class_types, classes):
+    """Check duplicated types for input list of class types."""
+    duplicates = find_duplicates(class_types)
+    if len(duplicates) != 0:  # Return the list of classes with duplicate type
         duplicates_classes = [
             (class_tuple[0], get_private(class_tuple[1], 'class_type'))
-            for class_tuple in package_classes if
+            for class_tuple in classes if
             get_private(class_tuple[1], 'class_type', None) in duplicates]
         raise ValueError("following classes have the same class type. Fix "
                          "before continue. {:}".format(duplicates_classes))
