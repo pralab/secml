@@ -57,7 +57,7 @@ class CLossCrossEntropy(CLossClassification):
 
     The cross entropy loss is defined as (for sample i):
 
-      L_\text{cross-entropy}(y, s) = - y_i log(\frac{e^{s_i}}{\sum_{k=1}^N e^s_k})
+      L_\text{cross-entropy}(y, s) = - log(\frac{e^{s_i}}{\sum_{k=1}^N e^s_k})
 
     Attributes
     ----------
@@ -98,7 +98,15 @@ class CLossCrossEntropy(CLossClassification):
         return -CArray(p[[range(score.shape[0]), a]]).log()
 
     def dloss(self, y_true, score, pos_label=None):
-        """Computes the value of the Cross Entropy loss function.
+        """Computes gradient of the Cross Entropy loss w.r.t.the classifier
+            discriminant function corresponding to class label pos_label
+
+        Assuming pos_label to be i, the derivative is:
+            pi-ti, being ti = 1 if i is equal to the true label yi,
+            0 otherwise
+
+        If pos_label is None, the derivative is taken always w.r.t the true
+        class, hence we have always p - 1
 
         Parameters
         ----------
@@ -127,4 +135,11 @@ class CLossCrossEntropy(CLossClassification):
 
         grad = CArray(grad[[range(score.shape[0]), a]])
 
-        return grad - 1.0
+        if pos_label is not None:
+
+            grad[y_true == CArray(a)] -= 1.0
+
+            return grad
+
+        else:  # derivative is taken always w.r.t the true class
+            return grad - 1.0
