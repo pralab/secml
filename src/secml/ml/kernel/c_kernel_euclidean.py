@@ -170,6 +170,9 @@ class CKernelEuclidean(CKernel):
         else:  # Broadcasting is supported by design for dense arrays
             v_broadcast = v
 
+        # Format of output array should be the same as v
+        x = x.tosparse() if v.issparse else x.todense()
+
         diff = (x - v_broadcast)
 
         if squared is True:  # 2 * (x - y)

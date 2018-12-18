@@ -56,6 +56,28 @@ class TestKernelGradient(CUnitTest):
                              "".format(grad_error))
             self.assertTrue(grad_error < 1e-3)
 
+    def test_gradient_sparse(self):
+        """Test for kernel gradients with sparse points."""
+        self.logger.info("Testing Gradient \w Sparse Data")
+
+        for kernel in self.kernels:
+            self.logger.info("kernel type: %s", kernel.class_type)
+
+            k_grad = kernel.gradient(self.p1_sparse, self.p2_dense)
+            self.logger.info(
+                "sparse/dense ->.isdense: {:}".format(k_grad.isdense))
+            self.assertTrue(k_grad.isdense)
+
+            k_grad = kernel.gradient(self.p1_dense, self.p2_sparse)
+            self.logger.info(
+                "dense/sparse ->.issparse: {:}".format(k_grad.issparse))
+            self.assertTrue(k_grad.issparse)
+
+            k_grad = kernel.gradient(self.p1_sparse, self.p2_sparse)
+            self.logger.info(
+                "sparse/sparse ->.issparse: {:}".format(k_grad.issparse))
+            self.assertTrue(k_grad.issparse)
+
     # TODO:
     # def test_matricial_gradient(self):
     #
