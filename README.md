@@ -15,7 +15,7 @@ Once the environment is set up, SecML-Lib can installed and run by
  1. Install from official PyPI repository **(not yet supported)**
     - `pip install secml-lib`
  2. Install from zip/wheel package:
-    - `pip install {package-file}`
+    - `pip install <package-file>`
  3. Install from local GitLab repository:
     - Clone the project repository in a directory of your choice
     - Run installation as: `python setup.py install`
@@ -55,7 +55,7 @@ Two common scenario are listed below:
     - Run `python setup.py develop`
 2. Editable install from remote repository
     - Run `pip install -e git+ssh://git@{repourl}.git[@branch]#egg=secml-lib`
-    - Project will be cloned automatically in “<venv path>/src/secml-lib”
+    - Project will be cloned automatically in `<venv path>/src/secml-lib`
     - The new repository can then be updated using standard `git` commands
 
 Editable installs are also available while using SecML-Lib as a
