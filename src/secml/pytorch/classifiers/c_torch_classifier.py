@@ -30,7 +30,7 @@ if use_cuda:
     torch.cuda.manual_seed_all(999)
 
 
-# FIXME: inner normalizer not manage yet for training phase
+# FIXME: inner preprocess not manage yet for training phase
 class CTorchClassifier(CClassifier):
     """
     A fully-connected ReLU network with one hidden layer, trained to predict y from x
@@ -47,7 +47,7 @@ class CTorchClassifier(CClassifier):
 
     def __init__(self, learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
                  n_epoch=100, gamma=0.1, lr_schedule=(50, 75), batch_size=5,
-                 train_transform=None, normalizer=None):
+                 train_transform=None, preprocess=None):
 
         self._learning_rate = learning_rate
         self._momentum = momentum
@@ -80,7 +80,7 @@ class CTorchClassifier(CClassifier):
         if use_cuda is True:
             self.logger.info("Using CUDA for PyTorch computations!")
 
-        super(CTorchClassifier, self).__init__(normalizer=normalizer)
+        super(CTorchClassifier, self).__init__(preprocess=preprocess)
 
     @property
     def learning_rate(self):
@@ -306,7 +306,7 @@ class CTorchClassifier(CClassifier):
     def fit(self, dataset, warm_start=False, n_jobs=1):
         """Trains the classifier.
 
-        If a normalizer has been specified,
+        If a preprocess has been specified,
         input is normalized before training.
 
         For multiclass case see `.CClassifierMulticlass`.
@@ -333,9 +333,9 @@ class CTorchClassifier(CClassifier):
             raise TypeError(
                 "training set should be provided as a CDataset object.")
 
-        if self.normalizer is not None:
+        if self.preprocess is not None:
             self.logger.warning(
-                "normalizer is not applied to training data. "
+                "preprocess is not applied to training data. "
                 "Use `train_transform` parameter if necessary.")
 
         if warm_start is False:
@@ -421,7 +421,7 @@ class CTorchClassifier(CClassifier):
     def decision_function(self, x, y, n_jobs=1):
         """Computes the decision function for each pattern in x.
 
-        If a normalizer has been specified, input is normalized
+        If a preprocess has been specified, input is normalized
         before computing the decision function.
 
         Parameters
@@ -444,9 +444,9 @@ class CTorchClassifier(CClassifier):
         """
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Normalizing data if a normalizer is defined
-        if self.normalizer is not None:
-            x = self.normalizer.normalize(x)
+        # Preprocessing data if a preprocess is defined
+        if self.preprocess is not None:
+            x = self.preprocess.normalize(x)
 
         return self._decision_function(x, y, n_jobs=n_jobs)
 
@@ -508,7 +508,7 @@ class CTorchClassifier(CClassifier):
     def predict(self, x, return_decision_function=False, n_jobs=1):
         """Perform classification of each pattern in x.
 
-        If a normalizer has been specified,
+        If a preprocess has been specified,
          input is normalized before classification.
 
         Parameters
@@ -537,9 +537,9 @@ class CTorchClassifier(CClassifier):
         """
         x_carray = CArray(x).atleast_2d()
 
-        # Normalizing data if a normalizer is defined
-        if self.normalizer is not None:
-            x_carray = self.normalizer.normalize(x_carray)
+        # Preprocessing data if a preprocess is defined
+        if self.preprocess is not None:
+            x_carray = self.preprocess.normalize(x_carray)
 
         x_loader = self._get_test_input_loader(x_carray, n_jobs=n_jobs)
 

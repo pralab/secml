@@ -516,13 +516,13 @@ class CAttack(CCreator):
         self.logger.info("Learning differentiable surrogate classifier...")
 
         # TODO: solve this more elegantly
-        if self._surrogate_classifier.normalizer is None:
-            norm = None
+        if self._surrogate_classifier.preprocess is None:
+            preprocessor = None
         else:
-            norm = self._surrogate_classifier.normalizer.deepcopy()
+            preprocessor = self._surrogate_classifier.preprocess.deepcopy()
 
         # creating instance of SVM learner
-        clf = CClassifierSVM(kernel='rbf', normalizer=norm)
+        clf = CClassifierSVM(kernel='rbf', preprocess=preprocessor)
 
         # clf.grad_sampling = 1 # speeding up gradient computation
 

@@ -67,10 +67,10 @@ class TestCClassifierNearestCentroid(CUnitTest):
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Normalizing data if a normalizer is defined
-        if self.nc.normalizer is not None:
-            x_norm = self.nc.normalizer.normalize(x)
-            p_norm = self.nc.normalizer.normalize(p)
+        # Preprocessing data if a preprocess is defined
+        if self.nc.preprocess is not None:
+            x_norm = self.nc.preprocess.normalize(x)
+            p_norm = self.nc.preprocess.normalize(p)
 
         # Testing decision_function on multiple points
 

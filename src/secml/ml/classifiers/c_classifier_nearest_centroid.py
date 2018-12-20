@@ -25,10 +25,10 @@ class CClassifierNearestCentroid(CClassifier):
     __class_type = 'nrst-centroid'
 
     def __init__(self, metric='euclidean',
-                 shrink_threshold=None, normalizer=None):
+                 shrink_threshold=None, preprocess=None):
 
         # Calling CClassifier init
-        super(CClassifierNearestCentroid, self).__init__(normalizer=normalizer)
+        super(CClassifierNearestCentroid, self).__init__(preprocess=preprocess)
 
         self._metric = metric
         self._shrink_threshold = shrink_threshold
@@ -87,7 +87,7 @@ class CClassifierNearestCentroid(CClassifier):
         The score is the distance of each pattern
          from the centroid of class `y`
 
-        If a normalizer has been specified, input is normalized
+        If a preprocess has been specified, input is normalized
          before computing the decision function.
 
         Parameters
@@ -111,9 +111,9 @@ class CClassifierNearestCentroid(CClassifier):
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Normalizing data if a normalizer is defined
-        if self.normalizer is not None:
-            x = self.normalizer.normalize(x)
+        # Preprocessing data if a preprocess is defined
+        if self.preprocess is not None:
+            x = self.preprocess.normalize(x)
 
         sign = convert_binary_labels(y)  # Sign depends on input label (0/1)
 

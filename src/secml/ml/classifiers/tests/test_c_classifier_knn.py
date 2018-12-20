@@ -133,10 +133,10 @@ class TestCClassifierKNN(CUnitTest):
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Normalizing data if a normalizer is defined
-        if self.knn.normalizer is not None:
-            x_norm = self.knn.normalizer.normalize(x)
-            p_norm = self.knn.normalizer.normalize(p)
+        # Preprocessing data if a preprocess is defined
+        if self.knn.preprocess is not None:
+            x_norm = self.knn.preprocess.normalize(x)
+            p_norm = self.knn.preprocess.normalize(p)
 
         # Testing decision_function on multiple points
 

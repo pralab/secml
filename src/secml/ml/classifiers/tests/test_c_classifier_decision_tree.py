@@ -73,10 +73,10 @@ class TestCClassifierDecisionTree(CUnitTest):
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Normalizing data if a normalizer is defined
-        if self.dec_tree.normalizer is not None:
-            x_norm = self.dec_tree.normalizer.normalize(x)
-            p_norm = self.dec_tree.normalizer.normalize(p)
+        # Preprocessing data if a preprocess is defined
+        if self.dec_tree.preprocess is not None:
+            x_norm = self.dec_tree.preprocess.normalize(x)
+            p_norm = self.dec_tree.preprocess.normalize(p)
 
         # Testing decision_function on multiple points
 

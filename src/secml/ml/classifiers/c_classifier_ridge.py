@@ -25,10 +25,10 @@ class CClassifierRidge(CClassifierLinear):
 
     def __init__(self, alpha=1.0, kernel=None,
                  max_iter=1e5, class_weight=None, tol=1e-4,
-                 fit_intercept=True, normalizer=None):
+                 fit_intercept=True, preprocess=None):
 
         # Calling the superclass init
-        CClassifierLinear.__init__(self, normalizer=normalizer)
+        CClassifierLinear.__init__(self, preprocess=preprocess)
 
         # Classifier parameters
         self.alpha = alpha

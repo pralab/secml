@@ -27,7 +27,7 @@ class TestEvasionNonLinearL1(CEvasionTestCases.TestCEvasion):
 
         normalizer = CNormalizerMinMax((-1, 1))
         self.classifier = CClassifierSVM(kernel='rbf', C=1,
-                                         normalizer=normalizer)
+                                         preprocess=normalizer)
         self.classifier.gamma = 2
 
         # self.seed = None  # Random state generator for the dataset

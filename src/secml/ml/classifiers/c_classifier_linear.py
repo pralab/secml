@@ -25,20 +25,20 @@ class CClassifierLinear(CClassifier):
 
     Parameters
     ----------
-    normalizer : str, CNormalizer
-        Features normalizer to applied to input data.
+    preprocess : str or CNormalizer
+        Features preprocess to applied to input data.
         Can be a CNormalizer subclass or a string with the desired
-        normalizer type. If None, input data is used as is.
+        preprocess type. If None, input data is used as is.
 
     """
 
-    def __init__(self, normalizer=None):
+    def __init__(self, preprocess=None):
         # Linear classifier parameters
         self._w = None
         self._b = None
 
         # Calling init of CClassifier
-        CClassifier.__init__(self, normalizer=normalizer)
+        CClassifier.__init__(self, preprocess=preprocess)
 
     def __clear(self):
         """Reset the object."""
@@ -59,15 +59,15 @@ class CClassifierLinear(CClassifier):
 
     def is_linear(self):
         """Return True as the classifier is linear."""
-        if self.normalizer is None or \
-                self.normalizer is not None and self.normalizer.is_linear():
+        if self.preprocess is None or \
+                self.preprocess is not None and self.preprocess.is_linear():
             return True
         return False
 
     def fit(self, dataset, n_jobs=1):
         """Trains the linear classifier.
 
-        If a normalizer has been specified,
+        If a preprocess has been specified,
         input is normalized before training.
 
         Training on 2nd class is avoided to speed up classification.
@@ -131,7 +131,7 @@ class CClassifierLinear(CClassifier):
 
             .. math:: f[i] =  (x[i] * w^T) + b
 
-        If a normalizer has been specified, input is normalized
+        If a preprocess has been specified, input is normalized
         before computing the decision function.
 
         Parameters
@@ -155,9 +155,9 @@ class CClassifierLinear(CClassifier):
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Normalizing data if a normalizer is defined
-        if self.normalizer is not None:
-            x = self.normalizer.normalize(x)
+        # Preprocessing data if a preprocess is defined
+        if self.preprocess is not None:
+            x = self.preprocess.normalize(x)
 
         sign = convert_binary_labels(y)  # Sign depends on input label (0/1)
 
@@ -166,7 +166,7 @@ class CClassifierLinear(CClassifier):
     def predict(self, x, return_decision_function=False, n_jobs=_NoValue):
         """Perform classification of each pattern in x.
 
-        If a normalizer has been specified,
+        If a preprocess has been specified,
         input is normalized before classification.
 
         Parameters

@@ -25,10 +25,10 @@ class CClassifierKNN(CClassifier):
     def __init__(self, n_neighbors=5, weights='uniform',
                  algorithm='auto', leaf_size=30, p=2,
                  metric='minkowski', metric_params=None,
-                 normalizer=None):
+                 preprocess=None):
 
         # Calling constructor of CClassifier
-        CClassifier.__init__(self, normalizer=normalizer)
+        CClassifier.__init__(self, preprocess=preprocess)
 
         self._n_neighbors = n_neighbors
         self._weights = weights

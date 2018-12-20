@@ -287,7 +287,7 @@ class TestCClassifierSVM(CUnitTest):
         norm = CNormalizerMinMax()
         data_norm = norm.fit_normalize(data.X)
 
-        svm1 = CClassifierSVM(normalizer='min-max')
+        svm1 = CClassifierSVM(preprocess='min-max')
         svm2 = CClassifierSVM()
 
         svm1.fit(data)
@@ -387,10 +387,10 @@ class TestCClassifierSVM(CUnitTest):
             x = x_norm = self.dataset.X
             p = p_norm = self.dataset.X[0, :].ravel()
 
-            # Normalizing data if a normalizer is defined
-            if svm.normalizer is not None:
-                x_norm = svm.normalizer.normalize(x)
-                p_norm = svm.normalizer.normalize(p)
+            # Preprocessing data if a preprocess is defined
+            if svm.preprocess is not None:
+                x_norm = svm.preprocess.normalize(x)
+                p_norm = svm.preprocess.normalize(p)
 
             # Testing decision_function on multiple points
 

@@ -128,7 +128,7 @@ class TestCClassifierMultiOVA(CUnitTest):
 
         multi = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                          class_weight='balanced',
-                                         normalizer='minmax')
+                                         preprocess='minmax')
         multi.fit(self.dataset)
         pred_y = multi.predict(self.dataset.X)
 
@@ -181,8 +181,9 @@ class TestCClassifierMultiOVA(CUnitTest):
                        random_state=0).load()
 
         multiclass = CClassifierMulticlassOVA(
-            classifier=CClassifierSVM, class_weight='balanced',
-            normalizer='minmax')
+            classifier=CClassifierSVM,
+            class_weight='balanced',
+            preprocess='minmax')
 
         # Training and classification
         multiclass.fit(ds)
@@ -266,10 +267,10 @@ class TestCClassifierMultiOVA(CUnitTest):
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Normalizing data if a normalizer is defined
-        if mc.normalizer is not None:
-            x_norm = mc.normalizer.normalize(x)
-            p_norm = mc.normalizer.normalize(p)
+        # Preprocessing data if a preprocess is defined
+        if mc.preprocess is not None:
+            x_norm = mc.preprocess.normalize(x)
+            p_norm = mc.preprocess.normalize(p)
 
         # Testing decision_function on multiple points
 

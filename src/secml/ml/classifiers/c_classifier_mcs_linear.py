@@ -39,10 +39,10 @@ class CClassifierMCSLinear(CClassifierLinear):
     __class_type = 'mcs-linear'
     
     def __init__(self, classifier, num_classifiers=10,
-                 max_samples=1.0, max_features=1.0, normalizer=None):
+                 max_samples=1.0, max_features=1.0, preprocess=None):
 
         # Calling constructor of CClassifierLinear
-        CClassifierLinear.__init__(self, normalizer=normalizer)
+        CClassifierLinear.__init__(self, preprocess=preprocess)
 
         # Instance of the classifier to use
         self.classifier = classifier

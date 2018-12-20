@@ -148,10 +148,10 @@ class TestCClassifierRidge(CUnitTest):
             x = x_norm = self.dataset.X
             p = p_norm = self.dataset.X[0, :].ravel()
 
-            # Normalizing data if a normalizer is defined
-            if ridge.normalizer is not None:
-                x_norm = ridge.normalizer.normalize(x)
-                p_norm = ridge.normalizer.normalize(p)
+            # Preprocessing data if a preprocess is defined
+            if ridge.preprocess is not None:
+                x_norm = ridge.preprocess.normalize(x)
+                p_norm = ridge.preprocess.normalize(p)
 
             # Testing decision_function on multiple points
 

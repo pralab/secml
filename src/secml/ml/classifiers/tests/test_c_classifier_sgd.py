@@ -191,10 +191,10 @@ class TestCClassifierSGD(CUnitTest):
             x = x_norm = self.dataset.X
             p = p_norm = self.dataset.X[0, :].ravel()
 
-            # Normalizing data if a normalizer is defined
-            if sgd.normalizer is not None:
-                x_norm = sgd.normalizer.normalize(x)
-                p_norm = sgd.normalizer.normalize(p)
+            # Preprocessing data if a preprocess is defined
+            if sgd.preprocess is not None:
+                x_norm = sgd.preprocess.normalize(x)
+                p_norm = sgd.preprocess.normalize(p)
 
             # Testing decision_function on multiple points
 

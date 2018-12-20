@@ -31,10 +31,10 @@ class CClassifierSGD(CClassifierLinear):
                  shuffle=True, learning_rate='optimal',
                  eta0=10.0, power_t=0.5, class_weight=None,
                  warm_start=False, average=False, random_state=None,
-                 normalizer=None):
+                 preprocess=None):
 
         # Calling the superclass init
-        CClassifierLinear.__init__(self, normalizer=normalizer)
+        CClassifierLinear.__init__(self, preprocess=preprocess)
 
         # Keep private (not an sklearn sgd parameter)
         self._loss = CLoss.create(loss)

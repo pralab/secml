@@ -18,10 +18,10 @@ class CClassifierMulticlass(CClassifier):
     ----------
     classifier : unbound class
         Unbound (not initialized) CClassifier subclass.
-    normalizer : str, CNormalizer
-        Features normalizer to applied to input data.
+    preprocess : str or CNormalizer
+        Features preprocess to applied to input data.
         Can be a CNormalizer subclass or a string with the desired
-        normalizer type. If None, input data is used as is.
+        preprocess type. If None, input data is used as is.
     clf_params : kwargs
         Any other construction parameter for the binary classifiers.
 
@@ -29,9 +29,9 @@ class CClassifierMulticlass(CClassifier):
     __metaclass__ = ABCMeta
     __super__ = 'CClassifierMulticlass'
 
-    def __init__(self, classifier, normalizer=None, **clf_params):
+    def __init__(self, classifier, preprocess=None, **clf_params):
         # Calling init of CClassifier
-        super(CClassifierMulticlass, self).__init__(normalizer=normalizer)
+        super(CClassifierMulticlass, self).__init__(preprocess=preprocess)
         # Binary classifier to use
         if not issubclass(classifier, CClassifier):
             raise TypeError(
@@ -263,7 +263,7 @@ class CClassifierMulticlass(CClassifier):
     def decision_function(self, x, y):
         """Computes the decision function for each pattern in x.
 
-        If a normalizer has been specified, input is normalized
+        If a preprocess has been specified, input is normalized
         before computing the decision function.
 
         .. note::
@@ -291,9 +291,9 @@ class CClassifierMulticlass(CClassifier):
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Normalizing data if a normalizer is defined
-        if self.normalizer is not None:
-            x = self.normalizer.normalize(x)
+        # Preprocessing data if a preprocess is defined
+        if self.preprocess is not None:
+            x = self.preprocess.normalize(x)
 
         return self._decision_function(x, y)
 

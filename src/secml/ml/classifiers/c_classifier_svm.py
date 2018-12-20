@@ -31,10 +31,10 @@ class CClassifierSVM(CClassifierLinear):
         weight one. The 'balanced' mode uses the values of labels to
         automatically adjust weights inversely proportional to
         class frequencies as `n_samples / (n_classes * np.bincount(y))`.
-    normalizer : str, CNormalizer
-        Features normalizer to applied to input data.
+    preprocess : str or CNormalizer
+        Features preprocess to applied to input data.
         Can be a CNormalizer subclass or a string with the desired
-        normalizer type. If None, input data is used as is.
+        preprocess type. If None, input data is used as is.
     grad_sampling : float
         Percentage in (0.0, 1.0] of the alpha weights to be considered
         when computing the classifier gradient.
@@ -57,10 +57,10 @@ class CClassifierSVM(CClassifierLinear):
     __class_type = 'svm'
 
     def __init__(self, kernel=None, C=1.0, class_weight=None,
-                 normalizer=None, grad_sampling=1.0, store_dual_vars=None):
+                 preprocess=None, grad_sampling=1.0, store_dual_vars=None):
 
         # Calling the superclass init
-        CClassifierLinear.__init__(self, normalizer=normalizer)
+        CClassifierLinear.__init__(self, preprocess=preprocess)
 
         # Classifier parameters
         self.C = C
@@ -248,7 +248,7 @@ class CClassifierSVM(CClassifierLinear):
         parameters. For linear SVM (i.e. if kernel is None)
         we also store the 'w' flat vector with each feature's weight.
 
-        If a normalizer has been specified, input is normalized
+        If a preprocess has been specified, input is normalized
         before computing the decision function.
 
         Parameters
