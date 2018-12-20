@@ -44,7 +44,7 @@ class TestCFigure(CUnitTest):
         self.logger.info("." * 50)
         from secml.ml.kernel import CKernelRBF
         self.classifier = CClassifierSVM(kernel=CKernelRBF())
-        self.classifier.train(self.dataset)
+        self.classifier.fit(self.dataset)
 
     def test_plot_dataset_points(self):
         """Test plot dataset points method."""
@@ -73,7 +73,7 @@ class TestCFigure(CUnitTest):
         bounds = [(self.x_min, self.x_max), (self.y_min, self.y_max)]
         try:
             self.fig.switch_sptype('function')
-            self.fig.sp.plot_fobj(self.classifier.discriminant_function,
+            self.fig.sp.plot_fobj(self.classifier.decision_function,
                                   plot_levels=False, grid_limits=bounds)
         except Exception as e:
             self.logger.info("Error: {:}".format(e))

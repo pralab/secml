@@ -55,7 +55,7 @@ class CClassifierDecisionTree(CClassifier):
         """Return decision tree min_samples_split."""
         self._min_samples_split = int(value)
 
-    def _train(self, dataset):
+    def _fit(self, dataset):
         """Trains the Decision Tree classifier."""
         if dataset.issparse is True and sklearn.__version__ < '0.16':
             raise ValueError(
@@ -71,8 +71,8 @@ class CClassifierDecisionTree(CClassifier):
 
         return self._dt
 
-    def _discriminant_function(self, x, y):
-        """Computes the discriminant function (probability estimates) for each pattern in x.
+    def _decision_function(self, x, y):
+        """Computes the decision function (probability estimates) for each pattern in x.
 
         Parameters
         ----------
@@ -85,7 +85,7 @@ class CClassifierDecisionTree(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """

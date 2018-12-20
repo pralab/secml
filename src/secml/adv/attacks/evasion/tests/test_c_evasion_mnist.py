@@ -48,7 +48,7 @@ class TestEvasionMNIST(CCreator):
         self._param_setter()
         self._dataset_creation()
         print "training classifier ..."
-        self.classifier.train(self._tr)
+        self.classifier.fit(self._tr)
         print "training classifier ... Done."
         self._chose_x0()
 

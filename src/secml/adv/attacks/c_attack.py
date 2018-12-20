@@ -65,7 +65,7 @@ class CAttack(CCreator):
 
         # labels and scores assigned by the surrogate clf to the surrogate data
         # these are "internal" attributes (no setter/getter), required to run
-        # evasion of nonlinear clf from a benign point, and also to train a
+        # evasion of nonlinear clf from a benign point, and also to fit a
         # surrogate differentiable classifier (if surrogate_clf is non-diff.)
         self._surrogate_labels = None
         self._surrogate_scores = None
@@ -478,7 +478,7 @@ class CAttack(CCreator):
 
         # otherwise...
         self.logger.info("Classification of surrogate data...")
-        y, score = self.surrogate_classifier.classify(self.surrogate_data.X)
+        y, score = self.surrogate_classifier.predict(self.surrogate_data.X)
         self._surrogate_labels = y
         self._surrogate_scores = score
 
@@ -499,13 +499,13 @@ class CAttack(CCreator):
         if self._surrogate_data is None:
             return
 
-        # train a differentiable surrogate classifier and pass it to solver
-        self._solver_clf = self._train_differentiable_surrogate_clf()
+        # fit a differentiable surrogate classifier and pass it to solver
+        self._solver_clf = self._fit_differentiable_surrogate_clf()
 
         return
 
     # TODO: this should be customizable from outside of this class.
-    def _train_differentiable_surrogate_clf(self):
+    def _fit_differentiable_surrogate_clf(self):
         """
         Trains a differentiable surrogate classifier to be passed to the
         solver. By default, an RBF SVM is trained on surrogate data re-labeled
@@ -539,10 +539,10 @@ class CAttack(CCreator):
         best_params = clf.estimate_parameters(
             relabeled_data, xval_parameters, xval_splitter, 'accuracy')
 
-        # train classifier with best params
+        # fit classifier with best params
         clf.set('C', best_params['C'])
         clf.set('gamma', best_params['gamma'])
-        clf.train(relabeled_data)
+        clf.fit(relabeled_data)
 
         return clf
 

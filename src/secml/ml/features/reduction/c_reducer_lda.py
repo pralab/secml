@@ -48,7 +48,7 @@ class CLda(CReducer):
         >>> from secml.ml.features.reduction import CLda
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
-        >>> CLda().train_transform(ds.X, ds.Y)
+        >>> CLda().fit_transform(ds.X, ds.Y)
         CArray([[-4.07872199]
          [-2.72723183]
          [ 6.80595382]])
@@ -77,8 +77,8 @@ class CLda(CReducer):
         """Unique targets used for training."""
         return self._classes
 
-    def train(self, data, targets):
-        """Train the LDA using input data.
+    def fit(self, data, targets):
+        """Fit the LDA using input data.
 
         Parameters
         ----------
@@ -102,7 +102,7 @@ class CLda(CReducer):
         >>> from secml.ml.features.reduction import CLda
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
-        >>> lda = CLda().train(ds.X, ds.Y)
+        >>> lda = CLda().fit(ds.X, ds.Y)
         >>> lda.eigenvec
         CArray([[ 0.47140452]
         [ 0.0942809 ]
@@ -149,7 +149,7 @@ class CLda(CReducer):
         >>> from secml.ml.features.reduction import CLda
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
-        >>> lda = CLda().train(ds.X, ds.Y)
+        >>> lda = CLda().fit(ds.X, ds.Y)
         >>> lda.transform(CArray.concatenate(ds.X, [4., 2., -6.], axis=0))
         CArray([[-1.20993827]
         [ 0.20427529]
@@ -163,7 +163,7 @@ class CLda(CReducer):
 
         """
         if self.mean is None:
-            raise ValueError("train LDA first.")
+            raise ValueError("fit LDA first.")
 
         data_carray = CArray(data).todense().atleast_2d()
         if data_carray.shape[1] != self.mean.size:
@@ -192,7 +192,7 @@ class CLda(CReducer):
         >>> from secml.ml.features.reduction import CLda
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
-        >>> lda = CLda().train(ds.X, ds.Y)
+        >>> lda = CLda().fit(ds.X, ds.Y)
         >>> array_lda = lda.transform(ds.X)
         >>> lda.revert(array_lda)
         CArray([[ 0.42962963  1.88592593 -2.04814815]
@@ -200,7 +200,7 @@ class CLda(CReducer):
         [ 1.47407407  2.09481481 -2.57037037]])
         """
         if self._mean is None:
-            raise ValueError("train LDA first.")
+            raise ValueError("fit LDA first.")
 
         data_carray = CArray(data).atleast_2d()
         if data_carray.shape[1] != self.n_components:

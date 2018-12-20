@@ -57,12 +57,12 @@ class CNormalizerMinMax(CNormalizerLinear):
     >>> from secml.ml.features.normalization import CNormalizerMinMax
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-    >>> print CNormalizerMinMax().train_normalize(array)
+    >>> print CNormalizerMinMax().fit_normalize(array)
     CArray([[ 0.5       0.        1.      ]
      [ 1.        0.5       0.333333]
      [ 0.        1.        0.      ]])
 
-    >>> print CNormalizerMinMax(feature_range=(-1,1)).train_normalize(array)
+    >>> print CNormalizerMinMax(feature_range=(-1,1)).fit_normalize(array)
     CArray([[ 0.       -1.        1.      ]
      [ 1.        0.       -0.333333]
      [-1.        1.       -1.      ]])
@@ -164,7 +164,7 @@ class CNormalizerMinMax(CNormalizerLinear):
             self._n = self.feature_range[1] - self.feature_range[0]
             self._v = self.feature_range[0]
 
-    def train(self, x):
+    def fit(self, x):
         """Compute the minimum and maximum to be used for scaling.
 
         Parameters
@@ -184,7 +184,7 @@ class CNormalizerMinMax(CNormalizerLinear):
         >>> from secml.ml.features.normalization import CNormalizerMinMax
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-        >>> normalizer = CNormalizerMinMax().train(array)
+        >>> normalizer = CNormalizerMinMax().fit(array)
         >>> normalizer.feature_range
         (0.0, 1.0)
         >>> print normalizer.min
@@ -236,7 +236,7 @@ class CNormalizerMinMax(CNormalizerLinear):
         >>> from secml.ml.features.normalization import CNormalizerMinMax
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-        >>> normalizer = CNormalizerMinMax().train(array)
+        >>> normalizer = CNormalizerMinMax().fit(array)
         >>> print normalizer.normalize(array)
         CArray([[ 0.5       0.        1.      ]
          [ 1.        0.5       0.333333]
@@ -281,7 +281,7 @@ class CNormalizerMinMax(CNormalizerLinear):
         >>> from secml.ml.features.normalization import CNormalizerMinMax
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-        >>> normalizer = CNormalizerMinMax().train(array)
+        >>> normalizer = CNormalizerMinMax().fit(array)
         >>> print normalizer.gradient(array)
         CArray([[ 0.5       0.        0.      ]
          [ 0.        0.5       0.      ]

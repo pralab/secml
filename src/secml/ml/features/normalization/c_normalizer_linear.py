@@ -71,7 +71,7 @@ class CNormalizerLinear(CNormalizer):
         """
         # Training first!
         if self.is_clear():
-            raise ValueError("train the normalizer first.")
+            raise ValueError("fit the normalizer first.")
 
         if x.atleast_2d().shape[1] != self.w.size:
             raise ValueError("array to normalize must have {:} "
@@ -96,7 +96,7 @@ class CNormalizerLinear(CNormalizer):
         """
         # Training first!
         if self.is_clear():
-            raise ValueError("train the normalizer first.")
+            raise ValueError("fit the normalizer first.")
         if x.atleast_2d().shape[1] != self.w.size:
             raise ValueError("array to revert must have {:} "
                              "features (columns).".format(self.w.size))
@@ -131,7 +131,7 @@ class CNormalizerLinear(CNormalizer):
         """
         # Training first!
         if self.is_clear():
-            raise ValueError("train the normalizer first.")
+            raise ValueError("fit the normalizer first.")
 
         if x.atleast_2d().shape[1] != self.w.size:
             raise ValueError("input data must have {:} features (columns)."

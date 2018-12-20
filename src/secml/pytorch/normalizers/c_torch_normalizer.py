@@ -37,7 +37,7 @@ class CTorchNormalizer(CNormalizer):
         """Returns True if object is clear."""
         return self.CNN.is_clear()
 
-    def train(self, X):
+    def fit(self, X):
         """Compute the minimum and maximum to be used for scaling.
 
         Parameters

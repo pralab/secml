@@ -22,10 +22,10 @@ class TestCRoc(CUnitTest):
         self.ds1 = self.dl1.load()
         self.ds2 = self.dl2.load()
 
-        self.svm = CClassifierSVM(C=1e-7).train(self.ds1)
+        self.svm = CClassifierSVM(C=1e-7).fit(self.ds1)
 
-        self.y1, self.s1 = self.svm.classify(self.ds1.X)
-        self.y2, self.s2 = self.svm.classify(self.ds2.X)
+        self.y1, self.s1 = self.svm.predict(self.ds1.X)
+        self.y2, self.s2 = self.svm.predict(self.ds2.X)
 
         self.roc = CRoc()
 

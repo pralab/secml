@@ -64,7 +64,7 @@ class CClassifierLinear(CClassifier):
             return True
         return False
 
-    def train(self, dataset, n_jobs=1):
+    def fit(self, dataset, n_jobs=1):
         """Trains the linear classifier.
 
         If a normalizer has been specified,
@@ -94,9 +94,9 @@ class CClassifierLinear(CClassifier):
             raise ValueError(
                 "training available on binary (2-classes) datasets only.")
 
-        return super(CClassifierLinear, self).train(dataset, n_jobs=n_jobs)
+        return super(CClassifierLinear, self).fit(dataset, n_jobs=n_jobs)
 
-    def _discriminant_function(self, x, y=1):
+    def _decision_function(self, x, y=1):
         """Computes the distance from the separating hyperplane for each pattern in x.
 
         Parameters
@@ -106,12 +106,12 @@ class CClassifierLinear(CClassifier):
             (n_patterns, n_features).
         y : {1}
             The label of the class wrt the function should be calculated.
-            Discriminant function is always computed wrt positive class (1).
+            decision function is always computed wrt positive class (1).
 
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
@@ -119,20 +119,20 @@ class CClassifierLinear(CClassifier):
             raise ValueError("make sure the classifier is trained first.")
         if y != 1:
             raise ValueError(
-                "discriminant function is always computed wrt positive class.")
+                "decision function is always computed wrt positive class.")
         x = x.atleast_2d()  # Ensuring input is 2-D
         # Computing: `x * w^T`
         return CArray(x.dot(self.w.T)).todense().ravel() + self.b
 
-    def discriminant_function(self, x, y=1):
-        """Computes the discriminant function for each pattern in x.
+    def decision_function(self, x, y=1):
+        """Computes the decision function for each pattern in x.
 
-        For a linear classifier the discriminant function is given by::
+        For a linear classifier the decision function is given by::
 
             .. math:: f[i] =  (x[i] * w^T) + b
 
         If a normalizer has been specified, input is normalized
-        before computing the discriminant function.
+        before computing the decision function.
 
         Parameters
         ----------
@@ -146,7 +146,7 @@ class CClassifierLinear(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
@@ -161,9 +161,9 @@ class CClassifierLinear(CClassifier):
 
         sign = convert_binary_labels(y)  # Sign depends on input label (0/1)
 
-        return sign * self._discriminant_function(x)
+        return sign * self._decision_function(x)
 
-    def classify(self, x, n_jobs=_NoValue):
+    def predict(self, x, n_jobs=_NoValue):
         """Perform classification of each pattern in x.
 
         If a normalizer has been specified,
@@ -189,9 +189,9 @@ class CClassifierLinear(CClassifier):
         if n_jobs is not _NoValue:
             raise ValueError("`n_jobs` not supported")
 
-        # Discriminant function is called once (2 classes)
+        # decision function is called once (2 classes)
         s_tmp = CArray(
-            self.discriminant_function(CArray(x).atleast_2d(), y=1))
+            self.decision_function(CArray(x).atleast_2d(), y=1))
         # Assembling scores for positive and negative class
         scores = CArray([[-elem, elem] for elem in s_tmp])
 

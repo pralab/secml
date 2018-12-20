@@ -303,7 +303,7 @@ class CTorchClassifier(CClassifier):
         state_dict['epoch'] = self._start_epoch
         return state_dict
 
-    def train(self, dataset, warm_start=False, n_jobs=1):
+    def fit(self, dataset, warm_start=False, n_jobs=1):
         """Trains the classifier.
 
         If a normalizer has been specified,
@@ -351,9 +351,9 @@ class CTorchClassifier(CClassifier):
             # Reinitialize the optimizer as we are starting clean
             self.init_optimizer()
 
-        return self._train(dataset, n_jobs=n_jobs)
+        return self._fit(dataset, n_jobs=n_jobs)
 
-    def _train(self, dataset, n_jobs=1):
+    def _fit(self, dataset, n_jobs=1):
         """At each training the weight are setted equal to the random weight
         that are chosen when we are instantiating the object
 
@@ -373,7 +373,7 @@ class CTorchClassifier(CClassifier):
                                num_workers=n_jobs-1)
 
         # Switch to training mode
-        self._model.train()
+        self._model.fit()
 
         # Scheduler to adjust the learning rate depending on epoch
         scheduler = optim.lr_scheduler.MultiStepLR(
@@ -418,11 +418,11 @@ class CTorchClassifier(CClassifier):
 
         return self
 
-    def discriminant_function(self, x, y, n_jobs=1):
-        """Computes the discriminant function for each pattern in x.
+    def decision_function(self, x, y, n_jobs=1):
+        """Computes the decision function for each pattern in x.
 
         If a normalizer has been specified, input is normalized
-        before computing the discriminant function.
+        before computing the decision function.
 
         Parameters
         ----------
@@ -438,7 +438,7 @@ class CTorchClassifier(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
@@ -448,10 +448,10 @@ class CTorchClassifier(CClassifier):
         if self.normalizer is not None:
             x = self.normalizer.normalize(x)
 
-        return self._discriminant_function(x, y, n_jobs=n_jobs)
+        return self._decision_function(x, y, n_jobs=n_jobs)
 
-    def _discriminant_function(self, x, y, n_jobs=1):
-        """Computes the discriminant function for each pattern in x.
+    def _decision_function(self, x, y, n_jobs=1):
+        """Computes the decision function for each pattern in x.
 
         Parameters
         ----------
@@ -467,7 +467,7 @@ class CTorchClassifier(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
@@ -505,7 +505,7 @@ class CTorchClassifier(CClassifier):
 
         return scores.ravel()
 
-    def classify(self, x, n_jobs=1):
+    def predict(self, x, n_jobs=1):
         """Perform classification of each pattern in x.
 
         If a normalizer has been specified,

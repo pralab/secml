@@ -12,12 +12,12 @@ class TestCClassifierKDE(CUnitTest):
     """Unit test for CClassifierKDE."""
 
     def setUp(self):
-        """Test for init and train methods."""
+        """Test for init and fit methods."""
         # generate synthetic data
         self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
                                  n_clusters_per_class=1).load()
 
-        self.dataset.X = CNormalizerMinMax().train_normalize(self.dataset.X)
+        self.dataset.X = CNormalizerMinMax().fit_normalize(self.dataset.X)
 
         self.logger.info("Testing classifier creation ")
         k = CKernelRBF(gamma=1e1)
@@ -34,20 +34,20 @@ class TestCClassifierKDE(CUnitTest):
         fig.switch_sptype(sp_type='ds')
         fig.sp.plot_ds(self.dataset)
 
-        self.kde.train(self.dataset)
+        self.kde.fit(self.dataset)
 
         fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(self.kde.discriminant_function, y=1)
+        fig.sp.plot_fobj(self.kde.decision_function, y=1)
         fig.title('kde Classifier')
 
-        self.logger.info(self.kde.classify(self.dataset.X))
+        self.logger.info(self.kde.predict(self.dataset.X))
 
         fig.show()
 
     def test_fun(self):
-        """Test for discriminant_function() and classify() methods."""
+        """Test for decision_function() and predict() methods."""
         self.logger.info(
-            "Test for discriminant_function() and classify() methods.")
+            "Test for decision_function() and predict() methods.")
 
         def _check_df_scores(s, n_samples):
             self.assertEqual(type(s), CArray)
@@ -68,7 +68,7 @@ class TestCClassifierKDE(CUnitTest):
             self.assertEqual(int, l.dtype)
             self.assertEqual(float, s.dtype)
 
-        self.kde.train(self.dataset)
+        self.kde.fit(self.dataset)
 
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
@@ -78,29 +78,29 @@ class TestCClassifierKDE(CUnitTest):
             x_norm = self.kde.normalizer.normalize(x)
             p_norm = self.kde.normalizer.normalize(p)
 
-        # Testing discriminant_function on multiple points
+        # Testing decision_function on multiple points
 
-        df_scores_neg = self.kde.discriminant_function(x, y=0)
+        df_scores_neg = self.kde.decision_function(x, y=0)
         self.logger.info(
-            "discriminant_function(p_norm, y=0):\n{:}".format(df_scores_neg))
+            "decision_function(p_norm, y=0):\n{:}".format(df_scores_neg))
         _check_df_scores(df_scores_neg, self.dataset.num_samples)
 
-        df_scores_pos = self.kde.discriminant_function(x, y=1)
+        df_scores_pos = self.kde.decision_function(x, y=1)
         self.logger.info(
-            "discriminant_function(x, y=1):\n{:}".format(df_scores_pos))
+            "decision_function(x, y=1):\n{:}".format(df_scores_pos))
         _check_df_scores(df_scores_pos, self.dataset.num_samples)
 
         self.assertFalse(((1 - df_scores_neg) != df_scores_pos).any())
 
-        # Testing _discriminant_function on multiple points
+        # Testing _decision_function on multiple points
 
-        ds_priv_scores_neg = self.kde._discriminant_function(x_norm, y=0)
-        self.logger.info("_discriminant_function(x_norm, y=0):\n"
+        ds_priv_scores_neg = self.kde._decision_function(x_norm, y=0)
+        self.logger.info("_decision_function(x_norm, y=0):\n"
                          "{:}".format(ds_priv_scores_neg))
         _check_df_scores(ds_priv_scores_neg, self.dataset.num_samples)
 
-        ds_priv_scores_pos = self.kde._discriminant_function(x_norm, y=1)
-        self.logger.info("_discriminant_function(x_norm, y=1):\n"
+        ds_priv_scores_pos = self.kde._decision_function(x_norm, y=1)
+        self.logger.info("_decision_function(x_norm, y=1):\n"
                          "{:}".format(ds_priv_scores_pos))
         _check_df_scores(ds_priv_scores_pos, self.dataset.num_samples)
 
@@ -109,42 +109,42 @@ class TestCClassifierKDE(CUnitTest):
         self.assertFalse((df_scores_pos != ds_priv_scores_pos).any())
         self.assertFalse((df_scores_neg != ds_priv_scores_neg).any())
 
-        # Testing classify on multiple points
+        # Testing predict on multiple points
 
-        labels, scores = self.kde.classify(x)
+        labels, scores = self.kde.predict(x)
         self.logger.info(
-            "classify(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
+            "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(
             labels, scores, self.dataset.num_samples, self.kde.n_classes)
 
-        # Comparing output of discriminant_function and classify
+        # Comparing output of decision_function and predict
 
         self.assertFalse((df_scores_neg != scores[:, 0].ravel()).any())
         self.assertFalse((df_scores_pos != scores[:, 1].ravel()).any())
 
-        # Testing discriminant_function on single point
+        # Testing decision_function on single point
 
-        df_scores_neg = self.kde.discriminant_function(p, y=0)
+        df_scores_neg = self.kde.decision_function(p, y=0)
         self.logger.info(
-            "discriminant_function(p, y=0):\n{:}".format(df_scores_neg))
+            "decision_function(p, y=0):\n{:}".format(df_scores_neg))
         _check_df_scores(df_scores_neg, 1)
 
-        df_scores_pos = self.kde.discriminant_function(p, y=1)
+        df_scores_pos = self.kde.decision_function(p, y=1)
         self.logger.info(
-            "discriminant_function(p, y=1):\n{:}".format(df_scores_pos))
+            "decision_function(p, y=1):\n{:}".format(df_scores_pos))
         _check_df_scores(df_scores_pos, 1)
 
         self.assertFalse(((1 - df_scores_neg) != df_scores_pos).any())
 
-        # Testing _discriminant_function on single point
+        # Testing _decision_function on single point
 
-        df_priv_scores_neg = self.kde._discriminant_function(p_norm, y=0)
-        self.logger.info("_discriminant_function(p_norm, y=0):\n"
+        df_priv_scores_neg = self.kde._decision_function(p_norm, y=0)
+        self.logger.info("_decision_function(p_norm, y=0):\n"
                          "{:}".format(df_priv_scores_neg))
         _check_df_scores(df_priv_scores_neg, 1)
 
-        df_priv_scores_pos = self.kde._discriminant_function(p_norm, y=1)
-        self.logger.info("_discriminant_function(p_norm, y=1):\n"
+        df_priv_scores_pos = self.kde._decision_function(p_norm, y=1)
+        self.logger.info("_decision_function(p_norm, y=1):\n"
                          "{:}".format(df_priv_scores_pos))
         _check_df_scores(df_priv_scores_pos, 1)
 
@@ -153,14 +153,14 @@ class TestCClassifierKDE(CUnitTest):
         self.assertFalse((df_scores_pos != df_priv_scores_pos).any())
         self.assertFalse((df_scores_neg != df_priv_scores_neg).any())
 
-        self.logger.info("Testing classify on single point")
+        self.logger.info("Testing predict on single point")
 
-        labels, scores = self.kde.classify(p)
+        labels, scores = self.kde.predict(p)
         self.logger.info(
-            "classify(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
+            "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 1, self.kde.n_classes)
 
-        # Comparing output of discriminant_function and classify
+        # Comparing output of decision_function and predict
 
         self.assertFalse(
             (df_scores_neg != CArray(scores[:, 0]).ravel()).any())

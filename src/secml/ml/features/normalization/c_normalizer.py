@@ -25,8 +25,8 @@ class CNormalizer(CCreator):
         return False
 
     @abstractmethod
-    def train(self, x):
-        """Train normalization algorithm using data.
+    def fit(self, x):
+        """Fit normalization algorithm using data.
 
         Parameters
         ----------
@@ -63,10 +63,10 @@ class CNormalizer(CCreator):
         raise NotImplementedError(
             "this is an abstract method. Must be overridden in subclass.")
 
-    def train_normalize(self, x):
-        """Train normalizer using data and then normalize data.
+    def fit_normalize(self, x):
+        """Fit normalizer using data and then normalize data.
 
-        This method is equivalent to call train(data) and normalize(data)
+        This method is equivalent to call fit(data) and normalize(data)
         in sequence, but it's useful when data is both the training array
         and the array to normalize.
 
@@ -84,11 +84,11 @@ class CNormalizer(CCreator):
 
         See Also
         --------
-        train : train the normalizer on input data.
+        fit : fit the normalizer on input data.
         normalize : normalize input data according training data.
 
         """
-        self.train(x)  # training normalizer first
+        self.fit(x)  # training normalizer first
         return self.normalize(x)
 
     def revert(self, x):
