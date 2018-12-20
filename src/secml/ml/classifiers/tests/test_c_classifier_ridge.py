@@ -13,13 +13,13 @@ class TestCClassifierRidge(CUnitTest):
     """Unit test for Ridge Classifier."""
 
     def setUp(self):
-        """Test for init and train methods."""
+        """Test for init and fit methods."""
         # generate synthetic data
         self.dataset = CDLRandom(n_features=1000, n_redundant=200,
                                  n_informative=250,
                                  n_clusters_per_class=2).load()
 
-        self.dataset.X = CNormalizerMinMax().train_normalize(self.dataset.X)
+        self.dataset.X = CNormalizerMinMax().fit_normalize(self.dataset.X)
 
         kernel_types = (None, CKernelLinear, CKernelRBF, CKernelPoly)
         self.ridges = [CClassifierRidge(
@@ -30,7 +30,7 @@ class TestCClassifierRidge(CUnitTest):
 
         for ridge in self.ridges:
             ridge.verbose = 2  # Enabling debug output for each classifier
-            ridge.train(self.dataset)
+            ridge.fit(self.dataset)
 
     def test_time(self):
         """ Compare execution time of ridge and SVM"""
@@ -43,11 +43,11 @@ class TestCClassifierRidge(CUnitTest):
             svm = CClassifierSVM(ridge.kernel)
 
             with self.timer() as t_svm:
-                svm.train(self.dataset)
+                svm.fit(self.dataset)
             self.logger.info(
                 "Execution time of SVM: {:}".format(t_svm.interval))
             with self.timer() as t_ridge:
-                ridge.train(self.dataset)
+                ridge.fit(self.dataset)
             self.logger.info(
                 "Execution time of ridge: {:}".format(t_ridge.interval))
 
@@ -58,12 +58,12 @@ class TestCClassifierRidge(CUnitTest):
         # generate 2D synthetic data
         dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=2,
                             n_clusters_per_class=1).load()
-        dataset.X = CNormalizerMinMax().train_normalize(dataset.X)
+        dataset.X = CNormalizerMinMax().fit_normalize(dataset.X)
 
-        self.ridges[0].train(dataset)
+        self.ridges[0].fit(dataset)
 
         svm = CClassifierSVM()
-        svm.train(dataset)
+        svm.fit(dataset)
 
         fig = CFigure(width=10, markersize=8)
         fig.subplot(2, 1, 1, sp_type='ds')
@@ -71,7 +71,7 @@ class TestCClassifierRidge(CUnitTest):
         fig.sp.plot_ds(dataset)
         # Plot objective function
         fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(svm.discriminant_function,
+        fig.sp.plot_fobj(svm.decision_function,
                          grid_limits=dataset.get_bounds())
         fig.sp.title('SVM')
 
@@ -80,7 +80,7 @@ class TestCClassifierRidge(CUnitTest):
         fig.sp.plot_ds(dataset)
         # Plot objective function
         fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(self.ridges[0].discriminant_function,
+        fig.sp.plot_fobj(self.ridges[0].decision_function,
                          grid_limits=dataset.get_bounds())
         fig.sp.title('ridge Classifier')
 
@@ -96,10 +96,12 @@ class TestCClassifierRidge(CUnitTest):
             self.logger.info("RIDGE kernel: {:}".format(ridge.kernel))
 
             svm = CClassifierSVM(ridge.kernel)
-            svm.train(self.dataset)
+            svm.fit(self.dataset)
 
-            label_svm, y_svm = svm.classify(self.dataset.X)
-            label_ridge, y_ridge = ridge.classify(self.dataset.X)
+            label_svm, y_svm = svm.predict(
+                self.dataset.X, return_decision_function=True)
+            label_ridge, y_ridge = ridge.predict(
+                self.dataset.X, return_decision_function=True)
 
             acc_svm = CMetric.create('f1').performance_score(
                 self.dataset.Y, label_svm)
@@ -114,9 +116,9 @@ class TestCClassifierRidge(CUnitTest):
                                "Accuracy of ridge: {:}".format(acc_ridge))
 
     def test_fun(self):
-        """Test for discriminant_function() and classify() methods."""
+        """Test for decision_function() and predict() methods."""
         self.logger.info(
-            "Test for discriminant_function() and classify() methods.")
+            "Test for decision_function() and predict() methods.")
         
         def _check_df_scores(s, n_samples):
             self.assertEqual(type(s), CArray)
@@ -141,7 +143,7 @@ class TestCClassifierRidge(CUnitTest):
 
             self.logger.info("RIDGE kernel: {:}".format(ridge.kernel))
 
-            ridge.train(self.dataset)
+            ridge.fit(self.dataset)
 
             x = x_norm = self.dataset.X
             p = p_norm = self.dataset.X[0, :].ravel()
@@ -151,25 +153,25 @@ class TestCClassifierRidge(CUnitTest):
                 x_norm = ridge.preprocess.normalize(x)
                 p_norm = ridge.preprocess.normalize(p)
 
-            # Testing discriminant_function on multiple points
+            # Testing decision_function on multiple points
 
-            df_scores_neg = ridge.discriminant_function(x, y=0)
-            self.logger.info("discriminant_function(x, y=0):\n"
+            df_scores_neg = ridge.decision_function(x, y=0)
+            self.logger.info("decision_function(x, y=0):\n"
                              "{:}".format(df_scores_neg))
             _check_df_scores(df_scores_neg, self.dataset.num_samples)
 
-            df_scores_pos = ridge.discriminant_function(x, y=1)
-            self.logger.info("discriminant_function(x, y=1):\n"
+            df_scores_pos = ridge.decision_function(x, y=1)
+            self.logger.info("decision_function(x, y=1):\n"
                              "{:}".format(df_scores_pos))
             _check_df_scores(df_scores_pos, self.dataset.num_samples)
 
             self.assertFalse(
                 ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
 
-            # Testing _discriminant_function on multiple points
+            # Testing _decision_function on multiple points
 
-            ds_priv_scores = ridge._discriminant_function(x_norm, y=1)
-            self.logger.info("_discriminant_function(x_norm, y=1):\n"
+            ds_priv_scores = ridge._decision_function(x_norm, y=1)
+            self.logger.info("_decision_function(x_norm, y=1):\n"
                              "{:}".format(ds_priv_scores))
             _check_df_scores(ds_priv_scores, self.dataset.num_samples)
 
@@ -177,38 +179,38 @@ class TestCClassifierRidge(CUnitTest):
 
             self.assertFalse((df_scores_pos != ds_priv_scores).any())
 
-            # Testing classify on multiple points
+            # Testing predict on multiple points
 
-            labels, scores = ridge.classify(x)
-            self.logger.info("classify(x):\nlabels: {:}\n"
+            labels, scores = ridge.predict(x, return_decision_function=True)
+            self.logger.info("predict(x):\nlabels: {:}\n"
                              "scores: {:}".format(labels, scores))
             _check_classify_scores(
                 labels, scores, self.dataset.num_samples, ridge.n_classes)
 
-            # Comparing output of discriminant_function and classify
+            # Comparing output of decision_function and predict
 
             self.assertFalse((df_scores_neg != scores[:, 0].ravel()).any())
             self.assertFalse((df_scores_pos != scores[:, 1].ravel()).any())
 
-            # Testing discriminant_function on single point
+            # Testing decision_function on single point
 
-            df_scores_neg = ridge.discriminant_function(p, y=0)
-            self.logger.info("discriminant_function(p, y=0):\n"
+            df_scores_neg = ridge.decision_function(p, y=0)
+            self.logger.info("decision_function(p, y=0):\n"
                              "{:}".format(df_scores_neg))
             _check_df_scores(df_scores_neg, 1)
 
-            df_scores_pos = ridge.discriminant_function(p, y=1)
-            self.logger.info("discriminant_function(p, y=1):\n"
+            df_scores_pos = ridge.decision_function(p, y=1)
+            self.logger.info("decision_function(p, y=1):\n"
                              "{:}".format(df_scores_pos))
             _check_df_scores(df_scores_pos, 1)
 
             self.assertFalse(
                 ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
 
-            # Testing _discriminant_function on single point
+            # Testing _decision_function on single point
 
-            df_priv_scores = ridge._discriminant_function(p_norm, y=1)
-            self.logger.info("_discriminant_function(p_norm, y=1):\n"
+            df_priv_scores = ridge._decision_function(p_norm, y=1)
+            self.logger.info("_decision_function(p_norm, y=1):\n"
                              "{:}".format(df_priv_scores))
             _check_df_scores(df_priv_scores, 1)
 
@@ -216,14 +218,14 @@ class TestCClassifierRidge(CUnitTest):
 
             self.assertFalse((df_scores_pos != df_priv_scores).any())
 
-            self.logger.info("Testing classify on single point")
+            self.logger.info("Testing predict on single point")
 
-            labels, scores = ridge.classify(p)
-            self.logger.info("classify(p):\nlabels: {:}\n"
+            labels, scores = ridge.predict(p, return_decision_function=True)
+            self.logger.info("predict(p):\nlabels: {:}\n"
                              "scores: {:}".format(labels, scores))
             _check_classify_scores(labels, scores, 1, ridge.n_classes)
 
-            # Comparing output of discriminant_function and classify
+            # Comparing output of decision_function and predict
 
             self.assertFalse(
                 (df_scores_neg != CArray(scores[:, 0]).ravel()).any())
@@ -233,9 +235,9 @@ class TestCClassifierRidge(CUnitTest):
             # Testing error raising
 
             with self.assertRaises(ValueError):
-                ridge._discriminant_function(x_norm, y=0)
+                ridge._decision_function(x_norm, y=0)
             with self.assertRaises(ValueError):
-                ridge._discriminant_function(p_norm, y=0)
+                ridge._decision_function(p_norm, y=0)
 
 
 if __name__ == '__main__':

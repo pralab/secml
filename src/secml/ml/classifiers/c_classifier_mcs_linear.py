@@ -23,7 +23,7 @@ class CClassifierMCSLinear(CClassifierLinear):
     classifier : CClassifierLinear
         Instance of the linear classifier to be used in the MCS.
     num_classifiers : int
-        Number of linear classifiers to train, default 10.
+        Number of linear classifiers to fit, default 10.
     max_samples : float
         Percentage of the samples to use for training,
         range [0, 1.0]. Default 1.0 (all the samples).
@@ -73,7 +73,7 @@ class CClassifierMCSLinear(CClassifierLinear):
         
     @property
     def n_classifiers(self):
-        """Number of linear classifiers to train."""
+        """Number of linear classifiers to fit."""
         return self._n_classifiers
     
     @n_classifiers.setter
@@ -102,8 +102,8 @@ class CClassifierMCSLinear(CClassifierLinear):
             raise ValueError("`max_features` must be inside [0, 1.0] range.")
         self._max_features = float(value)
 
-    def _train(self, dataset):
-        """Train the MCS Linear Classifier.
+    def _fit(self, dataset):
+        """Fit the MCS Linear Classifier.
 
         Parameters
         ----------
@@ -134,7 +134,7 @@ class CClassifierMCSLinear(CClassifierLinear):
 
             data = CDataset(data_x, dataset.Y[idx_samples])
             
-            self.classifier.train(data)
+            self.classifier.fit(data)
             self._w[idx_features] += self.classifier.w
             self._b += self.classifier.b
             

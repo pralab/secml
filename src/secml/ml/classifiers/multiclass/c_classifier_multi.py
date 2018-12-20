@@ -74,7 +74,7 @@ class CClassifierMulticlass(CClassifier):
     def num_classifiers(self):
         """Returns the number of instanced binary classifiers.
 
-        Returns 1 until .train(dataset) or .prepare(num_classes) is called.
+        Returns 1 until .fit(dataset) or .prepare(num_classes) is called.
 
         """
         return len(self.binary_classifiers)
@@ -215,7 +215,7 @@ class CClassifierMulticlass(CClassifier):
             n_jobs=n_jobs)
 
     @abstractmethod
-    def _train(self, dataset, n_jobs=1):
+    def _fit(self, dataset, n_jobs=1):
         """Trains the classifier.
 
         This method should store the list of trained classifiers
@@ -260,16 +260,16 @@ class CClassifierMulticlass(CClassifier):
         """
         raise NotImplementedError
 
-    def discriminant_function(self, x, y):
-        """Computes the discriminant function for each pattern in x.
+    def decision_function(self, x, y):
+        """Computes the decision function for each pattern in x.
 
         If a preprocess has been specified, input is normalized
-        before computing the discriminant function.
+        before computing the decision function.
 
         .. note::
 
-            The actual discriminant function should be implemented
-            case by case inside :meth:`_discriminant_function` method.
+            The actual decision function should be implemented
+            case by case inside :meth:`_decision_function` method.
 
         Parameters
         ----------
@@ -282,7 +282,7 @@ class CClassifierMulticlass(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
@@ -295,7 +295,7 @@ class CClassifierMulticlass(CClassifier):
         if self.preprocess is not None:
             x = self.preprocess.normalize(x)
 
-        return self._discriminant_function(x, y)
+        return self._decision_function(x, y)
 
     def apply_method(self, method, *args, **kwargs):
         """Apply input method to all trained classifers.

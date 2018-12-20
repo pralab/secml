@@ -56,7 +56,7 @@ class CPca(CReducer):
         >>> from secml.ml.features.reduction import CPca
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> CPca().train_transform(array)
+        >>> CPca().fit_transform(array)
         CArray([[ -4.07872199e+00   2.47826647e+00   0.00000000e+00]
          [ -2.72723183e+00  -2.82960262e+00   5.55111512e-17]
          [  6.80595382e+00   3.51336152e-01  -2.22044605e-16]])
@@ -105,8 +105,8 @@ class CPca(CReducer):
         """
         return self._explained_variance_ratio
 
-    def train(self, data, y=None):
-        """Train the PCA using input data.
+    def fit(self, data, y=None):
+        """Fit the PCA using input data.
 
         Parameters
         ----------
@@ -126,7 +126,7 @@ class CPca(CReducer):
         >>> from secml.ml.features.reduction import CPca
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> pca = CPca().train(array)
+        >>> pca = CPca().fit(array)
         >>> pca.eigenval
         CArray([  8.39015935e+00   3.77781588e+00   1.90957046e-17])
         >>> pca.eigenvec
@@ -219,7 +219,7 @@ class CPca(CReducer):
         >>> from secml.ml.features.reduction import CPca
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> pca = CPca().train(array)
+        >>> pca = CPca().fit(array)
         >>> pca.transform(CArray.concatenate(array, [4., 2., -6.], axis=0))
         CArray([[ -4.07872199e+00   2.47826647e+00   0.00000000e+00]
          [ -2.72723183e+00  -2.82960262e+00   5.55111512e-17]
@@ -233,7 +233,7 @@ class CPca(CReducer):
 
         """
         if self._mean is None:
-            raise ValueError("train PCA first.")
+            raise ValueError("fit PCA first.")
 
         data_carray = CArray(data).todense().atleast_2d()
         if data_carray.shape[1] != self.mean.size:
@@ -261,7 +261,7 @@ class CPca(CReducer):
         >>> from secml.ml.features.reduction import CPca
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> pca = CPca().train(array)
+        >>> pca = CPca().fit(array)
         >>> array_pca = pca.transform(array)
         >>> pca.revert(array_pca).round(6)
         CArray([[ 1. -0.  2.]
@@ -270,7 +270,7 @@ class CPca(CReducer):
 
         """
         if self._mean is None:
-            raise ValueError("train PCA first.")
+            raise ValueError("fit PCA first.")
 
         data_carray = CArray(data).atleast_2d()
         if data_carray.shape[1] != self.n_components:
@@ -334,7 +334,7 @@ class CKernelPca(CPca):
         >>> from secml.ml.kernel import CKernelLinear
         >>> from secml.ml.features.reduction import CKernelPca
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> CKernelPca(kernel=CKernelLinear()).train_transform(array)
+        >>> CKernelPca(kernel=CKernelLinear()).fit_transform(array)
         CArray([[ -4.07872199e+00   2.47826647e+00   5.96046448e-08]
          [ -2.72723183e+00  -2.82960262e+00   8.94069672e-08]
          [  6.80595382e+00   3.51336152e-01  -1.19209290e-07]])
@@ -376,8 +376,8 @@ class CKernelPca(CPca):
 
         return kernel + self._mean_all - self._mean_row.T - pred_cols
 
-    def train(self, data, y=None):
-        """Train the Kernel PCA using input data.
+    def fit(self, data, y=None):
+        """Fit the Kernel PCA using input data.
 
         Parameters
         ----------
@@ -397,7 +397,7 @@ class CKernelPca(CPca):
         >>> from secml.ml.kernel import CKernelLinear
         >>> from secml.ml.features.reduction import CKernelPca
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> kpca = CKernelPca(kernel=CKernelLinear()).train(array)
+        >>> kpca = CKernelPca(kernel=CKernelLinear()).fit(array)
         >>> kpca.eigenval
         CArray([  7.03947739e+01   1.42718928e+01   2.61554597e-15])
         >>> kpca.eigenvec
@@ -449,7 +449,7 @@ class CKernelPca(CPca):
         >>> from secml.ml.kernel import CKernelLinear
         >>> from secml.ml.features.reduction import CKernelPca
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> kpca = CKernelPca(kernel=CKernelLinear()).train(array)
+        >>> kpca = CKernelPca(kernel=CKernelLinear()).fit(array)
         >>> kpca.transform(CArray.concatenate(array, [4., 2., -6.], axis=0))
         CArray([[ -4.07872199e+00   2.47826647e+00   5.96046448e-08]
          [ -2.72723183e+00  -2.82960262e+00   8.94069672e-08]

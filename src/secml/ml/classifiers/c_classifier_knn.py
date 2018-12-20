@@ -128,7 +128,7 @@ class CClassifierKNN(CClassifier):
         """Sets classifier metric_params."""
         self._metric_params = value
 
-    def _train(self, dataset):
+    def _fit(self, dataset):
         """Trains the KNeighbors classifier.
 
         Training dataset is stored to use in kneighbors() method.
@@ -149,8 +149,8 @@ class CClassifierKNN(CClassifier):
 
         return self._KNC
 
-    def _discriminant_function(self, x, y):
-        """Computes the discriminant function (probability estimates) for each pattern in x.
+    def _decision_function(self, x, y):
+        """Computes the decision function (probability estimates) for each pattern in x.
 
         Parameters
         ----------
@@ -163,7 +163,7 @@ class CClassifierKNN(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """

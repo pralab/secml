@@ -55,8 +55,8 @@ class TestCPerfEvaluatorMulticlass(CUnitTest):
             self.assertEqual(clf.C, (1.0, 1.0, 10.0, 10.0)[clf_idx])
             self.assertEqual(clf.kernel.gamma, (0.1, 0.1, 0.1, 0.1)[clf_idx])
 
-        # Final test: train using best parameters
-        multiclass.train(tr)
+        # Final test: fit using best parameters
+        multiclass.fit(tr)
 
         for clf_idx, clf in enumerate(multiclass.binary_classifiers):
             for param in best_params:

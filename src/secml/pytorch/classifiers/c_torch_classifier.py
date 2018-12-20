@@ -303,7 +303,7 @@ class CTorchClassifier(CClassifier):
         state_dict['epoch'] = self._start_epoch
         return state_dict
 
-    def train(self, dataset, warm_start=False, n_jobs=1):
+    def fit(self, dataset, warm_start=False, n_jobs=1):
         """Trains the classifier.
 
         If a preprocess has been specified,
@@ -351,9 +351,9 @@ class CTorchClassifier(CClassifier):
             # Reinitialize the optimizer as we are starting clean
             self.init_optimizer()
 
-        return self._train(dataset, n_jobs=n_jobs)
+        return self._fit(dataset, n_jobs=n_jobs)
 
-    def _train(self, dataset, n_jobs=1):
+    def _fit(self, dataset, n_jobs=1):
         """At each training the weight are setted equal to the random weight
         that are chosen when we are instantiating the object
 
@@ -373,7 +373,7 @@ class CTorchClassifier(CClassifier):
                                num_workers=n_jobs-1)
 
         # Switch to training mode
-        self._model.train()
+        self._model.fit()
 
         # Scheduler to adjust the learning rate depending on epoch
         scheduler = optim.lr_scheduler.MultiStepLR(
@@ -418,11 +418,11 @@ class CTorchClassifier(CClassifier):
 
         return self
 
-    def discriminant_function(self, x, y, n_jobs=1):
-        """Computes the discriminant function for each pattern in x.
+    def decision_function(self, x, y, n_jobs=1):
+        """Computes the decision function for each pattern in x.
 
         If a preprocess has been specified, input is normalized
-        before computing the discriminant function.
+        before computing the decision function.
 
         Parameters
         ----------
@@ -438,7 +438,7 @@ class CTorchClassifier(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
@@ -448,10 +448,10 @@ class CTorchClassifier(CClassifier):
         if self.preprocess is not None:
             x = self.preprocess.normalize(x)
 
-        return self._discriminant_function(x, y, n_jobs=n_jobs)
+        return self._decision_function(x, y, n_jobs=n_jobs)
 
-    def _discriminant_function(self, x, y, n_jobs=1):
-        """Computes the discriminant function for each pattern in x.
+    def _decision_function(self, x, y, n_jobs=1):
+        """Computes the decision function for each pattern in x.
 
         Parameters
         ----------
@@ -467,7 +467,7 @@ class CTorchClassifier(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
@@ -505,7 +505,7 @@ class CTorchClassifier(CClassifier):
 
         return scores.ravel()
 
-    def classify(self, x, n_jobs=1):
+    def predict(self, x, return_decision_function=False, n_jobs=1):
         """Perform classification of each pattern in x.
 
         If a preprocess has been specified,
@@ -516,6 +516,9 @@ class CTorchClassifier(CClassifier):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
+        return_decision_function : bool, optional
+            Whether to return the decision_function value along
+            with predictions. Default False.
         n_jobs : int, optional
             Number of parallel workers to use for classification.
             Default 1. Cannot be higher than processor's number of cores.
@@ -526,9 +529,10 @@ class CTorchClassifier(CClassifier):
             Flat dense array of shape (n_patterns,) with the label assigned
              to each test pattern. The classification label is the label of
              the class associated with the highest score.
-        scores : CArray
+        scores : CArray, optional
             Array of shape (n_patterns, n_classes) with classification
              score of each test pattern with respect to each training class.
+            Will be returned only if `return_decision_function` is True.
 
         """
         x_carray = CArray(x).atleast_2d()
@@ -569,7 +573,9 @@ class CTorchClassifier(CClassifier):
         # TODO: WE SHOULD USE SOFTMAX TO COMPUTE LABELS?
         # The classification label is the label of the class
         # associated with the highest score
-        return scores.argmax(axis=1).ravel(), scores
+        labels = scores.argmax(axis=1).ravel()
+
+        return (labels, scores) if return_decision_function is True else labels
 
     def _gradient_f(self, x, y):
         """Computes the gradient of the classifier's decision function

@@ -110,7 +110,8 @@ class CAttackEvasion(CAttack):
         # Make classification in the sparse domain if possible
         x = x.tosparse() if self.issparse is True else x
 
-        y_pred, scores = self._solver_clf.classify(x)
+        y_pred, scores = self._solver_clf.predict(
+            x, return_decision_function=True)
         return self._objective_function_scores(y_pred, scores)
 
     def _objective_function_scores(self, y_pred, scores):
@@ -149,7 +150,8 @@ class CAttackEvasion(CAttack):
         # Make classification in the sparse domain if possible
         x = x.tosparse() if self.issparse is True else x
 
-        y_pred, score = self._solver_clf.classify(x)
+        y_pred, score = self._solver_clf.predict(
+            x, return_decision_function=True)
 
         if self.y_target is None:
             # indiscriminate evasion
@@ -242,12 +244,13 @@ class CAttackEvasion(CAttack):
             return
 
         self.logger.info("Classification of surrogate data...")
-        y_pred, scores = self._solver_clf.classify(self.surrogate_data.X)
+        y_pred, scores = self._solver_clf.predict(
+            self.surrogate_data.X, return_decision_function=True)
 
         # for targeted evasion, this does not depend on the data label y0
         if self.y_target is not None:
-            self._xk = self._get_point_with_min_f_obj(y_pred,
-                                                      scores.deepcopy())
+            self._xk = self._get_point_with_min_f_obj(
+                y_pred, scores.deepcopy())
             return
 
         # for indiscriminate evasion, this depends on y0
@@ -409,7 +412,8 @@ class CAttackEvasion(CAttack):
                     self._grad_eval))
             adv_ds.X[k, :] = x_opt
 
-        y_pred, scores = self.classifier.classify(adv_ds.X)
+        y_pred, scores = self.classifier.predict(
+            adv_ds.X, return_decision_function=True)
 
         y_pred = CArray(y_pred)
 

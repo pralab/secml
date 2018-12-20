@@ -13,8 +13,8 @@ class TestCPlot(CUnitTest):
         self.clf = CClassifierSVM()
         self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
                                  n_clusters_per_class=1).load()
-        self.dataset.X = CNormalizerMinMax().train_normalize(self.dataset.X)
-        self.clf.train(self.dataset)
+        self.dataset.X = CNormalizerMinMax().fit_normalize(self.dataset.X)
+        self.clf.fit(self.dataset)
 
     def test_fobj(self):
         """Test for CPlotFunction.plot_fobj method."""
@@ -23,7 +23,7 @@ class TestCPlot(CUnitTest):
         fig.sp.plot_ds(self.dataset)
 
         fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(self.clf.discriminant_function, y=1)
+        fig.sp.plot_fobj(self.clf.decision_function, y=1)
         fig.show()
 
     def test_fgrads(self):
@@ -33,7 +33,7 @@ class TestCPlot(CUnitTest):
         fig.sp.plot_ds(self.dataset)
 
         fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(self.clf.discriminant_function, y=1)
+        fig.sp.plot_fobj(self.clf.decision_function, y=1)
         fig.sp.plot_fgrads(lambda x: self.clf.gradient_f_x(x))
         fig.show()
 

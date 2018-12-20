@@ -78,7 +78,7 @@ class CClassifierKDE(CClassifier):
     def training_samples(self, value):
         self._training_samples = value
 
-    def _train(self, dataset):
+    def _fit(self, dataset):
         """Trains the One-Vs-All Kernel Density Estimator classifier.
 
         The following is a private method computing one single
@@ -116,11 +116,11 @@ class CClassifierKDE(CClassifier):
 
         return self
 
-    def discriminant_function(self, x, y=1):
-        """Computes the discriminant function for each pattern in x.
+    def decision_function(self, x, y=1):
+        """Computes the decision function for each pattern in x.
 
         If a preprocess has been specified, input is normalized
-         before computing the discriminant function.
+         before computing the decision function.
 
         Parameters
         ----------
@@ -134,7 +134,7 @@ class CClassifierKDE(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
@@ -147,10 +147,10 @@ class CClassifierKDE(CClassifier):
         if self.preprocess is not None:
             x = self.preprocess.normalize(x)
 
-        return self._discriminant_function(x, y=y)
+        return self._decision_function(x, y=y)
 
-    def _discriminant_function(self, x, y=1):
-        """Computes the discriminant function for each pattern in x.
+    def _decision_function(self, x, y=1):
+        """Computes the decision function for each pattern in x.
 
         Parameters
         ----------
@@ -164,7 +164,7 @@ class CClassifierKDE(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """

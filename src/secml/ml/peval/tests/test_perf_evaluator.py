@@ -107,12 +107,11 @@ class TestCPerfEvaluator(CUnitTest):
                 self.svm.set("C", parameters_combination[comb][0])
                 self.svm.kernel.gamma = parameters_combination[comb][1]
 
-                self.svm.train(
+                self.svm.fit(
                     self.training_dataset[xval_splitter.tr_idx[f], :])
 
-                this_fold_predicted = self.svm.classify(
-                    self.training_dataset[
-                        xval_splitter.ts_idx[f], :].X)[0].ravel()
+                this_fold_predicted = self.svm.predict(
+                    self.training_dataset[xval_splitter.ts_idx[f], :].X)
 
                 this_fold_accuracy = skm.accuracy_score(
                     self.training_dataset[
@@ -213,8 +212,8 @@ class TestCPerfEvaluator(CUnitTest):
             self.assertEqual(clf.C, 10.0)
             self.assertEqual(clf.kernel.gamma, 0.1)
 
-        # Final test: train using best parameters
-        multiclass.train(tr)
+        # Final test: fit using best parameters
+        multiclass.fit(tr)
 
         for clf in multiclass.binary_classifiers:
             for param in best_params:

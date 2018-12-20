@@ -240,8 +240,8 @@ class CClassifierSVM(CClassifierLinear):
         """Support Vectors."""
         return self._sv
 
-    def train(self, dataset, n_jobs=1):
-        """Trains the SVM classifier.
+    def fit(self, dataset, n_jobs=1):
+        """Fit the SVM classifier.
 
         We use :class:`sklearn.svm.SVC` for weights and Support Vectors
         computation. The routine will set alpha, sv, sv_idx and b
@@ -249,7 +249,7 @@ class CClassifierSVM(CClassifierLinear):
         we also store the 'w' flat vector with each feature's weight.
 
         If a preprocess has been specified, input is normalized
-        before computing the discriminant function.
+        before computing the decision function.
 
         Parameters
         ----------
@@ -266,14 +266,13 @@ class CClassifierSVM(CClassifierLinear):
             Instance of the SVM classifier trained using input dataset.
 
         """
-        # Train the SVM
-        super(CClassifierSVM, self).train(dataset, n_jobs=n_jobs)
+        super(CClassifierSVM, self).fit(dataset, n_jobs=n_jobs)
         # Cleaning up kernel matrix to free memory
         self._k = None
 
         return self
 
-    def _train(self, dataset):
+    def _fit(self, dataset):
         """Trains the One-Vs-All SVM classifier.
 
         Parameters
@@ -328,7 +327,7 @@ class CClassifierSVM(CClassifierLinear):
 
         return classifier
 
-    def _discriminant_function(self, x, y=1):
+    def _decision_function(self, x, y=1):
         """Computes the distance from the separating hyperplane for each pattern in x.
 
         For non linear SVM, the kernel between input patterns and
@@ -342,17 +341,17 @@ class CClassifierSVM(CClassifierLinear):
             (n_patterns, n_features).
         y : {1}
             The label of the class wrt the function should be calculated.
-            Discriminant function is always computed wrt positive class (1).
+            decision function is always computed wrt positive class (1).
 
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
         if self.is_kernel_linear():  # Scores are given by the linear model
-            return CClassifierLinear._discriminant_function(
+            return CClassifierLinear._decision_function(
                 self, x, y=y)
 
         # Non-linear SVM
@@ -360,7 +359,7 @@ class CClassifierSVM(CClassifierLinear):
             raise ValueError("make sure the classifier is trained first.")
         if y != 1:
             raise ValueError(
-                "discriminant function is always computed wrt positive class.")
+                "decision function is always computed wrt positive class.")
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 

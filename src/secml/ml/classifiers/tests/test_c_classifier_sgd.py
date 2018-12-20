@@ -17,14 +17,14 @@ class TestCClassifierSGD(CUnitTest):
     """Unit test for SGD Classifier."""
 
     def setUp(self):
-        """Test for init and train methods."""        
+        """Test for init and fit methods."""
         # generate synthetic data
         self.dataset = CDLRandom(n_features=1000, n_redundant=200,
                                  n_informative=250,
                                  n_clusters_per_class=2,
                                  random_state=0).load()
 
-        self.dataset.X = CNormalizerMinMax().train_normalize(self.dataset.X)
+        self.dataset.X = CNormalizerMinMax().fit_normalize(self.dataset.X)
 
         self.logger.info("Testing classifier creation ")
         self.sgd = CClassifierSGD(regularizer=CRegularizerL2(),
@@ -40,7 +40,7 @@ class TestCClassifierSGD(CUnitTest):
 
         for sgd in self.sgds:
             sgd.verbose = 2  # Enabling debug output for each classifier
-            sgd.train(self.dataset)
+            sgd.fit(self.dataset)
 
     def test_time(self):
         """ Compare execution time of SGD and SVM"""
@@ -53,10 +53,10 @@ class TestCClassifierSGD(CUnitTest):
             svm = CClassifierSVM(sgd.kernel)
 
             with self.timer() as t_svm:
-                svm.train(self.dataset)
+                svm.fit(self.dataset)
             self.logger.info("Execution time of SVM: " + str(t_svm.interval) + "\n")
             with self.timer() as t_sgd:
-                sgd.train(self.dataset)
+                sgd.fit(self.dataset)
             self.logger.info("Execution time of SGD: " + str(t_sgd.interval) + "\n")
 
     def test_draw(self):
@@ -66,12 +66,12 @@ class TestCClassifierSGD(CUnitTest):
         # generate 2D synthetic data
         dataset = CDLRandom(n_features=2, n_redundant=1, n_informative=1,
                             n_clusters_per_class=1).load()
-        dataset.X = CNormalizerMinMax().train_normalize(dataset.X)
+        dataset.X = CNormalizerMinMax().fit_normalize(dataset.X)
 
-        self.sgds[0].train(dataset)
+        self.sgds[0].fit(dataset)
 
         svm = CClassifierSVM()
-        svm.train(dataset)
+        svm.fit(dataset)
 
         fig = CFigure(width=10, markersize=8)
         fig.subplot(2, 1, 1, sp_type='ds')
@@ -79,7 +79,7 @@ class TestCClassifierSGD(CUnitTest):
         fig.sp.plot_ds(dataset)
         # Plot objective function
         fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(svm.discriminant_function,
+        fig.sp.plot_fobj(svm.decision_function,
                          grid_limits=dataset.get_bounds())
         fig.sp.title('SVM')
 
@@ -88,7 +88,7 @@ class TestCClassifierSGD(CUnitTest):
         fig.sp.plot_ds(dataset)
         # Plot objective function
         fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(self.sgds[0].discriminant_function,
+        fig.sp.plot_fobj(self.sgds[0].decision_function,
                          grid_limits=dataset.get_bounds())
         fig.sp.title('SGD Classifier')
 
@@ -105,10 +105,12 @@ class TestCClassifierSGD(CUnitTest):
 
             svm = CClassifierSVM(sgd.kernel)
 
-            svm.train(self.dataset)
+            svm.fit(self.dataset)
 
-            label_svm, y_svm = svm.classify(self.dataset.X)
-            label_sgd, y_sgd = sgd.classify(self.dataset.X)
+            label_svm, y_svm = svm.predict(
+                self.dataset.X, return_decision_function=True)
+            label_sgd, y_sgd = sgd.predict(
+                self.dataset.X, return_decision_function=True)
 
             acc_svm = CMetric.create('f1').performance_score(
                 self.dataset.Y, label_svm)
@@ -133,7 +135,7 @@ class TestCClassifierSGD(CUnitTest):
         # fit the model
         clf = CClassifierSGD(loss=CLossHinge(), regularizer=CRegularizerL2(),
                              alpha=0.01, max_iter=200, random_state=0)
-        clf.train(dataset)
+        clf.fit(dataset)
 
         # plot the line, the points, and the nearest vectors to the plane
         xx = CArray.linspace(-1, 5, 10)
@@ -144,7 +146,7 @@ class TestCClassifierSGD(CUnitTest):
         for (i, j), val in np.ndenumerate(X1):
             x1 = val
             x2 = X2[i, j]
-            Z[i, j] = clf.discriminant_function(CArray([x1, x2]))
+            Z[i, j] = clf.decision_function(CArray([x1, x2]))
         levels = [-1.0, 0.0, 1.0]
         linestyles = ['dashed', 'solid', 'dashed']
         colors = 'k'
@@ -157,9 +159,9 @@ class TestCClassifierSGD(CUnitTest):
         fig.show()
 
     def test_fun(self):
-        """Test for discriminant_function() and classify() methods."""
+        """Test for decision_function() and predict() methods."""
         self.logger.info(
-            "Test for discriminant_function() and classify() methods.")
+            "Test for decision_function() and predict() methods.")
 
         def _check_df_scores(s, n_samples):
             self.assertEqual(type(s), CArray)
@@ -184,7 +186,7 @@ class TestCClassifierSGD(CUnitTest):
 
             self.logger.info("SGD kernel: {:}".format(sgd.kernel))
 
-            sgd.train(self.dataset)
+            sgd.fit(self.dataset)
 
             x = x_norm = self.dataset.X
             p = p_norm = self.dataset.X[0, :].ravel()
@@ -194,25 +196,25 @@ class TestCClassifierSGD(CUnitTest):
                 x_norm = sgd.preprocess.normalize(x)
                 p_norm = sgd.preprocess.normalize(p)
 
-            # Testing discriminant_function on multiple points
+            # Testing decision_function on multiple points
 
-            df_scores_neg = sgd.discriminant_function(x, y=0)
-            self.logger.info("discriminant_function(x, y=0):\n"
+            df_scores_neg = sgd.decision_function(x, y=0)
+            self.logger.info("decision_function(x, y=0):\n"
                              "{:}".format(df_scores_neg))
             _check_df_scores(df_scores_neg, self.dataset.num_samples)
 
-            df_scores_pos = sgd.discriminant_function(x, y=1)
-            self.logger.info("discriminant_function(x, y=1):\n"
+            df_scores_pos = sgd.decision_function(x, y=1)
+            self.logger.info("decision_function(x, y=1):\n"
                              "{:}".format(df_scores_pos))
             _check_df_scores(df_scores_pos, self.dataset.num_samples)
 
             self.assertFalse(
                 ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
 
-            # Testing _discriminant_function on multiple points
+            # Testing _decision_function on multiple points
 
-            ds_priv_scores = sgd._discriminant_function(x_norm, y=1)
-            self.logger.info("_discriminant_function(x_norm, y=1):\n"
+            ds_priv_scores = sgd._decision_function(x_norm, y=1)
+            self.logger.info("_decision_function(x_norm, y=1):\n"
                              "{:}".format(ds_priv_scores))
             _check_df_scores(ds_priv_scores, self.dataset.num_samples)
 
@@ -220,38 +222,38 @@ class TestCClassifierSGD(CUnitTest):
 
             self.assertFalse((df_scores_pos != ds_priv_scores).any())
 
-            # Testing classify on multiple points
+            # Testing predict on multiple points
 
-            labels, scores = sgd.classify(x)
-            self.logger.info("classify(x):\nlabels: {:}\n"
+            labels, scores = sgd.predict(x, return_decision_function=True)
+            self.logger.info("predict(x):\nlabels: {:}\n"
                              "scores: {:}".format(labels, scores))
             _check_classify_scores(
                 labels, scores, self.dataset.num_samples, sgd.n_classes)
 
-            # Comparing output of discriminant_function and classify
+            # Comparing output of decision_function and predict
 
             self.assertFalse((df_scores_neg != scores[:, 0].ravel()).any())
             self.assertFalse((df_scores_pos != scores[:, 1].ravel()).any())
 
-            # Testing discriminant_function on single point
+            # Testing decision_function on single point
 
-            df_scores_neg = sgd.discriminant_function(p, y=0)
-            self.logger.info("discriminant_function(p, y=0):\n"
+            df_scores_neg = sgd.decision_function(p, y=0)
+            self.logger.info("decision_function(p, y=0):\n"
                              "{:}".format(df_scores_neg))
             _check_df_scores(df_scores_neg, 1)
 
-            df_scores_pos = sgd.discriminant_function(p, y=1)
-            self.logger.info("discriminant_function(p, y=1):\n"
+            df_scores_pos = sgd.decision_function(p, y=1)
+            self.logger.info("decision_function(p, y=1):\n"
                              "{:}".format(df_scores_pos))
             _check_df_scores(df_scores_pos, 1)
 
             self.assertFalse(
                 ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
 
-            # Testing _discriminant_function on single point
+            # Testing _decision_function on single point
 
-            df_priv_scores = sgd._discriminant_function(p_norm, y=1)
-            self.logger.info("_discriminant_function(p_norm, y=1):\n"
+            df_priv_scores = sgd._decision_function(p_norm, y=1)
+            self.logger.info("_decision_function(p_norm, y=1):\n"
                              "{:}".format(df_priv_scores))
             _check_df_scores(df_priv_scores, 1)
 
@@ -259,14 +261,14 @@ class TestCClassifierSGD(CUnitTest):
 
             self.assertFalse((df_scores_pos != df_priv_scores).any())
 
-            self.logger.info("Testing classify on single point")
+            self.logger.info("Testing predict on single point")
 
-            labels, scores = sgd.classify(p)
-            self.logger.info("classify(p):\nlabels: {:}\n"
+            labels, scores = sgd.predict(p, return_decision_function=True)
+            self.logger.info("predict(p):\nlabels: {:}\n"
                              "scores: {:}".format(labels, scores))
             _check_classify_scores(labels, scores, 1, sgd.n_classes)
 
-            # Comparing output of discriminant_function and classify
+            # Comparing output of decision_function and predict
 
             self.assertFalse(
                 (df_scores_neg != CArray(scores[:, 0]).ravel()).any())
@@ -276,9 +278,9 @@ class TestCClassifierSGD(CUnitTest):
             # Testing error raising
 
             with self.assertRaises(ValueError):
-                sgd._discriminant_function(x_norm, y=0)
+                sgd._decision_function(x_norm, y=0)
             with self.assertRaises(ValueError):
-                sgd._discriminant_function(p_norm, y=0)
+                sgd._decision_function(p_norm, y=0)
 
 
 if __name__ == '__main__':
