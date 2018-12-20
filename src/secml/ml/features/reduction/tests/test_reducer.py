@@ -40,7 +40,7 @@ class TestArrayDecomposition(CUnitTest):
             # Sklearn normalizer
             target = CArray(PCA().fit_transform(array.tondarray()))
             # Our normalizer
-            pca = CPca().train(array)
+            pca = CPca().fit(array)
             result = pca.transform(array)
 
             self.logger.info("Sklearn result is:\n{:}".format(target))
@@ -85,7 +85,7 @@ class TestArrayDecomposition(CUnitTest):
                 target = CArray(sklearn_pca.transform(array.tondarray()))
                 target.nan_to_num()  # Removing nans
                 # Our normalizer
-                pca = CKernelPca(kernel=kernel).train(array)
+                pca = CKernelPca(kernel=kernel).fit(array)
                 result = pca.transform(array)
 
                 self.logger.info("Sklearn result is:\n{:}".format(target))
@@ -119,9 +119,9 @@ class TestArrayDecomposition(CUnitTest):
         labels = CArray(iris_db.target)
 
         lda = CLda()
-        lda.train(patterns, labels)
+        lda.fit(patterns, labels)
         # store dataset reduced with pca
-        red_dts = lda.train_transform(patterns, labels)
+        red_dts = lda.fit_transform(patterns, labels)
 
         fig = CFigure(width=10, markersize=8)
         fig.sp.scatter(red_dts[:, 0].ravel(),

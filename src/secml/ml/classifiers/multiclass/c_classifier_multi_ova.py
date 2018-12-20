@@ -11,9 +11,9 @@ from secml.data import CDataset
 from secml.parallel import parfor2
 
 
-def _train_one_ova(
+def _fit_one_ova(
         tr_class_idx, multi_ova, dataset, verbose):
-    """Train a OVA classifier.
+    """Fit a OVA classifier.
 
     Parameters
     ----------
@@ -44,7 +44,7 @@ def _train_one_ova(
     # Setting verbosity level
     classifier_instance.verbose = multi_ova.verbose
     # Training one-vs-all classifier
-    classifier_instance.train(train_ds)
+    classifier_instance.fit(train_ds)
 
     return classifier_instance
 
@@ -66,7 +66,7 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
     """
     __class_type = 'ova'
 
-    def _train(self, dataset, n_jobs=1):
+    def _fit(self, dataset, n_jobs=1):
         """Trains the classifier.
 
         A One-Vs-All classifier is trained for each dataset class.
@@ -89,9 +89,9 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
         # Preparing the binary classifiers
         self.prepare(dataset.num_classes)
 
-        # Train a one-vs-all classifier for each class
+        # Fit a one-vs-all classifier for each class
         # Use the specified number of workers
-        self._binary_classifiers = parfor2(_train_one_ova,
+        self._binary_classifiers = parfor2(_fit_one_ova,
                                            self.classes.size,
                                            n_jobs, self, dataset,
                                            self.verbose)
@@ -118,8 +118,8 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
         return CDataset(
             dataset.X, dataset.get_labels_asbinary(dataset.classes[class_idx]))
 
-    def _discriminant_function(self, x, y):
-        """Computes the discriminant function for each pattern in x.
+    def _decision_function(self, x, y):
+        """Computes the decision function for each pattern in x.
 
         For One-Vs-All (OVA) multiclass scheme,
          this is the output of the `label`^th classifier.
@@ -135,12 +135,12 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
         self.logger.info(
-            "Getting discriminant function against class: {:}".format(y))
+            "Getting decision function against class: {:}".format(y))
         # Getting predicted scores for classifier associated with y
-        # The discriminant function is always computed wrt positive class (1)
-        return self.binary_classifiers[y].discriminant_function(x, y=1)
+        # The decision function is always computed wrt positive class (1)
+        return self.binary_classifiers[y].decision_function(x, y=1)

@@ -84,7 +84,7 @@ class CPlotFunction(CPlot):
                   n_colors=50, cmap='jet', alpha=1.0, alpha_levels=1.0,
                   vmin=None, vmax=None, colorbar=True, n_grid_points=30,
                   grid_limits=None,  func_args=(), **func_kwargs):
-        """Plot a function (used for discriminant functions or boundaries).
+        """Plot a function (used for decision functions or boundaries).
 
         Parameters
         ----------

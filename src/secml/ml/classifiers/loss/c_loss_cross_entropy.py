@@ -99,7 +99,7 @@ class CLossCrossEntropy(CLossClassification):
 
     def dloss(self, y_true, score, pos_label=None):
         """Computes gradient of the Cross Entropy loss w.r.t.the classifier
-            discriminant function corresponding to class label pos_label
+            decision function corresponding to class label pos_label
 
         Assuming pos_label to be i, the derivative is:
             pi-ti, being ti = 1 if i is equal to the true label yi,

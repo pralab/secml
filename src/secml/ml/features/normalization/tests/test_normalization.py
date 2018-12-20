@@ -42,7 +42,7 @@ class TestArrayNormalizers(CUnitTest):
             target = CArray(StandardScaler().fit_transform(
                 array.astype(float).tondarray())).round(4)
             # Our normalizer
-            result = CNormalizerZScore().train_normalize(array).round(4)
+            result = CNormalizerZScore().fit_normalize(array).round(4)
 
             self.assertFalse((target != result).any(),
                              "\n{:}\nis different from target\n"
@@ -67,7 +67,7 @@ class TestArrayNormalizers(CUnitTest):
             # Sklearn normalizer (requires float dtype input)
             target = CArray(Normalizer().fit_transform(array.astype(float).get_data())).round(4)
             # Our normalizer
-            result = CNormalizerUnitNorm().train_normalize(array).round(4)
+            result = CNormalizerUnitNorm().fit_normalize(array).round(4)
 
             self.assertFalse((target != result).any(), "\n{:}\nis different from target\n{:}".format(result, target))
 
@@ -94,7 +94,7 @@ class TestArrayNormalizers(CUnitTest):
             target = CArray(sk_norm.transform(array_sk)).round(4)
 
             # Our normalizer
-            our_norm = CNormalizerMinMax().train(array)
+            our_norm = CNormalizerMinMax().fit(array)
             result = our_norm.normalize(array).round(4)
 
             self.logger.info("Correct result is:\n{:}".format(target))

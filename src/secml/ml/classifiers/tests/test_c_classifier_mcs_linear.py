@@ -25,7 +25,7 @@ class TestCClassifierMCSLinear(CUnitTest):
                                             num_classifiers=10,
                                             max_features=0.5,
                                             max_samples=0.5)
-            self.mcs.train(self.dataset)
+            self.mcs.fit(self.dataset)
             self.logger.info("Trained MCS.")
 
         with self.timer():
@@ -38,7 +38,8 @@ class TestCClassifierMCSLinear(CUnitTest):
                                      self.dataset.Y.tondarray())
             self.logger.info("Trained Sklearn Bagging + SVC.")
 
-        label_mcs, s_mcs = self.mcs.classify(self.dataset.X)
+        label_mcs, s_mcs = self.mcs.predict(
+            self.dataset.X, return_decision_function=True)
         label_skbag = self.sklearn_bagging.predict(self.dataset.X.get_data())
 
         f1_mcs = CMetric.create('f1').performance_score(
@@ -61,7 +62,7 @@ class TestCClassifierMCSLinear(CUnitTest):
         self.logger.info("Training MCS on 2D Dataset... ")
         self.mcs = CClassifierMCSLinear(CClassifierSVM(),
                                         max_features=0.5, max_samples=0.5)
-        self.mcs.train(self.dataset)
+        self.mcs.fit(self.dataset)
 
         fig = CFigure()
         # Plot dataset points
@@ -69,15 +70,15 @@ class TestCClassifierMCSLinear(CUnitTest):
         fig.sp.plot_ds(self.dataset)
         # Plot objective function
         fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(self.mcs.discriminant_function,
+        fig.sp.plot_fobj(self.mcs.decision_function,
                          grid_limits=self.dataset.get_bounds())
         fig.show()
         
 
     def test_fun(self):
-        """Test for discriminant_function() and classify() methods."""
+        """Test for decision_function() and predict() methods."""
         self.logger.info(
-            "Test for discriminant_function() and classify() methods.")
+            "Test for decision_function() and predict() methods.")
 
         def _check_df_scores(s, n_samples):
             self.assertEqual(type(s), CArray)
@@ -102,7 +103,7 @@ class TestCClassifierMCSLinear(CUnitTest):
             CClassifierSVM(), num_classifiers=10,
             max_features=0.5, max_samples=0.5)
 
-        mcs.train(self.dataset)
+        mcs.fit(self.dataset)
 
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
@@ -112,25 +113,25 @@ class TestCClassifierMCSLinear(CUnitTest):
             x_norm = mcs.normalizer.normalize(x)
             p_norm = mcs.normalizer.normalize(p)
 
-        # Testing discriminant_function on multiple points
+        # Testing decision_function on multiple points
 
-        df_scores_neg = mcs.discriminant_function(x, y=0)
+        df_scores_neg = mcs.decision_function(x, y=0)
         self.logger.info(
-            "discriminant_function(x, y=0):\n{:}".format(df_scores_neg))
+            "decision_function(x, y=0):\n{:}".format(df_scores_neg))
         _check_df_scores(df_scores_neg, self.dataset.num_samples)
 
-        df_scores_pos = mcs.discriminant_function(x, y=1)
+        df_scores_pos = mcs.decision_function(x, y=1)
         self.logger.info(
-            "discriminant_function(x, y=1):\n{:}".format(df_scores_pos))
+            "decision_function(x, y=1):\n{:}".format(df_scores_pos))
         _check_df_scores(df_scores_pos, self.dataset.num_samples)
 
         self.assertFalse(
             ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
 
-        # Testing _discriminant_function on multiple points
+        # Testing _decision_function on multiple points
 
-        ds_priv_scores = mcs._discriminant_function(x_norm, y=1)
-        self.logger.info("_discriminant_function(x_norm, y=1):\n"
+        ds_priv_scores = mcs._decision_function(x_norm, y=1)
+        self.logger.info("_decision_function(x_norm, y=1):\n"
                          "{:}".format(ds_priv_scores))
         _check_df_scores(ds_priv_scores, self.dataset.num_samples)
 
@@ -138,38 +139,38 @@ class TestCClassifierMCSLinear(CUnitTest):
 
         self.assertFalse((df_scores_pos != ds_priv_scores).any())
 
-        # Testing classify on multiple points
+        # Testing predict on multiple points
 
-        labels, scores = mcs.classify(x)
+        labels, scores = mcs.predict(x, return_decision_function=True)
         self.logger.info(
-            "classify(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
+            "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(
             labels, scores, self.dataset.num_samples, mcs.n_classes)
 
-        # Comparing output of discriminant_function and classify
+        # Comparing output of decision_function and predict
 
         self.assertFalse((df_scores_neg != scores[:, 0].ravel()).any())
         self.assertFalse((df_scores_pos != scores[:, 1].ravel()).any())
 
-        # Testing discriminant_function on single point
+        # Testing decision_function on single point
 
-        df_scores_neg = mcs.discriminant_function(p, y=0)
+        df_scores_neg = mcs.decision_function(p, y=0)
         self.logger.info(
-            "discriminant_function(p, y=0):\n{:}".format(df_scores_neg))
+            "decision_function(p, y=0):\n{:}".format(df_scores_neg))
         _check_df_scores(df_scores_neg, 1)
 
-        df_scores_pos = mcs.discriminant_function(p, y=1)
+        df_scores_pos = mcs.decision_function(p, y=1)
         self.logger.info(
-            "discriminant_function(p, y=1):\n{:}".format(df_scores_pos))
+            "decision_function(p, y=1):\n{:}".format(df_scores_pos))
         _check_df_scores(df_scores_pos, 1)
 
         self.assertFalse(
             ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
 
-        # Testing _discriminant_function on single point
+        # Testing _decision_function on single point
 
-        df_priv_scores = mcs._discriminant_function(p_norm, y=1)
-        self.logger.info("_discriminant_function(p_norm, y=1):\n"
+        df_priv_scores = mcs._decision_function(p_norm, y=1)
+        self.logger.info("_decision_function(p_norm, y=1):\n"
                          "{:}".format(df_priv_scores))
         _check_df_scores(df_priv_scores, 1)
 
@@ -177,14 +178,14 @@ class TestCClassifierMCSLinear(CUnitTest):
 
         self.assertFalse((df_scores_pos != df_priv_scores).any())
 
-        self.logger.info("Testing classify on single point")
+        self.logger.info("Testing predict on single point")
 
-        labels, scores = mcs.classify(p)
+        labels, scores = mcs.predict(p, return_decision_function=True)
         self.logger.info(
-            "classify(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
+            "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 1, mcs.n_classes)
 
-        # Comparing output of discriminant_function and classify
+        # Comparing output of decision_function and predict
 
         self.assertFalse(
             (df_scores_neg != CArray(scores[:, 0]).ravel()).any())
@@ -194,9 +195,9 @@ class TestCClassifierMCSLinear(CUnitTest):
         # Testing error raising
 
         with self.assertRaises(ValueError):
-            mcs._discriminant_function(x_norm, y=0)
+            mcs._decision_function(x_norm, y=0)
         with self.assertRaises(ValueError):
-            mcs._discriminant_function(p_norm, y=0)
+            mcs._decision_function(p_norm, y=0)
 
 
 if __name__ == '__main__':

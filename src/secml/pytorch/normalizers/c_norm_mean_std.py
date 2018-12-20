@@ -70,7 +70,7 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         """Standard deviation."""
         return self._std
 
-    def train(self, data):
+    def fit(self, data):
         """Compute the mean and standard deviation to be used for scaling.
 
         Parameters
@@ -90,7 +90,7 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         >>> from secml.pytorch.normalizers import CNormalizerMeanSTD
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]],tosparse=True)
 
-        >>> normalizer = CNormalizerMeanSTD(0.5, 0.2).train(array)
+        >>> normalizer = CNormalizerMeanSTD(0.5, 0.2).fit(array)
         >>> print normalizer._data_mean
         CArray([ 0.5  0.5  0.5])
         >>> print normalizer._data_std
@@ -101,7 +101,7 @@ class CNormalizerMeanSTD(CNormalizerLinear):
          [ 7.5 -2.5 -2.5]
          [-2.5  2.5 -7.5]])
 
-        >>> normalizer = CNormalizerMeanSTD((0.5, 0.5, 0.2), (0.2, 0.1, 0.1)).train(array)
+        >>> normalizer = CNormalizerMeanSTD((0.5, 0.5, 0.2), (0.2, 0.1, 0.1)).fit(array)
 
         >>> print normalizer.normalize(array)
         CArray([[  2.5 -15.   18. ]
@@ -155,6 +155,6 @@ class CNormalizerMeanSTD(CNormalizerLinear):
 
         """
         if self.is_clear():
-            # This normalize has no "real" train so we can do it right now
-            self.train(data)
+            # This normalize has no "real" fit so we can do it right now
+            self.fit(data)
         return super(CNormalizerMeanSTD, self).normalize(data)

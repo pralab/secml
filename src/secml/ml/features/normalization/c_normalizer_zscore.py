@@ -52,12 +52,12 @@ class CNormalizerZScore(CNormalizerLinear):
     >>> from secml.ml.features.normalization import CNormalizerZScore
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-    >>> print CNormalizerZScore().train_normalize(array)
+    >>> print CNormalizerZScore().fit_normalize(array)
     CArray([[ 0.       -1.224745  1.336306]
      [ 1.224745  0.       -0.267261]
      [-1.224745  1.224745 -1.069045]])
 
-    >>> print CNormalizerZScore(with_std=False).train_normalize(array.tosparse())  # works with sparse arrays too
+    >>> print CNormalizerZScore(with_std=False).fit_normalize(array.tosparse())  # works with sparse arrays too
     CArray([[ 0.       -1.        1.666667]
      [ 1.        0.       -0.333333]
      [-1.        1.       -1.333333]])
@@ -132,7 +132,7 @@ class CNormalizerZScore(CNormalizerLinear):
         """
         return self._x_std
 
-    def train(self, x):
+    def fit(self, x):
         """Compute the mean and standard deviation to be used for scaling.
 
         If with_std parameter is set to False, only the mean is calculated.
@@ -154,7 +154,7 @@ class CNormalizerZScore(CNormalizerLinear):
         >>> from secml.ml.features.normalization import CNormalizerZScore
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]],tosparse=True)
 
-        >>> normalizer = CNormalizerZScore().train(array)
+        >>> normalizer = CNormalizerZScore().fit(array)
         >>> print normalizer.mean
         CArray([ 1.        0.        0.333333])
         >>> print normalizer.std
@@ -212,7 +212,7 @@ class CNormalizerZScore(CNormalizerLinear):
         >>> from secml.ml.features.normalization import CNormalizerZScore
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]], tosparse=True)
 
-        >>> normalizer = CNormalizerZScore().train(array)
+        >>> normalizer = CNormalizerZScore().fit(array)
         >>> array_normalized = normalizer.normalize(array)
         >>> print array_normalized
         CArray([[ 0.       -1.224745  1.336306]
@@ -270,7 +270,7 @@ class CNormalizerZScore(CNormalizerLinear):
         >>> from secml.ml.features.normalization import CNormalizerZScore
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-        >>> normalizer = CNormalizerZScore().train(array)
+        >>> normalizer = CNormalizerZScore().fit(array)
         >>> print normalizer.gradient(array)
         CArray([[ 1.224745  0.        0.      ]
          [ 0.        1.224745  0.      ]

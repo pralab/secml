@@ -106,7 +106,7 @@ class CDataLoaderImgClients(CDataLoader):
 
                 # If load_data is True, store features, else store path
                 if load_data is True:
-                    # Storing image as a 2D Carray
+                    # Storing image as a 2D CArray
                     array_img = CArray([img.getdata()])
                 else:
                     array_img = CArray([[file_path]])
