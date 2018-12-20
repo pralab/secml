@@ -58,7 +58,8 @@ class CPerfEvaluatorXVal(CPerfEvaluator):
             # Train the estimator
             estimator.fit(train_dataset)
 
-            pred_label, pred_score = estimator.predict(test_dataset.X)[0:2]
+            pred_label, pred_score = estimator.predict(
+                test_dataset.X, return_decision_function=True)
 
             if dataset.num_classes > 2:
                 pred_score = None  # Score cannot be used in multiclass case

@@ -67,7 +67,8 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
                 # Extract the target binary estimator
                 binary_clf = estimator.binary_classifiers[class_idx]
 
-                pred_label, pred_score = binary_clf.predict(test_binary_ds.X)
+                pred_label, pred_score = binary_clf.predict(
+                    test_binary_ds.X, return_decision_function=True)
 
                 # Extracting score of the positive class
                 pred_score = pred_score[:, 1].ravel()

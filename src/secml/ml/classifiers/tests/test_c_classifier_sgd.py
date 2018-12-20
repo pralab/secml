@@ -107,8 +107,10 @@ class TestCClassifierSGD(CUnitTest):
 
             svm.fit(self.dataset)
 
-            label_svm, y_svm = svm.predict(self.dataset.X)
-            label_sgd, y_sgd = sgd.predict(self.dataset.X)
+            label_svm, y_svm = svm.predict(
+                self.dataset.X, return_decision_function=True)
+            label_sgd, y_sgd = sgd.predict(
+                self.dataset.X, return_decision_function=True)
 
             acc_svm = CMetric.create('f1').performance_score(
                 self.dataset.Y, label_svm)
@@ -222,7 +224,7 @@ class TestCClassifierSGD(CUnitTest):
 
             # Testing predict on multiple points
 
-            labels, scores = sgd.predict(x)
+            labels, scores = sgd.predict(x, return_decision_function=True)
             self.logger.info("predict(x):\nlabels: {:}\n"
                              "scores: {:}".format(labels, scores))
             _check_classify_scores(
@@ -261,7 +263,7 @@ class TestCClassifierSGD(CUnitTest):
 
             self.logger.info("Testing predict on single point")
 
-            labels, scores = sgd.predict(p)
+            labels, scores = sgd.predict(p, return_decision_function=True)
             self.logger.info("predict(p):\nlabels: {:}\n"
                              "scores: {:}".format(labels, scores))
             _check_classify_scores(labels, scores, 1, sgd.n_classes)

@@ -56,7 +56,8 @@ class TestEvasionMulticlass(CUnitTest):
         # Training and classification
         self.multiclass.fit(self.ds)
 
-        self.y_pred, self.score_pred = self.multiclass.predict(self.ds.X)
+        self.y_pred, self.score_pred = self.multiclass.predict(
+            self.ds.X, return_decision_function=True)
 
     def test_evasion_multiclass(self):
 
@@ -112,7 +113,8 @@ class TestEvasionMulticlass(CUnitTest):
 
             eva.dmax = d
             x, f_opt = eva._run(x0=x0, y0=y0, x_init=x)
-            y_pred, score = self.multiclass.predict(x)
+            y_pred, score = self.multiclass.predict(
+                x, return_decision_function=True)
             f_seq = f_seq.append(f_opt)
             # not considering all iterations, just values at dmax
             # for all iterations, you should bring eva.x_seq and eva.f_seq
@@ -287,7 +289,7 @@ class TestEvasionMulticlass(CUnitTest):
 
         # Plotting multiclass decision function
         fig.switch_sptype('function')
-        fig.sp.plot_fobj(lambda x: self.multiclass.predict(x)[0],
+        fig.sp.plot_fobj(lambda x: self.multiclass.predict(x),
                          multipoint=True, cmap='Set2',
                          grid_limits=self.ds.get_bounds(offset=5),
                          colorbar=False, n_grid_points=300, plot_levels=True,

@@ -100,7 +100,7 @@ class TestCClassifierNearestCentroid(CUnitTest):
 
         # Testing predict on multiple points
 
-        labels, scores = self.nc.predict(x)
+        labels, scores = self.nc.predict(x, return_decision_function=True)
         self.logger.info(
             "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(
@@ -139,7 +139,7 @@ class TestCClassifierNearestCentroid(CUnitTest):
 
         self.logger.info("Testing predict on single point")
 
-        labels, scores = self.nc.predict(p)
+        labels, scores = self.nc.predict(p, return_decision_function=True)
         self.logger.info(
             "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 1, self.nc.n_classes)

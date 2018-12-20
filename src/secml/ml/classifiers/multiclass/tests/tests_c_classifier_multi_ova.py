@@ -6,7 +6,7 @@ from sklearn.svm import SVC
 from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM
-from secml.ml.classifiers import CClassifierMulticlassOVA
+from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.ml.peval.metrics import CMetric
 from secml.figure import CFigure
 
@@ -27,7 +27,8 @@ class TestCClassifierMultiOVA(CUnitTest):
         multiclass.verbose = 2
 
         multiclass.fit(self.dataset, n_jobs=2)
-        class_pred, score_pred = multiclass.predict(self.dataset.X, n_jobs=2)
+        class_pred, score_pred = multiclass.predict(
+            self.dataset.X, n_jobs=2, return_decision_function=True)
 
         self.logger.info("Predicted: \n{:}".format(class_pred))
         self.logger.info("Real: \n{:}".format(self.dataset.Y))
@@ -123,13 +124,13 @@ class TestCClassifierMultiOVA(CUnitTest):
         multi_nonorm = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                                 class_weight='balanced')
         multi_nonorm.fit(CDataset(ds_norm_x, self.dataset.Y))
-        pred_y_nonorm = multi_nonorm.predict(ds_norm_x)[0]
+        pred_y_nonorm = multi_nonorm.predict(ds_norm_x)
 
         multi = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                          class_weight='balanced',
                                          normalizer='minmax')
         multi.fit(self.dataset)
-        pred_y = multi.predict(self.dataset.X)[0]
+        pred_y = multi.predict(self.dataset.X)
 
         self.logger.info(
             "Predictions with internal norm:\n{:}".format(pred_y))
@@ -149,7 +150,7 @@ class TestCClassifierMultiOVA(CUnitTest):
         self.logger.info("Randomly selected pattern:\n%s", str(pattern))
 
         # Get predicted label
-        sample_label = multiclass.predict(pattern)[0].item()
+        sample_label = multiclass.predict(pattern).item()
         # Return the gradient of the label^th sub-classifier
         ova_grad = multiclass.binary_classifiers[
             sample_label].gradient_f_x(pattern)
@@ -185,7 +186,8 @@ class TestCClassifierMultiOVA(CUnitTest):
 
         # Training and classification
         multiclass.fit(ds)
-        y_pred, score_pred = multiclass.predict(ds.X)
+        y_pred, score_pred = multiclass.predict(
+            ds.X, return_decision_function=True)
 
         def plot_hyperplane(img, clf, min_v, max_v, linestyle, label):
             """Plot the hyperplane associated to the OVA clf."""
@@ -219,7 +221,7 @@ class TestCClassifierMultiOVA(CUnitTest):
 
         # Plotting multiclass decision function
         fig.switch_sptype('function')
-        fig.sp.plot_fobj(lambda x: multiclass.predict(x)[0],
+        fig.sp.plot_fobj(lambda x: multiclass.predict(x),
                          grid_limits=ds.get_bounds(offset=5), colorbar=False,
                          n_grid_points=50, plot_levels=False)
 
@@ -311,7 +313,7 @@ class TestCClassifierMultiOVA(CUnitTest):
 
         # Testing predict on multiple points
 
-        labels, scores = mc.predict(x)
+        labels, scores = mc.predict(x, return_decision_function=True)
         self.logger.info(
             "predict(x):\nlabels: {:}\nscores:{:}".format(labels, scores))
         _check_classify_scores(
@@ -365,7 +367,7 @@ class TestCClassifierMultiOVA(CUnitTest):
 
         self.logger.info("Testing predict on single point")
 
-        labels, scores = mc.predict(p)
+        labels, scores = mc.predict(p, return_decision_function=True)
         self.logger.info(
             "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 1, mc.n_classes)

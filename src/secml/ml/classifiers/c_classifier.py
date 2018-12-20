@@ -242,7 +242,7 @@ class CClassifier(CCreator):
 
         return score
 
-    def predict(self, x, n_jobs=1):
+    def predict(self, x, return_decision_function=False, n_jobs=1):
         """Perform classification of each pattern in x.
 
         If a normalizer has been specified,
@@ -250,9 +250,13 @@ class CClassifier(CCreator):
 
         Parameters
         ----------
+        return_decision_function
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
+        return_decision_function : bool, optional
+            Whether to return the decision_function value along
+            with predictions. Default False.
         n_jobs : int, optional
             Number of parallel workers to use for classification.
             Default 1. Cannot be higher than processor's number of cores.
@@ -263,9 +267,10 @@ class CClassifier(CCreator):
             Flat dense array of shape (n_patterns,) with the label assigned
              to each test pattern. The classification label is the label of
              the class associated with the highest score.
-        scores : CArray
+        scores : CArray, optional
             Array of shape (n_patterns, n_classes) with classification
              score of each test pattern with respect to each training class.
+            Will be returned only if `return_decision_function` is True.
 
         Warnings
         --------
@@ -291,7 +296,9 @@ class CClassifier(CCreator):
 
         # The classification label is the label of the class
         # associated with the highest score
-        return scores.argmax(axis=1).ravel(), scores
+        labels = scores.argmax(axis=1).ravel()
+
+        return (labels, scores) if return_decision_function is True else labels
 
     def estimate_parameters(self, dataset, parameters, splitter, metric,
                             pick='first', perf_evaluator='xval', n_jobs=1):

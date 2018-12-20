@@ -38,7 +38,8 @@ class TestCClassifierMCSLinear(CUnitTest):
                                      self.dataset.Y.tondarray())
             self.logger.info("Trained Sklearn Bagging + SVC.")
 
-        label_mcs, s_mcs = self.mcs.predict(self.dataset.X)
+        label_mcs, s_mcs = self.mcs.predict(
+            self.dataset.X, return_decision_function=True)
         label_skbag = self.sklearn_bagging.predict(self.dataset.X.get_data())
 
         f1_mcs = CMetric.create('f1').performance_score(
@@ -140,7 +141,7 @@ class TestCClassifierMCSLinear(CUnitTest):
 
         # Testing predict on multiple points
 
-        labels, scores = mcs.predict(x)
+        labels, scores = mcs.predict(x, return_decision_function=True)
         self.logger.info(
             "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(
@@ -179,7 +180,7 @@ class TestCClassifierMCSLinear(CUnitTest):
 
         self.logger.info("Testing predict on single point")
 
-        labels, scores = mcs.predict(p)
+        labels, scores = mcs.predict(p, return_decision_function=True)
         self.logger.info(
             "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 1, mcs.n_classes)

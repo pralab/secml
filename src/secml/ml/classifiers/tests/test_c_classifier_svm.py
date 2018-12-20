@@ -67,35 +67,47 @@ class TestCClassifierSVM(CUnitTest):
         linear_svm.fit(self.dataset)
         kernel_linear_svm.fit(self.dataset)
 
-        linear_svm_pred_y, linear_svm_pred_score = linear_svm.predict(self.dataset.X)
-        kernel_linear_svm_pred_y, kernel_linear_svm_pred_score = kernel_linear_svm.predict(self.dataset.X)
+        linear_svm_pred_y, linear_svm_pred_score = linear_svm.predict(
+            self.dataset.X, return_decision_function=True)
+        kernel_linear_svm_pred_y, \
+            kernel_linear_svm_pred_score = kernel_linear_svm.predict(
+                self.dataset.X, return_decision_function=True)
 
         # check prediction
-        npt.assert_array_equal(linear_svm_pred_y.get_data(), kernel_linear_svm_pred_y.get_data())
+        npt.assert_array_equal(linear_svm_pred_y.get_data(),
+                               kernel_linear_svm_pred_y.get_data())
 
         self.logger.info("Training both classifiers on sparse data")
         linear_svm.fit(self.dataset_sparse)
         kernel_linear_svm.fit(self.dataset_sparse)
 
-        self.assertTrue(linear_svm.w.issparse, "Weights vector is not sparse even if training data is sparse")
+        self.assertTrue(linear_svm.w.issparse,
+                        "Weights vector is not sparse even "
+                        "if training data is sparse")
 
-        linear_svm_pred_y, linear_svm_pred_score = linear_svm.predict(self.dataset_sparse.X)
-        kernel_linear_svm_pred_y, kernel_linear_svm_pred_score = kernel_linear_svm.predict(self.dataset_sparse.X)
+        linear_svm_pred_y, linear_svm_pred_score = linear_svm.predict(
+            self.dataset_sparse.X, return_decision_function=True)
+        kernel_linear_svm_pred_y, \
+            kernel_linear_svm_pred_score = kernel_linear_svm.predict(
+                self.dataset_sparse.X, return_decision_function=True)
 
         # check prediction
-        npt.assert_array_equal(linear_svm_pred_y.get_data(), kernel_linear_svm_pred_y.get_data())
+        npt.assert_array_equal(linear_svm_pred_y.get_data(),
+                               kernel_linear_svm_pred_y.get_data())
 
     def test_predict(self):
         """Performs tests on SVM prediction capabilities."""
         self.logger.info("Testing SVM predict accuracy")
 
         for svm in self.svms:
-            self.logger.info("SVM \w similarity function: %s", svm.kernel.__class__)
+            self.logger.info(
+                "SVM \w similarity function: %s", svm.kernel.__class__)
 
             # Training and predicting using our SVM
             svm.fit(self.dataset)
 
-            pred_y, pred_score = svm.predict(self.dataset.X)
+            pred_y, pred_score = svm.predict(
+                self.dataset.X, return_decision_function=True)
 
             # Training and predicting an SKlearn SVC
             sklearn_svm = SVC(kernel=svm.kernel.class_type)
@@ -103,9 +115,11 @@ class TestCClassifierSVM(CUnitTest):
             # Setting similarity function parameters into SVC too
             sklearn_svm.set_params(**svm.kernel.get_params())
 
-            sklearn_svm.fit(self.dataset.X.get_data(), np.ravel(self.dataset.Y.get_data()))
+            sklearn_svm.fit(self.dataset.X.get_data(),
+                            np.ravel(self.dataset.Y.get_data()))
             sklearn_pred_y = sklearn_svm.predict(self.dataset.X.get_data())
-            sklearn_score = sklearn_svm.decision_function(self.dataset.X.get_data())
+            sklearn_score = sklearn_svm.decision_function(
+                self.dataset.X.get_data())
 
             # Test if sklearn predicted labels are equal to our predicted labels
             npt.assert_array_equal(pred_y.get_data(), sklearn_pred_y)
@@ -132,7 +146,8 @@ class TestCClassifierSVM(CUnitTest):
 
             # Training and predicting using our SVM
             svm.fit(self.dataset)
-            pred_y, pred_score = svm.predict(self.dataset.X)
+            pred_y, pred_score = svm.predict(
+                self.dataset.X, return_decision_function=True)
             # chose random one pattern
             pattern = CArray(random.choice(self.dataset.X.get_data()))
             gradient = svm.gradient_f_x(pattern)
@@ -164,23 +179,27 @@ class TestCClassifierSVM(CUnitTest):
 
             # Training and predicting on dense data for reference
             svm.fit(self.dataset)
-            pred_y, pred_score = svm.predict(self.dataset.X)
+            pred_y, pred_score = svm.predict(
+                self.dataset.X, return_decision_function=True)
 
             # Training and predicting on sparse data
             svm.fit(self.dataset_sparse)
-            pred_y_sparse, pred_score_sparse = svm.predict(self.dataset_sparse.X)
+            pred_y_sparse, pred_score_sparse = svm.predict(
+                self.dataset_sparse.X, return_decision_function=True)
 
             _check_sparsedata(pred_y, pred_score, pred_y_sparse, pred_score_sparse)
 
             # Training on sparse and predicting on dense
             svm.fit(self.dataset_sparse)
-            pred_y_sparse, pred_score_sparse = svm.predict(self.dataset.X)
+            pred_y_sparse, pred_score_sparse = svm.predict(
+                self.dataset.X, return_decision_function=True)
 
             _check_sparsedata(pred_y, pred_score, pred_y_sparse, pred_score_sparse)
 
             # Training on dense and predicting on sparse
             svm.fit(self.dataset)
-            pred_y_sparse, pred_score_sparse = svm.predict(self.dataset_sparse.X)
+            pred_y_sparse, pred_score_sparse = svm.predict(
+                self.dataset_sparse.X, return_decision_function=True)
 
             _check_sparsedata(pred_y, pred_score, pred_y_sparse, pred_score_sparse)
 
@@ -272,10 +291,10 @@ class TestCClassifierSVM(CUnitTest):
         svm2 = CClassifierSVM()
 
         svm1.fit(data)
-        y1, score1 = svm1.predict(data.X)
+        y1, score1 = svm1.predict(data.X, return_decision_function=True)
 
         svm2.fit(CDataset(data_norm, data.Y))
-        y2, score2 = svm2.predict(data_norm)
+        y2, score2 = svm2.predict(data_norm, return_decision_function=True)
 
         self.assertTrue((y1 == y2).all())
         self.assertTrue((score1[:, 0] == score2[:, 0]).all())
@@ -401,7 +420,8 @@ class TestCClassifierSVM(CUnitTest):
 
             # Testing predict on multiple points
 
-            labels, scores = svm.predict(self.dataset.X)
+            labels, scores = svm.predict(
+                self.dataset.X, return_decision_function=True)
             self.logger.info("predict(x):\nlabels: {:}\n"
                              "scores: {:}".format(labels, scores))
             _check_classify_scores(
@@ -440,7 +460,7 @@ class TestCClassifierSVM(CUnitTest):
 
             self.logger.info("Testing predict on single point")
 
-            labels, scores = svm.predict(p)
+            labels, scores = svm.predict(p, return_decision_function=True)
             self.logger.info("predict(p):\nlabels: {:}\n"
                              "scores: {:}".format(labels, scores))
             _check_classify_scores(labels, scores, 1, svm.n_classes)

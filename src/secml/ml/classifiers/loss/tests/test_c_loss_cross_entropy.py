@@ -18,7 +18,8 @@ class TestCLossCrossEntropy(CUnitTest):
         self.logger.info("Fit an SVM and classify dataset...")
         self.ova = CClassifierMulticlassOVA(CClassifierSVM)
         self.ova.fit(self.ds)
-        self.labels, self.scores = self.ova.predict(self.ds.X)
+        self.labels, self.scores = self.ova.predict(
+            self.ds.X, return_decision_function=True)
 
     def test_softmax(self):
         """Unittests for softmax function."""

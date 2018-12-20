@@ -111,7 +111,7 @@ class TestCClassifierKDE(CUnitTest):
 
         # Testing predict on multiple points
 
-        labels, scores = self.kde.predict(x)
+        labels, scores = self.kde.predict(x, return_decision_function=True)
         self.logger.info(
             "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(
@@ -155,7 +155,7 @@ class TestCClassifierKDE(CUnitTest):
 
         self.logger.info("Testing predict on single point")
 
-        labels, scores = self.kde.predict(p)
+        labels, scores = self.kde.predict(p, return_decision_function=True)
         self.logger.info(
             "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 1, self.kde.n_classes)

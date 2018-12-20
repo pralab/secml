@@ -23,8 +23,10 @@ class TestCRoc(CUnitTest):
 
         self.svm = CClassifierSVM(C=1e-7).fit(self.ds1)
 
-        _, self.s1 = self.svm.predict(self.ds1.X)
-        _, self.s2 = self.svm.predict(self.ds2.X)
+        _, self.s1 = self.svm.predict(
+            self.ds1.X, return_decision_function=True)
+        _, self.s2 = self.svm.predict(
+            self.ds2.X, return_decision_function=True)
 
         self.s1 = self.s1[:, 1].ravel()
         self.s2 = self.s2[:, 1].ravel()

@@ -111,8 +111,7 @@ class TestCPerfEvaluator(CUnitTest):
                     self.training_dataset[xval_splitter.tr_idx[f], :])
 
                 this_fold_predicted = self.svm.predict(
-                    self.training_dataset[
-                        xval_splitter.ts_idx[f], :].X)[0].ravel()
+                    self.training_dataset[xval_splitter.ts_idx[f], :].X)
 
                 this_fold_accuracy = skm.accuracy_score(
                     self.training_dataset[

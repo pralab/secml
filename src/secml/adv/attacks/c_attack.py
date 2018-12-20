@@ -478,7 +478,8 @@ class CAttack(CCreator):
 
         # otherwise...
         self.logger.info("Classification of surrogate data...")
-        y, score = self.surrogate_classifier.predict(self.surrogate_data.X)
+        y, score = self.surrogate_classifier.predict(
+            self.surrogate_data.X, return_decision_function=True)
         self._surrogate_labels = y
         self._surrogate_scores = score
 

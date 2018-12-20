@@ -72,7 +72,8 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
         state = dl_pytorch_model('densenet-bc-L100-K12')
         self.clf.load_state(state, dataparallel=True)
 
-        labels, scores = self.clf.predict(self.ts[50:100, :].X)
+        labels, scores = self.clf.predict(
+            self.ts[50:100, :].X, return_decision_function=True)
 
         acc = CMetricAccuracy().performance_score(self.ts[50:100, :].Y, labels)
         self.logger.info("Accuracy: {:}".format(acc))
@@ -166,7 +167,7 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
 
         # Testing predict on multiple points
 
-        labels, scores = self.clf.predict(x)
+        labels, scores = self.clf.predict(x, return_decision_function=True)
         self.logger.info(
             "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 5, self.clf.n_classes)
@@ -219,7 +220,7 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
 
         self.logger.info("Testing predict on single point")
 
-        labels, scores = self.clf.predict(p)
+        labels, scores = self.clf.predict(p, return_decision_function=True)
         self.logger.info(
             "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 1, self.clf.n_classes)

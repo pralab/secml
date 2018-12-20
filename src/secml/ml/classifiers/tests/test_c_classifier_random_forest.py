@@ -23,19 +23,22 @@ class TestCClassifierRandomForest(CUnitTest):
         self.logger.info(
             "Number of classes: {:}".format(self.rnd_forest.n_classes))
         
-        y, result = self.rnd_forest.predict(self.dataset.X[0, :])
+        y, result = self.rnd_forest.predict(
+            self.dataset.X[0, :], return_decision_function=True)
         self.logger.info(
             "Probability of affinity to each class: {:}".format(result))
         self.logger.info("Class of affinity: {:}".format(y))
         self.assertEquals(y, self.dataset.Y[0], "Wrong classification")
         
-        y, result = self.rnd_forest.predict(self.dataset.X[50, :])
+        y, result = self.rnd_forest.predict(
+            self.dataset.X[50, :], return_decision_function=True)
         self.logger.info(
             "Probability of affinity to each class: {:}".format(result))
         self.logger.info("Class of affinity: {:}".format(y))
         self.assertEquals(y, self.dataset.Y[50], "Wrong classification")
         
-        y, result = self.rnd_forest.predict(self.dataset.X[120, :])
+        y, result = self.rnd_forest.predict(
+            self.dataset.X[120, :], return_decision_function=True)
         self.logger.info(
             "Probability of affinity to each class: {:}".format(result))
         self.logger.info("Class of affinity: {:}".format(y))
@@ -117,7 +120,7 @@ class TestCClassifierRandomForest(CUnitTest):
 
         # Testing predict on multiple points
 
-        labels, scores = self.rnd_forest.predict(x)
+        labels, scores = self.rnd_forest.predict(x, return_decision_function=True)
         self.logger.info(
             "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(
@@ -171,7 +174,7 @@ class TestCClassifierRandomForest(CUnitTest):
 
         self.logger.info("Testing predict on single point")
 
-        labels, scores = self.rnd_forest.predict(p)
+        labels, scores = self.rnd_forest.predict(p, return_decision_function=True)
         self.logger.info(
             "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 1, self.rnd_forest.n_classes)

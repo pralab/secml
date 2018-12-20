@@ -49,7 +49,7 @@ class TestCClassifierKNN(CUnitTest):
         xx, yy = np.meshgrid(np.arange(x_min, x_max, self.step),
                              np.arange(y_min, y_max, self.step))
         grid = CArray(np.c_[xx.ravel(), yy.ravel()])
-        lab, Z_tree = self.knn.predict(grid)
+        lab, Z_tree = self.knn.predict(grid, return_decision_function=True)
         Z_tree = Z_tree[:, 1]
         Z_tree = Z_tree.reshape(xx.shape)
         cmap_light = ListedColormap(['#FFAAAA', '#AAFFAA', '#AAAAFF'])
@@ -66,7 +66,8 @@ class TestCClassifierKNN(CUnitTest):
     def test_classification(self):
         self.logger.info("Check the classification method... ")
 
-        lab_cl, score = self.knn.predict(self.test.X)
+        lab_cl, score = self.knn.predict(
+            self.test.X, return_decision_function=True)
 
         acc = CMetricAccuracy().performance_score(self.test.Y, lab_cl)
 
@@ -179,7 +180,7 @@ class TestCClassifierKNN(CUnitTest):
 
         # Testing predict on multiple points
 
-        labels, scores = self.knn.predict(x)
+        labels, scores = self.knn.predict(x, return_decision_function=True)
         self.logger.info(
             "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(
@@ -233,7 +234,7 @@ class TestCClassifierKNN(CUnitTest):
 
         self.logger.info("Testing predict on single point")
 
-        labels, scores = self.knn.predict(p)
+        labels, scores = self.knn.predict(p, return_decision_function=True)
         self.logger.info(
             "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 1, self.knn.n_classes)

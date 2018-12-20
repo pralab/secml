@@ -17,7 +17,8 @@ class TestCLossRegression(CUnitTest):
         self.logger.info("Train an SVM and classify dataset...")
         self.svm = CClassifierSVM()
         self.svm.fit(self.ds)
-        self.labels, self.scores = self.svm.predict(self.ds.X)
+        self.labels, self.scores = self.svm.predict(
+            self.ds.X, return_decision_function=True)
 
     def test_in_out(self):
         """Unittest for input and output to loss classes"""
