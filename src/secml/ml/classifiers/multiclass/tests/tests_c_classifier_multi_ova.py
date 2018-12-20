@@ -6,7 +6,7 @@ from sklearn.svm import SVC
 from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM
-from secml.ml.classifiers import CClassifierMulticlassOVA
+from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.ml.peval.metrics import CMetric
 from secml.figure import CFigure
 
@@ -127,7 +127,7 @@ class TestCClassifierMultiOVA(CUnitTest):
 
         multi = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                          class_weight='balanced',
-                                         normalizer='minmax')
+                                         preprocess='minmax')
         multi.train(self.dataset)
         pred_y = multi.classify(self.dataset.X)[0]
 
@@ -180,8 +180,9 @@ class TestCClassifierMultiOVA(CUnitTest):
                        random_state=0).load()
 
         multiclass = CClassifierMulticlassOVA(
-            classifier=CClassifierSVM, class_weight='balanced',
-            normalizer='minmax')
+            classifier=CClassifierSVM,
+            class_weight='balanced',
+            preprocess='minmax')
 
         # Training and classification
         multiclass.train(ds)
@@ -264,10 +265,10 @@ class TestCClassifierMultiOVA(CUnitTest):
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Normalizing data if a normalizer is defined
-        if mc.normalizer is not None:
-            x_norm = mc.normalizer.normalize(x)
-            p_norm = mc.normalizer.normalize(p)
+        # Preprocessing data if a preprocess is defined
+        if mc.preprocess is not None:
+            x_norm = mc.preprocess.normalize(x)
+            p_norm = mc.preprocess.normalize(p)
 
         # Testing discriminant_function on multiple points
 

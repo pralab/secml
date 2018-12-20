@@ -34,10 +34,10 @@ class CClassifierKDE(CClassifier):
     """
     __class_type = 'kde'
 
-    def __init__(self, kernel=None, normalizer=None):
+    def __init__(self, kernel=None, preprocess=None):
 
         # Calling CClassifier init
-        super(CClassifierKDE, self).__init__(normalizer=normalizer)
+        super(CClassifierKDE, self).__init__(preprocess=preprocess)
 
         # Setting up the kernel function
         kernel_type = 'linear' if kernel is None else kernel
@@ -54,8 +54,8 @@ class CClassifierKDE(CClassifier):
 
     def is_linear(self):
         """Return True if the classifier is linear."""
-        if (self.normalizer is None or self.normalizer is not None and
-                self.normalizer.is_linear()) and self.is_kernel_linear():
+        if (self.preprocess is None or self.preprocess is not None and
+            self.preprocess.is_linear()) and self.is_kernel_linear():
             return True
         return False
 
@@ -119,7 +119,7 @@ class CClassifierKDE(CClassifier):
     def discriminant_function(self, x, y=1):
         """Computes the discriminant function for each pattern in x.
 
-        If a normalizer has been specified, input is normalized
+        If a preprocess has been specified, input is normalized
          before computing the discriminant function.
 
         Parameters
@@ -143,9 +143,9 @@ class CClassifierKDE(CClassifier):
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Normalizing data if a normalizer is defined
-        if self.normalizer is not None:
-            x = self.normalizer.normalize(x)
+        # Preprocessing data if a preprocess is defined
+        if self.preprocess is not None:
+            x = self.preprocess.normalize(x)
 
         return self._discriminant_function(x, y=y)
 

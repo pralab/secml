@@ -50,31 +50,30 @@ class CClassifier(CCreator):
 
     Parameters
     ----------
-    normalizer : str, CNormalizer
-        Features normalizer to applied to input data.
+    preprocess : str or CNormalizer
+        Features preprocess to applied to input data.
         Can be a CNormalizer subclass or a string with the desired
-        normalizer type. If None, input data is used as is.
+        preprocess type. If None, input data is used as is.
 
     """
     __metaclass__ = ABCMeta
     __super__ = 'CClassifier'
 
-    def __init__(self, normalizer=None):
+    def __init__(self, preprocess=None):
         # List of classes on which training has been performed
         self._classes = None
         # Number of features of the training dataset
         self._n_features = None
-        # Data normalizer
-        # Setting up the kernel function
-        self.normalizer = normalizer if normalizer is None \
-            else CNormalizer.create(normalizer)
+        # Data preprocess
+        self.preprocess = preprocess if preprocess is None \
+            else CNormalizer.create(preprocess)
 
     def __clear(self):
         """Reset the object."""
         self._classes = None
         self._n_features = None
-        if self.normalizer is not None:
-            self.normalizer.clear()
+        if self.preprocess is not None:
+            self.preprocess.clear()
 
     def __is_clear(self):
         """Returns True if object is clear."""
@@ -82,7 +81,7 @@ class CClassifier(CCreator):
             return False
         if self._n_features is not None:
             return False
-        if self.normalizer is not None and not self.normalizer.is_clear():
+        if self.preprocess is not None and not self.preprocess.is_clear():
             return False
         return True
 
@@ -127,7 +126,7 @@ class CClassifier(CCreator):
     def train(self, dataset, n_jobs=1):
         """Trains the classifier.
 
-        If a normalizer has been specified,
+        If a preprocess has been specified,
         input is normalized before training.
 
         For multiclass case see `.CClassifierMulticlass`.
@@ -159,9 +158,9 @@ class CClassifier(CCreator):
         self._n_features = dataset.num_features
 
         data_x = dataset.X
-        # Normalizing data if a normalizer is defined
-        if self.normalizer is not None:
-            data_x = self.normalizer.train_normalize(dataset.X)
+        # Preprocessing data if a preprocess is defined
+        if self.preprocess is not None:
+            data_x = self.preprocess.train_normalize(dataset.X)
 
         # Data is ready: train the classifier
         try:  # Try to use parallelization
@@ -197,7 +196,7 @@ class CClassifier(CCreator):
     def discriminant_function(self, x, y):
         """Computes the discriminant function for each pattern in x.
 
-        If a normalizer has been specified, input is normalized
+        If a preprocess has been specified, input is normalized
         before computing the discriminant function.
 
         .. note::
@@ -232,9 +231,9 @@ class CClassifier(CCreator):
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Normalizing data if a normalizer is defined
-        if self.normalizer is not None:
-            x = self.normalizer.normalize(x)
+        # Preprocessing data if a preprocess is defined
+        if self.preprocess is not None:
+            x = self.preprocess.normalize(x)
 
         score = CArray.ones(shape=x.shape[0])
         for i in xrange(x.shape[0]):
@@ -245,7 +244,7 @@ class CClassifier(CCreator):
     def classify(self, x, n_jobs=1):
         """Perform classification of each pattern in x.
 
-        If a normalizer has been specified,
+        If a preprocess has been specified,
          input is normalized before classification.
 
         Parameters
@@ -372,11 +371,11 @@ class CClassifier(CCreator):
             Gradient of the classifier's output wrt input. Vector-like array.
 
         """
-        # Get the derivative of the normalizer (if defined)
-        if self.normalizer is not None:
+        # Get the derivative of the preprocess (if defined)
+        if self.preprocess is not None:
             grad_norm = self._gradient_n(x)
             # Normalize data before compute the classifier gradient
-            x = self.normalizer.normalize(x)
+            x = self.preprocess.normalize(x)
         else:  # Normalizer not defined, use a "neutral" value
             grad_norm = CArray([1])
 
@@ -428,7 +427,7 @@ class CClassifier(CCreator):
         raise NotImplementedError
 
     def _gradient_n(self, x):
-        """Computes the gradient of the normalizer wrt normalizer input.
+        """Computes the gradient of the preprocess wrt preprocess input.
 
         Parameters
         ----------
@@ -438,11 +437,11 @@ class CClassifier(CCreator):
         Returns
         -------
         gradient : CArray
-            Gradient of the normalizer wrt its input. Vector-like array.
+            Gradient of the preprocess wrt its input. Vector-like array.
 
         """
-        grad_norm = self.normalizer.gradient(x)
-        if self.normalizer.is_linear():
+        grad_norm = self.preprocess.gradient(x)
+        if self.preprocess.is_linear():
             # Gradient of linear normalizers is an 'I * w' array
             # To avoid returning all the zeros, extract the main diagonal
             grad_norm = grad_norm.diag()

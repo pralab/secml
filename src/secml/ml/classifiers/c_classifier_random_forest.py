@@ -24,10 +24,10 @@ class CClassifierRandomForest(CClassifier):
     __class_type = 'random-forest'
 
     def __init__(self, n_estimators=10, criterion='gini',
-                 max_depth=None, min_samples_split=2, normalizer=None):
+                 max_depth=None, min_samples_split=2, preprocess=None):
 
         # Calling CClassifier constructor
-        CClassifier.__init__(self, normalizer=normalizer)
+        CClassifier.__init__(self, preprocess=preprocess)
 
         # Classifier Parameters
         self.n_estimators = n_estimators

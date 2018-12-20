@@ -26,7 +26,7 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
     def __init__(self, depth=100, growthRate=12, num_classes=10,
                  learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
                  n_epoch=300, gamma=0.1, lr_schedule=(150, 225), batch_size=64,
-                 train_transform=None, normalizer=None):
+                 train_transform=None, preprocess=None):
 
         # Specific parameters of the classifier
         self._classes = None  # TODO: MANAGE LIST OF CLASSES
@@ -43,7 +43,7 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
             lr_schedule=lr_schedule,
             batch_size=batch_size,
             train_transform=train_transform,
-            normalizer=normalizer
+            preprocess=preprocess
         )
 
         self._init_params = merge_dicts(self._init_params,

@@ -70,10 +70,10 @@ class TestCClassifierRandomForest(CUnitTest):
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Normalizing data if a normalizer is defined
-        if self.rnd_forest.normalizer is not None:
-            x_norm = self.rnd_forest.normalizer.normalize(x)
-            p_norm = self.rnd_forest.normalizer.normalize(p)
+        # Preprocessing data if a preprocess is defined
+        if self.rnd_forest.preprocess is not None:
+            x_norm = self.rnd_forest.preprocess.normalize(x)
+            p_norm = self.rnd_forest.preprocess.normalize(p)
 
         # Testing discriminant_function on multiple points
 

@@ -21,7 +21,7 @@ class TestEvasionLinearL1(CEvasionTestCases.TestCEvasion):
         self.eta_max = None
 
         self.normalizer = CNormalizerMinMax(feature_range=(-5, 5))
-        self.classifier = CClassifierSVM(C=1.0, normalizer=self.normalizer)
+        self.classifier = CClassifierSVM(C=1.0, preprocess=self.normalizer)
 
         self.seed = 10  # Random state generator for the dataset
 

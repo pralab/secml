@@ -73,10 +73,10 @@ class TestCClassifierKDE(CUnitTest):
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Normalizing data if a normalizer is defined
-        if self.kde.normalizer is not None:
-            x_norm = self.kde.normalizer.normalize(x)
-            p_norm = self.kde.normalizer.normalize(p)
+        # Preprocessing data if a preprocess is defined
+        if self.kde.preprocess is not None:
+            x_norm = self.kde.preprocess.normalize(x)
+            p_norm = self.kde.preprocess.normalize(p)
 
         # Testing discriminant_function on multiple points
 

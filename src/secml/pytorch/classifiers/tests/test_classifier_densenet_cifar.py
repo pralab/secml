@@ -34,7 +34,7 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
 
         cls.clf = CTorchClassifierDenseNetCifar(
             n_epoch=1, batch_size=25, train_transform=transform_tr,
-            normalizer=CNormalizerMeanSTD(mean=(0.4914, 0.4822, 0.4465),
+            preprocess=CNormalizerMeanSTD(mean=(0.4914, 0.4822, 0.4465),
                                           std=(0.2023, 0.1994, 0.2010)))
         cls.clf.verbose = 2
 
@@ -119,10 +119,10 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
         x = x_norm = self.ts.X[:5, :]
         p = p_norm = self.ts.X[0, :].ravel()
         
-        # Normalizing data if a normalizer is defined
-        if self.clf.normalizer is not None:
-            x_norm = self.clf.normalizer.normalize(x)
-            p_norm = self.clf.normalizer.normalize(p)
+        # Preprocessing data if a preprocess is defined
+        if self.clf.preprocess is not None:
+            x_norm = self.clf.preprocess.normalize(x)
+            p_norm = self.clf.preprocess.normalize(p)
 
         # Testing discriminant_function on multiple points
 

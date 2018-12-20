@@ -24,10 +24,10 @@ class CClassifierDecisionTree(CClassifier):
     __class_type = 'dec-tree'
 
     def __init__(self, criterion='gini', splitter='best',
-                 max_depth=None, min_samples_split=2, normalizer=None):
+                 max_depth=None, min_samples_split=2, preprocess=None):
 
         # Calling CClassifier constructor
-        CClassifier.__init__(self, normalizer=normalizer)
+        CClassifier.__init__(self, preprocess=preprocess)
 
         # Classifier Parameters
         self.criterion = criterion
