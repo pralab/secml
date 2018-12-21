@@ -120,6 +120,7 @@ REQ_PKGS, DEP_LINKS = install_deps()
 
 LONG_DESCRIPTION = read('README.md')
 
+# List of classifiers: https://pypi.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = """\
 Development Status :: 2 - Pre-Alpha
 Intended Audience :: Science/Research
@@ -133,6 +134,7 @@ Topic :: Software Development
 Topic :: Scientific/Engineering
 Operating System :: POSIX
 Operating System :: Unix
+Operating System :: MacOS
 """
 
 setup(
@@ -142,7 +144,7 @@ setup(
     long_description=LONG_DESCRIPTION,
     license='GNU GPLv3',
     classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
-    platforms=["Linux", "Unix"],
+    platforms=["Linux", "Mac OS-X", "Unix"],
     url='https://sec-ml.pluribus-one.it/lib/',
     download_url=
         'git+ssh://git@pragit.diee.unica.it/secml/secml-lib.git#egg=secml-lib',
