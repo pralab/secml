@@ -10,7 +10,7 @@ It comes with a set of powerful features:
 - **Extensible.** Easily create new wrappers for ML models or attack algorithms extending our abstract interfaces.
 - **Multi-processing.** Do you want to save time further? We provide full compatibility with all the multi-processing features of `scikit-learn` and `pytorch`, along with built-in support of the [`joblib`](https://joblib.readthedocs.io/) library.
 
-### SecML-Lib is currently in development. If you encounter any bug, please report them using the GitLab issues tracker.
+### SecML-Lib is currently in development. If you encounter any bug, please report them using the GitLab issue tracker.
 
 [![Status DEV](https://img.shields.io/badge/status-dev-red.svg)]()
 [![Python 2.7](https://img.shields.io/badge/python-2.7-brightgreen.svg)]()
