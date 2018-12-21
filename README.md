@@ -6,14 +6,15 @@
 ![GNU GPLv3](https://img.shields.io/badge/license-GPL%20(%3E%3D%203)-blue.svg)
 
 ## Installation Guide
-SecML-Lib should be installed in an existing or in a new
- [virtualenv](https://virtualenv.pypa.io) or [conda](https://conda.io)
- environment. System-wise installation is supported but discouraged and
- so will not be covered by this guide.
+As generally recommended for any Python project, SecML-Lib should be installed 
+ in a specific environment along with its dependencies. Common frameworks to 
+ create and manage envs are [virtualenv](https://virtualenv.pypa.io) and 
+ [conda](https://conda.io). Both altenatives provide convenient user guides on 
+ how to properly setup the envs, so the setup procedure will not be covered 
+ by this guide.
 
-The setup process is managed by the python package `setuptools`. Be sure
- to have the latest version of the package installed in your env by
- calling `pip install -U setuptools`.
+The setup process is managed by the Python package `setuptools`. Be sure
+ to obtain the latest version by calling `pip install -U setuptools`.
 
 Once the environment is set up, SecML-Lib can installed and run by
  multiple means:
