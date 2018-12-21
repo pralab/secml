@@ -13,8 +13,23 @@ As generally recommended for any Python project, SecML-Lib should be installed
  how to properly setup the envs, so the setup procedure will not be covered 
  by this guide.
 
+### Operating System requirements
+Depending on the Operating System (OS), few libraries must be installed before SecML-Lib
+and its dependencies. Most of them are provided by default on common distributions, but 
+we provide a list of required package for each OS for convenience:
+- Linux (Ubuntu >= 16.04):
+   - `python-dev python-pip wget build-essential pkg-config gfortran libatlas-base-dev libffi-dev libssl-dev`
+   - For full `matplotlib` support: `python-tk libpng-dev libgif-dev libjpeg8-dev libtiff5-dev libpng12-dev libfreetype6-dev`
+- MacOS: **TODO**
+- Windows: **TODO**
+
+### Installation process
+
+Before starting the installation process try to obtain the latest version
+of the `pip` manager by calling: `pip install -U pip`
+
 The setup process is managed by the Python package `setuptools`. Be sure
- to obtain the latest version by calling `pip install -U setuptools`.
+ to obtain the latest version by calling: `pip install -U setuptools`
 
 Once the environment is set up, SecML-Lib can installed and run by
  multiple means:
