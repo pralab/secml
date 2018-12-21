@@ -426,6 +426,6 @@ class CAttackEvasion(CAttack):
 
         # Compute the attacker objective function
         f_obj = CLossCrossEntropy().loss(
-            y.ravel(), scores, pos_label=self.y_target).mean() / scores.shape[0]
+            y.ravel(), scores).mean() / scores.shape[0]
 
         return y_pred, scores, adv_ds, f_obj, first_eva
