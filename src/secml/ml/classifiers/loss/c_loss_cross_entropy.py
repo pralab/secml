@@ -8,6 +8,7 @@
 """
 from secml.ml.classifiers.loss import CLossClassification
 from secml.array import CArray
+from secml import _NoValue
 
 __all__ = ['softmax', 'CLossCrossEntropy']
 
@@ -67,7 +68,7 @@ class CLossCrossEntropy(CLossClassification):
     """
     __class_type = 'cross-entropy'
 
-    def loss(self, y_true, score, pos_label=None):
+    def loss(self, y_true, score, pos_label=_NoValue):
         """Computes the value of the Cross Entropy loss function.
 
         Parameters
@@ -77,36 +78,37 @@ class CLossCrossEntropy(CLossClassification):
         score : CArray
             Outputs (predicted), targets.
             2-D array of shape (n_samples, n_classes).
-        pos_label : int or None, optional
-            The class wrt compute the loss function.
-            Default None, meaning that the function is computed
-             for each sample wrt the corresponding true label.
 
         Returns
         -------
         CArray
             Loss function. Vector-like array.
 
+        Notes
+        -----
+        Differently from other loss functions, CrossEntropyLoss requires
+        the full array (n_samples, n_classes) of predicted outputs.
+
         """
+        if pos_label is not _NoValue:
+            raise ValueError("`pos_label` not supported")
+
         score = score.atleast_2d()  # Working with 2-D arrays only
 
         p = softmax(score)  # SoftMax function
 
         # find-like indexing (list of lists)
-        a = y_true.tolist() if pos_label is None else [pos_label]
-
-        return -CArray(p[[range(score.shape[0]), a]]).log()
+        return -CArray(p[[range(score.shape[0]), y_true.tolist()]]).log()
 
     def dloss(self, y_true, score, pos_label=None):
         """Computes gradient of the Cross Entropy loss w.r.t.the classifier
-            decision function corresponding to class label pos_label
+            decision function corresponding to class label pos_label.
 
         Assuming pos_label to be i, the derivative is:
-            pi-ti, being ti = 1 if i is equal to the true label yi,
-            0 otherwise
+            p_i - t_i, t_i = 1 if i is equal to y_true_i, 0 otherwise
 
-        If pos_label is None, the derivative is taken always w.r.t the true
-        class, hence we have always p - 1
+        Then, the elements corresponding to y_true (if pos_label is None)
+        or pos_label will be returned.
 
         Parameters
         ----------
@@ -130,16 +132,11 @@ class CLossCrossEntropy(CLossClassification):
 
         grad = softmax(score)
 
+        # we subtract -1 only to the elements equal to y_true
+        grad[[range(score.shape[0]), y_true.tolist()]] -= 1.0
+
         # find-like indexing (list of lists)
         a = y_true.tolist() if pos_label is None else [pos_label]
 
-        grad = CArray(grad[[range(score.shape[0]), a]])
-
-        if pos_label is not None:
-
-            grad[y_true == CArray(a)] -= 1.0
-
-            return grad
-
-        else:  # derivative is taken always w.r.t the true class
-            return grad - 1.0
+        # Return elements equal to y_true (if pos_label is None) or pos_label
+        return CArray(grad[[range(score.shape[0]), a]])
