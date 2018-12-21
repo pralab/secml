@@ -1,5 +1,10 @@
 # SecML-Lib: A library for Secure Machine Learning
 
+![Status DEV](https://img.shields.io/badge/status-dev-red.svg)
+![Python 2.7](https://img.shields.io/badge/python-2.7-brightgreen.svg)
+![Platform MacOS | Linux](https://img.shields.io/badge/platform-macos%20%7C%20linux-lightgrey.svg)
+![GNU GPLv3](https://img.shields.io/badge/license-GPL%20(%3E%3D%203)-blue.svg)
+
 ## Installation Guide
 SecML-Lib should be installed in an existing or in a new
  [virtualenv](https://virtualenv.pypa.io) or [conda](https://conda.io)
