@@ -273,7 +273,7 @@ class CDense(_CArrayInterface):
 
                 else:
                     raise TypeError("{:} should not be used for "
-                                    "CSparse indexing.".format(type(idx)))
+                                    "CDense indexing.".format(type(e)))
 
             # Converting back to tuple
             idx = tuple(idx_list)
@@ -283,7 +283,7 @@ class CDense(_CArrayInterface):
                 idx = np.ix_(*idx)
 
         else:
-            # No other object is accepted for CSparse indexing
+            # No other object is accepted for CDense indexing
             raise TypeError("{:} should not be used for "
                             "CDense indexing.".format(type(idx)))
 
