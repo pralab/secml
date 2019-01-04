@@ -265,14 +265,30 @@ class CTorchClassifier(CClassifier):
             DataParallel model. Default False.
 
         """
-        # Restore the state of the optimizer
-        self._optimizer.load_state_dict(state_dict['optimizer'])
         # Change optimizer-related parameters accordingly to state
-        self._learning_rate = self._optimizer.defaults['lr']
-        self._momentum = self._optimizer.defaults['momentum']
-        self._weight_decay = self._optimizer.defaults['weight_decay']
+        # The default (initial) parameters are stored
+        # Parameters in `param_groups` list could be different
+        # depending on the epoch the state has been stored
+        # and will be restored later
+        if 'defaults' in state_dict['optimizer']:
+            defaults = state_dict['optimizer']['defaults']
+            self._learning_rate = defaults['lr']
+            self._momentum = defaults['momentum']
+            self._weight_decay = defaults['weight_decay']
+            # We need to recreate the optimizer after param change
+            self.init_optimizer()
+        else:
+            # If the state dict does not contain the default values,
+            # display warning and continue
+            self.logger.warning("State dictionary has no defaults for the "
+                                "optimizer parameters. Keeping current values")
+
+        # Restore the state of the param_groups in the optimizer
+        self._optimizer.load_state_dict(state_dict['optimizer'])
+
         # Restore the count of epochs
         self._start_epoch = state_dict['epoch'] + 1
+
         # Restore the state of the model
         if dataparallel is True:
             # Convert a DataParallel model state to a normal model state
@@ -299,6 +315,8 @@ class CTorchClassifier(CClassifier):
         """
         state_dict = dict()
         state_dict['optimizer'] = self._optimizer.state_dict()
+        # Saving other optimizer default parameters
+        state_dict['optimizer']['defaults'] = self._optimizer.defaults
         state_dict['state_dict'] = self._model.state_dict()
         state_dict['epoch'] = self._start_epoch
         return state_dict
