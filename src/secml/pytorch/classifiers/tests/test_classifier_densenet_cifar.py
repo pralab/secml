@@ -234,6 +234,42 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
         self.assertFalse(
             (df_scores_2 != CArray(scores[:, 2]).ravel()).any())
 
+    def test_params(self):
+        """Testing parameters setting."""
+        self.logger.info("Testing parameter `weight_decay`")
+        clf = CTorchClassifierDenseNetCifar(weight_decay=1e-2)
+
+        self.assertEqual(1e-2, clf._optimizer.defaults['weight_decay'])
+
+        clf.weight_decay = 1e-4
+        self.assertEqual(1e-4, clf._optimizer.defaults['weight_decay'])
+
+    def test_save_load_state(self):
+        """Test for load_state using state_dict."""
+        lr_default = 1e-2
+        lr = 30
+
+        # Initializing a CLF with an unusual parameter value
+        self.clf = CTorchClassifierDenseNetCifar(learning_rate=lr)
+        self.clf.verbose = 2
+
+        self.assertEqual(lr, self.clf.learning_rate)
+        self.assertEqual(lr, self.clf._optimizer.defaults['lr'])
+
+        state = self.clf.state_dict()
+
+        # Initializing the clf again using default parameters
+        self.clf = CTorchClassifierDenseNetCifar()
+        self.clf.verbose = 2
+
+        self.assertEqual(lr_default, self.clf.learning_rate)
+        self.assertEqual(lr_default, self.clf._optimizer.defaults['lr'])
+
+        self.clf.load_state(state)
+
+        self.assertEqual(lr, self.clf.learning_rate)
+        self.assertEqual(lr, self.clf._optimizer.defaults['lr'])
+
 
 if __name__ == '__main__':
     CUnitTest.main()
