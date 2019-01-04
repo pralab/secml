@@ -32,9 +32,13 @@ before_script:
       - .gitlab-ci.yml
       - .gitlab-ci-extra.sh
 
-test:py27-n13:
+test:min:
   extends: .tests
-  script: tox --workdir $TOX_WORK_DIR -e py27-n13
+  script: tox --workdir $TOX_WORK_DIR -e min
+
+test:latest:
+  extends: .tests
+  script: tox --workdir $TOX_WORK_DIR -e latest
 
 test:py27-n14:
   extends: .tests
@@ -43,14 +47,6 @@ test:py27-n14:
 test:py27-n15:
   extends: .tests
   script: tox --workdir $TOX_WORK_DIR -e py27-n15
-
-test:py27-sk19:
-  extends: .tests
-  script: tox --workdir $TOX_WORK_DIR -e py27-sk19
-
-test:py27-sk20:
-  extends: .tests
-  script: tox --workdir $TOX_WORK_DIR -e py27-sk20
 
 deploy:xenial:
   image: ubuntu:xenial
