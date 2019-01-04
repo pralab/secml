@@ -270,7 +270,7 @@ class CSparse(_CArrayInterface):
 
                 else:
                     raise TypeError("{:} should not be used for "
-                                    "CSparse indexing.".format(type(idx)))
+                                    "CSparse indexing.".format(type(e)))
 
             # Converting back to tuple
             idx = tuple(idx_list)
