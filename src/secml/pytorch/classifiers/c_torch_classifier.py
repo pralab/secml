@@ -47,11 +47,11 @@ class CTorchClassifier(CClassifier):
     weight_decay : float, optional
         Weight decay (L2 penalty). Control parameters regularization.
         Default 1e-4.
-    n_epoch : int, optional
+    epochs : int, optional
         Number of epochs. Default 100.
     gamma : float, optional
         Multiplicative factor of learning rate decay. Default: 0.1.
-    lr_schedule : tuple, optional
+    lr_schedule : list, optional
         List of epoch indices. Must be increasing.
         The current learning rate will be multiplied by gamma
         once the number of epochs reaches each index.
@@ -70,7 +70,7 @@ class CTorchClassifier(CClassifier):
     __super__ = 'CTorchClassifier'
 
     def __init__(self, batch_size, learning_rate=1e-2, momentum=0.9,
-                 weight_decay=1e-4, n_epoch=100, gamma=0.1,
+                 weight_decay=1e-4, epochs=100, gamma=0.1,
                  lr_schedule=(50, 75), regularize_bias=True,
                  train_transform=None, preprocess=None):
 
@@ -83,10 +83,9 @@ class CTorchClassifier(CClassifier):
         self._weight_decay = float(weight_decay)
 
         # Training params
-        self._n_epoch = n_epoch
+        self._epochs = epochs
         self._gamma = gamma
         self._lr_schedule = lr_schedule
-        self._start_epoch = 0
         self._regularize_bias = regularize_bias
         self._train_transform = train_transform
 
@@ -94,13 +93,18 @@ class CTorchClassifier(CClassifier):
                              'learning_rate': learning_rate,
                              'momentum': momentum,
                              'weight_decay': weight_decay,
-                             'n_epoch': n_epoch,
+                             'epochs': epochs,
                              'gamma': gamma,
                              'lr_schedule': lr_schedule,
+                             'regularize_bias': regularize_bias,
                              'train_transform': train_transform}
+
+        # Training vars
+        self._start_epoch = 0
 
         # PyTorch NeuralNetwork model
         self._model = None
+        # PyTorch Optimizer
         self._optimizer = None
 
         # Initialize the model (implementation specific for each clf)
@@ -445,10 +449,10 @@ class CTorchClassifier(CClassifier):
 
         # Scheduler to adjust the learning rate depending on epoch
         scheduler = optim.lr_scheduler.MultiStepLR(
-            self._optimizer, self._lr_schedule, gamma=self._gamma,
+            self._optimizer, list(self._lr_schedule), gamma=self._gamma,
             last_epoch=self._start_epoch - 1)
 
-        for e_idx in xrange(self._start_epoch, self._n_epoch):
+        for e_idx in xrange(self._start_epoch, self._epochs):
 
             scheduler.step()  # Adjust the learning rate
             losses = AverageMeter()  # Logger of the loss value

@@ -31,11 +31,11 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
     weight_decay : float, optional
         Weight decay (L2 penalty). Control parameters regularization.
         Default 1e-4.
-    n_epoch : int, optional
+    epochs : int, optional
         Number of epochs. Default 100.
     gamma : float, optional
         Multiplicative factor of learning rate decay. Default: 0.1.
-    lr_schedule : tuple, optional
+    lr_schedule : list, optional
         List of epoch indices. Must be increasing.
         The current learning rate will be multiplied by gamma
         once the number of epochs reaches each index.
@@ -60,21 +60,23 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
 
     def __init__(self, batch_size=64, depth=100, growthRate=12, num_classes=10,
                  learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
-                 n_epoch=300, gamma=0.1, lr_schedule=(150, 225),
+                 epochs=300, gamma=0.1, lr_schedule=(150, 225),
                  regularize_bias=True, train_transform=None, preprocess=None):
+
+        # Model params
+        self._depth = depth
+        self._growthRate = growthRate
+        self._num_classes = num_classes
 
         # Specific parameters of the classifier
         self._classes = None  # TODO: MANAGE LIST OF CLASSES
-        self._n_classes = num_classes
-        self._depth = depth
-        self._growthRate = growthRate
 
         super(CTorchClassifierDenseNetCifar, self).__init__(
             batch_size=batch_size,
             learning_rate=learning_rate,
             momentum=momentum,
             weight_decay=weight_decay,
-            n_epoch=n_epoch,
+            epochs=epochs,
             gamma=gamma,
             lr_schedule=lr_schedule,
             regularize_bias=regularize_bias,
@@ -91,10 +93,10 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
     def n_classes(self):
         """Number of classes of training dataset."""
         if self.classes is not None:
-            self._n_classes = self.classes.size  # Override the internal param
+            self._num_classes = self.classes.size  # Override the internal param
             return self.classes.size
         else:  # Use the internal parameter
-            return self._n_classes
+            return self._num_classes
 
     def _init_model(self):
         """Initialize the PyTorch Neural Network model."""

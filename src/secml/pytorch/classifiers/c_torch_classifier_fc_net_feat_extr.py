@@ -26,11 +26,11 @@ class CTorchClassifierFullyConnectedFE(CTorchClassifier):
 
     def __init__(self, batch_size=5, input_dims=1000, hidden_dims=100,
                  output_dims=10, learning_rate=1e-2, momentum=0.9,
-                 weight_decay=1e-4, n_epoch=100, gamma=0.1,
-                 lr_schedule=(50, 75),  regularize_bias=True,
+                 weight_decay=1e-4, epochs=100, gamma=0.1,
+                 lr_schedule=(50, 75), regularize_bias=True,
                  train_transform=None, preprocess=None):
 
-        # Specific parameters of the classifier
+        # Model params
         self._input_dims = input_dims
         self._hidden_dims = hidden_dims
         self._output_dims = output_dims
@@ -40,7 +40,7 @@ class CTorchClassifierFullyConnectedFE(CTorchClassifier):
             learning_rate=learning_rate,
             momentum=momentum,
             weight_decay=weight_decay,
-            n_epoch=n_epoch,
+            epochs=epochs,
             gamma=gamma,
             lr_schedule=lr_schedule,
             regularize_bias=regularize_bias,
