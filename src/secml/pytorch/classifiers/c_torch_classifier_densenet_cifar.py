@@ -58,9 +58,9 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
     """
     __class_type = 'torch-densenet-cifar'
 
-    def __init__(self, depth=100, growthRate=12, num_classes=10,
+    def __init__(self, batch_size=64, depth=100, growthRate=12, num_classes=10,
                  learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
-                 n_epoch=300, gamma=0.1, lr_schedule=(150, 225), batch_size=64,
+                 n_epoch=300, gamma=0.1, lr_schedule=(150, 225),
                  regularize_bias=True, train_transform=None, preprocess=None):
 
         # Specific parameters of the classifier
@@ -70,13 +70,13 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
         self._growthRate = growthRate
 
         super(CTorchClassifierDenseNetCifar, self).__init__(
+            batch_size=batch_size,
             learning_rate=learning_rate,
             momentum=momentum,
             weight_decay=weight_decay,
             n_epoch=n_epoch,
             gamma=gamma,
             lr_schedule=lr_schedule,
-            batch_size=batch_size,
             regularize_bias=regularize_bias,
             train_transform=train_transform,
             preprocess=preprocess

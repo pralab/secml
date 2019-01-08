@@ -37,6 +37,9 @@ class CTorchClassifier(CClassifier):
 
     Parameters
     ----------
+    batch_size : int
+        Size of the batch for grouping samples. Depends on the
+        neural network model and on the specific data.
     learning_rate : float, optional
         Learning rate. Default 1e-2.
     momentum : float, optional
@@ -52,8 +55,6 @@ class CTorchClassifier(CClassifier):
         List of epoch indices. Must be increasing.
         The current learning rate will be multiplied by gamma
         once the number of epochs reaches each index.
-    batch_size : int, optional
-        Size of the batch for grouping samples. Default 5.
     regularize_bias : bool, optional
         If False, L2 regularization will NOT be applied to biases.
         Default True, so regularization will be applied to all parameters.
@@ -68,9 +69,13 @@ class CTorchClassifier(CClassifier):
     __metaclass__ = ABCMeta
     __super__ = 'CTorchClassifier'
 
-    def __init__(self, learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
-                 n_epoch=100, gamma=0.1, lr_schedule=(50, 75), batch_size=5,
-                 regularize_bias=True, train_transform=None, preprocess=None):
+    def __init__(self, batch_size, learning_rate=1e-2, momentum=0.9,
+                 weight_decay=1e-4, n_epoch=100, gamma=0.1,
+                 lr_schedule=(50, 75), regularize_bias=True,
+                 train_transform=None, preprocess=None):
+
+        # Model params
+        self._batch_size = batch_size
 
         # Optimizer params
         self._learning_rate = learning_rate
@@ -82,17 +87,16 @@ class CTorchClassifier(CClassifier):
         self._gamma = gamma
         self._lr_schedule = lr_schedule
         self._start_epoch = 0
-        self._batch_size = batch_size
         self._regularize_bias = regularize_bias
         self._train_transform = train_transform
 
-        self._init_params = {'learning_rate': learning_rate,
+        self._init_params = {'batch_size': batch_size,
+                             'learning_rate': learning_rate,
                              'momentum': momentum,
                              'weight_decay': weight_decay,
                              'n_epoch': n_epoch,
                              'gamma': gamma,
                              'lr_schedule': lr_schedule,
-                             'batch_size': batch_size,
                              'train_transform': train_transform}
 
         # PyTorch NeuralNetwork model
