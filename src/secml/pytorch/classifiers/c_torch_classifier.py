@@ -21,6 +21,7 @@ from secml.ml.classifiers import CClassifier
 from secml.core.settings import SECML_PYTORCH_USE_CUDA
 from secml.pytorch.data import CTorchDataset
 from secml.pytorch.utils import AverageMeter, accuracy
+from secml.pytorch.utils.optim_utils import add_weight_decay
 
 # Use CUDA ?!
 use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
@@ -32,31 +33,57 @@ if use_cuda:
 
 # FIXME: inner preprocess not manage yet for training phase
 class CTorchClassifier(CClassifier):
-    """
-    A fully-connected ReLU network with one hidden layer, trained to predict y from x
-    by minimizing squared Euclidean distance.
-    This implementation uses the nn package from PyTorch to build the network.
-    PyTorch autograd makes it easy to define computational graphs and take gradients,
-    but raw autograd can be a bit too low-level for defining complex neural networks;
-    this is where the nn package can help. The nn package defines a set of Modules,
-    which you can think of as a neural network layer that has produces output from
-    input and may have some trainable weights or other state.
+    """PyTorch Neural Network classifier.
+
+    Parameters
+    ----------
+    learning_rate : float, optional
+        Learning rate. Default 1e-2.
+    momentum : float, optional
+        Momentum factor. Default 0.9.
+    weight_decay : float, optional
+        Weight decay (L2 penalty). Control parameters regularization.
+        Default 1e-4.
+    n_epoch : int, optional
+        Number of epochs. Default 100.
+    gamma : float, optional
+        Multiplicative factor of learning rate decay. Default: 0.1.
+    lr_schedule : tuple, optional
+        List of epoch indices. Must be increasing.
+        The current learning rate will be multiplied by gamma
+        once the number of epochs reaches each index.
+    batch_size : int, optional
+        Size of the batch for grouping samples. Default 5.
+    regularize_bias : bool, optional
+        If False, L2 regularization will NOT be applied to biases.
+        Default True, so regularization will be applied to all parameters.
+        If weight_decay is 0, regularization will not be applied anyway.
+        If fit.warm_start is True, this parameter has no effect.
+    train_transform : torchvision.transform or None, optional
+        Transformation to be applied before training.
+    preprocess : CNormalizer or None, optional
+        Preprocessing for data.
+
     """
     __metaclass__ = ABCMeta
     __super__ = 'CTorchClassifier'
 
     def __init__(self, learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
                  n_epoch=100, gamma=0.1, lr_schedule=(50, 75), batch_size=5,
-                 train_transform=None, preprocess=None):
+                 regularize_bias=True, train_transform=None, preprocess=None):
 
+        # Optimizer params
         self._learning_rate = learning_rate
         self._momentum = momentum
         self._weight_decay = float(weight_decay)
+
+        # Training params
         self._n_epoch = n_epoch
         self._gamma = gamma
         self._lr_schedule = lr_schedule
         self._start_epoch = 0
         self._batch_size = batch_size
+        self._regularize_bias = regularize_bias
         self._train_transform = train_transform
 
         self._init_params = {'learning_rate': learning_rate,
@@ -223,7 +250,14 @@ class CTorchClassifier(CClassifier):
 
     def init_optimizer(self):
         """Initialize the PyTorch Neural Network optimizer."""
-        self._optimizer = optim.SGD(self._model.parameters(),
+        # Altering parameters by adding weight_decay only to proper params
+        if self.weight_decay != 0 and self._regularize_bias is False:
+            params = add_weight_decay(self._model, self.weight_decay)
+        else:  # .. but only if necessary!
+            params = self._model.parameters()
+
+        # weight_decay is passed anyway to the optimizer and act as a default
+        self._optimizer = optim.SGD(params,
                                     lr=self._learning_rate,
                                     momentum=self._momentum,
                                     weight_decay=self.weight_decay)
@@ -265,6 +299,8 @@ class CTorchClassifier(CClassifier):
             DataParallel model. Default False.
 
         """
+        # Set this to True if optimizer needs to be recreated
+        recreate_optimizer = False
         # Change optimizer-related parameters accordingly to state
         # The default (initial) parameters are stored
         # Parameters in `param_groups` list could be different
@@ -275,13 +311,22 @@ class CTorchClassifier(CClassifier):
             self._learning_rate = defaults['lr']
             self._momentum = defaults['momentum']
             self._weight_decay = defaults['weight_decay']
-            # We need to recreate the optimizer after param change
-            self.init_optimizer()
+            recreate_optimizer = True
         else:
             # If the state dict does not contain the default values,
             # display warning and continue
             self.logger.warning("State dictionary has no defaults for the "
                                 "optimizer parameters. Keeping current values")
+
+        try:  # biases have been regularized?
+            self._regularize_bias = bool(
+                state_dict['optimizer']['regularize_bias'])
+            recreate_optimizer = True
+        except KeyError:
+            pass  # `regularize_bias` not defined probably, use default
+
+        if recreate_optimizer is True:
+            self.init_optimizer()
 
         # Restore the state of the param_groups in the optimizer
         self._optimizer.load_state_dict(state_dict['optimizer'])
@@ -317,6 +362,7 @@ class CTorchClassifier(CClassifier):
         state_dict['optimizer'] = self._optimizer.state_dict()
         # Saving other optimizer default parameters
         state_dict['optimizer']['defaults'] = self._optimizer.defaults
+        state_dict['optimizer']['regularize_bias'] = self._regularize_bias
         state_dict['state_dict'] = self._model.state_dict()
         state_dict['epoch'] = self._start_epoch
         return state_dict
