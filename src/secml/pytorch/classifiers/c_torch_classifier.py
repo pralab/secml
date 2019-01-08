@@ -37,6 +37,9 @@ class CTorchClassifier(CClassifier):
 
     Parameters
     ----------
+    batch_size : int
+        Size of the batch for grouping samples. Depends on the
+        neural network model and on the specific data.
     learning_rate : float, optional
         Learning rate. Default 1e-2.
     momentum : float, optional
@@ -44,16 +47,14 @@ class CTorchClassifier(CClassifier):
     weight_decay : float, optional
         Weight decay (L2 penalty). Control parameters regularization.
         Default 1e-4.
-    n_epoch : int, optional
+    epochs : int, optional
         Number of epochs. Default 100.
     gamma : float, optional
         Multiplicative factor of learning rate decay. Default: 0.1.
-    lr_schedule : tuple, optional
+    lr_schedule : list, optional
         List of epoch indices. Must be increasing.
         The current learning rate will be multiplied by gamma
         once the number of epochs reaches each index.
-    batch_size : int, optional
-        Size of the batch for grouping samples. Default 5.
     regularize_bias : bool, optional
         If False, L2 regularization will NOT be applied to biases.
         Default True, so regularization will be applied to all parameters.
@@ -68,35 +69,33 @@ class CTorchClassifier(CClassifier):
     __metaclass__ = ABCMeta
     __super__ = 'CTorchClassifier'
 
-    def __init__(self, learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
-                 n_epoch=100, gamma=0.1, lr_schedule=(50, 75), batch_size=5,
-                 regularize_bias=True, train_transform=None, preprocess=None):
+    def __init__(self, batch_size, learning_rate=1e-2, momentum=0.9,
+                 weight_decay=1e-4, epochs=100, gamma=0.1,
+                 lr_schedule=(50, 75), regularize_bias=True,
+                 train_transform=None, preprocess=None):
 
-        # Optimizer params
-        self._learning_rate = learning_rate
-        self._momentum = momentum
+        # Model params
+        self._batch_size = batch_size
+
+        # Optimizer params (set the protected attrs to avoid
+        # reinitialize the optimizer each time)
+        self._learning_rate = float(learning_rate)
+        self._momentum = float(momentum)
         self._weight_decay = float(weight_decay)
 
         # Training params
-        self._n_epoch = n_epoch
-        self._gamma = gamma
-        self._lr_schedule = lr_schedule
-        self._start_epoch = 0
-        self._batch_size = batch_size
-        self._regularize_bias = regularize_bias
-        self._train_transform = train_transform
+        self.epochs = epochs
+        self.gamma = gamma
+        self.lr_schedule = lr_schedule
+        self.regularize_bias = regularize_bias
+        self.train_transform = train_transform
 
-        self._init_params = {'learning_rate': learning_rate,
-                             'momentum': momentum,
-                             'weight_decay': weight_decay,
-                             'n_epoch': n_epoch,
-                             'gamma': gamma,
-                             'lr_schedule': lr_schedule,
-                             'batch_size': batch_size,
-                             'train_transform': train_transform}
+        # Training vars
+        self._start_epoch = 0
 
         # PyTorch NeuralNetwork model
         self._model = None
+        # PyTorch Optimizer
         self._optimizer = None
 
         # Initialize the model (implementation specific for each clf)
@@ -110,100 +109,110 @@ class CTorchClassifier(CClassifier):
         super(CTorchClassifier, self).__init__(preprocess=preprocess)
 
     @property
+    def batch_size(self):
+        """Size of the batch for grouping samples."""
+        return self._batch_size
+
+    @property
     def learning_rate(self):
-        """Learning rate of the optimizer."""
+        """Learning rate. """
         return self._learning_rate
 
     @learning_rate.setter
     def learning_rate(self, value):
-        """Learning rate of the optimizer."""
+        """Learning rate."""
         self._learning_rate = float(value)
         # We need to recreate the optimizer after param change
         self.init_optimizer()
 
     @property
     def momentum(self):
-        """Momentum of the optimizer."""
+        """Momentum factor."""
         return self._momentum
 
     @momentum.setter
     def momentum(self, value):
-        """Momentum of the optimizer."""
+        """Momentum factor."""
         self._momentum = float(value)
         # We need to recreate the optimizer after param change
         self.init_optimizer()
 
     @property
     def weight_decay(self):
-        """L2 penalty of the optimizer."""
+        """Weight decay (L2 penalty). Control parameters regularization."""
         return self._weight_decay
 
     @weight_decay.setter
     def weight_decay(self, value):
-        """L2 penalty of the optimizer."""
+        """Weight decay (L2 penalty). Control parameters regularization."""
         self._weight_decay = float(value)
         # We need to recreate the optimizer after param change
         self.init_optimizer()
 
     @property
+    def epochs(self):
+        """Number of epochs."""
+        return self._epochs
+
+    @epochs.setter
+    def epochs(self, value):
+        """Number of epochs."""
+        self._epochs = int(value)
+
+    @property
+    def gamma(self):
+        """Multiplicative factor of learning rate decay."""
+        return self._gamma
+
+    @gamma.setter
+    def gamma(self, value):
+        """Multiplicative factor of learning rate decay."""
+        self._gamma = float(value)
+
+    @property
+    def lr_schedule(self):
+        """List of epoch indices."""
+        return self._lr_schedule
+
+    @lr_schedule.setter
+    def lr_schedule(self, value):
+        """List of epoch indices."""
+        self._lr_schedule = list(value)
+
+    @property
+    def regularize_bias(self):
+        """If False, L2 regularization will NOT be applied to biases."""
+        return self._regularize_bias
+
+    @regularize_bias.setter
+    def regularize_bias(self, value):
+        """If False, L2 regularization will NOT be applied to biases."""
+        self._regularize_bias = bool(value)
+
+    @property
+    def start_epoch(self):
+        """Current training epoch."""
+        return self._start_epoch
+
+    @property
     def w(self):
+        """Concatenation of weights from each layer of the network."""
         w = CArray([])
         with torch.no_grad():
             for m in self._model.modules():
                 if hasattr(m, 'weight') and m.weight is not None:
-                    w = w.append(CArray(m.weight.data.cpu().numpy()), axis=None)
+                    w = w.append(CArray(m.weight.data.cpu().numpy()))
         return w
 
     @property
     def b(self):
+        """Concatenation of bias from each layer of the network."""
         b = CArray([])
         with torch.no_grad():
             for m in self._model.modules():
                 if hasattr(m, 'bias') and m.bias is not None:
-                    b = b.append(CArray(m.bias.data.cpu().numpy()), axis=None)
+                    b = b.append(CArray(m.bias.data.cpu().numpy()))
         return b
-
-    @w.setter
-    def w(self, val):
-        """
-        :param val: flat CArray
-        :return:
-        """
-        with torch.no_grad():
-            starting_w = 0
-            for m in self._model.modules():
-                if hasattr(m, 'weight') and m.weight is not None:
-                    lyr_size = m.weight.data.cpu().numpy().size
-                    lyr_shape = m.weight.data.cpu().numpy().shape
-                    lyr_w = val[starting_w:(starting_w + lyr_size)].reshape(lyr_shape).tondarray()
-                    lyr_w = torch.from_numpy(lyr_w)
-                    lyr_w = lyr_w.type(torch.FloatTensor)
-                    if len(lyr_shape) > 1:
-                        m.weight[:, :] = lyr_w[:, :]
-                    else:
-                        m.weight[:] = lyr_w[:]
-                    starting_w += lyr_size
-
-    @b.setter
-    def b(self, val):
-        """
-        :param val: flat CArray
-        :return:
-        """
-        with torch.no_grad():
-            starting_b = 0
-            for m in self._model.modules():
-                if hasattr(m, 'bias') and m.bias is not None:
-                    lyr_size = m.bias.data.cpu().numpy().size
-                    lyr_shape = m.bias.data.cpu().numpy().shape
-                    lyr_b = val[starting_b:(starting_b + lyr_size)].reshape(lyr_shape).tondarray()
-                    lyr_b = torch.from_numpy(lyr_b)
-                    lyr_b = lyr_b.type(torch.FloatTensor)
-                    if len(lyr_shape) > 1:
-                        m.bias[:, :] = lyr_b[:, :]
-                    else:
-                        m.bias[:] = lyr_b[:]
-                    starting_b += lyr_size
 
     def __deepcopy__(self, memo, *args, **kwargs):
         """Called when copy.deepcopy(object) is called.
@@ -251,15 +260,15 @@ class CTorchClassifier(CClassifier):
     def init_optimizer(self):
         """Initialize the PyTorch Neural Network optimizer."""
         # Altering parameters by adding weight_decay only to proper params
-        if self.weight_decay != 0 and self._regularize_bias is False:
+        if self.weight_decay != 0 and self.regularize_bias is False:
             params = add_weight_decay(self._model, self.weight_decay)
         else:  # .. but only if necessary!
             params = self._model.parameters()
 
         # weight_decay is passed anyway to the optimizer and act as a default
         self._optimizer = optim.SGD(params,
-                                    lr=self._learning_rate,
-                                    momentum=self._momentum,
+                                    lr=self.learning_rate,
+                                    momentum=self.momentum,
                                     weight_decay=self.weight_decay)
 
     @abstractmethod
@@ -279,7 +288,7 @@ class CTorchClassifier(CClassifier):
         """Return a loader for input test data."""
         # Convert to CTorchDataset and use a dataloader that returns batches
         return DataLoader(CTorchDataset(x),
-                          batch_size=self._batch_size,
+                          batch_size=self.batch_size,
                           shuffle=False,
                           num_workers=n_jobs-1)
 
@@ -308,9 +317,11 @@ class CTorchClassifier(CClassifier):
         # and will be restored later
         if 'defaults' in state_dict['optimizer']:
             defaults = state_dict['optimizer']['defaults']
-            self._learning_rate = defaults['lr']
-            self._momentum = defaults['momentum']
-            self._weight_decay = defaults['weight_decay']
+            # set the protected attrs to avoid reinitialize
+            # the optimizer each time
+            self._learning_rate = float(defaults['lr'])
+            self._momentum = float(defaults['momentum'])
+            self._weight_decay = float(defaults['weight_decay'])
             recreate_optimizer = True
         else:
             # If the state dict does not contain the default values,
@@ -319,7 +330,7 @@ class CTorchClassifier(CClassifier):
                                 "optimizer parameters. Keeping current values")
 
         try:  # biases have been regularized?
-            self._regularize_bias = bool(
+            self.regularize_bias = bool(
                 state_dict['optimizer']['regularize_bias'])
             recreate_optimizer = True
         except KeyError:
@@ -349,7 +360,7 @@ class CTorchClassifier(CClassifier):
         """Return a dictionary with PyTorch objects state.
 
         Returns
-        ----------
+        -------
         dict
             Dictionary with the state of the model, optimizer and last epoch.
             Will contain the following keys:
@@ -362,18 +373,15 @@ class CTorchClassifier(CClassifier):
         state_dict['optimizer'] = self._optimizer.state_dict()
         # Saving other optimizer default parameters
         state_dict['optimizer']['defaults'] = self._optimizer.defaults
-        state_dict['optimizer']['regularize_bias'] = self._regularize_bias
+        state_dict['optimizer']['regularize_bias'] = self.regularize_bias
         state_dict['state_dict'] = self._model.state_dict()
-        state_dict['epoch'] = self._start_epoch
+        state_dict['epoch'] = self.start_epoch
         return state_dict
 
     def fit(self, dataset, warm_start=False, n_jobs=1):
         """Trains the classifier.
 
-        If a preprocess has been specified,
-        input is normalized before training.
-
-        For multiclass case see `.CClassifierMulticlass`.
+        If specified, train_transform is applied to data.
 
         Parameters
         ----------
@@ -392,12 +400,18 @@ class CTorchClassifier(CClassifier):
         trained_cls : CClassifier
             Instance of the classifier trained using input dataset.
 
+        Warnings
+        --------
+        preprocess is not applied to data before training. This behaviour
+         will change in the feature.
+
         """
         if not isinstance(dataset, CDataset):
             raise TypeError(
                 "training set should be provided as a CDataset object.")
 
         if self.preprocess is not None:
+            # TODO: CHANGE THIS BEHAVIOUR
             self.logger.warning(
                 "preprocess is not applied to training data. "
                 "Use `train_transform` parameter if necessary.")
@@ -418,12 +432,28 @@ class CTorchClassifier(CClassifier):
         return self._fit(dataset, n_jobs=n_jobs)
 
     def _fit(self, dataset, n_jobs=1):
-        """At each training the weight are setted equal to the random weight
-        that are chosen when we are instantiating the object
+        """Trains the classifier.
 
-        :param trX:
-        :param trY:
-        :return:
+        If specified, train_transform is applied to data.
+
+        Parameters
+        ----------
+        dataset : CDataset
+            Training set. Must be a :class:`.CDataset` instance with
+            patterns data and corresponding labels.
+        n_jobs : int, optional
+            Number of parallel workers to use for training the classifier.
+            Default 1. Cannot be higher than processor's number of cores.
+
+        Returns
+        -------
+        trained_cls : CClassifier
+            Instance of the classifier trained using input dataset.
+
+        Warnings
+        --------
+        preprocess is not applied to data before training. This behaviour
+         will change in the feature.
 
         """
         # Binarize labels using a OVA scheme
@@ -431,8 +461,8 @@ class CTorchClassifier(CClassifier):
 
         # Convert to CTorchDataset and use a dataloader that returns batches
         ds_loader = DataLoader(CTorchDataset(dataset.X, ova_labels,
-                                             transform=self._train_transform),
-                               batch_size=self._batch_size,
+                                             transform=self.train_transform),
+                               batch_size=self.batch_size,
                                shuffle=True,
                                num_workers=n_jobs-1)
 
@@ -441,10 +471,10 @@ class CTorchClassifier(CClassifier):
 
         # Scheduler to adjust the learning rate depending on epoch
         scheduler = optim.lr_scheduler.MultiStepLR(
-            self._optimizer, self._lr_schedule, gamma=self._gamma,
-            last_epoch=self._start_epoch - 1)
+            self._optimizer, self.lr_schedule, gamma=self.gamma,
+            last_epoch=self.start_epoch - 1)
 
-        for e_idx in xrange(self._start_epoch, self._n_epoch):
+        for e_idx in xrange(self.start_epoch, self.epochs):
 
             scheduler.step()  # Adjust the learning rate
             losses = AverageMeter()  # Logger of the loss value
@@ -495,7 +525,7 @@ class CTorchClassifier(CClassifier):
             (n_patterns, n_features).
         y : int
             The label of the class wrt the function should be calculated.
-        n_jobs : int
+        n_jobs : int, optional
             Number of parallel workers to use. Default 1.
             Cannot be higher than processor's number of cores.
 
@@ -524,7 +554,7 @@ class CTorchClassifier(CClassifier):
             (n_patterns, n_features).
         y : int
             The label of the class wrt the function should be calculated.
-        n_jobs : int
+        n_jobs : int, optional
             Number of parallel workers to use. Default 1.
             Cannot be higher than processor's number of cores.
 

@@ -31,11 +31,11 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
     weight_decay : float, optional
         Weight decay (L2 penalty). Control parameters regularization.
         Default 1e-4.
-    n_epoch : int, optional
+    epochs : int, optional
         Number of epochs. Default 100.
     gamma : float, optional
         Multiplicative factor of learning rate decay. Default: 0.1.
-    lr_schedule : tuple, optional
+    lr_schedule : list, optional
         List of epoch indices. Must be increasing.
         The current learning rate will be multiplied by gamma
         once the number of epochs reaches each index.
@@ -58,50 +58,63 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
     """
     __class_type = 'torch-densenet-cifar'
 
-    def __init__(self, depth=100, growthRate=12, num_classes=10,
+    def __init__(self, batch_size=64, depth=100, growthRate=12, num_classes=10,
                  learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
-                 n_epoch=300, gamma=0.1, lr_schedule=(150, 225), batch_size=64,
+                 epochs=300, gamma=0.1, lr_schedule=(150, 225),
                  regularize_bias=True, train_transform=None, preprocess=None):
+
+        # Model params
+        self._depth = depth
+        self._growthRate = growthRate
+        self._num_classes = num_classes
 
         # Specific parameters of the classifier
         self._classes = None  # TODO: MANAGE LIST OF CLASSES
-        self._n_classes = num_classes
-        self._depth = depth
-        self._growthRate = growthRate
 
         super(CTorchClassifierDenseNetCifar, self).__init__(
+            batch_size=batch_size,
             learning_rate=learning_rate,
             momentum=momentum,
             weight_decay=weight_decay,
-            n_epoch=n_epoch,
+            epochs=epochs,
             gamma=gamma,
             lr_schedule=lr_schedule,
-            batch_size=batch_size,
             regularize_bias=regularize_bias,
             train_transform=train_transform,
             preprocess=preprocess
         )
 
-        self._init_params = merge_dicts(self._init_params,
-                                        {'num_classes': num_classes,
-                                         'depth': depth,
-                                         'growthRate': growthRate})
+    @property
+    def depth(self):
+        """Model depth."""
+        return self._depth
+
+    @property
+    def growthRate(self):
+        """Growth rate for DenseNet."""
+        return self._growthRate
+
+    @property
+    def num_classes(self):
+        """Number of classes of training dataset."""
+        # Wraps our CClassifier.n_classes property as they use num_ as prefix
+        return self.n_classes
 
     @property
     def n_classes(self):
         """Number of classes of training dataset."""
         if self.classes is not None:
-            self._n_classes = self.classes.size  # Override the internal param
+            self._num_classes = self.classes.size  # Override the internal param
             return self.classes.size
         else:  # Use the internal parameter
-            return self._n_classes
+            return self._num_classes
 
     def _init_model(self):
         """Initialize the PyTorch Neural Network model."""
         self._model = densenet(
-            num_classes=self.n_classes,
-            depth=self._depth,
-            growthRate=self._growthRate,
+            num_classes=self.num_classes,
+            depth=self.depth,
+            growthRate=self.growthRate,
             compressionRate=2,
             dropRate=0,
         )

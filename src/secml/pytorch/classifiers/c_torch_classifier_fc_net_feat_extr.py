@@ -24,33 +24,44 @@ class CTorchClassifierFullyConnectedFE(CTorchClassifier):
     """
     __class_type = 'torch-fc-fe'
 
-    def __init__(self, input_dims=1000, hidden_dims=100, output_dims=10,
-                 learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
-                 n_epoch=100, gamma=0.1, lr_schedule=(50, 75), batch_size=5,
-                 regularize_bias=True, train_transform=None, preprocess=None):
+    def __init__(self, batch_size=5, input_dims=1000, hidden_dims=100,
+                 output_dims=10, learning_rate=1e-2, momentum=0.9,
+                 weight_decay=1e-4, epochs=100, gamma=0.1,
+                 lr_schedule=(50, 75), regularize_bias=True,
+                 train_transform=None, preprocess=None):
 
-        # Specific parameters of the classifier
+        # Model params
         self._input_dims = input_dims
         self._hidden_dims = hidden_dims
         self._output_dims = output_dims
 
         super(CTorchClassifierFullyConnectedFE, self).__init__(
+            batch_size=batch_size,
             learning_rate=learning_rate,
             momentum=momentum,
             weight_decay=weight_decay,
-            n_epoch=n_epoch,
+            epochs=epochs,
             gamma=gamma,
             lr_schedule=lr_schedule,
-            batch_size=batch_size,
             regularize_bias=regularize_bias,
             train_transform=train_transform,
             preprocess=preprocess
         )
 
-        self._init_params = merge_dicts(self._init_params,
-                                        {'input_dims': input_dims,
-                                         'hidden_dims': hidden_dims,
-                                         'output_dims': output_dims})
+    @property
+    def input_dims(self):
+        """Size of the input layer."""
+        return self._input_dims
+
+    @property
+    def hidden_dims(self):
+        """Size of the hidden layers."""
+        return self._hidden_dims
+
+    @property
+    def output_dims(self):
+        """Size of the output layer."""
+        return self._output_dims
 
     def _init_model(self):
         """Initialize the PyTorch Neural Network model."""
@@ -61,11 +72,11 @@ class CTorchClassifierFullyConnectedFE(CTorchClassifier):
         # Tensors for its weight and bias. After constructing the model
         # we use the .to() method to move it to the desired device
         self._model = torch.nn.Sequential(OrderedDict([
-            ('linear1', torch.nn.Linear(self._input_dims, self._hidden_dims)),
+            ('linear1', torch.nn.Linear(self.input_dims, self.hidden_dims)),
             ('relu', torch.nn.ReLU()),
-            ('linear2', torch.nn.Linear(self._hidden_dims, self._hidden_dims)),
+            ('linear2', torch.nn.Linear(self.hidden_dims, self.hidden_dims)),
             ('relu2', torch.nn.ReLU()),
-            ('linear3', torch.nn.Linear(self._hidden_dims, self._output_dims)),
+            ('linear3', torch.nn.Linear(self.hidden_dims, self.output_dims)),
         ]))
 
     def loss(self, x, target):

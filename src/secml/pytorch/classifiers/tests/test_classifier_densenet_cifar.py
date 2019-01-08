@@ -33,7 +33,7 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
         cls.tr, cls.ts, transform_tr = cls._load_cifar10()
 
         cls.clf = CTorchClassifierDenseNetCifar(
-            n_epoch=1, batch_size=25, train_transform=transform_tr,
+            batch_size=25, epochs=1, train_transform=transform_tr,
             preprocess=CNormalizerMeanSTD(mean=(0.4914, 0.4822, 0.4465),
                                           std=(0.2023, 0.1994, 0.2010)))
         cls.clf.verbose = 2
