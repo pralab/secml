@@ -360,7 +360,7 @@ class CTorchClassifier(CClassifier):
         """Return a dictionary with PyTorch objects state.
 
         Returns
-        ----------
+        -------
         dict
             Dictionary with the state of the model, optimizer and last epoch.
             Will contain the following keys:
@@ -381,10 +381,7 @@ class CTorchClassifier(CClassifier):
     def fit(self, dataset, warm_start=False, n_jobs=1):
         """Trains the classifier.
 
-        If a preprocess has been specified,
-        input is normalized before training.
-
-        For multiclass case see `.CClassifierMulticlass`.
+        If specified, train_transform is applied to data.
 
         Parameters
         ----------
@@ -403,12 +400,18 @@ class CTorchClassifier(CClassifier):
         trained_cls : CClassifier
             Instance of the classifier trained using input dataset.
 
+        Warnings
+        --------
+        preprocess is not applied to data before training. This behaviour
+         will change in the feature.
+
         """
         if not isinstance(dataset, CDataset):
             raise TypeError(
                 "training set should be provided as a CDataset object.")
 
         if self.preprocess is not None:
+            # TODO: CHANGE THIS BEHAVIOUR
             self.logger.warning(
                 "preprocess is not applied to training data. "
                 "Use `train_transform` parameter if necessary.")
@@ -429,12 +432,28 @@ class CTorchClassifier(CClassifier):
         return self._fit(dataset, n_jobs=n_jobs)
 
     def _fit(self, dataset, n_jobs=1):
-        """At each training the weight are setted equal to the random weight
-        that are chosen when we are instantiating the object
+        """Trains the classifier.
 
-        :param trX:
-        :param trY:
-        :return:
+        If specified, train_transform is applied to data.
+
+        Parameters
+        ----------
+        dataset : CDataset
+            Training set. Must be a :class:`.CDataset` instance with
+            patterns data and corresponding labels.
+        n_jobs : int, optional
+            Number of parallel workers to use for training the classifier.
+            Default 1. Cannot be higher than processor's number of cores.
+
+        Returns
+        -------
+        trained_cls : CClassifier
+            Instance of the classifier trained using input dataset.
+
+        Warnings
+        --------
+        preprocess is not applied to data before training. This behaviour
+         will change in the feature.
 
         """
         # Binarize labels using a OVA scheme
@@ -506,7 +525,7 @@ class CTorchClassifier(CClassifier):
             (n_patterns, n_features).
         y : int
             The label of the class wrt the function should be calculated.
-        n_jobs : int
+        n_jobs : int, optional
             Number of parallel workers to use. Default 1.
             Cannot be higher than processor's number of cores.
 
@@ -535,7 +554,7 @@ class CTorchClassifier(CClassifier):
             (n_patterns, n_features).
         y : int
             The label of the class wrt the function should be calculated.
-        n_jobs : int
+        n_jobs : int, optional
             Number of parallel workers to use. Default 1.
             Cannot be higher than processor's number of cores.
 
