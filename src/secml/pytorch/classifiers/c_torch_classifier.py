@@ -196,63 +196,23 @@ class CTorchClassifier(CClassifier):
 
     @property
     def w(self):
+        """Concatenation of weights from each layer of the network."""
         w = CArray([])
         with torch.no_grad():
             for m in self._model.modules():
                 if hasattr(m, 'weight') and m.weight is not None:
-                    w = w.append(CArray(m.weight.data.cpu().numpy()), axis=None)
+                    w = w.append(CArray(m.weight.data.cpu().numpy()))
         return w
 
     @property
     def b(self):
+        """Concatenation of bias from each layer of the network."""
         b = CArray([])
         with torch.no_grad():
             for m in self._model.modules():
                 if hasattr(m, 'bias') and m.bias is not None:
-                    b = b.append(CArray(m.bias.data.cpu().numpy()), axis=None)
+                    b = b.append(CArray(m.bias.data.cpu().numpy()))
         return b
-
-    @w.setter
-    def w(self, val):
-        """
-        :param val: flat CArray
-        :return:
-        """
-        with torch.no_grad():
-            starting_w = 0
-            for m in self._model.modules():
-                if hasattr(m, 'weight') and m.weight is not None:
-                    lyr_size = m.weight.data.cpu().numpy().size
-                    lyr_shape = m.weight.data.cpu().numpy().shape
-                    lyr_w = val[starting_w:(starting_w + lyr_size)].reshape(lyr_shape).tondarray()
-                    lyr_w = torch.from_numpy(lyr_w)
-                    lyr_w = lyr_w.type(torch.FloatTensor)
-                    if len(lyr_shape) > 1:
-                        m.weight[:, :] = lyr_w[:, :]
-                    else:
-                        m.weight[:] = lyr_w[:]
-                    starting_w += lyr_size
-
-    @b.setter
-    def b(self, val):
-        """
-        :param val: flat CArray
-        :return:
-        """
-        with torch.no_grad():
-            starting_b = 0
-            for m in self._model.modules():
-                if hasattr(m, 'bias') and m.bias is not None:
-                    lyr_size = m.bias.data.cpu().numpy().size
-                    lyr_shape = m.bias.data.cpu().numpy().shape
-                    lyr_b = val[starting_b:(starting_b + lyr_size)].reshape(lyr_shape).tondarray()
-                    lyr_b = torch.from_numpy(lyr_b)
-                    lyr_b = lyr_b.type(torch.FloatTensor)
-                    if len(lyr_shape) > 1:
-                        m.bias[:, :] = lyr_b[:, :]
-                    else:
-                        m.bias[:] = lyr_b[:]
-                    starting_b += lyr_size
 
     def __deepcopy__(self, memo, *args, **kwargs):
         """Called when copy.deepcopy(object) is called.
