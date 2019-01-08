@@ -7,15 +7,45 @@ from secml.utils.dict_utils import merge_dicts
 
 # FIXME: UPDATE CLASS DOCSTRING
 class CTorchClassifierFullyConnected(CTorchClassifier):
-    """
-    A fully-connected ReLU network with one hidden layer, trained to predict y from x
-    by minimizing squared Euclidean distance.
-    This implementation uses the nn package from PyTorch to build the network.
-    PyTorch autograd makes it easy to define computational graphs and take gradients,
-    but raw autograd can be a bit too low-level for defining complex neural networks;
-    this is where the nn package can help. The nn package defines a set of Modules,
-    which you can think of as a neural network layer that has produces output from
-    input and may have some trainable weights or other state.
+    """Torch classifier with Fully-Connected Neural Network.
+
+    Fully-connected neural network with two hidden layers and
+     ReLU as activation function.
+
+    Parameters
+    ----------
+    input_dims : int, optional
+        Size of the input layer. Default 1000.
+    hidden_dims : int, optional
+        Size of the hidden layers. Default 100.
+    output_dims : int, optional
+        Size of the output layer. Default 10.
+    learning_rate : float, optional
+        Learning rate. Default 1e-2.
+    momentum : float, optional
+        Momentum factor. Default 0.9.
+    weight_decay : float, optional
+        Weight decay (L2 penalty). Control parameters regularization.
+        Default 1e-4.
+    n_epoch : int, optional
+        Number of epochs. Default 100.
+    gamma : float, optional
+        Multiplicative factor of learning rate decay. Default: 0.1.
+    lr_schedule : tuple, optional
+        List of epoch indices. Must be increasing.
+        The current learning rate will be multiplied by gamma
+        once the number of epochs reaches each index.
+    batch_size : int, optional
+        Size of the batch for grouping samples. Default 5.
+    regularize_bias : bool, optional
+        If False, L2 regularization will NOT be applied to biases.
+        Default True, so regularization will be applied to all parameters.
+        If weight_decay is 0, regularization will not be applied anyway.
+        If fit.warm_start is True, this parameter has no effect.
+    train_transform : torchvision.transform or None, optional
+        Transformation to be applied before training.
+    preprocess : CNormalizer or None, optional
+        Preprocessing for data.
 
     Attributes
     ----------
@@ -27,7 +57,7 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
     def __init__(self, input_dims=1000, hidden_dims=100, output_dims=10,
                  learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
                  n_epoch=100, gamma=0.1, lr_schedule=(50, 75), batch_size=5,
-                 train_transform=None, preprocess=None):
+                 regularize_bias=True, train_transform=None, preprocess=None):
 
         # Specific parameters of the classifier
         self._input_dims = input_dims
@@ -42,6 +72,7 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
             gamma=gamma,
             lr_schedule=lr_schedule,
             batch_size=batch_size,
+            regularize_bias=regularize_bias,
             train_transform=train_transform,
             preprocess=preprocess
         )

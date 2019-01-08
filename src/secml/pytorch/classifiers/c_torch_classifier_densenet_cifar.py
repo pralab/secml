@@ -14,7 +14,42 @@ from secml.utils.dict_utils import merge_dicts
 
 
 class CTorchClassifierDenseNetCifar(CTorchClassifier):
-    """Torch Classifier DenseNet Cifar.
+    """Torch Classifier with DenseNet CIFAR Neural Network.
+
+    Parameters
+    ----------
+    depth : int, optional
+        Model depth. Default 100.
+    growthRate : int, optional
+        Growth rate for DenseNet. Default 12.
+    num_classes : int, optional
+        Size of the output layer. Default 10.
+    learning_rate : float, optional
+        Learning rate. Default 1e-2.
+    momentum : float, optional
+        Momentum factor. Default 0.9.
+    weight_decay : float, optional
+        Weight decay (L2 penalty). Control parameters regularization.
+        Default 1e-4.
+    n_epoch : int, optional
+        Number of epochs. Default 100.
+    gamma : float, optional
+        Multiplicative factor of learning rate decay. Default: 0.1.
+    lr_schedule : tuple, optional
+        List of epoch indices. Must be increasing.
+        The current learning rate will be multiplied by gamma
+        once the number of epochs reaches each index.
+    batch_size : int, optional
+        Size of the batch for grouping samples. Default 5.
+    regularize_bias : bool, optional
+        If False, L2 regularization will NOT be applied to biases.
+        Default True, so regularization will be applied to all parameters.
+        If weight_decay is 0, regularization will not be applied anyway.
+        If fit.warm_start is True, this parameter has no effect.
+    train_transform : torchvision.transform or None, optional
+        Transformation to be applied before training.
+    preprocess : CNormalizer or None, optional
+        Preprocessing for data.
 
     Attributes
     ----------
@@ -26,7 +61,7 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
     def __init__(self, depth=100, growthRate=12, num_classes=10,
                  learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
                  n_epoch=300, gamma=0.1, lr_schedule=(150, 225), batch_size=64,
-                 train_transform=None, preprocess=None):
+                 regularize_bias=True, train_transform=None, preprocess=None):
 
         # Specific parameters of the classifier
         self._classes = None  # TODO: MANAGE LIST OF CLASSES
@@ -42,6 +77,7 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
             gamma=gamma,
             lr_schedule=lr_schedule,
             batch_size=batch_size,
+            regularize_bias=regularize_bias,
             train_transform=train_transform,
             preprocess=preprocess
         )
