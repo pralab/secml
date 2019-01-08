@@ -90,16 +90,6 @@ class CTorchClassifier(CClassifier):
         self.regularize_bias = regularize_bias
         self.train_transform = train_transform
 
-        self._init_params = {'batch_size': batch_size,
-                             'learning_rate': learning_rate,
-                             'momentum': momentum,
-                             'weight_decay': weight_decay,
-                             'epochs': epochs,
-                             'gamma': gamma,
-                             'lr_schedule': lr_schedule,
-                             'regularize_bias': regularize_bias,
-                             'train_transform': train_transform}
-
         # Training vars
         self._start_epoch = 0
 

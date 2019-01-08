@@ -84,11 +84,6 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
             preprocess=preprocess
         )
 
-        self._init_params = merge_dicts(self._init_params,
-                                        {'num_classes': num_classes,
-                                         'depth': depth,
-                                         'growthRate': growthRate})
-
     @property
     def depth(self):
         """Model depth."""

@@ -78,11 +78,6 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
             preprocess=preprocess
         )
 
-        self._init_params = merge_dicts(self._init_params,
-                                        {'input_dims': input_dims,
-                                         'hidden_dims': hidden_dims,
-                                         'output_dims': output_dims})
-
     @property
     def input_dims(self):
         """Size of the input layer."""
