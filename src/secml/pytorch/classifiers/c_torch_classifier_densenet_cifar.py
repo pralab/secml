@@ -117,9 +117,9 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
     def _init_model(self):
         """Initialize the PyTorch Neural Network model."""
         self._model = densenet(
-            num_classes=self.n_classes,
-            depth=self._depth,
-            growthRate=self._growthRate,
+            num_classes=self.num_classes,
+            depth=self.depth,
+            growthRate=self.growthRate,
             compressionRate=2,
             dropRate=0,
         )

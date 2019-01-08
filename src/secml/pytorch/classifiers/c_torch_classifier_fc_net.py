@@ -107,11 +107,11 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
         # Tensors for its weight and bias. After constructing the model
         # we use the .to() method to move it to the desired device
         self._model = torch.nn.Sequential(OrderedDict([
-            ('linear1', torch.nn.Linear(self._input_dims, self._hidden_dims)),
+            ('linear1', torch.nn.Linear(self.input_dims, self.hidden_dims)),
             ('relu1', torch.nn.ReLU()),
-            ('linear2', torch.nn.Linear(self._hidden_dims, self._hidden_dims)),
+            ('linear2', torch.nn.Linear(self.hidden_dims, self.hidden_dims)),
             ('relu2', torch.nn.ReLU()),
-            ('linear3', torch.nn.Linear(self._hidden_dims, self._output_dims)),
+            ('linear3', torch.nn.Linear(self.hidden_dims, self.output_dims)),
             ('softmax', torch.nn.Softmax(dim=-1))
         ]))
 

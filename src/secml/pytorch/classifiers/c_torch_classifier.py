@@ -77,16 +77,17 @@ class CTorchClassifier(CClassifier):
         # Model params
         self._batch_size = batch_size
 
-        # Optimizer params
-        self._learning_rate = learning_rate
-        self._momentum = momentum
+        # Optimizer params (set the protected attrs to avoid
+        # reinitialize the optimizer each time)
+        self._learning_rate = float(learning_rate)
+        self._momentum = float(momentum)
         self._weight_decay = float(weight_decay)
 
         # Training params
-        self._epochs = epochs
-        self._gamma = gamma
-        self._lr_schedule = lr_schedule
-        self._regularize_bias = regularize_bias
+        self.epochs = epochs
+        self.gamma = gamma
+        self.lr_schedule = lr_schedule
+        self.regularize_bias = regularize_bias
         self.train_transform = train_transform
 
         self._init_params = {'batch_size': batch_size,
@@ -309,15 +310,15 @@ class CTorchClassifier(CClassifier):
     def init_optimizer(self):
         """Initialize the PyTorch Neural Network optimizer."""
         # Altering parameters by adding weight_decay only to proper params
-        if self.weight_decay != 0 and self._regularize_bias is False:
+        if self.weight_decay != 0 and self.regularize_bias is False:
             params = add_weight_decay(self._model, self.weight_decay)
         else:  # .. but only if necessary!
             params = self._model.parameters()
 
         # weight_decay is passed anyway to the optimizer and act as a default
         self._optimizer = optim.SGD(params,
-                                    lr=self._learning_rate,
-                                    momentum=self._momentum,
+                                    lr=self.learning_rate,
+                                    momentum=self.momentum,
                                     weight_decay=self.weight_decay)
 
     @abstractmethod
@@ -337,7 +338,7 @@ class CTorchClassifier(CClassifier):
         """Return a loader for input test data."""
         # Convert to CTorchDataset and use a dataloader that returns batches
         return DataLoader(CTorchDataset(x),
-                          batch_size=self._batch_size,
+                          batch_size=self.batch_size,
                           shuffle=False,
                           num_workers=n_jobs-1)
 
@@ -366,9 +367,11 @@ class CTorchClassifier(CClassifier):
         # and will be restored later
         if 'defaults' in state_dict['optimizer']:
             defaults = state_dict['optimizer']['defaults']
-            self._learning_rate = defaults['lr']
-            self._momentum = defaults['momentum']
-            self._weight_decay = defaults['weight_decay']
+            # set the protected attrs to avoid reinitialize
+            # the optimizer each time
+            self._learning_rate = float(defaults['lr'])
+            self._momentum = float(defaults['momentum'])
+            self._weight_decay = float(defaults['weight_decay'])
             recreate_optimizer = True
         else:
             # If the state dict does not contain the default values,
@@ -377,7 +380,7 @@ class CTorchClassifier(CClassifier):
                                 "optimizer parameters. Keeping current values")
 
         try:  # biases have been regularized?
-            self._regularize_bias = bool(
+            self.regularize_bias = bool(
                 state_dict['optimizer']['regularize_bias'])
             recreate_optimizer = True
         except KeyError:
@@ -420,9 +423,9 @@ class CTorchClassifier(CClassifier):
         state_dict['optimizer'] = self._optimizer.state_dict()
         # Saving other optimizer default parameters
         state_dict['optimizer']['defaults'] = self._optimizer.defaults
-        state_dict['optimizer']['regularize_bias'] = self._regularize_bias
+        state_dict['optimizer']['regularize_bias'] = self.regularize_bias
         state_dict['state_dict'] = self._model.state_dict()
-        state_dict['epoch'] = self._start_epoch
+        state_dict['epoch'] = self.start_epoch
         return state_dict
 
     def fit(self, dataset, warm_start=False, n_jobs=1):
@@ -490,7 +493,7 @@ class CTorchClassifier(CClassifier):
         # Convert to CTorchDataset and use a dataloader that returns batches
         ds_loader = DataLoader(CTorchDataset(dataset.X, ova_labels,
                                              transform=self.train_transform),
-                               batch_size=self._batch_size,
+                               batch_size=self.batch_size,
                                shuffle=True,
                                num_workers=n_jobs-1)
 
@@ -499,10 +502,10 @@ class CTorchClassifier(CClassifier):
 
         # Scheduler to adjust the learning rate depending on epoch
         scheduler = optim.lr_scheduler.MultiStepLR(
-            self._optimizer, self._lr_schedule, gamma=self._gamma,
-            last_epoch=self._start_epoch - 1)
+            self._optimizer, self.lr_schedule, gamma=self.gamma,
+            last_epoch=self.start_epoch - 1)
 
-        for e_idx in xrange(self._start_epoch, self._epochs):
+        for e_idx in xrange(self.start_epoch, self.epochs):
 
             scheduler.step()  # Adjust the learning rate
             losses = AverageMeter()  # Logger of the loss value
