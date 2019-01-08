@@ -90,6 +90,22 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
                                          'growthRate': growthRate})
 
     @property
+    def depth(self):
+        """Model depth."""
+        return self._depth
+
+    @property
+    def growthRate(self):
+        """Growth rate for DenseNet."""
+        return self._growthRate
+
+    @property
+    def num_classes(self):
+        """Number of classes of training dataset."""
+        # Wraps our CClassifier.n_classes property as they use num_ as prefix
+        return self.n_classes
+
+    @property
     def n_classes(self):
         """Number of classes of training dataset."""
         if self.classes is not None:

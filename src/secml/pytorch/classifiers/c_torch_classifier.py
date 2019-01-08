@@ -87,7 +87,7 @@ class CTorchClassifier(CClassifier):
         self._gamma = gamma
         self._lr_schedule = lr_schedule
         self._regularize_bias = regularize_bias
-        self._train_transform = train_transform
+        self.train_transform = train_transform
 
         self._init_params = {'batch_size': batch_size,
                              'learning_rate': learning_rate,
@@ -118,40 +118,90 @@ class CTorchClassifier(CClassifier):
         super(CTorchClassifier, self).__init__(preprocess=preprocess)
 
     @property
+    def batch_size(self):
+        """Size of the batch for grouping samples."""
+        return self._batch_size
+
+    @property
     def learning_rate(self):
-        """Learning rate of the optimizer."""
+        """Learning rate. """
         return self._learning_rate
 
     @learning_rate.setter
     def learning_rate(self, value):
-        """Learning rate of the optimizer."""
+        """Learning rate."""
         self._learning_rate = float(value)
         # We need to recreate the optimizer after param change
         self.init_optimizer()
 
     @property
     def momentum(self):
-        """Momentum of the optimizer."""
+        """Momentum factor."""
         return self._momentum
 
     @momentum.setter
     def momentum(self, value):
-        """Momentum of the optimizer."""
+        """Momentum factor."""
         self._momentum = float(value)
         # We need to recreate the optimizer after param change
         self.init_optimizer()
 
     @property
     def weight_decay(self):
-        """L2 penalty of the optimizer."""
+        """Weight decay (L2 penalty). Control parameters regularization."""
         return self._weight_decay
 
     @weight_decay.setter
     def weight_decay(self, value):
-        """L2 penalty of the optimizer."""
+        """Weight decay (L2 penalty). Control parameters regularization."""
         self._weight_decay = float(value)
         # We need to recreate the optimizer after param change
         self.init_optimizer()
+
+    @property
+    def epochs(self):
+        """Number of epochs."""
+        return self._epochs
+
+    @epochs.setter
+    def epochs(self, value):
+        """Number of epochs."""
+        self._epochs = int(value)
+
+    @property
+    def gamma(self):
+        """Multiplicative factor of learning rate decay."""
+        return self._gamma
+
+    @gamma.setter
+    def gamma(self, value):
+        """Multiplicative factor of learning rate decay."""
+        self._gamma = float(value)
+
+    @property
+    def lr_schedule(self):
+        """List of epoch indices."""
+        return self._lr_schedule
+
+    @lr_schedule.setter
+    def lr_schedule(self, value):
+        """List of epoch indices."""
+        self._lr_schedule = list(value)
+
+    @property
+    def regularize_bias(self):
+        """If False, L2 regularization will NOT be applied to biases."""
+        return self._regularize_bias
+
+    @regularize_bias.setter
+    def regularize_bias(self, value):
+        """If False, L2 regularization will NOT be applied to biases."""
+        self._regularize_bias = bool(value)
+
+    @property
+    def start_epoch(self):
+        """Current training epoch."""
+        return self._start_epoch
 
     @property
     def w(self):
@@ -439,7 +489,7 @@ class CTorchClassifier(CClassifier):
 
         # Convert to CTorchDataset and use a dataloader that returns batches
         ds_loader = DataLoader(CTorchDataset(dataset.X, ova_labels,
-                                             transform=self._train_transform),
+                                             transform=self.train_transform),
                                batch_size=self._batch_size,
                                shuffle=True,
                                num_workers=n_jobs-1)
@@ -449,7 +499,7 @@ class CTorchClassifier(CClassifier):
 
         # Scheduler to adjust the learning rate depending on epoch
         scheduler = optim.lr_scheduler.MultiStepLR(
-            self._optimizer, list(self._lr_schedule), gamma=self._gamma,
+            self._optimizer, self._lr_schedule, gamma=self._gamma,
             last_epoch=self._start_epoch - 1)
 
         for e_idx in xrange(self._start_epoch, self._epochs):

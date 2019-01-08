@@ -83,6 +83,21 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
                                          'hidden_dims': hidden_dims,
                                          'output_dims': output_dims})
 
+    @property
+    def input_dims(self):
+        """Size of the input layer."""
+        return self._input_dims
+
+    @property
+    def hidden_dims(self):
+        """Size of the hidden layers."""
+        return self._hidden_dims
+
+    @property
+    def output_dims(self):
+        """Size of the output layer."""
+        return self._output_dims
+
     def _init_model(self):
         """Initialize the PyTorch Neural Network model."""
         # Use the nn package to define our model as a sequence of layers.
