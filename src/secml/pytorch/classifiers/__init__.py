@@ -1,4 +1,3 @@
 from c_torch_classifier import CTorchClassifier
 from c_torch_classifier_fc_net import CTorchClassifierFullyConnected
-from c_torch_classifier_fc_net_feat_extr import CTorchClassifierFullyConnectedFE
 from c_torch_classifier_densenet_cifar import CTorchClassifierDenseNetCifar
