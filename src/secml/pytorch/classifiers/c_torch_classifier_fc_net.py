@@ -2,7 +2,6 @@ import torch
 from collections import OrderedDict
 
 from . import CTorchClassifier
-from secml.utils.dict_utils import merge_dicts
 
 
 # FIXME: UPDATE CLASS DOCSTRING
@@ -16,8 +15,10 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
     ----------
     input_dims : int, optional
         Size of the input layer. Default 1000.
-    hidden_dims : int, optional
-        Size of the hidden layers. Default 100.
+    hidden_dims : tuple, optional
+        Size of the hidden layers. Each value in the tuple represents
+        an hidden layer. Default (100, 100), so a network with
+        two hidden layers and 100 neurons each.
     output_dims : int, optional
         Size of the output layer. Default 10.
     learning_rate : float, optional
@@ -54,11 +55,16 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
     """
     __class_type = 'torch-fc'
 
-    def __init__(self, batch_size=5, input_dims=1000, hidden_dims=100,
-                 output_dims=10, learning_rate=1e-2, momentum=0.9,
+    def __init__(self, input_dims=1000, hidden_dims=(100, 100), output_dims=10,
+                 batch_size=5, learning_rate=1e-2, momentum=0.9,
                  weight_decay=1e-4, epochs=100, gamma=0.1,
                  lr_schedule=(50, 75), regularize_bias=True,
                  train_transform=None, preprocess=None):
+
+        if len(hidden_dims) < 1:
+            raise ValueError("at least one hidden dim should be defined")
+        if any(d <= 0 for d in hidden_dims):
+            raise ValueError("each hidden layer must have at least one neuron")
 
         # Model params
         self._input_dims = input_dims
@@ -89,26 +95,37 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
         return self._hidden_dims
 
     @property
+    def n_hidden_layers(self):
+        """Number of hidden layers."""
+        return len(self._hidden_dims)
+
+    @property
     def output_dims(self):
         """Size of the output layer."""
         return self._output_dims
 
     def _init_model(self):
         """Initialize the PyTorch Neural Network model."""
-        # Use the nn package to define our model as a sequence of layers.
-        # nn.Sequential is a Module which contains other Modules, and applies
-        # them in sequence to produce its output. Each Linear Module computes
-        # output from input using a linear function, and holds internal
-        # Tensors for its weight and bias. After constructing the model
-        # we use the .to() method to move it to the desired device
-        self._model = torch.nn.Sequential(OrderedDict([
-            ('linear1', torch.nn.Linear(self.input_dims, self.hidden_dims)),
+        # Input layers
+        layers = [
+            ('linear1', torch.nn.Linear(self.input_dims, self.hidden_dims[0])),
             ('relu1', torch.nn.ReLU()),
-            ('linear2', torch.nn.Linear(self.hidden_dims, self.hidden_dims)),
-            ('relu2', torch.nn.ReLU()),
-            ('linear3', torch.nn.Linear(self.hidden_dims, self.output_dims)),
-            ('softmax', torch.nn.Softmax(dim=-1))
-        ]))
+        ]
+        # Appending additional hidden layers
+        for hl_i, hl_dims in enumerate(self.hidden_dims[1:]):
+            prev_hl_dims = self.hidden_dims[hl_i]  # Dims of the previous hl
+            i_str = str(hl_i + 2)
+            layers += [
+                ('linear' + i_str, torch.nn.Linear(prev_hl_dims, hl_dims)),
+                ('relu' + i_str, torch.nn.ReLU())]
+        # Output layers
+        layers += [
+            ('linear' + str(self.n_hidden_layers + 1),
+             torch.nn.Linear(self.hidden_dims[-1], self.output_dims)),
+            ('softmax', torch.nn.Softmax(dim=-1))]
+
+        # Creating the model with the list of layers
+        self._model = torch.nn.Sequential(OrderedDict(layers))
 
     def loss(self, x, target):
         """Return the loss function computed on input."""
