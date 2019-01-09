@@ -2,7 +2,6 @@ import torch
 from collections import OrderedDict
 
 from . import CTorchClassifier
-from secml.utils.dict_utils import merge_dicts
 
 
 # FIXME: UPDATE CLASS DOCSTRING
@@ -20,6 +19,8 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
         Size of the hidden layers. Default 100.
     output_dims : int, optional
         Size of the output layer. Default 10.
+    batch_size : int, optional
+        Size of the batch for grouping samples. Default 5.
     learning_rate : float, optional
         Learning rate. Default 1e-2.
     momentum : float, optional
@@ -35,8 +36,6 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
         List of epoch indices. Must be increasing.
         The current learning rate will be multiplied by gamma
         once the number of epochs reaches each index.
-    batch_size : int, optional
-        Size of the batch for grouping samples. Default 5.
     regularize_bias : bool, optional
         If False, L2 regularization will NOT be applied to biases.
         Default True, so regularization will be applied to all parameters.
@@ -54,8 +53,8 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
     """
     __class_type = 'torch-fc'
 
-    def __init__(self, batch_size=5, input_dims=1000, hidden_dims=100,
-                 output_dims=10, learning_rate=1e-2, momentum=0.9,
+    def __init__(self, input_dims=1000, hidden_dims=100, output_dims=10,
+                 batch_size=5, learning_rate=1e-2, momentum=0.9,
                  weight_decay=1e-4, epochs=100, gamma=0.1,
                  lr_schedule=(50, 75), regularize_bias=True,
                  train_transform=None, preprocess=None):
