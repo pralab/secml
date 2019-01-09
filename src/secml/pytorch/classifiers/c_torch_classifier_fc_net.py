@@ -21,6 +21,8 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
         two hidden layers and 100 neurons each.
     output_dims : int, optional
         Size of the output layer. Default 10.
+    batch_size : int, optional
+        Size of the batch for grouping samples. Default 5.
     learning_rate : float, optional
         Learning rate. Default 1e-2.
     momentum : float, optional
@@ -36,8 +38,6 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
         List of epoch indices. Must be increasing.
         The current learning rate will be multiplied by gamma
         once the number of epochs reaches each index.
-    batch_size : int, optional
-        Size of the batch for grouping samples. Default 5.
     regularize_bias : bool, optional
         If False, L2 regularization will NOT be applied to biases.
         Default True, so regularization will be applied to all parameters.
