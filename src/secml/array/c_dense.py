@@ -1788,6 +1788,41 @@ class CDense(_CArrayInterface):
         return cls(np.random.randn(*shape))  # randn only accepts sequences
 
     @classmethod
+    def randuniform(cls, low=0.0, high=1.0, shape=None, random_state=None):
+        """Wrapper for random.uniform.
+
+        Samples are uniformly distributed over the half-open
+        interval [low, high) (includes low, but excludes high).
+        In other words, any value within the given interval is
+        equally likely to be drawn.
+
+        Parameters
+        ----------
+        low : float or CDense, optional
+            Lower boundary of the output interval. All values generated
+             will be greater than or equal to low. The default value is 0.
+            A CDense of floats can be passed to specify a different bound
+             for each position.
+        high : float or CDense, optional
+            Upper boundary of the output interval. All values generated
+             will be less than high. The default value is 1.0.
+            A CDense of floats can be passed to specify a different bound
+             for each position.
+        shape : int, tuple of ints or None, optional
+            Shape of output array. If None, a single value is returned.
+        random_state : int or None, optional
+            If int, random_state is the seed used by the
+            random number generator; If None, is the seed used by np.random.
+
+        """
+        if isinstance(low, CDense):
+            low = low.tondarray()  # Convert to ndarray
+        if isinstance(high, CDense):
+            high = high.tondarray()  # Convert to ndarray
+        np.random.seed(random_state)  # Setting the random seed
+        return cls(np.random.uniform(low, high, shape))
+
+    @classmethod
     def randint(cls, low, high=None, shape=None, random_state=None):
         """Wrapper for random.randint.
 
