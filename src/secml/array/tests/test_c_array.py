@@ -4323,6 +4323,64 @@ class TestCArray(CUnitTest):
                     self.assertFalse((res < inter[0]).any())
                     self.assertFalse((res >= inter[1]).any())
 
+    def test_randuniform(self):
+        """Test for CArray.randuniform() classmethod."""
+        self.logger.info("Test for CArray.randuniform() classmethod.")
+
+        for inter in [(0, 1), (0, 2), (1, 3)]:
+            for shape in [1, 2, (1, 2), (2, 1), (2, 2)]:
+                for sparse in [False, True]:
+                    if not isinstance(inter, tuple):
+                        res = CArray.randuniform(
+                            inter, shape=shape, sparse=sparse)
+                    else:
+                        res = CArray.randuniform(
+                            *inter, shape=shape, sparse=sparse)
+                    self.logger.info(
+                        "CArray.randuniform({:}, shape={:}, sparse={:}):"
+                        "\n{:}".format(inter, shape, sparse, res))
+
+                    self.assertIsInstance(res, CArray)
+                    self.assertEqual(res.isdense, not sparse)
+                    self.assertEqual(res.issparse, sparse)
+                    if isinstance(shape, tuple):
+                        self.assertEqual(res.shape, shape)
+                    else:
+                        if sparse is True:
+                            self.assertEqual(res.shape, (1, shape))
+                        else:
+                            self.assertEqual(res.shape, (shape, ))
+                    self.assertEqual(res.dtype, float)
+
+                if not isinstance(inter, tuple):
+                    self.assertFalse((res < 0).any())
+                    self.assertFalse((res >= inter).any())
+                else:
+                    self.assertFalse((res < inter[0]).any())
+                    self.assertFalse((res >= inter[1]).any())
+
+        # Testing arrays as high/low
+        bounds = (CArray([-1, -2, 3]), 5)
+        res = CArray.randuniform(*bounds, shape=(2, 3))
+        self.assertFalse((res < bounds[0]).any())
+        self.assertFalse((res >= bounds[1]).any())
+
+        bounds = (-4, CArray([-1, -2, 3]))
+        res = CArray.randuniform(*bounds, shape=(2, 3))
+        self.assertFalse((res < bounds[0]).any())
+        self.assertFalse((res >= bounds[1]).any())
+
+        bounds = (CArray([-5, -8, 1]), CArray([-1, -2, 3]))
+        res = CArray.randuniform(*bounds, shape=(2, 3))
+        self.assertFalse((res < bounds[0]).any())
+        self.assertFalse((res >= bounds[1]).any())
+
+        # if low is higher then high -> ValueError
+        with self.assertRaises(ValueError):
+            CArray.randuniform(5, CArray([-1, -2, 3]), (2, 3))
+        with self.assertRaises(ValueError):
+            CArray.randuniform(CArray([5, -3, 4]), CArray([-1, -2, 3]), (2, 3))
+
     def test_norm(self):
         """Test for CArray.norm() method."""
         self.logger.info("Test for CArray.norm() method.")
