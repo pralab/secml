@@ -156,5 +156,8 @@ setup(
     include_package_data=True,
     python_requires='==2.7.*',
     install_requires=REQ_PKGS,
+    extras_require={
+        'pytorch': ["torch==0.4.*", "torchvision==0.1.8"]
+    },
     zip_safe=False
 )
