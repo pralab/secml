@@ -1,5 +1,5 @@
 """
-.. module:: CTorchClassifier
+.. module:: CClassifierPyTorch
    :synopsis: Classifier with PyTorch Neural Network
 
 .. moduleauthor:: Ambra Demontis <marco.melis@diee.unica.it>
@@ -19,7 +19,7 @@ from secml.data import CDataset
 from secml.ml.classifiers import CClassifier
 
 from secml.core.settings import SECML_PYTORCH_USE_CUDA
-from secml.pytorch.data import CTorchDataset
+from secml.pytorch.data import CDatasetPyTorch
 from secml.pytorch.utils import AverageMeter, accuracy
 from secml.pytorch.utils.optim_utils import add_weight_decay
 
@@ -32,7 +32,7 @@ if use_cuda:
 
 
 # FIXME: inner preprocess not manage yet for training phase
-class CTorchClassifier(CClassifier):
+class CClassifierPyTorch(CClassifier):
     """PyTorch Neural Network classifier.
 
     Parameters
@@ -67,7 +67,7 @@ class CTorchClassifier(CClassifier):
 
     """
     __metaclass__ = ABCMeta
-    __super__ = 'CTorchClassifier'
+    __super__ = 'CClassifierPyTorch'
 
     def __init__(self, batch_size, learning_rate=1e-2, momentum=0.9,
                  weight_decay=1e-4, epochs=100, gamma=0.1,
@@ -106,7 +106,7 @@ class CTorchClassifier(CClassifier):
         if use_cuda is True:
             self.logger.info("Using CUDA for PyTorch computations!")
 
-        super(CTorchClassifier, self).__init__(preprocess=preprocess)
+        super(CClassifierPyTorch, self).__init__(preprocess=preprocess)
 
     @property
     def batch_size(self):
@@ -231,7 +231,7 @@ class CTorchClassifier(CClassifier):
 
         # Now we are ready to clone the clf
         new_obj = super(
-            CTorchClassifier, self).__deepcopy__(memo, *args, **kwargs)
+            CClassifierPyTorch, self).__deepcopy__(memo, *args, **kwargs)
 
         # Restore optimizer/model in the current object
         self._optimizer = optimizer
@@ -286,8 +286,8 @@ class CTorchClassifier(CClassifier):
 
     def _get_test_input_loader(self, x, n_jobs=1):
         """Return a loader for input test data."""
-        # Convert to CTorchDataset and use a dataloader that returns batches
-        return DataLoader(CTorchDataset(x),
+        # Convert to CDatasetPyTorch and use a dataloader that returns batches
+        return DataLoader(CDatasetPyTorch(x),
                           batch_size=self.batch_size,
                           shuffle=False,
                           num_workers=n_jobs-1)
@@ -459,9 +459,9 @@ class CTorchClassifier(CClassifier):
         # Binarize labels using a OVA scheme
         ova_labels = dataset.get_labels_asbinary()
 
-        # Convert to CTorchDataset and use a dataloader that returns batches
-        ds_loader = DataLoader(CTorchDataset(dataset.X, ova_labels,
-                                             transform=self.train_transform),
+        # Convert to CDatasetPyTorch and use a dataloader that returns batches
+        ds_loader = DataLoader(CDatasetPyTorch(dataset.X, ova_labels,
+                                               transform=self.train_transform),
                                batch_size=self.batch_size,
                                shuffle=True,
                                num_workers=n_jobs-1)

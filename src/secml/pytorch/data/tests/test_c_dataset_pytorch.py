@@ -2,11 +2,11 @@ import torch
 
 from secml.utils import CUnitTest
 from secml.data.loader import CDLRandomToy
-from secml.pytorch.data import CTorchDataset
+from secml.pytorch.data import CDatasetPyTorch
 
 
-class TestCTorchDataset(CUnitTest):
-    """Unittests for CTorchDataset."""
+class TestCDatasetPyTorch(CUnitTest):
+    """Unittests for CDatasetPyTorch."""
 
     def setUp(self):
 
@@ -15,37 +15,37 @@ class TestCTorchDataset(CUnitTest):
             self.ds.num_samples, self.ds.num_classes))
 
     def test_convert(self):
-        """Test converting a CDataset into a CTorchDataset."""
-        torch_ds = CTorchDataset(self.ds)
+        """Test converting a CDataset into a CDatasetPyTorch."""
+        torch_ds = CDatasetPyTorch(self.ds)
         self.assertEqual(torch_ds.X.ndim, 2)
         self.assertEqual(torch_ds.Y.ndim, 1)
         self.assertEqual(len(torch_ds), self.ds.num_samples)
 
         # Now we try setting only the samples
-        torch_ds = CTorchDataset(self.ds.X)
+        torch_ds = CDatasetPyTorch(self.ds.X)
         self.assertEqual(torch_ds.X.ndim, 2)
         self.assertEqual(torch_ds.Y, None)
         self.assertEqual(len(torch_ds), self.ds.num_samples)
 
         # Now we try setting samples and labels separately
-        torch_ds = CTorchDataset(self.ds.X, self.ds.Y)
+        torch_ds = CDatasetPyTorch(self.ds.X, self.ds.Y)
         self.assertEqual(torch_ds.X.ndim, 2)
         self.assertEqual(torch_ds.Y.ndim, 1)
         self.assertEqual(len(torch_ds), self.ds.num_samples)
 
         # Now we try setting samples and labels (OVA) separately
-        torch_ds = CTorchDataset(self.ds.X, self.ds.get_labels_asbinary())
+        torch_ds = CDatasetPyTorch(self.ds.X, self.ds.get_labels_asbinary())
         self.assertEqual(torch_ds.X.ndim, 2)
         self.assertEqual(torch_ds.Y.ndim, 2)
         self.assertEqual(len(torch_ds), self.ds.num_samples)
 
         # Passing a ds and setting labels should raise TypeError
         with self.assertRaises(TypeError):
-            CTorchDataset(self.ds, labels=self.ds.Y)
+            CDatasetPyTorch(self.ds, labels=self.ds.Y)
 
     def test_getitem(self):
-        """Test getitem from CTorchDataset."""
-        torch_ds = CTorchDataset(self.ds)
+        """Test getitem from CDatasetPyTorch."""
+        torch_ds = CDatasetPyTorch(self.ds)
 
         i = 10  # Index for getitem
         res = torch_ds[i]
@@ -61,7 +61,7 @@ class TestCTorchDataset(CUnitTest):
         self.assertEqual(labels.shape, ())  # 0-D
 
         # Testing again with 2-D labels
-        torch_ds = CTorchDataset(self.ds.X, self.ds.get_labels_asbinary())
+        torch_ds = CDatasetPyTorch(self.ds.X, self.ds.get_labels_asbinary())
 
         i = 10  # Index for getitem
         res = torch_ds[i]

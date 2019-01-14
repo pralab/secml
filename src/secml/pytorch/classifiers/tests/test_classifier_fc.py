@@ -3,7 +3,7 @@ from secml.utils import CUnitTest
 import random
 import torch
 
-from secml.pytorch.classifiers import CTorchClassifierFullyConnected
+from secml.pytorch.classifiers import CClassifierPyTorchFullyConnected
 
 use_cuda = torch.cuda.is_available()
 print "Using CUDA: ", use_cuda
@@ -15,11 +15,11 @@ if use_cuda:
     torch.cuda.manual_seed_all(999)
 
 
-class TestCTorchClassifierDenseNetCifar(CUnitTest):
+class TestCPyTorchClassifierDenseNetCifar(CUnitTest):
 
     def setUp(self):
 
-        self.clf = CTorchClassifierFullyConnected()
+        self.clf = CClassifierPyTorchFullyConnected()
         self.clf.verbose = 2
 
     # TODO: ADD TEST FOR TRAINING
@@ -31,7 +31,7 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
             self.logger.info("Testing dims: in {:}, hid {:}, out {:}".format(
                 in_dims, h_dims, out_dims))
 
-            nn = CTorchClassifierFullyConnected(in_dims, h_dims, out_dims)
+            nn = CClassifierPyTorchFullyConnected(in_dims, h_dims, out_dims)
 
             layers = nn._model._modules.items()
 
@@ -85,9 +85,9 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
         check_layers(input_dims, hidden_dims, output_dims)
 
         with self.assertRaises(ValueError):
-            CTorchClassifierFullyConnected(hidden_dims=(0, ))
+            CClassifierPyTorchFullyConnected(hidden_dims=(0,))
         with self.assertRaises(ValueError):
-            CTorchClassifierFullyConnected(hidden_dims=tuple())
+            CClassifierPyTorchFullyConnected(hidden_dims=tuple())
 
     def test_model_params(self):
         """Test for model parameters shape."""
@@ -102,7 +102,7 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
     def test_optimizer_params(self):
         """Testing optimizer parameters setting."""
         self.logger.info("Testing parameter `weight_decay`")
-        clf = CTorchClassifierFullyConnected(weight_decay=1e-2)
+        clf = CClassifierPyTorchFullyConnected(weight_decay=1e-2)
 
         self.assertEqual(1e-2, clf._optimizer.defaults['weight_decay'])
 
@@ -115,7 +115,7 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
         lr = 30
 
         # Initializing a CLF with an unusual parameter value
-        self.clf = CTorchClassifierFullyConnected(learning_rate=lr)
+        self.clf = CClassifierPyTorchFullyConnected(learning_rate=lr)
         self.clf.verbose = 2
 
         self.assertEqual(lr, self.clf.learning_rate)
@@ -124,7 +124,7 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
         state = self.clf.state_dict()
 
         # Initializing the clf again using default parameters
-        self.clf = CTorchClassifierFullyConnected()
+        self.clf = CClassifierPyTorchFullyConnected()
         self.clf.verbose = 2
 
         self.assertEqual(lr_default, self.clf.learning_rate)

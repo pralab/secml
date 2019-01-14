@@ -8,12 +8,12 @@
 import torch
 import torchvision.transforms as transforms
 
-from . import CTorchClassifier
+from . import CClassifierPyTorch
 from ..models.cifar import densenet
 
 
-class CTorchClassifierDenseNetCifar(CTorchClassifier):
-    """Torch Classifier with DenseNet CIFAR Neural Network.
+class CClassifierPyTorchDenseNetCifar(CClassifierPyTorch):
+    """PyTorch Classifier with DenseNet CIFAR Neural Network.
 
     Parameters
     ----------
@@ -52,10 +52,10 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
 
     Attributes
     ----------
-    class_type : 'torch-densenet-cifar'
+    class_type : 'pytorch-densenet-cifar'
 
     """
-    __class_type = 'torch-densenet-cifar'
+    __class_type = 'pytorch-densenet-cifar'
 
     def __init__(self, depth=100, growthRate=12, num_classes=10, batch_size=64,
                  learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
@@ -70,7 +70,7 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
         # Specific parameters of the classifier
         self._classes = None  # TODO: MANAGE LIST OF CLASSES
 
-        super(CTorchClassifierDenseNetCifar, self).__init__(
+        super(CClassifierPyTorchDenseNetCifar, self).__init__(
             batch_size=batch_size,
             learning_rate=learning_rate,
             momentum=momentum,
@@ -120,8 +120,8 @@ class CTorchClassifierDenseNetCifar(CTorchClassifier):
 
     def _get_test_input_loader(self, x, n_jobs=1):
         """Return a loader for input test data."""
-        # Convert to CTorchDataset and use a dataloader that returns batches
-        dl = super(CTorchClassifierDenseNetCifar, self)._get_test_input_loader(
+        # Convert to CDatasetPyTorch and use a dataloader that returns batches
+        dl = super(CClassifierPyTorchDenseNetCifar, self)._get_test_input_loader(
             x, n_jobs=n_jobs)
 
         # Add a transformation that reshape samples to (C x H x W)

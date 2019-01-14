@@ -1,12 +1,12 @@
 import torch
 from collections import OrderedDict
 
-from . import CTorchClassifier
+from . import CClassifierPyTorch
 
 
 # FIXME: UPDATE CLASS DOCSTRING
-class CTorchClassifierFullyConnected(CTorchClassifier):
-    """Torch classifier with Fully-Connected Neural Network.
+class CClassifierPyTorchFullyConnected(CClassifierPyTorch):
+    """PyTorch classifier with Fully-Connected Neural Network.
 
     Fully-connected neural network with two hidden layers and
      ReLU as activation function.
@@ -50,10 +50,10 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
 
     Attributes
     ----------
-    class_type : 'torch-fc'
+    class_type : 'pytorch-fc'
 
     """
-    __class_type = 'torch-fc'
+    __class_type = 'pytorch-fc'
 
     def __init__(self, input_dims=1000, hidden_dims=(100, 100), output_dims=10,
                  batch_size=5, learning_rate=1e-2, momentum=0.9,
@@ -71,7 +71,7 @@ class CTorchClassifierFullyConnected(CTorchClassifier):
         self._hidden_dims = hidden_dims
         self._output_dims = output_dims
 
-        super(CTorchClassifierFullyConnected, self).__init__(
+        super(CClassifierPyTorchFullyConnected, self).__init__(
             batch_size=batch_size,
             learning_rate=learning_rate,
             momentum=momentum,
