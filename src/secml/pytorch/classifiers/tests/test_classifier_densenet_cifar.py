@@ -6,7 +6,7 @@ import torchvision.transforms as transforms
 
 from secml.data.loader import CDataLoaderCIFAR10
 from secml.array import CArray
-from secml.pytorch.classifiers import CTorchClassifierDenseNetCifar
+from secml.pytorch.classifiers import CClassifierPyTorchDenseNetCifar
 from secml.pytorch.normalizers import CNormalizerMeanSTD
 from secml.pytorch.models import dl_pytorch_model
 from secml.ml.peval.metrics import CMetricAccuracy
@@ -21,7 +21,7 @@ if use_cuda:
     torch.cuda.manual_seed_all(999)
 
 
-class TestCTorchClassifierDenseNetCifar(CUnitTest):
+class TestCPyTorchClassifierDenseNetCifar(CUnitTest):
 
     @classmethod
     def setUpClass(cls):
@@ -32,7 +32,7 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
 
         cls.tr, cls.ts, transform_tr = cls._load_cifar10()
 
-        cls.clf = CTorchClassifierDenseNetCifar(
+        cls.clf = CClassifierPyTorchDenseNetCifar(
             batch_size=25, epochs=1, train_transform=transform_tr,
             preprocess=CNormalizerMeanSTD(mean=(0.4914, 0.4822, 0.4465),
                                           std=(0.2023, 0.1994, 0.2010)))
@@ -237,7 +237,7 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
     def test_params(self):
         """Testing parameters setting."""
         self.logger.info("Testing parameter `weight_decay`")
-        clf = CTorchClassifierDenseNetCifar(weight_decay=1e-2)
+        clf = CClassifierPyTorchDenseNetCifar(weight_decay=1e-2)
 
         self.assertEqual(1e-2, clf._optimizer.defaults['weight_decay'])
 
@@ -250,7 +250,7 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
         lr = 30
 
         # Initializing a CLF with an unusual parameter value
-        self.clf = CTorchClassifierDenseNetCifar(learning_rate=lr)
+        self.clf = CClassifierPyTorchDenseNetCifar(learning_rate=lr)
         self.clf.verbose = 2
 
         self.assertEqual(lr, self.clf.learning_rate)
@@ -259,7 +259,7 @@ class TestCTorchClassifierDenseNetCifar(CUnitTest):
         state = self.clf.state_dict()
 
         # Initializing the clf again using default parameters
-        self.clf = CTorchClassifierDenseNetCifar()
+        self.clf = CClassifierPyTorchDenseNetCifar()
         self.clf.verbose = 2
 
         self.assertEqual(lr_default, self.clf.learning_rate)
