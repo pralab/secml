@@ -1,3 +1,3 @@
 from c_classifier_pytorch import CClassifierPyTorch
-from c_classifier_pytorch_fc_net import CClassifierPyTorchFullyConnected
+from c_classifier_pytorch_mlp import CClassifierPyTorchMLP
 from c_classifier_pytorch_densenet_cifar import CClassifierPyTorchDenseNetCifar
