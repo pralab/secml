@@ -14,8 +14,8 @@ from secml.data import CDataset
 from secml.core.type_utils import is_int
 
 
-class CTorchDataset(Dataset):
-    """CDataset to Torch Dataset wrapper.
+class CDatasetPyTorch(Dataset):
+    """CDataset to PyTorch Dataset wrapper.
 
     Parameters
     ----------

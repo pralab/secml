@@ -1,1 +1,1 @@
-from c_torch_dataset import CTorchDataset
+from c_dataset_pytorch import CDatasetPyTorch
