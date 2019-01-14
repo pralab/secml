@@ -4,12 +4,10 @@ from collections import OrderedDict
 from . import CClassifierPyTorch
 
 
-# FIXME: UPDATE CLASS DOCSTRING
-class CClassifierPyTorchFullyConnected(CClassifierPyTorch):
-    """PyTorch classifier with Fully-Connected Neural Network.
+class CClassifierPyTorchMLP(CClassifierPyTorch):
+    """PyTorch Multi-layer Perceptron Classifier.
 
-    Fully-connected neural network with two hidden layers and
-     ReLU as activation function.
+    Multi-layer Perceptron neural network with ReLU as activation function.
 
     Parameters
     ----------
@@ -50,10 +48,10 @@ class CClassifierPyTorchFullyConnected(CClassifierPyTorch):
 
     Attributes
     ----------
-    class_type : 'pytorch-fc'
+    class_type : 'pytorch-mlp'
 
     """
-    __class_type = 'pytorch-fc'
+    __class_type = 'pytorch-mlp'
 
     def __init__(self, input_dims=1000, hidden_dims=(100, 100), output_dims=10,
                  batch_size=5, learning_rate=1e-2, momentum=0.9,
@@ -71,7 +69,7 @@ class CClassifierPyTorchFullyConnected(CClassifierPyTorch):
         self._hidden_dims = hidden_dims
         self._output_dims = output_dims
 
-        super(CClassifierPyTorchFullyConnected, self).__init__(
+        super(CClassifierPyTorchMLP, self).__init__(
             batch_size=batch_size,
             learning_rate=learning_rate,
             momentum=momentum,
