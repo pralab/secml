@@ -140,10 +140,11 @@ test:install:unzip-extras:
     - apt-get install -yq unzip > /dev/null
     - unzip ${CI_PROJECT_DIR}/dist/SecML-Lib-*.zip
     - cd SecML-Lib-*
-    - pip install .[pytorch]
+    - pip install .[pytorch,cleverhans]
   after_script:
     - python -c "import secml"
     - python -c "import secml.pytorch"
+    - python -c "import secml.tf.clvhs"
 
 release:
   stage: release

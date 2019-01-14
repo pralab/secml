@@ -157,7 +157,8 @@ setup(
     python_requires='==2.7.*',
     install_requires=REQ_PKGS,
     extras_require={
-        'pytorch': ["torch>=0.4.*", "torchvision>=0.1.8"]
+        'pytorch': ["torch>=0.4.*", "torchvision>=0.1.8"],
+        'cleverhans': ["tensorflow>=1.5.*,<2", "cleverhans"]
     },
     zip_safe=False
 )
