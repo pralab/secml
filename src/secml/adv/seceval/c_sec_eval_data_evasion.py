@@ -32,16 +32,3 @@ class CSecEvalDataEvasion(CSecEvalData):
         """Returns True if object is clear."""
         return self._first_eva is None
 
-    ###########################################################################
-    #                           READ-WRITE ATTRIBUTES
-    ###########################################################################
-
-    @property
-    def first_eva(self):
-        """A list with the first x_opt that evaded (or None)."""
-        return self._first_eva
-
-    @first_eva.setter
-    def first_eva(self, value):
-        """Sets first_eva."""
-        self._first_eva = value
