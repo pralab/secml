@@ -467,7 +467,7 @@ class CClassifierPyTorch(CClassifier):
                                num_workers=n_jobs-1)
 
         # Switch to training mode
-        self._model.fit()
+        self._model.train()
 
         # Scheduler to adjust the learning rate depending on epoch
         scheduler = optim.lr_scheduler.MultiStepLR(
