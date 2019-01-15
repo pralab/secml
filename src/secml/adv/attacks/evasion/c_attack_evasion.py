@@ -15,7 +15,7 @@ from secml.data import CDataset
 from secml.core.constants import nan
 from secml.optimization.function import CFunction
 from secml.optimization.constraints import CConstraint
-from secml.ml.classifiers.loss import CLossCrossEntropy
+from secml.ml.classifiers.reject import CClassifierReject
 
 
 class CAttackEvasion(CAttack):
@@ -57,6 +57,10 @@ class CAttackEvasion(CAttack):
         attack_classes : 'all' or CArray, optional
             List of classes that can be manipulated by the attacker or
              'all' (default) if all classes can be manipulated.
+        y_target : int or None, optional
+                If None an indiscriminate attack will be performed, else a
+                targeted attack to have the samples misclassified as
+                belonging to the y_target class.
 
         """
         self._x0 = None
@@ -96,84 +100,121 @@ class CAttackEvasion(CAttack):
     #                              PRIVATE METHODS
     ###########################################################################
 
+    def _find_k_c(self, y_pred, scores):
+        """Find the class of which we aim to maximize and the one of which we
+         aim to minimize the score.
+
+        This function works on the prediction and score of either, a single
+        or multiple samples.
+
+        """
+        scores = scores.deepcopy()
+
+        n_samples = y_pred.size
+
+        k = CArray.zeros(shape=(n_samples,), dtype=int)
+
+        if self.y_target is None:  # indiscriminate attack
+
+            # if the sample is not rejected k is the true class
+            k[:] = self._y0
+            # for the rejected samples k is the reject class
+            k[y_pred == -1] = -1
+
+            # c is neither k nor the reject class
+            smpls_idx = CArray.arange(n_samples).tolist()
+            scores[[smpls_idx, k.tolist()]] = nan
+            if issubclass(self._solver_clf.__class__, CClassifierReject):
+                scores[:, -1] = nan
+
+        else:  # targeted attack
+
+            # c is not the target class
+            scores[:, self.y_target] = nan
+
+            # k is the target class
+            k[:] = self.y_target
+
+        c = scores.nanargmax(axis=1).ravel()
+
+        if issubclass(self._solver_clf.__class__, CClassifierReject):
+            c[c == self.surrogate_data.num_classes] = -1
+
+        return k, c
+
     def _objective_function(self, x):
         """
+        Compute the objective function of the evasion attack.
+        The objective function is:
+
+        - for indiscriminate evasion:
+            min f_obj(x) = f_{k|o (if the sample is rejected) }(x)
+            argmax_{(c != k) and (c != o)} f_c(x),
+            where k is the true class, o is the reject class and c is the
+            competing class, which is the class with the maximum score, and
+            can be neither k nor c
+
+        -for targeted evasion:
+            min -f_obj(x) =  -f_k(x) + argmax_{c != k} f_c(x),
+            where k is the target class and c is the competing class,
+            which is the class with the maximum score except for the
+            target class
+
         Parameters
         ----------
-        x: is a single point!
+        x: CArray containing the data points (one or more than one)
 
         Returns
         -------
         f_obj: values of objective function at x
+        
         """
-
         # Make classification in the sparse domain if possible
         x = x.tosparse() if self.issparse is True else x
 
         y_pred, scores = self._solver_clf.predict(
             x, return_decision_function=True)
-        return self._objective_function_scores(y_pred, scores)
 
-    def _objective_function_scores(self, y_pred, scores):
+        f_obj = self._objective_function_pred_scores(y_pred, scores)
 
-        if self.y_target is None:
-            # indiscriminate evasion
-            # min f_obj(x) = f_k(x) - argmax_{c != k} f_c(x),
-            # where k is the true class
-            k = self._y0
+        return f_obj
 
-            # the attacker aims to avoid the reject region,
-            # to have the attack sample misclassified as a valid class.
-            if hasattr(self._solver_clf, 'reject_option') and \
-                    self._solver_clf.reject_option is True:
-                scores[:, -1] = nan
-        else:
-            # targeted evasion
-            # min -f_obj(x) =  -f_k(x) + argmax_{c != k} f_c(x),
-            # where k is the target class
-            k = self.y_target
+    def _objective_function_pred_scores(self, y_pred, scores):
+        """
+        Given the predicted labels and the scores, compute the objective
+        function. (This function allows to use already computed prediction
+        labels and scores)
 
-        f_k = scores[:, k]
-        scores[:, k] = nan
-        f_obj = f_k - scores.nanmax(axis=1)
+        """
+        n_samples = y_pred.size
 
-        f_obj = f_obj.item() if f_obj.size == 1 else f_obj
+        k, c = self._find_k_c(y_pred, scores)
+
+        smpls_idx = CArray.arange(n_samples).tolist()
+        f_k = scores[[smpls_idx, k.tolist()]]
+        f_obj = f_k - scores[[smpls_idx, c.tolist()]]
 
         return f_obj if self.y_target is None else -f_obj
 
     def _objective_function_gradient(self, x):
+        """Compute the gradient of the evasion objective function.
 
-        if x.is_vector_like is False:
-            raise ValueError("only one sample can be passed. "
-                             "x has shape {:}".format(x.shape))
+        Parameters
+        ----------
+        x : CArray
+            A single point.
 
+        """
         # Make classification in the sparse domain if possible
         x = x.tosparse() if self.issparse is True else x
 
-        y_pred, score = self._solver_clf.predict(
+        y_pred, scores = self._solver_clf.predict(
             x, return_decision_function=True)
 
-        if self.y_target is None:
-            # indiscriminate evasion
-            # min f_obj(x) = f_k(x) - argmax_{c != k} f_c(x),
-            # where k is the true class
-            k = self._y0
+        k, c = self._find_k_c(y_pred, scores)
 
-            # the attacker aims to avoid the reject region,
-            # to have the attack sample misclassified as a valid class.
-            if hasattr(self._solver_clf, 'reject_option') and \
-                    self._solver_clf.reject_option is True:
-                score[:, -1] = nan
-        else:
-            # targeted evasion
-            # min -f_obj(x) =  -f_k(x) + argmax_{c != k} f_c(x),
-            # where k is the target class
-            k = self.y_target
-
-        score[:, k] = nan
-        c = score.nanargmax(axis=1).item()
-        grad = self._solver_clf.gradient_f_x(x, y=k) - \
-               self._solver_clf.gradient_f_x(x, y=c)
+        grad = self._solver_clf.gradient_f_x(x, y=k.item()) - \
+               self._solver_clf.gradient_f_x(x, y=c.item())
 
         return grad if self.y_target is None else -grad
 
@@ -214,7 +255,7 @@ class CAttackEvasion(CAttack):
         self._solver.verbose = self.verbose
 
     # TODO: add probability as in c_attack_poisoning
-    # (we could also move this direcly in c_attack)
+    # (we could also move this directly in c_attack)
     def _get_point_with_min_f_obj(self, y_pred, scores):
         """
         Retrieves the data point x with minimum value of objective function
@@ -222,14 +263,15 @@ class CAttackEvasion(CAttack):
 
         Returns
         -------
-        x: surrogate data point with minimum value of objective function
-        """
+        x : CArray
+            Surrogate data point with minimum value of objective function.
 
+        """
         if self._surrogate_data is None:
             raise ValueError('Surrogate data has not been set!')
 
-        f_obj = self._objective_function_scores(y_pred, scores)
-        k = f_obj.argmin()
+        f_objs = self._objective_function_pred_scores(y_pred, scores)
+        k = f_objs.argmin()
         return self._surrogate_data.X[k, :].ravel()
 
     # TODO: better to override setters for surrogate classifier and data
@@ -261,10 +303,9 @@ class CAttackEvasion(CAttack):
                                 dtype=self.surrogate_data.X.dtype)
         for i in xrange(self.surrogate_data.num_classes):
             self._y0 = i
-            self._xk[i, :] = self._get_point_with_min_f_obj(y_pred,
-                                                            scores.deepcopy())
+            self._xk[i, :] = self._get_point_with_min_f_obj(
+                y_pred, scores.deepcopy())
         self._y0 = None
-        return
 
     ###########################################################################
     #                              PUBLIC METHODS
@@ -360,9 +401,6 @@ class CAttackEvasion(CAttack):
 
         return self._x_opt, self._f_opt
 
-    # TODO: this should run either on a single x,y point, or on multiple points
-    # and also return f_opt or its average (define a common interface also for
-    # poisoning attacks)
     def run(self, X, Y, ds_init=None):
         """
         Runs evasion on a dataset.
@@ -385,7 +423,7 @@ class CAttackEvasion(CAttack):
 
         # only consider samples that can be manipulated
         v = self.is_attack_class(y)
-        idx = CArray(CArray(v.find(v)).ravel())  # TODO: fix CArray
+        idx = CArray(v.find(v)).ravel()
         # print v, idx
 
         # number of modifiable samples
@@ -400,6 +438,9 @@ class CAttackEvasion(CAttack):
         if X.issparse is True:
             self._issparse = True
 
+        # array in wich the value of the optimization function are stored
+        fs_opt = CArray.zeros(n_mod_samples, )
+
         for i in xrange(n_mod_samples):
             k = idx[i]  # idx of sample that can be modified
 
@@ -411,6 +452,7 @@ class CAttackEvasion(CAttack):
                     k, x.shape[0], self._dmax, f_opt, self._f_eval,
                     self._grad_eval))
             adv_ds.X[k, :] = x_opt
+            fs_opt[i] = f_opt
 
         y_pred, scores = self.classifier.predict(
             adv_ds.X, return_decision_function=True)
@@ -424,8 +466,8 @@ class CAttackEvasion(CAttack):
             else:
                 first_eva.append(None)
 
-        # Compute the attacker objective function
-        f_obj = CLossCrossEntropy().loss(
-            y.ravel(), scores).mean() / scores.shape[0]
+        # Return the mean objective function value on the evasion points (
+        # computed from the outputs of the surrogate classifier)
+        f_obj = fs_opt.mean()
 
         return y_pred, scores, adv_ds, f_obj, first_eva
