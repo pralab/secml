@@ -714,6 +714,45 @@ class CClassifierPyTorch(CClassifier):
 
         return CArray(s.grad.data.cpu().numpy().ravel())
 
+    def _get_layer_output(self, s, layer=None):
+        """Returns the output of the desired net layer.
+
+        Parameters
+        ----------
+        s : torch.Tensor
+            Input tensor to forward propagate.
+        layer : str or None, optional
+            Name of the layer.
+            If None, the output of the last layer will be returned.
+
+        Returns
+        -------
+        torch.Tensor
+            Output of the desired layer.
+
+        """
+        # Switch to evaluation mode
+        self._model.eval()
+
+        if layer is None:  # Directly use the last layer
+            s = self._model(s)  # Forward pass
+
+        else:  # FIXME: THIS DOES NOT WORK IF THE FORWARD METHOD
+                # HAS ANY SPECIAL OPERATION INSIDE (LIKE DENSENET)
+            # Manual iterate the network and stop at desired layer
+            # Use _model to iterate over first level modules only
+            for m_k, m in self._model._modules.iteritems():
+                s = m(s)  # Forward input trough module
+                if m_k == layer:
+                    # We found the desired layer
+                    break
+            else:
+                if layer is not None:
+                    raise ValueError(
+                        "No layer `{:}` found!".format(layer))
+
+        return s
+
     def get_layer_output(self, x, layer=None):
         """Returns the output of the desired net layer.
 
@@ -733,9 +772,6 @@ class CClassifierPyTorch(CClassifier):
         """
         x_loader = self._get_test_input_loader(x)
 
-        # Switch to evaluation mode
-        self._model.eval()
-
         out = None
         for batch_idx, (s, _) in enumerate(x_loader):
 
@@ -744,19 +780,12 @@ class CClassifierPyTorch(CClassifier):
             s = Variable(s, requires_grad=True)
 
             with torch.no_grad():
-                # Manual iterate the network and stop at desired layer
-                # Use _model to iterate over first level modules only
-                for m_k, m in self._model._modules.iteritems():
-                    s = m(s)  # Forward input trough module
-                    if m_k == layer:
-                        # We found the desired layer
-                        break
-                else:
-                    if layer is not None:
-                        raise ValueError("No layer `{:}` found!".format(layer))
+                # Get the model output at specific layer
+                s = self._get_layer_output(s, layer=layer)
 
             # Convert to CArray
-            s = CArray(s.data.cpu().numpy())
+            s = s.view(s.size(0), -1)
+            s = CArray(s.data.cpu().numpy()).astype(float)
 
             if out is not None:
                 out = out.append(s, axis=0)
