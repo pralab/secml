@@ -9,7 +9,7 @@ from secml import _NoValue
 from secml.array import CArray
 from secml.data.c_dataset import CDataset
 from secml.ml.classifiers import CClassifier
-from secml.ml.classifiers.loss import softmax
+from secml.ml.classifiers.loss import CSoftmax
 from secml.ml.classifiers.reject import CClassifierReject
 
 
@@ -77,8 +77,7 @@ class CClassifierRejectDetector(CClassifierReject):
 
     def _normalize_scores(self, orig_score):
         """Normalizes the scores using softmax."""
-        norm_scores = softmax(orig_score)
-        return norm_scores
+        return CSoftmax().softmax(orig_score)
 
     def fit(self, dataset, n_jobs=1):
         """Trains both the classifier and the detector.
