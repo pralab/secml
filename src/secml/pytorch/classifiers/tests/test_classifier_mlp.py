@@ -4,6 +4,7 @@ import random
 import torch
 
 from secml.pytorch.classifiers import CClassifierPyTorchMLP
+from secml.data.loader import CDLRandom
 
 use_cuda = torch.cuda.is_available()
 print "Using CUDA: ", use_cuda
@@ -19,7 +20,13 @@ class TestCPyTorchClassifierMLP(CUnitTest):
 
     def setUp(self):
 
-        self.clf = CClassifierPyTorchMLP()
+        self.ds = CDLRandom(n_samples=100, n_classes=10,
+                            n_features=20, n_informative=15,
+                            random_state=0).load()
+
+        self.clf = CClassifierPyTorchMLP(
+            input_dims=20, hidden_dims=(50, ), output_dims=10,
+            weight_decay=0, epochs=50, learning_rate=1e-2, momentum=0)
         self.clf.verbose = 2
 
     # TODO: ADD TEST FOR TRAINING
@@ -134,6 +141,58 @@ class TestCPyTorchClassifierMLP(CUnitTest):
 
         self.assertEqual(lr, self.clf.learning_rate)
         self.assertEqual(lr, self.clf._optimizer.defaults['lr'])
+
+    def test_out_at_layer(self):
+        """Test for extracting output at specific layer."""
+        self.clf.verbose = 0
+        self.clf.fit(self.ds)
+
+        x_ds = self.ds[0, :]
+        x, y = x_ds.X, x_ds.Y
+
+        layer = None
+        self.logger.info("Returning output for layer: {:}".format(layer))
+        out_predict = self.clf.predict(x, return_decision_function=True)[1]
+        out = self.clf.get_layer_output(x, layer=layer)
+
+        self.logger.info("Output of predict:\n{:}".format(out_predict))
+        self.logger.info("Output of get_layer_output:\n{:}".format(out))
+
+        self.assertFalse((out_predict != out).any())
+
+        layer = 'linear2'
+        self.logger.info("Returning output for layer: {:}".format(layer))
+        out = self.clf.get_layer_output(x, layer=layer)
+
+        self.logger.info("Output of get_layer_output:\n{:}".format(out))
+
+    def test_gradient(self):
+        """Test for extracting gradient."""
+        self.clf.verbose = 0
+        self.clf.fit(self.ds)
+
+        x_ds = self.ds[0, :]
+        x, y = x_ds.X, x_ds.Y
+
+        layer = None
+        self.logger.info("Returning gradient for layer: {:}".format(layer))
+        grad = self.clf.gradient_f_x(x, y=0, layer=layer)
+
+        self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
+
+        self.assertTrue(grad.is_vector_like)
+        self.assertEqual(x.size, grad.size)
+
+        layer = 'linear2'
+        self.logger.info("Returning output for layer: {:}".format(layer))
+        out = self.clf.get_layer_output(x, layer=layer)
+        self.logger.info("Returning gradient for layer: {:}".format(layer))
+        grad = self.clf.gradient_f_x(x, y=0, w=out, layer=layer)
+
+        self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
+
+        self.assertTrue(grad.is_vector_like)
+        self.assertEqual(x.size, grad.size)
 
 
 if __name__ == '__main__':
