@@ -431,9 +431,6 @@ class CAttackEvasion(CAttack):
 
         adv_ds = CDataset(x.deepcopy(), y.deepcopy())
 
-        # TODO: avoid storing sample as we have them already in adv_ds
-        first_eva = []  # None or x_opt, if evaded
-
         # If dataset is sparse, set the proper attribute
         if X.issparse is True:
             self._issparse = True
@@ -459,15 +456,8 @@ class CAttackEvasion(CAttack):
 
         y_pred = CArray(y_pred)
 
-        for i in xrange(adv_ds.num_samples):
-            if (self.y_target is not None and y_pred[i] == self.y_target) or \
-                    (self.y_target is None and y_pred[i] != y[i]):
-                first_eva.append(adv_ds.X[i, :])
-            else:
-                first_eva.append(None)
-
         # Return the mean objective function value on the evasion points (
         # computed from the outputs of the surrogate classifier)
         f_obj = fs_opt.mean()
 
-        return y_pred, scores, adv_ds, f_obj, first_eva
+        return y_pred, scores, adv_ds, f_obj
