@@ -114,7 +114,7 @@ class CSolver(CCreator):
 
     @property
     def f_opt(self):
-        return self._f_seq[-1]
+        return self._f_seq[-1].item()
 
     @property
     def x_seq(self):
