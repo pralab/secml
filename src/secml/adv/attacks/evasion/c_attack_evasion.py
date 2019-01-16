@@ -431,9 +431,6 @@ class CAttackEvasion(CAttack):
 
         adv_ds = CDataset(x.deepcopy(), y.deepcopy())
 
-        # TODO: avoid storing sample as we have them already in adv_ds
-        first_eva = []  # None or x_opt, if evaded
-
         # If dataset is sparse, set the proper attribute
         if X.issparse is True:
             self._issparse = True
