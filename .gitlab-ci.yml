@@ -1,8 +1,9 @@
 variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
     SECML_HOME_DIR: "$CI_PROJECT_DIR/secml-lib-data"
-    TOX_WORK_DIR: "$CI_PROJECT_DIR/.tox"
+    TOX_WORKDIR: "$CI_PROJECT_DIR/.tox"
     TOX_TESTENV_PASSENV: "PIP_CACHE_DIR"
+    TOX_USEDEVELOP: "False"
 
 cache:
   key: "$CI_JOB_NAME"
@@ -34,19 +35,19 @@ before_script:
 
 test:min:
   extends: .tests
-  script: tox --workdir $TOX_WORK_DIR -e min
+  script: tox -e min
 
 test:latest:
   extends: .tests
-  script: tox --workdir $TOX_WORK_DIR -e latest
+  script: tox -e latest
 
 test:py27-n14:
   extends: .tests
-  script: tox --workdir $TOX_WORK_DIR -e py27-n14
+  script: tox -e py27-n14
 
 test:py27-n15:
   extends: .tests
-  script: tox --workdir $TOX_WORK_DIR -e py27-n15
+  script: tox -e py27-n15
 
 deploy:xenial:
   image: ubuntu:xenial
