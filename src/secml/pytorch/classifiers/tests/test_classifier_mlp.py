@@ -158,7 +158,7 @@ class TestCPyTorchClassifierMLP(CUnitTest):
         self.logger.info("Output of predict:\n{:}".format(out_predict))
         self.logger.info("Output of get_layer_output:\n{:}".format(out))
 
-        self.assertFalse((out_predict != out).any())
+        self.assertFalse((out_predict.round(6) != out.round(6)).any())
 
         layer = 'linear2'
         self.logger.info("Returning output for layer: {:}".format(layer))
