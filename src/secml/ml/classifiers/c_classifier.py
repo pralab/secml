@@ -378,20 +378,38 @@ class CClassifier(CCreator):
             Gradient of the classifier's output wrt input. Vector-like array.
 
         """
-        # Get the derivative of the preprocess (if defined)
         if self.preprocess is not None:
-            grad_norm = self._gradient_n(x)
             # Normalize data before compute the classifier gradient
-            x = self.preprocess.normalize(x)
-        else:  # Normalizer not defined, use a "neutral" value
-            grad_norm = CArray([1])
+            x_pre = self.preprocess.normalize(x)
+        else:  # Data will not be preprocessed
+            x_pre = x
 
-        # Get the derivative of decision_function
-        try:
-            grad_f = self._gradient_f(x, **kwargs)
+        try:  # Get the derivative of decision_function
+            grad_f = self._gradient_f(x_pre, **kwargs)
         except NotImplementedError:
             raise NotImplementedError("{:} does not implement `gradient_f_x`"
                                       "".format(self.__class__.__name__))
+
+        # Get the derivative of the preprocess (if defined)
+        if self.preprocess is None:  # preprocess not defined... placeholder
+            grad_norm = CArray([1])
+        else:
+            # We pass the classifier gradient to preprocess
+            try:
+                grad_norm = self.preprocess.gradient(x, w=grad_f)
+                # preprocess gradient will be accumulated in grad_f
+                # and can be directly returned
+                return grad_norm.ravel()
+            except TypeError:  # preprocess does not support w probably
+                grad_norm = self.preprocess.gradient(x)
+
+            # We need to left multiply clf gradient and preprocess gradient
+            if self.preprocess.is_linear():
+                # Gradient of linear normalizers is an 'I * w' array
+                # To avoid returning all the zeros, extract the main diagonal
+                grad_norm = grad_norm.diag()
+            else:
+                grad_norm = grad_norm.ravel()
 
         return (grad_f * grad_norm).ravel()
 
@@ -432,24 +450,3 @@ class CClassifier(CCreator):
 
         """
         raise NotImplementedError
-
-    def _gradient_n(self, x):
-        """Computes the gradient of the preprocess wrt preprocess input.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the preprocess wrt its input. Vector-like array.
-
-        """
-        grad_norm = self.preprocess.gradient(x)
-        if self.preprocess.is_linear():
-            # Gradient of linear normalizers is an 'I * w' array
-            # To avoid returning all the zeros, extract the main diagonal
-            grad_norm = grad_norm.diag()
-        return grad_norm.ravel()

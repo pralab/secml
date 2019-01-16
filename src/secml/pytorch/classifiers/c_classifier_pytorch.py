@@ -671,7 +671,7 @@ class CClassifierPyTorch(CClassifier):
 
         return (labels, scores) if return_decision_function is True else labels
 
-    def _gradient_f(self, x, y):
+    def _gradient_f(self, x, y=None, w=None, layer=None):
         """Computes the gradient of the classifier's decision function
          wrt decision function input.
 
@@ -679,8 +679,18 @@ class CClassifierPyTorch(CClassifier):
         ----------
         x : CArray
             The gradient is computed in the neighborhood of x.
-        y : int
+        y : int or None, optional
             Index of the class wrt the gradient must be computed.
+            This is not required if w is passed.
+        w : CArray or None, optional
+            If CArray, will be passed to backward and must have a proper shape
+            depending on the chosen output layer (the last one if `layer`
+            is None). This is required if `layer` is not None.
+        layer : str or None, optional
+            Name of the layer.
+            If None, the gradient at the last layer will be returned
+             and `y` is required if `w` is None.
+            If not None, `w` of proper shape is required.
 
         Returns
         -------
@@ -697,22 +707,77 @@ class CClassifierPyTorch(CClassifier):
 
         if use_cuda is True:
             s = s.cuda()
-        s = s.unsqueeze(0)  # Get a [1,h,w,c] tensor as required by the net
+        s = s.unsqueeze(0)   # unsqueeze to simulate a single point batch
         s = Variable(s, requires_grad=True)
 
+        # Get the model output at specific layer
+        out = self._get_layer_output(s, layer=layer)
+
+        # unsqueeze if net output does not take into account the batch size
+        if len(out.shape) < len(s.shape):
+            out = out.unsqueeze(0)
+
+        if w is None:
+            if layer is not None:
+                raise ValueError(
+                    "grad can be implicitly created only for the last layer. "
+                    "`w` is needed when `layer` is not None.")
+            if y is None:  # if layer is None and y is required
+                raise ValueError("The class label wrt compute the gradient "
+                                 "at the last layer is required.")
+            w = torch.FloatTensor(1, out.shape[-1])
+            w.zero_()
+            w[0, y] = 1  # create a mask to get the gradient wrt y
+        else:
+            if y is not None:  # Inform the user y is ignored
+                self.logger.warning("`y` will be ignored!")
+            w = self._to_tensor(w)
+        if use_cuda is True:
+            w = w.cuda()
+        w = w.unsqueeze(0)  # unsqueeze to simulate a single point batch
+
+        out.backward(w)  # Backward on `out` (grad will appear on `s`)
+
+        return CArray(s.grad.data.cpu().numpy().ravel())
+
+    def _get_layer_output(self, s, layer=None):
+        """Returns the output of the desired net layer.
+
+        Parameters
+        ----------
+        s : torch.Tensor
+            Input tensor to forward propagate.
+        layer : str or None, optional
+            Name of the layer.
+            If None, the output of the last layer will be returned.
+
+        Returns
+        -------
+        torch.Tensor
+            Output of the desired layer.
+
+        """
         # Switch to evaluation mode
         self._model.eval()
 
-        logits = self._model(s)
+        if layer is None:  # Directly use the last layer
+            s = self._model(s)  # Forward pass
 
-        mask = torch.FloatTensor(s.shape[0], logits.shape[-1])
-        mask.zero_()
-        mask[0, y] = 1  # grad wrt first class neuron out
-        if use_cuda is True:
-            mask = mask.cuda()
-        logits.backward(mask)
+        else:  # FIXME: THIS DOES NOT WORK IF THE FORWARD METHOD
+                # HAS ANY SPECIAL OPERATION INSIDE (LIKE DENSENET)
+            # Manual iterate the network and stop at desired layer
+            # Use _model to iterate over first level modules only
+            for m_k, m in self._model._modules.iteritems():
+                s = m(s)  # Forward input trough module
+                if m_k == layer:
+                    # We found the desired layer
+                    break
+            else:
+                if layer is not None:
+                    raise ValueError(
+                        "No layer `{:}` found!".format(layer))
 
-        return CArray(s.grad.data.cpu().numpy().ravel())
+        return s
 
     def get_layer_output(self, x, layer=None):
         """Returns the output of the desired net layer.
@@ -733,9 +798,6 @@ class CClassifierPyTorch(CClassifier):
         """
         x_loader = self._get_test_input_loader(x)
 
-        # Switch to evaluation mode
-        self._model.eval()
-
         out = None
         for batch_idx, (s, _) in enumerate(x_loader):
 
@@ -744,19 +806,12 @@ class CClassifierPyTorch(CClassifier):
             s = Variable(s, requires_grad=True)
 
             with torch.no_grad():
-                # Manual iterate the network and stop at desired layer
-                # Use _model to iterate over first level modules only
-                for m_k, m in self._model._modules.iteritems():
-                    s = m(s)  # Forward input trough module
-                    if m_k == layer:
-                        # We found the desired layer
-                        break
-                else:
-                    if layer is not None:
-                        raise ValueError("No layer `{:}` found!".format(layer))
+                # Get the model output at specific layer
+                s = self._get_layer_output(s, layer=layer)
 
             # Convert to CArray
-            s = CArray(s.data.cpu().numpy())
+            s = s.view(s.size(0), -1)
+            s = CArray(s.data.cpu().numpy()).astype(float)
 
             if out is not None:
                 out = out.append(s, axis=0)
