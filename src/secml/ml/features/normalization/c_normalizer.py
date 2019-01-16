@@ -115,17 +115,13 @@ class CNormalizer(CCreator):
         raise NotImplementedError(
             "this is a placeholder method. Override if necessary.")
 
-    def gradient(self, x, **kwargs):
+    def gradient(self, x):
         """Returns the normalizer gradient wrt data.
 
         Parameters
         ----------
         x : CArray
             Data array, 2-Dimensional or ravel.
-        **kwargs
-            Optional parameters for the function that computes the
-            gradient of the normalizer. See the description of each
-            normalizer for a complete list of optional parameters.
 
         Returns
         -------
