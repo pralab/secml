@@ -143,7 +143,7 @@ class CEvasionTestCases(object):
             self.logger.info("Is sparse?: " + str(x.issparse))
             final_time = time.time() - start_time
             self.logger.info("Starting score: " + str(
-                self.classifier.decision_function(self.x0, y=1)))
+                self.classifier.decision_function(self.x0, y=1).item()))
             self.logger.info("Final score: " + str(evas.f_opt))
             self.logger.info("x*: " + str(evas.x_opt))
             self.logger.info("Point sequence: " + str(evas.x_seq))

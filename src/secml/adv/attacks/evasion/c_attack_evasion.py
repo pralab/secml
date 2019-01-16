@@ -311,7 +311,6 @@ class CAttackEvasion(CAttack):
     #                              PUBLIC METHODS
     ###########################################################################
 
-    # TODO: this should be private as _run
     def _run(self, x0, y0, x_init=None):
         """
         Perform evasion for a given dmax on a single pattern
@@ -339,7 +338,7 @@ class CAttackEvasion(CAttack):
 
         # x0 must 2-D, y0 scalar if a CArray of size 1
         x0 = x0.atleast_2d()
-        y0 = y0.item() if isinstance(y0, CArray) and y0.size == 1 else y0
+        y0 = y0.item() if isinstance(y0, CArray) else y0
 
         # if data can not be modified by the attacker, exit
         if not self.is_attack_class(y0):
@@ -435,11 +434,11 @@ class CAttackEvasion(CAttack):
         if X.issparse is True:
             self._issparse = True
 
-        # array in wich the value of the optimization function are stored
+        # array in which the value of the optimization function are stored
         fs_opt = CArray.zeros(n_mod_samples, )
 
         for i in xrange(n_mod_samples):
-            k = idx[i]  # idx of sample that can be modified
+            k = idx[i].item()  # idx of sample that can be modified
 
             xi = x[k, :] if x_init is None else x_init[k, :]
             x_opt, f_opt = self._run(x[k, :], y[k], x_init=xi)
