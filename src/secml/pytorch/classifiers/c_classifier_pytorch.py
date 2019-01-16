@@ -707,11 +707,15 @@ class CClassifierPyTorch(CClassifier):
 
         if use_cuda is True:
             s = s.cuda()
-        s = s.unsqueeze(0)  # Get a [1,h,w,c] tensor as required by the net
+        s = s.unsqueeze(0)   # unsqueeze to simulate a single point batch
         s = Variable(s, requires_grad=True)
 
         # Get the model output at specific layer
         out = self._get_layer_output(s, layer=layer)
+
+        # unsqueeze if net output does not take into account the batch size
+        if len(out.shape) < len(s.shape):
+            out = out.unsqueeze(0)
 
         if w is None:
             if layer is not None:
@@ -721,15 +725,16 @@ class CClassifierPyTorch(CClassifier):
             if y is None:  # if layer is None and y is required
                 raise ValueError("The class label wrt compute the gradient "
                                  "at the last layer is required.")
-            w = torch.FloatTensor(1, out.shape[-1]).unsqueeze(0)
+            w = torch.FloatTensor(1, out.shape[-1])
             w.zero_()
-            w[0, 0, y] = 1  # grad wrt first class neuron out
+            w[0, y] = 1  # create a mask to get the gradient wrt y
         else:
             if y is not None:  # Inform the user y is ignored
                 self.logger.warning("`y` will be ignored!")
-            w = self._to_tensor(w).unsqueeze(0)
+            w = self._to_tensor(w)
         if use_cuda is True:
             w = w.cuda()
+        w = w.unsqueeze(0)  # unsqueeze to simulate a single point batch
 
         out.backward(w)  # Backward on `out` (grad will appear on `s`)
 
