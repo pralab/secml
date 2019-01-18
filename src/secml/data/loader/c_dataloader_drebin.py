@@ -16,8 +16,7 @@ from secml.array import CArray
 from secml.utils import fm
 from secml.utils.download_utils import dl_file
 from secml.utils.dict_utils import invert_dict
-from secml.core import settings
-
+from secml import settings
 
 DREBIN_URL = 'https://nue.diee.unica.it/public.php/webdav'
 DREBIN_USER = 'd74ffeaf5d14d3fb2d0bc621d38ef09d'

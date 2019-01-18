@@ -4,7 +4,7 @@ import subprocess
 from pkg_resources import parse_version
 
 from ._globals import _NoValue
-from .core.settings import SECML_CONFIG
+from .settings import SECML_CONFIG
 
 
 __all__ = ['_NoValue', 'SECML_CONFIG', '__version__']
