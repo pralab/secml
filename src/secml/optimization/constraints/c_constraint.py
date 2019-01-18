@@ -167,6 +167,12 @@ class CConstraint(CCreator):
             if self.is_violated(X) is True:
                 self.logger.debug("Constraint violated, projecting...")
                 X = self._projection(X.ravel())
+
+                # ensure that the projected point is within the feasible domain
+                if self.is_violated(X.ravel()) is True:
+                    raise RuntimeError(
+                        "Projected x is outside of feasible domain!")
+
             return X.ravel()
 
         X = X.deepcopy()  # Return a new array
@@ -175,6 +181,11 @@ class CConstraint(CCreator):
             if self.is_violated(x_i) is True:
                 self.logger.debug("Constraint violated, projecting...")
                 X[i, :] = self._projection(x_i.ravel())
+                
+                # ensure that the projected point is within the feasible domain
+                if self._is_violated(X[i, :].ravel()):
+                    raise RuntimeError(
+                        "Projected x is outside of feasible domain!")
         return X
 
     def gradient(self, X):
