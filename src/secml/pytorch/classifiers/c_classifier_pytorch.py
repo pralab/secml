@@ -27,10 +27,6 @@ from secml.pytorch.utils.optim_utils import add_weight_decay
 # Use CUDA ?!
 use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
 
-torch.manual_seed(999)
-if use_cuda:
-    torch.cuda.manual_seed_all(999)
-
 
 # FIXME: inner preprocess not manage yet for training phase
 class CClassifierPyTorch(CClassifier):
@@ -73,6 +69,13 @@ class CClassifierPyTorch(CClassifier):
         Shape of the input expected by the first layer of the network.
         If None, samples will not be reshaped before passing them to the net.
         If not set, `load_state` will not be available.
+    random_state : int or None, optional
+        If int, random_state is the seed used by the random number generator.
+        If None, no fixed seed will be set.
+    model_params : str or kwargs
+        Any other keyword argument for the model function.
+        If a string, must be a path to a dictionary where
+         model parameters are stored.
 
     """
     __super__ = 'CClassifierPyTorch'
@@ -80,8 +83,8 @@ class CClassifierPyTorch(CClassifier):
     def __init__(self, model, learning_rate=1e-2, momentum=0.9,
                  weight_decay=1e-4, loss='cross-entropy', epochs=100,
                  gamma=0.1, lr_schedule=(50, 75), batch_size=1,
-                 regularize_bias=True, train_transform=None,
-                 preprocess=None, input_shape=None, **model_params):
+                 regularize_bias=True, train_transform=None, preprocess=None,
+                 input_shape=None, random_state=None, **model_params):
 
         # Model and params
         self._model_base = model
@@ -116,6 +119,13 @@ class CClassifierPyTorch(CClassifier):
 
         # Training vars
         self._start_epoch = 0
+
+        # Random seed
+        if random_state is not None:
+            torch.manual_seed(random_state)
+            if use_cuda:
+                torch.cuda.manual_seed_all(random_state)
+                torch.backends.cudnn.deterministic = True
 
         # PyTorch NeuralNetwork model
         self._model = None

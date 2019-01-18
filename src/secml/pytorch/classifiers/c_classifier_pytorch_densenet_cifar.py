@@ -55,10 +55,10 @@ class CClassifierPyTorchDenseNetCifar(CClassifierPyTorch):
     __class_type = 'pytorch-densenet-cifar'
 
     def __init__(self, depth=100, growthRate=12, compressionRate=2,
-                 dropRate=0, num_classes=10,
-                 learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
-                 epochs=300, gamma=0.1, lr_schedule=(150, 225), batch_size=64,
-                 regularize_bias=True, train_transform=None, preprocess=None):
+                 dropRate=0, num_classes=10, learning_rate=1e-2, momentum=0.9,
+                 weight_decay=1e-4, epochs=300,  gamma=0.1,
+                 lr_schedule=(150, 225), batch_size=64, regularize_bias=True,
+                 train_transform=None, preprocess=None, random_state=None):
 
         super(CClassifierPyTorchDenseNetCifar, self).__init__(
             model=densenet,
@@ -74,6 +74,7 @@ class CClassifierPyTorchDenseNetCifar(CClassifierPyTorch):
             train_transform=train_transform,
             preprocess=preprocess,
             input_shape=(3, 32, 32),
+            random_state=random_state,
             depth=depth,
             growthRate=growthRate,
             compressionRate=compressionRate,

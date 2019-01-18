@@ -1,21 +1,9 @@
 from secml.utils import CUnitTest
 
-import random
-import torch
-
 from secml.pytorch.classifiers import CClassifierPyTorch
 from secml.pytorch.models import mlp
 from secml.data.loader import CDLRandom
 from secml.utils import fm
-
-use_cuda = torch.cuda.is_available()
-print "Using CUDA: ", use_cuda
-
-# Random seed
-random.seed(999)
-torch.manual_seed(999)
-if use_cuda:
-    torch.cuda.manual_seed_all(999)
 
 
 class TestCClassifierPyTorc(CUnitTest):
