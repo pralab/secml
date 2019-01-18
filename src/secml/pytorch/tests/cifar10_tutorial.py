@@ -59,7 +59,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 
-from secml.core.settings import SECML_PYTORCH_DATA_DIR
+from secml.settings import SECML_PYTORCH_DATA_DIR
 from secml.utils import fm
 from secml.data.loader import CDataLoaderCIFAR10
 from secml.pytorch.data import CTorchDataset

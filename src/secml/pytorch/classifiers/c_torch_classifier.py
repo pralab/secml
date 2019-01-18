@@ -18,7 +18,7 @@ from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.classifiers import CClassifier
 
-from secml.core.settings import SECML_PYTORCH_USE_CUDA
+from secml.pytorch.settings import SECML_PYTORCH_USE_CUDA
 from secml.pytorch.data import CTorchDataset
 from secml.pytorch.utils import AverageMeter, accuracy
 from secml.pytorch.utils.optim_utils import add_weight_decay

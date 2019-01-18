@@ -19,7 +19,7 @@ import torch.utils.data as data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
-from secml.core.settings import SECML_PYTORCH_DATA_DIR, SECML_PYTORCH_MODELS_DIR
+from secml.settings import SECML_PYTORCH_DATA_DIR, SECML_PYTORCH_MODELS_DIR
 from secml.utils import fm
 
 from secml.data.loader import CDataLoaderCIFAR10

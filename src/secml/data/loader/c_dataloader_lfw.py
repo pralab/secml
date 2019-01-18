@@ -9,7 +9,7 @@ from secml.data.loader import CDataLoader
 from secml.data import CDataset
 from secml.array import CArray
 from secml.utils import fm
-from secml.core.settings import SECML_DS_DIR
+from secml.settings import SECML_DS_DIR
 
 from sklearn.datasets import fetch_lfw_people
 

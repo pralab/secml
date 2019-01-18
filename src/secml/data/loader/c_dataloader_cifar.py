@@ -14,7 +14,7 @@ from secml.data.loader import CDataLoader
 from secml.data import CDataset
 from secml.utils import fm
 from secml.utils.download_utils import dl_file, md5
-from secml.core.settings import SECML_DS_DIR
+from secml.settings import SECML_DS_DIR
 
 
 CIFAR10_URL_PYTHON = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
