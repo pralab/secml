@@ -21,7 +21,7 @@ if use_cuda:
     torch.cuda.manual_seed_all(999)
 
 
-class TestCPyTorchClassifierDenseNetCifar(CUnitTest):
+class TestCClassifierPyTorchDenseNetCifar(CUnitTest):
 
     @classmethod
     def setUpClass(cls):

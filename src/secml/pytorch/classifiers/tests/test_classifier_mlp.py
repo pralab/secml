@@ -16,7 +16,7 @@ if use_cuda:
     torch.cuda.manual_seed_all(999)
 
 
-class TestCPyTorchClassifierMLP(CUnitTest):
+class TestCClassifierPyTorchMLP(CUnitTest):
 
     def setUp(self):
 
