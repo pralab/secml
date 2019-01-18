@@ -1,7 +1,12 @@
-import torch
-from collections import OrderedDict
+"""
+.. module:: PyTorchClassifierMLP
+   :synopsis: Classifier with PyTorch Multi-layer Perceptron
 
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+
+"""
 from . import CClassifierPyTorch
+from ..models import mlp
 
 
 class CClassifierPyTorchMLP(CClassifierPyTorch):
@@ -19,8 +24,6 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
         two hidden layers and 100 neurons each.
     output_dims : int, optional
         Size of the output layer. Default 10.
-    batch_size : int, optional
-        Size of the batch for grouping samples. Default 5.
     learning_rate : float, optional
         Learning rate. Default 1e-2.
     momentum : float, optional
@@ -36,6 +39,8 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
         List of epoch indices. Must be increasing.
         The current learning rate will be multiplied by gamma
         once the number of epochs reaches each index.
+    batch_size : int, optional
+        Size of the batch for grouping samples. Default 5.
     regularize_bias : bool, optional
         If False, L2 regularization will NOT be applied to biases.
         Default True, so regularization will be applied to all parameters.
@@ -54,79 +59,26 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
     __class_type = 'pytorch-mlp'
 
     def __init__(self, input_dims=1000, hidden_dims=(100, 100), output_dims=10,
-                 batch_size=5, learning_rate=1e-2, momentum=0.9,
-                 weight_decay=1e-4, epochs=100, gamma=0.1,
-                 lr_schedule=(50, 75), regularize_bias=True,
+                 learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
+                 epochs=100, gamma=0.1, lr_schedule=(50, 75),
+                 batch_size=5, regularize_bias=True,
                  train_transform=None, preprocess=None):
 
-        if len(hidden_dims) < 1:
-            raise ValueError("at least one hidden dim should be defined")
-        if any(d <= 0 for d in hidden_dims):
-            raise ValueError("each hidden layer must have at least one neuron")
-
-        # Model params
-        self._input_dims = input_dims
-        self._hidden_dims = hidden_dims
-        self._output_dims = output_dims
-
         super(CClassifierPyTorchMLP, self).__init__(
-            batch_size=batch_size,
+            model=mlp,
             learning_rate=learning_rate,
             momentum=momentum,
             weight_decay=weight_decay,
+            loss='mse',
             epochs=epochs,
             gamma=gamma,
             lr_schedule=lr_schedule,
+            batch_size=batch_size,
             regularize_bias=regularize_bias,
             train_transform=train_transform,
-            preprocess=preprocess
+            preprocess=preprocess,
+            input_shape=(1, input_dims),
+            input_dims=input_dims,
+            hidden_dims=hidden_dims,
+            output_dims=output_dims,
         )
-
-    @property
-    def input_dims(self):
-        """Size of the input layer."""
-        return self._input_dims
-
-    @property
-    def hidden_dims(self):
-        """Size of the hidden layers."""
-        return self._hidden_dims
-
-    @property
-    def n_hidden_layers(self):
-        """Number of hidden layers."""
-        return len(self._hidden_dims)
-
-    @property
-    def output_dims(self):
-        """Size of the output layer."""
-        return self._output_dims
-
-    def _init_model(self):
-        """Initialize the PyTorch Neural Network model."""
-        # Input layers
-        layers = [
-            ('linear1', torch.nn.Linear(self.input_dims, self.hidden_dims[0])),
-            ('relu1', torch.nn.ReLU()),
-        ]
-        # Appending additional hidden layers
-        for hl_i, hl_dims in enumerate(self.hidden_dims[1:]):
-            prev_hl_dims = self.hidden_dims[hl_i]  # Dims of the previous hl
-            i_str = str(hl_i + 2)
-            layers += [
-                ('linear' + i_str, torch.nn.Linear(prev_hl_dims, hl_dims)),
-                ('relu' + i_str, torch.nn.ReLU())]
-        # Output layers
-        layers += [
-            ('linear' + str(self.n_hidden_layers + 1),
-             torch.nn.Linear(self.hidden_dims[-1], self.output_dims)),
-            ('softmax', torch.nn.Softmax(dim=-1))]
-
-        # Creating the model with the list of layers
-        self._model = torch.nn.Sequential(OrderedDict(layers))
-
-    def loss(self, x, target):
-        """Return the loss function computed on input."""
-        # The nn package also contains definitions of popular loss functions;
-        # in this case we will use Mean Squared Error (MSE) as our loss
-        return torch.nn.MSELoss(size_average=False)(x, target.float())
