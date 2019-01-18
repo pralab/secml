@@ -116,6 +116,8 @@ class CClassifierPyTorch(CClassifier):
 
         # Training vars
         self._start_epoch = 0
+        self._acc = 0  # epoch accuracy FIXME: ON TRAINING SET
+        self._best_acc = 0  # best accuracy FIXME: ON TRAINING SET
 
         # PyTorch NeuralNetwork model
         self._model = None
@@ -247,6 +249,18 @@ class CClassifierPyTorch(CClassifier):
     def start_epoch(self):
         """Current training epoch."""
         return self._start_epoch
+
+    @property
+    def acc(self):
+        """Classification accuracy for current epoch."""
+        # FIXME: ON TRAINING SET
+        return self._acc
+
+    @property
+    def best_acc(self):
+        """Best classification accuracy."""
+        # FIXME: ON TRAINING SET
+        return self._best_acc
 
     @property
     def w(self):
@@ -427,6 +441,10 @@ class CClassifierPyTorch(CClassifier):
         # Restore the count of epochs
         self._start_epoch = state_dict['epoch'] + 1
 
+        # Restore accuracy data if available
+        self._acc = state_dict.get('acc', 0)
+        self._best_acc = state_dict.get('best_acc', 0)
+
         # Restore the state of the model
         if dataparallel is True:
             # Convert a DataParallel model state to a normal model state
@@ -473,6 +491,8 @@ class CClassifierPyTorch(CClassifier):
         state_dict['optimizer']['regularize_bias'] = self.regularize_bias
         state_dict['state_dict'] = self._model.state_dict()
         state_dict['epoch'] = self.start_epoch
+        state_dict['acc'] = self.acc
+        state_dict['best_acc'] = self.best_acc
         state_dict['input_shape'] = self.input_shape
         return state_dict
 
@@ -572,7 +592,12 @@ class CClassifierPyTorch(CClassifier):
             self._optimizer, self.lr_schedule, gamma=self.gamma,
             last_epoch=self.start_epoch - 1)
 
-        for e_idx in xrange(self.start_epoch, self.epochs):
+        # Storing a copy of the best epoch
+        # will be used as the final training state dict
+        best_epoch = self.start_epoch
+        best_state_dict = deepcopy(self.state_dict())
+
+        for self._start_epoch in xrange(self.start_epoch, self.epochs):
 
             scheduler.step()  # Adjust the learning rate
             losses = AverageMeter()  # Logger of the loss value
@@ -581,7 +606,7 @@ class CClassifierPyTorch(CClassifier):
             # Log progress of epoch
             self.logger.info(
                 'Epoch: [{curr_epoch}|{epochs}] LR: {lr} - STARTED'.format(
-                    curr_epoch=e_idx + 1,
+                    curr_epoch=self.start_epoch + 1,
                     epochs=self.epochs,
                     lr=scheduler.get_lr()[0],
                 ))
@@ -610,7 +635,7 @@ class CClassifierPyTorch(CClassifier):
                 # Log progress of batch
                 self.logger.debug('Epoch: {epoch}, Batch: ({batch}/{size}) '
                                   'Loss: {loss:.4f} Acc: {acc:.2f}'.format(
-                                    epoch=e_idx + 1,
+                                    epoch=self.start_epoch + 1,
                                     batch=batch_idx + 1,
                                     size=len(ds_loader),
                                     loss=losses.avg,
@@ -620,13 +645,26 @@ class CClassifierPyTorch(CClassifier):
             # Log progress of epoch
             self.logger.info('Epoch: [{curr_epoch}|{epochs}] '
                              'Loss: {loss:.4f} Acc: {acc:.2f}'.format(
-                               curr_epoch=e_idx + 1,
+                               curr_epoch=self.start_epoch + 1,
                                epochs=self.epochs,
                                loss=losses.avg,
                                acc=acc.avg,
                              ))
 
-            self._start_epoch = e_idx
+            # Average accuracy after epoch FIXME: ON TRAINING SET
+            self._acc = acc.avg.item()
+
+            # Store the current epoch as best one if accuracy is higher
+            # If equal accuracy, the last epoch should have better loss
+            if self.acc >= self.best_acc:
+                self._best_acc = self.acc
+                best_epoch = self.start_epoch
+                best_state_dict = deepcopy(self.state_dict())
+
+        self.logger.info(
+            "Best accuracy {:} obtained on epoch {:}".format(
+                self.best_acc, best_epoch + 1))
+        self.load_state(best_state_dict)
 
         return self
 
