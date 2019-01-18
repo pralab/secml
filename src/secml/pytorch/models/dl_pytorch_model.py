@@ -6,7 +6,8 @@
 
 """
 import torch
-from secml.settings import SECML_PYTORCH_MODELS_DIR
+
+from secml.pytorch.settings import SECML_PYTORCH_MODELS_DIR
 from secml.utils import fm
 from secml.utils.download_utils import dl_file
 
