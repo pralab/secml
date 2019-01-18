@@ -10,7 +10,7 @@ from secml.data import CDataset
 from secml.array import CArray
 from secml.utils import fm
 from secml.utils.download_utils import dl_file, md5
-from secml.core.settings import SECML_DS_DIR
+from secml.settings import SECML_DS_DIR
 
 import gzip
 import struct
