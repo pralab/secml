@@ -16,7 +16,7 @@ if use_cuda:
     torch.cuda.manual_seed_all(999)
 
 
-class TestCPyTorchClassifierMLP(CUnitTest):
+class TestCClassifierPyTorchMLP(CUnitTest):
 
     def setUp(self):
 
@@ -193,6 +193,17 @@ class TestCPyTorchClassifierMLP(CUnitTest):
 
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
+
+    def test_deepcopy(self):
+        """Test for deepcopy."""
+        self.clf.verbose = 0
+        self.clf.fit(self.ds)
+
+        self.logger.info("Try deepcopy of classifier...")
+        clf2 = self.clf.deepcopy()
+
+        clf2.weight_decay = 300
+        self.assertNotEqual(clf2.weight_decay, self.clf.weight_decay)
 
 
 if __name__ == '__main__':

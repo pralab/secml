@@ -2,21 +2,22 @@
 .. module:: CClassifierPyTorch
    :synopsis: Classifier with PyTorch Neural Network
 
-.. moduleauthor:: Ambra Demontis <marco.melis@diee.unica.it>
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <marco.melis@diee.unica.it>
 
 """
 from copy import deepcopy
-from abc import ABCMeta, abstractproperty, abstractmethod
 
 import torch
 from torch.utils.data import DataLoader
 import torch.optim as optim
 from torch.autograd import Variable
+import torchvision.transforms as transforms
 
 from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.classifiers import CClassifier
+from secml.utils import load_dict, fm
 
 from secml.core.settings import SECML_PYTORCH_USE_CUDA
 from secml.pytorch.data import CDatasetPyTorch
@@ -37,9 +38,8 @@ class CClassifierPyTorch(CClassifier):
 
     Parameters
     ----------
-    batch_size : int
-        Size of the batch for grouping samples. Depends on the
-        neural network model and on the specific data.
+    model
+        PyTorch Neural Network model or function which returns a model.
     learning_rate : float, optional
         Learning rate. Default 1e-2.
     momentum : float, optional
@@ -47,6 +47,9 @@ class CClassifierPyTorch(CClassifier):
     weight_decay : float, optional
         Weight decay (L2 penalty). Control parameters regularization.
         Default 1e-4.
+    loss : str, optional
+        Identifier of the loss function to use for training.
+        Default Cross-Entropy loss (cross-entropy).
     epochs : int, optional
         Number of epochs. Default 100.
     gamma : float, optional
@@ -55,6 +58,8 @@ class CClassifierPyTorch(CClassifier):
         List of epoch indices. Must be increasing.
         The current learning rate will be multiplied by gamma
         once the number of epochs reaches each index.
+    batch_size : int, optional
+        Size of the batch for grouping samples. Default 1.
     regularize_bias : bool, optional
         If False, L2 regularization will NOT be applied to biases.
         Default True, so regularization will be applied to all parameters.
@@ -64,18 +69,32 @@ class CClassifierPyTorch(CClassifier):
         Transformation to be applied before training.
     preprocess : CNormalizer or None, optional
         Preprocessing for data.
+    input_shape : tuple, optional
+        Shape of the input expected by the first layer of the network.
+        If None, samples will not be reshaped before passing them to the net.
+        If not set, `load_state` will not be available.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CClassifierPyTorch'
 
-    def __init__(self, batch_size, learning_rate=1e-2, momentum=0.9,
-                 weight_decay=1e-4, epochs=100, gamma=0.1,
-                 lr_schedule=(50, 75), regularize_bias=True,
-                 train_transform=None, preprocess=None):
+    def __init__(self, model, learning_rate=1e-2, momentum=0.9,
+                 weight_decay=1e-4, loss='cross-entropy', epochs=100,
+                 gamma=0.1, lr_schedule=(50, 75), batch_size=1,
+                 regularize_bias=True, train_transform=None,
+                 preprocess=None, input_shape=None, **model_params):
 
-        # Model params
-        self._batch_size = batch_size
+        # Model and params
+        self._model_base = model
+
+        # If a string was passed as `model_params` try to load params from file
+        if 'model_params' in model_params:
+            model_params_url = model_params['model_params']
+            if not fm.file_exist(model_params_url):
+                raise ValueError(
+                    "no file available at {:}".format(model_params_url))
+            model_params = load_dict(model_params_url, int)
+
+        self._model_params = model_params
 
         # Optimizer params (set the protected attrs to avoid
         # reinitialize the optimizer each time)
@@ -84,11 +103,16 @@ class CClassifierPyTorch(CClassifier):
         self._weight_decay = float(weight_decay)
 
         # Training params
+        self.loss_id = loss
         self.epochs = epochs
         self.gamma = gamma
         self.lr_schedule = lr_schedule
+        self.batch_size = batch_size
         self.regularize_bias = regularize_bias
         self.train_transform = train_transform
+
+        # Other parameters
+        self.input_shape = input_shape
 
         # Training vars
         self._start_epoch = 0
@@ -98,7 +122,7 @@ class CClassifierPyTorch(CClassifier):
         # PyTorch Optimizer
         self._optimizer = None
 
-        # Initialize the model (implementation specific for each clf)
+        # Initialize the model
         self.init_model()
         # Initialize the optimizer
         self.init_optimizer()
@@ -109,9 +133,9 @@ class CClassifierPyTorch(CClassifier):
         super(CClassifierPyTorch, self).__init__(preprocess=preprocess)
 
     @property
-    def batch_size(self):
-        """Size of the batch for grouping samples."""
-        return self._batch_size
+    def model_params(self):
+        """Model parameters dictionary."""
+        return self._model_params
 
     @property
     def learning_rate(self):
@@ -150,6 +174,16 @@ class CClassifierPyTorch(CClassifier):
         self.init_optimizer()
 
     @property
+    def loss_id(self):
+        """Loss function for training (id)."""
+        return self._loss_id
+
+    @loss_id.setter
+    def loss_id(self, value):
+        """Loss function for training (id)."""
+        self._loss_id = str(value)
+
+    @property
     def epochs(self):
         """Number of epochs."""
         return self._epochs
@@ -180,6 +214,16 @@ class CClassifierPyTorch(CClassifier):
         self._lr_schedule = list(value)
 
     @property
+    def batch_size(self):
+        """Size of the batch for grouping samples."""
+        return self._batch_size
+
+    @batch_size.setter
+    def batch_size(self, value):
+        """Size of the batch for grouping samples."""
+        self._batch_size = int(value)
+
+    @property
     def regularize_bias(self):
         """If False, L2 regularization will NOT be applied to biases."""
         return self._regularize_bias
@@ -188,6 +232,16 @@ class CClassifierPyTorch(CClassifier):
     def regularize_bias(self, value):
         """If False, L2 regularization will NOT be applied to biases."""
         self._regularize_bias = bool(value)
+
+    @property
+    def input_shape(self):
+        """Shape of the model input."""
+        return self._input_shape
+
+    @input_shape.setter
+    def input_shape(self, value):
+        """Shape of the model input."""
+        self._input_shape = value
 
     @property
     def start_epoch(self):
@@ -246,16 +300,14 @@ class CClassifierPyTorch(CClassifier):
 
     def init_model(self):
         """Initialize the PyTorch Neural Network model."""
-        # Call the specific model initialization method
-        self._init_model()
+        # Call the specific model initialization method passing params
+        self._model = self._model_base(**self._model_params)
+        # Make sure that model is a proper PyTorch module
+        if not isinstance(self._model, torch.nn.Module):
+            raise TypeError("`model` must be a `torch.nn.Module`.")
         # Ensure we are using cuda if available
         if use_cuda is True:
             self._model = self._model.cuda()
-
-    @abstractmethod
-    def _init_model(self):
-        """Initialize the PyTorch Neural Network model."""
-        raise NotImplementedError
 
     def init_optimizer(self):
         """Initialize the PyTorch Neural Network optimizer."""
@@ -271,10 +323,34 @@ class CClassifierPyTorch(CClassifier):
                                     momentum=self.momentum,
                                     weight_decay=self.weight_decay)
 
-    @abstractmethod
     def loss(self, x, target):
-        """Return the loss function computed on input."""
-        raise NotImplementedError
+        """Return the loss function computed on input.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Scores as 2D Tensor of shape (N, C).
+        target : torch.Tensor
+            Targets as 2D Tensor of shape (N, C).
+
+        Returns
+        -------
+        loss : torch.Tensor
+            Value of the loss. Single scalar tensor.
+
+        """
+        # As scores might have shape [N, 1, C], squeeze them
+        x = x.squeeze(1)
+
+        if self.loss_id == 'cross-entropy':
+            # Cross-Entropy Loss (includes softmax)
+            # target are one-hot encoded so we extract single targets
+            return torch.nn.CrossEntropyLoss()(x, torch.max(target, 1)[1])
+        elif self.loss_id == 'mse':
+            # Mean Squared Error (MSE)
+            return torch.nn.MSELoss(size_average=False)(x, target.float())
+        else:
+            raise ValueError("loss `{:}` not supported".format(self.loss_id))
 
     def _to_tensor(self, x):
         """Convert input array to tensor."""
@@ -287,10 +363,16 @@ class CClassifierPyTorch(CClassifier):
     def _get_test_input_loader(self, x, n_jobs=1):
         """Return a loader for input test data."""
         # Convert to CDatasetPyTorch and use a dataloader that returns batches
-        return DataLoader(CDatasetPyTorch(x),
-                          batch_size=self.batch_size,
-                          shuffle=False,
-                          num_workers=n_jobs-1)
+        dl = DataLoader(CDatasetPyTorch(x),
+                        batch_size=self.batch_size,
+                        shuffle=False,
+                        num_workers=n_jobs-1)
+
+        # Add a transformation that reshape samples to (C x H x W)
+        dl.dataset.transform = transforms.Lambda(
+            lambda p: p.reshape(self.input_shape))
+
+        return dl
 
     def load_state(self, state_dict, dataparallel=False):
         """Load PyTorch objects state from dictionary.
@@ -356,6 +438,21 @@ class CClassifierPyTorch(CClassifier):
                 state_dict['state_dict'].pop(k)
         self._model.load_state_dict(state_dict['state_dict'])
 
+        # If input_shape is not set, try to load from state_dict
+        if self.input_shape is None:
+            self.input_shape = state_dict.get('input_shape', None)
+        # Now input_shape should be not None, otherwise raise error
+        if self.input_shape is None:
+            raise RuntimeError("`input_shape` is not known. Cannot load state")
+
+        # Restoring CClassifier params
+        self._n_features = sum(self.input_shape)
+        # For _classes we input a fake sample to the model and check output
+        x = torch.rand(2, *self.input_shape).type(torch.FloatTensor)
+        if use_cuda is True:
+            x = x.cuda()
+        self._classes = CArray.arange(self._model(x).shape[-1])
+
     def state_dict(self):
         """Return a dictionary with PyTorch objects state.
 
@@ -376,6 +473,7 @@ class CClassifierPyTorch(CClassifier):
         state_dict['optimizer']['regularize_bias'] = self.regularize_bias
         state_dict['state_dict'] = self._model.state_dict()
         state_dict['epoch'] = self.start_epoch
+        state_dict['input_shape'] = self.input_shape
         return state_dict
 
     def fit(self, dataset, warm_start=False, n_jobs=1):
@@ -486,7 +584,10 @@ class CClassifierPyTorch(CClassifier):
                     x, y = x.cuda(), y.cuda(async=True)
                 x, y = Variable(x, requires_grad=True), Variable(y)
 
-                # compute output and loss
+                # As y have shape [N, 1, C], squeeze them
+                y = y.squeeze(1)
+
+                # Compute output and loss
                 logits = self._model(x)
                 loss = self.loss(logits, y)
 
@@ -588,7 +689,7 @@ class CClassifierPyTorch(CClassifier):
 
             with torch.no_grad():
                 logits = self._model(s)
-                logits = logits.view(logits.size(0), -1)
+                logits = logits.squeeze(1)
                 logits = CArray(
                     logits.data.cpu().numpy()[:, y]).astype(float)
 
@@ -656,7 +757,7 @@ class CClassifierPyTorch(CClassifier):
 
             with torch.no_grad():
                 logits = self._model(s)
-                logits = logits.view(logits.size(0), -1)
+                logits = logits.squeeze(1)
                 logits = CArray(logits.data.cpu().numpy()).astype(float)
 
             if scores is not None:
