@@ -578,6 +578,14 @@ class CClassifierPyTorch(CClassifier):
             losses = AverageMeter()  # Logger of the loss value
             acc = AverageMeter()  # Logger of the accuracy
 
+            # Log progress of epoch
+            self.logger.info(
+                'Epoch: [{curr_epoch}|{epochs}] LR: {lr} - STARTED'.format(
+                    curr_epoch=e_idx + 1,
+                    epochs=self.epochs,
+                    lr=scheduler.get_lr()[0],
+                ))
+
             for batch_idx, (x, y) in enumerate(ds_loader):
 
                 if use_cuda is True:
@@ -599,15 +607,24 @@ class CClassifierPyTorch(CClassifier):
                 losses.update(loss.item(), x.size(0))
                 acc.update(accuracy(logits.data, y.data)[0], x.size(0))
 
-                # Log progress
-                self.logger.info('EPOCH {epoch} ({batch}/{size}) '
-                                 'Loss: {loss:.4f} Acc: {acc:.2f}'.format(
-                                    epoch=e_idx,
+                # Log progress of batch
+                self.logger.debug('Epoch: {epoch}, Batch: ({batch}/{size}) '
+                                  'Loss: {loss:.4f} Acc: {acc:.2f}'.format(
+                                    epoch=e_idx + 1,
                                     batch=batch_idx + 1,
                                     size=len(ds_loader),
                                     loss=losses.avg,
                                     acc=acc.avg,
-                                 ))
+                                  ))
+
+            # Log progress of epoch
+            self.logger.info('Epoch: [{curr_epoch}|{epochs}] '
+                             'Loss: {loss:.4f} Acc: {acc:.2f}'.format(
+                               curr_epoch=e_idx + 1,
+                               epochs=self.epochs,
+                               loss=losses.avg,
+                               acc=acc.avg,
+                             ))
 
             self._start_epoch = e_idx
 
