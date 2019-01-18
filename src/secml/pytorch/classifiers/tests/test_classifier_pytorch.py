@@ -33,7 +33,7 @@ class TestCClassifierPyTorc(CUnitTest):
         try:
             fm.remove_file(dict_file)
         except (OSError, IOError) as e:
-            self.logger.info(e.message)
+            pass
 
         # Creating a textfile with model params
         mlp_params = {'input_dims': 20, 'output_dims': 10}
@@ -50,7 +50,7 @@ class TestCClassifierPyTorc(CUnitTest):
         try:
             fm.remove_file(dict_file)
         except (OSError, IOError) as e:
-            self.logger.info(e.message)
+            self.logger.info(e)
 
 
 if __name__ == '__main__':
