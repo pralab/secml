@@ -1,0 +1,543 @@
+import numpy as np
+import scipy.sparse as scs
+import operator as op
+
+from secml.utils import CUnitTest
+from c_array_testcases import CArrayTestCases
+
+from secml.array import CArray
+from secml.array.c_dense import CDense
+from secml.array.c_sparse import CSparse
+
+
+class TestCArraySystemOverloads(CArrayTestCases.TestCArray):
+    """Unit test for CArray SYSTEM OVERLOADS methods."""
+
+    def test_operators_array_vs_array(self):
+        """Test for mathematical operators array vs array."""
+        operators = [op.add, op.sub]
+        expected_result = [CSparse, CDense, CDense, CDense]
+        items = [(self.array_sparse, self.array_sparse),
+                 (self.array_sparse, self.array_dense),
+                 (self.array_dense, self.array_sparse),
+                 (self.array_dense, self.array_dense)]
+        self._test_cycle(operators, items, expected_result)
+
+        operators = [op.mul]
+        expected_result = [CSparse, CSparse, CDense, CDense]
+        items = [(self.array_sparse, self.array_sparse),
+                 (self.array_sparse, self.array_dense),
+                 (self.array_dense, self.array_sparse),
+                 (self.array_dense, self.array_dense)]
+        self._test_cycle(operators, items, expected_result)
+
+        operators = [op.div, op.floordiv]
+        expected_result = [CDense, CDense, CDense, CDense]
+        items = [(self.array_sparse, self.array_sparse),
+                 (self.array_sparse, self.array_dense),
+                 (self.array_dense, self.array_sparse),
+                 (self.array_dense, self.array_dense)]
+        self._test_cycle(operators, items, expected_result)
+
+        operators = [op.pow, CArray.pow]
+        expected_result = [CDense, CDense]
+        items = [(self.array_dense, self.array_sparse),
+                 (self.array_dense, self.array_dense)]
+        self._test_cycle(operators, items, expected_result)
+
+        # Sparse array ** array is not supported
+        with self.assertRaises(TypeError):
+            self.array_sparse ** self.array_sparse
+        with self.assertRaises(TypeError):
+            self.array_sparse ** self.array_dense
+        with self.assertRaises(TypeError):
+            self.array_sparse.pow(self.array_sparse)
+        with self.assertRaises(TypeError):
+            self.array_sparse.pow(self.array_dense)
+
+    def test_operators_array(self):
+        """Test for mathematical operators for single array."""
+        # abs()
+        self.logger.info("Checking abs() operator...")
+        s_abs = abs(self.array_sparse)
+        d_abs = abs(self.array_dense)
+        # Check if method returned correct datatypes
+        self.assertIsInstance(s_abs._data, CSparse)
+        self.assertIsInstance(d_abs._data, CDense)
+        # Check if we have the same output in all cases
+        self.assertTrue(self._test_multiple_eq([s_abs, d_abs]))
+
+        # array.abs()
+        self.logger.info("Checking .abs() method...")
+        s_abs = self.array_sparse.abs()
+        d_abs = self.array_dense.abs()
+        # Check if method returned correct datatypes
+        self.assertIsInstance(s_abs._data, CSparse)
+        self.assertIsInstance(d_abs._data, CDense)
+        # Check if we have the same output in all cases
+        self.assertTrue(self._test_multiple_eq([s_abs, d_abs]))
+
+        # Negative
+        self.logger.info("Checking negative operator...")
+        s_abs = -self.array_sparse
+        d_abs = -self.array_dense
+        # Check if method returned correct datatypes
+        self.assertIsInstance(s_abs._data, CSparse)
+        self.assertIsInstance(d_abs._data, CDense)
+        # Check if we have the same output in all cases
+        self.assertTrue(self._test_multiple_eq([s_abs, d_abs]))
+
+    def test_operators_array_vs_scalar(self):
+        """Test for mathematical operators array vs scalar."""
+
+        # ARRAY +,* SCALAR, SCALAR +,* ARRAY
+        operators = [op.add, op.mul]
+        expected_result = [CDense, CDense,
+                           CDense, CDense,
+                           CDense, CDense,
+                           CDense, CDense]
+        items = [(self.array_dense, 2), (2, self.array_dense),
+                 (self.array_dense, np.ravel(2)[0]),
+                 (np.ravel(2)[0], self.array_dense),
+                 (self.array_dense, np.ravel(2.0)[0]),
+                 (np.ravel(2.0)[0], self.array_dense),
+                 (self.array_dense, np.float32(2.0)),
+                 (np.float32(2.0), self.array_dense)]
+        self._test_cycle(operators, items, expected_result)
+
+        # ARRAY * SCALAR, SCALAR * ARRAY
+        operators = [op.mul]
+        expected_result = [CSparse, CSparse,
+                           CSparse, CSparse,
+                           CSparse, CSparse,
+                           CSparse, CSparse]
+        items = [(self.array_sparse, 2),
+                 (2, self.array_sparse),
+                 (self.array_sparse, np.ravel(2)[0]),
+                 (np.ravel(2)[0], self.array_sparse),
+                 (self.array_sparse, np.ravel(2.0)[0]),
+                 (np.ravel(2.0)[0], self.array_sparse),
+                 (self.array_sparse, np.float32(2.0)),
+                 (np.float32(2.0), self.array_sparse)]
+        self._test_cycle(operators, items, expected_result)
+
+        # ARRAY / SCALAR
+        operators = [op.div, op.floordiv]
+        expected_result = [CSparse, CSparse, CSparse, CSparse]
+        items = [(self.array_sparse, 2),
+                 (self.array_sparse, np.ravel(2)[0]),
+                 (self.array_sparse, np.ravel(2.0)[0]),
+                 (self.array_sparse, np.float32(2))]
+        self._test_cycle(operators, items, expected_result)
+
+        # ARRAY -,/ SCALAR
+        operators = [op.sub, op.div, op.floordiv]
+        expected_result = [CDense, CDense, CDense, CDense]
+        items = [(self.array_dense, 2),
+                 (self.array_dense, np.ravel(2)[0]),
+                 (self.array_dense, np.ravel(2.0)[0]),
+                 (self.array_dense, np.float32(2))]
+        self._test_cycle(operators, items, expected_result)
+
+        # SCALAR -,/ ARRAY
+        operators = [op.sub, op.div, op.floordiv]
+        expected_result = [CDense, CDense, CDense, CDense]
+        items = [(2, self.array_dense),
+                 (np.ravel(2)[0], self.array_dense),
+                 (np.ravel(2.0)[0], self.array_dense),
+                 (np.float32(2), self.array_dense)]
+        self._test_cycle(operators, items, expected_result)
+
+        # ARRAY ** SCALAR
+        operators = [op.pow, CArray.pow]
+        expected_result = [CSparse, CDense,
+                           CSparse, CDense,
+                           CSparse, CDense,
+                           CSparse, CDense]
+        items = [(self.array_sparse, 2), (self.array_dense, 2),
+                 (self.array_sparse, np.ravel(2)[0]),
+                 (self.array_dense, np.ravel(2)[0]),
+                 (self.array_sparse, np.ravel(2.0)[0]),
+                 (self.array_dense, np.ravel(2.0)[0]),
+                 (self.array_sparse, np.float32(2)),
+                 (self.array_dense, np.float32(2))]
+        self._test_cycle(operators, items, expected_result)
+
+        # SCALAR ** ARRAY
+        operators = [op.pow]
+        expected_result = [CDense, CDense, CDense, CDense]
+        items = [(2, self.array_dense),
+                 (np.ravel(2)[0], self.array_dense),
+                 (np.ravel(2.0)[0], self.array_dense),
+                 (np.float32(2), self.array_dense)]
+        self._test_cycle(operators, items, expected_result)
+
+        # SCALAR / SPARSE ARRAY NOT SUPPORTED
+        with self.assertRaises(NotImplementedError):
+            2 / self.array_sparse
+        with self.assertRaises(NotImplementedError):
+            np.ravel(2)[0] / self.array_sparse
+        with self.assertRaises(NotImplementedError):
+            np.ravel(2.0)[0] / self.array_sparse
+        with self.assertRaises(NotImplementedError):
+            np.float32(2) / self.array_sparse
+
+        # SCALAR ** SPARSE ARRAY NOT SUPPORTED
+        with self.assertRaises(NotImplementedError):
+            2 ** self.array_sparse
+        with self.assertRaises(NotImplementedError):
+            np.ravel(2)[0] ** self.array_sparse
+        with self.assertRaises(NotImplementedError):
+            np.ravel(2.0)[0] ** self.array_sparse
+        with self.assertRaises(NotImplementedError):
+            np.float32(2) ** self.array_sparse
+
+    def test_operators_array_vs_unsupported(self):
+        """Test for mathematical operators array vs unsupported types."""
+
+        def test_unsupported(x):
+            for operator in [op.add, op.sub, op.mul,
+                             op.div, op.floordiv, op.pow]:
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} dense vs '{:}'".format(
+                        operator.__name__, type(x).__name__))
+                    operator(self.array_dense, x)
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} sparse vs '{:}'".format(
+                        operator.__name__, type(x).__name__))
+                    operator(self.array_sparse, x)
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} dense vect vs '{:}'".format(
+                        operator.__name__, type(x).__name__))
+                    operator(self.row_flat_dense, x)
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} sparse vect vs '{:}'".format(
+                        operator.__name__, type(x).__name__))
+                    operator(self.row_sparse, x)
+
+        test_unsupported(np.array([1, 2, 3]))
+        test_unsupported(scs.csr_matrix([1, 2, 3]))
+        test_unsupported([1, 2, 3])
+        test_unsupported((1, 2, 3))
+        test_unsupported(set([1, 2, 3]))
+        test_unsupported(dict({1: 2}))
+        test_unsupported('test')
+
+    def test_operators_unsupported_vs_array(self):
+        """Test for mathematical operators unsupported types vs array."""
+
+        def test_unsupported(x):
+            for operator in [op.add, op.sub, op.mul,
+                             op.div, op.floordiv, op.pow]:
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs dense".format(
+                        operator.__name__, type(x).__name__))
+                    operator(x, self.array_dense)
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs sparse".format(
+                        operator.__name__, type(x).__name__))
+                    operator(x, self.array_sparse)
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs dense vect".format(
+                        operator.__name__, type(x).__name__))
+                    operator(x, self.row_flat_dense)
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs sparse vect".format(
+                        operator.__name__, type(x).__name__))
+                    operator(x, self.row_sparse)
+
+        # Array do broadcasting of each element wrt our array
+        # There is NO way of blocking this
+        # test_unsupported(np.array([1, 2, 3]))
+        # test_unsupported(scs.csr_matrix([1, 2, 3]))
+
+        test_unsupported([1, 2, 3])
+        test_unsupported((1, 2, 3))
+        test_unsupported(set([1, 2, 3]))
+        test_unsupported(dict({1: 2}))
+        test_unsupported('test')
+
+    def test_comparison_array_vs_array(self):
+        """Test for comparison operators array vs array."""
+        operators = [op.eq, op.lt, op.le, op.gt, op.ge, op.ne]
+        expected_result = [CSparse, CDense, CDense, CDense]
+        items = [(self.array_sparse, self.array_sparse),
+                 (self.array_sparse, self.array_dense),
+                 (self.array_dense, self.array_sparse),
+                 (self.array_dense, self.array_dense)]
+        self._test_cycle(operators, items, expected_result)
+
+    def test_comparison_array_vs_scalar(self):
+        """Test for comparison operators array vs scalar."""
+        operators = [op.eq, op.lt, op.le, op.gt, op.ge, op.ne]
+        expected_result = [CSparse, CDense, CSparse, CDense]
+        items = [(self.array_sparse, 2),
+                 (self.array_dense, 2),
+                 (self.array_sparse, np.ravel(2)[0]),
+                 (self.array_dense, np.ravel(2)[0])]
+        self._test_cycle(operators, items, expected_result)
+
+    def test_comparison_array_vs_unsupported(self):
+        """Test for comparison operators array vs unsupported types."""
+
+        def test_unsupported_arrays(x):
+            for operator in [op.eq, op.lt, op.le, op.gt, op.ge, op.ne]:
+
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs dense".format(
+                        operator.__name__, type(x).__name__))
+                    operator(self.array_dense, x)
+
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs sparse".format(
+                        operator.__name__, type(x).__name__))
+                    operator(self.array_sparse, x)
+
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs dense vect".format(
+                        operator.__name__, type(x).__name__))
+                    operator(self.row_flat_dense, x)
+
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs sparse vect".format(
+                        operator.__name__, type(x).__name__))
+                    operator(self.row_sparse, x)
+
+        def test_unsupported(x):
+            for operator in [op.lt, op.le, op.gt, op.ge]:
+
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs dense".format(
+                        operator.__name__, type(x).__name__))
+                    operator(self.array_dense, x)
+
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs sparse".format(
+                        operator.__name__, type(x).__name__))
+                    operator(self.array_sparse, x)
+
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs dense vect".format(
+                        operator.__name__, type(x).__name__))
+                    operator(self.row_flat_dense, x)
+
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs sparse vect".format(
+                        operator.__name__, type(x).__name__))
+                    operator(self.row_sparse, x)
+
+        def test_false(x):
+
+            self.logger.info("Testing {:} dense vs '{:}'".format(
+                op.eq.__name__, type(x).__name__))
+            self.assertFalse(op.eq(self.array_dense, x))
+
+            self.logger.info("Testing {:} sparse vs '{:}'".format(
+                op.eq.__name__, type(x).__name__))
+            self.assertFalse(op.eq(self.array_sparse, x))
+
+            self.logger.info("Testing {:} dense vect vs '{:}'".format(
+                op.eq.__name__, type(x).__name__))
+            self.assertFalse(op.eq(self.row_flat_dense, x))
+
+            self.logger.info("Testing {:} sparse vect vs '{:}'".format(
+                op.eq.__name__, type(x).__name__))
+            self.assertFalse(op.eq(self.row_sparse, x))
+
+        def test_true(x):
+
+            self.logger.info("Testing {:} dense vs '{:}'".format(
+                op.ne.__name__, type(x).__name__))
+            self.assertTrue(op.ne(self.array_dense, x))
+
+            self.logger.info("Testing {:} sparse vs '{:}'".format(
+                op.ne.__name__, type(x).__name__))
+            self.assertTrue(op.ne(self.array_sparse, x))
+
+            self.logger.info("Testing {:} dense vect vs '{:}'".format(
+                op.ne.__name__, type(x).__name__))
+            self.assertTrue(op.ne(self.row_flat_dense, x))
+
+            self.logger.info("Testing {:} sparse vect vs '{:}'".format(
+                op.ne.__name__, type(x).__name__))
+            self.assertTrue(op.ne(self.row_sparse, x))
+
+        test_unsupported_arrays(np.array([1, 2, 3]))
+        test_unsupported_arrays(scs.csr_matrix([1, 2, 3]))
+
+        test_unsupported([1, 2, 3])
+        test_unsupported((1, 2, 3))
+        test_unsupported(set([1, 2, 3]))
+        test_unsupported(dict({1: 2}))
+        test_unsupported('test')
+
+        test_false([1, 2, 3])
+        test_false((1, 2, 3))
+        test_false(set([1, 2, 3]))
+        test_false(dict({1: 2}))
+        test_false('test')
+
+        test_true([1, 2, 3])
+        test_true((1, 2, 3))
+        test_true(set([1, 2, 3]))
+        test_true(dict({1: 2}))
+        test_true('test')
+
+    def test_operators_comparison_vs_array(self):
+        """Test for comparison operators unsupported types vs array."""
+
+        def test_unsupported(x):
+            for operator in [op.lt, op.le, op.gt, op.ge]:
+
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs dense".format(
+                        operator.__name__, type(x).__name__))
+                    operator(x, self.array_dense)
+
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs sparse".format(
+                        operator.__name__, type(x).__name__))
+                    operator(x, self.array_sparse)
+
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs dense vect".format(
+                        operator.__name__, type(x).__name__))
+                    operator(x, self.row_flat_dense)
+
+                with self.assertRaises(TypeError):
+                    self.logger.info("Testing {:} '{:}' vs sparse vect".format(
+                        operator.__name__, type(x).__name__))
+                    operator(x, self.row_sparse)
+
+        def test_false(x):
+
+            self.logger.info("Testing {:} dense vs '{:}'".format(
+                op.eq.__name__, type(x).__name__))
+            self.assertFalse(op.eq(x, self.array_dense))
+
+            self.logger.info("Testing {:} sparse vs '{:}'".format(
+                op.eq.__name__, type(x).__name__))
+            self.assertFalse(op.eq(x, self.array_sparse))
+
+            self.logger.info("Testing {:} dense vect vs '{:}'".format(
+                op.eq.__name__, type(x).__name__))
+            self.assertFalse(op.eq(x, self.row_flat_dense))
+
+            self.logger.info("Testing {:} sparse vect vs '{:}'".format(
+                op.eq.__name__, type(x).__name__))
+            self.assertFalse(op.eq(x, self.row_sparse))
+
+        def test_true(x):
+
+            self.logger.info("Testing {:} dense vs '{:}'".format(
+                op.ne.__name__, type(x).__name__))
+            self.assertTrue(op.ne(x, self.array_dense))
+
+            self.logger.info("Testing {:} sparse vs '{:}'".format(
+                op.ne.__name__, type(x).__name__))
+            self.assertTrue(op.ne(x, self.array_sparse))
+
+            self.logger.info("Testing {:} dense vect vs '{:}'".format(
+                op.ne.__name__, type(x).__name__))
+            self.assertTrue(op.ne(x, self.row_flat_dense))
+
+            self.logger.info("Testing {:} sparse vect vs '{:}'".format(
+                op.ne.__name__, type(x).__name__))
+            self.assertTrue(op.ne(x, self.row_sparse))
+
+        # Array do broadcasting of each element wrt our array
+        # There is NO way of blocking this
+        # test_unsupported(np.array([1, 2, 3]))
+        # test_unsupported(scs.csr_matrix([1, 2, 3]))
+
+        test_unsupported([1, 2, 3])
+        test_unsupported((1, 2, 3))
+        test_unsupported(set([1, 2, 3]))
+        test_unsupported(dict({1: 2}))
+        test_unsupported('test')
+
+        test_false([1, 2, 3])
+        test_false((1, 2, 3))
+        test_false(set([1, 2, 3]))
+        test_false(dict({1: 2}))
+        test_false('test')
+
+        test_true([1, 2, 3])
+        test_true((1, 2, 3))
+        test_true(set([1, 2, 3]))
+        test_true(dict({1: 2}))
+        test_true('test')
+
+    def test_bool_operators(self):
+
+        a = CArray([1, 2, 3])
+        b = CArray([1, 1, 1])
+
+        d = (a < 2)
+        c = (b == 1)
+
+        self.logger.info("C -> " + str(c))
+        self.logger.info("D -> " + str(d))
+
+        self.logger.info("C logical_and D -> " + str(c.logical_and(d)))
+        self.logger.info("D logical_and C -> " + str(d.logical_and(c)))
+
+        with self.assertRaises(ValueError):
+            print d and c
+        with self.assertRaises(ValueError):
+            print c and d
+        with self.assertRaises(ValueError):
+            print d or c
+        with self.assertRaises(ValueError):
+            print c or d
+
+        a = CArray(True)
+        b = CArray(False)
+
+        self.assertTrue((a and b) == False)
+        self.assertTrue((b and a) == False)
+        self.assertTrue((a or b) == True)
+        self.assertTrue((b or a) == True)
+
+    def test_iteration(self):
+        """Unittest for CArray __iter__."""
+        self.logger.info("Unittest for CArray __iter__")
+
+        res = []
+        for elem_id, elem in enumerate(self.array_dense):
+            res.append(elem)
+            self.assertFalse(self.array_dense.ravel()[elem_id] != elem)
+        # Check if all array elements have been returned
+        self.assertEquals(len(res), self.array_dense.size)
+
+        res = []
+        for elem_id, elem in enumerate(self.array_sparse):
+            res.append(elem)
+            self.assertFalse(self.array_sparse.ravel()[elem_id] != elem)
+        # Check if all array elements have been returned
+        self.assertEquals(len(res), self.array_sparse.size)
+
+        res = []
+        for elem_id, elem in enumerate(self.row_flat_dense):
+            res.append(elem)
+            self.assertFalse(self.row_flat_dense[elem_id] != elem)
+        # Check if all array elements have been returned
+        self.assertEquals(len(res), self.row_flat_dense.size)
+
+        res = []
+        for elem_id, elem in enumerate(self.row_dense):
+            res.append(elem)
+            self.assertFalse(self.row_dense[elem_id] != elem)
+        # Check if all array elements have been returned
+        self.assertEquals(len(res), self.row_dense.size)
+
+        res = []
+        for elem_id, elem in enumerate(self.row_sparse):
+            res.append(elem)
+            self.assertFalse(self.row_sparse[elem_id] != elem)
+        # Check if all array elements have been returned
+        self.assertEquals(len(res), self.row_sparse.size)
+
+
+if __name__ == '__main__':
+    CUnitTest.main()
