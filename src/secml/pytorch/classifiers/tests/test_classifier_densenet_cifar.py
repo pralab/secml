@@ -28,6 +28,11 @@ class TestCClassifierPyTorchDenseNetCifar(CUnitTest):
             random_state=0)
         cls.clf.verbose = 2
 
+    def setUp(self):
+
+        # Restore as this could have be modified by the test cases
+        self.clf.softmax_outputs = False
+
     @staticmethod
     def _load_cifar10():
 
