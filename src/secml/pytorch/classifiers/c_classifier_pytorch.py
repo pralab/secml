@@ -125,7 +125,7 @@ class CClassifierPyTorch(CClassifier):
             torch.manual_seed(random_state)
             if use_cuda:
                 torch.cuda.manual_seed_all(random_state)
-                # torch.backends.cudnn.deterministic = True
+                torch.backends.cudnn.deterministic = True
 
         # PyTorch NeuralNetwork model
         self._model = None

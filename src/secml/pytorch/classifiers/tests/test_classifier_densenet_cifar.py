@@ -17,7 +17,7 @@ class TestCClassifierPyTorchDenseNetCifar(CUnitTest):
 
         CUnitTest.setUpClass()
 
-        cls._run_train = True  # Training is a long process for dnn, skip
+        cls._run_train = False  # Training is a long process for dnn, skip
 
         cls.tr, cls.ts, transform_tr = cls._load_cifar10()
 
