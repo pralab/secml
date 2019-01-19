@@ -1,9 +1,8 @@
 from secml.utils import CUnitTest
 
-import torch
-
 from secml.pytorch.classifiers import CClassifierPyTorchMLP
 from secml.data.loader import CDLRandom
+from secml.ml.peval.metrics import CMetricAccuracy
 
 
 class TestCClassifierPyTorchMLP(CUnitTest):
@@ -132,6 +131,22 @@ class TestCClassifierPyTorchMLP(CUnitTest):
 
         self.assertEqual(lr, self.clf.learning_rate)
         self.assertEqual(lr, self.clf._optimizer.defaults['lr'])
+
+    def test_predict(self):
+        """Test for predict."""
+        self.clf.verbose = 1
+        self.clf.fit(self.ds)
+
+        labels, scores = self.clf.predict(
+            self.ds[50:100, :].X, return_decision_function=True)
+
+        self.logger.info("Labels:\n{:}".format(labels))
+        self.logger.info("Scores:\n{:}".format(scores))
+
+        acc = CMetricAccuracy().performance_score(self.ds[50:100, :].Y, labels)
+        self.logger.info("Accuracy: {:}".format(acc))
+
+        self.assertEqual(0.94, acc)  # We should always get the same acc
 
     def test_out_at_layer(self):
         """Test for extracting output at specific layer."""
