@@ -46,6 +46,11 @@ class CClassifierPyTorchDenseNetCifar(CClassifierPyTorch):
         Transformation to be applied before training.
     preprocess : CNormalizer or None, optional
         Preprocessing for data.
+    softmax_outputs : bool, optional
+        If True, apply softmax function to the outputs. Default False.
+    random_state : int or None, optional
+        If int, random_state is the seed used by the random number generator.
+        If None, no fixed seed will be set.
 
     Attributes
     ----------
@@ -58,7 +63,8 @@ class CClassifierPyTorchDenseNetCifar(CClassifierPyTorch):
                  dropRate=0, num_classes=10, learning_rate=1e-2, momentum=0.9,
                  weight_decay=1e-4, epochs=300,  gamma=0.1,
                  lr_schedule=(150, 225), batch_size=64, regularize_bias=True,
-                 train_transform=None, preprocess=None, random_state=None):
+                 train_transform=None, preprocess=None, softmax_outputs=False,
+                 random_state=None):
 
         super(CClassifierPyTorchDenseNetCifar, self).__init__(
             model=densenet,
@@ -74,6 +80,7 @@ class CClassifierPyTorchDenseNetCifar(CClassifierPyTorch):
             train_transform=train_transform,
             preprocess=preprocess,
             input_shape=(3, 32, 32),
+            softmax_outputs=softmax_outputs,
             random_state=random_state,
             depth=depth,
             growthRate=growthRate,

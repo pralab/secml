@@ -65,9 +65,28 @@ class TestCClassifierPyTorchDenseNetCifar(CUnitTest):
         labels, scores = self.clf.predict(
             self.ts[50:100, :].X, return_decision_function=True)
 
+        self.logger.info("Labels:\n{:}".format(labels))
+        self.logger.info("Scores:\n{:}".format(scores))
+
         acc = CMetricAccuracy().performance_score(self.ts[50:100, :].Y, labels)
         self.logger.info("Accuracy: {:}".format(acc))
 
+        self.assertEqual(0.92, acc)  # We should always get the same acc
+
+        self.logger.info("Testing softmax-scaled outputs")
+
+        self.clf.softmax_outputs = True
+
+        labels, scores = self.clf.predict(
+            self.ts[50:100, :].X, return_decision_function=True)
+
+        self.logger.info("Labels:\n{:}".format(labels))
+        self.logger.info("Scores:\n{:}".format(scores))
+
+        acc = CMetricAccuracy().performance_score(self.ts[50:100, :].Y, labels)
+        self.logger.info("Accuracy: {:}".format(acc))
+
+        # Accuracy will not change after scaling the outputs
         self.assertEqual(0.92, acc)  # We should always get the same acc
 
     def test_gradient(self):
