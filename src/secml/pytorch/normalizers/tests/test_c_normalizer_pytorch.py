@@ -16,7 +16,7 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.clf = CClassifierPyTorchMLP(
             input_dims=20, hidden_dims=(50, ), output_dims=3,
             weight_decay=0, epochs=10, learning_rate=1e-2, momentum=0,
-            random_state=0)
+            softmax_outputs=False, random_state=0)  # FIXME: REMOVE SOFOTMAX_OUTPUTS=FALSE AFTER IMPLEMENTING SOFTMAX GRADIENT
         self.clf.fit(self.ds)
 
         self.norm = CNormalizerPyTorch(pytorch_clf=self.clf)
@@ -35,9 +35,10 @@ class TestCNormalizerPyTorch(CUnitTest):
 
         self.assertFalse((out_norm.round(4) != out_net.round(4)).any())
 
-        self.logger.info("Testing normalization at layer linear2")
+        self.norm.out_layer = 'linear1'
 
-        self.norm.out_layer = 'linear2'
+        self.logger.info(
+            "Testing normalization at layer {:}".format(self.norm.out_layer))
 
         out_norm = self.norm.normalize(x)
         out_net = self.clf.get_layer_output(x, layer=self.norm.out_layer)
@@ -61,7 +62,7 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
 
-        layer = 'linear2'
+        layer = 'linear1'
         self.norm.out_layer = layer
         self.logger.info("Returning output for layer: {:}".format(layer))
         out = self.clf.get_layer_output(x, layer=layer)
@@ -98,10 +99,10 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
 
-        self.logger.info("Testing layer 'linear2'")
-
-        layer = 'linear2'
+        layer = 'linear1'
         self.norm.out_layer = layer
+
+        self.logger.info("Testing layer {:}".format(self.norm.out_layer))
 
         clf.fit(self.ds)
 
@@ -110,7 +111,7 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.logger.info("Predictions:\n{:}".format(y_pred.tolist()))
         self.logger.info("Scores:\n{:}".format(scores))
 
-        self.logger.info("Testing 'linear2' layer gradient")
+        self.logger.info("Testing 'linear1' layer gradient")
         grad = clf.gradient_f_x(x, y=0)  # y is required for multiclassova
         self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
 

@@ -14,6 +14,8 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
 
     Multi-layer Perceptron neural network with ReLU as activation function.
 
+    Loss function for training: cross-entropy (includes softmax)
+
     Parameters
     ----------
     input_dims : int, optional
@@ -50,6 +52,11 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
         Transformation to be applied before training.
     preprocess : CNormalizer or None, optional
         Preprocessing for data.
+    softmax_outputs : bool, optional
+        If True, apply softmax function to the outputs. Default True.
+    random_state : int or None, optional
+        If int, random_state is the seed used by the random number generator.
+        If None, no fixed seed will be set.
 
     Attributes
     ----------
@@ -61,15 +68,15 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
     def __init__(self, input_dims=1000, hidden_dims=(100, 100), output_dims=10,
                  learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
                  epochs=100, gamma=0.1, lr_schedule=(50, 75),
-                 batch_size=5,  regularize_bias=True,
-                 train_transform=None, preprocess=None, random_state=None):
+                 batch_size=5,  regularize_bias=True, train_transform=None,
+                 preprocess=None, softmax_outputs=True, random_state=None):
 
         super(CClassifierPyTorchMLP, self).__init__(
             model=mlp,
             learning_rate=learning_rate,
             momentum=momentum,
             weight_decay=weight_decay,
-            loss='mse',
+            loss='cross-entropy',
             epochs=epochs,
             gamma=gamma,
             lr_schedule=lr_schedule,
@@ -78,6 +85,7 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
             train_transform=train_transform,
             preprocess=preprocess,
             input_shape=(1, input_dims),
+            softmax_outputs=softmax_outputs,
             random_state=random_state,
             input_dims=input_dims,
             hidden_dims=hidden_dims,
