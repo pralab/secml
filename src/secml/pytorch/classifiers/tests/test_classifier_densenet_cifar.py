@@ -1,7 +1,5 @@
 from secml.utils import CUnitTest
 
-import random
-import torch
 import torchvision.transforms as transforms
 
 from secml.data.loader import CDataLoaderCIFAR10
@@ -10,15 +8,6 @@ from secml.pytorch.classifiers import CClassifierPyTorchDenseNetCifar
 from secml.pytorch.normalizers import CNormalizerMeanSTD
 from secml.pytorch.models import dl_pytorch_model
 from secml.ml.peval.metrics import CMetricAccuracy
-
-use_cuda = torch.cuda.is_available()
-print "Using CUDA: ", use_cuda
-
-# Random seed
-random.seed(999)
-torch.manual_seed(999)
-if use_cuda:
-    torch.cuda.manual_seed_all(999)
 
 
 class TestCClassifierPyTorchDenseNetCifar(CUnitTest):
@@ -35,7 +24,8 @@ class TestCClassifierPyTorchDenseNetCifar(CUnitTest):
         cls.clf = CClassifierPyTorchDenseNetCifar(
             batch_size=25, epochs=1, train_transform=transform_tr,
             preprocess=CNormalizerMeanSTD(mean=(0.4914, 0.4822, 0.4465),
-                                          std=(0.2023, 0.1994, 0.2010)))
+                                          std=(0.2023, 0.1994, 0.2010)),
+            random_state=0)
         cls.clf.verbose = 2
 
     @staticmethod

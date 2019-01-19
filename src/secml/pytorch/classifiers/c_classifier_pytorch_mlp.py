@@ -61,8 +61,8 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
     def __init__(self, input_dims=1000, hidden_dims=(100, 100), output_dims=10,
                  learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
                  epochs=100, gamma=0.1, lr_schedule=(50, 75),
-                 batch_size=5, regularize_bias=True,
-                 train_transform=None, preprocess=None):
+                 batch_size=5,  regularize_bias=True,
+                 train_transform=None, preprocess=None, random_state=None):
 
         super(CClassifierPyTorchMLP, self).__init__(
             model=mlp,
@@ -78,6 +78,7 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
             train_transform=train_transform,
             preprocess=preprocess,
             input_shape=(1, input_dims),
+            random_state=random_state,
             input_dims=input_dims,
             hidden_dims=hidden_dims,
             output_dims=output_dims,

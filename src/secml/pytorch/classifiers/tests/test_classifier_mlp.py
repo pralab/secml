@@ -1,19 +1,9 @@
 from secml.utils import CUnitTest
 
-import random
 import torch
 
 from secml.pytorch.classifiers import CClassifierPyTorchMLP
 from secml.data.loader import CDLRandom
-
-use_cuda = torch.cuda.is_available()
-print "Using CUDA: ", use_cuda
-
-# Random seed
-random.seed(999)
-torch.manual_seed(999)
-if use_cuda:
-    torch.cuda.manual_seed_all(999)
 
 
 class TestCClassifierPyTorchMLP(CUnitTest):
@@ -26,7 +16,8 @@ class TestCClassifierPyTorchMLP(CUnitTest):
 
         self.clf = CClassifierPyTorchMLP(
             input_dims=20, hidden_dims=(50, ), output_dims=10,
-            weight_decay=0, epochs=50, learning_rate=1e-2, momentum=0)
+            weight_decay=0, epochs=50, learning_rate=1e-2,
+            momentum=0, random_state=0)
         self.clf.verbose = 2
 
     # TODO: ADD TEST FOR TRAINING
