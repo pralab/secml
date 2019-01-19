@@ -12,6 +12,8 @@ from ..models.cifar import densenet
 class CClassifierPyTorchDenseNetCifar(CClassifierPyTorch):
     """PyTorch Classifier with DenseNet CIFAR Neural Network.
 
+    Loss function for training: cross-entropy (includes softmax)
+
     Parameters
     ----------
     depth : int, optional
