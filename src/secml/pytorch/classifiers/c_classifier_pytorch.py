@@ -123,7 +123,7 @@ class CClassifierPyTorch(CClassifier):
         # Random seed
         if random_state is not None:
             torch.manual_seed(random_state)
-            if use_cuda:
+            if use_cuda:  # FIXME: SHOULD NOT BE NEEDED WITH PYTORCH 1.0
                 torch.cuda.manual_seed_all(random_state)
                 torch.backends.cudnn.deterministic = True
 
