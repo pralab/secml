@@ -731,6 +731,9 @@ class CClassifierPyTorch(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
+        if self.is_clear():
+            raise ValueError("make sure the classifier is trained first.")
+
         x = x.atleast_2d()  # Ensuring input is 2-D
 
         x_loader = self._get_test_input_loader(x, n_jobs=n_jobs)
@@ -795,6 +798,9 @@ class CClassifierPyTorch(CClassifier):
             Will be returned only if `return_decision_function` is True.
 
         """
+        if self.is_clear():
+            raise ValueError("make sure the classifier is trained first.")
+
         x_carray = CArray(x).atleast_2d()
 
         # Preprocessing data if a preprocess is defined
