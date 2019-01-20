@@ -1,19 +1,8 @@
-"""
-This is the class for testing CArray
-
-@author: Marco Melis
-@author: Ambra Demontis
-
-When adding a test method please use method to test name plus 'test_' as suffix.
-As first test method line use self.logger.info("UNITTEST - CLASSNAME - METHODNAME")
-
-"""
-import unittest
-
 from secml.utils import CUnitTest
+
 from secml.array import CArray
-from secml.ml.features.reduction import CPca, CKernelPca, CLda
-from sklearn.decomposition import PCA, KernelPCA
+from secml.ml.features.reduction import CPca, CLda
+from sklearn.decomposition import PCA
 from secml.figure import CFigure
 
 
@@ -38,7 +27,8 @@ class TestArrayDecomposition(CUnitTest):
             self.logger.info("Original array is:\n{:}".format(array))
 
             # Sklearn normalizer
-            target = CArray(PCA().fit_transform(array.tondarray()))
+            sklearn_pca = PCA().fit(array.tondarray())
+            target = CArray(sklearn_pca.transform(array.tondarray()))
             # Our normalizer
             pca = CPca().fit(array)
             result = pca.transform(array)
@@ -49,50 +39,11 @@ class TestArrayDecomposition(CUnitTest):
             self.assertFalse((result.round(5) != target.round(5)).any(),
                              "PraLib and sklearn results are different.")
 
-            self.logger.info("Correct result is:\n{:}".format(result))
-
             original = pca.revert(result)
 
             self.assertFalse((original.round(6) != array).any(),
-                             "\n{:}\nis different from original\n{:}".format(original.round(6), array))
-
-        sklearn_comp(self.array_dense)
-        sklearn_comp(self.array_sparse)
-        sklearn_comp(self.row_dense.atleast_2d())  # We manage flat vectors differently from numpy/sklearn
-        sklearn_comp(self.row_sparse)
-        sklearn_comp(self.column_dense)
-        sklearn_comp(self.column_sparse)
-
-    def test_kernelpca(self):
-        """Test for Kernel PCA. This compares sklearn equivalent to our method."""
-
-        from secml.ml.kernel import CKernelLinear, CKernelRBF, CKernelPoly
-
-        def sklearn_comp(array):
-            kernels = [CKernelLinear(),
-                       CKernelRBF(gamma=1.0 / array.shape[1]),
-                       CKernelPoly(gamma=1.0 / array.shape[1], degree=3)]
-
-            for kernel in kernels:
-                self.logger.info("Original array is:\n{:}".format(array))
-
-                self.logger.info("Using {:}".format(kernel.__class__.__name__))
-
-                # Sklearn normalizer
-                sklearn_pca = KernelPCA(kernel=kernel.class_type,
-                                        n_components=array.shape[0],
-                                        remove_zero_eig=False).fit(array.tondarray())
-                target = CArray(sklearn_pca.transform(array.tondarray()))
-                target.nan_to_num()  # Removing nans
-                # Our normalizer
-                pca = CKernelPca(kernel=kernel).fit(array)
-                result = pca.transform(array)
-
-                self.logger.info("Sklearn result is:\n{:}".format(target))
-                self.logger.info("Result is:\n{:}".format(result))
-
-                self.assertFalse((abs(result).round(5) != abs(target).round(5)).any(),
-                                 "PraLib and sklearn results are different.")
+                             "\n{:}\nis different from original\n{:}"
+                             "".format(original.round(6), array))
 
         sklearn_comp(self.array_dense)
         sklearn_comp(self.array_sparse)
@@ -138,4 +89,4 @@ class TestArrayDecomposition(CUnitTest):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()
