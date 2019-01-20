@@ -22,7 +22,8 @@ from secml.utils import load_dict, fm
 
 from secml.pytorch.settings import SECML_PYTORCH_USE_CUDA
 from secml.pytorch.data import CDatasetPyTorch
-from secml.pytorch.utils import AverageMeter, accuracy
+from secml.pytorch.metrics import CMetricPyTorchAccuracy
+from secml.pytorch.utils import AverageMeter
 from secml.pytorch.utils.optim_utils import add_weight_decay
 
 # Use CUDA ?!
@@ -655,7 +656,8 @@ class CClassifierPyTorch(CClassifier):
                 self._optimizer.step()
 
                 losses.update(loss.item(), x.size(0))
-                acc.update(accuracy(logits.data, y.data)[0], x.size(0))
+                acc.update(CMetricPyTorchAccuracy().performance_score(
+                    y_true=y.data, score=logits.data)[0], x.size(0))
 
                 # Log progress of batch
                 self.logger.debug('Epoch: {epoch}, Batch: ({batch}/{size}) '
