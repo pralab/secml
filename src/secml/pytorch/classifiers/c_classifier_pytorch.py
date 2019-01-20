@@ -19,10 +19,11 @@ from secml.data import CDataset
 from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.loss import CSoftmax
 from secml.utils import load_dict, fm
+from secml.utils.mixed_utils import AverageMeter
 
 from secml.pytorch.settings import SECML_PYTORCH_USE_CUDA
 from secml.pytorch.data import CDatasetPyTorch
-from secml.pytorch.utils import AverageMeter, accuracy
+from secml.pytorch.metrics import CMetricPyTorchAccuracy
 from secml.pytorch.utils.optim_utils import add_weight_decay
 
 # Use CUDA ?!
@@ -655,7 +656,8 @@ class CClassifierPyTorch(CClassifier):
                 self._optimizer.step()
 
                 losses.update(loss.item(), x.size(0))
-                acc.update(accuracy(logits.data, y.data)[0], x.size(0))
+                acc.update(CMetricPyTorchAccuracy().performance_score(
+                    y_true=y.data, score=logits.data)[0].item(), x.size(0))
 
                 # Log progress of batch
                 self.logger.debug('Epoch: {epoch}, Batch: ({batch}/{size}) '
@@ -677,7 +679,7 @@ class CClassifierPyTorch(CClassifier):
                              ))
 
             # Average accuracy after epoch FIXME: ON TRAINING SET
-            self._acc = acc.avg.item()
+            self._acc = acc.avg
 
             # Store the current epoch as best one if accuracy is higher
             # If equal accuracy, the last epoch should have better loss
