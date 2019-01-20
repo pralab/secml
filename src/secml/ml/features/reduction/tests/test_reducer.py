@@ -1,16 +1,5 @@
-"""
-This is the class for testing CArray
-
-@author: Marco Melis
-@author: Ambra Demontis
-
-When adding a test method please use method to test name plus 'test_' as suffix.
-As first test method line use self.logger.info("UNITTEST - CLASSNAME - METHODNAME")
-
-"""
-import unittest
-
 from secml.utils import CUnitTest
+
 from secml.array import CArray
 from secml.ml.features.reduction import CPca, CKernelPca, CLda
 from sklearn.decomposition import PCA, KernelPCA
@@ -38,7 +27,8 @@ class TestArrayDecomposition(CUnitTest):
             self.logger.info("Original array is:\n{:}".format(array))
 
             # Sklearn normalizer
-            target = CArray(PCA().fit_transform(array.tondarray()))
+            sklearn_pca = PCA().fit(array.tondarray())
+            target = CArray(sklearn_pca.transform(array.tondarray()))
             # Our normalizer
             pca = CPca().fit(array)
             result = pca.transform(array)
@@ -49,12 +39,11 @@ class TestArrayDecomposition(CUnitTest):
             self.assertFalse((result.round(5) != target.round(5)).any(),
                              "PraLib and sklearn results are different.")
 
-            self.logger.info("Correct result is:\n{:}".format(result))
-
             original = pca.revert(result)
 
             self.assertFalse((original.round(6) != array).any(),
-                             "\n{:}\nis different from original\n{:}".format(original.round(6), array))
+                             "\n{:}\nis different from original\n{:}"
+                             "".format(original.round(6), array))
 
         sklearn_comp(self.array_dense)
         sklearn_comp(self.array_sparse)
@@ -84,6 +73,7 @@ class TestArrayDecomposition(CUnitTest):
                                         remove_zero_eig=False).fit(array.tondarray())
                 target = CArray(sklearn_pca.transform(array.tondarray()))
                 target.nan_to_num()  # Removing nans
+
                 # Our normalizer
                 pca = CKernelPca(kernel=kernel).fit(array)
                 result = pca.transform(array)
@@ -138,4 +128,4 @@ class TestArrayDecomposition(CUnitTest):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()
