@@ -163,7 +163,8 @@ class CPca(CReducer):
         # Computing SVD reduction
         from numpy import linalg
         from sklearn.utils.extmath import svd_flip
-        u, s, v = linalg.svd(data_carray.atleast_2d().tondarray(), full_matrices=False)
+        u, s, v = linalg.svd(data_carray.atleast_2d().tondarray(),
+                             full_matrices=False)
         # flip eigenvectors' sign to enforce deterministic output
         u, v = svd_flip(u, v)
 
@@ -177,7 +178,7 @@ class CPca(CReducer):
         eigenvec = CArray(eigenvec[:, idx]).atleast_2d()
         components = CArray(components[idx, :]).atleast_2d()
         # percentage of variance explained by each component
-        explained_variance = (eigenval ** 2) / data_carray.shape[0]
+        explained_variance = (eigenval ** 2) / (data_carray.shape[0] - 1)
         explained_variance_ratio = explained_variance / explained_variance.sum()
 
         if 0 < self.n_components < 1.0:
@@ -192,8 +193,8 @@ class CPca(CReducer):
         self._components = CArray(components[:self.n_components, :])
 
         # storing explained variance of n_components only
-        self._explained_variance = explained_variance[0:self.n_components]
-        self._explained_variance_ratio = explained_variance_ratio[0:self.n_components]
+        self._explained_variance = explained_variance[:self.n_components]
+        self._explained_variance_ratio = explained_variance_ratio[:self.n_components]
 
         return self
 
