@@ -1,6 +1,6 @@
 from secml.utils import CUnitTest
 
-from secml.pytorch.normalizers import CNormalizerPyTorch
+from secml.pytorch.normalization import CNormalizerPyTorch
 from secml.pytorch.classifiers import CClassifierPyTorchMLP
 from secml.data.loader import CDLRandom
 

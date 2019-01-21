@@ -66,7 +66,10 @@ class CClassifierPyTorch(CClassifier):
     train_transform : torchvision.transform or None, optional
         Transformation to be applied before training.
     preprocess : CNormalizer or None, optional
-        Preprocessing for data.
+        Preprocessing for data. If not None and model state will be loaded
+        using `.load_state()`, this should be an already-trained preprocessor
+        or `.preprocess.fit(x)` should be called after `.load_state(x)`
+        with appropriate input.
     input_shape : tuple, optional
         Shape of the input expected by the first layer of the network.
         If None, samples will not be reshaped before passing them to the net.
