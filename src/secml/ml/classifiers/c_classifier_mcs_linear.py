@@ -22,14 +22,17 @@ class CClassifierMCSLinear(CClassifierLinear):
     ----------
     classifier : CClassifierLinear
         Instance of the linear classifier to be used in the MCS.
-    num_classifiers : int
+    num_classifiers : int, optional
         Number of linear classifiers to fit, default 10.
-    max_samples : float
+    max_samples : float, optional
         Percentage of the samples to use for training,
         range [0, 1.0]. Default 1.0 (all the samples).
-    max_features : float
+    max_features : float, optional
         Percentage of the features to use for training,
         range [0, 1.0]. Default 1.0 (all the features.
+    random_state : int or None, optional
+        If int, random_state is the seed used by the random number generator.
+        If None, no fixed seed will be set.
 
     Attributes
     ----------
@@ -39,7 +42,8 @@ class CClassifierMCSLinear(CClassifierLinear):
     __class_type = 'mcs-linear'
     
     def __init__(self, classifier, num_classifiers=10,
-                 max_samples=1.0, max_features=1.0, preprocess=None):
+                 max_samples=1.0, max_features=1.0,
+                 random_state=None, preprocess=None):
 
         # Calling constructor of CClassifierLinear
         CClassifierLinear.__init__(self, preprocess=preprocess)
@@ -50,6 +54,7 @@ class CClassifierMCSLinear(CClassifierLinear):
         self.n_classifiers = num_classifiers
         self.max_samples = max_samples
         self.max_features = max_features
+        self.random_state = random_state
 
     def __is_clear(self):
         """Returns True if object is clear."""
@@ -126,8 +131,10 @@ class CClassifierMCSLinear(CClassifierLinear):
         for i in xrange(self.n_classifiers):
 
             # generate random indices for features and samples
-            idx_samples = CArray.randsample(dataset.num_samples, num_samples)
-            idx_features = CArray.randsample(dataset.num_features, num_features)
+            idx_samples = CArray.randsample(dataset.num_samples, num_samples,
+                                            random_state=self.random_state)
+            idx_features = CArray.randsample(dataset.num_features, num_features,
+                                             random_state=self.random_state)
 
             data_x = dataset.X[idx_samples, :]
             data_x = data_x[:, idx_features]
