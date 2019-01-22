@@ -1,17 +1,17 @@
-from secml.utils import CUnitTest
-
-from secml.ml.classifiers.loss import CSoftmax
+from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM
+from secml.ml.classifiers.loss.c_softmax import CSoftmax
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
-from secml.array import CArray
+from secml.optimization import COptimizer
+from secml.optimization.function import CFunction
+from secml.utils import CUnitTest
 
 
 class TestCSoftmax(CUnitTest):
     """Unittests for CSoftmax."""
 
     def setUp(self):
-
         self.ds = CDLRandom(n_classes=3, n_samples=50, random_state=0,
                             n_informative=3).load()
 
@@ -42,6 +42,58 @@ class TestCSoftmax(CUnitTest):
         self.logger.info("SKlearn softmax.max():\n{:}".format(sm_sk.max()))
 
         self.assertFalse((sm.round(4) != CArray(sm_sk).round(4)).any())
+
+    def test_softmax_gradient(self):
+        """Unittests for softmax gradient:
+           Compare analytical gradients with its numerical approximation."""
+
+        self.softmax = CSoftmax()
+
+        def _sigma_pos_label(s, y):
+            """
+            Compute the sigmoid for the scores in s and return the i-th
+            element of the vector that contains the results
+
+            Parameters
+            ----------
+            s: CArray
+                scores
+            pos_label: index of the considered score into the vector
+
+            Returns
+            -------
+            softmax: CArray
+            """
+            softmax = self.softmax.softmax(s).ravel()
+            return softmax[y]
+
+        def _grad_wrapper(s, y):
+            return self.softmax.gradient(s, y)
+
+        score = self.scores[0, :]
+
+        for pos_label in (0, 1, 2):
+            self.logger.info("POS_LABEL: {:}".format(pos_label))
+
+            # real value of the gradient on x
+            grad = _grad_wrapper(score, pos_label)
+
+            self.logger.info("ANALITICAL GRAD: {:}".format(grad))
+
+            approx = COptimizer(
+                CFunction(_sigma_pos_label,
+                          _grad_wrapper)
+            ).approx_fprime(score, 1e-5, pos_label)
+
+            self.logger.info("NUMERICAL GRADIENT: {:}".format(approx))
+
+            check_grad_val = (grad - approx).norm()
+
+            self.logger.info("The norm of the difference bettween the "
+                             "analytical and the numerical gradient is: %s",
+                             str(check_grad_val))
+            self.assertLess(check_grad_val, 1e-4,
+                            "the gradient is wrong {:}".format(check_grad_val))
 
 
 if __name__ == '__main__':
