@@ -4,7 +4,7 @@ SecML-Lib is an open-source Python library for the **security evaluation** of Ma
 
 It comes with a set of powerful features:
 - **Dense/Sparse data support.** We provide full, transparent support for both dense (through `numpy` library) and sparse data (through `scipy` library) in a single data structure.
-- **Wide range of supported ML algorithms.** All supervised learning algorithms supported by `scikit-learn` are available, as well as Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.
+- **Wide range of supported ML algorithms.** All supervised learning algorithms supported by `scikit-learn` are available, as well as Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform (optional).
 - **Built-in attack algorithms.** Evasion and poisoning (*available soon*) attacks based on gradient-descent optimization.
 - **Visualize your results.** We provide visualization and plotting framework based on the widely-known library [`matplotlib`](https://matplotlib.org/).
 - **Extensible.** Easily create new wrappers for ML models or attack algorithms extending our abstract interfaces.
@@ -51,7 +51,7 @@ Once the environment is set up, SecML-Lib can installed and run by
     - `pip install <package-file>`
  3. Install from local GitLab repository:
     - Clone the project repository in a directory of your choice
-    - Run installation as: `python setup.py install`
+    - Run installation as: `pip install .`
  4. Install from remote GitLab repository. In this case, given
     `{repourl}` in the format, es., `pragit.diee.unica.it/secml/secml-lib`:
     - `pip install git+ssh://git@{repourl}.git[@branch]#egg=secml-lib`
@@ -95,6 +95,20 @@ Editable installs are also available while using SecML-Lib as a
 dependency of other libraries/projects (see "Installation Guide"
 section for more information).
 
+## Extra Components
+
+SecML-Lib comes with a set of extras components that can be installed if desired.
+
+To specify the extra components to install, add the section `[extras]` while calling `pip install`.
+`extras` will be a comma-separated list of components you want to install. Example:
+- `pip install secml-lib[extra1,extra2]`
+
+All the installation procedures via `pip` described above allow definition of the `[extras]` section.
+
+### Available extra components
+  - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
+    Will install the following libraries: `torch == 0.4.*`, `torchvision >= 0.1.8`
+
 ## Usage Guide
 
 SecML-Lib is based on [`numpy`](http://www.numpy.org/), [`scipy`](https://www.scipy.org/), [`scikit-learn`](https://scikit-learn.org/) and [`pytorch`](https://pytorch.org/), widely-used packages for scientific 
@@ -109,7 +123,7 @@ The `secml.adv` package contains evasion and poisoning (*available soon*) attack
 
 The `secml.figure` package contains a visualization and plotting framework based on [`matplotlib`](https://matplotlib.org/).
 
-**[optional]** The `secml.pytorch` package contains support classes for the [PyTorch](https://pytorch.org/) deep learning platform. This package will be available only if the installation of `pytorch` library has been allowed during installation.
+The `secml.pytorch` package contains support classes for the [PyTorch](https://pytorch.org/) deep learning platform. This package will be available only if the extra component `pytorch` has been specified during installation.
 
 ## Credits
 SecML-Lib has been developed by [PRALab](https://pralab.diee.unica.it) - Pattern Recognition and Applications lab under [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html) license. Copyright 2019.
