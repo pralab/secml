@@ -29,7 +29,7 @@ class TestCClassifierGradient(CUnitTest):
                          str(self.dataset.num_samples))
         self.logger.info("Features: %s", str(self.dataset.num_features))
 
-    def _clf_gradient_check(self, clf):
+    def _clf_gradient_check(self, clf, clf_idx):
 
         i = random.sample(xrange(self.dataset.num_samples), 1)[0]
         pattern = self.dataset.X[i, :]
@@ -47,11 +47,10 @@ class TestCClassifierGradient(CUnitTest):
             self.logger.info(
                 "norm(grad - num_grad): %s", str(check_grad_val))
             self.assertLess(check_grad_val, 1e-3,
-                            "problematic kernel is " +
-                            clf.kernel.class_type)
+                            "problematic classifier is " +
+                            clf_idx)
             for i, elm in enumerate(gradient):
                 self.assertIsInstance(elm, float)
-
 
     def test_f_x_gradient(self):
         """Test the gradient of the classifier discriminant function"""
@@ -63,9 +62,9 @@ class TestCClassifierGradient(CUnitTest):
                              "inside", clf_idx)
 
             clf.fit(self.dataset)
-            self._clf_gradient_check(clf)
+            self._clf_gradient_check(clf, clf_idx)
 
-    def _test_f_norm_x_gradient(self):
+    def test_f_norm_x_gradient(self):
         """Test the gradient of the classifier discriminant function
         when the classifier have a normalizer inside"""
         self.logger.info(
@@ -82,7 +81,7 @@ class TestCClassifierGradient(CUnitTest):
 
             clf.preprocess = normalizer
             clf.fit(self.dataset)
-            self._clf_gradient_check(clf)
+            self._clf_gradient_check(clf, clf_idx)
 
 
 if __name__ == '__main__':
