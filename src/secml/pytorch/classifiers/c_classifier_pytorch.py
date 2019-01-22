@@ -844,28 +844,22 @@ class CClassifierPyTorch(CClassifier):
                     size=len(x_loader)
                 ))
 
-            print "Creating variable"
             if use_cuda is True:
                 s = s.cuda()
             s = Variable(s, requires_grad=True)
 
             with torch.no_grad():
-                print "Calling _model(s)"
                 logits = self._model(s)
-                print "squeeze"
                 logits = logits.squeeze(1)
-                print "carray conversion"
                 logits = CArray(logits.data.cpu().numpy()).astype(float)
 
             if scores is not None:
-                print "append"
                 scores = scores.append(logits, axis=0)
             else:
                 scores = logits
 
         # Apply softmax-scaling if needed
         if self.softmax_outputs is True:
-            print "softmax"
             scores = CSoftmax().softmax(scores)
 
         # TODO: WE SHOULD USE SOFTMAX TO COMPUTE LABELS?
