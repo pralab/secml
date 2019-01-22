@@ -1,5 +1,7 @@
 from secml.data.loader import CDLRandom
-from secml.ml.classifiers import CClassifierSVM
+from secml.ml.classifiers.loss import CLossHinge
+from secml.ml.classifiers.regularizer import CRegularizerL2
+from secml.ml.classifiers import CClassifierSVM, CClassifierKDE, CClassifierSGD
 from secml.utils import CUnitTest
 from test_c_classifier_gradient import CClassifierGradientTestCases
 
@@ -16,8 +18,14 @@ class TestCClassifierGradientBinary(
         self.dataset_sparse = self.dataset.tosparse()
 
     def _clfs_creation(self):
-        self.clfs = [CClassifierSVM()]
-        self.clf_ids = ['lin-SVM']
+
+        self.clfs = [CClassifierSVM(), CClassifierSVM(kernel='rbf'),
+                     CClassifierKDE(), CClassifierSGD(CLossHinge(),
+                      CRegularizerL2()),
+                     CClassifierSGD(CLossHinge(),CRegularizerL2(),
+                      kernel='rbf')]
+
+        self.clf_ids = ['lin-SVM', 'rbf-SVM', 'lin-SGD', 'rbf-SGD','KDE']
 
         for clf in self.clfs:  # Enabling debug output for each classifier
             clf.verbose = 2
