@@ -4,7 +4,7 @@ from secml.utils import CUnitTest
 from test_c_classifier_gradient import CClassifierGradientTestCases
 
 
-class TestCClassifierBinaryGradient(
+class TestCClassifierGradientBinary(
     CClassifierGradientTestCases.TestCClassifierGradient):
     """Test of binary classifiers gradients."""
 
