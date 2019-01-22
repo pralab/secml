@@ -33,7 +33,18 @@ class CClassifierGradientTestCases(object):
                              str(self.dataset.num_samples))
             self.logger.info("Features: %s", str(self.dataset.num_features))
 
+        def _fun_args(self, x, *args):
+            return self.clf.decision_function(x, **args[0])
+
+        def _grad_args(self, x, *args):
+            """
+            Wrapper needed as gradient_f_x have **kwargs
+            """
+            return self.clf.gradient_f_x(x, **args[0])
+
         def _clf_gradient_check(self, clf, clf_idx):
+
+            self.clf = clf
 
             i = random.sample(xrange(self.dataset.num_samples), 1)[0]
             pattern = self.dataset.X[i, :]
@@ -46,8 +57,8 @@ class CClassifierGradientTestCases(object):
                 self.logger.info("Gradient w.r.t. class %s: %s", str(c), str(
                     gradient))
                 check_grad_val = COptimizer(
-                    CFunction(clf.decision_function,
-                              clf.gradient_f_x)).check_grad(pattern, c)
+                    CFunction(self._fun_args,
+                              self._grad_args)).check_grad(pattern, ({'y':c}) )
                 self.logger.info(
                     "norm(grad - num_grad): %s", str(check_grad_val))
                 self.assertLess(check_grad_val, 1e-3,
