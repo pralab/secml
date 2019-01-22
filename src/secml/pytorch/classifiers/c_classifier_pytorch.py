@@ -28,6 +28,9 @@ from secml.pytorch.utils.optim_utils import add_weight_decay
 
 # Use CUDA ?!
 use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
+print use_cuda
+print torch.get_num_threads()
+torch.backends.cudnn.benchmark=True
 
 
 # FIXME: inner preprocess not manage yet for training phase
@@ -768,13 +771,17 @@ class CClassifierPyTorch(CClassifier):
                     size=len(x_loader)
                 ))
 
+            self.logger.info("Creating variable")
             if use_cuda is True:
                 s = s.cuda()
             s = Variable(s, requires_grad=True)
 
             with torch.no_grad():
+                self.logger.info("Calling _model(s)")
                 logits = self._model(s)
+                self.logger.info("squeeze")
                 logits = logits.squeeze(1)
+                self.logger.info("carray conversion")
                 logits = CArray(logits.data.cpu().numpy()).astype(float)
 
             # Apply softmax-scaling if needed
@@ -844,22 +851,28 @@ class CClassifierPyTorch(CClassifier):
                     size=len(x_loader)
                 ))
 
+            self.logger.info("Creating variable")
             if use_cuda is True:
                 s = s.cuda()
             s = Variable(s, requires_grad=True)
 
             with torch.no_grad():
+                self.logger.info("Calling _model(s)")
                 logits = self._model(s)
+                self.logger.info("squeeze")
                 logits = logits.squeeze(1)
+                self.logger.info("carray conversion")
                 logits = CArray(logits.data.cpu().numpy()).astype(float)
 
             if scores is not None:
+                self.logger.info("append")
                 scores = scores.append(logits, axis=0)
             else:
                 scores = logits
 
         # Apply softmax-scaling if needed
         if self.softmax_outputs is True:
+            self.logger.info("softmax")
             scores = CSoftmax().softmax(scores)
 
         # TODO: WE SHOULD USE SOFTMAX TO COMPUTE LABELS?
