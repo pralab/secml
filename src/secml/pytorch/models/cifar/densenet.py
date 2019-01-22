@@ -127,16 +127,24 @@ class DenseNet(nn.Module):
 
 
     def forward(self, x):
+        print "conv1"
         x = self.conv1(x)
 
-        x = self.trans1(self.dense1(x)) 
-        x = self.trans2(self.dense2(x)) 
+        print "dense1"
+        x = self.trans1(self.dense1(x))
+        print "dense2"
+        x = self.trans2(self.dense2(x))
+        print "dense3"
         x = self.dense3(x)
+        print "bn"
         x = self.bn(x)
+        print "relu"
         x = self.relu(x)
 
+        print "avgp"
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
+        print "fc"
         x = self.fc(x)
 
         return x
