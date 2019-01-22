@@ -1,10 +1,11 @@
+from secml.utils import CUnitTest
+
 import random
 from abc import ABCMeta, abstractmethod
 
 from secml.ml.features.normalization import CNormalizerMinMax
 from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
-from secml.utils import CUnitTest
 
 
 class CClassifierGradientTestCases(object):
@@ -46,7 +47,7 @@ class CClassifierGradientTestCases(object):
                     gradient))
                 check_grad_val = COptimizer(
                     CFunction(clf.decision_function,
-                              clf.gradient_f_x)).check_grad(pattern, y=c)
+                              clf.gradient_f_x)).check_grad(pattern, c)
                 self.logger.info(
                     "norm(grad - num_grad): %s", str(check_grad_val))
                 self.assertLess(check_grad_val, 1e-3,
