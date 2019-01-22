@@ -28,6 +28,9 @@ from secml.pytorch.utils.optim_utils import add_weight_decay
 
 # Use CUDA ?!
 use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
+print use_cuda
+print torch.get_num_threads()
+torch.backends.cudnn.benchmark=True
 
 
 # FIXME: inner preprocess not manage yet for training phase
