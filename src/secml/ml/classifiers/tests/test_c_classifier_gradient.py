@@ -1,13 +1,10 @@
-from secml.utils import CUnitTest
+import random
 from abc import ABCMeta, abstractmethod
 
-import random
-
-from secml.data.loader import CDLRandom
-from secml.ml.classifiers import CClassifierSVM
 from secml.ml.features.normalization import CNormalizerMinMax
 from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
+from secml.utils import CUnitTest
 
 
 class CClassifierGradientTestCases(object):
@@ -45,7 +42,7 @@ class CClassifierGradientTestCases(object):
 
                 # Compare the analytical grad with the numerical grad
                 gradient = clf.gradient_f_x(pattern, y=c)
-                self.logger.info("Gradient w.r.t. class %s: %s",str(c), str(
+                self.logger.info("Gradient w.r.t. class %s: %s", str(c), str(
                     gradient))
                 check_grad_val = COptimizer(
                     CFunction(clf.decision_function,
@@ -60,12 +57,14 @@ class CClassifierGradientTestCases(object):
 
         def test_f_x_gradient(self):
             """Test the gradient of the classifier discriminant function"""
-            self.logger.info("Testing the gradient of the discriminant function")
+            self.logger.info(
+                "Testing the gradient of the discriminant function")
 
             for clf, clf_idx in zip(self.clfs, self.clf_ids):
-                self.logger.info("Computing gradient for the classifier: %s when "
-                                 "the classifier does not have a normalizer "
-                                 "inside", clf_idx)
+                self.logger.info(
+                    "Computing gradient for the classifier: %s when "
+                    "the classifier does not have a normalizer "
+                    "inside", clf_idx)
 
                 clf.fit(self.dataset)
                 self._clf_gradient_check(clf, clf_idx)
@@ -81,9 +80,10 @@ class CClassifierGradientTestCases(object):
             normalizer = CNormalizerMinMax()
 
             for clf, clf_idx in zip(self.clfs, self.clf_ids):
-                self.logger.info("Computing gradient for the classifier: %s when "
-                                 "the classifier have a normalizer "
-                                 "inside", clf_idx)
+                self.logger.info(
+                    "Computing gradient for the classifier: %s when "
+                    "the classifier have a normalizer "
+                    "inside", clf_idx)
 
                 clf.preprocess = normalizer
                 clf.fit(self.dataset)
