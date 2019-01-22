@@ -25,7 +25,9 @@ class TestCClassifierGradientBinary(
                      CClassifierSGD(CLossHinge(), CRegularizerL2(),
                                     kernel='rbf')]
 
-        self.clf_ids = ['lin-SVM', 'rbf-SVM', 'lin-SGD', 'rbf-SGD', 'KDE']
+        # fixme: test the other classifiers too
+        #self.clf_ids = ['lin-SVM', 'rbf-SVM', 'lin-SGD', 'rbf-SGD', 'KDE']
+        self.clf_ids = ['lin-SVM', 'rbf-SVM']
 
         for clf in self.clfs:  # Enabling debug output for each classifier
             clf.verbose = 2
