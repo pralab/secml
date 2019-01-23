@@ -89,6 +89,7 @@ package:
     refs:
       - /^release-.*$/
       - /^.*-stable$/
+      - develop
       - tags
       - web
     changes:
