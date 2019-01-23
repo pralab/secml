@@ -1,4 +1,5 @@
 include README.md
+include CHANGELOG.md
 include requirements.txt
 include src/secml/VERSION
 include src/secml/VERSION_REV
