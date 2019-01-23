@@ -99,11 +99,10 @@ class CNormalizerPyTorch(CNormalizer):
             Data array, 2-Dimensional or ravel.
         y : int or None, optional
             Index of the class wrt the gradient must be computed.
-            This is not required if w is passed.
+            This could be not required if w is passed..
         w : CArray or None, optional
             If CArray, will be passed to backward in the net and must have
             a proper shape depending on the chosen output layer.
-            This is required if `out_layer` is not None.
 
         Returns
         -------
@@ -119,5 +118,15 @@ class CNormalizerPyTorch(CNormalizer):
         if not x.is_vector_like:
             raise ValueError('Gradient available only wrt a single point!')
 
-        return self.pytorch_clf.gradient_f_x(
+        # For this normalizer we take the net layer output directly
+        # So disable the softmax-scaling option
+        softmax_outputs = self.pytorch_clf.softmax_outputs
+        self.pytorch_clf.softmax_outputs = False
+
+        out_grad = self.pytorch_clf.gradient_f_x(
             x, y=y, w=w, layer=self.out_layer)
+
+        # Restore softmax-scaling option
+        self.pytorch_clf.softmax_outputs = softmax_outputs
+
+        return out_grad

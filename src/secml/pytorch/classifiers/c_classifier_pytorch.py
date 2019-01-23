@@ -397,10 +397,11 @@ class CClassifierPyTorch(CClassifier):
 
     def _to_tensor(self, x):
         """Convert input array to tensor."""
-        x = x.atleast_2d()
         x = x.tondarray()
         x = torch.from_numpy(x)
         x = x.type(torch.FloatTensor)
+        if use_cuda is True:
+            x = x.cuda()
         return x
 
     def _get_test_input_loader(self, x, n_jobs=1):
@@ -865,7 +866,6 @@ class CClassifierPyTorch(CClassifier):
         if self.softmax_outputs is True:
             scores = CSoftmax().softmax(scores)
 
-        # TODO: WE SHOULD USE SOFTMAX TO COMPUTE LABELS?
         # The classification label is the label of the class
         # associated with the highest score
         labels = scores.argmax(axis=1).ravel()
@@ -882,7 +882,10 @@ class CClassifierPyTorch(CClassifier):
             The gradient is computed in the neighborhood of x.
         y : int or None, optional
             Index of the class wrt the gradient must be computed.
-            This is not required if w is passed.
+            This is not required if:
+             - `w` is passed and the last layer is used but
+              softmax_outputs is False
+             - an intermediate layer is used
         w : CArray or None, optional
             If CArray, will be passed to backward and must have a proper shape
             depending on the chosen output layer (the last one if `layer`
@@ -890,7 +893,7 @@ class CClassifierPyTorch(CClassifier):
         layer : str or None, optional
             Name of the layer.
             If None, the gradient at the last layer will be returned
-             and `y` is required if `w` is None.
+             and `y` is required if `w` is None or softmax_outputs is True.
             If not None, `w` of proper shape is required.
 
         Returns
@@ -923,29 +926,34 @@ class CClassifierPyTorch(CClassifier):
                 raise ValueError(
                     "grad can be implicitly created only for the last layer. "
                     "`w` is needed when `layer` is not None.")
-            if y is None:  # if layer is None and y is required
+            if y is None:  # if layer is None -> y is required
                 raise ValueError("The class label wrt compute the gradient "
                                  "at the last layer is required.")
-            w = torch.FloatTensor(1, out.shape[-1])
-            w.zero_()
-            w[0, y] = 1  # create a mask to get the gradient wrt y
+
+            w_in = torch.FloatTensor(1, out.shape[-1])
+            if use_cuda is True:
+                w_in = w_in.cuda()
+            w_in.zero_()
+            w_in[0, y] = 1  # create a mask to get the gradient wrt y
+
         else:
-            if y is not None:  # Inform the user y is ignored
-                self.logger.warning("`y` will be ignored!")
-            w = self._to_tensor(w)
-        if use_cuda is True:
-            w = w.cuda()
-        w = w.unsqueeze(0)  # unsqueeze to simulate a single point batch
+            w_in = self._to_tensor(w.atleast_2d())
 
-        out.backward(w)  # Backward on `out` (grad will appear on `s`)
-
-        out = CArray(s.grad.data.cpu().numpy().ravel())
+        w_in = w_in.unsqueeze(0)  # unsqueeze to simulate a single point batch
 
         # Apply softmax-scaling if needed
-        if self.softmax_outputs is True:
-            out = CSoftmax().gradient(out)
+        if layer is None and self.softmax_outputs is True:
+            out_carray = CArray(
+                out.squeeze(0).data.cpu().numpy()).astype(float)
+            softmax_grad = CSoftmax().gradient(out_carray, pos_label=y)
+            w_in *= self._to_tensor(softmax_grad.atleast_2d()).unsqueeze(0)
+        elif w is not None and y is not None:
+            # Inform the user y has not been used
+            self.logger.warning("`y` will be ignored!")
 
-        return out
+        out.backward(w_in)  # Backward on `out` (grad will appear on `s`)
+
+        return CArray(s.grad.data.cpu().numpy().ravel())
 
     def _get_layer_output(self, s, layer=None):
         """Returns the output of the desired net layer.

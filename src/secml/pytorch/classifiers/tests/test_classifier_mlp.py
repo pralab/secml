@@ -3,19 +3,21 @@ from secml.utils import CUnitTest
 from secml.pytorch.classifiers import CClassifierPyTorchMLP
 from secml.data.loader import CDLRandom
 from secml.ml.peval.metrics import CMetricAccuracy
+from secml.optimization import COptimizer
+from secml.optimization.function import CFunction
 
 
 class TestCClassifierPyTorchMLP(CUnitTest):
 
     def setUp(self):
 
-        self.ds = CDLRandom(n_samples=100, n_classes=10,
+        self.ds = CDLRandom(n_samples=100, n_classes=3,
                             n_features=20, n_informative=15,
                             random_state=0).load()
 
         self.clf = CClassifierPyTorchMLP(
-            input_dims=20, hidden_dims=(50, ), output_dims=10,
-            weight_decay=0, epochs=50, learning_rate=1e-2,
+            input_dims=20, hidden_dims=(40, ), output_dims=3,
+            weight_decay=0, epochs=10, learning_rate=1e-1,
             momentum=0, random_state=0)
         self.clf.verbose = 2
 
@@ -143,7 +145,7 @@ class TestCClassifierPyTorchMLP(CUnitTest):
         acc = CMetricAccuracy().performance_score(self.ds[50:100, :].Y, labels)
         self.logger.info("Accuracy: {:}".format(acc))
 
-        self.assertEqual(0.98, acc)  # We should always get the same acc
+        self.assertEqual(1.0, acc)  # We should always get the same acc
 
         self.logger.info("Testing NOT softmax-scaled outputs")
 
@@ -159,7 +161,7 @@ class TestCClassifierPyTorchMLP(CUnitTest):
         self.logger.info("Accuracy: {:}".format(acc))
 
         # Accuracy will not change after scaling the outputs
-        self.assertEqual(0.98, acc)  # We should always get the same acc
+        self.assertEqual(1.0, acc)  # We should always get the same acc
 
     def test_out_at_layer(self):
         """Test for extracting output at specific layer."""
@@ -189,6 +191,13 @@ class TestCClassifierPyTorchMLP(CUnitTest):
 
         self.logger.info("Output of get_layer_output:\n{:}".format(out))
 
+    def _fun_args(self, x, *args):
+        return self.clf.decision_function(x, **args[0])
+
+    def _grad_args(self, x, *args):
+        """Wrapper needed as gradient_f_x have **kwargs"""
+        return self.clf.gradient_f_x(x, **args[0])
+
     def test_gradient(self):
         """Test for extracting gradient."""
         self.clf.verbose = 0
@@ -197,25 +206,32 @@ class TestCClassifierPyTorchMLP(CUnitTest):
         x_ds = self.ds[0, :]
         x, y = x_ds.X, x_ds.Y
 
-        # FIXME: REMOVE THIS AFTER IMPLEMENTING SOFTMAX GRADIENT
-        self.logger.info(
-            "Deactivate softmax-scaling to easily compare outputs")
-        self.clf.softmax_outputs = False
-
         layer = None
-        self.logger.info("Returning gradient for layer: {:}".format(layer))
-        grad = self.clf.gradient_f_x(x, y=0, layer=layer)
+        self.logger.info("Testing gradients for layer: {:}".format(layer))
 
-        self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
+        for c in self.ds.classes:
 
-        self.assertTrue(grad.is_vector_like)
-        self.assertEqual(x.size, grad.size)
+            self.logger.info("Gradient w.r.t. class {:}".format(c))
+
+            grad = self.clf.gradient_f_x(x, y=c, layer=layer)
+
+            self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
+
+            check_grad_val = COptimizer(
+                CFunction(self._fun_args, self._grad_args)).check_grad(
+                    x, ({'y': c}), epsilon=1e-1)
+            self.logger.info(
+                "norm(grad - num_grad): %s", str(check_grad_val))
+            self.assertLess(check_grad_val, 1e-3)
+
+            self.assertTrue(grad.is_vector_like)
+            self.assertEqual(x.size, grad.size)
 
         layer = 'linear1'
         self.logger.info("Returning output for layer: {:}".format(layer))
         out = self.clf.get_layer_output(x, layer=layer)
         self.logger.info("Returning gradient for layer: {:}".format(layer))
-        grad = self.clf.gradient_f_x(x, y=0, w=out, layer=layer)
+        grad = self.clf.gradient_f_x(x, w=out, layer=layer)
 
         self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
 
