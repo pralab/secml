@@ -27,7 +27,6 @@ before_script:
   only:
     changes:
       - src/secml/**/*
-      - pytest.ini
       - tox.ini
       - requirements.txt
       - .gitlab-ci.yml
