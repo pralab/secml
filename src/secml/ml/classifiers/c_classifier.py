@@ -394,8 +394,7 @@ class CClassifier(CCreator):
         if self.preprocess is None:  # preprocess not defined... placeholder
             grad_norm = CArray([1])
         else:
-            # We pass the classifier gradient to preprocess
-            try:
+            try:  # We try to pass the classifier gradient to preprocess
                 grad_norm = self.preprocess.gradient(x, w=grad_f)
                 # preprocess gradient will be accumulated in grad_f
                 # and can be directly returned
