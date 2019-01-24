@@ -17,11 +17,13 @@ import torchvision.transforms as transforms
 from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.classifiers import CClassifier
+from secml.ml.classifiers.loss import CSoftmax
 from secml.utils import load_dict, fm
+from secml.utils.mixed_utils import AverageMeter
 
 from secml.pytorch.settings import SECML_PYTORCH_USE_CUDA
 from secml.pytorch.data import CDatasetPyTorch
-from secml.pytorch.utils import AverageMeter, accuracy
+from secml.pytorch.metrics import CMetricPyTorchAccuracy
 from secml.pytorch.utils.optim_utils import add_weight_decay
 
 # Use CUDA ?!
@@ -64,11 +66,16 @@ class CClassifierPyTorch(CClassifier):
     train_transform : torchvision.transform or None, optional
         Transformation to be applied before training.
     preprocess : CNormalizer or None, optional
-        Preprocessing for data.
+        Preprocessing for data. If not None and model state will be loaded
+        using `.load_state()`, this should be an already-trained preprocessor
+        or `.preprocess.fit(x)` should be called after `.load_state(x)`
+        with appropriate input.
     input_shape : tuple, optional
         Shape of the input expected by the first layer of the network.
         If None, samples will not be reshaped before passing them to the net.
         If not set, `load_state` will not be available.
+    softmax_outputs : bool, optional
+        If True, apply softmax function to the outputs. Default False.
     random_state : int or None, optional
         If int, random_state is the seed used by the random number generator.
         If None, no fixed seed will be set.
@@ -84,7 +91,8 @@ class CClassifierPyTorch(CClassifier):
                  weight_decay=1e-4, loss='cross-entropy', epochs=100,
                  gamma=0.1, lr_schedule=(50, 75), batch_size=1,
                  regularize_bias=True, train_transform=None, preprocess=None,
-                 input_shape=None, random_state=None, **model_params):
+                 input_shape=None, softmax_outputs=False,
+                 random_state=None, **model_params):
 
         # Model and params
         self._model_base = model
@@ -116,6 +124,7 @@ class CClassifierPyTorch(CClassifier):
 
         # Other parameters
         self.input_shape = input_shape
+        self.softmax_outputs = softmax_outputs
 
         # Training vars
         self._start_epoch = 0
@@ -125,7 +134,7 @@ class CClassifierPyTorch(CClassifier):
         # Random seed
         if random_state is not None:
             torch.manual_seed(random_state)
-            if use_cuda:  # FIXME: SHOULD NOT BE NEEDED WITH PYTORCH 1.0
+            if use_cuda:
                 torch.cuda.manual_seed_all(random_state)
                 torch.backends.cudnn.deterministic = True
 
@@ -254,6 +263,16 @@ class CClassifierPyTorch(CClassifier):
     def input_shape(self, value):
         """Shape of the model input."""
         self._input_shape = value
+
+    @property
+    def softmax_outputs(self):
+        """If True, outputs will be softmax-scaled."""
+        return self._softmax_outputs
+
+    @softmax_outputs.setter
+    def softmax_outputs(self, value):
+        """If True, outputs will be softmax-scaled."""
+        self._softmax_outputs = value
 
     @property
     def start_epoch(self):
@@ -640,7 +659,8 @@ class CClassifierPyTorch(CClassifier):
                 self._optimizer.step()
 
                 losses.update(loss.item(), x.size(0))
-                acc.update(accuracy(logits.data, y.data)[0], x.size(0))
+                acc.update(CMetricPyTorchAccuracy().performance_score(
+                    y_true=y.data, score=logits.data)[0].item(), x.size(0))
 
                 # Log progress of batch
                 self.logger.debug('Epoch: {epoch}, Batch: ({batch}/{size}) '
@@ -662,7 +682,7 @@ class CClassifierPyTorch(CClassifier):
                              ))
 
             # Average accuracy after epoch FIXME: ON TRAINING SET
-            self._acc = acc.avg.item()
+            self._acc = acc.avg
 
             # Store the current epoch as best one if accuracy is higher
             # If equal accuracy, the last epoch should have better loss
@@ -731,6 +751,9 @@ class CClassifierPyTorch(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
+        if self.is_clear():
+            raise ValueError("make sure the classifier is trained first.")
+
         x = x.atleast_2d()  # Ensuring input is 2-D
 
         x_loader = self._get_test_input_loader(x, n_jobs=n_jobs)
@@ -755,8 +778,13 @@ class CClassifierPyTorch(CClassifier):
             with torch.no_grad():
                 logits = self._model(s)
                 logits = logits.squeeze(1)
-                logits = CArray(
-                    logits.data.cpu().numpy()[:, y]).astype(float)
+                logits = CArray(logits.data.cpu().numpy()).astype(float)
+
+            # Apply softmax-scaling if needed
+            if self.softmax_outputs is True:
+                logits = CSoftmax().softmax(logits)
+
+            logits = logits[:, y]  # Extract desired class
 
             if scores is not None:
                 scores = scores.append(logits, axis=0)
@@ -795,6 +823,9 @@ class CClassifierPyTorch(CClassifier):
             Will be returned only if `return_decision_function` is True.
 
         """
+        if self.is_clear():
+            raise ValueError("make sure the classifier is trained first.")
+
         x_carray = CArray(x).atleast_2d()
 
         # Preprocessing data if a preprocess is defined
@@ -829,6 +860,10 @@ class CClassifierPyTorch(CClassifier):
                 scores = scores.append(logits, axis=0)
             else:
                 scores = logits
+
+        # Apply softmax-scaling if needed
+        if self.softmax_outputs is True:
+            scores = CSoftmax().softmax(scores)
 
         # TODO: WE SHOULD USE SOFTMAX TO COMPUTE LABELS?
         # The classification label is the label of the class
@@ -904,7 +939,13 @@ class CClassifierPyTorch(CClassifier):
 
         out.backward(w)  # Backward on `out` (grad will appear on `s`)
 
-        return CArray(s.grad.data.cpu().numpy().ravel())
+        out = CArray(s.grad.data.cpu().numpy().ravel())
+
+        # Apply softmax-scaling if needed
+        if self.softmax_outputs is True:
+            out = CSoftmax().gradient(out)
+
+        return out
 
     def _get_layer_output(self, s, layer=None):
         """Returns the output of the desired net layer.

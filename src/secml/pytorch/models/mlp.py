@@ -24,8 +24,7 @@ def mlp(input_dims=1000, hidden_dims=(100, 100), output_dims=10):
     # Output layers
     layers += [
         ('linear' + str(len(hidden_dims) + 1),
-         torch.nn.Linear(hidden_dims[-1], output_dims)),
-        ('softmax', torch.nn.Softmax(dim=-1))]
+         torch.nn.Linear(hidden_dims[-1], output_dims))]
 
     # Creating the model with the list of layers
     return torch.nn.Sequential(OrderedDict(layers))

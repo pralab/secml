@@ -4,10 +4,10 @@ import torchvision.transforms as transforms
 
 from secml.data.loader import CDataLoaderCIFAR10
 from secml.array import CArray
-from secml.pytorch.classifiers import CClassifierPyTorchDenseNetCifar
-from secml.pytorch.normalizers import CNormalizerMeanSTD
-from secml.pytorch.models import dl_pytorch_model
+from secml.ml.features.normalization import CNormalizerMeanSTD
 from secml.ml.peval.metrics import CMetricAccuracy
+from secml.pytorch.classifiers import CClassifierPyTorchDenseNetCifar
+from secml.pytorch.models import dl_pytorch_model
 
 
 class TestCClassifierPyTorchDenseNetCifar(CUnitTest):
@@ -19,14 +19,16 @@ class TestCClassifierPyTorchDenseNetCifar(CUnitTest):
 
         cls._run_train = False  # Training is a long process for dnn, skip
 
-        cls.tr, cls.ts, transform_tr = cls._load_cifar10()
+        cls.tr, cls.ts, cls.transform_tr = cls._load_cifar10()
 
-        cls.clf = CClassifierPyTorchDenseNetCifar(
-            batch_size=25, epochs=1, train_transform=transform_tr,
-            preprocess=CNormalizerMeanSTD(mean=(0.4914, 0.4822, 0.4465),
-                                          std=(0.2023, 0.1994, 0.2010)),
-            random_state=0)
-        cls.clf.verbose = 2
+    def setUp(self):
+
+        self.clf = CClassifierPyTorchDenseNetCifar(
+            batch_size=25, epochs=1, train_transform=self.transform_tr,
+            preprocess=CNormalizerMeanSTD(
+                mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.2010)
+            ).fit(self.tr.X), random_state=0)
+        self.clf.verbose = 2
 
     @staticmethod
     def _load_cifar10():
@@ -65,9 +67,28 @@ class TestCClassifierPyTorchDenseNetCifar(CUnitTest):
         labels, scores = self.clf.predict(
             self.ts[50:100, :].X, return_decision_function=True)
 
+        self.logger.info("Labels:\n{:}".format(labels))
+        self.logger.info("Scores:\n{:}".format(scores))
+
         acc = CMetricAccuracy().performance_score(self.ts[50:100, :].Y, labels)
         self.logger.info("Accuracy: {:}".format(acc))
 
+        self.assertEqual(0.92, acc)  # We should always get the same acc
+
+        self.logger.info("Testing softmax-scaled outputs")
+
+        self.clf.softmax_outputs = True
+
+        labels, scores = self.clf.predict(
+            self.ts[50:100, :].X, return_decision_function=True)
+
+        self.logger.info("Labels:\n{:}".format(labels))
+        self.logger.info("Scores:\n{:}".format(scores))
+
+        acc = CMetricAccuracy().performance_score(self.ts[50:100, :].Y, labels)
+        self.logger.info("Accuracy: {:}".format(acc))
+
+        # Accuracy will not change after scaling the outputs
         self.assertEqual(0.92, acc)  # We should always get the same acc
 
     def test_gradient(self):

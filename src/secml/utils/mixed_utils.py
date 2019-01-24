@@ -1,12 +1,56 @@
 """
 .. module:: FunctionUtils
-   :synopsis: Collection of mixed utility functions
+   :synopsis: Collection of mixed utility classes and functions
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
 
-__all__ = ['OrderedFlexibleClass']
+__all__ = ['AverageMeter', 'OrderedFlexibleClass']
+
+
+class AverageMeter(object):
+    """Computes and stores the average and current value.
+
+    Attributes
+    ----------
+    val : float
+        Current value.
+    avg : float
+        Average.
+    sum : float
+        Cumulative sum of seen values.
+    count : int
+        Number of seen values.
+
+    """
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0.
+        self.avg = 0.
+        self.sum = 0.
+        self.count = 0
+
+    def update(self, val, n=1):
+        """Updated average and current value.
+
+        Parameters
+        ----------
+        val : float
+            New current value.
+        n : int, optional
+            Multiplier for the current value. Indicates how many times
+            the value should be counted in the average. Default 1.
+
+        """
+        val = float(val)
+        n = int(n)
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
 
 
 class OrderedFlexibleClass(object):

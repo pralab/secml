@@ -1,9 +1,8 @@
 from secml.utils import CUnitTest
 
-import torch
-
 from secml.pytorch.classifiers import CClassifierPyTorchMLP
 from secml.data.loader import CDLRandom
+from secml.ml.peval.metrics import CMetricAccuracy
 
 
 class TestCClassifierPyTorchMLP(CUnitTest):
@@ -20,9 +19,6 @@ class TestCClassifierPyTorchMLP(CUnitTest):
             momentum=0, random_state=0)
         self.clf.verbose = 2
 
-    # TODO: ADD TEST FOR TRAINING
-    # TODO: ADD TEST FOR CLASSIFICATION
-
     def test_model_creation(self):
         """Testing model creation with different number of layers/neurons."""
         def check_layers(in_dims, h_dims, out_dims):
@@ -34,7 +30,7 @@ class TestCClassifierPyTorchMLP(CUnitTest):
             layers = nn._model._modules.items()
 
             # Expected number of layers: 4 if hl=1, 6 if hl=2, 8 if hl=3, etc.
-            self.assertEqual(2 * (len(h_dims) - 1) + 4, len(layers))
+            self.assertEqual(2 * (len(h_dims) - 1) + 3, len(layers))
 
             self.assertEqual('linear1', layers[0][0])
             self.assertEqual(in_dims, layers[0][1].in_features)
@@ -53,9 +49,9 @@ class TestCClassifierPyTorchMLP(CUnitTest):
                                  layers[hl_idx * 2][1].out_features)
 
             self.assertEqual('linear' + str(len(h_dims) + 1),
-                             layers[-2][0])
-            self.assertEqual(h_dims[-1], layers[-2][1].in_features)
-            self.assertEqual(out_dims, layers[-2][1].out_features)
+                             layers[-1][0])
+            self.assertEqual(h_dims[-1], layers[-1][1].in_features)
+            self.assertEqual(out_dims, layers[-1][1].out_features)
 
         # Default values
         input_dims = 1000
@@ -133,6 +129,38 @@ class TestCClassifierPyTorchMLP(CUnitTest):
         self.assertEqual(lr, self.clf.learning_rate)
         self.assertEqual(lr, self.clf._optimizer.defaults['lr'])
 
+    def test_predict(self):
+        """Test for predict."""
+        self.clf.verbose = 1
+        self.clf.fit(self.ds)
+
+        labels, scores = self.clf.predict(
+            self.ds[50:100, :].X, return_decision_function=True)
+
+        self.logger.info("Labels:\n{:}".format(labels))
+        self.logger.info("Scores:\n{:}".format(scores))
+
+        acc = CMetricAccuracy().performance_score(self.ds[50:100, :].Y, labels)
+        self.logger.info("Accuracy: {:}".format(acc))
+
+        self.assertEqual(0.98, acc)  # We should always get the same acc
+
+        self.logger.info("Testing NOT softmax-scaled outputs")
+
+        self.clf.softmax_outputs = False
+
+        labels, scores = self.clf.predict(
+            self.ds[50:100, :].X, return_decision_function=True)
+
+        self.logger.info("Labels:\n{:}".format(labels))
+        self.logger.info("Scores:\n{:}".format(scores))
+
+        acc = CMetricAccuracy().performance_score(self.ds[50:100, :].Y, labels)
+        self.logger.info("Accuracy: {:}".format(acc))
+
+        # Accuracy will not change after scaling the outputs
+        self.assertEqual(0.98, acc)  # We should always get the same acc
+
     def test_out_at_layer(self):
         """Test for extracting output at specific layer."""
         self.clf.verbose = 0
@@ -140,6 +168,10 @@ class TestCClassifierPyTorchMLP(CUnitTest):
 
         x_ds = self.ds[0, :]
         x, y = x_ds.X, x_ds.Y
+
+        self.logger.info(
+            "Deactivate softmax-scaling to easily compare outputs")
+        self.clf.softmax_outputs = False
 
         layer = None
         self.logger.info("Returning output for layer: {:}".format(layer))
@@ -151,7 +183,7 @@ class TestCClassifierPyTorchMLP(CUnitTest):
 
         self.assertFalse((out_predict.round(4) != out.round(4)).any())
 
-        layer = 'linear2'
+        layer = 'linear1'
         self.logger.info("Returning output for layer: {:}".format(layer))
         out = self.clf.get_layer_output(x, layer=layer)
 
@@ -165,6 +197,11 @@ class TestCClassifierPyTorchMLP(CUnitTest):
         x_ds = self.ds[0, :]
         x, y = x_ds.X, x_ds.Y
 
+        # FIXME: REMOVE THIS AFTER IMPLEMENTING SOFTMAX GRADIENT
+        self.logger.info(
+            "Deactivate softmax-scaling to easily compare outputs")
+        self.clf.softmax_outputs = False
+
         layer = None
         self.logger.info("Returning gradient for layer: {:}".format(layer))
         grad = self.clf.gradient_f_x(x, y=0, layer=layer)
@@ -174,7 +211,7 @@ class TestCClassifierPyTorchMLP(CUnitTest):
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
 
-        layer = 'linear2'
+        layer = 'linear1'
         self.logger.info("Returning output for layer: {:}".format(layer))
         out = self.clf.get_layer_output(x, layer=layer)
         self.logger.info("Returning gradient for layer: {:}".format(layer))
