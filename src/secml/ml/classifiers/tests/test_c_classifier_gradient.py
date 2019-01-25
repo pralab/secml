@@ -1,8 +1,7 @@
-from secml.utils import CUnitTest
-
 import random
 from abc import ABCMeta, abstractmethod
 
+from secml.utils import CUnitTest
 from secml.ml.features.normalization import CNormalizerMinMax
 from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
@@ -54,16 +53,21 @@ class CClassifierGradientTestCases(object):
 
                 # Compare the analytical grad with the numerical grad
                 gradient = clf.gradient_f_x(pattern, y=c)
-                self.logger.info("Gradient w.r.t. class %s: %s", str(c), str(
-                    gradient))
-                check_grad_val = COptimizer(
+                num_gradient = COptimizer(
                     CFunction(self._fun_args,
-                              self._grad_args)).check_grad(pattern, ({'y':c}) )
+                              self._grad_args)).approx_fprime(pattern, 1e-8,
+                                                              ({'y': c}))
+                error = (gradient - num_gradient).norm(order=1)
+                self.logger.info("Analitic gradient w.r.t. class %s: %s",
+                                 str(c), str(gradient))
+                self.logger.info("Numeric gradient w.r.t. class %s: %s",
+                                 str(c), str(num_gradient))
+
                 self.logger.info(
-                    "norm(grad - num_grad): %s", str(check_grad_val))
-                self.assertLess(check_grad_val, 1e-3,
-                                "problematic classifier is " +
+                    "norm(grad - num_grad): %s", str(error))
+                self.assertLess(error, 1e-3,"problematic classifier is " +
                                 clf_idx)
+
                 for i, elm in enumerate(gradient):
                     self.assertIsInstance(elm, float)
 
@@ -81,7 +85,7 @@ class CClassifierGradientTestCases(object):
                 clf.fit(self.dataset)
                 self._clf_gradient_check(clf, clf_idx)
 
-        def test_f_norm_x_gradient(self):
+        def _test_f_norm_x_gradient(self):
             """Test the gradient of the classifier discriminant function
             when the classifier have a normalizer inside"""
             self.logger.info(
