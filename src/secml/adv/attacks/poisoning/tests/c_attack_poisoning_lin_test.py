@@ -89,7 +89,7 @@ class CAttackPoisoningLinTest(CCreator):
                                           None else self.pois_obj.ts.Y
 
         # computing gradient of loss(y, f(x)) w.r.t. f
-        score = clf.discriminant_function(self.pois_obj.ts.X)
+        score = clf.decision_function(self.pois_obj.ts.X)
         loss_grad = self.pois_obj._attacker_loss.dloss(y_ts, score)
 
         return idx, clf, loss_grad, tr
