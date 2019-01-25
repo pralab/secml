@@ -141,9 +141,9 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         k = self.ts.num_samples
 
         # handle normalizer, if present
-        x = x if clf.normalizer is None else clf.normalizer.normalize(x)
-        xk = xk if clf.normalizer is None else clf.normalizer.normalize(xk)
-        xc = xc if clf.normalizer is None else clf.normalizer.normalize(xc)
+        x = x if clf.preprocess is None else clf.preprocess.normalize(x)
+        xk = xk if clf.preprocess is None else clf.preprocess.normalize(xk)
+        xc = xc if clf.preprocess is None else clf.preprocess.normalize(xc)
 
         s = self._s(x, w, b)
         sigm = self._sigm(y, s)
@@ -185,5 +185,5 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         #gt = self._compute_grad_solve_iterative(G, H, grad_loss_params) #*
 
         # propagating gradient back to input space
-        return gt if clf.normalizer is None else \
+        return gt if clf.preprocess is None else \
             clf.normalizer.gradient(xc0, gt)

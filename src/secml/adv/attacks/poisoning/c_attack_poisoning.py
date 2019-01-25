@@ -365,10 +365,10 @@ class CAttackPoisoning(CAttack):
             # we assume that normalizer is not changing w.r.t xc!
             # so we avoid re-training the normalizer on dataset including xc
 
-            if not self.classifier.normalizer is None:
+            if not self.classifier.preprocess is None:
                 self._poisoned_clf.retrain_normalizer = train_normalizer
 
-            self._poisoned_clf.train(tr)
+            self._poisoned_clf.fit(tr)
 
         return self._poisoned_clf, tr
 
@@ -406,7 +406,7 @@ class CAttackPoisoning(CAttack):
         # targeted attacks
         y_ts = self._y_target if self._y_target is not None else self.ts.Y
 
-        y_pred, score = clf.classify(self.ts.X)
+        y_pred, score = clf.predict(self.ts.X, return_decision_function=True)
 
         # TODO: binary loss check
         if self._attacker_loss.class_type != 'softmax':
@@ -451,7 +451,7 @@ class CAttackPoisoning(CAttack):
         y_ts = self._y_target if self._y_target is not None else self.ts.Y
 
         # computing gradient of loss(y, f(x)) w.r.t. f
-        score = clf.classify(self.ts.X)[1]
+        score = clf.predict(self.ts.X, return_decision_function=True)[1]
 
         grad = CArray.zeros((xc.size,))
 

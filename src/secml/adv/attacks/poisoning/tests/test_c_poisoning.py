@@ -92,7 +92,7 @@ class CPoisoningTestCases(object):
             self._clf_creation()
 
             start_training = time.time()
-            self.classifier.train(self.tr)
+            self.classifier.fit(self.tr)
             self.clf_orig = self.classifier.deepcopy()
             end_training = time.time()
             print "training time ", end_training - start_training
@@ -124,7 +124,7 @@ class CPoisoningTestCases(object):
 
         def _test_accuracy(self, clf):
             metric = CMetric.create('accuracy')
-            y_pred, scores = clf.classify(self.ts.X)
+            y_pred, scores = clf.predict(self.ts.X, return_decision_function=True)
             acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
             self.logger.info("Error on testing data: " + str(1 - acc))
 
@@ -144,7 +144,8 @@ class CPoisoningTestCases(object):
             self.logger.info("Grad Eval: " + str(self.poisoning.grad_eval))
 
             metric = CMetric.create('accuracy')
-            y_pred, scores = self.classifier.classify(self.ts.X)
+            y_pred, scores = self.classifier.predict(self.ts.X,
+                                          return_decision_function=True)
             acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
             self.logger.info("Error on testing data: " + str(1 - acc))
 
@@ -153,8 +154,9 @@ class CPoisoningTestCases(object):
             pois_clf = self.classifier.deepcopy()
             pois_clf.clear()
 
-            pois_clf.train(tr)
-            y_pred, scores = pois_clf.classify(self.ts.X)
+            pois_clf.fit(tr)
+            y_pred, scores = pois_clf.predict(self.ts.X,
+                                              return_decision_function=True)
             acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
             self.logger.info(
                 "Error on testing data (poisoned): " + str(1 - acc))
