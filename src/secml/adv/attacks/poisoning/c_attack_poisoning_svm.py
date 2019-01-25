@@ -202,8 +202,8 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         grad_loss_fk = CArray(loss_grad[abs(loss_grad) > 0]).atleast_2d()
 
         # handle normalizer, if present
-        xk = xk if svm.normalizer is None else svm.normalizer.normalize(xk)
-        xc = xc if svm.normalizer is None else svm.normalizer.normalize(xc)
+        xk = xk if svm.preprocess is None else svm.preprocess.normalize(xk)
+        xc = xc if svm.preprocess is None else svm.preprocess.normalize(xc)
 
         # gt is the gradient in feature space
         # this gradient component is the only one if margin SV set is empty
@@ -216,8 +216,8 @@ class CAttackPoisoningSVM(CAttackPoisoning):
             self.logger.debug("Warning: xs is empty "
                               "(all points are error vectors).")
          #   print "gt ", gt.norm()
-            return gt if svm.normalizer is None else \
-                svm.normalizer.gradient(xc0, gt)
+            return gt if svm.preprocess is None else \
+                svm.preprocess.gradient(xc0, gt)
 
         s = xs.shape[0]
         k = grad_loss_fk.size
@@ -253,5 +253,5 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         gt += v * alpha_c
 
         # propagating gradient back to input space
-        return gt if svm.normalizer is None else \
-            svm.normalizer.gradient(xc0, gt)
+        return gt if svm.preprocess is None else \
+            svm.preprocess.gradient(xc0, gt)

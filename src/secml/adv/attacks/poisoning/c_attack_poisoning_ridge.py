@@ -110,10 +110,10 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         grad_loss_fk = CArray(loss_grad.ravel()).T  # column vector
 
         # handle normalizer, if present
-        xc = xc if clf.normalizer is None else clf.normalizer.normalize(xc)
+        xc = xc if clf.preprocess is None else clf.preprocess.normalize(xc)
         xc = xc.ravel().atleast_2d()
-        xk = xk if clf.normalizer is None else clf.normalizer.normalize(xk)
-        x = x if clf.normalizer is None else clf.normalizer.normalize(x)
+        xk = xk if clf.preprocess is None else clf.preprocess.normalize(xk)
+        x = x if clf.preprocess is None else clf.preprocess.normalize(x)
 
         # gt is the gradient in feature space
         n = x.shape[0]  # num training samples
@@ -158,7 +158,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
 
         # da sistemare il ret
         # propagating gradient back to input space
-        return gt if clf.normalizer is None else \
-            clf.normalizer.gradient(xc0, gt)
+        return gt if clf.preprocess is None else \
+            clf.preprocess.gradient(xc0, gt)
 
 
