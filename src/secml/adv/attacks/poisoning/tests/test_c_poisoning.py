@@ -303,7 +303,7 @@ class CPoisoningTestCases(object):
 
             # Plotting multiclass decision function
             fig.switch_sptype('function')
-            fig.sp.plot_fobj(lambda x: clf.classify(x)[0],
+            fig.sp.plot_fobj(lambda x: clf.predict(x),
                              multipoint=True, cmap='Set2',
                              grid_limits=self.grid_limits,
                              colorbar=False, n_grid_points=100,
