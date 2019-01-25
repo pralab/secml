@@ -25,10 +25,10 @@ class CClassifierRidge(CClassifierLinear):
 
     def __init__(self, alpha=1.0, kernel=None,
                  max_iter=1e5, class_weight=None, tol=1e-4,
-                 fit_intercept=True, normalizer=None):
+                 fit_intercept=True, preprocess=None):
 
         # Calling the superclass init
-        CClassifierLinear.__init__(self, normalizer=normalizer)
+        CClassifierLinear.__init__(self, preprocess=preprocess)
 
         # Classifier parameters
         self.alpha = alpha
@@ -41,16 +41,22 @@ class CClassifierRidge(CClassifierLinear):
         # Keep private (not a param of SGD)
         self._kernel = kernel if kernel is None else CKernel.create(kernel)
 
-        # After training attributes
         self._tr = None  # slot for the training data
 
     def __clear(self):
         """Reset the object."""
         self._tr = None
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        return self._tr is None and super(CClassifierRidge, self).is_clear()
+        if self._tr is not None:
+            return False
+
+        # CClassifierLinear attributes
+        if self._w is not None or self._b is not None:
+            return False
+
+        return True
 
     @property
     def kernel(self):
@@ -85,7 +91,7 @@ class CClassifierRidge(CClassifierLinear):
         """Returns the number of training samples."""
         return self._tr.shape[0] if self._tr is not None else None
 
-    def _train(self, dataset):
+    def _fit(self, dataset):
         """Trains the One-Vs-All Ridge classifier.
 
         The following is a private method computing one single
@@ -135,7 +141,7 @@ class CClassifierRidge(CClassifierLinear):
         self._w = CArray(ridge.coef_, tosparse=dataset.issparse).ravel()
         self._b = CArray(ridge.intercept_)[0] if self.fit_intercept else 0
 
-    def _discriminant_function(self, x, y=1):
+    def _decision_function(self, x, y=1):
         """Computes the distance from the separating hyperplane for each pattern in x.
 
         The scores are computed in kernel space if kernel is defined.
@@ -147,17 +153,17 @@ class CClassifierRidge(CClassifierLinear):
             (n_patterns, n_features).
         y : {1}
             The label of the class wrt the function should be calculated.
-            Discriminant function is always computed wrt positive class (1).
+            decision function is always computed wrt positive class (1).
 
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
         x = x.atleast_2d()  # Ensuring input is 2-D
-        # Compute discriminant function in kernel space if necessary
+        # Compute decision function in kernel space if necessary
         k = x if self.kernel is None else CArray(self.kernel.k(x, self._tr))
         # Scores are given by the linear model
-        return CClassifierLinear._discriminant_function(self, k, y=y)
+        return CClassifierLinear._decision_function(self, k, y=y)

@@ -6,7 +6,7 @@ from sklearn.svm import SVC
 from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM
-from secml.ml.classifiers import CClassifierMulticlassOVA
+from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.ml.peval.metrics import CMetric
 from secml.figure import CFigure
 
@@ -26,8 +26,9 @@ class TestCClassifierMultiOVA(CUnitTest):
                                               class_weight='balanced')
         multiclass.verbose = 2
 
-        multiclass.train(self.dataset, n_jobs=2)
-        class_pred, score_pred = multiclass.classify(self.dataset.X, n_jobs=2)
+        multiclass.fit(self.dataset, n_jobs=2)
+        class_pred, score_pred = multiclass.predict(
+            self.dataset.X, n_jobs=2, return_decision_function=True)
 
         self.logger.info("Predicted: \n{:}".format(class_pred))
         self.logger.info("Real: \n{:}".format(self.dataset.Y))
@@ -67,8 +68,8 @@ class TestCClassifierMultiOVA(CUnitTest):
         different_gamma = (50, 60, 70, 80)
         multiclass.set('kernel.gamma', different_gamma)
 
-        # Train multiclass classifier than test set after training
-        multiclass.train(self.dataset)
+        # Fit multiclass classifier than test set after training
+        multiclass.fit(self.dataset)
 
         for clf_idx, clf in enumerate(multiclass.binary_classifiers):
             self.assertEqual(clf.C, different_c[clf_idx])
@@ -106,7 +107,7 @@ class TestCClassifierMultiOVA(CUnitTest):
 
         multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                               class_weight='balanced')
-        multiclass.train(self.dataset)
+        multiclass.fit(self.dataset)
         multiclass.apply_method(CClassifierSVM.set, param_name='C',
                                 param_value=150)
 
@@ -118,18 +119,18 @@ class TestCClassifierMultiOVA(CUnitTest):
         from secml.ml.features.normalization import CNormalizerMinMax
         from secml.data import CDataset
 
-        ds_norm_x = CNormalizerMinMax().train_normalize(self.dataset.X)
+        ds_norm_x = CNormalizerMinMax().fit_normalize(self.dataset.X)
 
         multi_nonorm = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                                 class_weight='balanced')
-        multi_nonorm.train(CDataset(ds_norm_x, self.dataset.Y))
-        pred_y_nonorm = multi_nonorm.classify(ds_norm_x)[0]
+        multi_nonorm.fit(CDataset(ds_norm_x, self.dataset.Y))
+        pred_y_nonorm = multi_nonorm.predict(ds_norm_x)
 
         multi = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                          class_weight='balanced',
-                                         normalizer='minmax')
-        multi.train(self.dataset)
-        pred_y = multi.classify(self.dataset.X)[0]
+                                         preprocess='minmax')
+        multi.fit(self.dataset)
+        pred_y = multi.predict(self.dataset.X)
 
         self.logger.info(
             "Predictions with internal norm:\n{:}".format(pred_y))
@@ -142,14 +143,14 @@ class TestCClassifierMultiOVA(CUnitTest):
         """Unittests for gradient() function."""
         multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                               class_weight='balanced')
-        multiclass.train(self.dataset)
+        multiclass.fit(self.dataset)
 
         import random
         pattern = CArray(random.choice(self.dataset.X.get_data()))
         self.logger.info("Randomly selected pattern:\n%s", str(pattern))
 
         # Get predicted label
-        sample_label = multiclass.classify(pattern)[0].item()
+        sample_label = multiclass.predict(pattern).item()
         # Return the gradient of the label^th sub-classifier
         ova_grad = multiclass.binary_classifiers[
             sample_label].gradient_f_x(pattern)
@@ -180,12 +181,14 @@ class TestCClassifierMultiOVA(CUnitTest):
                        random_state=0).load()
 
         multiclass = CClassifierMulticlassOVA(
-            classifier=CClassifierSVM, class_weight='balanced',
-            normalizer='minmax')
+            classifier=CClassifierSVM,
+            class_weight='balanced',
+            preprocess='minmax')
 
         # Training and classification
-        multiclass.train(ds)
-        y_pred, score_pred = multiclass.classify(ds.X)
+        multiclass.fit(ds)
+        y_pred, score_pred = multiclass.predict(
+            ds.X, return_decision_function=True)
 
         def plot_hyperplane(img, clf, min_v, max_v, linestyle, label):
             """Plot the hyperplane associated to the OVA clf."""
@@ -219,7 +222,7 @@ class TestCClassifierMultiOVA(CUnitTest):
 
         # Plotting multiclass decision function
         fig.switch_sptype('function')
-        fig.sp.plot_fobj(lambda x: multiclass.classify(x)[0],
+        fig.sp.plot_fobj(lambda x: multiclass.predict(x),
                          grid_limits=ds.get_bounds(offset=5), colorbar=False,
                          n_grid_points=50, plot_levels=False)
 
@@ -233,9 +236,9 @@ class TestCClassifierMultiOVA(CUnitTest):
         fig.show()
 
     def test_fun(self):
-        """Test for discriminant_function() and classify() methods."""
+        """Test for decision_function() and predict() methods."""
         self.logger.info(
-            "Test for discriminant_function() and classify() methods.")
+            "Test for decision_function() and predict() methods.")
 
         def _check_df_scores(s, n_samples):
             self.assertEqual(type(s), CArray)
@@ -259,47 +262,47 @@ class TestCClassifierMultiOVA(CUnitTest):
         mc = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                       class_weight='balanced')
 
-        mc.train(self.dataset, n_jobs=2)
+        mc.fit(self.dataset, n_jobs=2)
 
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Normalizing data if a normalizer is defined
-        if mc.normalizer is not None:
-            x_norm = mc.normalizer.normalize(x)
-            p_norm = mc.normalizer.normalize(p)
+        # Preprocessing data if a preprocess is defined
+        if mc.preprocess is not None:
+            x_norm = mc.preprocess.normalize(x)
+            p_norm = mc.preprocess.normalize(p)
 
-        # Testing discriminant_function on multiple points
+        # Testing decision_function on multiple points
 
-        df_scores_0 = mc.discriminant_function(x, y=0)
+        df_scores_0 = mc.decision_function(x, y=0)
         self.logger.info(
-            "discriminant_function(x, y=0):\n{:}".format(df_scores_0))
+            "decision_function(x, y=0):\n{:}".format(df_scores_0))
         _check_df_scores(df_scores_0, self.dataset.num_samples)
 
-        df_scores_1 = mc.discriminant_function(x, y=1)
+        df_scores_1 = mc.decision_function(x, y=1)
         self.logger.info(
-            "discriminant_function(x, y=1):\n{:}".format(df_scores_1))
+            "decision_function(x, y=1):\n{:}".format(df_scores_1))
         _check_df_scores(df_scores_1, self.dataset.num_samples)
 
-        df_scores_2 = mc.discriminant_function(x, y=2)
+        df_scores_2 = mc.decision_function(x, y=2)
         self.logger.info(
-            "discriminant_function(x, y=2):\n{:}".format(df_scores_2))
+            "decision_function(x, y=2):\n{:}".format(df_scores_2))
         _check_df_scores(df_scores_2, self.dataset.num_samples)
 
-        # Testing _discriminant_function on multiple points
+        # Testing _decision_function on multiple points
 
-        ds_priv_scores_0 = mc._discriminant_function(x_norm, y=0)
-        self.logger.info("_discriminant_function(x_norm, y=0):\n"
+        ds_priv_scores_0 = mc._decision_function(x_norm, y=0)
+        self.logger.info("_decision_function(x_norm, y=0):\n"
                          "{:}".format(ds_priv_scores_0))
         _check_df_scores(ds_priv_scores_0, self.dataset.num_samples)
 
-        ds_priv_scores_1 = mc._discriminant_function(x_norm, y=1)
-        self.logger.info("_discriminant_function(x_norm, y=1):\n"
+        ds_priv_scores_1 = mc._decision_function(x_norm, y=1)
+        self.logger.info("_decision_function(x_norm, y=1):\n"
                          "{:}".format(ds_priv_scores_1))
         _check_df_scores(ds_priv_scores_1, self.dataset.num_samples)
 
-        ds_priv_scores_2 = mc._discriminant_function(x_norm, y=2)
-        self.logger.info("_discriminant_function(x_norm, y=2):\n"
+        ds_priv_scores_2 = mc._decision_function(x_norm, y=2)
+        self.logger.info("_decision_function(x_norm, y=2):\n"
                          "{:}".format(ds_priv_scores_2))
         _check_df_scores(ds_priv_scores_2, self.dataset.num_samples)
 
@@ -309,51 +312,51 @@ class TestCClassifierMultiOVA(CUnitTest):
         self.assertFalse((df_scores_1 != ds_priv_scores_1).any())
         self.assertFalse((df_scores_2 != ds_priv_scores_2).any())
 
-        # Testing classify on multiple points
+        # Testing predict on multiple points
 
-        labels, scores = mc.classify(x)
+        labels, scores = mc.predict(x, return_decision_function=True)
         self.logger.info(
-            "classify(x):\nlabels: {:}\nscores:{:}".format(labels, scores))
+            "predict(x):\nlabels: {:}\nscores:{:}".format(labels, scores))
         _check_classify_scores(
             labels, scores, self.dataset.num_samples, mc.n_classes)
 
-        # Comparing output of discriminant_function and classify
+        # Comparing output of decision_function and predict
 
         self.assertFalse((df_scores_0 != scores[:, 0].ravel()).any())
         self.assertFalse((df_scores_1 != scores[:, 1].ravel()).any())
         self.assertFalse((df_scores_2 != scores[:, 2].ravel()).any())
 
-        # Testing discriminant_function on single point
+        # Testing decision_function on single point
 
-        df_scores_0 = mc.discriminant_function(p, y=0)
+        df_scores_0 = mc.decision_function(p, y=0)
         self.logger.info(
-            "discriminant_function(p, y=0):\n{:}".format(df_scores_0))
+            "decision_function(p, y=0):\n{:}".format(df_scores_0))
         _check_df_scores(df_scores_0, 1)
 
-        df_scores_1 = mc.discriminant_function(p, y=1)
+        df_scores_1 = mc.decision_function(p, y=1)
         self.logger.info(
-            "discriminant_function(p, y=1):\n{:}".format(df_scores_1))
+            "decision_function(p, y=1):\n{:}".format(df_scores_1))
         _check_df_scores(df_scores_1, 1)
 
-        df_scores_2 = mc.discriminant_function(p, y=2)
+        df_scores_2 = mc.decision_function(p, y=2)
         self.logger.info(
-            "discriminant_function(p, y=2):\n{:}".format(df_scores_2))
+            "decision_function(p, y=2):\n{:}".format(df_scores_2))
         _check_df_scores(df_scores_2, 1)
 
-        # Testing _discriminant_function on single point
+        # Testing _decision_function on single point
 
-        df_priv_scores_0 = mc._discriminant_function(p_norm, y=0)
-        self.logger.info("_discriminant_function(p_norm, y=0):\n{:}"
+        df_priv_scores_0 = mc._decision_function(p_norm, y=0)
+        self.logger.info("_decision_function(p_norm, y=0):\n{:}"
                          "".format(df_priv_scores_0))
         _check_df_scores(df_priv_scores_0, 1)
 
-        df_priv_scores_1 = mc._discriminant_function(p_norm, y=1)
-        self.logger.info("_discriminant_function(p_norm, y=1):\n{:}"
+        df_priv_scores_1 = mc._decision_function(p_norm, y=1)
+        self.logger.info("_decision_function(p_norm, y=1):\n{:}"
                          "".format(df_priv_scores_1))
         _check_df_scores(df_priv_scores_1, 1)
 
-        df_priv_scores_2 = mc._discriminant_function(p_norm, y=2)
-        self.logger.info("_discriminant_function(p_norm, y=2):\n"
+        df_priv_scores_2 = mc._decision_function(p_norm, y=2)
+        self.logger.info("_decision_function(p_norm, y=2):\n"
                          "{:}".format(df_priv_scores_2))
         _check_df_scores(df_priv_scores_2, 1)
 
@@ -363,14 +366,14 @@ class TestCClassifierMultiOVA(CUnitTest):
         self.assertFalse((df_scores_1 != df_priv_scores_1).any())
         self.assertFalse((df_scores_2 != df_priv_scores_2).any())
 
-        self.logger.info("Testing classify on single point")
+        self.logger.info("Testing predict on single point")
 
-        labels, scores = mc.classify(p)
+        labels, scores = mc.predict(p, return_decision_function=True)
         self.logger.info(
-            "classify(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
+            "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 1, mc.n_classes)
 
-        # Comparing output of discriminant_function and classify
+        # Comparing output of decision_function and predict
 
         self.assertFalse(
             (df_scores_0 != CArray(scores[:, 0]).ravel()).any())

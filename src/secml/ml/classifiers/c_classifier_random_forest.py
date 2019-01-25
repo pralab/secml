@@ -24,10 +24,10 @@ class CClassifierRandomForest(CClassifier):
     __class_type = 'random-forest'
 
     def __init__(self, n_estimators=10, criterion='gini',
-                 max_depth=None, min_samples_split=2, normalizer=None):
+                 max_depth=None, min_samples_split=2, preprocess=None):
 
         # Calling CClassifier constructor
-        CClassifier.__init__(self, normalizer=normalizer)
+        CClassifier.__init__(self, preprocess=preprocess)
 
         # Classifier Parameters
         self.n_estimators = n_estimators
@@ -41,10 +41,9 @@ class CClassifierRandomForest(CClassifier):
         """Reset the object."""
         self._rf = None
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        return self._rf is None and \
-            super(CClassifierRandomForest, self).is_clear()
+        return self._rf is None
 
     @property
     def n_estimators(self):
@@ -66,7 +65,7 @@ class CClassifierRandomForest(CClassifier):
         """Sets classifier min_samples_split."""
         self._min_samples_split = value
 
-    def _train(self, dataset):
+    def _fit(self, dataset):
         """Trains the Random Forest classifier."""
         if dataset.issparse is True and sklearn.__version__ < '0.16':
             raise ValueError(
@@ -82,8 +81,8 @@ class CClassifierRandomForest(CClassifier):
 
         return self._rf
 
-    def _discriminant_function(self, x, y):
-        """Computes the discriminant function (probability estimates) for each pattern in x.
+    def _decision_function(self, x, y):
+        """Computes the decision function (probability estimates) for each pattern in x.
 
         Parameters
         ----------
@@ -96,7 +95,7 @@ class CClassifierRandomForest(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """

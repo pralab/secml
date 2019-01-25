@@ -100,8 +100,6 @@ class CLossLogistic(CLossClassification):
         y_true = convert_binary_labels(y_true).ravel()  # Convert to {-1, 1}
         score = _check_binary_score(score, pos_label)
 
-        y_true = y_true.astype(float)
-
         # d/df log ( 1+ exp(-yf)) / log(2)  =
         #     1/ log(2) * ( 1+ exp(-yf)) exp(-yf) -y
 
@@ -113,7 +111,7 @@ class CLossLogistic(CLossClassification):
         else:
             # linear approximation avoids numerical overflows
             # when -yf >> 1 : loss ~= -yf, and grad = -y
-            h = -y_true
+            h = -y_true.astype(float)
             h[v < bound] = h[v < bound] * v[v < bound].exp() / \
                                                     (1.0 + v[v < bound].exp())
 

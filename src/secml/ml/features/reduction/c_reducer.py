@@ -21,8 +21,8 @@ class CReducer(CCreator):
     __super__ = 'CReducer'
 
     @abstractmethod
-    def train(self, data, y):
-        """Train reduction algorithm using data.
+    def fit(self, data, y):
+        """Fit reduction algorithm using data.
 
         Parameters
         ----------
@@ -30,7 +30,7 @@ class CReducer(CCreator):
             Array to be used for training reduction algorithm.
             Shape of input array depends on the algorithm itself.
         y : CArray
-            Flat Carray with target values. This is not used by all
+            Flat CArray with target values. This is not used by all
             reduction algorithms.
 
         Returns
@@ -60,10 +60,10 @@ class CReducer(CCreator):
         """
         return NotImplementedError("this is an abstract method. Must be overriden in subclass.")
 
-    def train_transform(self, data, y=None):
-        """Train reduction algorithm using data and then transform data.
+    def fit_transform(self, data, y=None):
+        """Fit reduction algorithm using data and then transform data.
 
-        This method is equivalent to call train(data) and transform(data)
+        This method is equivalent to call fit(data) and transform(data)
         in sequence, but it's useful when data is both the training array
         and the array to transform.
 
@@ -74,7 +74,7 @@ class CReducer(CCreator):
             Each row must correspond to one single pattern, so each
             column is a different feature.
         y : CArray
-            Flat Carray with target values. This is not used by all
+            Flat CArray with target values. This is not used by all
             reduction algorithms.
 
         Returns
@@ -84,11 +84,11 @@ class CReducer(CCreator):
 
         See Also
         --------
-        train : train the reduction algorithm on input data.
+        fit : fit the reduction algorithm on input data.
         transform : transform input data according training data.
 
         """
-        self.train(data, y)  # training reduction first
+        self.fit(data, y)  # training reduction first
         return self.transform(data)
 
     def revert(self, data):

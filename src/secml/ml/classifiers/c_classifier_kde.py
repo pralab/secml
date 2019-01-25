@@ -34,30 +34,28 @@ class CClassifierKDE(CClassifier):
     """
     __class_type = 'kde'
 
-    def __init__(self, kernel=None, normalizer=None):
+    def __init__(self, kernel=None, preprocess=None):
 
         # Calling CClassifier init
-        super(CClassifierKDE, self).__init__(normalizer=normalizer)
-
-        # After-training attributes
-        self._training_samples = None  # slot store training samples
+        super(CClassifierKDE, self).__init__(preprocess=preprocess)
 
         # Setting up the kernel function
         kernel_type = 'linear' if kernel is None else kernel
         self._kernel = CKernel.create(kernel_type)
 
+        self._training_samples = None  # slot store training samples
+
     def __clear(self):
         self._training_samples = None
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        return self._training_samples is None and \
-            super(CClassifierKDE, self).is_clear()
+        return self._training_samples is None
 
     def is_linear(self):
         """Return True if the classifier is linear."""
-        if (self.normalizer is None or self.normalizer is not None and
-                self.normalizer.is_linear()) and self.is_kernel_linear():
+        if (self.preprocess is None or self.preprocess is not None and
+            self.preprocess.is_linear()) and self.is_kernel_linear():
             return True
         return False
 
@@ -80,7 +78,7 @@ class CClassifierKDE(CClassifier):
     def training_samples(self, value):
         self._training_samples = value
 
-    def _train(self, dataset):
+    def _fit(self, dataset):
         """Trains the One-Vs-All Kernel Density Estimator classifier.
 
         The following is a private method computing one single
@@ -118,11 +116,11 @@ class CClassifierKDE(CClassifier):
 
         return self
 
-    def discriminant_function(self, x, y=1):
-        """Computes the discriminant function for each pattern in x.
+    def decision_function(self, x, y=1):
+        """Computes the decision function for each pattern in x.
 
-        If a normalizer has been specified, input is normalized
-         before computing the discriminant function.
+        If a preprocess has been specified, input is normalized
+         before computing the decision function.
 
         Parameters
         ----------
@@ -136,7 +134,7 @@ class CClassifierKDE(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
@@ -145,14 +143,14 @@ class CClassifierKDE(CClassifier):
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Normalizing data if a normalizer is defined
-        if self.normalizer is not None:
-            x = self.normalizer.normalize(x)
+        # Preprocessing data if a preprocess is defined
+        if self.preprocess is not None:
+            x = self.preprocess.normalize(x)
 
-        return self._discriminant_function(x, y=y)
+        return self._decision_function(x, y=y)
 
-    def _discriminant_function(self, x, y=1):
-        """Computes the discriminant function for each pattern in x.
+    def _decision_function(self, x, y=1):
+        """Computes the decision function for each pattern in x.
 
         Parameters
         ----------
@@ -166,7 +164,7 @@ class CClassifierKDE(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """

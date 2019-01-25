@@ -19,11 +19,11 @@ import torch.utils.data as data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
-from secml.core.settings import SECML_PYTORCH_DATA_DIR, SECML_PYTORCH_MODELS_DIR
+from secml.settings import SECML_PYTORCH_DATA_DIR, SECML_PYTORCH_MODELS_DIR
 from secml.utils import fm
 
 from secml.data.loader import CDataLoaderCIFAR10
-from secml.pytorch.data import CTorchDataset
+from secml.pytorch.data import CDatasetPyTorch
 
 from secml.pytorch.models import dl_pytorch_model
 import secml.pytorch.models.cifar as models
@@ -85,7 +85,7 @@ def main():
          transforms.Normalize((0.4914, 0.4822, 0.4465),
                               (0.2023, 0.1994, 0.2010))])
 
-    trainset = CTorchDataset(tr, transform=transform)
+    trainset = CDatasetPyTorch(tr, transform=transform)
 
     # trainset = datasets.CIFAR10(root=fm.join(SECML_PYTORCH_DATA_DIR, 'data'),
     #                             train=True, download=True,
@@ -93,7 +93,7 @@ def main():
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=25,
                                               shuffle=True, num_workers=1)
 
-    testset = CTorchDataset(ts, transform=transform)
+    testset = CDatasetPyTorch(ts, transform=transform)
 
     # testset = datasets.CIFAR10(root=fm.join(SECML_PYTORCH_DATA_DIR, 'data'),
     #                            train=False, download=True,

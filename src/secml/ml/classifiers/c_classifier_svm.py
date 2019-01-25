@@ -31,10 +31,10 @@ class CClassifierSVM(CClassifierLinear):
         weight one. The 'balanced' mode uses the values of labels to
         automatically adjust weights inversely proportional to
         class frequencies as `n_samples / (n_classes * np.bincount(y))`.
-    normalizer : str, CNormalizer
-        Features normalizer to applied to input data.
+    preprocess : str or CNormalizer
+        Features preprocess to applied to input data.
         Can be a CNormalizer subclass or a string with the desired
-        normalizer type. If None, input data is used as is.
+        preprocess type. If None, input data is used as is.
     grad_sampling : float
         Percentage in (0.0, 1.0] of the alpha weights to be considered
         when computing the classifier gradient.
@@ -57,10 +57,10 @@ class CClassifierSVM(CClassifierLinear):
     __class_type = 'svm'
 
     def __init__(self, kernel=None, C=1.0, class_weight=None,
-                 normalizer=None, grad_sampling=1.0, store_dual_vars=None):
+                 preprocess=None, grad_sampling=1.0, store_dual_vars=None):
 
         # Calling the superclass init
-        CClassifierLinear.__init__(self, normalizer=normalizer)
+        CClassifierLinear.__init__(self, preprocess=preprocess)
 
         # Classifier parameters
         self.C = C
@@ -82,28 +82,31 @@ class CClassifierSVM(CClassifierLinear):
         self._sv = None
 
         # slot for the computed kernel function (to speed up multiclass)
+        # DO NOT CLEAR
         self._k = None
 
     def __clear(self):
         """Reset the object."""
-        # SVM specific attributes
         self._n_sv = None
         self._sv_idx = None
         self._alpha = None
         self._sv = None
         self._k = None
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        # SVM is a special case, we cannot use a 'super' chain easily
-        cond_nl = self.n_sv is None and self.sv_idx is None and \
-            self.sv is None and self.alpha is None and self.b is None and \
-            self._classes is None and self._n_features is None and \
-            (self.normalizer is None or
-             self.normalizer is not None and self.normalizer.is_clear())
-        if self.is_kernel_linear():
-            return cond_nl and self.w is None
-        return cond_nl
+        if self.n_sv is not None or self.sv_idx is not None:
+            return False
+        if self.alpha is not None or self.sv is not None:
+            return False
+
+        # Following are special cases as SVM can be both linear and nonlinear
+        if self.b is not None:
+            return False
+        if self.is_kernel_linear() is True and self.w is not None:
+            return False
+
+        return True
 
     def is_linear(self):
         """Return True if the classifier is linear."""
@@ -237,16 +240,16 @@ class CClassifierSVM(CClassifierLinear):
         """Support Vectors."""
         return self._sv
 
-    def train(self, dataset, n_jobs=1):
-        """Trains the SVM classifier.
+    def fit(self, dataset, n_jobs=1):
+        """Fit the SVM classifier.
 
         We use :class:`sklearn.svm.SVC` for weights and Support Vectors
         computation. The routine will set alpha, sv, sv_idx and b
         parameters. For linear SVM (i.e. if kernel is None)
         we also store the 'w' flat vector with each feature's weight.
 
-        If a normalizer has been specified, input is normalized
-        before computing the discriminant function.
+        If a preprocess has been specified, input is normalized
+        before computing the decision function.
 
         Parameters
         ----------
@@ -263,14 +266,13 @@ class CClassifierSVM(CClassifierLinear):
             Instance of the SVM classifier trained using input dataset.
 
         """
-        # Train the SVM
-        super(CClassifierSVM, self).train(dataset, n_jobs=n_jobs)
+        super(CClassifierSVM, self).fit(dataset, n_jobs=n_jobs)
         # Cleaning up kernel matrix to free memory
         self._k = None
 
         return self
 
-    def _train(self, dataset):
+    def _fit(self, dataset):
         """Trains the One-Vs-All SVM classifier.
 
         Parameters
@@ -325,7 +327,7 @@ class CClassifierSVM(CClassifierLinear):
 
         return classifier
 
-    def _discriminant_function(self, x, y=1):
+    def _decision_function(self, x, y=1):
         """Computes the distance from the separating hyperplane for each pattern in x.
 
         For non linear SVM, the kernel between input patterns and
@@ -339,17 +341,17 @@ class CClassifierSVM(CClassifierLinear):
             (n_patterns, n_features).
         y : {1}
             The label of the class wrt the function should be calculated.
-            Discriminant function is always computed wrt positive class (1).
+            decision function is always computed wrt positive class (1).
 
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
         if self.is_kernel_linear():  # Scores are given by the linear model
-            return CClassifierLinear._discriminant_function(
+            return CClassifierLinear._decision_function(
                 self, x, y=y)
 
         # Non-linear SVM
@@ -357,7 +359,7 @@ class CClassifierSVM(CClassifierLinear):
             raise ValueError("make sure the classifier is trained first.")
         if y != 1:
             raise ValueError(
-                "discriminant function is always computed wrt positive class.")
+                "decision function is always computed wrt positive class.")
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 

@@ -22,14 +22,17 @@ class CClassifierMCSLinear(CClassifierLinear):
     ----------
     classifier : CClassifierLinear
         Instance of the linear classifier to be used in the MCS.
-    num_classifiers : int
-        Number of linear classifiers to train, default 10.
-    max_samples : float
+    num_classifiers : int, optional
+        Number of linear classifiers to fit, default 10.
+    max_samples : float, optional
         Percentage of the samples to use for training,
         range [0, 1.0]. Default 1.0 (all the samples).
-    max_features : float
+    max_features : float, optional
         Percentage of the features to use for training,
         range [0, 1.0]. Default 1.0 (all the features.
+    random_state : int or None, optional
+        If int, random_state is the seed used by the random number generator.
+        If None, no fixed seed will be set.
 
     Attributes
     ----------
@@ -39,10 +42,11 @@ class CClassifierMCSLinear(CClassifierLinear):
     __class_type = 'mcs-linear'
     
     def __init__(self, classifier, num_classifiers=10,
-                 max_samples=1.0, max_features=1.0, normalizer=None):
+                 max_samples=1.0, max_features=1.0,
+                 random_state=None, preprocess=None):
 
         # Calling constructor of CClassifierLinear
-        CClassifierLinear.__init__(self, normalizer=normalizer)
+        CClassifierLinear.__init__(self, preprocess=preprocess)
 
         # Instance of the classifier to use
         self.classifier = classifier
@@ -50,6 +54,14 @@ class CClassifierMCSLinear(CClassifierLinear):
         self.n_classifiers = num_classifiers
         self.max_samples = max_samples
         self.max_features = max_features
+        self.random_state = random_state
+
+    def __is_clear(self):
+        """Returns True if object is clear."""
+        # CClassifierLinear attributes
+        if self._w is not None or self._b is not None:
+            return False
+        return True
     
     @property
     def classifier(self):
@@ -66,7 +78,7 @@ class CClassifierMCSLinear(CClassifierLinear):
         
     @property
     def n_classifiers(self):
-        """Number of linear classifiers to train."""
+        """Number of linear classifiers to fit."""
         return self._n_classifiers
     
     @n_classifiers.setter
@@ -95,8 +107,8 @@ class CClassifierMCSLinear(CClassifierLinear):
             raise ValueError("`max_features` must be inside [0, 1.0] range.")
         self._max_features = float(value)
 
-    def _train(self, dataset):
-        """Train the MCS Linear Classifier.
+    def _fit(self, dataset):
+        """Fit the MCS Linear Classifier.
 
         Parameters
         ----------
@@ -119,15 +131,17 @@ class CClassifierMCSLinear(CClassifierLinear):
         for i in xrange(self.n_classifiers):
 
             # generate random indices for features and samples
-            idx_samples = CArray.randsample(dataset.num_samples, num_samples)
-            idx_features = CArray.randsample(dataset.num_features, num_features)
+            idx_samples = CArray.randsample(dataset.num_samples, num_samples,
+                                            random_state=self.random_state)
+            idx_features = CArray.randsample(dataset.num_features, num_features,
+                                             random_state=self.random_state)
 
             data_x = dataset.X[idx_samples, :]
             data_x = data_x[:, idx_features]
 
             data = CDataset(data_x, dataset.Y[idx_samples])
             
-            self.classifier.train(data)
+            self.classifier.fit(data)
             self._w[idx_features] += self.classifier.w
             self._b += self.classifier.b
             

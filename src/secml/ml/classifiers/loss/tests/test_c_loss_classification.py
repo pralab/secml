@@ -1,13 +1,12 @@
 from secml.utils import CUnitTest
-from secml.array import CArray
+
 from secml.ml.classifiers.loss import *
 from secml.data.loader import CDLRandom
-from secml.figure import CFigure
 from secml.ml.classifiers import CClassifierSVM
-from secml.ml.classifiers.loss import *
+from secml.array import CArray
+from secml.figure import CFigure
 from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
-from secml.utils import CUnitTest
 
 
 class TestCLossClassification(CUnitTest):
@@ -19,13 +18,15 @@ class TestCLossClassification(CUnitTest):
 
         self.logger.info("Train an SVM and classify dataset...")
         self.svm = CClassifierSVM()
-        self.svm.train(self.ds)
-        self.labels, self.scores = self.svm.classify(self.ds.X)
+        self.svm.fit(self.ds)
+        self.labels, self.scores = self.svm.predict(
+            self.ds.X, return_decision_function=True)
 
     def test_one_at_zero(self):
         """Testing that classification loss return 1 for input 0."""
 
-        for loss_id in ('hinge', 'hinge_squared', 'square', 'log'):
+        for loss_id in ('hinge', 'hinge-squared', 'square', 'log'):
+
             self.logger.info("Creating loss: {:}".format(loss_id))
             loss_class = CLoss.create(loss_id)
 
@@ -42,7 +43,8 @@ class TestCLossClassification(CUnitTest):
             self.assertEqual(n_samples, l.size)
             self.assertEqual(l.dtype, float)
 
-        for loss_id in ('hinge', 'hinge_squared', 'square', 'log'):
+        for loss_id in ('hinge', 'hinge-squared', 'square', 'log'):
+
             self.logger.info("Creating loss: {:}".format(loss_id))
             loss_class = CLoss.create(loss_id)
 
@@ -97,7 +99,8 @@ class TestCLossClassification(CUnitTest):
         fig.sp.plot(x, CArray([1 if i <= 0 else 0 for i in x]),
                     label='0-1 indicator')
 
-        for loss_id in ('hinge', 'hinge_squared', 'square', 'log'):
+        for loss_id in ('hinge', 'hinge-squared', 'square', 'log'):
+
             self.logger.info("Creating loss: {:}".format(loss_id))
             loss_class = CLoss.create(loss_id)
             fig.sp.plot(x, loss_class.loss(CArray([1]), x), label=loss_id)
@@ -107,27 +110,26 @@ class TestCLossClassification(CUnitTest):
 
         fig.show()
 
-    def _loss_wrapper(self, score):
-        return self.loss.loss(self._y_true, score)
-
-    def _dloss_wrapper(self, score):
-        return self.loss.dloss(self._y_true, score)
-
     def test_grad(self):
-        # Compare analytical gradient with its numerical approximation
+        """Compare analytical gradients with its numerical approximation."""
+        def _loss_wrapper(scores, loss, true_labels):
+            return loss.loss(true_labels, scores)
 
-        for loss_id in ('hinge', 'hinge_squared', 'square', 'log'):
+        def _dloss_wrapper(scores, loss, true_labels):
+            return loss.dloss(true_labels, scores)
+
+        for loss_id in ('hinge', 'hinge-squared', 'square', 'log'):
             self.logger.info("Creating loss: {:}".format(loss_id))
-            self.loss = CLoss.create(loss_id)
+            loss_class = CLoss.create(loss_id)
 
             n_elemes = 1
-            self._y_true = CArray.randint(0, 2, n_elemes).todense()
+            y_true = CArray.randint(0, 2, n_elemes).todense()
             score = CArray.randn((n_elemes,))
 
             check_grad_val = COptimizer(
-                CFunction(self._loss_wrapper,
-                          self._dloss_wrapper)
-            ).check_grad(score)
+                CFunction(_loss_wrapper,
+                          _dloss_wrapper)
+            ).check_grad(score, loss_class, y_true)
             self.logger.info("Gradient difference between analytical svm "
                              "gradient and numerical gradient: %s",
                              str(check_grad_val))

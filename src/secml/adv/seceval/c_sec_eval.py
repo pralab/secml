@@ -11,7 +11,7 @@ import time
 from secml.core import CCreator
 from secml.array import CArray
 
-from secml.adv.seceval import CSecEvalData, CSecEvalDataEvasion
+from secml.adv.seceval import CSecEvalData
 from secml.adv.attacks.c_attack import CAttack
 
 
@@ -50,11 +50,7 @@ class CSecEval(CCreator):
         self.attack = attack
         self._save_adv_ds = save_adv_ds
 
-        # read-only variables (security evaluation results)
-        if self.attack.class_type == 'evasion':
-            self._sec_eval_data = CSecEvalDataEvasion()
-        else:
-            self._sec_eval_data = CSecEvalData()
+        self._sec_eval_data = CSecEvalData()
         self._sec_eval_data.param_name = param_name
         self._sec_eval_data.param_values = param_values
         if not self._attack.y_target is None:
@@ -197,15 +193,6 @@ class CSecEval(CCreator):
                 else:
                     self._sec_eval_data.adv_ds = [adv_ds.deepcopy()]
 
-            if self.attack.class_type == 'evasion':
-                first_eva = attack_result[4]
-                if self._sec_eval_data.first_eva is not None:
-                    for e_i, e in enumerate(self._sec_eval_data.first_eva):
-                        if e is None and first_eva[e_i] is not None:
-                            self._sec_eval_data.first_eva[e_i] = first_eva[e_i]
-                else:
-                    self._sec_eval_data.first_eva = first_eva
-
             self._sec_eval_data.Y_pred[k] = y_pred
             self._sec_eval_data.scores[k] = scores
             self._sec_eval_data.fobj[k] = fobj
@@ -218,7 +205,4 @@ class CSecEval(CCreator):
 
     def load_data(self, path):
         """Restore Sec Eval data from file."""
-        if self.attack.class_type == 'evasion':
-            self._sec_eval_data = CSecEvalDataEvasion.load(path)
-        else:
-            self._sec_eval_data = CSecEvalData.load(path)
+        self._sec_eval_data = CSecEvalData.load(path)

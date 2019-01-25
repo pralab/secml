@@ -25,10 +25,10 @@ class CClassifierNearestCentroid(CClassifier):
     __class_type = 'nrst-centroid'
 
     def __init__(self, metric='euclidean',
-                 shrink_threshold=None, normalizer=None):
+                 shrink_threshold=None, preprocess=None):
 
         # Calling CClassifier init
-        super(CClassifierNearestCentroid, self).__init__(normalizer=normalizer)
+        super(CClassifierNearestCentroid, self).__init__(preprocess=preprocess)
 
         self._metric = metric
         self._shrink_threshold = shrink_threshold
@@ -41,10 +41,9 @@ class CClassifierNearestCentroid(CClassifier):
         self._nc = None
         self._centroids = None
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        return self._nc is None and self._centroids is None and \
-            super(CClassifierNearestCentroid, self).is_clear()
+        return self._nc is None and self._centroids is None
 
     @property
     def metric(self):
@@ -54,7 +53,7 @@ class CClassifierNearestCentroid(CClassifier):
     def centroids(self):
         return self._centroids
 
-    def _train(self, dataset):
+    def _fit(self, dataset):
         """Trains classifier 
     
         Parameters
@@ -82,14 +81,14 @@ class CClassifierNearestCentroid(CClassifier):
 
         return self._nc
 
-    def discriminant_function(self, x, y=1):
-        """Computes the discriminant function for each pattern in x.
+    def decision_function(self, x, y=1):
+        """Computes the decision function for each pattern in x.
 
         The score is the distance of each pattern
          from the centroid of class `y`
 
-        If a normalizer has been specified, input is normalized
-         before computing the discriminant function.
+        If a preprocess has been specified, input is normalized
+         before computing the decision function.
 
         Parameters
         ----------
@@ -103,7 +102,7 @@ class CClassifierNearestCentroid(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
@@ -112,16 +111,16 @@ class CClassifierNearestCentroid(CClassifier):
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Normalizing data if a normalizer is defined
-        if self.normalizer is not None:
-            x = self.normalizer.normalize(x)
+        # Preprocessing data if a preprocess is defined
+        if self.preprocess is not None:
+            x = self.preprocess.normalize(x)
 
         sign = convert_binary_labels(y)  # Sign depends on input label (0/1)
 
-        return sign * self._discriminant_function(x)
+        return sign * self._decision_function(x)
 
-    def _discriminant_function(self, x, y=1):
-        """Computes the discriminant function for each pattern in x.
+    def _decision_function(self, x, y=1):
+        """Computes the decision function for each pattern in x.
 
         The score is the distance of each pattern
          from the centroid of class `label`
@@ -133,18 +132,18 @@ class CClassifierNearestCentroid(CClassifier):
             (n_patterns, n_features).
         y : {1}
             The label of the class wrt the function should be calculated.
-            Discriminant function is always computed wrt positive class (1).
+            decision function is always computed wrt positive class (1).
 
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
         if y != 1:
             raise ValueError(
-                "discriminant function is always computed wrt positive class.")
+                "decision function is always computed wrt positive class.")
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 

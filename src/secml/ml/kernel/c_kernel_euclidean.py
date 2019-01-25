@@ -83,8 +83,8 @@ class CKernelEuclidean(CKernel):
 
         The gradient of Euclidean distances kernel is given by::
 
-            dK(x,v)/dv = (x - v) / k(x,v)   if squared = False (default)
-            dK(x,v)/dv = 2 * (x - v)        if squared = True
+            dK(x,v)/dv = - (x - v) / k(x,v)   if squared = False (default)
+            dK(x,v)/dv = - 2 * (x - v)        if squared = True
 
         Parameters
         ----------
@@ -110,12 +110,12 @@ class CKernelEuclidean(CKernel):
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])
         >>> print CKernelEuclidean().gradient(array, vector)
-        CArray([[ 0.544988  0.838444]
-         [ 0.652039  0.758185]])
+        CArray([[-0.544988 -0.838444]
+         [-0.652039 -0.758185]])
 
         >>> print CKernelEuclidean().gradient(array, vector, squared=True)
-        CArray([[ 26  40]
-         [ 86 100]])
+        CArray([[ -26  -40]
+         [ -86 -100]])
 
         >>> print CKernelEuclidean().gradient(vector, vector)
         CArray([ 0.  0.])
@@ -137,8 +137,8 @@ class CKernelEuclidean(CKernel):
 
         The gradient of Euclidean distances kernel is given by::
 
-            dK(x,v)/dv = (x - v) / k(x,v)   if squared = False (default)
-            dK(x,v)/dv = 2 * (x - v)        if squared = True
+            dK(x,v)/dv = - (x - v) / k(x,v)   if squared = False (default)
+            dK(x,v)/dv = - 2 * (x - v)        if squared = True
 
         Parameters
         ----------
@@ -170,10 +170,13 @@ class CKernelEuclidean(CKernel):
         else:  # Broadcasting is supported by design for dense arrays
             v_broadcast = v
 
+        # Format of output array should be the same as v
+        x = x.tosparse() if v.issparse else x.todense()
+
         diff = (x - v_broadcast)
 
-        if squared is True:  # 2 * (x - y)
-            return 2 * diff
+        if squared is True:  # - 2 * (x - y)
+            return - 2 * diff
 
         k_grad = self._k(x, v)
         k_grad[k_grad == 0] = 1.0  # To avoid nans later
@@ -182,5 +185,7 @@ class CKernelEuclidean(CKernel):
         if diff.issparse is True:
             k_grad = k_grad.tosparse()
 
-        # (x - y) / k(x - y)
-        return diff / k_grad
+        # - (x - y) / k(x - y)
+        grad = - diff / k_grad
+        # Casting to sparse if necessary
+        return grad.tosparse() if diff.issparse else grad

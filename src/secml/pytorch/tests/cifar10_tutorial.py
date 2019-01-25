@@ -59,10 +59,10 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 
-from secml.core.settings import SECML_PYTORCH_DATA_DIR
+from secml.settings import SECML_PYTORCH_DATA_DIR
 from secml.utils import fm
 from secml.data.loader import CDataLoaderCIFAR10
-from secml.pytorch.data import CTorchDataset
+from secml.pytorch.data import CDatasetPyTorch
 
 ########################################################################
 # The output of torchvision datasets are PILImage images of range [0, 1].
@@ -76,7 +76,7 @@ transform = transforms.Compose(
      transforms.ToTensor(),
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-trainset = CTorchDataset(tr, transform=transform)
+trainset = CDatasetPyTorch(tr, transform=transform)
 
 # trainset = torchvision.datasets.CIFAR10(
 #     root=fm.join(SECML_PYTORCH_DATA_DIR, 'data'),
@@ -84,7 +84,7 @@ trainset = CTorchDataset(tr, transform=transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
                                           shuffle=True, num_workers=1)
 
-testset = CTorchDataset(ts, transform=transform)
+testset = CDatasetPyTorch(ts, transform=transform)
 
 # testset = torchvision.datasets.CIFAR10(
 #     root=fm.join(SECML_PYTORCH_DATA_DIR, 'data'),

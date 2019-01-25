@@ -17,7 +17,7 @@ class CNormalizerUnitNorm(CNormalizer):
     patterns so that its norm (l1 or l2) equals one.
 
     For the Row normalizer, no training routine is needed, so using
-    train_normalize() method is suggested for clarity. Use train() method,
+    fit_normalize() method is suggested for clarity. Use fit() method,
     which does nothing, only to streamline a pipelined environment.
 
     Parameters
@@ -44,13 +44,13 @@ class CNormalizerUnitNorm(CNormalizer):
     >>> from secml.ml.features.normalization import CNormalizerUnitNorm
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-    >>> dense_normalized = CNormalizerUnitNorm().train_normalize(array)
+    >>> dense_normalized = CNormalizerUnitNorm().fit_normalize(array)
     >>> print dense_normalized
     CArray([[ 0.408248 -0.408248  0.816497]
      [ 1.        0.        0.      ]
      [ 0.        0.707107 -0.707107]])
 
-    >>> print CNormalizerUnitNorm(order=1).train_normalize(array)
+    >>> print CNormalizerUnitNorm(order=1).fit_normalize(array)
     CArray([[ 0.25 -0.25  0.5 ]
      [ 1.    0.    0.  ]
      [ 0.    0.5  -0.5 ]])
@@ -63,14 +63,15 @@ class CNormalizerUnitNorm(CNormalizer):
         if order != 1 and order != 2:
             raise ValueError("Norm of order {:} is not supported.".format(order))
         self._order = order
+
         self._norm = None
 
     def __clear(self):
         """Reset the object."""
         self._norm = None
 
-    def is_clear(self):
-        """Return True if normalizer has not been trained."""
+    def __is_clear(self):
+        """Returns True if object is clear."""
         return self.norm is None
 
     @property
@@ -83,11 +84,11 @@ class CNormalizerUnitNorm(CNormalizer):
         """Returns the norm of each training array's patterns."""
         return self._norm
 
-    def train(self, x):
-        """Train the normalizer. Does reset only.
+    def fit(self, x):
+        """Fit the normalizer. Does reset only.
 
         For the Row normalizer, no training routine is needed, so using
-        train_normalize() method is suggested for clarity. Use train() method,
+        fit_normalize() method is suggested for clarity. Use fit() method,
         which does nothing, only to streamline a pipelined environment.
 
         Parameters
@@ -125,7 +126,7 @@ class CNormalizerUnitNorm(CNormalizer):
         >>> from secml.ml.features.normalization import CNormalizerUnitNorm
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]], tosparse=True)
 
-        >>> normalizer = CNormalizerUnitNorm().train(array)
+        >>> normalizer = CNormalizerUnitNorm().fit(array)
         >>> array_normalized = normalizer.normalize(array)
         >>> print array_normalized  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	0.408248290464
@@ -191,7 +192,7 @@ class CNormalizerUnitNorm(CNormalizer):
         >>> from secml.ml.features.normalization import CNormalizerUnitNorm
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]], tosparse=True)
 
-        >>> normalizer = CNormalizerUnitNorm().train(array)
+        >>> normalizer = CNormalizerUnitNorm().fit(array)
         >>> array_normalized = normalizer.normalize(array)
         >>> print normalizer.revert(array_normalized)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1.0
@@ -206,7 +207,7 @@ class CNormalizerUnitNorm(CNormalizer):
 
         # Training first!
         if self.norm is None:
-            raise ValueError("train the normalizer first.")
+            raise ValueError("fit the normalizer first.")
 
         if x.shape[0] != self.norm.size:
             raise ValueError("array to revert must have {:} patterns (rows)."

@@ -645,6 +645,12 @@ class _CArrayInterface(object):
 
     @classmethod
     @abstractmethod
+    def randuniform(cls, low=0.0, high=1.0, shape=None, random_state=None):
+        """Return random samples from low (inclusive) to high (exclusive)."""
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
     def randint(cls, low, high=None, shape=None, random_state=None):
         """Return random integers from low (inclusive) to high (exclusive)."""
         raise NotImplementedError

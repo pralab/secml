@@ -35,7 +35,7 @@ def _classify_one(tr_class_idx, clf, test_x, verbose):
     # level is stored per-object looking to id
     clf.verbose = verbose
     # Getting predicted data for current class classifier
-    return clf.discriminant_function(test_x, y=tr_class_idx)
+    return clf.decision_function(test_x, y=tr_class_idx)
 
 
 class CClassifier(CCreator):
@@ -50,37 +50,40 @@ class CClassifier(CCreator):
 
     Parameters
     ----------
-    normalizer : str, CNormalizer
-        Features normalizer to applied to input data.
+    preprocess : str or CNormalizer
+        Features preprocess to applied to input data.
         Can be a CNormalizer subclass or a string with the desired
-        normalizer type. If None, input data is used as is.
+        preprocess type. If None, input data is used as is.
 
     """
     __metaclass__ = ABCMeta
     __super__ = 'CClassifier'
 
-    def __init__(self, normalizer=None):
+    def __init__(self, preprocess=None):
         # List of classes on which training has been performed
         self._classes = None
         # Number of features of the training dataset
         self._n_features = None
-        # Data normalizer
-        # Setting up the kernel function
-        self.normalizer = normalizer if normalizer is None \
-            else CNormalizer.create(normalizer)
+        # Data preprocess
+        self.preprocess = preprocess if preprocess is None \
+            else CNormalizer.create(preprocess)
 
     def __clear(self):
         """Reset the object."""
         self._classes = None
         self._n_features = None
-        if self.normalizer is not None:
-            self.normalizer.clear()
+        if self.preprocess is not None:
+            self.preprocess.clear()
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        return self._classes is None and self._n_features is None and \
-            (self.normalizer is None or
-             self.normalizer is not None and self.normalizer.is_clear())
+        if self._classes is not None:
+            return False
+        if self._n_features is not None:
+            return False
+        if self.preprocess is not None and not self.preprocess.is_clear():
+            return False
+        return True
 
     @property
     def classes(self):
@@ -102,7 +105,7 @@ class CClassifier(CCreator):
         return False
 
     @abstractmethod
-    def _train(self, dataset):
+    def _fit(self, dataset):
         """Private method that trains the One-Vs-All classifier.
         Must be reimplemented by subclasses.
 
@@ -120,10 +123,10 @@ class CClassifier(CCreator):
         """
         raise NotImplementedError()
 
-    def train(self, dataset, n_jobs=1):
+    def fit(self, dataset, n_jobs=1):
         """Trains the classifier.
 
-        If a normalizer has been specified,
+        If a preprocess has been specified,
         input is normalized before training.
 
         For multiclass case see `.CClassifierMulticlass`.
@@ -155,21 +158,21 @@ class CClassifier(CCreator):
         self._n_features = dataset.num_features
 
         data_x = dataset.X
-        # Normalizing data if a normalizer is defined
-        if self.normalizer is not None:
-            data_x = self.normalizer.train_normalize(dataset.X)
+        # Preprocessing data if a preprocess is defined
+        if self.preprocess is not None:
+            data_x = self.preprocess.fit_normalize(dataset.X)
 
-        # Data is ready: train the classifier
+        # Data is ready: fit the classifier
         try:  # Try to use parallelization
-            self._train(CDataset(data_x, dataset.Y), n_jobs=n_jobs)
+            self._fit(CDataset(data_x, dataset.Y), n_jobs=n_jobs)
         except TypeError:  # Parallelization is probably not supported
-            self._train(CDataset(data_x, dataset.Y))
+            self._fit(CDataset(data_x, dataset.Y))
 
         return self
 
     @abstractmethod
-    def _discriminant_function(self, x, y):
-        """Private method that computes the discriminant function.
+    def _decision_function(self, x, y):
+        """Private method that computes the decision function.
 
         .. warning:: Must be reimplemented by a subclass of `.CClassifier`.
 
@@ -184,22 +187,22 @@ class CClassifier(CCreator):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
         raise NotImplementedError()
 
-    def discriminant_function(self, x, y):
-        """Computes the discriminant function for each pattern in x.
+    def decision_function(self, x, y):
+        """Computes the decision function for each pattern in x.
 
-        If a normalizer has been specified, input is normalized
-        before computing the discriminant function.
+        If a preprocess has been specified, input is normalized
+        before computing the decision function.
 
         .. note::
 
-            The actual discriminant function should be implemented
-            case by case inside :meth:`_discriminant_function` method.
+            The actual decision function should be implemented
+            case by case inside :meth:`_decision_function` method.
 
         Parameters
         ----------
@@ -212,13 +215,13 @@ class CClassifier(CCreator):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         Warnings
         --------
         This method implements a generic formulation where the
-         discriminant function is computed separately for each pattern.
+         decision function is computed separately for each pattern.
          It's convenient to override this when the function can be computed
          for all patterns at once to improve performance.
 
@@ -228,27 +231,31 @@ class CClassifier(CCreator):
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Normalizing data if a normalizer is defined
-        if self.normalizer is not None:
-            x = self.normalizer.normalize(x)
+        # Preprocessing data if a preprocess is defined
+        if self.preprocess is not None:
+            x = self.preprocess.normalize(x)
 
         score = CArray.ones(shape=x.shape[0])
         for i in xrange(x.shape[0]):
-            score[i] = self._discriminant_function(x[i, :], y)
+            score[i] = self._decision_function(x[i, :], y)
 
         return score
 
-    def classify(self, x, n_jobs=1):
+    def predict(self, x, return_decision_function=False, n_jobs=1):
         """Perform classification of each pattern in x.
 
-        If a normalizer has been specified,
+        If a preprocess has been specified,
          input is normalized before classification.
 
         Parameters
         ----------
+        return_decision_function
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
+        return_decision_function : bool, optional
+            Whether to return the decision_function value along
+            with predictions. Default False.
         n_jobs : int, optional
             Number of parallel workers to use for classification.
             Default 1. Cannot be higher than processor's number of cores.
@@ -259,9 +266,10 @@ class CClassifier(CCreator):
             Flat dense array of shape (n_patterns,) with the label assigned
              to each test pattern. The classification label is the label of
              the class associated with the highest score.
-        scores : CArray
+        scores : CArray, optional
             Array of shape (n_patterns, n_classes) with classification
              score of each test pattern with respect to each training class.
+            Will be returned only if `return_decision_function` is True.
 
         Warnings
         --------
@@ -277,7 +285,7 @@ class CClassifier(CCreator):
 
         scores = CArray.ones(shape=(x.shape[0], self.n_classes))
 
-        # Compute the discriminant function for each training class in parallel
+        # Compute the decision function for each training class in parallel
         res = parfor2(_classify_one, self.n_classes,
                       n_jobs, self, x, self.verbose)
 
@@ -287,7 +295,9 @@ class CClassifier(CCreator):
 
         # The classification label is the label of the class
         # associated with the highest score
-        return scores.argmax(axis=1).ravel(), scores
+        labels = scores.argmax(axis=1).ravel()
+
+        return (labels, scores) if return_decision_function is True else labels
 
     def estimate_parameters(self, dataset, parameters, splitter, metric,
                             pick='first', perf_evaluator='xval', n_jobs=1):
@@ -368,20 +378,37 @@ class CClassifier(CCreator):
             Gradient of the classifier's output wrt input. Vector-like array.
 
         """
-        # Get the derivative of the normalizer (if defined)
-        if self.normalizer is not None:
-            grad_norm = self._gradient_n(x)
+        if self.preprocess is not None:
             # Normalize data before compute the classifier gradient
-            x = self.normalizer.normalize(x)
-        else:  # Normalizer not defined, use a "neutral" value
-            grad_norm = CArray([1])
+            x_pre = self.preprocess.normalize(x)
+        else:  # Data will not be preprocessed
+            x_pre = x
 
-        # Get the derivative of discriminant_function
-        try:
-            grad_f = self._gradient_f(x, **kwargs)
+        try:  # Get the derivative of decision_function
+            grad_f = self._gradient_f(x_pre, **kwargs)
         except NotImplementedError:
             raise NotImplementedError("{:} does not implement `gradient_f_x`"
                                       "".format(self.__class__.__name__))
+
+        # Get the derivative of the preprocess (if defined)
+        if self.preprocess is None:  # preprocess not defined... placeholder
+            grad_norm = CArray([1])
+        else:
+            try:  # We try to pass the classifier gradient to preprocess
+                grad_norm = self.preprocess.gradient(x, w=grad_f)
+                # preprocess gradient will be accumulated in grad_f
+                # and can be directly returned
+                return grad_norm.ravel()
+            except TypeError:  # preprocess does not support w probably
+                grad_norm = self.preprocess.gradient(x)
+
+            # We need to left multiply clf gradient and preprocess gradient
+            if self.preprocess.is_linear():
+                # Gradient of linear normalizers is an 'I * w' array
+                # To avoid returning all the zeros, extract the main diagonal
+                grad_norm = grad_norm.diag()
+            else:
+                grad_norm = grad_norm.ravel()
 
         return (grad_f * grad_norm).ravel()
 
@@ -422,24 +449,3 @@ class CClassifier(CCreator):
 
         """
         raise NotImplementedError
-
-    def _gradient_n(self, x):
-        """Computes the gradient of the normalizer wrt normalizer input.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the normalizer wrt its input. Vector-like array.
-
-        """
-        grad_norm = self.normalizer.gradient(x)
-        if self.normalizer.is_linear():
-            # Gradient of linear normalizers is an 'I * w' array
-            # To avoid returning all the zeros, extract the main diagonal
-            grad_norm = grad_norm.diag()
-        return grad_norm.ravel()

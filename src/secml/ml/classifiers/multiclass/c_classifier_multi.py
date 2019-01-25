@@ -18,10 +18,10 @@ class CClassifierMulticlass(CClassifier):
     ----------
     classifier : unbound class
         Unbound (not initialized) CClassifier subclass.
-    normalizer : str, CNormalizer
-        Features normalizer to applied to input data.
+    preprocess : str or CNormalizer
+        Features preprocess to applied to input data.
         Can be a CNormalizer subclass or a string with the desired
-        normalizer type. If None, input data is used as is.
+        preprocess type. If None, input data is used as is.
     clf_params : kwargs
         Any other construction parameter for the binary classifiers.
 
@@ -29,9 +29,9 @@ class CClassifierMulticlass(CClassifier):
     __metaclass__ = ABCMeta
     __super__ = 'CClassifierMulticlass'
 
-    def __init__(self, classifier, normalizer=None, **clf_params):
+    def __init__(self, classifier, preprocess=None, **clf_params):
         # Calling init of CClassifier
-        super(CClassifierMulticlass, self).__init__(normalizer=normalizer)
+        super(CClassifierMulticlass, self).__init__(preprocess=preprocess)
         # Binary classifier to use
         if not issubclass(classifier, CClassifier):
             raise TypeError(
@@ -44,13 +44,11 @@ class CClassifierMulticlass(CClassifier):
         for clf in self._binary_classifiers:
             clf.clear()
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
         for clf in self._binary_classifiers:
             if not clf.is_clear():
                 return False
-        if not super(CClassifierMulticlass, self).is_clear():
-            return False
         return True
 
     @CClassifier.verbose.setter
@@ -76,7 +74,7 @@ class CClassifierMulticlass(CClassifier):
     def num_classifiers(self):
         """Returns the number of instanced binary classifiers.
 
-        Returns 1 until .train(dataset) or .prepare(num_classes) is called.
+        Returns 1 until .fit(dataset) or .prepare(num_classes) is called.
 
         """
         return len(self.binary_classifiers)
@@ -217,7 +215,7 @@ class CClassifierMulticlass(CClassifier):
             n_jobs=n_jobs)
 
     @abstractmethod
-    def _train(self, dataset, n_jobs=1):
+    def _fit(self, dataset, n_jobs=1):
         """Trains the classifier.
 
         This method should store the list of trained classifiers
@@ -262,16 +260,16 @@ class CClassifierMulticlass(CClassifier):
         """
         raise NotImplementedError
 
-    def discriminant_function(self, x, y):
-        """Computes the discriminant function for each pattern in x.
+    def decision_function(self, x, y):
+        """Computes the decision function for each pattern in x.
 
-        If a normalizer has been specified, input is normalized
-        before computing the discriminant function.
+        If a preprocess has been specified, input is normalized
+        before computing the decision function.
 
         .. note::
 
-            The actual discriminant function should be implemented
-            case by case inside :meth:`_discriminant_function` method.
+            The actual decision function should be implemented
+            case by case inside :meth:`_decision_function` method.
 
         Parameters
         ----------
@@ -284,7 +282,7 @@ class CClassifierMulticlass(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """
@@ -293,11 +291,11 @@ class CClassifierMulticlass(CClassifier):
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Normalizing data if a normalizer is defined
-        if self.normalizer is not None:
-            x = self.normalizer.normalize(x)
+        # Preprocessing data if a preprocess is defined
+        if self.preprocess is not None:
+            x = self.preprocess.normalize(x)
 
-        return self._discriminant_function(x, y)
+        return self._decision_function(x, y)
 
     def apply_method(self, method, *args, **kwargs):
         """Apply input method to all trained classifers.

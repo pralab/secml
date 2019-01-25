@@ -25,10 +25,10 @@ class CClassifierKNN(CClassifier):
     def __init__(self, n_neighbors=5, weights='uniform',
                  algorithm='auto', leaf_size=30, p=2,
                  metric='minkowski', metric_params=None,
-                 normalizer=None):
+                 preprocess=None):
 
         # Calling constructor of CClassifier
-        CClassifier.__init__(self, normalizer=normalizer)
+        CClassifier.__init__(self, preprocess=preprocess)
 
         self._n_neighbors = n_neighbors
         self._weights = weights
@@ -37,17 +37,26 @@ class CClassifierKNN(CClassifier):
         self._p = p
         self._metric = metric
         self._metric_params = metric_params
+
         self._n_samples_training = 0
         self._tr_dataset = None
         self._KNC = None
 
     def __clear(self):
         """Reset the object."""
+        self._n_samples_training = 0
+        self._tr_dataset = None
         self._KNC = None
 
-    def is_clear(self):
+    def __is_clear(self):
         """Returns True if object is clear."""
-        return self._KNC is None and super(CClassifierKNN, self).is_clear()
+        if self._n_samples_training != 0:
+            return False
+        if self._tr_dataset is not None:
+            return False
+        if self._KNC is not None:
+            return False
+        return True
 
     @property
     def n_neighbors(self):
@@ -119,7 +128,7 @@ class CClassifierKNN(CClassifier):
         """Sets classifier metric_params."""
         self._metric_params = value
 
-    def _train(self, dataset):
+    def _fit(self, dataset):
         """Trains the KNeighbors classifier.
 
         Training dataset is stored to use in kneighbors() method.
@@ -140,8 +149,8 @@ class CClassifierKNN(CClassifier):
 
         return self._KNC
 
-    def _discriminant_function(self, x, y):
-        """Computes the discriminant function (probability estimates) for each pattern in x.
+    def _decision_function(self, x, y):
+        """Computes the decision function (probability estimates) for each pattern in x.
 
         Parameters
         ----------
@@ -154,7 +163,7 @@ class CClassifierKNN(CClassifier):
         Returns
         -------
         score : CArray
-            Value of the discriminant function for each test pattern.
+            Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
 
         """

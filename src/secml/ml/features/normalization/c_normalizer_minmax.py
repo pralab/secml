@@ -57,12 +57,12 @@ class CNormalizerMinMax(CNormalizerLinear):
     >>> from secml.ml.features.normalization import CNormalizerMinMax
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-    >>> print CNormalizerMinMax().train_normalize(array)
+    >>> print CNormalizerMinMax().fit_normalize(array)
     CArray([[ 0.5       0.        1.      ]
      [ 1.        0.5       0.333333]
      [ 0.        1.        0.      ]])
 
-    >>> print CNormalizerMinMax(feature_range=(-1,1)).train_normalize(array)
+    >>> print CNormalizerMinMax(feature_range=(-1,1)).fit_normalize(array)
     CArray([[ 0.       -1.        1.      ]
      [ 1.        0.       -0.333333]
      [-1.        1.       -1.      ]])
@@ -72,20 +72,20 @@ class CNormalizerMinMax(CNormalizerLinear):
 
     def __init__(self, feature_range=None):
         """Class constructor"""
+        # The following SHOULD NOT be reset:
+        # _n, _v and _feature_range does not depends on training
+        self._n = None
+        self._v = None
+        self._feature_range = None
+        # setting desired feature range... the property will check for correct type
+        self.feature_range = (0., 1.) if feature_range is None else feature_range
+
         self._data_min = None
         self._data_max = None
         # Properties of the linear normalizer
         # we split them to easily manage feature_range
         self._m = None
         self._q = None
-        # The following two shouldn't be reset:
-        # feature range does not depends on training
-        self._n = None
-        self._v = None
-
-        self._feature_range = None
-        # setting desired feature range... the property will check for correct type
-        self.feature_range = (0., 1.) if feature_range is None else feature_range
 
     def __clear(self):
         """Reset the object."""
@@ -96,8 +96,8 @@ class CNormalizerMinMax(CNormalizerLinear):
         self._m = None
         self._q = None
 
-    def is_clear(self):
-        """Return True if normalizer has not been trained."""
+    def __is_clear(self):
+        """Returns True if object is clear."""
         return self.min is None and self.max is None and \
             self._m is None and self._q is None
 
@@ -164,7 +164,7 @@ class CNormalizerMinMax(CNormalizerLinear):
             self._n = self.feature_range[1] - self.feature_range[0]
             self._v = self.feature_range[0]
 
-    def train(self, x):
+    def fit(self, x):
         """Compute the minimum and maximum to be used for scaling.
 
         Parameters
@@ -184,7 +184,7 @@ class CNormalizerMinMax(CNormalizerLinear):
         >>> from secml.ml.features.normalization import CNormalizerMinMax
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-        >>> normalizer = CNormalizerMinMax().train(array)
+        >>> normalizer = CNormalizerMinMax().fit(array)
         >>> normalizer.feature_range
         (0.0, 1.0)
         >>> print normalizer.min
@@ -236,7 +236,7 @@ class CNormalizerMinMax(CNormalizerLinear):
         >>> from secml.ml.features.normalization import CNormalizerMinMax
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-        >>> normalizer = CNormalizerMinMax().train(array)
+        >>> normalizer = CNormalizerMinMax().fit(array)
         >>> print normalizer.normalize(array)
         CArray([[ 0.5       0.        1.      ]
          [ 1.        0.5       0.333333]
@@ -281,7 +281,7 @@ class CNormalizerMinMax(CNormalizerLinear):
         >>> from secml.ml.features.normalization import CNormalizerMinMax
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-        >>> normalizer = CNormalizerMinMax().train(array)
+        >>> normalizer = CNormalizerMinMax().fit(array)
         >>> print normalizer.gradient(array)
         CArray([[ 0.5       0.        0.      ]
          [ 0.        0.5       0.      ]

@@ -77,10 +77,9 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
         """Reset the object."""
         self._tr_classes = []
 
-    def is_clear(self):
-        """Return True if the XVal object is clear."""
-        return len(self._tr_classes) == 0 and \
-            super(CDataSplitterOpenWorldKFold, self).is_clear()
+    def __is_clear(self):
+        """Returns True if object is clear."""
+        return len(self._tr_classes) == 0
 
     @property
     def tr_classes(self):

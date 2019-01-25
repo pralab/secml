@@ -11,12 +11,12 @@ class TestCClassifierNearestCentroid(CUnitTest):
     """Unit test for CClassifierNearestCentroid."""
 
     def setUp(self):
-        """Test for init and train methods."""
+        """Test for init and fit methods."""
 
         self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
                                  n_clusters_per_class=1).load()
 
-        self.dataset.X = CNormalizerMinMax().train_normalize(self.dataset.X)
+        self.dataset.X = CNormalizerMinMax().fit_normalize(self.dataset.X)
 
         self.nc = CClassifierNearestCentroid()
 
@@ -28,20 +28,20 @@ class TestCClassifierNearestCentroid(CUnitTest):
         fig.switch_sptype(sp_type='ds')
         fig.sp.plot_ds(self.dataset)
 
-        self.nc.train(self.dataset)
+        self.nc.fit(self.dataset)
 
         fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(self.nc.discriminant_function, y=1)
+        fig.sp.plot_fobj(self.nc.decision_function, y=1)
         fig.title('nearest centroid  Classifier')
 
-        self.logger.info(self.nc.classify(self.dataset.X))
+        self.logger.info(self.nc.predict(self.dataset.X))
 
         fig.show()
 
     def test_fun(self):
-        """Test for discriminant_function() and classify() methods."""
+        """Test for decision_function() and predict() methods."""
         self.logger.info(
-            "Test for discriminant_function() and classify() methods.")
+            "Test for decision_function() and predict() methods.")
 
         def _check_df_scores(s, n_samples):
             self.assertEqual(type(s), CArray)
@@ -62,35 +62,35 @@ class TestCClassifierNearestCentroid(CUnitTest):
             self.assertEqual(int, l.dtype)
             self.assertEqual(float, s.dtype)
 
-        self.nc.train(self.dataset)
+        self.nc.fit(self.dataset)
 
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Normalizing data if a normalizer is defined
-        if self.nc.normalizer is not None:
-            x_norm = self.nc.normalizer.normalize(x)
-            p_norm = self.nc.normalizer.normalize(p)
+        # Preprocessing data if a preprocess is defined
+        if self.nc.preprocess is not None:
+            x_norm = self.nc.preprocess.normalize(x)
+            p_norm = self.nc.preprocess.normalize(p)
 
-        # Testing discriminant_function on multiple points
+        # Testing decision_function on multiple points
 
-        df_scores_neg = self.nc.discriminant_function(x, y=0)
+        df_scores_neg = self.nc.decision_function(x, y=0)
         self.logger.info(
-            "discriminant_function(x, y=0):\n{:}".format(df_scores_neg))
+            "decision_function(x, y=0):\n{:}".format(df_scores_neg))
         _check_df_scores(df_scores_neg, self.dataset.num_samples)
 
-        df_scores_pos = self.nc.discriminant_function(x, y=1)
+        df_scores_pos = self.nc.decision_function(x, y=1)
         self.logger.info(
-            "discriminant_function(x, y=1):\n{:}".format(df_scores_pos))
+            "decision_function(x, y=1):\n{:}".format(df_scores_pos))
         _check_df_scores(df_scores_pos, self.dataset.num_samples)
 
         self.assertFalse(
             ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
 
-        # Testing _discriminant_function on multiple points
+        # Testing _decision_function on multiple points
 
-        ds_priv_scores = self.nc._discriminant_function(x_norm, y=1)
-        self.logger.info("_discriminant_function(x_norm, y=1):\n"
+        ds_priv_scores = self.nc._decision_function(x_norm, y=1)
+        self.logger.info("_decision_function(x_norm, y=1):\n"
                          "{:}".format(ds_priv_scores))
         _check_df_scores(ds_priv_scores, self.dataset.num_samples)
 
@@ -98,38 +98,38 @@ class TestCClassifierNearestCentroid(CUnitTest):
 
         self.assertFalse((df_scores_pos != ds_priv_scores).any())
 
-        # Testing classify on multiple points
+        # Testing predict on multiple points
 
-        labels, scores = self.nc.classify(x)
+        labels, scores = self.nc.predict(x, return_decision_function=True)
         self.logger.info(
-            "classify(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
+            "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(
             labels, scores, self.dataset.num_samples, self.nc.n_classes)
 
-        # Comparing output of discriminant_function and classify
+        # Comparing output of decision_function and predict
 
         self.assertFalse((df_scores_neg != scores[:, 0].ravel()).any())
         self.assertFalse((df_scores_pos != scores[:, 1].ravel()).any())
 
-        # Testing discriminant_function on single point
+        # Testing decision_function on single point
 
-        df_scores_neg = self.nc.discriminant_function(p, y=0)
+        df_scores_neg = self.nc.decision_function(p, y=0)
         self.logger.info(
-            "discriminant_function(p, y=0):\n{:}".format(df_scores_neg))
+            "decision_function(p, y=0):\n{:}".format(df_scores_neg))
         _check_df_scores(df_scores_neg, 1)
 
-        df_scores_pos = self.nc.discriminant_function(p, y=1)
+        df_scores_pos = self.nc.decision_function(p, y=1)
         self.logger.info(
-            "discriminant_function(p, y=1):\n{:}".format(df_scores_pos))
+            "decision_function(p, y=1):\n{:}".format(df_scores_pos))
         _check_df_scores(df_scores_pos, 1)
 
         self.assertFalse(
             ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
 
-        # Testing _discriminant_function on single point
+        # Testing _decision_function on single point
 
-        df_priv_scores = self.nc._discriminant_function(p_norm, y=1)
-        self.logger.info("_discriminant_function(p_norm, y=1):\n"
+        df_priv_scores = self.nc._decision_function(p_norm, y=1)
+        self.logger.info("_decision_function(p_norm, y=1):\n"
                          "{:}".format(df_priv_scores))
         _check_df_scores(df_priv_scores, 1)
 
@@ -137,14 +137,14 @@ class TestCClassifierNearestCentroid(CUnitTest):
 
         self.assertFalse((df_scores_pos != df_priv_scores).any())
 
-        self.logger.info("Testing classify on single point")
+        self.logger.info("Testing predict on single point")
 
-        labels, scores = self.nc.classify(p)
+        labels, scores = self.nc.predict(p, return_decision_function=True)
         self.logger.info(
-            "classify(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
+            "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(labels, scores, 1, self.nc.n_classes)
 
-        # Comparing output of discriminant_function and classify
+        # Comparing output of decision_function and predict
 
         self.assertFalse(
             (df_scores_neg != CArray(scores[:, 0]).ravel()).any())
@@ -154,9 +154,9 @@ class TestCClassifierNearestCentroid(CUnitTest):
         # Testing error raising
 
         with self.assertRaises(ValueError):
-            self.nc._discriminant_function(x_norm, y=0)
+            self.nc._decision_function(x_norm, y=0)
         with self.assertRaises(ValueError):
-            self.nc._discriminant_function(p_norm, y=0)
+            self.nc._decision_function(p_norm, y=0)
 
 
 if __name__ == '__main__':

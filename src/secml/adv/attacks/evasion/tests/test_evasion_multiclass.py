@@ -8,8 +8,7 @@ from secml.ml.kernel import CKernelRBF
 from secml.utils import fm
 
 from secml.figure import CFigure
-from secml.optimization.constraints import \
-    CConstraintL2
+from secml.optimization.constraints import CConstraintL2
 from secml.ml.features.normalization import CNormalizerMinMax
 
 from secml.adv.attacks.evasion import CAttackEvasion
@@ -18,6 +17,8 @@ from secml.adv.attacks.evasion import CAttackEvasion
 class TestEvasionMulticlass(CUnitTest):
 
     def setUp(self):
+
+        self.show_plot = False
 
         import numpy as np
         np.random.seed(12345678)
@@ -34,9 +35,6 @@ class TestEvasionMulticlass(CUnitTest):
         self.ds.Y[(self.ds.X[:, 0] > 0).logical_and(
             self.ds.X[:, 1] > 1).ravel()] = self.ds.num_classes
 
-        # set targeted (0,... c-1) or indiscriminate (None) evasion
-        self.y_target = 2
-
         # self.kernel = None
         self.kernel = CKernelRBF(gamma=1)
 
@@ -46,19 +44,34 @@ class TestEvasionMulticlass(CUnitTest):
         self.normalizer = CNormalizerMinMax()
         self.normalizer = None
         if self.normalizer is not None:
-            self.ds.X = self.normalizer.train_normalize(self.ds.X)
+            self.ds.X = self.normalizer.fit_normalize(self.ds.X)
 
         self.multiclass = CClassifierMulticlassOVA(
             classifier=CClassifierSVM, class_weight='balanced',
-            normalizer=None, kernel=self.kernel)
+            preprocess=None, kernel=self.kernel)
         self.multiclass.verbose = 0
 
         # Training and classification
-        self.multiclass.train(self.ds)
+        self.multiclass.fit(self.ds)
 
-        self.y_pred, self.score_pred = self.multiclass.classify(self.ds.X)
+        self.y_pred, self.score_pred = self.multiclass.predict(
+            self.ds.X, return_decision_function=True)
 
-    def test_evasion_multiclass(self):
+    def test_evasion_indiscriminate(self):
+
+        # set targeted (0,... c-1) or indiscriminate (None) evasion
+        self.y_target = None
+
+        self._test_evasion_multiclass()
+
+    def test_evasion_targeted(self):
+
+        # set targeted (0,... c-1) or indiscriminate (None) evasion
+        self.y_target = 2
+
+        self._test_evasion_multiclass()
+
+    def _test_evasion_multiclass(self):
 
         # EVASION
         self.multiclass.verbose = 0
@@ -112,7 +125,8 @@ class TestEvasionMulticlass(CUnitTest):
 
             eva.dmax = d
             x, f_opt = eva._run(x0=x0, y0=y0, x_init=x)
-            y_pred, score = self.multiclass.classify(x)
+            y_pred, score = self.multiclass.predict(
+                x, return_decision_function=True)
             f_seq = f_seq.append(f_opt)
             # not considering all iterations, just values at dmax
             # for all iterations, you should bring eva.x_seq and eva.f_seq
@@ -130,6 +144,11 @@ class TestEvasionMulticlass(CUnitTest):
         self.logger.info("Objective function after evasion: {:}".format(f_opt))
 
         # PLOT SECTION
+        if self.show_plot:
+
+            self._make_plots(x_seq, dmax,eva, x0, scores, f_seq)
+
+    def _make_plots(self, x_seq, dmax,eva, x0, scores, f_seq):
 
         fig = CFigure(height=9, width=10, markersize=6, fontsize=12)
 
@@ -195,8 +214,6 @@ class TestEvasionMulticlass(CUnitTest):
                              levels_style=':',
                              alpha_levels=.5, c=x0, r=d)
 
-        # Use the actual target used in evasion
-        # target = self.ds.Y[p_idx] if target_class is None else target_class
         fig.sp.plot_fobj(lambda x: eva._objective_function(x),
                          multipoint=True,
                          grid_limits=ds_bounds,
@@ -233,6 +250,8 @@ class TestEvasionMulticlass(CUnitTest):
             "multiclass_{:}c_kernel-{:}_target-{:}.pdf".format(
                 self.ds.num_classes, k_name, self.y_target)
         ))
+
+        self.logger.info("The plot has been shown")
 
     #######################################
     # PRIVATE METHODS
@@ -287,7 +306,7 @@ class TestEvasionMulticlass(CUnitTest):
 
         # Plotting multiclass decision function
         fig.switch_sptype('function')
-        fig.sp.plot_fobj(lambda x: self.multiclass.classify(x)[0],
+        fig.sp.plot_fobj(lambda x: self.multiclass.predict(x),
                          multipoint=True, cmap='Set2',
                          grid_limits=self.ds.get_bounds(offset=5),
                          colorbar=False, n_grid_points=300, plot_levels=True,

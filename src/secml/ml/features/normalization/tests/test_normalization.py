@@ -1,18 +1,10 @@
-"""
-This is the class for testing CCOlumnsNormalizer class
-
-@author: Ambra Demontis, Marco Melis
-
-When adding a test method please use method to test name plus 'test_' as suffix.
-As first test method line use self.logger.info("UNITTEST - CLASSNAME - METHODNAME")
-
-"""
-import unittest
-
 from secml.utils import CUnitTest
+
+from sklearn.preprocessing import MinMaxScaler, Normalizer
+
 from secml.array import CArray
-from secml.ml.features.normalization import CNormalizerMinMax, CNormalizerZScore, CNormalizerUnitNorm
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, Normalizer
+from secml.ml.features.normalization import \
+    CNormalizerMinMax, CNormalizerUnitNorm
 
 
 class TestArrayNormalizers(CUnitTest):
@@ -31,34 +23,8 @@ class TestArrayNormalizers(CUnitTest):
         self.row_sparse = CArray(self.row_dense.deepcopy(), tosparse=True)
         self.column_sparse = self.row_sparse.deepcopy().T
 
-    def test_zscore(self):
-        """Test for ZScoreScaler. This compares sklearn equivalent to our normalizer."""
-
-        def sklearn_comp(array):
-
-            self.logger.info("Original array is:\n{:}".format(array))
-
-            # Sklearn normalizer
-            target = CArray(StandardScaler().fit_transform(
-                array.astype(float).tondarray())).round(4)
-            # Our normalizer
-            result = CNormalizerZScore().train_normalize(array).round(4)
-
-            self.assertFalse((target != result).any(),
-                             "\n{:}\nis different from target\n"
-                             "{:}".format(result, target))
-
-            self.logger.info("Correct result is:\n{:}".format(result))
-
-        sklearn_comp(self.array_dense)
-        sklearn_comp(self.array_sparse)
-        sklearn_comp(self.row_dense.atleast_2d())  # We manage flat vectors differently from numpy/sklearn
-        sklearn_comp(self.row_sparse)
-        sklearn_comp(self.column_dense)
-        sklearn_comp(self.column_sparse)
-
     def test_norm_unitnorm(self):
-        """Test for CNormalizerUnitNorm. This compares sklearn equivalent to our normalizer."""
+        """Test for CNormalizerUnitNorm."""
 
         def sklearn_comp(array):
 
@@ -67,15 +33,18 @@ class TestArrayNormalizers(CUnitTest):
             # Sklearn normalizer (requires float dtype input)
             target = CArray(Normalizer().fit_transform(array.astype(float).get_data())).round(4)
             # Our normalizer
-            result = CNormalizerUnitNorm().train_normalize(array).round(4)
+            result = CNormalizerUnitNorm().fit_normalize(array).round(4)
 
-            self.assertFalse((target != result).any(), "\n{:}\nis different from target\n{:}".format(result, target))
+            self.logger.info("Correct result is:\n{:}".format(target))
+            self.logger.info("Our result is:\n{:}".format(result))
 
-            self.logger.info("Correct result is:\n{:}".format(result))
+            self.assertFalse((target != result).any(),
+                             "\n{:}\nis different from target\n{:}"
+                             "".format(result, target))
 
         sklearn_comp(self.array_dense)
         sklearn_comp(self.array_sparse)
-        sklearn_comp(self.row_dense.atleast_2d())  # We manage flat vectors differently from numpy/sklearn
+        sklearn_comp(self.row_dense.atleast_2d())
         sklearn_comp(self.row_sparse)
         sklearn_comp(self.column_dense)
         sklearn_comp(self.column_sparse)
@@ -94,7 +63,7 @@ class TestArrayNormalizers(CUnitTest):
             target = CArray(sk_norm.transform(array_sk)).round(4)
 
             # Our normalizer
-            our_norm = CNormalizerMinMax().train(array)
+            our_norm = CNormalizerMinMax().fit(array)
             result = our_norm.normalize(array).round(4)
 
             self.logger.info("Correct result is:\n{:}".format(target))
@@ -124,4 +93,4 @@ class TestArrayNormalizers(CUnitTest):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

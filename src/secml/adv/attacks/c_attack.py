@@ -65,7 +65,7 @@ class CAttack(CCreator):
 
         # labels and scores assigned by the surrogate clf to the surrogate data
         # these are "internal" attributes (no setter/getter), required to run
-        # evasion of nonlinear clf from a benign point, and also to train a
+        # evasion of nonlinear clf from a benign point, and also to fit a
         # surrogate differentiable classifier (if surrogate_clf is non-diff.)
         self._surrogate_labels = None
         self._surrogate_scores = None
@@ -120,7 +120,7 @@ class CAttack(CCreator):
         CAttack.__clear(self)
 
     def __clear(self):
-
+        """Reset the object."""
         # the attack point obtained after manipulation
         self._x_opt = None
 
@@ -140,6 +140,21 @@ class CAttack(CCreator):
         # clear solver
         if self._solver is not None:
             self._solver.clear()
+
+    def __is_clear(self):
+        """Returns True if object is clear."""
+        if self._x_opt is not None or self._f_opt is not None:
+            return False
+        if self._x_seq is not None or self._f_seq is not None:
+            return False
+
+        if self._solver is not None and not self._solver.is_clear():
+            return False
+
+        if self._f_eval + self._grad_eval != 0:
+            return False
+
+        return True
 
     @property
     def attack_classes(self):
@@ -463,7 +478,8 @@ class CAttack(CCreator):
 
         # otherwise...
         self.logger.info("Classification of surrogate data...")
-        y, score = self.surrogate_classifier.classify(self.surrogate_data.X)
+        y, score = self.surrogate_classifier.predict(
+            self.surrogate_data.X, return_decision_function=True)
         self._surrogate_labels = y
         self._surrogate_scores = score
 
@@ -484,13 +500,13 @@ class CAttack(CCreator):
         if self._surrogate_data is None:
             return
 
-        # train a differentiable surrogate classifier and pass it to solver
-        self._solver_clf = self._train_differentiable_surrogate_clf()
+        # fit a differentiable surrogate classifier and pass it to solver
+        self._solver_clf = self._fit_differentiable_surrogate_clf()
 
         return
 
     # TODO: this should be customizable from outside of this class.
-    def _train_differentiable_surrogate_clf(self):
+    def _fit_differentiable_surrogate_clf(self):
         """
         Trains a differentiable surrogate classifier to be passed to the
         solver. By default, an RBF SVM is trained on surrogate data re-labeled
@@ -500,13 +516,13 @@ class CAttack(CCreator):
         self.logger.info("Learning differentiable surrogate classifier...")
 
         # TODO: solve this more elegantly
-        if self._surrogate_classifier.normalizer is None:
-            norm = None
+        if self._surrogate_classifier.preprocess is None:
+            preprocessor = None
         else:
-            norm = self._surrogate_classifier.normalizer.deepcopy()
+            preprocessor = self._surrogate_classifier.preprocess.deepcopy()
 
         # creating instance of SVM learner
-        clf = CClassifierSVM(kernel='rbf', normalizer=norm)
+        clf = CClassifierSVM(kernel='rbf', preprocess=preprocessor)
 
         # clf.grad_sampling = 1 # speeding up gradient computation
 
@@ -524,10 +540,10 @@ class CAttack(CCreator):
         best_params = clf.estimate_parameters(
             relabeled_data, xval_parameters, xval_splitter, 'accuracy')
 
-        # train classifier with best params
+        # fit classifier with best params
         clf.set('C', best_params['C'])
         clf.set('gamma', best_params['gamma'])
-        clf.train(relabeled_data)
+        clf.fit(relabeled_data)
 
         return clf
 

@@ -55,7 +55,7 @@ class CEvasionTestCases(object):
 
             self.logger.info("Initializing SVM with training data... ")
 
-            self.classifier.train(self.dataset)
+            self.classifier.fit(self.dataset)
 
             # pick a malicious sample and init evasion
             malicious_idxs = self.dataset.Y.find(self.dataset.Y == 1)
@@ -143,7 +143,7 @@ class CEvasionTestCases(object):
             self.logger.info("Is sparse?: " + str(x.issparse))
             final_time = time.time() - start_time
             self.logger.info("Starting score: " + str(
-                self.classifier.discriminant_function(self.x0, y=1)))
+                self.classifier.decision_function(self.x0, y=1).item()))
             self.logger.info("Final score: " + str(evas.f_opt))
             self.logger.info("x*: " + str(evas.x_opt))
             self.logger.info("Point sequence: " + str(evas.x_seq))
@@ -178,7 +178,7 @@ class CEvasionTestCases(object):
             fig.sp.plot_ds(self.dataset)
             fig.switch_sptype(sp_type="function")
             fig.sp.plot_fobj(
-                func=evas.classifier.discriminant_function,
+                func=evas.classifier.decision_function,
                 grid_limits=self.grid_limits, colorbar=False, y=1)
             # construct and plot box
             if self.lb == "x0":

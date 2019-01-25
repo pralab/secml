@@ -188,5 +188,13 @@ class CKernelPoly(CKernel):
             u_carray.get_data(), v_carray.get_data(),
             self.degree-1, self.gamma, self.coef0))
 
+        # Format of output array should be the same as v
+        if v_carray.issparse:
+            u_carray = u_carray.tosparse()
+            # Casting the kernel to sparse for efficient broadcasting
+            k = k.tosparse()
+        else:
+            u_carray = u_carray.todense()
+
         k_grad = u_carray * k.ravel() * self.gamma * self.degree
         return k_grad * 2 if (u_carray - v_carray).norm() < 1e-8 else k_grad

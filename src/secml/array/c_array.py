@@ -4781,6 +4781,77 @@ class CArray(_CArrayInterface):
         return cls(CDense.randn(shape, random_state=random_state))
 
     @classmethod
+    def randuniform(cls, low=0.0, high=1.0,
+                    shape=None, random_state=None, sparse=False):
+        """Return random samples from low (inclusive) to high (exclusive).
+
+        Samples are uniformly distributed over the half-open
+        interval [low, high) (includes low, but excludes high).
+        In other words, any value within the given interval is
+        equally likely to be drawn.
+
+        Parameters
+        ----------
+        low : float or CArray, optional
+            Lower boundary of the output interval. All values generated
+             will be greater than or equal to low. The default value is 0.
+            A CArray of floats can be passed to specify a different bound
+             for each position.
+        high : float or CArray, optional
+            Upper boundary of the output interval. All values generated
+             will be less than high. The default value is 1.0.
+            A CArray of floats can be passed to specify a different bound
+             for each position.
+        shape : int, tuple or None, optional
+            Shape of output array. If None, a single value is returned.
+        random_state : int or None, optional
+            If int, random_state is the seed used by the
+             random number generator; If None, is the seed used by np.random.
+        sparse : bool, optional
+            If False (default) a dense array will be returned. Otherwise,
+            a random sparse array is created.
+
+        Returns
+        -------
+        CArray
+            Size-shaped array of random samples.
+
+        Warnings
+        --------
+        When sparse is True, array is created as dense and then converted
+        to sparse format. Consequently, the performance of this method
+        is not comparable to other sparse array creation routines.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray.randuniform(high=5.0, shape=5)  # doctest: +SKIP
+        CArray([ 4.36769   0.139844  3.711734  4.924484  3.737672])
+
+        >>> print CArray.randuniform(shape=(2, 5))  # doctest: +SKIP
+        CArray([[ 0.158324  0.485235  0.723386  0.072326  0.344732]
+         [ 0.761642  0.844458  0.501523  0.171417  0.002068]])
+
+        >>> print CArray.randuniform(CArray([-1, -2, 3]), 5, (2, 3))  # doctest: +SKIP
+        CArray([[ -0.584032  1.433291  3.671319]
+         [ 3.566163 -1.139602  4.268376]])
+
+        """
+        if CArray(low > high).any():
+            raise ValueError(
+                "values in `low` should be lower than values in `high`")
+
+        if isinstance(low, CArray):
+            low = low.todense()._data  # Convert to CDense
+        if isinstance(high, CArray):
+            high = high.todense()._data  # Convert to CDense
+
+        return cls(CDense.randuniform(
+            low=low, high=high, shape=shape, random_state=random_state),
+            tosparse=sparse)
+
+    @classmethod
     def randint(cls, low, high=None,
                 shape=None, random_state=None, sparse=False):
         """Return random integers from low (inclusive) to high (exclusive).

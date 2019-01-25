@@ -50,12 +50,17 @@ class CFunction(CCreator):
         # sets expected size of input point `x`
         self._n_dim = n_dim
 
-        CFunction.__clear(self)
-
-    def __clear(self):
-        # reset functions evaluation counts
         self._n_fun_eval = 0
         self._n_grad_eval = 0
+
+    def __clear(self):
+        """Reset the object."""
+        self._n_fun_eval = 0
+        self._n_grad_eval = 0
+
+    def __is_clear(self):
+        """Returns True if object is clear."""
+        return self._n_fun_eval + self._n_grad_eval == 0
 
     @property
     def n_fun_eval(self):

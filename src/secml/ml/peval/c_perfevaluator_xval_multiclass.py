@@ -55,8 +55,8 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
             train_dataset = dataset[self.splitter.tr_idx[split_idx], :]
             test_dataset = dataset[self.splitter.ts_idx[split_idx], :]
 
-            # Train the estimator
-            estimator.train(train_dataset)
+            # Fit the estimator
+            estimator.fit(train_dataset)
 
             # Get the classification performance of each binary estimator
             split_scores = []
@@ -67,7 +67,8 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
                 # Extract the target binary estimator
                 binary_clf = estimator.binary_classifiers[class_idx]
 
-                pred_label, pred_score = binary_clf.classify(test_binary_ds.X)
+                pred_label, pred_score = binary_clf.predict(
+                    test_binary_ds.X, return_decision_function=True)
 
                 # Extracting score of the positive class
                 pred_score = pred_score[:, 1].ravel()
