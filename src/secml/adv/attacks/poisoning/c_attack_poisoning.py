@@ -26,6 +26,7 @@ class CAttackPoisoning(CAttack):
     __metaclass__ = ABCMeta
     __super__ = 'CAttackPoisoning'
 
+    # fixme: use always the softmax loss as attacker loss
     def __init__(self, classifier,
                  training_data,
                  surrogate_classifier,
