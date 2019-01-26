@@ -142,7 +142,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         s = self._s()
 
         if s.size == 0:
-            return None
+            return None, None
 
         xs = self._poisoned_clf.sv[s, :].atleast_2d()
         return xs, s
