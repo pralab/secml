@@ -163,9 +163,6 @@ class CPoisoningTestCases(object):
 
         def _clf_poisoning(self):
 
-            print "self.yc before run ", self.yc
-
-            # with self.logger.timer():
             xc = self.poisoning._run(self.xc, self.yc)
 
             self.logger.info("Starting score: " + str(self.poisoning.f_seq[0]))
@@ -179,8 +176,9 @@ class CPoisoningTestCases(object):
             metric = CMetric.create('accuracy')
             y_pred, scores = self.classifier.predict(self.ts.X,
                                                      return_decision_function=True)
-            acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
-            self.logger.info("Error on testing data: " + str(1 - acc))
+            orig_acc = metric.performance_score(y_true=self.ts.Y,
+                                                y_pred=y_pred)
+            self.logger.info("Error on testing data: " + str(1 - orig_acc))
 
             tr = self.tr.append(CDataset(xc, self.yc))
 
@@ -190,12 +188,14 @@ class CPoisoningTestCases(object):
             pois_clf.fit(tr)
             y_pred, scores = pois_clf.predict(self.ts.X,
                                               return_decision_function=True)
-            acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
+            pois_acc = metric.performance_score(y_true=self.ts.Y,
+                                                y_pred=y_pred)
             self.logger.info(
-                "Error on testing data (poisoned): " + str(1 - acc))
+                "Error on testing data (poisoned): " + str(1 - pois_acc))
 
-            # fixme: check, in quello calcolato dentro la classe di poisoning
-            # sembra ok invece qui a volte sembra che l'errore diminuisca
+            self.assertGreater(orig_acc, pois_acc, "The accuracy is not "
+                                                   "decreased after the "
+                                                   "poisoning" )
 
             return pois_clf, xc
 
