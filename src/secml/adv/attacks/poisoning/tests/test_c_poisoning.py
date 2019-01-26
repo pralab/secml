@@ -1,46 +1,90 @@
 import time
 from abc import ABCMeta
 
+from secml.utils import CUnitTest
+from secml.data.loader import CDLRandomBlobs
+from secml.data.splitter import CDataSplitterShuffle
+from secml.ml.features.normalization import CNormalizerMinMax
 from secml.adv.attacks.poisoning import CAttackPoisoningLogisticRegression, \
     CAttackPoisoningRidge, CAttackPoisoningSVM
 from secml.array import CArray
 from secml.data import CDataset
-from secml.figure import CFigure
-from secml.ml.classifiers import CClassifierSVM, CClassifierRidge, \
-    CClassifierSGD
+from secml.ml.classifiers import CClassifierSVM, CClassifierRidge
+from secml.ml.classifiers import CClassifierLogistic
 from secml.ml.peval.metrics import CMetric
 from secml.optimization import COptimizer
 from secml.optimization.constraints import CConstraintBox
 from secml.optimization.function import CFunction
-from secml.utils import CUnitTest
 
 
 class CPoisoningTestCases(object):
-
     class TestCPoisoning(CUnitTest):
         """Unit test for CAttackPoisoning."""
         __metaclass__ = ABCMeta
 
-        def _clf_creation(self):
+        def _dataset_creation(self):
+            self.n_features = 2  # Number of dataset features
 
-            if self.clf_idx == 'logistic':
+            self.n_tr = 50
+            self.n_ts = 1000
+            self.n_classes = 2
 
-                self.classifier = CClassifierSGD(loss='log', regularizer='l2',
-                                                 alpha=1, random_state=0)
-                                                 #alpha=0.0001)
+            # Random state generator for the dataset
+            self.seed = 44
+
+            if self.n_classes == 2:
+                loader = CDLRandomBlobs(
+                    n_samples=self.n_tr + self.n_ts,
+                    n_features=self.n_features,
+                    centers=[(-1, -1), (+1, +1)],
+                    center_box=(-2, 2),
+                    cluster_std=0.8,
+                    random_state=self.seed)
+
+            self.logger.info(
+                "Loading `random_blobs` with seed: {:}".format(self.seed))
+
+            dataset = loader.load()
+            splitter = CDataSplitterShuffle(num_folds=1, train_size=self.n_tr,
+                                            random_state=3)
+            splitter.compute_indices(dataset)
+            self.tr = dataset[splitter.tr_idx[0], :]
+            self.ts = dataset[splitter.ts_idx[0], :]
+
+            normalizer = CNormalizerMinMax(feature_range=(-1, 1))
+            self.tr.X = normalizer.fit_normalize(self.tr.X)
+            self.ts.X = normalizer.normalize(self.ts.X)
+
+            self.lb = -1
+            self.ub = 1
+
+            self.grid_limits = [(self.lb - 0.1, self.ub + 0.1),
+                                (self.lb - 0.1, self.ub + 0.1)]
+
+        def _clf_creation(self, clf_idx):
+
+            if clf_idx == 'logistic':
+
+                # self.classifier = CClassifierSGD(loss='log', regularizer='l2',
+                #                                  alpha=1, random_state=0)
+                #                                  #alpha=0.0001)
+
+                self.classifier = CClassifierLogistic(C=100,
+                                                      preprocess=None,
+                                                      random_seed=self.seed)
 
                 self.pois_class = CAttackPoisoningLogisticRegression
 
                 self.discr_f_level = 0
 
-            elif self.clf_idx == 'svm':
+            elif clf_idx == 'svm':
 
                 self.classifier = CClassifierSVM(kernel='linear', C=0.01)
 
                 self.pois_class = CAttackPoisoningSVM
                 self.discr_f_level = 0
 
-            elif self.clf_idx == 'ridge':
+            elif clf_idx == 'ridge':
 
                 self.classifier = CClassifierRidge(fit_intercept=True,
                                                    alpha=1)  # 0.01
@@ -80,28 +124,23 @@ class CPoisoningTestCases(object):
 
             self.logger.info('yc: ' + str(self.yc))
 
-            self.name_file = 'poisoning.pdf'
-
         def setUp(self):
 
             # Setting all defined parameter
-            self.param_setter()
             self.verbose = 2
-
             self._dataset_creation()
-            self._clf_creation()
+
+        def _objs_creation(self, clf_idx):
+
+            self._clf_creation(clf_idx)
 
             start_training = time.time()
             self.classifier.fit(self.tr)
             self.clf_orig = self.classifier.deepcopy()
             end_training = time.time()
-            print "training time ", end_training - start_training
 
             self._test_accuracy(self.classifier)
-
             self._pois_obj_creation()
-
-            return
 
         #####################################################################
         #                             TESTED METHODS
@@ -122,12 +161,6 @@ class CPoisoningTestCases(object):
             for i, elm in enumerate(self.xc.size):
                 self.assertIsInstance(elm, float)
 
-        def _test_accuracy(self, clf):
-            metric = CMetric.create('accuracy')
-            y_pred, scores = clf.predict(self.ts.X, return_decision_function=True)
-            acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
-            self.logger.info("Error on testing data: " + str(1 - acc))
-
         def _clf_poisoning(self):
 
             print "self.yc before run ", self.yc
@@ -145,7 +178,7 @@ class CPoisoningTestCases(object):
 
             metric = CMetric.create('accuracy')
             y_pred, scores = self.classifier.predict(self.ts.X,
-                                          return_decision_function=True)
+                                                     return_decision_function=True)
             acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
             self.logger.info("Error on testing data: " + str(1 - acc))
 
@@ -161,83 +194,10 @@ class CPoisoningTestCases(object):
             self.logger.info(
                 "Error on testing data (poisoned): " + str(1 - acc))
 
-            #fixme: check, in quello calcolato dentro la classe di poisoning
+            # fixme: check, in quello calcolato dentro la classe di poisoning
             # sembra ok invece qui a volte sembra che l'errore diminuisca
 
             return pois_clf, xc
-
-        def test_poisoning_2D_plot(self):
-
-            pois_clf = self._clf_poisoning()[0]
-
-            if self.n_features == 2:
-                fig = CFigure(height=4, width=10)
-                n_rows = 1
-                n_cols = 2
-
-                fig.subplot(n_rows, n_cols, grid_slot=1)
-                fig.sp.title('Attacker objective and gradients')
-                self._plot_func(fig, self.poisoning._objective_function)
-                self._plot_obj_grads(
-                    fig, self.poisoning._objective_function_gradient)
-                self._plot_ds(fig, self.tr)
-                self._plot_clf(fig, self.clf_orig, self.tr,
-                               background=False, line_color='k')
-                self._plot_clf(fig, pois_clf, self.tr, background=False)
-                self._plot_box(fig)
-                fig.sp.plot_path(self.poisoning.x_seq,
-                                 start_facecolor='r' if self.yc == 1 else 'b')
-
-                fig.subplot(n_rows, n_cols, grid_slot=2)
-                fig.sp.title('Classification error on ts')
-                self._plot_func(fig, self.poisoning._objective_function,
-                                acc=True)
-                self._plot_ds(fig, self.tr)
-                self._plot_clf(fig, pois_clf, self.tr, background=False)
-                self._plot_box(fig)
-                fig.sp.plot_path(self.poisoning.x_seq,
-                                 start_facecolor='r' if self.yc == 1 else 'b')
-
-                fig.show()
-                fig.savefig(self.name_file, file_format='pdf')
-
-        def test_poisoning_point_fobj_improvement(self):
-            """
-            This function check if the objective function of the original
-            classifier is higger when it is trained on the optimized
-            poisoning point than when it is trained on the starting
-            poisoning point.
-            """
-            x0 = self.xc  # starting poisoning point
-            xc = self._clf_poisoning()[1]
-
-            fobj_x0 = self.poisoning._objective_function(xc=x0)
-            fobj_xc = self.poisoning._objective_function(xc=xc)
-
-            self.assertLess(fobj_x0, fobj_xc,
-                            "The attack does not increase the objective "
-                            "function of the attacker. The fobj on the "
-                            "original poisoning point is {:} while "
-                            "on the optimized poisoning point is {:}.".format(
-                                fobj_x0, fobj_xc))
-
-        def test_acc_impact(self):
-            """
-            Check if the accuracy of the classifier decrease when it is
-            trained on the poisoning point.
-            """
-            x0 = self.xc  # starting poisoning point
-            xc = self._clf_poisoning()[1]
-
-            acc_tr_on_x0 = self.poisoning._objective_function(xc=x0, acc=True)
-            acc_tr_on_xc = self.poisoning._objective_function(xc=xc, acc=True)
-
-            self.assertLess(acc_tr_on_x0, acc_tr_on_xc,
-                            "The attack does not decrease the classifier "
-                            "accuracy. The accuracy of the classifier trained "
-                            "on the original poisoning point is {:} while "
-                            "on the optimized poisoning point is {:}.".format(
-                                acc_tr_on_x0, acc_tr_on_xc))
 
         #####################################################################
         #                             INTERNALS
@@ -338,21 +298,13 @@ class CPoisoningTestCases(object):
                              grid_limits=self.grid_limits,
                              levels=[self.discr_f_level], colorbar=False)
 
-        def test_poisoning_grad_check(self):
-
-            self._clf_poisoning()
-
-            x0 = self.xc
-
-            # Compare analytical gradient with its numerical approximation
-            check_grad_val = COptimizer(
-                CFunction(self.poisoning._objective_function,
-                          self.poisoning._objective_function_gradient)
-            ).check_grad(x0)
-            self.logger.info("Gradient difference between analytical "
-                             "poisoning "
-                             "gradient and numerical gradient: %s",
-                             str(check_grad_val))
-            self.assertLess(check_grad_val, 1,
-                            "poisoning gradient is wrong {:}".format(
-                                check_grad_val))
+        def _test_accuracy(self, clf):
+            metric = CMetric.create('accuracy')
+            y_pred, scores = clf.predict(self.ts.X,
+                                         return_decision_function=True)
+            acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
+            self.logger.info("Error on testing data: " + str(1 - acc))
+            self.assertGreater(acc, 0.7, "The trained classifier have an "
+                                         "accuracy that is too low to evaluate "
+                                         "if the poisoning against this "
+                                         "calssifier works")
