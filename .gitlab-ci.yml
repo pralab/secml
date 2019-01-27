@@ -19,8 +19,8 @@ stages:
   - deploy
 
 .test:
-  image: ubuntu:xenial
   stage: test
+  image: ubuntu:xenial
   before_script:
     - echo $CI_PROJECT_DIR
     - sh .gitlab-ci-extra.sh > /dev/null
@@ -51,15 +51,12 @@ test:py27-n15:
   script: tox -e py27-n15
 
 package:
-  image: ubuntu:xenial
   stage: package
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/python2-setuptools:latest
   when: always
   before_script:
     - echo $CI_PROJECT_DIR
   script:
-    - apt-get update -yq > /dev/null
-    - apt-get install -yq python-pip > /dev/null
-    - pip install -U setuptools
     - python setup.py sdist --formats=zip
   only:
     changes:
@@ -78,8 +75,8 @@ package:
       - ${CI_PROJECT_DIR}/dist/SecML-Lib-*.zip
 
 .install:
-  image: ubuntu:xenial
   stage: install
+  image: ubuntu:xenial
   before_script:
     - echo $CI_PROJECT_DIR
     - sh .gitlab-ci-extra.sh > /dev/null
