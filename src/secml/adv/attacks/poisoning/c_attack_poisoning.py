@@ -17,7 +17,7 @@ from secml.ml.peval.metrics import CMetric
 from secml.optimization.constraints import CConstraint
 from secml.optimization.function import CFunction
 
-
+# fixme: cleaning this class
 class CAttackPoisoning(CAttack):
     """Class providing a common interface to CSolver classes."""
     __metaclass__ = ABCMeta
