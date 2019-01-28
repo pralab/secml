@@ -62,7 +62,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         acc: float
             classifier accuracy
         """
-        labels, scores = self.clf.predict(
+        labels, scores = clf.predict(
             self.ts[50:100, :].X, return_decision_function=True)
 
         self.logger.info("Labels:\n{:}".format(labels))
