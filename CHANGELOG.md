@@ -1,3 +1,9 @@
+## v0.2.1-dev (28/01/2019)
+
+### Bugfix (1 change)
+- #254 Fixed not usable properties w and b of CClassifierPyTorch.
+
+
 ## v0.2-dev (23/01/2019)
 - #183 Complete review of the `pytorch` package.
 - #12 Classifiers with reject option based on a threshold.
