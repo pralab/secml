@@ -83,7 +83,7 @@ class CClassifierPyTorchCarliniCNNMNIST(CClassifierPyTorch):
             regularize_bias=regularize_bias,
             train_transform=train_transform,
             preprocess=preprocess,
-            input_shape=(28, 28, 1),
+            input_shape=(1, 28, 28),
             softmax_outputs=softmax_outputs,
             random_state=random_state,
             num_classes=num_classes
