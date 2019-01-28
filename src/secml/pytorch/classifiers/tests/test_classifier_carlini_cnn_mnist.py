@@ -53,8 +53,8 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
             transforms.Lambda(lambda x: x.reshape([1, 28, 28])),
         ])
 
-    def test_classify(self):
-        """Test predict"""
+    def test_accuracy(self):
+        """Test the classifier accuracy"""
 
         labels, scores = self.clf.predict(
             self.ts[50:100, :].X, return_decision_function=True)
@@ -65,7 +65,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         acc = CMetricAccuracy().performance_score(self.ts[50:100, :].Y, labels)
         self.logger.info("Accuracy: {:}".format(acc))
 
-        self.assertEqual(0.92, acc)  # We should always get the same acc
+        self.assertGreater(acc, 0.90)
 
         self.logger.info("Testing softmax-scaled outputs")
 
@@ -77,11 +77,13 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         self.logger.info("Labels:\n{:}".format(labels))
         self.logger.info("Scores:\n{:}".format(scores))
 
-        acc = CMetricAccuracy().performance_score(self.ts[50:100, :].Y, labels)
+        acc2 = CMetricAccuracy().performance_score(self.ts[50:100, :].Y,
+                                                   labels)
         self.logger.info("Accuracy: {:}".format(acc))
 
-        # Accuracy will not change after scaling the outputs
-        self.assertEqual(0.92, acc)  # We should always get the same acc
+        # Accuracy should not change after scaling the outputs
+        self.assertEqual(acc, acc2, "The accuracy is different if we do "
+                                    "not scale the logit using softmax")
 
 
 # fixme: test deepcopy
