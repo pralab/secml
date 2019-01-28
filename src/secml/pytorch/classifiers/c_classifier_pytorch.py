@@ -298,7 +298,7 @@ class CClassifierPyTorch(CClassifier):
         with torch.no_grad():
             for m in self._model.modules():
                 if hasattr(m, 'weight') and m.weight is not None:
-                    w = w.append(CArray(m.weight.data.cpu().numpy()))
+                    w = w.append(CArray(m.weight.data.cpu().numpy().ravel()))
         return w
 
     @property
@@ -308,7 +308,7 @@ class CClassifierPyTorch(CClassifier):
         with torch.no_grad():
             for m in self._model.modules():
                 if hasattr(m, 'bias') and m.bias is not None:
-                    b = b.append(CArray(m.bias.data.cpu().numpy()))
+                    b = b.append(CArray(m.bias.data.cpu().numpy().ravel()))
         return b
 
     def __deepcopy__(self, memo, *args, **kwargs):
