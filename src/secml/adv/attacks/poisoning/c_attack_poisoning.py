@@ -657,15 +657,16 @@ class CAttackPoisoning(CAttack):
                                                                         self._f_opt))
 
                 ###############
-                xc.save("advXprov", overwrite=True)
-                yc.save("advYprov", overwrite=True)
-                y_pred, scores = self._poisoned_clf.classify(x)
-                acc = metric.performance_score(y_true=y, y_pred=y_pred)
+                # xc.save("advXprov", overwrite=True)
+                # yc.save("advYprov", overwrite=True)
+                # y_pred, scores = self._poisoned_clf.predict(x,
+                #                                             return_decision_function=True)
+                # acc = metric.performance_score(y_true=y, y_pred=y_pred)
                 # self.logger.info("Poisoned classifier accuracy on test data {:}".format(acc))
 
                 ###############
 
-            delta = (xc_prv - xc).norm()
+            delta = (xc_prv - xc).norm_2d()()
             # self.logger.info(
             #     "Optimization with n points: " + str(self._n_points) +
             #     " iter: " + str(k) + ", delta: " + str(
