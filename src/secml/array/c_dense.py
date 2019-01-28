@@ -186,14 +186,20 @@ class CDense(_CArrayInterface):
                     "or arrays with shape[0] == 1.")
 
         elif is_list(idx):
-            if self.ndim == 1:
+            # Empty lists are converted to float by numpy,
+            # special handling needed
+            if len(idx) == 0:
+                idx = np.asarray(idx, dtype=int)
+            else:  # Otherwise we leave np decide
                 idx = np.asarray(idx)
+
+            if self.ndim == 1:
                 # Check the size of any boolean array
                 self._check_index_bool(idx)
 
             elif self.ndim > 1 and self.shape[0] == 1:
                 # Fake 2D index. Use ndarrays to mimic Matlab-like indexing
-                idx = (np.asarray([0]), np.asarray(idx))
+                idx = (np.asarray([0]), idx)
                 # Check the size of any boolean array
                 self._check_index_bool(idx)
                 # 2D array: matlab-like indexing
@@ -251,7 +257,12 @@ class CDense(_CArrayInterface):
                     self._check_index_bool(tuple(t))
 
                 elif is_list(e):
-                    idx_list[e_i] = np.asarray(e)
+                    # Empty lists are converted to float by numpy,
+                    # special handling needed
+                    if len(e) == 0:
+                        idx_list[e_i] = np.asarray(e, dtype=int)
+                    else:  # Otherwise we leave np decide
+                        idx_list[e_i] = np.asarray(e)
                     # Check the size of any boolean array inside tuple
                     t = [None, None]  # Fake index for booleans check
                     t[e_i] = idx_list[e_i]

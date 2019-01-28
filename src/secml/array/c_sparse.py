@@ -177,7 +177,7 @@ class CSparse(_CArrayInterface):
             # SPECIAL CASE: Matlab-like indexing
             idx = np.ix_(*idx)
 
-            # Workround for scipy indexing when 2 integer-like are passed
+            # Workaround for scipy indexing when 2 integer-like are passed
             if idx[1].size == 1:
                 idx = tuple(elem.ravel()[0] for elem in idx)
 
@@ -211,8 +211,15 @@ class CSparse(_CArrayInterface):
                 raise IndexError("vector-like indexing is only applicable "
                                  "to arrays with shape[0] == 1.")
 
+            # Empty lists are converted to float by numpy,
+            # special handling needed
+            if len(idx) == 0:
+                idx = np.asarray(idx, dtype=int)
+            else:  # Otherwise we leave np decide
+                idx = np.asarray(idx)
+
             # Fake 2D index. Use ndarrays to mimic Matlab-like indexing
-            idx = (np.asarray([0]), np.asarray(idx))
+            idx = (np.asarray([0]), idx)
 
             # Check the size of any boolean array inside tuple
             self._check_index_bool(idx)
@@ -220,7 +227,7 @@ class CSparse(_CArrayInterface):
             # SPECIAL CASE: Matlab-like indexing
             idx = np.ix_(*idx)
 
-            # Workround for scipy indexing when 2 integer-like are passed
+            # Workaround for scipy indexing when 2 integer-like are passed
             if idx[1].size == 1:
                 idx = tuple(elem.ravel()[0] for elem in idx)
 
@@ -249,7 +256,12 @@ class CSparse(_CArrayInterface):
                     self._check_index_bool(tuple(t))
 
                 elif is_list(e):
-                    idx_list[e_i] = np.asarray(e)
+                    # Empty lists are converted to float by numpy,
+                    # special handling needed
+                    if len(e) == 0:
+                        idx_list[e_i] = np.asarray(e, dtype=int)
+                    else:  # Otherwise we leave np decide
+                        idx_list[e_i] = np.asarray(e)
                     # Check the size of any boolean array inside tuple
                     t = [None, None]  # Fake index for booleans check
                     t[e_i] = idx_list[e_i]
@@ -279,7 +291,7 @@ class CSparse(_CArrayInterface):
             if all(is_ndarray(elem) for elem in idx):
                 idx = np.ix_(*idx)
 
-            # Workround for scipy indexing when 2 integer-like are passed
+            # Workaround for scipy indexing when 2 integer-like are passed
             if all(is_intlike(elem) for elem in idx):
                 idx = tuple(elem.ravel()[0] for elem in idx)
 
