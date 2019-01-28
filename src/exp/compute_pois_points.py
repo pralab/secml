@@ -72,8 +72,8 @@ class TestComputePoisoningPoints(CCreator):
         self.surr_clf = CClassifierLogistic(C=1.0, random_seed=0)
 
         self.target_clf = CClassifierPyTorchCarliniCNNMNIST(num_classes=2,
-                                                          random_state=0,
-                                                          train_transform=self.transform_train)
+                                                            random_state=0,
+                                                            train_transform=self.transform_train)
 
     def compute_pois_points(self):
 
@@ -85,9 +85,11 @@ class TestComputePoisoningPoints(CCreator):
         print("Accuracy of the classifier trained on the "
               "original training dataset: {:}".format(acc))
 
+        # nb: the gradient-descent solver in lib does not have the grid search
         self.solver_type = 'gradient-descent'
-        self.grad_desc_solver_params = {'eta': 0.1,  #[0.05, 0.1, 0.2, 0.5],
-                                        'eps': 1e-6}
+        self.grad_desc_solver_params = {'eta': 0.1,  # [0.05, 0.1, 0.2, 0.5],
+                                        'eps': 1e-6,
+                                        'max_iter': 2}
 
         self.pois = CAttackPoisoningLogisticRegression(self.surr_clf,
                                                        training_data=self.tr,
@@ -108,17 +110,15 @@ class TestComputePoisoningPoints(CCreator):
 
         self.param_name = 'n_points'
 
-        #fixme: change this (low number only for debugging purpose)
-        self.param_values = [0, 2]
-        #self.param_values = [0, 5, 10, 15, 20, 26, 55, 125]
+        self.param_values = [0, 5, 10, 15, 20, 26, 55, 125]
         self.sec_eval = CSecEval(self.pois, param_name=self.param_name,
                                  param_values=self.param_values,
                                  save_adv_ds=True)
 
         self.sec_eval.run_sec_eval(self.ts)
 
-        self._save_pois_data(self.sec_eval.sec_eval_data.adv_ds)
-
+        self._save_pois_data(self.sec_eval.sec_eval_data.adv_ds[5])
+        self._save_pois_data(self.sec_eval.sec_eval_data.adv_ds[7])
 
 test = TestComputePoisoningPoints()
 test.compute_pois_points()
