@@ -16,15 +16,15 @@ class Flatten(nn.Module):
         super(Flatten, self).__init__()
 
     def forward(self, x):
-        x = x.view(x.numel())
+        x = x.view(x.shape[0], -1)
         return x
 
-class Flatten2(nn.Module):
+class CheckShape(nn.Module):
     def __init__(self):
-        super(Flatten2, self).__init__()
+        super(CheckShape, self).__init__()
 
     def forward(self, x):
-        x = x.view(-1)
+        print x.shape
         return x
 
 class CarliniMNISTModel(nn.Module):
@@ -35,8 +35,7 @@ class CarliniMNISTModel(nn.Module):
         super(CarliniMNISTModel, self).__init__()
 
         self.features = nn.Sequential(
-            nn.Conv2d(1, nb_filters, groups=1, kernel_size=5, \
-                      stride=2),
+            nn.Conv2d(1, nb_filters, kernel_size=5, stride=2),
             nn.ReLU(inplace=True),
             nn.Conv2d(in_channels=nb_filters, out_channels=nb_filters,
                       kernel_size=3, stride=2),
@@ -45,10 +44,9 @@ class CarliniMNISTModel(nn.Module):
                       kernel_size=3, stride=1),
             nn.ReLU(inplace=True),
             Flatten(),
-            nn.Linear(73728, out_features=32),
+            nn.Linear(576, out_features=32),
             nn.ReLU(inplace=True),
             nn.Dropout(p=.5, inplace=False),
-            Flatten2(),
         )
         self.classifier = nn.Linear(32, num_classes)
 
@@ -57,6 +55,13 @@ class CarliniMNISTModel(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
         return x
+
+    #
+    # def forward(self, x):
+    #     x = self.features(x)
+    #     x = x.view(x.size(0), 256 * 6 * 6)
+    #     x = self.classifier(x)
+    #     return x
 
 
 def carlini_mnist_model(**kwargs):
