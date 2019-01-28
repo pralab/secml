@@ -612,7 +612,8 @@ class CAttackPoisoning(CAttack):
 
         if self._n_points is None or self._n_points == 0:
             # evaluate performance on x,y
-            y_pred, scores = self._classifier.classify(x)
+            y_pred, scores = self._classifier.predict(x,
+                                                      return_decision_function=True)
             return y_pred, scores, ds_init, 0
 
         # n_points > 0
