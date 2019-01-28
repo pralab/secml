@@ -19,7 +19,7 @@ from secml.optimization.constraints import CConstraint
 from secml.optimization.constraints import CConstraintL2
 from secml.optimization.function import CFunction
 
-
+# fixme: cleaning this class
 class CAttackPoisoning(CAttack):
     """Class providing a common interface to CSolver classes."""
 
