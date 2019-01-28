@@ -1,33 +1,31 @@
-from secml.utils import CUnitTest
-
 import torchvision.transforms as transforms
+
+from secml.utils import CUnitTest
 from secml.data.loader import CDataLoaderMNIST
 from secml.array import CArray
-from secml.ml.features.normalization import CNormalizerMeanSTD
 from secml.ml.peval.metrics import CMetricAccuracy
 from secml.pytorch.classifiers import CClassifierPyTorchCarliniCNNMNIST
-from secml.pytorch.models import dl_pytorch_model
 
 
 class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
 
     def setUp(self):
-
         self.seed = 0
 
         self._load_mnist()
 
-        self.clf = CClassifierPyTorchCarliniCNNMNIST().fit(self.tr)
+        self.clf = CClassifierPyTorchCarliniCNNMNIST(
+            train_transform=self.transform_train).fit(self.tr)
         self.clf.verbose = 2
 
     def _load_mnist(self):
-
         loader = CDataLoaderMNIST()
 
         self._digits = CArray.arange(10).tolist()
         self.tr = loader.load('training', digits=self._digits)
 
         print "classes: ", self.tr.classes
+        print "features ", self.tr.num_features
 
         self.ts = loader.load('testing', digits=self._digits)
 
@@ -51,10 +49,13 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         ts_dts_idx = CArray.randsample(idx, 100, random_state=self.seed)
         self.ts = self.ts[ts_dts_idx, :]
 
+        self.transform_train = transforms.Compose([
+            transforms.Lambda(lambda x: x.reshape([28, 28, 1])),
+            transforms.ToTensor(),
+        ])
+
     def test_classify(self):
         """Test predict"""
-        state = dl_pytorch_model('densenet-bc-L100-K12')
-        self.clf.load_state(state, dataparallel=True)
 
         labels, scores = self.clf.predict(
             self.ts[50:100, :].X, return_decision_function=True)
@@ -82,6 +83,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
 
         # Accuracy will not change after scaling the outputs
         self.assertEqual(0.92, acc)  # We should always get the same acc
+
 
 # fixme: test deepcopy
 # fixme: test incremental training

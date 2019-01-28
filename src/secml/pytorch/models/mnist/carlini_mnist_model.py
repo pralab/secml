@@ -11,6 +11,22 @@ import torch.nn as nn
 __all__ = ['carlini_mnist_model']
 
 
+class Flatten(nn.Module):
+    def __init__(self):
+        super(Flatten, self).__init__()
+
+    def forward(self, x):
+        x = x.view(x.numel())
+        return x
+
+class Flatten2(nn.Module):
+    def __init__(self):
+        super(Flatten2, self).__init__()
+
+    def forward(self, x):
+        x = x.view(-1)
+        return x
+
 class CarliniMNISTModel(nn.Module):
 
     def __init__(self, num_classes=10):
@@ -19,18 +35,20 @@ class CarliniMNISTModel(nn.Module):
         super(CarliniMNISTModel, self).__init__()
 
         self.features = nn.Sequential(
-            nn.Conv2d(1, nb_filters, kernel_size=(5, 5), stride=(2, 2)),
+            nn.Conv2d(1, nb_filters, groups=1, kernel_size=5, \
+                      stride=2),
             nn.ReLU(inplace=True),
             nn.Conv2d(in_channels=nb_filters, out_channels=nb_filters,
-                      kernel_size=(3, 3), stride=(2, 2)),
+                      kernel_size=3, stride=2),
             nn.ReLU(inplace=True),
             nn.Conv2d(in_channels=nb_filters, out_channels=nb_filters,
-                      kernel_size=(3, 3), stride=(1, 1)),
+                      kernel_size=3, stride=1),
             nn.ReLU(inplace=True),
-            # Flatten(),
-            nn.Linear(64, out_features=32),
+            Flatten(),
+            nn.Linear(73728, out_features=32),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=.5, inplace=False)
+            nn.Dropout(p=.5, inplace=False),
+            Flatten2(),
         )
         self.classifier = nn.Linear(32, num_classes)
 
@@ -44,8 +62,3 @@ class CarliniMNISTModel(nn.Module):
 def carlini_mnist_model(**kwargs):
     model = CarliniMNISTModel(**kwargs)
     return model
-
-
-
-
-#model = carlini_mnist_model()
