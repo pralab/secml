@@ -50,8 +50,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         self.ts = self.ts[ts_dts_idx, :]
 
         self.transform_train = transforms.Compose([
-            transforms.Lambda(lambda x: x.reshape([28, 28, 1])),
-            transforms.ToTensor(),
+            transforms.Lambda(lambda x: x.reshape([1, 28, 28])),
         ])
 
     def test_classify(self):
