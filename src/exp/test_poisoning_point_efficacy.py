@@ -16,42 +16,6 @@ class TestPoisoningPointEfficacy(CCreator):
     Test that given a saved set of poisoning points compute their
     effectiveness into decrease the classifier accuracy.
     """
-
-    # def _load_mnist(self):
-    #     loader = CDataLoaderMNIST()
-    #
-    #     self._digits = [8, 9]
-    #     self.tr = loader.load('training', digits=self._digits)
-    #
-    #     print "classes: ", self.tr.classes
-    #     print "features ", self.tr.num_features
-    #
-    #     self.ts = loader.load('testing', digits=self._digits)
-    #
-    #     # get dataset img dimension
-    #     # TODO: these should not be included in CDataset!
-    #     # they're lost after conversion tosparse
-    #     self.img_w = self.tr.img_w
-    #     self.img_h = self.tr.img_h
-    #
-    #     self.tr.X /= 255.0
-    #     self.ts.X /= 255.0
-    #
-    #     idx = CArray.arange(0, self.tr.num_samples)
-    #     val_dts_idx = CArray.randsample(idx, 500, random_state=self.seed)
-    #     self._val = self.tr[val_dts_idx, :]
-    #
-    #     tr_dts_idx = CArray.randsample(idx, 1000, random_state=self.seed)
-    #     self.tr = self.tr[tr_dts_idx, :]
-    #
-    #     idx = CArray.arange(0, self.ts.num_samples)
-    #     ts_dts_idx = CArray.randsample(idx, 1000, random_state=self.seed)
-    #     self.ts = self.ts[ts_dts_idx, :]
-    #
-    #     self.transform_train = transforms.Compose([
-    #         transforms.Lambda(lambda x: x.reshape([1, 28, 28])),
-    #     ])
-
     def _load_mnist(self):
 
         self.tr, self.val, self.ts, self.tr2 = create_mnist_dataset(
@@ -90,8 +54,40 @@ class TestPoisoningPointEfficacy(CCreator):
                 Y = fm['Y']
             X = CArray(X)
             Y = CArray(Y)
-            pois_data = CDataset(X, Y)[:self.n_pois_points, :]
+            # pois_data = CDataset(X, Y)[:self.n_pois_points, :]
+            # pois_data = CDataset(X, Y)[-1:, :] #acc  0.979
+            pois_data = CDataset(X, Y)[0, :]  # il punto calcolato con l'svm
+            # la butta a 0.5
             print "number of poisoning samples ", pois_data.num_samples
+
+            print "pois data min ", pois_data.X.min(axis=None)
+            print "pois data max ", pois_data.X.max(axis=None)
+            print "pois data label ", pois_data.Y
+            pois_data.X[pois_data.X<0] = 0
+            print "pois data min ", pois_data.X.min(axis=None)
+
+            print "pois data x ", pois_data.X
+
+            idx = CArray.arange(0, 784)
+            from secml.figure import CFigure
+            fig = CFigure()
+            fig.subplot(1,2,1)
+            fig.sp.title("svm pois point")
+            fig.sp.bar(idx, pois_data.X.ravel())
+            print pois_data.X.shape
+            print type(pois_data.X[0,0])
+
+            print "tr data min ", self.tr.X.min(axis=None)
+            print "tr data max ", self.tr.X.max(axis=None)
+            print "tr data mean sum ", self.tr.X.sum(axis = 0).mean(axis=None)
+
+            print self.tr.X.mean(axis=0).shape
+            fig.subplot(1,2,2)
+            fig.sp.title("mean dataset point")
+            fig.sp.bar(idx, self.tr.X.mean(axis=0).ravel())
+
+            fig.show()
+
         else:
             raise ValueError("file not found")
 
@@ -101,15 +97,30 @@ class TestPoisoningPointEfficacy(CCreator):
 
         self.seed = 0
 
-        self.n_pois_points = 25
+        self.n_pois_points = 1
+        # computed on the validation dataset:
         #self.pois_data_path = "/home/ambra/np_adv/mnist_0_logistic"
+        # self.pois_data_path = "/home/ambra/np_adv/mnist_0_ridge-10"
+
+        # computed on the training dataset:
         #self.pois_data_path = "/home/ambra/np_adv_tr/mnist_0_logistic"
-        self.pois_data_path = "/home/ambra/new_np_adv/secml_code"
+        # self.pois_data_path = "/home/ambra/np_adv_tr/mnist_0_ridge-10"
+
+        self.pois_data_path = "/home/ambra/np_adv_tr/mnist_0_lin-svm-c100"
+
+        #self.pois_data_path = "/home/ambra/new_np_adv/secml_code"
+        # self.pois_data_path = "/home/ambra/new_np_adv/noinv_solver"
 
         self._load_mnist()
 
+        # random state 0 acc tr single point svm 0.5 (partendo da 0.976)
+        # random state 2 acc tr single point svm 0.974 (partendo da 0.977)
+
         self.clf = CClassifierPyTorchCarliniCNNMNIST(num_classes=2,
-                                                     random_state=0,
+                                                     random_state=0, #random
+                                                     # state 2 quasi
+                                                     # ineffettivo un punto
+                                                     # solo
                                                      train_transform=self.transform_train)
 
     def test_pois_efficacy(self):
