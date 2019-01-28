@@ -666,7 +666,7 @@ class CAttackPoisoning(CAttack):
 
                 ###############
 
-            delta = (xc_prv - xc).norm_2d()()
+            delta = (xc_prv - xc).norm_2d()
             # self.logger.info(
             #     "Optimization with n points: " + str(self._n_points) +
             #     " iter: " + str(k) + ", delta: " + str(
