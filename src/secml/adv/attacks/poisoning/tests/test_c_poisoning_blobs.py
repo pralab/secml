@@ -21,7 +21,7 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
             pois_clf = self._clf_poisoning()[0]
 
             if self.n_features == 2:
-                fig = CFigure(height=4, width=10)
+                fig = CFigure(height=4, width=10, title=clf_idx)
                 n_rows = 1
                 n_cols = 2
 
@@ -48,6 +48,7 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
                 fig.sp.plot_path(self.poisoning.x_seq,
                                  start_facecolor='r' if self.yc == 1 else 'b')
 
+                fig.tight_layout()
                 fig.show()
                 fig.savefig(clf_idx + "_2d_pois", file_format='pdf')
 
