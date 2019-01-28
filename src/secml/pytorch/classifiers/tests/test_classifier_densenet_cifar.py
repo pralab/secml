@@ -255,6 +255,34 @@ class TestCClassifierPyTorchDenseNetCifar(CUnitTest):
         clf.weight_decay = 1e-4
         self.assertEqual(1e-4, clf._optimizer.defaults['weight_decay'])
 
+    def test_properties(self):
+        """Test for properties."""
+        self.logger.info("Testing before loading state")
+
+        w = self.clf.w
+        self.assertEqual(1, w.ndim)
+        # We know the number of params for the L100-K12 model
+        self.assertEqual(757158, w.size)
+
+        b = self.clf.b
+        self.assertEqual(1, b.ndim)
+        # We know the number of params for the L100-K12 model
+        self.assertEqual(12004, b.size)
+
+        self.logger.info("Testing after loading state")
+
+        state = dl_pytorch_model('densenet-bc-L100-K12')
+        self.clf.load_state(state, dataparallel=True)
+
+        self.assertEqual(1, w.ndim)
+        # We know the number of params for the L100-K12 model
+        self.assertEqual(757158, w.size)
+
+        b = self.clf.b
+        self.assertEqual(1, b.ndim)
+        # We know the number of params for the L100-K12 model
+        self.assertEqual(12004, b.size)
+
     def test_save_load_state(self):
         """Test for load_state using state_dict."""
         lr_default = 1e-2
