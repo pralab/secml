@@ -680,7 +680,7 @@ class CAttackPoisoning(CAttack):
                                             train_normalizer=False)
         # fixme: rechange train_normalizer=True
 
-        y_pred, scores = clf.classify(x)
+        y_pred, scores = clf.predict(x, return_decision_function=True)
         acc = metric.performance_score(y_true=y, y_pred=y_pred)
         self.logger.info(
             "Original classifier accuracy on test data {:}".format(acc))
