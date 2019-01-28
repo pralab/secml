@@ -12,6 +12,12 @@ from secml.pytorch.models.mnist import carlini_mnist_model
 
 class CClassifierPyTorchCarliniCNNMNIST(CClassifierPyTorch):
     """
+    The CNN learned on the MNIST dataset by Carlini in the paper:
+    N. Carlini and D. A. Wagner, "Adversarial examples are not easily
+    detected: Bypassing ten detection methods"
+
+    ref to the Carlini's code:
+    https://github.com/carlini/nn_breaking_detection/blob/master/setup_mnist.py
 
     Loss function for training: cross-entropy (includes softmax)
 
