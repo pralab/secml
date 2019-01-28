@@ -61,6 +61,7 @@ class CClassifierPyTorchCarliniCNNMNIST(CClassifierPyTorch):
     """
     __class_type = 'pytorch-carlini-cnn-mnist'
 
+    # fixme: fix the lr
     # def get_lr(epoch):
     #   return base_lr * (.5 ** (epoch / num_epochs * 10))
 
