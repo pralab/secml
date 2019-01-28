@@ -19,14 +19,6 @@ class Flatten(nn.Module):
         x = x.view(x.shape[0], -1)
         return x
 
-class CheckShape(nn.Module):
-    def __init__(self):
-        super(CheckShape, self).__init__()
-
-    def forward(self, x):
-        print x.shape
-        return x
-
 class CarliniMNISTModel(nn.Module):
 
     def __init__(self, num_classes=10):
@@ -55,14 +47,6 @@ class CarliniMNISTModel(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
         return x
-
-    #
-    # def forward(self, x):
-    #     x = self.features(x)
-    #     x = x.view(x.size(0), 256 * 6 * 6)
-    #     x = self.classifier(x)
-    #     return x
-
 
 def carlini_mnist_model(**kwargs):
     model = CarliniMNISTModel(**kwargs)
