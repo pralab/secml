@@ -64,8 +64,8 @@ class TestComputePoisoningPoints(CCreator):
 
         self.seed = 0
 
-        self.n_pois_points = 25
-        self.pois_data_path = "/home/ambra/new_np_adv/secml_code"
+        #self.pois_data_path = "/home/ambra/new_np_adv/secml_code"
+        self.pois_data_path = "/home/ambra/new_np_adv/noinv_solver"
 
         self._load_mnist()
 
