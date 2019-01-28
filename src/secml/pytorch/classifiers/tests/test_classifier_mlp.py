@@ -238,6 +238,20 @@ class TestCClassifierPyTorchMLP(CUnitTest):
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
 
+    def test_properties(self):
+        """Test for properties."""
+        self.logger.info("Testing before loading state")
+
+        w = self.clf.w
+        self.assertEqual(1, w.ndim)
+        # We know the number of params (20*40 + 3*40)
+        self.assertEqual(920, w.size)
+
+        b = self.clf.b
+        self.assertEqual(1, b.ndim)
+        # We know the number of params (40 + 3)
+        self.assertEqual(43, b.size)
+
     def test_deepcopy(self):
         """Test for deepcopy."""
         self.clf.verbose = 0
