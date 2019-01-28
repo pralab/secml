@@ -122,3 +122,8 @@ class TestComputePoisoningPoints(CCreator):
 
 test = TestComputePoisoningPoints()
 test.compute_pois_points()
+
+#2019-01-28 20:11:19,708 - CAttackPoisoningLogisticRegression.0x7f98159e7f50
+# - INFO - Original classifier accuracy on test data 0.848
+#2019-01-28 20:11:19,709 - CSecEval.0x7f98261c3f50 - INFO - Time: CArray([
+# 200.034727])

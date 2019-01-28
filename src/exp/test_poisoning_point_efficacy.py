@@ -102,9 +102,9 @@ class TestPoisoningPointEfficacy(CCreator):
         self.seed = 0
 
         self.n_pois_points = 25
-        self.pois_data_path = "/home/ambra/np_adv/mnist_0_logistic"
-        # self.pois_data_path = "/home/ambra/np_adv_tr/mnist_0_logistic"
-        #self.pois_data_path = "/home/ambra/new_np_adv/secml_code"
+        #self.pois_data_path = "/home/ambra/np_adv/mnist_0_logistic"
+        #self.pois_data_path = "/home/ambra/np_adv_tr/mnist_0_logistic"
+        self.pois_data_path = "/home/ambra/new_np_adv/secml_code"
 
         self._load_mnist()
 
