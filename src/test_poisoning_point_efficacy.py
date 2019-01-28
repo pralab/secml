@@ -12,11 +12,15 @@ from secml.ml.peval.metrics import CMetricAccuracy
 
 
 class TestPoisoningPointEfficacy(CCreator):
+    """
+    Test that given a saved set of poisoning points compute their
+    effectiveness into decrease the classifier accuracy.
+    """
 
     def _load_mnist(self):
         loader = CDataLoaderMNIST()
 
-        self._digits = [8, 9]  # CArray.arange(10).tolist()
+        self._digits = [8, 9]
         self.tr = loader.load('training', digits=self._digits)
 
         print "classes: ", self.tr.classes
@@ -60,14 +64,14 @@ class TestPoisoningPointEfficacy(CCreator):
         labels, scores = clf.predict(
             self.ts[50:100, :].X, return_decision_function=True)
 
-        self.logger.info("Labels:\n{:}".format(labels))
-        self.logger.info("Scores:\n{:}".format(scores))
+        print("Labels:\n{:}".format(labels))
+        print("Scores:\n{:}".format(scores))
 
         acc = CMetricAccuracy().performance_score(self.ts[50:100, :].Y, labels)
 
         return acc
 
-    def _load_pois_dataset(self):
+    def _load_pois_data(self):
 
         if os.path.isfile(self.pois_data_path + '.npz'):
             with np.load(self.pois_data_path + '.npz') as fm:
@@ -75,33 +79,51 @@ class TestPoisoningPointEfficacy(CCreator):
                 Y = fm['Y']
             X = CArray(X)
             Y = CArray(Y)
-            pois_ds = CDataset(X, Y)[:self.n_pois_points, :]
-            print "number of poisoning samples ", pois_ds.num_samples
+            pois_data = CDataset(X, Y)[:self.n_pois_points, :]
+            print "number of poisoning samples ", pois_data.num_samples
         else:
             raise ValueError("file not found")
 
+        return pois_data
+
     def __init__(self):
 
+        self.seed = 0
+
         self.n_pois_points = 25
+        # self.pois_data_path = "/home/ambra/np_adv/mnist_0_logistic"
         self.pois_data_path = "/home/ambra/np_adv_tr/mnist_0_logistic"
 
         self._load_mnist()
 
-        clf = CClassifierPyTorchCarliniCNNMNIST(num_classes=2, random_state=0,
-                                                train_transform=self.transform_train)
+        self.clf = CClassifierPyTorchCarliniCNNMNIST(num_classes=2,
+                                                     random_state=0,
+                                                     train_transform=self.transform_train)
 
-        clf.fit(self.tr)
+    def test_pois_efficacy(self):
 
-        clear_acc = self._get_accuracy(clf)
-        self.logger.info("Accuracy of the classifier trained on the "
-                         "original training dataset: {:}".format(clear_acc))
+        print("Test the efficacy of the poisoning point")
 
-        clf.clear()
+        self.clf.fit(self.tr)
 
-        pois_dts = self._load_pois_dataset()
+        clear_acc = self._get_accuracy(self.clf)
+        print("Accuracy of the classifier trained on the "
+              "original training dataset: {:}".format(clear_acc))
 
-        clf.fit(pois_dts)
+        self.clf.clear()
 
-        pois_acc = self._get_accuracy(clf)
-        self.logger.info("Accuracy of the classifier trained on the "
-                         "poisoned training dataset: {:}".format(pois_acc))
+        pois_data = self._load_pois_data()
+        pois_dts = self.tr.append(pois_data)
+        print "pois dts X shape ", pois_dts.X.shape
+
+        self.clf.fit(pois_dts)
+
+        pois_acc = self._get_accuracy(self.clf)
+        print("Accuracy of the classifier trained on the "
+              "poisoned training dataset: {:}".format(pois_acc))
+
+
+test = TestPoisoningPointEfficacy()
+test.test_pois_efficacy()
+
+
