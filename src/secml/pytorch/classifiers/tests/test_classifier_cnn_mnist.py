@@ -79,7 +79,7 @@ class TestCClassifierPyTorchCNNMNIST(CUnitTest):
 
         self.logger.info("Check the classifier accuracy")
 
-        self.clf.fit(self.tr)
+        self.clf.fit(self.tr, best_acc_params=False)
 
         acc = self._get_accuracy(self.clf)
 
@@ -141,14 +141,14 @@ class TestCClassifierPyTorchCNNMNIST(CUnitTest):
 
         self.clf.epochs = 3
 
-        self.clf.fit(self.tr)
+        self.clf.fit(self.tr, best_acc_params=True)
 
         acc1 = self._get_accuracy(self.clf)
 
         self.logger.info("Accuracy after the first training : {:}".format(
             acc1))
 
-        self.clf.fit(self.tr, warm_start=True)
+        self.clf.fit(self.tr, warm_start=True, best_acc_params=True)
 
         acc2 = self._get_accuracy(self.clf)
 
@@ -192,7 +192,7 @@ class TestCClassifierPyTorchCNNMNIST(CUnitTest):
         self.clf.verbose = 0
 
         # train the classifier on dataset 2
-        self.clf.fit(dts2)
+        self.clf.fit(dts2, best_acc_params=False)
 
         print "best acc ", self.clf.best_acc
         print "epochs ", self.clf.epochs
@@ -202,7 +202,7 @@ class TestCClassifierPyTorchCNNMNIST(CUnitTest):
         self.logger.info("acc1: {:}".format(acc_clf1_tr2))
 
         # train again the classifier on dataset 2
-        self.clf.fit(dts2)
+        self.clf.fit(dts2, best_acc_params=False)
 
         print "best acc ", self.clf.best_acc
         print "epochs ", self.clf.epochs
