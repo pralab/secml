@@ -469,7 +469,7 @@ class CClassifierPyTorch(CClassifier):
         self._optimizer.load_state_dict(state_dict['optimizer'])
 
         # Restore the count of epochs
-        self._start_epoch = state_dict['epoch'] + 1
+        self._start_epoch = state_dict['epoch']
 
         # Restore accuracy data if available
         self._acc = state_dict.get('acc', 0)
@@ -520,7 +520,7 @@ class CClassifierPyTorch(CClassifier):
         state_dict['optimizer']['defaults'] = self._optimizer.defaults
         state_dict['optimizer']['regularize_bias'] = self.regularize_bias
         state_dict['state_dict'] = self._model.state_dict()
-        state_dict['epoch'] = self.start_epoch
+        state_dict['epoch'] = self.start_epoch + 1
         state_dict['acc'] = self.acc
         state_dict['best_acc'] = self.best_acc
         state_dict['input_shape'] = self.input_shape
