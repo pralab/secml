@@ -131,12 +131,7 @@ class CClassifierPyTorch(CClassifier):
         self._acc = 0  # epoch accuracy FIXME: ON TRAINING SET
         self._best_acc = 0  # best accuracy FIXME: ON TRAINING SET
 
-        # Random seed
-        if random_state is not None:
-            torch.manual_seed(random_state)
-            if use_cuda:
-                torch.cuda.manual_seed_all(random_state)
-                torch.backends.cudnn.deterministic = True
+        self._random_state = random_state
 
         # PyTorch NeuralNetwork model
         self._model = None
@@ -339,15 +334,34 @@ class CClassifierPyTorch(CClassifier):
         new_obj.init_optimizer()
         new_obj.load_state(state_dict)
 
+        # Restoring original CClassifier parameters
+        # that may had been updated by `load_state`
+        # Ugly, but required for managing the train/pretrain cases
+        new_obj._classes = self.classes
+        new_obj._n_features = self.n_features
+
+        # Decrementing the start_epoch counter as the temporary
+        # save/load of the state has incremented it
+        new_obj._start_epoch -= 1
+
         return new_obj
 
     def init_model(self):
         """Initialize the PyTorch Neural Network model."""
+        # Setting random seed
+        if self._random_state is not None:
+            torch.manual_seed(self._random_state)
+            if use_cuda:
+                torch.cuda.manual_seed_all(self._random_state)
+                torch.backends.cudnn.deterministic = True
+
         # Call the specific model initialization method passing params
         self._model = self._model_base(**self._model_params)
+
         # Make sure that model is a proper PyTorch module
         if not isinstance(self._model, torch.nn.Module):
             raise TypeError("`model` must be a `torch.nn.Module`.")
+
         # Ensure we are using cuda if available
         if use_cuda is True:
             self._model = self._model.cuda()
@@ -469,7 +483,7 @@ class CClassifierPyTorch(CClassifier):
         self._optimizer.load_state_dict(state_dict['optimizer'])
 
         # Restore the count of epochs
-        self._start_epoch = state_dict['epoch'] + 1
+        self._start_epoch = state_dict['epoch']
 
         # Restore accuracy data if available
         self._acc = state_dict.get('acc', 0)
@@ -520,7 +534,7 @@ class CClassifierPyTorch(CClassifier):
         state_dict['optimizer']['defaults'] = self._optimizer.defaults
         state_dict['optimizer']['regularize_bias'] = self.regularize_bias
         state_dict['state_dict'] = self._model.state_dict()
-        state_dict['epoch'] = self.start_epoch
+        state_dict['epoch'] = self.start_epoch + 1
         state_dict['acc'] = self.acc
         state_dict['best_acc'] = self.best_acc
         state_dict['input_shape'] = self.input_shape
@@ -574,6 +588,9 @@ class CClassifierPyTorch(CClassifier):
             self.init_model()
             # Reinitialize count of epochs
             self._start_epoch = 0
+            # Reinitialize accuracy and best accuracy
+            self._best_acc = 0
+            self._acc = 0
             # Reinitialize the optimizer as we are starting clean
             self.init_optimizer()
 
