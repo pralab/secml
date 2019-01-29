@@ -65,14 +65,11 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         labels, scores = clf.predict(
             self.ts[50:100, :].X, return_decision_function=True)
 
-        self.logger.info("Labels:\n{:}".format(labels))
-        self.logger.info("Scores:\n{:}".format(scores))
-
         acc = CMetricAccuracy().performance_score(self.ts[50:100, :].Y, labels)
 
         return acc
 
-    def test_accuracy(self):
+    def _test_accuracy(self):
         """Test the classifier accuracy"""
 
         self.clf.fit(self.tr)
@@ -100,8 +97,13 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         Make a deepcopy of the network, train both and check if their
         accuracy is equal.
         """
+        #self.clf.fit(self.tr[:100, :])
+
         self.logger.info("Check the deepcopy")
         clf2 = self.clf.deepcopy()
+
+        print self.clf
+        print clf2
 
         self.clf.fit(self.tr[:100, :])
         acc1 = self._get_accuracy(self.clf)
@@ -114,7 +116,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
                                                  "for its deepcopy is "
                                                  "different")
 
-    def test_incremental_training(self):
+    def _test_incremental_training(self):
         """
         Test if after an incremental training the accuracy increases
         """
@@ -132,7 +134,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
                         "The accuracy did not increase after "
                         "the incremental training")
 
-    def test_training_from_scratch(self):
+    def _test_training_from_scratch(self):
         """
         Train a network with a fixed random seed. Clear the network. Train
         it again and check if the accuracy is equal to the one that we get
