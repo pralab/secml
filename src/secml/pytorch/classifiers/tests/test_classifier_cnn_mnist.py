@@ -4,7 +4,7 @@ from secml.utils import CUnitTest
 from secml.data.loader import CDataLoaderMNIST
 from secml.array import CArray
 from secml.ml.peval.metrics import CMetricAccuracy
-from secml.pytorch.classifiers import CClassifierPyTorchCarliniCNNMNIST
+from secml.pytorch.classifiers import CClassifierPyTorchCNNMNIST
 
 
 class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
@@ -14,8 +14,8 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
 
         self._load_mnist()
 
-        self.clf = CClassifierPyTorchCarliniCNNMNIST(random_state=0,
-                                                     train_transform=self.transform_train)
+        self.clf = CClassifierPyTorchCNNMNIST(random_state=0,
+                                        train_transform=self.transform_train)
         self.clf.verbose = 0  # 2
 
     def _load_mnist(self):
