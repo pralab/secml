@@ -31,8 +31,11 @@ class CDataLoaderImgClients(CDataLoader):
     def load(self, ds_path, img_format, label_dtype=None, load_data=True):
         """Load all images of specified format inside given path.
 
-        'id' (last `ds_path` folder), 'img_w', 'img_h' will be added
-        as custom CDataset attributes.
+        The following custom CDataset attributes are available:
+        - 'id' (last `ds_path` folder)
+        - 'img_w' (image width)
+        - 'img_h' (image height)
+        - 'img_c' (image number of channels)
 
         Any other custom attribute is retrieved from 'attributes.txt' file.
 
@@ -59,10 +62,11 @@ class CDataLoaderImgClients(CDataLoader):
         # Dimensions of each image
         img_w = CArray([], dtype=int)
         img_h = CArray([], dtype=int)
+        img_c = CArray([], dtype=int)
 
         # Load files!
-        patterns, img_w, img_h = self._load_files(
-            ds_path, img_w, img_h, img_ext, load_data=load_data)
+        patterns, img_w, img_h, img_c = self._load_files(
+            ds_path, img_w, img_h, img_c, img_ext, load_data=load_data)
 
         labels = CArray.load(
             fm.join(ds_path, 'clients.txt'), dtype=label_dtype).ravel()
@@ -81,9 +85,10 @@ class CDataLoaderImgClients(CDataLoader):
             patterns.shape[0], ds_path))
 
         return CDataset(patterns, labels, id=fm.split(ds_path)[1],
-                        img_w=img_w, img_h=img_h, **attributes)
+                        img_w=img_w, img_h=img_h, img_c=img_c, **attributes)
 
-    def _load_files(self, ds_path, img_w, img_h, img_ext, load_data=True):
+    def _load_files(self, ds_path, img_w, img_h, img_c,
+                    img_ext, load_data=True):
         """Loads any file with given extension inside input folder."""
         # Files will be loaded in alphabetical order
         files_list = sorted(fm.listdir(ds_path))
@@ -101,13 +106,14 @@ class CDataLoaderImgClients(CDataLoader):
                 img = Image.open(file_path)
 
                 # Storing image dimensions...
-                img_w = img_w.append(img.size[0])
-                img_h = img_h.append(img.size[1])
+                img_w = img_w.append(img.width)
+                img_h = img_h.append(img.height)
+                img_c = img_c.append(len(img.getbands()))
 
                 # If load_data is True, store features, else store path
                 if load_data is True:
                     # Storing image as a 2D CArray
-                    array_img = CArray([img.getdata()])
+                    array_img = CArray(img.getdata()).ravel().atleast_2d()
                 else:
                     array_img = CArray([[file_path]])
 
@@ -118,4 +124,4 @@ class CDataLoaderImgClients(CDataLoader):
                 self.logger.debug("{:} has been loaded..."
                                   "".format(fm.join(ds_path, file_name)))
 
-        return patterns, img_w, img_h
+        return patterns, img_w, img_h, img_c
