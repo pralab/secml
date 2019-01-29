@@ -18,7 +18,7 @@ class TestCClassifierPyTorchCNNMNIST(CUnitTest):
 
         self._load_mnist()
 
-        self.clf = CClassifierPyTorchCNNMNIST(random_state=0, num_classes=2,
+        self.clf = CClassifierPyTorchCNNMNIST(random_state=2, num_classes=2,
                                               train_transform=self.transform_train)
 
         self.clf.verbose = 0  # 2
@@ -47,7 +47,7 @@ class TestCClassifierPyTorchCNNMNIST(CUnitTest):
         val_dts_idx = CArray.randsample(idx, 1000, random_state=self.seed)
         self._val = self.tr[val_dts_idx, :]
 
-        tr_dts_idx = CArray.randsample(idx, 5000, random_state=self.seed)
+        tr_dts_idx = CArray.randsample(idx, 500, random_state=self.seed)
         self.tr = self.tr[tr_dts_idx, :]
 
         idx = CArray.arange(0, self.ts.num_samples)
@@ -141,14 +141,14 @@ class TestCClassifierPyTorchCNNMNIST(CUnitTest):
 
         self.clf.epochs = 3
 
-        self.clf.fit(self.tr[:1000, :])
+        self.clf.fit(self.tr)
 
         acc1 = self._get_accuracy(self.clf)
 
         self.logger.info("Accuracy after the first training : {:}".format(
             acc1))
 
-        self.clf.fit(self.tr[:1000, :], warm_start=True)
+        self.clf.fit(self.tr, warm_start=True)
 
         acc2 = self._get_accuracy(self.clf)
 
@@ -186,7 +186,7 @@ class TestCClassifierPyTorchCNNMNIST(CUnitTest):
                          "from scratch")
 
         pp = self._load_problematic_points()
-        dts2 = self.tr[:500, :].append(pp)
+        dts2 = self.tr.append(pp)
         print "dts shape ", dts2.X.shape
 
         self.clf.verbose = 0
