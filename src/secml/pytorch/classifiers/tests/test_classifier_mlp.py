@@ -255,11 +255,32 @@ class TestCClassifierPyTorchMLP(CUnitTest):
     def test_deepcopy(self):
         """Test for deepcopy."""
         self.clf.verbose = 0
-        self.clf.fit(self.ds)
 
-        self.logger.info("Try deepcopy of classifier...")
+        self.logger.info("Try deepcopy of not-trained classifier...")
         clf2 = self.clf.deepcopy()
 
+        self.assertEqual(None, self.clf.classes)
+        self.assertEqual(None, self.clf.n_features)
+
+        self.assertEqual(None, clf2.classes)
+        self.assertEqual(None, clf2.n_features)
+
+        self.assertEqual(self.clf.start_epoch, clf2.start_epoch)
+
+        self.logger.info("Try deepcopy of trained classifier...")
+        self.clf.fit(self.ds)
+
+        clf2 = self.clf.deepcopy()
+
+        self.assertFalse((self.clf.classes != clf2.classes).any())
+        self.assertEqual(self.clf.n_features, clf2.n_features)
+
+        self.assertEqual(3, clf2.classes.size)
+        self.assertEqual(21, clf2.n_features)
+
+        self.assertEqual(self.clf.start_epoch, clf2.start_epoch)
+
+        self.logger.info("Try setting different parameters on the copy...")
         clf2.weight_decay = 300
         self.assertNotEqual(clf2.weight_decay, self.clf.weight_decay)
 

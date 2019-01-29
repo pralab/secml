@@ -339,6 +339,16 @@ class CClassifierPyTorch(CClassifier):
         new_obj.init_optimizer()
         new_obj.load_state(state_dict)
 
+        # Restoring original CClassifier parameters
+        # that may had been updated by `load_state`
+        # Ugly, but required for managing the train/pretrain cases
+        new_obj._classes = self.classes
+        new_obj._n_features = self.n_features
+
+        # Decrementing the start_epoch counter as the temporary
+        # save/load of the state has incremented it
+        new_obj._start_epoch -= 1
+
         return new_obj
 
     def init_model(self):
