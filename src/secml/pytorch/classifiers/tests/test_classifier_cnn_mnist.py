@@ -97,14 +97,26 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         Make a deepcopy of the network, train both and check if their
         accuracy is equal.
         """
-        #self.clf.fit(self.tr[:100, :])
-
         self.logger.info("Check the deepcopy")
         clf2 = self.clf.deepcopy()
 
-        print self.clf
-        print clf2
+        # check if the parameter are equal comparing their dictionary
+        dict_clf_1 = self.clf.get_params()
+        dict_clf_2 = clf2.get_params()
+        self.assertEqual(dict_clf_1, dict_clf_2, "the dictionary of the two "
+                                                 "classifiers is different")
 
+        # check some parameters defined in the classifier
+        self.assertEqual(self.clf1.n_features, clf2.n_features,
+                         "the number of features parameter is different for "
+                         "the two classifiers")
+
+        # check some parameters that are specific of the pytorch network
+        self.assertEqual(self.clf1.start_epoch, clf2.start_epoch,
+                         "the number of features parameter is different for "
+                         "the two classifiers")
+
+        # check the accuracy
         self.clf.fit(self.tr[:100, :])
         acc1 = self._get_accuracy(self.clf)
 
