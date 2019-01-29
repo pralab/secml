@@ -77,9 +77,16 @@ class CPoisoningTestCases(object):
 
                 self.discr_f_level = 0
 
-            elif clf_idx == 'svm':
+            elif clf_idx == 'lin-svm':
 
-                self.classifier = CClassifierSVM(kernel='linear', C=0.01)
+                self.classifier = CClassifierSVM(kernel='linear', C=0.1)
+
+                self.pois_class = CAttackPoisoningSVM
+                self.discr_f_level = 0
+
+            elif clf_idx == 'rbf-svm':
+
+                self.classifier = CClassifierSVM(kernel='rbf')
 
                 self.pois_class = CAttackPoisoningSVM
                 self.discr_f_level = 0
@@ -134,10 +141,10 @@ class CPoisoningTestCases(object):
 
             self._clf_creation(clf_idx)
 
-            start_training = time.time()
+            self.classifier.store_dual_vars = True
+
             self.classifier.fit(self.tr)
             self.clf_orig = self.classifier.deepcopy()
-            end_training = time.time()
 
             self._test_accuracy(self.classifier)
             self._pois_obj_creation()
@@ -192,10 +199,6 @@ class CPoisoningTestCases(object):
                                                 y_pred=y_pred)
             self.logger.info(
                 "Error on testing data (poisoned): " + str(1 - pois_acc))
-
-            self.assertGreater(orig_acc, pois_acc, "The accuracy is not "
-                                                   "decreased after the "
-                                                   "poisoning" )
 
             return pois_clf, xc
 

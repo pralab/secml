@@ -148,4 +148,3 @@ class CClassifierLogistic(CClassifierLinear):
         self._b = CArray(self._sklearn_clf.intercept_)
 
         return self
-

@@ -6,7 +6,6 @@ from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
 
 
-# l'attacco all'svm e' da fixare
 class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
     """
     Check the derivative of the classifier weights w.r.t. the poisoning point
@@ -15,7 +14,8 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
     """
 
     def clf_list(self):
-        return ['ridge', 'logistic']
+        return [ 'logistic', 'ridge']
+        #return ['lin-svm'] #, 'logistic', 'ridge']
 
     def test_2D(self):
         """
@@ -72,15 +72,13 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
                         "poisoning gradient is wrong {:}".format(
                             check_grad_val))
 
-    def test_poisoning_grad_check(self):
+    def _test_poisoning_grad_check(self):
 
         self.logger.info("Create 2-dimensional plot")
 
         for clf_idx in self.clf_list():
             self.logger.info("Test the {:} classifier".format(clf_idx))
             self._objs_creation(clf_idx)
-
-            pois_clf = self._clf_poisoning()[0]
 
             xc = self.xc
 
