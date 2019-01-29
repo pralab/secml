@@ -11,7 +11,7 @@ from secml.ml.peval.metrics import CMetricAccuracy
 from secml.pytorch.classifiers import CClassifierPyTorchCNNMNIST
 
 
-class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
+class TestCClassifierPyTorchCNNMNIST(CUnitTest):
 
     def setUp(self):
         self.seed = 0
