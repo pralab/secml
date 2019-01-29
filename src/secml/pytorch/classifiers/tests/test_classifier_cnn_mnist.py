@@ -182,6 +182,8 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         dts2 = self.tr[:500, :].append(pp)
         print "dts shape ", dts2.X.shape
 
+        self.clf.verbose = 1
+
         # train the classifier on dataset 2
         self.clf.fit(dts2)
 
