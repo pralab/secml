@@ -8,6 +8,7 @@
 import tarfile
 from collections import OrderedDict
 from itertools import izip
+from multiprocessing import Lock
 import numpy as np
 
 from secml.data.loader import CDataLoader, CDataLoaderSvmLight
@@ -66,6 +67,7 @@ class CDataLoaderDrebin(CDataLoader):
 
     """
     __class_type = 'drebin'
+    __lock = Lock()  # Lock to prevent multiple parallel download/extraction
 
     def __init__(self):
 
@@ -75,9 +77,10 @@ class CDataLoaderDrebin(CDataLoader):
         self.feat_mapping_path = fm.join(DREBIN_PATH, 'feature_mapping.txt')
         self.families_path = fm.join(DREBIN_PATH, 'sha256_family.csv')
 
-        # Download (if needed) data and extract it
-        if not fm.file_exist(self.data_path):
-            self._get_data(DREBIN_URL, DREBIN_PATH)
+        with CDataLoaderDrebin.__lock:
+            # Download (if needed) data and extract it
+            if not fm.file_exist(self.data_path):
+                self._get_data(DREBIN_URL, DREBIN_PATH)
 
     def load(self, feats_info=False):
         """Load the dataset.
