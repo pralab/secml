@@ -20,7 +20,6 @@ from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.loss import CSoftmax
 from secml.utils import load_dict, fm
 from secml.utils.mixed_utils import AverageMeter
-
 from secml.pytorch.settings import SECML_PYTORCH_USE_CUDA
 from secml.pytorch.data import CDatasetPyTorch
 from secml.pytorch.metrics import CMetricPyTorchAccuracy
@@ -540,7 +539,7 @@ class CClassifierPyTorch(CClassifier):
         state_dict['input_shape'] = self.input_shape
         return state_dict
 
-    def fit(self, dataset, warm_start=False, n_jobs=1):
+    def fit(self, dataset, warm_start=False, best_acc_params = True, n_jobs=1):
         """Trains the classifier.
 
         If specified, train_transform is applied to data.
@@ -553,6 +552,12 @@ class CClassifierPyTorch(CClassifier):
         warm_start : bool, optional
             If False (default) model will be reinitialized before training.
             Otherwise the state of the model will be preserved.
+        best_acc_params : bool, optional
+            If True (default) model the parameters that give the higher
+            accuracy (averaged between the ones that we get on the single
+            batch during an epoch) are chosen
+            Otherwhise the parameter are the ones computed on the last batch
+            during the last training epoch
         n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
@@ -580,6 +585,8 @@ class CClassifierPyTorch(CClassifier):
 
         if warm_start is False:
             # Resetting the classifier
+            self._acc = 0
+            self._best_acc = 0
             self.clear()
             # Storing dataset classes
             self._classes = dataset.classes
@@ -594,9 +601,9 @@ class CClassifierPyTorch(CClassifier):
             # Reinitialize the optimizer as we are starting clean
             self.init_optimizer()
 
-        return self._fit(dataset, n_jobs=n_jobs)
+        return self._fit(dataset, best_acc_params, n_jobs=n_jobs)
 
-    def _fit(self, dataset, n_jobs=1):
+    def _fit(self, dataset, best_acc_params, n_jobs=1):
         """Trains the classifier.
 
         If specified, train_transform is applied to data.
@@ -709,10 +716,11 @@ class CClassifierPyTorch(CClassifier):
                 best_epoch = self.start_epoch
                 best_state_dict = deepcopy(self.state_dict())
 
-        self.logger.info(
-            "Best accuracy {:} obtained on epoch {:}".format(
-                self.best_acc, best_epoch + 1))
-        self.load_state(best_state_dict)
+        if best_acc_params:
+            self.logger.info(
+                "Best accuracy {:} obtained on epoch {:}".format(
+                    self.best_acc, best_epoch + 1))
+            self.load_state(best_state_dict)
 
         return self
 
