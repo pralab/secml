@@ -16,6 +16,7 @@ class TestPoisoningPointEfficacy(CCreator):
     Test that given a saved set of poisoning points compute their
     effectiveness into decrease the classifier accuracy.
     """
+
     def _load_mnist(self):
 
         self.tr, self.val, self.ts, self.tr2 = create_mnist_dataset(
@@ -63,7 +64,7 @@ class TestPoisoningPointEfficacy(CCreator):
             print "pois data min ", pois_data.X.min(axis=None)
             print "pois data max ", pois_data.X.max(axis=None)
             print "pois data label ", pois_data.Y
-            pois_data.X[pois_data.X<0] = 0
+            pois_data.X[pois_data.X < 0] = 0
             print "pois data min ", pois_data.X.min(axis=None)
 
             print "pois data x ", pois_data.X
@@ -71,20 +72,45 @@ class TestPoisoningPointEfficacy(CCreator):
             idx = CArray.arange(0, 784)
             from secml.figure import CFigure
             fig = CFigure()
-            fig.subplot(1,2,1)
+            fig.subplot(1, 4, 1)
             fig.sp.title("svm pois point")
             fig.sp.bar(idx, pois_data.X.ravel())
             print pois_data.X.shape
-            print type(pois_data.X[0,0])
+            print type(pois_data.X[0, 0])
 
             print "tr data min ", self.tr.X.min(axis=None)
             print "tr data max ", self.tr.X.max(axis=None)
-            print "tr data mean sum ", self.tr.X.sum(axis = 0).mean(axis=None)
+            print "tr data mean sum ", self.tr.X.sum(axis=0).mean(axis=None)
+
+            idx_pp_max = pois_data.X.find(pois_data.X > 0.9)
 
             print self.tr.X.mean(axis=0).shape
-            fig.subplot(1,2,2)
+            fig.subplot(1, 4, 2)
             fig.sp.title("mean dataset point")
             fig.sp.bar(idx, self.tr.X.mean(axis=0).ravel())
+
+            print self.tr.X.min(axis=0).shape
+            fig.subplot(1, 4, 3)
+            fig.sp.title("min tr point")
+            fig.sp.bar(idx, self.tr.X.min(axis=0).ravel())
+
+            print self.tr.X.max(axis=0).shape
+            fig.subplot(1, 4, 4)
+            fig.sp.title("max tr point")
+            fig.sp.bar(idx, self.tr.X.max(axis=0).ravel())
+
+            idx_tr_max = self.tr.X.max(axis=0).find(self.tr.X.max(axis=0) > 0.9)
+
+            present = 0
+            absent = 0
+            for idx_pp in xrange(len(idx_pp_max)):
+                if idx_pp in idx_tr_max:
+                    present += 1
+                else:
+                    absent += 1
+
+            print "present ", present
+            print "absent ", absent
 
             fig.show()
 
@@ -99,16 +125,16 @@ class TestPoisoningPointEfficacy(CCreator):
 
         self.n_pois_points = 1
         # computed on the validation dataset:
-        #self.pois_data_path = "/home/ambra/np_adv/mnist_0_logistic"
+        # self.pois_data_path = "/home/ambra/np_adv/mnist_0_logistic"
         # self.pois_data_path = "/home/ambra/np_adv/mnist_0_ridge-10"
 
         # computed on the training dataset:
-        #self.pois_data_path = "/home/ambra/np_adv_tr/mnist_0_logistic"
+        # self.pois_data_path = "/home/ambra/np_adv_tr/mnist_0_logistic"
         # self.pois_data_path = "/home/ambra/np_adv_tr/mnist_0_ridge-10"
 
         self.pois_data_path = "/home/ambra/np_adv_tr/mnist_0_lin-svm-c100"
 
-        #self.pois_data_path = "/home/ambra/new_np_adv/secml_code"
+        # self.pois_data_path = "/home/ambra/new_np_adv/secml_code"
         # self.pois_data_path = "/home/ambra/new_np_adv/noinv_solver"
 
         self._load_mnist()
@@ -117,7 +143,7 @@ class TestPoisoningPointEfficacy(CCreator):
         # random state 2 acc tr single point svm 0.974 (partendo da 0.977)
 
         self.clf = CClassifierPyTorchCarliniCNNMNIST(num_classes=2,
-                                                     random_state=0, #random
+                                                     random_state=0,  # random
                                                      # state 2 quasi
                                                      # ineffettivo un punto
                                                      # solo
