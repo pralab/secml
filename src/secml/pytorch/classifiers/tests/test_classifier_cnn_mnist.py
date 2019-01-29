@@ -20,8 +20,6 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
 
         self.clf = CClassifierPyTorchCNNMNIST(random_state=0, num_classes=2,
                                               train_transform=self.transform_train)
-        self.clf2 = CClassifierPyTorchCNNMNIST(random_state=0, num_classes=2,
-                                               train_transform=self.transform_train)
 
         self.clf.verbose = 0  # 2
 
@@ -184,37 +182,43 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         dts2 = self.tr[:500, :].append(pp)
         print "dts shape ", dts2.X.shape
 
-        # train the first classifier on dataset 1
+        # train the classifier on dataset 1
         self.clf.fit(self.tr)
 
         acc_clf1_tr1 = self._get_accuracy(self.clf)
 
-        self.logger.info("The accuracy of the first classifier after the "
+        self.logger.info("The accuracy of the classifier after the "
                          "training on the first dataset is equal to "
                          ": {:}".format(acc_clf1_tr1))
 
-
-        # train the first classifier on dataset 2
+        # train the classifier on dataset 2
         self.clf.fit(dts2)
+
+        print "best acc ", self.clf.best_acc
+        print "epochs ", self.clf.epochs
 
         acc_clf1_tr2 = self._get_accuracy(self.clf)
 
-        self.logger.info("The accuracy of the first classifier after the "
+        self.logger.info("The accuracy of the classifier after the "
                          " training on the second dataset is equal to "
                          ": {:}".format(acc_clf1_tr2))
 
-        # train the second classifier on dataset 2
+        # train again the classifier on dataset 2
         self.clf.fit(dts2)
 
-        acc_clf2_tr2 = self._get_accuracy(self.clf)
+        print "best acc ", self.clf.best_acc
+        print "epochs ", self.clf.epochs
 
-        self.logger.info("The accuracy of the second classifier after the "
-                         " training on the second datasetis equal to: {:} "
+        acc_clf_tr2b = self._get_accuracy(self.clf)
+
+        self.logger.info("The accuracy of the classifier after the second "
+                         " training on the second dataset is equal to: {:} "
                          "".format(
-            acc_clf2_tr2))
+            acc_clf_tr2b))
 
-        self.assertLess(abs(acc_clf1_tr2 - acc_clf2_tr2) < 1e-3,
-                        "The accuracy is different after the first and the second training")
+        self.assertLess(abs(acc_clf1_tr2 - acc_clf_tr2b) < 1e-3,
+                        "The accuracy is different after the first and the "
+                        "second training on the same dataset")
 
 
 if __name__ == '__main__':
