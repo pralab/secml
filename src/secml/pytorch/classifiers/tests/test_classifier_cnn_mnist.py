@@ -74,7 +74,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
 
         return acc
 
-    def _test_accuracy(self):
+    def test_accuracy(self):
         """Test the classifier accuracy"""
 
         self.clf.fit(self.tr)
@@ -97,7 +97,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         self.assertEqual(acc, acc2, "The accuracy is different if we do "
                                     "not scale the logit using softmax")
 
-    def _test_deepcopy(self):
+    def test_deepcopy(self):
         """
         Make a deepcopy of the network, train both and check if their
         accuracy is equal.
@@ -133,9 +133,11 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
                                                  "for its deepcopy is "
                                                  "different")
 
-        # fixme : add a check on the weights
+        # check the classifier weights
+        self.assertFalse((self.clf.w.todense() != clf2.w.todense()).any(),
+                         "Loaded arrays are not equal!")
 
-    def _test_incremental_training(self):
+    def test_incremental_training(self):
         """
         Test if after an incremental training the accuracy increases
         """
