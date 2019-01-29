@@ -584,8 +584,9 @@ class CClassifierPyTorch(CClassifier):
             self.init_model()
             # Reinitialize count of epochs
             self._start_epoch = 0
-            # Reinitialize best accuracy
+            # Reinitialize accuracy and best accuracy
             self._best_acc = 0
+            self._acc = 0
             # Reinitialize the optimizer as we are starting clean
             self.init_optimizer()
 
@@ -644,8 +645,6 @@ class CClassifierPyTorch(CClassifier):
             scheduler.step()  # Adjust the learning rate
             losses = AverageMeter()  # Logger of the loss value
             acc = AverageMeter()  # Logger of the accuracy
-
-            self._acc = 0  # Resetting accuracy for current epoch
 
             # Log progress of epoch
             self.logger.info(
