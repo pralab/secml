@@ -207,7 +207,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
                          "".format(
             acc_clf_tr2b))
 
-        self.assertLess(abs(acc_clf1_tr2 - acc_clf_tr2b) < 1e-3,
+        self.assertGreater(abs(acc_clf1_tr2 - acc_clf_tr2b) , 1e-3,
                         "The accuracy is different after the first and the "
                         "second training on the same dataset")
 
