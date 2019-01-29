@@ -182,15 +182,6 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         dts2 = self.tr[:500, :].append(pp)
         print "dts shape ", dts2.X.shape
 
-        # train the classifier on dataset 1
-        self.clf.fit(self.tr)
-
-        acc_clf1_tr1 = self._get_accuracy(self.clf)
-
-        self.logger.info("The accuracy of the classifier after the "
-                         "training on the first dataset is equal to "
-                         ": {:}".format(acc_clf1_tr1))
-
         # train the classifier on dataset 2
         self.clf.fit(dts2)
 
