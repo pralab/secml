@@ -190,9 +190,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
 
         acc_clf1_tr2 = self._get_accuracy(self.clf)
 
-        self.logger.info("The accuracy of the classifier after the "
-                         " training on the second dataset is equal to "
-                         ": {:}".format(acc_clf1_tr2))
+        self.logger.info("acc1: {:}".format(acc_clf1_tr2))
 
         # train again the classifier on dataset 2
         self.clf.fit(dts2)
@@ -202,10 +200,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
 
         acc_clf_tr2b = self._get_accuracy(self.clf)
 
-        self.logger.info("The accuracy of the classifier after the second "
-                         " training on the second dataset is equal to: {:} "
-                         "".format(
-            acc_clf_tr2b))
+        self.logger.info("acc2: {:}".format(acc_clf_tr2b))
 
         self.assertLess(abs(acc_clf1_tr2 - acc_clf_tr2b) , 1e-3,
                         "The accuracy is different after the first and the "
