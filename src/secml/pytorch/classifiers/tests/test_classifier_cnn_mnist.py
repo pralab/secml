@@ -77,6 +77,8 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
     def test_accuracy(self):
         """Test the classifier accuracy"""
 
+        self.logger.info("Check the classifier accuracy")
+
         self.clf.fit(self.tr)
 
         acc = self._get_accuracy(self.clf)
@@ -105,19 +107,13 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         self.logger.info("Check the deepcopy")
         clf2 = self.clf.deepcopy()
 
-        # check if the parameter are equal comparing their dictionary
-        dict_clf_1 = self.clf.get_params()
-        dict_clf_2 = clf2.get_params()
-        self.assertEqual(dict_clf_1, dict_clf_2, "the dictionary of the two "
-                                                 "classifiers is different")
-
         # check some parameters defined in the classifier
-        self.assertEqual(self.clf1.n_features, clf2.n_features,
+        self.assertEqual(self.clf.n_features, clf2.n_features,
                          "the number of features parameter is different for "
                          "the two classifiers")
 
         # check some parameters that are specific of the pytorch network
-        self.assertEqual(self.clf1.start_epoch, clf2.start_epoch,
+        self.assertEqual(self.clf.start_epoch, clf2.start_epoch,
                          "the number of features parameter is different for "
                          "the two classifiers")
 
@@ -143,15 +139,24 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         """
         self.logger.info("Check the accuracy after an incremental training")
 
-        self.clf.fit(self.tr[:100, :])
+        self.clf.epochs = 3
+
+        self.clf.fit(self.tr[:1000, :])
 
         acc1 = self._get_accuracy(self.clf)
 
-        self.clf.fit(self.tr[:100, :], warm_start=True)
+        self.logger.info("Accuracy after the first training : {:}".format(
+            acc1))
+
+        self.clf.fit(self.tr[:1000, :], warm_start=True)
 
         acc2 = self._get_accuracy(self.clf)
 
-        self.assertLess(abs(acc1 - acc2) < 1e-3,
+        self.logger.info(
+            "Accuracy after the training with warm start : {:}".format(
+                acc2))
+
+        self.assertGreater( acc2, acc1,
                         "The accuracy did not increase after "
                         "the incremental training")
 
@@ -184,7 +189,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         dts2 = self.tr[:500, :].append(pp)
         print "dts shape ", dts2.X.shape
 
-        self.clf.verbose = 1
+        self.clf.verbose = 0
 
         # train the classifier on dataset 2
         self.clf.fit(dts2)
@@ -206,7 +211,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
 
         self.logger.info("acc2: {:}".format(acc_clf_tr2b))
 
-        self.assertLess(abs(acc_clf1_tr2 - acc_clf_tr2b) , 1e-3,
+        self.assertLess(abs(acc_clf1_tr2 - acc_clf_tr2b), 1e-3,
                         "The accuracy is different after the first and the "
                         "second training on the same dataset")
 
