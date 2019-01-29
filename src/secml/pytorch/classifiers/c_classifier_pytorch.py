@@ -131,12 +131,7 @@ class CClassifierPyTorch(CClassifier):
         self._acc = 0  # epoch accuracy FIXME: ON TRAINING SET
         self._best_acc = 0  # best accuracy FIXME: ON TRAINING SET
 
-        # Random seed
-        if random_state is not None:
-            torch.manual_seed(random_state)
-            if use_cuda:
-                torch.cuda.manual_seed_all(random_state)
-                torch.backends.cudnn.deterministic = True
+        self._random_state = random_state
 
         # PyTorch NeuralNetwork model
         self._model = None
@@ -353,11 +348,20 @@ class CClassifierPyTorch(CClassifier):
 
     def init_model(self):
         """Initialize the PyTorch Neural Network model."""
+        # Setting random seed
+        if self._random_state is not None:
+            torch.manual_seed(self._random_state)
+            if use_cuda:
+                torch.cuda.manual_seed_all(self._random_state)
+                torch.backends.cudnn.deterministic = True
+
         # Call the specific model initialization method passing params
         self._model = self._model_base(**self._model_params)
+
         # Make sure that model is a proper PyTorch module
         if not isinstance(self._model, torch.nn.Module):
             raise TypeError("`model` must be a `torch.nn.Module`.")
+
         # Ensure we are using cuda if available
         if use_cuda is True:
             self._model = self._model.cuda()
