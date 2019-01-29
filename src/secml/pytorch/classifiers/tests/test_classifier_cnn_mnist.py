@@ -1,5 +1,9 @@
-import torchvision.transforms as transforms
+import os
 
+import torchvision.transforms as transforms
+import numpy as np
+
+from secml.data import CDataset
 from secml.utils import CUnitTest
 from secml.data.loader import CDataLoaderMNIST
 from secml.array import CArray
@@ -14,14 +18,17 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
 
         self._load_mnist()
 
-        self.clf = CClassifierPyTorchCNNMNIST(random_state=0,
-                                        train_transform=self.transform_train)
+        self.clf = CClassifierPyTorchCNNMNIST(random_state=0, num_classes=2,
+                                              train_transform=self.transform_train)
+        self.clf2 = CClassifierPyTorchCNNMNIST(random_state=0, num_classes=2,
+                                               train_transform=self.transform_train)
+
         self.clf.verbose = 0  # 2
 
     def _load_mnist(self):
         loader = CDataLoaderMNIST()
 
-        self._digits = CArray.arange(10).tolist()
+        self._digits = [8, 9]
         self.tr = loader.load('training', digits=self._digits)
 
         print "classes: ", self.tr.classes
@@ -46,7 +53,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         self.tr = self.tr[tr_dts_idx, :]
 
         idx = CArray.arange(0, self.ts.num_samples)
-        ts_dts_idx = CArray.randsample(idx, 100, random_state=self.seed)
+        ts_dts_idx = CArray.randsample(idx, 1000, random_state=self.seed)
         self.ts = self.ts[ts_dts_idx, :]
 
         self.transform_train = transforms.Compose([
@@ -63,9 +70,9 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
             classifier accuracy
         """
         labels, scores = clf.predict(
-            self.ts[50:100, :].X, return_decision_function=True)
+            self.ts.X, return_decision_function=True)
 
-        acc = CMetricAccuracy().performance_score(self.ts[50:100, :].Y, labels)
+        acc = CMetricAccuracy().performance_score(self.ts.Y, labels)
 
         return acc
 
@@ -92,7 +99,7 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         self.assertEqual(acc, acc2, "The accuracy is different if we do "
                                     "not scale the logit using softmax")
 
-    def test_deepcopy(self):
+    def _test_deepcopy(self):
         """
         Make a deepcopy of the network, train both and check if their
         accuracy is equal.
@@ -128,6 +135,8 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
                                                  "for its deepcopy is "
                                                  "different")
 
+        # fixme : add a check on the weights
+
     def _test_incremental_training(self):
         """
         Test if after an incremental training the accuracy increases
@@ -146,7 +155,23 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
                         "The accuracy did not increase after "
                         "the incremental training")
 
-    def _test_training_from_scratch(self):
+    def _load_problematic_points(self):
+
+        probl_points_path = "{:}/{:}".format(os.path.dirname(
+            os.path.abspath(__file__)), "p_points")
+        if os.path.isfile(probl_points_path + '.npz'):
+            with np.load(probl_points_path + '.npz') as fm:
+                X = fm['X']
+                Y = fm['Y']
+            X = CArray(X)
+            Y = CArray(Y)
+            pois_data = CDataset(X, Y)
+        else:
+            raise ValueError("file not found!")
+
+        return pois_data
+
+    def test_training_from_scratch(self):
         """
         Train a network with a fixed random seed. Clear the network. Train
         it again and check if the accuracy is equal to the one that we get
@@ -155,28 +180,41 @@ class TestCClassifierPyTorchCarliniCNNMNIST(CUnitTest):
         self.logger.info("Check the accuracy when the classifier is trained "
                          "from scratch")
 
-        self.clf.fit(self.tr[:100, :])
-        # print self.clf.w.shape
+        pp = self._load_problematic_points()
+        dts2 = self.tr[:500, :].append(pp)
+        print "dts shape ", dts2.X.shape
 
-        acc1 = self._get_accuracy(self.clf)
+        # train the first classifier on dataset 1
+        self.clf.fit(self.tr)
 
-        self.logger.info("The accuracy after the first training is equal to "
-                         ": {:}".format(acc1))
+        acc_clf1_tr1 = self._get_accuracy(self.clf)
 
-        self.clf.clear()
+        self.logger.info("The accuracy of the first classifier after the "
+                         "training on the first dataset is equal to "
+                         ": {:}".format(acc_clf1_tr1))
 
-        self.clf.fit(self.tr[:100, :])
-        # w2 = self.clf.w.deepcopy()
 
-        acc2 = self._get_accuracy(self.clf)
+        # train the first classifier on dataset 2
+        self.clf.fit(dts2)
 
-        self.logger.info("The accuracy after the second training is equal "
-                         "to: {:} "
-                         "".format(acc1))
+        acc_clf1_tr2 = self._get_accuracy(self.clf)
 
-        self.assertLess(abs(acc1 - acc2) < 1e-3, "The accuracy is "
-                                                 "different after the "
-                                                 "first and the second training")
+        self.logger.info("The accuracy of the first classifier after the "
+                         " training on the second dataset is equal to "
+                         ": {:}".format(acc_clf1_tr2))
+
+        # train the second classifier on dataset 2
+        self.clf.fit(dts2)
+
+        acc_clf2_tr2 = self._get_accuracy(self.clf)
+
+        self.logger.info("The accuracy of the second classifier after the "
+                         " training on the second datasetis equal to: {:} "
+                         "".format(
+            acc_clf2_tr2))
+
+        self.assertLess(abs(acc_clf1_tr2 - acc_clf2_tr2) < 1e-3,
+                        "The accuracy is different after the first and the second training")
 
 
 if __name__ == '__main__':
