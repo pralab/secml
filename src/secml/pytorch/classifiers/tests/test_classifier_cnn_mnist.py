@@ -150,15 +150,9 @@ class TestCClassifierPyTorchCNNMNIST(CUnitTest):
         self.logger.info("Accuracy after the first training : {:}".format(
             acc1))
 
-        # if we increment the number of epoch as in the row below,
-        # the classifier is correctly
-        # trained for 3 more epoch, otherwise (if we left it equal to 3,
-        # it is trained for one more epoch)
-        #self.clf.epochs = 6
+        self.clf.epochs = 6
 
         self.clf.fit(self.tr, warm_start=True, best_acc_params=False)
-
-        print "best acc ", self.clf.best_acc
 
         acc2 = self._get_accuracy(self.clf)
 
@@ -197,15 +191,11 @@ class TestCClassifierPyTorchCNNMNIST(CUnitTest):
 
         pp = self._load_problematic_points()
         dts2 = self.tr.append(pp)
-        print "dts shape ", dts2.X.shape
 
         self.clf.verbose = 0
 
         # train the classifier on dataset 2
         self.clf.fit(dts2, best_acc_params=False)
-
-        print "best acc ", self.clf.best_acc
-        print "epochs ", self.clf.epochs
 
         acc_clf1_tr2 = self._get_accuracy(self.clf)
 
@@ -213,9 +203,6 @@ class TestCClassifierPyTorchCNNMNIST(CUnitTest):
 
         # train again the classifier on dataset 2
         self.clf.fit(dts2, best_acc_params=False)
-
-        print "best acc ", self.clf.best_acc
-        print "epochs ", self.clf.epochs
 
         acc_clf_tr2b = self._get_accuracy(self.clf)
 
