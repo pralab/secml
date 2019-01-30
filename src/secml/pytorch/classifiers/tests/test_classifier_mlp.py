@@ -252,6 +252,52 @@ class TestCClassifierPyTorchMLP(CUnitTest):
         # We know the number of params (40 + 3)
         self.assertEqual(43, b.size)
 
+    def test_retrain(self):
+        """Test for multiple retrain of the classifier."""
+        self.clf.verbose = 1
+
+        self.logger.info("Training first time...")
+        self.clf.fit(self.ds)
+
+        w1 = self.clf.w.deepcopy()
+
+        self.logger.info("Training second time...")
+        self.clf.fit(self.ds)
+
+        w2 = self.clf.w.deepcopy()
+
+        self.logger.info("W1:\n{:}".format(w1))
+        self.logger.info("W2:\n{:}".format(w2))
+
+        self.logger.info("Comparing final weights")
+        self.assertFalse((w1 != w2).any())
+
+    def test_warmstart(self):
+        """Test for training with warm start of the classifier."""
+        self.clf.verbose = 1
+
+        self.logger.info("Training first time...")
+        self.clf.fit(self.ds)
+
+        w1 = self.clf.w.deepcopy()
+
+        self.logger.info("We know that the last epoch has the best solution")
+        self.assertFalse(self.clf.start_epoch != self.clf.epochs,
+                         "For this test the start epoch after training "
+                         "must be equal to the number of epochs")
+
+        self.logger.info("Training second time with warm_start..."
+                         "No training should be performed (max epochs)!")
+        self.clf.fit(self.ds, warm_start=True)
+
+        w2 = self.clf.w.deepcopy()
+
+        self.logger.info("W1:\n{:}".format(w1))
+        self.logger.info("W2:\n{:}".format(w2))
+
+        self.logger.info("Comparing final weights")
+        self.assertFalse((w1 != w2).any())
+
     def test_deepcopy(self):
         """Test for deepcopy."""
         self.clf.verbose = 0
