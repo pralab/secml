@@ -10,12 +10,13 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
     """
     Check the derivative of the classifier weights w.r.t. the poisoning point
 
+    NB: does not works for classifier learned in the dual space.
+
     (d_w w.r.t d_xc and d_b w.r.t d_xc)
     """
 
     def clf_list(self):
         return [ 'logistic', 'ridge']
-        #return ['lin-svm'] #, 'logistic', 'ridge']
 
     def test_2D(self):
         """
