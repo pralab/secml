@@ -139,12 +139,13 @@ class TestCClassifierPyTorchCNNMNIST(CUnitTest):
         """
         self.logger.info("Check the accuracy after an incremental training")
 
-        self.clf.verbose = 0
+        self.clf.verbose = 1
 
         self.clf.epochs = 3
 
         self.clf.fit(self.tr, best_acc_params=False)
 
+        self.clf.verbose = 0
         acc1 = self._get_accuracy(self.clf)
 
         self.logger.info("Accuracy after the first training : {:}".format(
@@ -156,19 +157,23 @@ class TestCClassifierPyTorchCNNMNIST(CUnitTest):
         # it is trained for one more epoch)
         #self.clf.epochs = 6
 
+        self.clf.verbose = 1
         self.clf.fit(self.tr, warm_start=True, best_acc_params=False)
 
         print "best acc ", self.clf.best_acc
 
+        self.clf.verbose = 0
         acc2 = self._get_accuracy(self.clf)
 
         self.logger.info(
             "Accuracy after the training with warm start : {:}".format(
                 acc2))
 
-        self.assertGreater( acc2, acc1,
-                        "The accuracy did not increase after "
-                        "the incremental training")
+        # TODO: MM REMOVED THIS ASSERT AS NOW TRAINING IS
+        #  NOT PERFORMED THE SECOND TIME (CORRECTLY).
+        # self.assertGreater( acc2, acc1,
+        #                 "The accuracy did not increase after "
+        #                 "the incremental training")
 
     def _load_problematic_points(self):
 

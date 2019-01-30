@@ -706,9 +706,15 @@ class CClassifierPyTorch(CClassifier):
             # Average accuracy after epoch FIXME: ON TRAINING SET
             self._acc = acc.avg
 
-            # Store the current epoch as best one if accuracy is higher
-            # If equal accuracy, the last epoch should have better loss
-            if self.acc >= self.best_acc:
+            if best_acc_params:
+                # Store the current epoch as best one only if accuracy is
+                # higher or at least same (in this last case the loss should
+                # be better anyway for last epoch)
+                if self.acc >= self.best_acc:
+                    self._best_acc = self.acc
+                    best_epoch = self.start_epoch
+                    best_state_dict = deepcopy(self.state_dict())
+            else:  # Use the latest epoch state as best state
                 self._best_acc = self.acc
                 best_epoch = self.start_epoch
                 best_state_dict = deepcopy(self.state_dict())
@@ -717,7 +723,10 @@ class CClassifierPyTorch(CClassifier):
             self.logger.info(
                 "Best accuracy {:} obtained on epoch {:}".format(
                     self.best_acc, best_epoch + 1))
-            self.load_state(best_state_dict)
+
+        # Restoring the final state to use
+        # (could be the best by accuracy score or the latest)
+        self.load_state(best_state_dict)
 
         return self
 
