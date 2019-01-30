@@ -71,7 +71,7 @@ class CClassifierPyTorchCNNMNIST(CClassifierPyTorch):
     __class_type = 'pytorch-cnn-mnist'
 
     def __init__(self, num_classes=10, learning_rate=0.1, momentum=0.9,
-                 weight_decay=0, epochs=30, gamma=0.1, batch_size=128,
+                 weight_decay=0, epochs=30, gamma=1.0, batch_size=128,
                  regularize_bias=True, lr_schedule=(1000,),
                  train_transform=None, preprocess=None, softmax_outputs=False,
                  random_state=None):
