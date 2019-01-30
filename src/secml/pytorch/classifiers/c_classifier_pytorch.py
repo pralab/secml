@@ -584,9 +584,6 @@ class CClassifierPyTorch(CClassifier):
                 "Use `train_transform` parameter if necessary.")
 
         if warm_start is False:
-            # Resetting the classifier
-            self._acc = 0
-            self._best_acc = 0
             self.clear()
             # Storing dataset classes
             self._classes = dataset.classes
