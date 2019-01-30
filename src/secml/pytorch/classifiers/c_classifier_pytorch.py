@@ -625,6 +625,11 @@ class CClassifierPyTorch(CClassifier):
          will change in the feature.
 
         """
+        if self.start_epoch >= self.epochs:
+            self.logger.warning("Maximum number of epochs reached, "
+                                "no training will be performed.")
+            return self
+
         # Binarize labels using a OVA scheme
         ova_labels = dataset.get_labels_asbinary()
 
