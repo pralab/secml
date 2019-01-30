@@ -9,7 +9,7 @@ from secml.optimization.function import CFunction
 class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
 
     def clf_list(self):
-        return ['ridge', 'logistic','lin-svm', 'rbf-svm']
+        return ['ridge', 'logistic', 'lin-svm', 'rbf-svm']
 
     def test_poisoning_2D_plot(self):
         self.logger.info("Create 2-dimensional plot")
