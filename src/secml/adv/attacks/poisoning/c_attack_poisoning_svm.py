@@ -164,12 +164,6 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # as this set is appended to the training set, idx is shifted
         idx += self._surrogate_data.num_samples
 
-        # from prlib.figure import CFigure
-        # fig = CFigure()
-        # sp = fig.subplot()
-        # sp.plot(self._poisoned_clf.alpha)
-        # fig.show()
-
         k = self._poisoned_clf.sv_idx.find(self._poisoned_clf.sv_idx == idx)
         if len(k) == 1:  # if not empty
             return self._poisoned_clf.alpha[k]
@@ -193,6 +187,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
 
         alpha_c = self._alpha_c()
 
+        # todo: recheck (even if should be fine)
         if abs(alpha_c) == 0: # < svm.C:  # this include alpha_c == 0
             # self.logger.debug("Warning: xc is not an error vector.")
             return grad
@@ -215,7 +210,6 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         if xs is None:
             self.logger.debug("Warning: xs is empty "
                               "(all points are error vectors).")
-         #   print "gt ", gt.norm()
             return gt if svm.preprocess is None else \
                 svm.preprocess.gradient(xc0, gt)
 
@@ -251,10 +245,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # solve using inverse/pseudoinverse of H
         v = - self._compute_grad_inv(G, H, grad_loss_params)
 
-        # nb : we had to move this before or in _compute_grad_inv the
-        # derivative of the parameters w.r.t. xc will not be set correctly
         gt += v
-        #gt += v * alpha_c
 
         # propagating gradient back to input space
         return gt if svm.preprocess is None else \

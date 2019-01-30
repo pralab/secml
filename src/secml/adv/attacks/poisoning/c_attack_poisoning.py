@@ -86,45 +86,21 @@ class CAttackPoisoning(CAttack):
             raise ValueError(
                 "Poisoning in discrete space is not implemented yet!")
 
-        # self._attacker_loss = CLoss.create(
-        #    'softmax', extend_binary_labels=True)
-
-        # fixme: aggiungere il softmax loss e usare quello per tutti
-
+        # fixme: use the cross-entropy for all the classifier poisoning
         if classifier.class_type == 'svm':
             print "POISONING ATTACK WITH HINGE LOSS"
             loss_name = 'hinge'
-        elif classifier.class_type == 'pytorch-lin':
-            if self.classifier._clf_type == 'logistic':
-                print "POISONING ATTACK WITH LOGISTIC LOSS"
-                loss_name = 'log'
-            else:
-                print "POISONING ATTACK WITH QUADRATIC LOSS"
-                loss_name = 'square'
         elif classifier.class_type == 'logistic':
-            print "POISONING ATTACK WITH LOGISTIC LOSS"
-            loss_name = 'log'
-        elif classifier.class_type == 'sgd' and \
-                classifier.loss.class_type == 'sgd':
             print "POISONING ATTACK WITH LOGISTIC LOSS"
             loss_name = 'log'
         elif classifier.class_type == 'ridge':
             print "POISONING ATTACK WITH QUADRATIC LOSS"
             loss_name = 'square'
-            # loss_name = 'softmax'
         else:
-            loss_name = 'log'
-            # raise NotImplementedError
-
-        # loss_name = 'hinge'
+            raise NotImplementedError("We cannot poisoning that classifier")
 
         self._attacker_loss = CLoss.create(
             loss_name)
-
-        # if loss_name == 'softmax':
-        #     self._init_loss = self._attacker_loss
-        # else:
-        #     self._init_loss = CLoss.create('softmax')
 
         self._init_loss = self._attacker_loss
 
@@ -149,7 +125,7 @@ class CAttackPoisoning(CAttack):
         self.eta = solver_params['eta']
 
         # fixme: forced
-        self.verbose = 2  # 2
+        self.verbose = 2
 
         # this is used to speed up some poisoning algorithms by re-using
         # the solution obtained at a previous step of the optimization
@@ -285,17 +261,8 @@ class CAttackPoisoning(CAttack):
         idx = CArray.randsample(init_dataset.num_samples, n_points,
                                 random_state=self.random_seed)
 
-        # print "pois point idx ", idx
-
-        # taking xc and adding small noise to avoid singular matrix inversion
-        # print "random point idx ", idx
 
         xc = init_dataset.X[idx, :].deepcopy()
-
-        # print "idx of the poisoning point ", idx
-        # print "initial poisoning point ", xc
-
-        # xc.save("advX0", overwrite=True)
 
         if not self.discrete:  # if the attack is in a continuous space we add a
             # little perturbation to the initial poisoning point
@@ -307,9 +274,6 @@ class CAttackPoisoning(CAttack):
 
         yc = CArray(init_dataset.Y[idx]).deepcopy()  # true labels
 
-        # yc.save("advY0", overwrite=True)
-        # print "initial yc ", yc
-
         # randomly pick yc from a different class
         for i in xrange(yc.size):
             labels = CArray.randsample(init_dataset.num_classes, 2,
@@ -318,9 +282,6 @@ class CAttackPoisoning(CAttack):
                 yc[i] = labels[1]
             else:
                 yc[i] = labels[0]
-
-        # print "label flip ", yc
-        # print "initial yc after label flip ", self.surrogate_data.Y[idx]
 
         return xc, yc
 
@@ -419,9 +380,6 @@ class CAttackPoisoning(CAttack):
             error = self._attacker_loss.loss(y_ts, score)
         obj = error.mean()
 
-        # if hasattr(self,'_all_obj'):
-        #   self._all_obj = self._all_obj.append(obj)
-
         return obj
 
     def _objective_function_gradient(self, xc, normalization=True):
@@ -461,13 +419,7 @@ class CAttackPoisoning(CAttack):
                                                                1]).ravel())
             grad = self._gradient_fk_xc(self._xc[idx, :],
                                         self._yc[idx],
-                                        clf, loss_grad, tr)  # , 1)
-
-            # grad += self._gradient_fk_xc_pert(clf.n_classes, self._xc[idx,
-            #                                                 :], self._yc[
-            #     idx],
-            #                                   clf, loss_grad, tr)
-
+                                        clf, loss_grad, tr)
         else:
             # compute the gradient as a sum of the gradient for each class
             for c in xrange(clf.n_classes):
@@ -476,63 +428,11 @@ class CAttackPoisoning(CAttack):
                 grad += self._gradient_fk_xc(self._xc[idx, :], self._yc[idx],
                                              clf, loss_grad, tr, c)
 
-                # grad += self._gradient_fk_xc_pert(clf.n_classes, self._xc[
-                #                                                 idx, :], self._yc[
-                #     idx],
-                #                                   clf, loss_grad, tr, c)
-
-        # ##############################
-        # from prlib.figure import CFigure
-        # fig = CFigure(title='unnorm-grad')
-        # idx = CArray.arange(grad.size)
-        # fig.sp.bar(idx, grad.ravel())
-        # fig.show()
-        ##############################
-
         if normalization:
             norm = grad.norm()
             return grad / norm if norm > 0 else grad
         else:
             return grad
-
-    # todo: aggiungere il seed sulla perturbazione random generata
-    def _gradient_fk_xc_pert(self, num_classes, xc, yc, clf, loss_grad, tr, \
-                             k=None):
-        """
-        Derivative of the classifier's discriminant function f_k(x)
-        computed on a set of points x w.r.t. a single poisoning point xc
-
-        This is a classifier-specific implementation, so we delegate its
-        implementation to inherited classes.
-        """
-        n_perts = 10
-
-        grad = CArray.zeros(shape=xc.size, )
-
-        constr = CConstraintL2(center=xc, radius=0.1)
-
-        for n_pert in xrange(n_perts):
-            rand_pert = CArray.rand(shape=xc.shape)
-            rand_pert /= rand_pert.norm()
-
-            # pert_xc = xc + (rand_pert / 10.0)
-
-            rand_pert *= 100
-            pert_xc = xc + rand_pert
-            pert_xc = constr.projection(pert_xc)
-
-            # print "distance between the original xc and the perturbed one {
-            # :}", str(
-            #   (pert_xc - xc).norm())
-
-            if num_classes <= 2:
-                grad += self._gradient_fk_xc(pert_xc, yc,
-                                             clf, loss_grad, tr)
-            else:
-                grad += self._gradient_fk_xc(pert_xc, yc,
-                                             clf, loss_grad, tr, k)
-
-        return grad / float(n_perts)
 
     @abstractmethod
     def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr, k=None):
@@ -656,21 +556,19 @@ class CAttackPoisoning(CAttack):
                     "poisoning point {:} optimization fopt: {:}".format(i,
                                                                         self._f_opt))
 
-                ###############
-                # xc.save("advXprov", overwrite=True)
-                # yc.save("advYprov", overwrite=True)
-                # y_pred, scores = self._poisoned_clf.predict(x,
-                #                                             return_decision_function=True)
-                # acc = metric.performance_score(y_true=y, y_pred=y_pred)
-                # self.logger.info("Poisoned classifier accuracy on test data {:}".format(acc))
 
-                ###############
+                y_pred, scores = self._poisoned_clf.predict(x,
+                                                            return_decision_function=True)
+                acc = metric.performance_score(y_true=y, y_pred=y_pred)
+                self.logger.info("Poisoned classifier accuracy on test data {:}".format(acc))
+
+
 
             delta = (xc_prv - xc).norm_2d()
-            # self.logger.info(
-            #     "Optimization with n points: " + str(self._n_points) +
-            #     " iter: " + str(k) + ", delta: " + str(
-            #         delta) + ", fopt: " + str(self._f_opt))
+            self.logger.info(
+                "Optimization with n points: " + str(self._n_points) +
+                " iter: " + str(k) + ", delta: " + str(
+                    delta) + ", fopt: " + str(self._f_opt))
             k += 1
 
         # re-train the targeted classifier (copied) on poisoned data
