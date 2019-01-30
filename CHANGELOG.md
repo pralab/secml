@@ -1,3 +1,12 @@
+## v0.2.2-dev (30/01/2019)
+
+### Bugfix (4 changes)
+- #262 Deepcopy of `CClassifierPyTorch` now correctly restores the parameters for both trained and untrained classifiers.
+- #267 `start_epoch` in `CClassifierPyTorch` is now incremented on storing state instead of loading.
+- #268 Accuracy and Best Accuracy are now reset when appropriate in `CClassifierPyTorch`.
+- #269 `random_state` in `CClassifierPyTorch` is now called upon model initialization to allow reproducibility in case of retraining.
+
+
 ## v0.2.1-dev (28/01/2019)
 
 ### Bugfix (1 change)
