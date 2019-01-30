@@ -30,7 +30,7 @@ class CClassifierPyTorchDenseNetCifar(CClassifierPyTorch):
         Weight decay (L2 penalty). Control parameters regularization.
         Default 1e-4.
     epochs : int, optional
-        Number of epochs. Default 100.
+        Maximum number of epochs of the training process. Default 100.
     gamma : float, optional
         Multiplicative factor of learning rate decay. Default: 0.1.
     lr_schedule : list, optional

@@ -1,5 +1,7 @@
 from secml.utils import CUnitTest
 
+import numpy.testing as npt
+
 from secml.pytorch.normalization import CNormalizerPyTorch
 from secml.pytorch.classifiers import CClassifierPyTorchMLP
 from secml.data.loader import CDLRandom
@@ -35,7 +37,7 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.logger.info("Output of normalize:\n{:}".format(out_norm))
         self.logger.info("Output of net:\n{:}".format(out_net))
 
-        self.assertFalse((out_norm.round(4) != out_net.round(4)).any())
+        npt.assert_allclose(out_norm.tondarray(), out_net.tondarray())
 
         self.norm.out_layer = 'linear1'
 
@@ -48,7 +50,7 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.logger.info("Output of normalize:\n{:}".format(out_norm))
         self.logger.info("Output of net:\n{:}".format(out_net))
 
-        self.assertFalse((out_norm.round(4) != out_net.round(4)).any())
+        npt.assert_allclose(out_norm.tondarray(), out_net.tondarray())
 
     def test_gradient(self):
         """Test for gradient."""
