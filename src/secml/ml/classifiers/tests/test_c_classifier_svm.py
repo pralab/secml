@@ -1,7 +1,6 @@
 from secml.utils import CUnitTest
 
 import numpy as np
-import numpy.testing as npt
 from sklearn.svm import SVC
 import sklearn.metrics as skm
 
@@ -74,8 +73,7 @@ class TestCClassifierSVM(CUnitTest):
                 self.dataset.X, return_decision_function=True)
 
         # check prediction
-        npt.assert_array_equal(linear_svm_pred_y.get_data(),
-                               kernel_linear_svm_pred_y.get_data())
+        self.assert_array_equal(linear_svm_pred_y, kernel_linear_svm_pred_y)
 
         self.logger.info("Training both classifiers on sparse data")
         linear_svm.fit(self.dataset_sparse)
@@ -92,8 +90,7 @@ class TestCClassifierSVM(CUnitTest):
                 self.dataset_sparse.X, return_decision_function=True)
 
         # check prediction
-        npt.assert_array_equal(linear_svm_pred_y.get_data(),
-                               kernel_linear_svm_pred_y.get_data())
+        self.assert_array_equal(linear_svm_pred_y, kernel_linear_svm_pred_y)
 
     def test_predict(self):
         """Performs tests on SVM prediction capabilities."""
@@ -121,15 +118,18 @@ class TestCClassifierSVM(CUnitTest):
             sklearn_score = sklearn_svm.decision_function(
                 self.dataset.X.get_data())
 
-            # Test if sklearn predicted labels are equal to our predicted labels
-            npt.assert_array_equal(pred_y.get_data(), sklearn_pred_y)
-            # Test if sklearn computed distance from separating hyperplane is the same of own
-            # This is a fix for some architectures that exhibit floating point problems
-            npt.assert_allclose(pred_score[:, 1].get_data().ravel(), sklearn_score)
+            # Test if sklearn pred_y are equal to our predicted labels
+            self.assert_array_equal(pred_y, sklearn_pred_y)
+            # Test if sklearn computed distance from separating hyperplane
+            # is the same of own. This is a fix for some architectures that
+            # exhibit floating point problems
+            self.assert_allclose(pred_score[:, 1].ravel(), sklearn_score)
 
             # EVALUATE PERFORMANCE
-            accuracy = skm.accuracy_score(self.dataset.Y.get_data(), sklearn_pred_y)
-            self.logger.info("Prediction accuracy for kernel %s is %f ", svm.kernel.class_type, accuracy)
+            accuracy = skm.accuracy_score(
+                self.dataset.Y.get_data(), sklearn_pred_y)
+            self.logger.info("Prediction accuracy for kernel %s is %f ",
+                             svm.kernel.class_type, accuracy)
 
     def test_shape(self):
         """Test shape of SVM parameters, scores etc."""
