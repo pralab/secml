@@ -185,7 +185,7 @@ class TestCClassifierPyTorchMLP(CUnitTest):
         self.logger.info("Output of predict:\n{:}".format(out_predict))
         self.logger.info("Output of get_layer_output:\n{:}".format(out))
 
-        npt.assert_allclose(out_predict.tondarray(), out.tondarray())
+        self.assert_allclose(out_predict, out)
 
         layer = 'linear1'
         self.logger.info("Returning output for layer: {:}".format(layer))
@@ -272,7 +272,7 @@ class TestCClassifierPyTorchMLP(CUnitTest):
         self.logger.info("W2:\n{:}".format(w2))
 
         self.logger.info("Comparing final weights")
-        npt.assert_allclose(w1.tondarray(), w2.tondarray())
+        self.assert_allclose(w1, w2)
 
     def test_warmstart(self):
         """Test for training with warm start of the classifier."""
@@ -301,7 +301,7 @@ class TestCClassifierPyTorchMLP(CUnitTest):
         self.logger.info("W2:\n{:}".format(w2))
 
         self.logger.info("Comparing final weights")
-        npt.assert_allclose(w1.tondarray(), w2.tondarray())
+        self.assert_allclose(w1, w2)
 
     def test_deepcopy(self):
         """Test for deepcopy."""

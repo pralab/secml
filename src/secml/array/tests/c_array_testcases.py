@@ -83,8 +83,7 @@ class CArrayTestCases(object):
             for item_idx, item in enumerate(items_list):
                 if item_idx == len(items_list) - 1:
                     break  # We checked all the elements
-                np.testing.assert_equal(item.tondarray(),
-                                        items_list[item_idx + 1].tondarray())
+                self.assert_array_equal(item, items_list[item_idx + 1])
 
             # Every item is equal to each other, return True
             return True

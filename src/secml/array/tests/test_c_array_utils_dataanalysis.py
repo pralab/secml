@@ -852,8 +852,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                             res_expected = res_expected.ravel()
                         self.assertEqual(res.shape, res_expected.shape)
                     # use numpy.testing to proper compare arrays with nans
-                    np.testing.assert_equal(CArray(res).tondarray(),
-                                            CArray(res_expected).tondarray())
+                    self.assert_array_equal(res, res_expected)
 
         # array_dense = CArray([[1, 0, 0, 5], [2, 4, 0, 0], [3, 6, 0, 0]]
         # row_flat_dense = CArray([4, 0, 6])
@@ -1018,9 +1017,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
             self.assertIsInstance(argmin_res, int)
             min_res = array.nanmin(axis=None)
             # use numpy.testing to proper compare arrays with nans
-            np.testing.assert_equal(
-                CArray(array.ravel()[argmin_res]).tondarray(),
-                CArray(min_res).tondarray())
+            self.assert_array_equal(array.ravel()[argmin_res], min_res)
 
             self.logger.info("a: \n{:}".format(array))
             if array.shape[0] == 1:
@@ -1038,9 +1035,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                 argmin_res = [
                     argmin_res.ravel().tolist(), range(array.shape[1])]
                 # use numpy.testing to proper compare arrays with nans
-                np.testing.assert_equal(
-                    CArray(array[argmin_res]).tondarray(),
-                    CArray(min_res).tondarray())
+                self.assert_array_equal(array[argmin_res], min_res)
 
             self.logger.info("a: \n{:}".format(array))
             if array.shape[1] == 1:
@@ -1058,9 +1053,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                 argmin_res = [
                     range(array.shape[0]), argmin_res.ravel().tolist()]
                 # use numpy.testing to proper compare arrays with nans
-                np.testing.assert_equal(
-                    CArray(array[argmin_res]).tondarray(),
-                    CArray(min_res).tondarray())
+                self.assert_array_equal(array[argmin_res], min_res)
 
         _check_nanargmin(self.array_dense)
         _check_nanargmin(self.row_dense)
@@ -1090,9 +1083,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                 "a.nanargmax(axis=None): \n{:}".format(argmax_res))
             self.assertIsInstance(argmax_res, int)
             max_res = array.nanmax(axis=None)
-            np.testing.assert_equal(
-                CArray(array.ravel()[argmax_res]).tondarray(),
-                CArray(max_res).tondarray())
+            self.assert_array_equal(array.ravel()[argmax_res], max_res)
 
             self.logger.info("a: \n{:}".format(array))
             if array.shape[0] == 1:
@@ -1109,9 +1100,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                 max_res = max_res.ravel()
                 argmax_res = [
                     argmax_res.ravel().tolist(), range(array.shape[1])]
-                np.testing.assert_equal(
-                    CArray(array[argmax_res]).tondarray(),
-                    CArray(max_res).tondarray())
+                self.assert_array_equal(array[argmax_res], max_res)
 
             self.logger.info("a: \n{:}".format(array))
             if array.shape[1] == 1:
@@ -1128,9 +1117,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                 max_res = max_res.ravel()
                 argmax_res = [
                     range(array.shape[0]), argmax_res.ravel().tolist()]
-                np.testing.assert_equal(
-                    CArray(array[argmax_res]).tondarray(),
-                    CArray(max_res).tondarray())
+                self.assert_array_equal(array[argmax_res], max_res)
 
         _check_nanargmax(self.array_dense)
         _check_nanargmax(self.row_dense)
