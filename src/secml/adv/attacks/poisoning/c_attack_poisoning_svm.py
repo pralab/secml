@@ -233,6 +233,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
 
         G = CArray.zeros(shape=(gt.size, s + 1))
         G[:, :s] = svm.kernel.gradient(xs, xc).T
+        G *= alpha_c
 
         # warm start is disabled if the set of SVs changes!
         # if self._sv_idx is None or self._sv_idx.size != sv_idx.size or \
@@ -250,7 +251,10 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # solve using inverse/pseudoinverse of H
         v = - self._compute_grad_inv(G, H, grad_loss_params)
 
-        gt += v * alpha_c
+        # nb : we had to move this before or in _compute_grad_inv the
+        # derivative of the parameters w.r.t. xc will not be set correctly
+        gt += v
+        #gt += v * alpha_c
 
         # propagating gradient back to input space
         return gt if svm.preprocess is None else \
