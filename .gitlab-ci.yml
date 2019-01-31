@@ -13,8 +13,8 @@ cache:
     - "$CI_PROJECT_DIR/secml-lib-data"
 
 stages:
-  - test
   - package
+  - test
   - install
   - deploy
 
@@ -53,7 +53,6 @@ test:py27-n15:
 package:
   stage: package
   image: ${CI_REGISTRY}/pralab/docker-helper-images/python2-setuptools:latest
-  when: always
   before_script:
     - echo $CI_PROJECT_DIR
   script:
@@ -69,6 +68,7 @@ package:
       - requirements.txt
       - setup.py
       - tox.ini
+  cache: {}  # No cache needed for `package` job
   artifacts:
     name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
     paths:
