@@ -34,8 +34,8 @@ class CClassifierRejectThreshold(CClassifierReject):
 
     def __init__(self, clf, threshold):
 
-        self._clf = clf
-        self._threshold = threshold
+        self.clf = clf
+        self.threshold = threshold
 
         super(CClassifierRejectThreshold, self).__init__()
 
@@ -46,6 +46,20 @@ class CClassifierRejectThreshold(CClassifierReject):
     def __is_clear(self):
         """Returns True if object is clear."""
         return self._clf.is_clear()
+
+    @property
+    def clf(self):
+        """Returns the inner classifier."""
+        return self._clf
+
+    @clf.setter
+    def clf(self, value):
+        """Sets the inner classifier."""
+        if isinstance(value, CClassifier):
+            self._clf = value
+        else:
+            raise ValueError(
+                "the inner classifier should be an istance of CClassifier")
 
     @property
     def threshold(self):
