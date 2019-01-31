@@ -128,7 +128,7 @@ class TestCClassifierMultiOVA(CUnitTest):
 
         multi = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                          class_weight='balanced',
-                                         preprocess='minmax')
+                                         preprocess='min-max')
         multi.fit(self.dataset)
         pred_y = multi.predict(self.dataset.X)
 
@@ -173,6 +173,11 @@ class TestCClassifierMultiOVA(CUnitTest):
 
             self.assertFalse((gradient != ova_grad).any())
 
+        with self.assertRaises(ValueError):
+            multiclass.gradient_f_x(pattern, y=-1)
+        with self.assertRaises(ValueError):
+            multiclass.gradient_f_x(pattern, y=100)
+
     def test_plot_decision_function(self):
         """Test plot of multiclass classifier decision function."""
         # generate synthetic data
@@ -183,7 +188,7 @@ class TestCClassifierMultiOVA(CUnitTest):
         multiclass = CClassifierMulticlassOVA(
             classifier=CClassifierSVM,
             class_weight='balanced',
-            preprocess='minmax')
+            preprocess='min-max')
 
         # Training and classification
         multiclass.fit(ds)
