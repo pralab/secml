@@ -162,6 +162,19 @@ class CClassifierMulticlass(CClassifier):
         # Delete binary classifiers in excess
         del self._binary_classifiers[num_classes:]
 
+    def _check_clf_index(self, y):
+        """Raise error if index y is outside [0, num_classifiers) range.
+
+        Parameters
+        ----------
+        y : int
+            Index of the binary classifier.
+
+        """
+        if y < 0 or y >= self.num_classifiers:
+            raise ValueError(
+                "binary classifier index {:} is out of range".format(y))
+
     def estimate_parameters(self, dataset, parameters, splitter, metric,
                             pick='first', perf_evaluator='xval', n_jobs=1):
         """Estimate parameter that give better result respect a chose metric.
@@ -295,6 +308,8 @@ class CClassifierMulticlass(CClassifier):
         if self.preprocess is not None:
             x = self.preprocess.normalize(x)
 
+        self._check_clf_index(y)  # Check the binary classifier input index
+
         return self._decision_function(x, y)
 
     def apply_method(self, method, *args, **kwargs):
@@ -332,4 +347,5 @@ class CClassifierMulticlass(CClassifier):
             Gradient of the classifier's df wrt its input. Vector-like array.
 
         """
-        return CArray(self.binary_classifiers[y].gradient_f_x(x)).ravel()
+        self._check_clf_index(y)  # Check the binary classifier input index
+        return self.binary_classifiers[y].gradient_f_x(x).ravel()
