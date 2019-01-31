@@ -31,6 +31,8 @@ class TestEvasionMNIST(CCreator):
             kernel=CKernel.create('rbf', gamma=0.01),
         )
 
+        self.surrogate_classifier = self.classifier
+
         self.lb = 0.0
         self.ub = 1.0
 
@@ -141,13 +143,13 @@ class TestEvasionMNIST(CCreator):
 
         fig = CFigure(height=5.0, width=15.0)
         fig.subplot(1, 3, 1)
-        fig.sp.title(self._digits[y0])
+        fig.sp.title(self._digits[y0.item()])
         fig.sp.imshow(x0.reshape((self.img_h, self.img_w)), cmap='gray')
         fig.subplot(1, 3, 2)
         fig.sp.imshow(
             added_noise.reshape((self.img_h, self.img_w)), cmap='gray')
         fig.subplot(1, 3, 3)
-        fig.sp.title(self._digits[y_pred])
+        fig.sp.title(self._digits[y_pred.item()])
         fig.sp.imshow(xopt.reshape((self.img_h, self.img_w)), cmap='gray')
         fig.savefig(self.name_file, file_format='pdf')
         fig.show()

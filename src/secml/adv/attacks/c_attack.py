@@ -1,27 +1,40 @@
 """
-Class CAttack
+.. module:: CAttack
+   :synopsis: Interface class for evasion and poisoning attacks.
 
-@author: Battista Biggio
-
-Interface class for evasion and poisoning attacks.
+.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 
 from secml.core import CCreator
 from secml.core.type_utils import is_int
 from secml.array import CArray
-from secml.ml.classifiers import CClassifier, CClassifierSVM
+from secml.ml.classifiers import CClassifier
 from secml.data import CDataset
-from secml.data.splitter import CDataSplitter
-# from secml.optimization.function import CFunction
-# from secml.optimization.constraints import CConstraint
-# from secml.adv.attacks.evasion.solvers import CSolver
 
 
 class CAttack(CCreator):
-    """
-    Interface class for evasion and poisoning attacks.
+    """Interface class for evasion and poisoning attacks.
+
+    It requires classifier, surrogate_classifier,
+    and surrogate_data (if surrogate classifier is nonlinear).
+
+    The surrogate classifier must be differentiable
+    and already trained on surrogate data.
+
+    TODO: complete list of parameters
+
+    Parameters
+    ------
+    discrete: True/False (default: false).
+              If True, input space is considered discrete (integer-valued),
+              otherwise continuous.
+    attack_classes : 'all' or CArray, optional
+        List of classes that can be manipulated by the attacker or
+         'all' (default) if all classes can be manipulated.
+
     """
     __metaclass__ = ABCMeta
     __super__ = 'CAttack'
@@ -38,37 +51,6 @@ class CAttack(CCreator):
                  attack_classes='all',
                  solver_type=None,
                  solver_params=None):
-        """
-        Initialization method.
-
-        It requires classifier, surrogate_classifier, and surrogate_data.
-        Note that surrogate_classifier is assumed to be trained (before
-        passing it to this class) on surrogate_data.
-
-        TODO: complete list of parameters
-
-        Parameters
-        ------
-        discrete: True/False (default: false).
-                  If True, input space is considered discrete (integer-valued),
-                  otherwise continuous.
-        attack_classes : 'all' or CArray, optional
-            List of classes that can be manipulated by the attacker or
-             'all' (default) if all classes can be manipulated.
-
-        """
-
-        # init attributes to None (replaced below using setters)
-        self._classifier = None
-        self._surrogate_classifier = None
-        self._surrogate_data = None
-
-        # labels and scores assigned by the surrogate clf to the surrogate data
-        # these are "internal" attributes (no setter/getter), required to run
-        # evasion of nonlinear clf from a benign point, and also to fit a
-        # surrogate differentiable classifier (if surrogate_clf is non-diff.)
-        self._surrogate_labels = None
-        self._surrogate_scores = None
 
         # set true/targeted classifier (and ndim)
         self.classifier = classifier
@@ -87,14 +69,6 @@ class CAttack(CCreator):
 
         # TODO: FULLY SUPPORT SPARSE DATA
         self._issparse = False  # We work with dense data by default
-        self._dmax = None
-        self._lb = None
-        self._ub = None
-        self._distance = None
-        self._discrete = None
-        self._y_target = None
-        self._solver_type = None
-        self._solver_params = None
 
         # now we populate solver parameters (via dedicated setters)
         self.dmax = dmax
@@ -106,15 +80,10 @@ class CAttack(CCreator):
         self.solver_type = solver_type
         self.solver_params = solver_params
 
-        # Setting mandatory attributes (besides classifier):
-        # surrogate_classifier and surrogate_data.
-        # The latter two allow us to define
-        # solver_params['classifier'], which is passed to solver.
-        # If any of them changes, solver is re-initialized.
+        # Surrogate classifier. Should be differentiable
         self.surrogate_classifier = surrogate_classifier
 
-        # if surrogate_classifier is not differentiable,
-        # surrogate_data can not be set to None.
+        # Surrogate data. Required in case of a nonlinear surrogate classifier
         self.surrogate_data = surrogate_data
 
         CAttack.__clear(self)
@@ -283,7 +252,6 @@ class CAttack(CCreator):
         """Sets classifier"""
         if not isinstance(value, CClassifier):
             raise ValueError("Classifier is not a CClassifier!")
-
         self._classifier = value
 
     @property
@@ -292,15 +260,19 @@ class CAttack(CCreator):
         return self._surrogate_classifier
 
     @surrogate_classifier.setter
-    def surrogate_classifier(self, value):
+    def surrogate_classifier(self, clf):
         """Sets surrogate classifier"""
-        if not isinstance(value, CClassifier):
+        if not isinstance(clf, CClassifier):
             raise ValueError("Surrogate classifier is not a CClassifier!")
 
-        self._surrogate_classifier = value
+        # TODO: WE DO NOT CURRENTLY HAVE A RELIABLE WAY TO CHECK IF THE
+        #  CLASSIFIER IS DIFFERENTIABLE. `_run` WILL CRASH ANYWAY LATER
+        #  IF `_gradient_f` IS NOT DEFINED
 
-        # compute surrogate labels, if possible
-        self._set_surrogate_labels_and_scores()
+        if clf.is_clear():
+            raise RuntimeError("surrogate classifier must be already trained")
+
+        self._surrogate_classifier = clf
 
         # set classifier inside solver (and re-init solver)
         self._set_solver_classifier()
@@ -312,27 +284,13 @@ class CAttack(CCreator):
 
     @surrogate_data.setter
     def surrogate_data(self, value):
-        """
-        Sets surrogate data.
-        If surrogate_classifier is differentiable,
-        surrogate_data can be set to None,
-        otherwise it has to be a CDataset.
-        """
-        if value is None and self._is_surrogate_clf_diff():
-            self._surrogate_data = None
-            return
-
+        """Sets surrogate data."""
         if not isinstance(value, CDataset):
             raise ValueError("Surrogate data is not a CDataset!")
-
         self._surrogate_data = value
 
-        # compute surrogate labels, if possible
-        self._set_surrogate_labels_and_scores()
-
-        # if surrogate_data changes, and surrogate_classifier is non-diff.,
-        # then a differentiable surrogate is learned and re-set inside solver.
-        self._set_solver_classifier()
+        # Surrogate data changed, reset predictions of solver classifier
+        self._clear_solver_surrogate_predictions()
 
     ###########################################################################
     #            READ-WRITE ATTRIBUTES (from/to solver instance)
@@ -349,7 +307,6 @@ class CAttack(CCreator):
         if value is None:
             self._dmax = None
             return
-
         self._dmax = float(value)
 
     @property
@@ -431,156 +388,50 @@ class CAttack(CCreator):
 
     @abstractmethod
     def _objective_function(self, x):
-        """
+        """Objective function.
+
         Parameters
         ----------
-        x: could be a matrix / dataset
+        x : CArray or CDataset
 
         Returns
         -------
-        f_obj: values of objective function at x
+        f_obj : float or CArray of floats
+
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def _objective_function_gradient(self, x):
-        pass
+        """Gradient of the objective function."""
+        raise NotImplementedError
 
-    def _is_surrogate_clf_diff(self):
-        """Returns True if the surrogate classifiers implements `gradient_f_x`.
+    def _set_solver_classifier(self):
+        """Sets the classifier of the solver."""
+        self._solver_clf = self._surrogate_classifier
 
-        Returns
-        -------
-        bool
-            True if the surrogate classifiers implements `gradient_f_x`,
-            False otherwise.
+        # Solver classifier changed, reset predictions on surrogate dataset
+        self._clear_solver_surrogate_predictions()
 
-        """
-        try:  # Try to call gradient function with fake input
-            self._surrogate_classifier.gradient_f_x(CArray([]), y=None)
-        except NotImplementedError:
-            return False  # Classifier does not implement the gradient
-        except:  # Wildcard for any other error, gradient is implemented
-            return True
-        else:  # No error raised, gradient is implemented
-            return True
+    def _set_solver_surrogate_predictions(self):
+        """Compute predictions on surrogate data using solver classifier."""
+        if self.surrogate_data is None:
+            raise ValueError("surrogate data is not defined")
 
-    def _set_surrogate_labels_and_scores(self):
-        """
-        This function computes the labels assigned to the surrogate data
-        by the surrogate classifier (only for nonlinear classifiers).
-        """
+        # Reset the current predictions
+        self._clear_solver_surrogate_predictions()
 
-        if self._surrogate_classifier is None or self._surrogate_data is None:
-            self._surrogate_labels = None
-            self._surrogate_scores = None
-            return
-
-        # otherwise...
+        # Compute the new predictions
         self.logger.info("Classification of surrogate data...")
-        y, score = self.surrogate_classifier.predict(
+        y, score = self._solver_clf.predict(
             self.surrogate_data.X, return_decision_function=True)
         self._surrogate_labels = y
         self._surrogate_scores = score
 
-    def _set_solver_classifier(self):
-        """This function returns the surrogate classifier,
-        if differentiable; otherwise, it learns a smooth approximation for
-        the nondiff. (surrogate) classifier (e.g., decision tree)
-        using an SVM with the RBF kernel."""
-
-        # check if surrogate learner is differentiable.
-        if self._is_surrogate_clf_diff():
-            self._solver_clf = self._surrogate_classifier
-            return
-
-        # if not, construct smooth approximation.
-        # to this end, we need surrogate_data,
-        # which may be not have been set yet
-        if self._surrogate_data is None:
-            return
-
-        # fit a differentiable surrogate classifier and pass it to solver
-        self._solver_clf = self._fit_differentiable_surrogate_clf()
-
-        return
-
-    # TODO: this should be customizable from outside of this class.
-    def _fit_differentiable_surrogate_clf(self):
-        """
-        Trains a differentiable surrogate classifier to be passed to the
-        solver. By default, an RBF SVM is trained on surrogate data re-labeled
-        by the surrogate (non-differentiable) classifier.
-        """
-
-        self.logger.info("Learning differentiable surrogate classifier...")
-
-        # TODO: solve this more elegantly
-        if self._surrogate_classifier.preprocess is None:
-            preprocessor = None
-        else:
-            preprocessor = self._surrogate_classifier.preprocess.deepcopy()
-
-        # creating instance of SVM learner
-        clf = CClassifierSVM(kernel='rbf', preprocess=preprocessor)
-
-        # clf.grad_sampling = 1 # speeding up gradient computation
-
-        # construct dataset relabeled by surrogate learner
-        relabeled_data = CDataset(
-            self._surrogate_data.X,
-            self._surrogate_labels)
-
-        # configuring cross-validation to set C, gamma
-        xval_parameters = {'C': [0.1, 1, 10, 100], 'gamma': [0.1, 1, 10]}
-        xval_splitter = CDataSplitter.create('kfold', num_folds=5)
-        xval_splitter.compute_indices(relabeled_data)
-
-        # set best parameters
-        best_params = clf.estimate_parameters(
-            relabeled_data, xval_parameters, xval_splitter, 'accuracy')
-
-        # fit classifier with best params
-        clf.set('C', best_params['C'])
-        clf.set('gamma', best_params['gamma'])
-        clf.fit(relabeled_data)
-
-        return clf
-
-    # def _init_solver(self):
-    #     """Create solver instance."""
-    #
-    #     if self._solver_clf is None or self.discrete is None:
-    #         raise ValueError('Solver not set properly!')
-    #
-    #     # map attributes to fun, constr, box
-    #     fun = CFunction(fun=self._objective_function,
-    #                     gradient=self._objective_function_gradient,
-    #                     n_dim=self.n_dim)
-    #
-    #     if self.solver_type is None:
-    #         solver_type = 'descent-direction'
-    #
-    #     constr = None
-    #     if self._distance is not None:
-    #         constr = CConstraint.create(self._distance)
-    #         constr.center = self._x0
-    #         constr.radius = self.dmax
-    #
-    #     # only feature increments or decrements are allowed
-    #     lb = self._x0 if self.lb == 'x0'else self.lb
-    #     ub = self._x0 if self.ub == 'x0'else self.ub
-    #     bounds = CConstraint.create('box', lb=lb, ub=ub)
-    #
-    #     self._solver = CSolver.create(
-    #         solver_type,
-    #         fun=fun, constr=constr,
-    #         bounds=bounds,
-    #         discrete=self._discrete,
-    #         **self._solver_params)
-    #
-    #     # TODO: fix this verbose level propagation
-    #     self._solver.verbose = self.verbose
+    def _clear_solver_surrogate_predictions(self):
+        """Reset the predictions on surrogate data using solver classifier."""
+        self._surrogate_labels = None
+        self._surrogate_scores = None
 
     def _solution_from_solver(self):
         """
