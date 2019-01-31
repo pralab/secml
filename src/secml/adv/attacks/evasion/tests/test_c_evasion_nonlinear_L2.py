@@ -29,6 +29,8 @@ class TestEvasionNonLinearL2(CEvasionTestCases.TestCEvasion):
         self.classifier.gamma = 0.01
         # self.classifier = CClassifierKDE(kernel='rbf', preprocess='minmax')
 
+        self.surrogate_classifier = self.classifier
+
         self.seed = None  # Random state generator for the dataset
         # self.seed = 879858889
         # self.seed = 308757615

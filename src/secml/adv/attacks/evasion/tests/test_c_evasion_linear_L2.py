@@ -24,6 +24,8 @@ class TestEvasionLinearL2(CEvasionTestCases.TestCEvasion):
         self.normalizer = CNormalizerMinMax(feature_range=(-1, 1))
         self.classifier = CClassifierSVM(C=0.1, preprocess=self.normalizer)
 
+        self.surrogate_classifier = self.classifier
+
         self.seed = 48574308  # Random state generator for the dataset
 
         self.n_clusters = 2  # Number of dataset clusters

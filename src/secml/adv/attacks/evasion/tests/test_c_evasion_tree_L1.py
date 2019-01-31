@@ -1,7 +1,7 @@
 from secml.utils import CUnitTest
 from test_c_evasion import CEvasionTestCases
 
-from secml.ml.classifiers import CClassifierDecisionTree
+from secml.ml.classifiers import CClassifierDecisionTree, CClassifierSVM
 from secml.utils import fm
 
 
@@ -22,6 +22,8 @@ class TestEvasionTreeL1(CEvasionTestCases.TestCEvasion):
         self.normalizer = None
 
         self.classifier = CClassifierDecisionTree()
+
+        self.surrogate_classifier = CClassifierSVM(kernel='rbf')
 
         self.seed = None  # Random state generator for the dataset
 
