@@ -64,10 +64,6 @@ class CPoisoningTestCases(object):
 
             if clf_idx == 'logistic':
 
-                # self.classifier = CClassifierSGD(loss='log', regularizer='l2',
-                #                                  alpha=1, random_state=0)
-                #                                  #alpha=0.0001)
-
                 self.classifier = CClassifierLogistic(C=100,
                                                       preprocess=None,
                                                       random_seed=self.seed)
@@ -133,6 +129,7 @@ class CPoisoningTestCases(object):
         def setUp(self):
 
             # Setting all defined parameter
+            self.plot = True
             self.verbose = 2
             self._dataset_creation()
 

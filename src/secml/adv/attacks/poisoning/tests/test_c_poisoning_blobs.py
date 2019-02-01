@@ -12,6 +12,10 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
         return ['ridge', 'logistic', 'lin-svm', 'rbf-svm']
 
     def test_poisoning_2D_plot(self):
+        if self.plot:
+            self._make_plot()
+
+    def _make_plot(self):
         self.logger.info("Create 2-dimensional plot")
 
         for clf_idx in self.clf_list():
@@ -78,57 +82,6 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
                             "original poisoning point is {:} while "
                             "on the optimized poisoning point is {:}.".format(
                                 fobj_x0, fobj_xc))
-
-    def test_acc_impact(self):
-        """
-        Check if the accuracy of the classifier decrease when it is
-        trained on the poisoning point.
-        """
-        self.logger.info("Test the impact of the attack on the classifier "
-                         "accuracy")
-
-        for clf_idx in self.clf_list():
-            self.logger.info("Test the {:} classifier".format(clf_idx))
-            self._objs_creation(clf_idx)
-
-            x0 = self.xc  # starting poisoning point
-            xc = self._clf_poisoning()[1]
-
-            acc_tr_on_x0 = self.poisoning._objective_function(xc=x0, acc=True)
-            acc_tr_on_xc = self.poisoning._objective_function(xc=xc, acc=True)
-
-            self.assertLess(acc_tr_on_x0, acc_tr_on_xc,
-                            "The attack does not decrease the classifier "
-                            "accuracy. The accuracy of the classifier trained "
-                            "on the original poisoning point is {:} while "
-                            "on the optimized poisoning point is {:}.".format(
-                                acc_tr_on_x0, acc_tr_on_xc))
-
-    def test_poisoning_grad_check(self):
-
-        self.logger.info("Compare the numerical with the analytical "
-                         "poisoning gradient")
-
-        for clf_idx in self.clf_list():
-            self.logger.info("Test the {:} classifier".format(clf_idx))
-            self._objs_creation(clf_idx)
-
-            self._clf_poisoning()
-
-            x0 = self.xc
-
-            # Compare analytical gradient with its numerical approximation
-            check_grad_val = COptimizer(
-                CFunction(self.poisoning._objective_function,
-                          self.poisoning._objective_function_gradient)
-            ).check_grad(x0)
-            self.logger.info("Gradient difference between analytical "
-                             "poisoning "
-                             "gradient and numerical gradient: %s",
-                             str(check_grad_val))
-            self.assertLess(check_grad_val, 1,
-                            "poisoning gradient is wrong {:}".format(
-                                check_grad_val))
 
 
 if __name__ == '__main__':
