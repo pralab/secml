@@ -1,11 +1,12 @@
-'''
+"""
 The CNN learned on the MNIST dataset by Carlini in the paper:
 N. Carlini and D. A. Wagner, "Adversarial examples are not easily
 detected: Bypassing ten detection methods"
 
 ref to the Carlini's code:
 https://github.com/carlini/nn_breaking_detection/blob/master/setup_mnist.py
-'''
+
+"""
 import torch.nn as nn
 
 __all__ = ['mnist_model']
@@ -21,20 +22,21 @@ class Flatten(nn.Module):
 
 
 class MNISTModel(nn.Module):
+    """
+
+    Parameters
+    ----------
+    num_classes
+    init_strategy default
+    Use the default initialization strategy for all the layers,
+    `fan_out`: use the default init strategy for the linear layer and
+    the kaiming_normal
+    init strategy with the option fan_out for the convolutinal layers
+    uniform_scaling use the uniform scaling strategy for all the layers
+    """
 
     def __init__(self, num_classes=10, init_strategy='default'):
-        """
 
-        Parameters
-        ----------
-        num_classes
-        init_strategy default
-        Use the default initialization strategy for all the layers,
-        `fan_out`: use the default init strategy for the linear layer and
-        the kaiming_normal
-        init strategy with the option fan_out for the convolutinal layers
-        uniform_scaling use the uniform scaling strategy for all the layers
-        """
         nb_filters = 64
 
         super(MNISTModel, self).__init__()
@@ -66,8 +68,8 @@ class MNISTModel(nn.Module):
                 if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
                     uniform_scaling_(m.weight)
         elif init_strategy == "default":
-            "Delving deep into rectifiers: Surpassing human - level " \
-            "performance on ImageNet classification - He, K. et al. (2015)"
+            # Delving deep into rectifiers: Surpassing human - level
+            # performance on ImageNet classification - He, K. et al. (2015)"
             pass
         else:
             raise ValueError("Unknown initialization strategy!")
@@ -85,7 +87,7 @@ def mnist_model(**kwargs):
 
 
 def uniform_scaling_(tensor, factor=1.0):
-    r"""Initialization with random values from uniform distribution without scaling
+    """Initialization with random values from uniform distribution without scaling
     variance.
 
     When initializing a deep network, it is in principle advantageous to keep
