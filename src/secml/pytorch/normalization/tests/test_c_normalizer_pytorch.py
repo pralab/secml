@@ -35,7 +35,7 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.logger.info("Output of normalize:\n{:}".format(out_norm))
         self.logger.info("Output of net:\n{:}".format(out_net))
 
-        self.assertFalse((out_norm.round(4) != out_net.round(4)).any())
+        self.assertFalse((out_norm.round(3) != out_net.round(3)).any())
 
         self.norm.out_layer = 'linear1'
 
@@ -48,7 +48,7 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.logger.info("Output of normalize:\n{:}".format(out_norm))
         self.logger.info("Output of net:\n{:}".format(out_net))
 
-        self.assertFalse((out_norm.round(4) != out_net.round(4)).any())
+        self.assertFalse((out_norm.round(3) != out_net.round(3)).any())
 
     def test_gradient(self):
         """Test for gradient."""
