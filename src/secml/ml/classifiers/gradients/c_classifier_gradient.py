@@ -40,7 +40,7 @@ class CClassifierGradient(CCreator):
     @abstractmethod
     def Ld_params(self, x):
         """
-        Derivative of the classifier classifier loss function (regularizer
+        Derivative of the classifier loss function (regularizer
         included) w.r.t. the classifier parameters
         """
         raise NotImplementedError()
@@ -48,6 +48,6 @@ class CClassifierGradient(CCreator):
     @abstractmethod
     def Ld_s(self):
         """
-        Derivative of the classifier classifier loss function w.r.t. the score
+        Derivative of the classifier loss function w.r.t. the score
         """
         raise NotImplementedError()
