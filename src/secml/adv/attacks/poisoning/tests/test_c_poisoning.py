@@ -129,7 +129,7 @@ class CPoisoningTestCases(object):
         def setUp(self):
 
             # Setting all defined parameter
-            self.plot = True
+            self.plot = False
             self.verbose = 2
             self._dataset_creation()
 
