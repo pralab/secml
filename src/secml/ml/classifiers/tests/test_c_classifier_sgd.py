@@ -42,23 +42,6 @@ class TestCClassifierSGD(CClassifierTestCases):
             sgd.verbose = 2  # Enabling debug output for each classifier
             sgd.fit(self.dataset)
 
-    def test_time(self):
-        """ Compare execution time of SGD and SVM"""
-        self.logger.info("Testing training speed of SGD compared to SVM ")
-
-        for sgd in self.sgds:
-
-            self.logger.info("SGD kernel: {:}".format(sgd.kernel))
-
-            svm = CClassifierSVM(sgd.kernel)
-
-            with self.timer() as t_svm:
-                svm.fit(self.dataset)
-            self.logger.info("Execution time of SVM: " + str(t_svm.interval) + "\n")
-            with self.timer() as t_sgd:
-                sgd.fit(self.dataset)
-            self.logger.info("Execution time of SGD: " + str(t_sgd.interval) + "\n")
-
     def test_draw(self):
         """ Compare the classifiers graphically"""
         self.logger.info("Testing classifiers graphically")
