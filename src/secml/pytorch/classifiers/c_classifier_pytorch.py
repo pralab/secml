@@ -20,6 +20,7 @@ from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.loss import CSoftmax
 from secml.utils import load_dict, fm
 from secml.utils.mixed_utils import AverageMeter
+
 from secml.pytorch.settings import SECML_PYTORCH_USE_CUDA
 from secml.pytorch.data import CDatasetPyTorch
 from secml.pytorch.metrics import CMetricPyTorchAccuracy
@@ -48,7 +49,7 @@ class CClassifierPyTorch(CClassifier):
         Identifier of the loss function to use for training.
         Default Cross-Entropy loss (cross-entropy).
     epochs : int, optional
-        Number of epochs. Default 100.
+        Maximum number of epochs of the training process. Default 100.
     gamma : float, optional
         Multiplicative factor of learning rate decay. Default: 0.1.
     lr_schedule : list, optional
@@ -200,12 +201,12 @@ class CClassifierPyTorch(CClassifier):
 
     @property
     def epochs(self):
-        """Number of epochs."""
+        """Maximum number of epochs of the training process."""
         return self._epochs
 
     @epochs.setter
     def epochs(self, value):
-        """Number of epochs."""
+        """Maximum number of epochs of the training process."""
         self._epochs = int(value)
 
     @property
@@ -539,7 +540,7 @@ class CClassifierPyTorch(CClassifier):
         state_dict['input_shape'] = self.input_shape
         return state_dict
 
-    def fit(self, dataset, warm_start=False, best_acc_params = True, n_jobs=1):
+    def fit(self, dataset, warm_start=False, store_best_params=True, n_jobs=1):
         """Trains the classifier.
 
         If specified, train_transform is applied to data.
@@ -552,12 +553,10 @@ class CClassifierPyTorch(CClassifier):
         warm_start : bool, optional
             If False (default) model will be reinitialized before training.
             Otherwise the state of the model will be preserved.
-        best_acc_params : bool, optional
-            If True (default) model the parameters that give the higher
-            accuracy (averaged between the ones that we get on the single
-            batch during an epoch) are chosen
-            Otherwhise the parameter are the ones computed on the last batch
-            during the last training epoch
+        store_best_params : bool, optional
+            If True (default) the best parameters by classification accuracy
+             found during the training process are stored.
+            Otherwise, the parameters from the last epoch are stored.
         n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
@@ -584,6 +583,7 @@ class CClassifierPyTorch(CClassifier):
                 "Use `train_transform` parameter if necessary.")
 
         if warm_start is False:
+            # Resetting the classifier
             self.clear()
             # Storing dataset classes
             self._classes = dataset.classes
@@ -598,9 +598,9 @@ class CClassifierPyTorch(CClassifier):
             # Reinitialize the optimizer as we are starting clean
             self.init_optimizer()
 
-        return self._fit(dataset, best_acc_params, n_jobs=n_jobs)
+        return self._fit(dataset, store_best_params, n_jobs=n_jobs)
 
-    def _fit(self, dataset, best_acc_params, n_jobs=1):
+    def _fit(self, dataset, store_best_params=True, n_jobs=1):
         """Trains the classifier.
 
         If specified, train_transform is applied to data.
@@ -610,6 +610,10 @@ class CClassifierPyTorch(CClassifier):
         dataset : CDataset
             Training set. Must be a :class:`.CDataset` instance with
             patterns data and corresponding labels.
+        store_best_params : bool, optional
+            If True (default) the best parameters by classification accuracy
+             found during the training process are stored.
+            Otherwise, the parameters from the last epoch are stored.
         n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
@@ -622,7 +626,7 @@ class CClassifierPyTorch(CClassifier):
         Warnings
         --------
         preprocess is not applied to data before training. This behaviour
-         will change in the feature.
+         will change in the future.
 
         """
         if self.start_epoch >= self.epochs:
@@ -711,20 +715,17 @@ class CClassifierPyTorch(CClassifier):
             # Average accuracy after epoch FIXME: ON TRAINING SET
             self._acc = acc.avg
 
-            if best_acc_params:
-                # Store the current epoch as best one only if accuracy is
-                # higher or at least same (in this last case the loss should
-                # be better anyway for last epoch)
-                if self.acc >= self.best_acc:
-                    self._best_acc = self.acc
-                    best_epoch = self.start_epoch
-                    best_state_dict = deepcopy(self.state_dict())
-            else:  # Use the latest epoch state as best state
+            # If the best parameters should be stored, store the current epoch
+            # as best one only if accuracy is higher or at least same
+            # (as the loss should be better anyway for latest epoch)
+            if store_best_params is True and self.acc < self.best_acc:
+                continue  # Otherwise do not store the current epoch
+            else:  # Better accuracy or we should store the latest epoch anyway
                 self._best_acc = self.acc
                 best_epoch = self.start_epoch
                 best_state_dict = deepcopy(self.state_dict())
 
-        if best_acc_params:
+        if store_best_params is True:
             self.logger.info(
                 "Best accuracy {:} obtained on epoch {:}".format(
                     self.best_acc, best_epoch + 1))

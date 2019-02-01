@@ -76,7 +76,7 @@ class CClassifierPyTorchCNNMNIST(CClassifierPyTorch):
                  train_transform=None, preprocess=None, softmax_outputs=False,
                  random_state=None):
         super(CClassifierPyTorchCNNMNIST, self).__init__(
-            model= mnist_model,
+            model=mnist_model,
             learning_rate=learning_rate,
             momentum=momentum,
             weight_decay=weight_decay,
