@@ -1,6 +1,6 @@
 """
 .. module:: CClassifierGradient
-   :synopsis: Common inteface for the implementations of the classifier
+   :synopsis: Common interface for the implementations of the classifier
    gradients
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
