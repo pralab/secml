@@ -20,7 +20,8 @@ class TestCArraySaveLoad(CArrayTestCases.TestCArray):
             fm.remove_file(test_file)
             fm.remove_file(test_file_2)
         except (OSError, IOError) as e:
-            self.logger.info(e.message)
+            if e.errno != 2:
+                raise e
 
         self.logger.info(
             "UNITTEST - CArray - Testing save/load for sparse matrix")
@@ -61,7 +62,8 @@ class TestCArraySaveLoad(CArrayTestCases.TestCArray):
             fm.remove_file(test_file)
             fm.remove_file(test_file_2)
         except (OSError, IOError) as e:
-            self.logger.info(e.message)
+            if e.errno != 2:
+                raise e
 
 
 if __name__ == '__main__':
