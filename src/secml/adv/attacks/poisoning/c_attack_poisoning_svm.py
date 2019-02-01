@@ -187,8 +187,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
 
         alpha_c = self._alpha_c()
 
-        # todo: recheck (even if should be fine)
-        if abs(alpha_c) == 0: # < svm.C:  # this include alpha_c == 0
+        if abs(alpha_c) == 0:  # < svm.C:  # this include alpha_c == 0
             # self.logger.debug("Warning: xc is not an error vector.")
             return grad
 
@@ -240,7 +239,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         #     G, H, grad_loss_params, tol=1e-3)
 
         # solve with standard linear solver
-        #v = - self._compute_grad_solve(G, H, grad_loss_params, sym_pos=False)
+        # v = - self._compute_grad_solve(G, H, grad_loss_params, sym_pos=False)
 
         # solve using inverse/pseudoinverse of H
         v = - self._compute_grad_inv(G, H, grad_loss_params)

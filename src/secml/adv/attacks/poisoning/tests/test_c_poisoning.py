@@ -1,4 +1,3 @@
-import time
 from abc import ABCMeta
 
 from secml.utils import CUnitTest

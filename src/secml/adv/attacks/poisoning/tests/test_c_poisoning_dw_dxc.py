@@ -16,7 +16,7 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
     """
 
     def clf_list(self):
-        return [ 'logistic', 'ridge']
+        return ['logistic', 'ridge']
 
     def test_2D(self):
         """

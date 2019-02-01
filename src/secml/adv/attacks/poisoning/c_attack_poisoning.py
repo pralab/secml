@@ -16,10 +16,9 @@ from secml.data import CDataset
 from secml.ml.classifiers.loss import CLoss
 from secml.ml.peval.metrics import CMetric
 from secml.optimization.constraints import CConstraint
-from secml.optimization.constraints import CConstraintL2
 from secml.optimization.function import CFunction
 
-# fixme: cleaning this class
+
 class CAttackPoisoning(CAttack):
     """Class providing a common interface to CSolver classes."""
 
@@ -260,7 +259,6 @@ class CAttackPoisoning(CAttack):
 
         idx = CArray.randsample(init_dataset.num_samples, n_points,
                                 random_state=self.random_seed)
-
 
         xc = init_dataset.X[idx, :].deepcopy()
 
@@ -556,13 +554,12 @@ class CAttackPoisoning(CAttack):
                     "poisoning point {:} optimization fopt: {:}".format(i,
                                                                         self._f_opt))
 
-
                 y_pred, scores = self._poisoned_clf.predict(x,
                                                             return_decision_function=True)
                 acc = metric.performance_score(y_true=y, y_pred=y_pred)
-                self.logger.info("Poisoned classifier accuracy on test data {:}".format(acc))
-
-
+                self.logger.info(
+                    "Poisoned classifier accuracy on test data {:}".format(
+                        acc))
 
             delta = (xc_prv - xc).norm_2d()
             self.logger.info(

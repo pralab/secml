@@ -97,8 +97,8 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         implementation to inherited classes.
         """
 
-        # fixme: bisognerebbe mettere un parametero per questo (nel caso
-        # l'attacco sia contro un regressore non ci va)
+        # fixme: add a paramer for this as if we are attacking a regressor
+        #  we shoudn't do this.
         yc = convert_binary_labels(yc)
 
         xc0 = xc.deepcopy()
@@ -151,7 +151,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         # gt is the gradient in feature space
         gt = self._compute_grad_inv(G, H, grad_loss_params)
         # gt = self._compute_grad_solve(G, H, grad_loss_params)
-        #gt = self._compute_grad_solve_iterative(G, H, grad_loss_params) #*
+        # gt = self._compute_grad_solve_iterative(G, H, grad_loss_params) #*
 
         # end = time.time()
         # print "time: ", end - start
@@ -160,5 +160,3 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         # propagating gradient back to input space
         return gt if clf.preprocess is None else \
             clf.preprocess.gradient(xc0, gt)
-
-
