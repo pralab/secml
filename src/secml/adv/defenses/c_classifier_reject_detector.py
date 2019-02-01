@@ -35,8 +35,13 @@ class CClassifierRejectDetector(CClassifierReject):
 
     def __init__(self, clf, det, adv_x):
 
+        if not isinstance(clf, CClassifier):
+            raise TypeError("`clf` must be an instance of `CClassifier`")
         self._clf = clf
+        if not isinstance(det, CClassifier):
+            raise TypeError("`det` must be an instance of `CClassifier`")
         self._det = det
+
         self.adv_x = adv_x
 
         super(CClassifierRejectDetector, self).__init__()
@@ -51,6 +56,16 @@ class CClassifierRejectDetector(CClassifierReject):
         return self._det.is_clear() and self._clf.is_clear()
 
     @property
+    def clf(self):
+        """Return the inner classifier."""
+        return self._clf
+
+    @property
+    def det(self):
+        """Return the inner detector."""
+        return self._det
+
+    @property
     def adv_x(self):
         """Array containing already computed adversarial samples."""
         return self._adv_x
@@ -59,21 +74,6 @@ class CClassifierRejectDetector(CClassifierReject):
     def adv_x(self, value):
         """Array containing already computed adversarial samples."""
         self._adv_x = value.atleast_2d()
-
-    @property
-    def classes(self):
-        """Return the list of classes on which training has been performed."""
-        return self._clf.classes
-
-    @property
-    def n_classes(self):
-        """Number of classes of training dataset."""
-        return self._clf.n_classes
-
-    @property
-    def n_features(self):
-        """Number of features"""
-        return self._clf.n_features
 
     def _normalize_scores(self, orig_score):
         """Normalizes the scores using softmax."""
