@@ -18,7 +18,11 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
     def clf_list(self):
         return ['logistic', 'ridge']
 
-    def test_2D(self):
+    def test_gradient_2D_plot(self):
+        if self.plot:
+            self._make_plot()
+
+    def _make_plot(self):
         """
         Test the poisoning derivative showing some 2-dimensiona plots
         """
@@ -73,13 +77,15 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
                         "poisoning gradient is wrong {:}".format(
                             check_grad_val))
 
-    def _test_poisoning_grad_check(self):
+    def test_poisoning_grad_check(self):
 
         self.logger.info("Create 2-dimensional plot")
 
         for clf_idx in self.clf_list():
             self.logger.info("Test the {:} classifier".format(clf_idx))
             self._objs_creation(clf_idx)
+
+            pois_clf = self._clf_poisoning()[0]
 
             xc = self.xc
 
