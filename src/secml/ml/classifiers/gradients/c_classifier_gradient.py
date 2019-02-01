@@ -50,4 +50,4 @@ class CClassifierGradient(CCreator):
         """
         Derivative of the classifier classifier loss function w.r.t. the score
         """
-        raise NotImplementedError
+        raise NotImplementedError()
