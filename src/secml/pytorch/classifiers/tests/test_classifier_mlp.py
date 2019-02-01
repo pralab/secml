@@ -238,14 +238,95 @@ class TestCClassifierPyTorchMLP(CUnitTest):
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
 
+    def test_properties(self):
+        """Test for properties."""
+        self.logger.info("Testing before loading state")
+
+        w = self.clf.w
+        self.assertEqual(1, w.ndim)
+        # We know the number of params (20*40 + 3*40)
+        self.assertEqual(920, w.size)
+
+        b = self.clf.b
+        self.assertEqual(1, b.ndim)
+        # We know the number of params (40 + 3)
+        self.assertEqual(43, b.size)
+
+    def test_retrain(self):
+        """Test for multiple retrain of the classifier."""
+        self.clf.verbose = 1
+
+        self.logger.info("Training first time...")
+        self.clf.fit(self.ds)
+
+        w1 = self.clf.w.deepcopy()
+
+        self.logger.info("Training second time...")
+        self.clf.fit(self.ds)
+
+        w2 = self.clf.w.deepcopy()
+
+        self.logger.info("W1:\n{:}".format(w1))
+        self.logger.info("W2:\n{:}".format(w2))
+
+        self.logger.info("Comparing final weights")
+        self.assertFalse((w1 != w2).any())
+
+    def test_warmstart(self):
+        """Test for training with warm start of the classifier."""
+        self.clf.verbose = 1
+
+        self.logger.info("Training first time...")
+        self.clf.fit(self.ds)
+
+        w1 = self.clf.w.deepcopy()
+
+        self.logger.info("We know that the last epoch has the best solution")
+        self.assertFalse(self.clf.start_epoch != self.clf.epochs,
+                         "For this test the start epoch after training "
+                         "must be equal to the number of epochs")
+
+        self.logger.info("Training second time with warm_start..."
+                         "No training should be performed (max epochs)!")
+        self.clf.fit(self.ds, warm_start=True)
+
+        w2 = self.clf.w.deepcopy()
+
+        self.logger.info("W1:\n{:}".format(w1))
+        self.logger.info("W2:\n{:}".format(w2))
+
+        self.logger.info("Comparing final weights")
+        self.assertFalse((w1 != w2).any())
+
     def test_deepcopy(self):
         """Test for deepcopy."""
         self.clf.verbose = 0
-        self.clf.fit(self.ds)
 
-        self.logger.info("Try deepcopy of classifier...")
+        self.logger.info("Try deepcopy of not-trained classifier...")
         clf2 = self.clf.deepcopy()
 
+        self.assertEqual(None, self.clf.classes)
+        self.assertEqual(None, self.clf.n_features)
+
+        self.assertEqual(None, clf2.classes)
+        self.assertEqual(None, clf2.n_features)
+
+        self.assertEqual(self.clf.start_epoch, clf2.start_epoch)
+
+        self.logger.info("Try deepcopy of trained classifier...")
+        self.clf.fit(self.ds)
+
+        clf2 = self.clf.deepcopy()
+
+        self.assertFalse((self.clf.classes != clf2.classes).any())
+        self.assertEqual(self.clf.n_features, clf2.n_features)
+
+        self.assertEqual(3, clf2.classes.size)
+        self.assertEqual(21, clf2.n_features)
+
+        self.assertEqual(self.clf.start_epoch, clf2.start_epoch)
+
+        self.logger.info("Try setting different parameters on the copy...")
         clf2.weight_decay = 300
         self.assertNotEqual(clf2.weight_decay, self.clf.weight_decay)
 

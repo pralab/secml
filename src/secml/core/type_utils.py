@@ -27,11 +27,28 @@ def is_int(x):
 
 
 def is_intlike(x):
-    """Return True if input is integer or list/array of 1 integer."""
+    """Return True if input is integer or list/array of 1 integer.
+
+    Examples
+    --------
+    >>> from secml.core.type_utils import is_intlike
+
+    >>> print is_intlike(0)  # Standard int
+    True
+    >>> print is_intlike(0.1)  # Standard float
+    False
+
+    >>> print is_intlike(np.array([0]))  # ndarray with one int
+    True
+    >>> print is_intlike(np.array([0.1]))  # ndarray with one float
+    False
+
+    """
+
     if is_int(x):
         return True  # built-in or numpy integers
     elif (is_list(x) and len(x) == 1 and is_int(x[0])) or \
-            (is_ndarray(x) and x.size <= 1 and x.dtype.kind in ('i', 'u')):
+            (is_ndarray(x) and x.size == 1 and x.dtype.kind in ('i', 'u')):
         return True
     else:
         return False
@@ -42,11 +59,27 @@ def is_float(x):
 
 
 def is_floatlike(x):
-    """Return True if input is float or list/array of 1 float."""
+    """Return True if input is float or list/array of 1 float.
+
+    Examples
+    --------
+    >>> from secml.core.type_utils import is_floatlike
+
+    >>> print is_floatlike(0.1)  # Standard float
+    True
+    >>> print is_floatlike(0)  # Standard int
+    False
+
+    >>> print is_floatlike(np.array([0.1]))  # ndarray with one float
+    True
+    >>> print is_floatlike(np.array([0]))  # ndarray with one int
+    False
+
+    """
     if is_float(x):
         return True  # built-in or numpy floats
     elif (is_list(x) and len(x) == 1 and is_float(x[0])) or \
-            (is_ndarray(x) and x.size <= 1 and x.dtype.kind in ('f')):
+            (is_ndarray(x) and x.size == 1 and x.dtype.kind in ('f')):
         return True
     else:
         return False
@@ -75,9 +108,15 @@ def is_list_of_lists(x):
     True
     >>> is_list_of_lists([[1], 2, [3]])
     False
+    >>> is_list_of_lists([])
+    False
 
     """
-    if not is_list(x) or any(not is_list(elem) for elem in x):
+    if not is_list(x):  # Not a list
+        return False
+    elif len(x) == 0:  # Empty list
+        return False
+    elif any(not is_list(elem) for elem in x):  # One or more elems not lists
         return False
     return True
 

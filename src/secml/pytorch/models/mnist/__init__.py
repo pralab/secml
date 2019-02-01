@@ -4,4 +4,4 @@ from __future__ import absolute_import
 MNIST
 """
 
-from .carlini_mnist_model import *
+from .mnist_model import *

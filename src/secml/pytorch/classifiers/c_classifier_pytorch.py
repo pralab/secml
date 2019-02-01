@@ -49,7 +49,7 @@ class CClassifierPyTorch(CClassifier):
         Identifier of the loss function to use for training.
         Default Cross-Entropy loss (cross-entropy).
     epochs : int, optional
-        Number of epochs. Default 100.
+        Maximum number of epochs of the training process. Default 100.
     gamma : float, optional
         Multiplicative factor of learning rate decay. Default: 0.1.
     lr_schedule : list, optional
@@ -131,12 +131,7 @@ class CClassifierPyTorch(CClassifier):
         self._acc = 0  # epoch accuracy FIXME: ON TRAINING SET
         self._best_acc = 0  # best accuracy FIXME: ON TRAINING SET
 
-        # Random seed
-        if random_state is not None:
-            torch.manual_seed(random_state)
-            if use_cuda:
-                torch.cuda.manual_seed_all(random_state)
-                torch.backends.cudnn.deterministic = True
+        self._random_state = random_state
 
         # PyTorch NeuralNetwork model
         self._model = None
@@ -206,12 +201,12 @@ class CClassifierPyTorch(CClassifier):
 
     @property
     def epochs(self):
-        """Number of epochs."""
+        """Maximum number of epochs of the training process."""
         return self._epochs
 
     @epochs.setter
     def epochs(self, value):
-        """Number of epochs."""
+        """Maximum number of epochs of the training process."""
         self._epochs = int(value)
 
     @property
@@ -298,7 +293,7 @@ class CClassifierPyTorch(CClassifier):
         with torch.no_grad():
             for m in self._model.modules():
                 if hasattr(m, 'weight') and m.weight is not None:
-                    w = w.append(CArray(m.weight.data.cpu().numpy()))
+                    w = w.append(CArray(m.weight.data.cpu().numpy().ravel()))
         return w
 
     @property
@@ -308,7 +303,7 @@ class CClassifierPyTorch(CClassifier):
         with torch.no_grad():
             for m in self._model.modules():
                 if hasattr(m, 'bias') and m.bias is not None:
-                    b = b.append(CArray(m.bias.data.cpu().numpy()))
+                    b = b.append(CArray(m.bias.data.cpu().numpy().ravel()))
         return b
 
     def __deepcopy__(self, memo, *args, **kwargs):
@@ -339,15 +334,34 @@ class CClassifierPyTorch(CClassifier):
         new_obj.init_optimizer()
         new_obj.load_state(state_dict)
 
+        # Restoring original CClassifier parameters
+        # that may had been updated by `load_state`
+        # Ugly, but required for managing the train/pretrain cases
+        new_obj._classes = self.classes
+        new_obj._n_features = self.n_features
+
+        # Decrementing the start_epoch counter as the temporary
+        # save/load of the state has incremented it
+        new_obj._start_epoch -= 1
+
         return new_obj
 
     def init_model(self):
         """Initialize the PyTorch Neural Network model."""
+        # Setting random seed
+        if self._random_state is not None:
+            torch.manual_seed(self._random_state)
+            if use_cuda:
+                torch.cuda.manual_seed_all(self._random_state)
+                torch.backends.cudnn.deterministic = True
+
         # Call the specific model initialization method passing params
         self._model = self._model_base(**self._model_params)
+
         # Make sure that model is a proper PyTorch module
         if not isinstance(self._model, torch.nn.Module):
             raise TypeError("`model` must be a `torch.nn.Module`.")
+
         # Ensure we are using cuda if available
         if use_cuda is True:
             self._model = self._model.cuda()
@@ -469,7 +483,7 @@ class CClassifierPyTorch(CClassifier):
         self._optimizer.load_state_dict(state_dict['optimizer'])
 
         # Restore the count of epochs
-        self._start_epoch = state_dict['epoch'] + 1
+        self._start_epoch = state_dict['epoch']
 
         # Restore accuracy data if available
         self._acc = state_dict.get('acc', 0)
@@ -520,13 +534,13 @@ class CClassifierPyTorch(CClassifier):
         state_dict['optimizer']['defaults'] = self._optimizer.defaults
         state_dict['optimizer']['regularize_bias'] = self.regularize_bias
         state_dict['state_dict'] = self._model.state_dict()
-        state_dict['epoch'] = self.start_epoch
+        state_dict['epoch'] = self.start_epoch + 1
         state_dict['acc'] = self.acc
         state_dict['best_acc'] = self.best_acc
         state_dict['input_shape'] = self.input_shape
         return state_dict
 
-    def fit(self, dataset, warm_start=False, n_jobs=1):
+    def fit(self, dataset, warm_start=False, store_best_params=True, n_jobs=1):
         """Trains the classifier.
 
         If specified, train_transform is applied to data.
@@ -539,6 +553,10 @@ class CClassifierPyTorch(CClassifier):
         warm_start : bool, optional
             If False (default) model will be reinitialized before training.
             Otherwise the state of the model will be preserved.
+        store_best_params : bool, optional
+            If True (default) the best parameters by classification accuracy
+             found during the training process are stored.
+            Otherwise, the parameters from the last epoch are stored.
         n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
@@ -574,12 +592,15 @@ class CClassifierPyTorch(CClassifier):
             self.init_model()
             # Reinitialize count of epochs
             self._start_epoch = 0
+            # Reinitialize accuracy and best accuracy
+            self._best_acc = 0
+            self._acc = 0
             # Reinitialize the optimizer as we are starting clean
             self.init_optimizer()
 
-        return self._fit(dataset, n_jobs=n_jobs)
+        return self._fit(dataset, store_best_params, n_jobs=n_jobs)
 
-    def _fit(self, dataset, n_jobs=1):
+    def _fit(self, dataset, store_best_params=True, n_jobs=1):
         """Trains the classifier.
 
         If specified, train_transform is applied to data.
@@ -589,6 +610,10 @@ class CClassifierPyTorch(CClassifier):
         dataset : CDataset
             Training set. Must be a :class:`.CDataset` instance with
             patterns data and corresponding labels.
+        store_best_params : bool, optional
+            If True (default) the best parameters by classification accuracy
+             found during the training process are stored.
+            Otherwise, the parameters from the last epoch are stored.
         n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
@@ -601,9 +626,14 @@ class CClassifierPyTorch(CClassifier):
         Warnings
         --------
         preprocess is not applied to data before training. This behaviour
-         will change in the feature.
+         will change in the future.
 
         """
+        if self.start_epoch >= self.epochs:
+            self.logger.warning("Maximum number of epochs reached, "
+                                "no training will be performed.")
+            return self
+
         # Binarize labels using a OVA scheme
         ova_labels = dataset.get_labels_asbinary()
 
@@ -685,16 +715,23 @@ class CClassifierPyTorch(CClassifier):
             # Average accuracy after epoch FIXME: ON TRAINING SET
             self._acc = acc.avg
 
-            # Store the current epoch as best one if accuracy is higher
-            # If equal accuracy, the last epoch should have better loss
-            if self.acc >= self.best_acc:
+            # If the best parameters should be stored, store the current epoch
+            # as best one only if accuracy is higher or at least same
+            # (as the loss should be better anyway for latest epoch)
+            if store_best_params is True and self.acc < self.best_acc:
+                continue  # Otherwise do not store the current epoch
+            else:  # Better accuracy or we should store the latest epoch anyway
                 self._best_acc = self.acc
                 best_epoch = self.start_epoch
                 best_state_dict = deepcopy(self.state_dict())
 
-        self.logger.info(
-            "Best accuracy {:} obtained on epoch {:}".format(
-                self.best_acc, best_epoch + 1))
+        if store_best_params is True:
+            self.logger.info(
+                "Best accuracy {:} obtained on epoch {:}".format(
+                    self.best_acc, best_epoch + 1))
+
+        # Restoring the final state to use
+        # (could be the best by accuracy score or the latest)
         self.load_state(best_state_dict)
 
         return self

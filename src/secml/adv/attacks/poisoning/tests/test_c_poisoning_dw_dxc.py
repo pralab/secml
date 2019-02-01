@@ -13,6 +13,7 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
     NB: does not works for classifier learned in the dual space.
 
     (d_w w.r.t d_xc and d_b w.r.t d_xc)
+
     """
 
     def clf_list(self):

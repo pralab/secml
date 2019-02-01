@@ -36,6 +36,8 @@ class TestCArrayIndexing(CArrayTestCases.TestCArray):
                     else:
                         self.assertEqual(target_list[selector_idx].shape,
                                          selection.shape)
+                    self.assertEqual(
+                        target_list[selector_idx].dtype, selection.dtype)
                 else:
                     self.assertIsInstance(
                         selection, type(target_list[selector_idx]))
@@ -110,8 +112,9 @@ class TestCArrayIndexing(CArrayTestCases.TestCArray):
             selectors_row = [0, np.ravel(0)[0], [0], CArray([0]),
                              -1, np.ravel(-1)[0], [-1], CArray([-1]),
                              True, np.ravel(True)[0], [True], CArray([True])]
-            selectors_col = [0, np.ravel(0)[0], [2, 2], CArray([2, 2]),
-                             slice(1, 3), [False, True, True], CArray([False, True, True])]
+            selectors_col = [[], 0, np.ravel(0)[0], [2, 2], CArray([2, 2]),
+                             slice(1, 3), [False, True, True],
+                             CArray([False, True, True])]
             selectors = selectors_a + [(x, y) for x in selectors_row for y in selectors_col]
 
             targets_a = [CArray([6, 4, 0])]
@@ -119,9 +122,11 @@ class TestCArrayIndexing(CArrayTestCases.TestCArray):
             targets = 4 * targets_a + 2 * targets_b
             # Output always flat for flat arrays
             if array.ndim == 1:
-                targets += 12 * (2 * [CArray([4])] + 2 * [CArray([6, 6])] + 3 * [CArray([0, 6])])
+                targets += 12 * ([CArray([], dtype=int)] + 2 * [CArray([4])] +
+                                 2 * [CArray([6, 6])] + 3 * [CArray([0, 6])])
             else:
-                targets += 12 * (2 * [CArray([[4]])] + 2 * [CArray([[6, 6]])] + 3 * [CArray([[0, 6]])])
+                targets += 12 * ([CArray([[]], dtype=int)] + 2 * [CArray([[4]])] +
+                                 2 * [CArray([[6, 6]])] + 3 * [CArray([[0, 6]])])
 
             test_selectors(array, selectors, targets)
 
@@ -131,13 +136,15 @@ class TestCArrayIndexing(CArrayTestCases.TestCArray):
 
             self.logger.info("Testing getters for vector: \n" + str(array))
 
-            selectors = [0, np.ravel(0)[0], [2, 2], CArray([2, 2]), slice(1, 3), slice(None)]
+            selectors = [[], 0, np.ravel(0)[0], [2, 2], CArray([2, 2]), slice(1, 3), slice(None)]
 
             # Output always flat for flat arrays
             if array.ndim == 1:
-                targets = 2 * [CArray([4])] + 2 * [CArray([6, 6])] + [CArray([0, 6])] + [CArray([4, 0, 6])]
+                targets = [CArray([], dtype=int)] + 2 * [CArray([4])] + \
+                          2 * [CArray([6, 6])] + [CArray([0, 6])] + [CArray([4, 0, 6])]
             else:
-                targets = 2 * [CArray([[4]])] + 2 * [CArray([[6, 6]])] + [CArray([[0, 6]])] + [CArray([[4, 0, 6]])]
+                targets = [CArray([[]], dtype=int)] + 2 * [CArray([[4]])] + \
+                          2 * [CArray([[6, 6]])] + [CArray([[0, 6]])] + [CArray([[4, 0, 6]])]
 
             test_selectors(array, selectors, targets)
 
@@ -147,14 +154,17 @@ class TestCArrayIndexing(CArrayTestCases.TestCArray):
 
             self.logger.info("Testing getters for array: \n" + str(array))
 
-            selectors = [0, np.ravel(0)[0], True, [True], CArray([True]), slice(0, 1), slice(None), CArray([0, 0])]
+            selectors = [[], 0, np.ravel(0)[0], True, [True], CArray([True]),
+                         slice(0, 1), slice(None), CArray([0, 0])]
 
             # CArray([True]) is considered a boolean mask in this case,
             # resulting selection is always flat
             if array.ndim == 1:
-                targets = 4 * [CArray([4])] + [CArray([4])] + 2 * [CArray([4])] + [CArray([4, 4])]
+                targets = [CArray([], dtype=int)] + 4 * [CArray([4])] + \
+                          [CArray([4])] + 2 * [CArray([4])] + [CArray([4, 4])]
             else:
-                targets = 4 * [CArray([[4]])] + [CArray([4])] + 2 * [CArray([[4]])] +  [CArray([[4, 4]])]
+                targets = [CArray([[]], dtype=int)] + 4 * [CArray([[4]])] + \
+                          [CArray([4])] + 2 * [CArray([[4]])] + [CArray([[4, 4]])]
 
             test_selectors(array, selectors, targets)
 
@@ -244,12 +254,12 @@ class TestCArrayIndexing(CArrayTestCases.TestCArray):
             selectors_row = [0, np.ravel(0)[0], [0], CArray([0]),
                              -1, np.ravel(-1)[0], [-1], CArray([-1]),
                              True, np.ravel(True)[0], [True], CArray([True])]
-            selectors_col = [0, np.ravel(0)[0], [1, 2], CArray([1, 2]),
+            selectors_col = [[], 0, np.ravel(0)[0], [1, 2], CArray([1, 2]),
                              slice(1, 3), [False, True, True], CArray([False, True, True])]
             selectors = selectors_a + [(x, y) for x in selectors_row for y in selectors_col]
 
             assignments_a = 2 * [CArray([10, 20])] + 2 * [CArray([[10, 20]])] + 2 * [CArray([10, 20])]
-            assignments_b = [10, 10] + 2 * [CArray([[10, 20]])] + 3 * [CArray([10, 20])]
+            assignments_b = [0] + [10, 10] + 2 * [CArray([[10, 20]])] + 3 * [CArray([10, 20])]
             assignments = assignments_a + 12 * assignments_b
 
             targets_a = CArray([20, 0, 10])
@@ -258,10 +268,12 @@ class TestCArrayIndexing(CArrayTestCases.TestCArray):
             targets_d = CArray([4, 10, 20])
             # Output always flat for flat arrays
             if array.ndim == 1:
-                targets = 4 * [targets_a] + 2 * [targets_b] + 12 * (2 * [targets_c] + 5 * [targets_d])
+                targets = 4 * [targets_a] + 2 * [targets_b] + \
+                          12 * ([CArray([4, 0, 6])] + 2 * [targets_c] + 5 * [targets_d])
             else:
                 targets = 4 * [targets_a.atleast_2d()] + 2 * [targets_b.atleast_2d()] + \
-                            12 * (2 * [targets_c.atleast_2d()] + 5 * [targets_d.atleast_2d()])
+                            12 * ([CArray([[4, 0, 6]])] +
+                                  2 * [targets_c.atleast_2d()] + 5 * [targets_d.atleast_2d()])
 
             test_selectors(array, selectors, assignments, targets)
 
@@ -271,9 +283,9 @@ class TestCArrayIndexing(CArrayTestCases.TestCArray):
 
             self.logger.info("Testing setters for vector: \n" + str(array))
 
-            selectors = [0, np.ravel(0)[0], [1, 2], CArray([1, 2]), slice(1, 3), slice(None)]
+            selectors = [[], 0, np.ravel(0)[0], [1, 2], CArray([1, 2]), slice(1, 3), slice(None)]
 
-            assignments = [10, 10] + 2 * [CArray([[10, 20]])] + \
+            assignments = [0] + [10, 10] + 2 * [CArray([[10, 20]])] + \
                           [CArray([[10, 20]], tosparse=True)] + [CArray([[10, 20, 30]])]
 
             targets_a = CArray([10, 0, 6])
@@ -281,9 +293,10 @@ class TestCArrayIndexing(CArrayTestCases.TestCArray):
             targets_c = CArray([10, 20, 30])
             # Output always flat for flat arrays
             if array.ndim == 1:
-                targets = 2 * [targets_a] + 3 * [targets_b] + [targets_c]
+                targets = [CArray([4, 0, 6])] + 2 * [targets_a] + 3 * [targets_b] + [targets_c]
             else:
-                targets = 2 * [targets_a.atleast_2d()] + 3 * [targets_b.atleast_2d()] + [targets_c.atleast_2d()]
+                targets = [CArray([[4, 0, 6]])] + 2 * [targets_a.atleast_2d()] + \
+                          3 * [targets_b.atleast_2d()] + [targets_c.atleast_2d()]
 
             test_selectors(array, selectors, assignments, targets)
 
@@ -293,16 +306,16 @@ class TestCArrayIndexing(CArrayTestCases.TestCArray):
 
             self.logger.info("Testing setters for array: \n" + str(array))
 
-            selectors = [0, np.ravel(0)[0], True, [True], CArray([True]), slice(0, 1), slice(None)]
+            selectors = [[], 0, np.ravel(0)[0], True, [True], CArray([True]), slice(0, 1), slice(None)]
 
-            assignments = 7 * [10]
+            assignments = 8 * [10]
 
             targets_a = CArray([10])
             # Output always flat for flat arrays
             if array.ndim == 1:
-                targets = 7 * [targets_a]
+                targets = [CArray([4])] + 7 * [targets_a]
             else:
-                targets = 7 * [targets_a.atleast_2d()]
+                targets = [CArray([[4]])] + 7 * [targets_a.atleast_2d()]
 
             test_selectors(array, selectors, assignments, targets)
 
