@@ -38,7 +38,8 @@ class TestCDataLoaderSvmLight(CUnitTest):
         try:
             fm.remove_file(test_file)
         except (OSError, IOError) as e:
-            self.logger.info(e.message)
+            if e.errno != 2:
+                raise e
 
         self.logger.info("Patterns saved:\n{:}".format(self.patterns))
         self.logger.info("Labels saved:\n{:}".format(self.labels))
@@ -78,7 +79,8 @@ class TestCDataLoaderSvmLight(CUnitTest):
         try:
             fm.remove_file(test_file)
         except (OSError, IOError) as e:
-            self.logger.info(e.message)
+            if e.errno != 2:
+                raise e
 
 
 if __name__ == '__main__':
