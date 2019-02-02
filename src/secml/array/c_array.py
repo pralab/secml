@@ -5301,3 +5301,21 @@ class CArray(_CArrayInterface):
         """
         import itertools
         return CArray(list(itertools.chain.from_iterable(iterables_list)))
+
+    def sha1(self):
+        """Calculate the sha1 hash of the array.
+
+        DENSE FORMAT ONLY
+
+        Returns
+        -------
+        hash_str : the array hash
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([0,1,3]).sha1()
+
+        """
+        return self._data.sha1()
