@@ -17,13 +17,14 @@ class TestCClassifierRidge(CUnitTest):
         # generate synthetic data
         self.dataset = CDLRandom(n_features=1000, n_redundant=200,
                                  n_informative=250,
-                                 n_clusters_per_class=2).load()
+                                 n_clusters_per_class=2,
+                                 random_state=0).load()
 
         self.dataset.X = CNormalizerMinMax().fit_normalize(self.dataset.X)
 
         kernel_types = (None, CKernelLinear, CKernelRBF, CKernelPoly)
         self.ridges = [CClassifierRidge(
-            alpha=1e-6, kernel=kernel() if kernel is not None else None)
+            alpha=1, kernel=kernel() if kernel is not None else None)
                 for kernel in kernel_types]
         self.logger.info(
             "Testing RIDGE with kernel unctions: %s", str(kernel_types))
@@ -57,7 +58,7 @@ class TestCClassifierRidge(CUnitTest):
 
         # generate 2D synthetic data
         dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=2,
-                            n_clusters_per_class=1).load()
+                            n_clusters_per_class=1, random_state=0).load()
         dataset.X = CNormalizerMinMax().fit_normalize(dataset.X)
 
         self.ridges[0].fit(dataset)
