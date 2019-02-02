@@ -40,7 +40,8 @@ class CReducer(CCreator):
             input data.
 
         """
-        return NotImplementedError("this is an abstract method. Must be overriden in subclass.")
+        raise NotImplementedError(
+            "this is an abstract method. Must be overridden in subclass.")
 
     @abstractmethod
     def transform(self, data):
@@ -58,7 +59,8 @@ class CReducer(CCreator):
             Input data transformed using reduction algorithm.
 
         """
-        return NotImplementedError("this is an abstract method. Must be overriden in subclass.")
+        raise NotImplementedError(
+            "this is an abstract method. Must be overridden in subclass.")
 
     def fit_transform(self, data, y=None):
         """Fit reduction algorithm using data and then transform data.
@@ -112,4 +114,5 @@ class CReducer(CCreator):
         be implemented only if applicable.
 
         """
-        return NotImplementedError("this is a placeholder method. Override if necessary.")
+        raise NotImplementedError(
+            "this is a placeholder method. Override if necessary.")
