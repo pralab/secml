@@ -6,7 +6,9 @@ from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
 from secml.ml.classifiers.gradients.tests.utils import CClassifierGradientTest
 
-
+# fixme: add the test for the other gradient. as not all the classifier will
+#  be implemented we can check if the CCgradient class have that gradient to
+#  understand if we should or not execute that test function
 class CClassifierGradientTestCases(object):
     """Wrapper for TestCClassifierGradient to make unittest.main() work correctly."""
 
