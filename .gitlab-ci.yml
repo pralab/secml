@@ -105,6 +105,8 @@ package:
       - requirements.txt
       - setup.py
       - tox.ini
+  except:
+    - schedules
 
 #install:pypi:
 #  extends: .install
