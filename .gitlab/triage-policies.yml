@@ -1,0 +1,70 @@
+host_url: https://pragit.diee.unica.it
+resource_rules:
+  issues:
+    rules:
+      - name: UnlabelledIssues
+        conditions:
+          date:
+            attribute: updated_at
+            condition: older_than
+            interval_type: days
+            interval: 5
+          state: opened
+          labels:
+            - No Label
+        limits:
+          most_recent: 50
+        actions:
+          mention:
+            - m.melis
+          comment: |
+            {{author}} This issue is unlabelled after 5 days. It needs attention. Please take care of this before the end of #{2.days.from_now.strftime('%Y-%m-%d')}
+          summarize:
+            title: |
+              #{resource[:type].capitalize} require labels
+            item: |
+              - [ ] [{{title}}]({{web_url}}) {{labels}}
+            redact_confidential_resources: false
+            summary: |
+              The following issues require labels:
+
+              {{items}}
+
+              Please take care of them before the end of #{7.days.from_now.strftime('%Y-%m-%d')}
+      - name: RemovePriorityAfterClosing
+        conditions:
+          date:
+            attribute: updated_at
+            condition: older_than
+            interval_type: days
+            interval: 1
+          state: closed
+          labels:
+            - priority-{medium, high}
+        limits:
+          oldest: 50
+        actions:
+          remove_labels:
+            - priority-medium
+            - priority-high
+          comment: Issue is closed, removing prioritization labels.
+
+  merge_requests:
+    rules:
+      - name: RemovePriorityAfterClosing
+        conditions:
+          date:
+            attribute: updated_at
+            condition: older_than
+            interval_type: days
+            interval: 1
+          state: closed
+          labels:
+            - priority-{medium, high}
+        limits:
+          oldest: 50
+        actions:
+          remove_labels:
+            - priority-medium
+            - priority-high
+          comment: Merge request is closed, removing prioritization labels.
