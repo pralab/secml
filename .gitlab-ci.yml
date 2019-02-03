@@ -167,25 +167,24 @@ install:unzip-extras:
 #  script:
 #    - echo "DEPLOY"
 
-# triage:run:
-#  stage: triage
-#  image: ruby:2.4
-#  cache: {}
-#  script:
-#    - gem install gitlab-triage
-#    - export SSL_CERT_FILE=$CI_SERVER_TLS_CA_FILE
-#    - gitlab-triage --debug --host-url $CI_PROJECT_DOMAIN --token $TRIAGE_API_TOKEN --project-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
-#  only:
-#    - schedules
+.triage:
+  image: ruby:2.4
+  cache: {}
+  before_script:
+    - gem install gitlab-triage
+    - export SSL_CERT_FILE=$CI_SERVER_TLS_CA_FILE
+
+triage:run:
+  stage: triage
+  extends: .triage
+  script:
+    - gitlab-triage --debug --host-url $CI_PROJECT_DOMAIN --token $TRIAGE_API_TOKEN --project-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
+  only:
+    - schedules
 
 triage:dry-run:
   stage: triage
-  image: ruby:2.4
-  cache: {}
+  extends: .triage
   script:
-    - gem install gitlab-triage
-    - export SSL_CERT_FILE=$CI_SERVER_TLS_CA_FILE
     - gitlab-triage --dry-run --debug --host-url $CI_PROJECT_DOMAIN --token $TRIAGE_API_TOKEN --project-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
-  only:
-    - schedules
-#  when: manual
+  when: manual
