@@ -186,5 +186,7 @@ triage:dry-run:
   stage: triage
   extends: .triage
   script:
-    - gitlab-triage --dry-run --debug --host-url $CI_PROJECT_DOMAIN --token $TRIAGE_API_TOKEN --project-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
+    - gitlab-triage --dry-run --debug --host-url $CI_PROJECT_DOMAIN --token $TRIAGE_API_TOKEN --project-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies-test.yml
+  only:
+    - schedules
   when: manual
