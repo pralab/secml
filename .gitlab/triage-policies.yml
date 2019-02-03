@@ -47,7 +47,6 @@ resource_rules:
           remove_labels:
             - priority-medium
             - priority-high
-          comment: Issue is closed, removing prioritization labels.
 
   merge_requests:
     rules:
@@ -67,4 +66,3 @@ resource_rules:
           remove_labels:
             - priority-medium
             - priority-high
-          comment: Merge request is closed, removing prioritization labels.
