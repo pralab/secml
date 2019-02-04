@@ -20,6 +20,14 @@ class CClassifierGradientLinear(CClassifierGradient):
     def _C(self, clf):
         raise NotImplementedError()
 
+    # todo: remove and use directly the classifier discriminant function
+    # nb: we will have to reshape it
+    def _s(self, x, w, b):
+        """
+        Classifier score
+        """
+        return x.dot(w) + b
+
     def fd_w(self, x):
         """
         Derivative of the discriminant function w.r.t. the classifier

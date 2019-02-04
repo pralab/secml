@@ -20,12 +20,6 @@ class CClassifierGradientLogisticRegression(CClassifierGradientLinear):
         self._loss = CLossLogistic()
         self._reg = CRegularizerL2()
 
-    def _s(self, x, w, b):
-        """
-        Classifier score
-        """
-        return x.dot(w) + b
-
     def _sigm(self, y, s):
         """
         Sigmoid function
@@ -45,6 +39,9 @@ class CClassifierGradientLogisticRegression(CClassifierGradientLinear):
         w = CArray(clf.w.ravel()).T  # column vector
         b = clf.b
         C = clf.C
+
+        # handle normalizer, if present
+        x = x if clf.preprocess is None else clf.preprocess.normalize(x)
 
         x = x.atleast_2d()
         n = x.shape[0]
