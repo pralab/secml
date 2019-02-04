@@ -41,9 +41,32 @@ class CClassifierGradientSVM(CClassifierGradient):
 
         return H
 
-    def fd_params(self, x, y, clf):
-        raise NotImplementedError()
+    def fd_params(self, x, clf):
+        """
+        Derivative of the discriminant function w.r.t. the classifier
+        parameters
+        """
+        xs, sv_idx = self._xs()  # these points are already normalized
+
+        if xs is None:
+            self.logger.debug("Warning: xs is empty "
+                              "(all points are error vectors).")
+            return None
+
+        x = x if clf.preprocess is None else clf.preprocess.normalize(x)
+
+        s = xs.shape[0]
+        k = x.shape[0]
+
+        Kks_ext = CArray.ones(shape=(k, s + 1))
+        Kks_ext[:, :s] = clf.kernel.k(x, xs)
+        return Kks_ext
+
+    def fd_x(self, x=None, y=1):
+        """
+        Derivative of the discriminant function w.r.t. an input sample
+        """
+        pass
 
     def L_tot_d_params(self, x, y, clf):
         raise NotImplementedError()
-
