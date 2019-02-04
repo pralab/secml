@@ -162,4 +162,4 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
 
         # propagating gradient back to input space
         return gt if clf.preprocess is None else \
-            clf.normalizer.gradient(xc0, gt)
+            clf.preprocess.gradient(xc0, gt)
