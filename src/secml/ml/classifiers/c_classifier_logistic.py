@@ -6,10 +6,13 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from sklearn.linear_model import LogisticRegression
+
 from secml.array import CArray
 from secml.ml.classifiers import CClassifierLinear
-from sklearn.linear_model import LogisticRegression
 from secml.ml.classifiers.loss import CLoss
+from secml.ml.classifiers.gradients import \
+    CClassifierGradientLogisticRegression
 
 
 class CClassifierLogistic(CClassifierLinear):
@@ -33,6 +36,12 @@ class CClassifierLogistic(CClassifierLinear):
         self._init_w = None
         self._init_b = None
 
+        self._gradients = CClassifierGradientLogisticRegression()
+
+    @property
+    def gradients(self):
+        return self._gradients
+
     @property
     def max_iter(self):
         return self._max_iter
@@ -51,7 +60,8 @@ class CClassifierLogistic(CClassifierLinear):
 
     def _clf_init(self):
         self._sklearn_clf = LogisticRegression(
-            penalty='l2', dual=False, tol=0.0001, C=self._C, fit_intercept=True,
+            penalty='l2', dual=False, tol=0.0001, C=self._C,
+            fit_intercept=True,
             intercept_scaling=1.0, class_weight=None, solver='liblinear',
             random_state=self._random_seed,
             max_iter=self._max_iter, multi_class='ovr',
@@ -120,7 +130,8 @@ class CClassifierLogistic(CClassifierLinear):
         This function fix the training parameters initialization.
         :return:
         """
-        self._init_w = CArray.rand(shape=(ds.num_features,), random_state=self._random_seed)
+        self._init_w = CArray.rand(shape=(ds.num_features,),
+                                   random_state=self._random_seed)
         self._init_b = CArray.rand(shape=(1,), random_state=self._random_seed)
 
     def _fit(self, ds):
