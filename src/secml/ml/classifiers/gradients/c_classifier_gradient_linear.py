@@ -75,7 +75,7 @@ class CClassifierGradientLinear(CClassifierGradient):
 
         x = x.atleast_2d()
 
-        s = clf.discriminant_function(x)
+        s = clf.decision_function(x)
 
         fd_w = self.fd_w(x)  # d * n_samples
         fd_b = self.fd_b(x)  # 1 * n_samples
