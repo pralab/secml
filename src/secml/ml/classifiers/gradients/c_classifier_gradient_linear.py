@@ -40,7 +40,7 @@ class CClassifierGradientLinear(CClassifierGradient):
         parameters
         """
         if clf.preprocess is not None:
-            x = clf.normalizer.normalize(x)
+            x = clf.preprocess.normalize(x)
 
         fd_w = self.fd_w(x)
         fd_b = self.fd_b(x)
