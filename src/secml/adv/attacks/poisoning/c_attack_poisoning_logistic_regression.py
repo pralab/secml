@@ -120,6 +120,8 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
             raise ValueError("Error: The classifier does not have neither C "
                              "nor alpha")
 
+        H = clf.gradients.hessian(tr.X, tr.Y, clf)
+
         # change vector dimensions to match the mathematical formulation...
 
         yc = convert_binary_labels(yc)
@@ -129,49 +131,23 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         b = clf.b
         grad_loss_fk = CArray(loss_grad.ravel()).T  # column vector
 
-        # training points
-        x = tr.X.atleast_2d()
-        y = tr.Y.ravel()
-        y = convert_binary_labels(y)
-        y = CArray(y).astype(float).T  # column vector
-        n = tr.num_samples
-
         # validation points
         xk = self.ts.X.atleast_2d()
         k = self.ts.num_samples
 
         # handle normalizer, if present
-        x = x if clf.preprocess is None else clf.preprocess.normalize(x)
         xk = xk if clf.preprocess is None else clf.preprocess.normalize(xk)
         xc = xc if clf.preprocess is None else clf.preprocess.normalize(xc)
-
-        s = self._s(x, w, b)
-        sigm = self._sigm(y, s)
-        z = sigm * (1 - sigm)
 
         s_c = self._s(xc, w, b)
         sigm_c = self._sigm(yc, s_c)
         z_c = sigm_c * (1 - sigm_c)
 
-        # compute the derivatives of the attacker loss function:
-        diag = z * CArray.eye(n_rows=n, n_cols=n)
-        dww = C * (x.T.dot(diag).dot(x)) + CArray.eye(d, d)  # matrix d*d
-
-        # first derivative wrt b derived w.r.t. w
-        dbw = C * ((z * x).sum(axis=0)).T  # column vector
-        dbb = C * (z.sum(axis=None))  # scalar
         dbx_c = z_c * w  # column vector
         dwx_c = ((yc * (-1 + sigm_c)) * CArray.eye(d, d)) + z_c * (
             w.dot(xc))  # matrix d*d
 
         G = C * (dwx_c.append(dbx_c, axis=1))
-
-        H = CArray.zeros((d + 1, d + 1))
-        H[:d, :d] = dww
-        H[:-1, d] = dbw
-        H[d, :-1] = dbw.T
-        H[-1, -1] = dbb
-        H += 1e-9 * CArray.eye(d + 1)  # to improve stability
 
         # compute the derivatives of the classifier discriminant function
         fdw = xk.T
