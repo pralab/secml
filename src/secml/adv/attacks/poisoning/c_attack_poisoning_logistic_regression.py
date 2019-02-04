@@ -133,10 +133,11 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
 
         # validation points
         xk = self.ts.X.atleast_2d()
+        yk = self.ts.Y
+
         k = self.ts.num_samples
 
         # handle normalizer, if present
-        xk = xk if clf.preprocess is None else clf.preprocess.normalize(xk)
         xc = xc if clf.preprocess is None else clf.preprocess.normalize(xc)
 
         s_c = self._s(xc, w, b)
@@ -149,11 +150,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
 
         G = C * (dwx_c.append(dbx_c, axis=1))
 
-        # compute the derivatives of the classifier discriminant function
-        fdw = xk.T
-        fdb = CArray.ones((1, k))
-        fd_params = fdw.append(fdb, axis=0)
-
+        fd_params = self.classifier.gradients.fd_params(xk, clf)
         grad_loss_params = fd_params.dot(grad_loss_fk)
 
         gt = self._compute_grad_inv(G, H, grad_loss_params)
