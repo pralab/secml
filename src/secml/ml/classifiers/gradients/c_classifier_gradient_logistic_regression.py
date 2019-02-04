@@ -36,8 +36,6 @@ class CClassifierGradientLogisticRegression(CClassifierGradientLinear):
         y = convert_binary_labels(y)
         y = CArray(y).astype(float).T  # column vector
 
-        w = CArray(clf.w.ravel()).T  # column vector
-        b = clf.b
         C = clf.C
 
         x = x.atleast_2d()
