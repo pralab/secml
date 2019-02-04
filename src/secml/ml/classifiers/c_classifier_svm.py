@@ -12,6 +12,7 @@ from secml.array import CArray
 from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.ml.kernel import CKernel
+from secml.ml.classifiers.gradients import CClassifierGradientSVM
 
 
 class CClassifierSVM(CClassifierLinear):
@@ -84,6 +85,13 @@ class CClassifierSVM(CClassifierLinear):
         # slot for the computed kernel function (to speed up multiclass)
         # DO NOT CLEAR
         self._k = None
+
+        self._gradients = CClassifierGradientSVM()
+
+    @property
+    def gradients(self):
+        return self._gradients
+
 
     def __clear(self):
         """Reset the object."""
