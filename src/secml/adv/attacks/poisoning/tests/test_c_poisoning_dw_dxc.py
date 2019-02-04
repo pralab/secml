@@ -76,10 +76,11 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
 
                 fig.tight_layout()
                 fig.show()
-                exp_idx = clf_idx
+                exp_idx = "2d_grad_pois_"
+                exp_idx += clf_idx
                 if normalizer:
                     exp_idx += "_norm"
-                fig.savefig(exp_idx + "_2d_grad_pois", file_format='pdf')
+                fig.savefig(exp_idx, file_format='pdf')
 
     def _single_param_grad_check(self, xc, f_param, df_param, param_name):
         """

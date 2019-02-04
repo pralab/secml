@@ -65,10 +65,11 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
 
                 fig.tight_layout()
                 fig.show()
-                exp_idx = clf_idx
+                exp_idx = "2d_pois_"
+                exp_idx += clf_idx
                 if normalizer:
                     exp_idx += "_norm"
-                fig.savefig(exp_idx +"_2d_pois", file_format='pdf')
+                fig.savefig(exp_idx, file_format='pdf')
 
     def test_poisoning_point_fobj_improvement(self):
         """
