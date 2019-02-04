@@ -308,7 +308,8 @@ class CPlotRoc(CPlot):
             True if 1 - tpr (False Negative Rates) should be plotted
             on y axis. Default False.
         style : str or None, optional
-            Style of the roc plot.
+            Style of the roc plot. If a string, must follow the
+            matplotlib convention: '[color][marker][line]'.
         plot_std : bool (default False)
             If True, standard deviation of True Positive Rates will be plotted.
         logx : bool, optional
@@ -345,7 +346,7 @@ class CPlotRoc(CPlot):
             if roc.has_std_dev is False:
                 raise ValueError("roc object has no standard deviation for data.")
             self.errorbar(roc.mean_fpr[mkrs_idx] * 100, mean_tpr[mkrs_idx] * 100,
-                          ecolor=styles[n_lines % len(styles)][0] if style is None else style,
+                          ecolor=styles[n_lines % len(styles)][0] if style is None else style[0],
                           fmt='None', yerr=roc.std_dev_tpr[mkrs_idx] * 100)
 
         if label is not None:

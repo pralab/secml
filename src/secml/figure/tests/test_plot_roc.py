@@ -190,7 +190,7 @@ class TestCRoc(CUnitTest):
         roc_fig.sp.xticklabels(['0', '20', '40', '60', '80', '100'])
 
         roc_fig.sp.plot_mean(
-            self.roc_wmean, plot_std=True, logx=False,
+            self.roc_wmean, plot_std=True, logx=False, style='go-',
             label='Mean ROC (area = %0.2f)' % (auc(fp.tondarray(),
                                                    tp.tondarray())))
 
