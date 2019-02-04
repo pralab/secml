@@ -161,5 +161,8 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         # gt = self._compute_grad_solve_iterative(G, H, grad_loss_params) #*
 
         # propagating gradient back to input space
-        return gt if clf.preprocess is None else \
-            clf.preprocess.gradient(xc0, gt)
+        return gt if clf.preprocess is None else gt.dot(clf.preprocess.gradient(
+            xc0)).ravel()
+        # fixme: change when the preprocessor gradient will take again a
+        #  w parameter
+        # clf.preprocess.gradient(xc0, gt)
