@@ -40,8 +40,8 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
                                  "a normalizer inside ".format(clf_idx))
             else:
                 if normalizer:
-                    self.logger.info("Test the {:} classifier when it do not  "
-                                     "has a normalizer inside ".format(
+                    self.logger.info("Test the {:} classifier when it does "
+                                     "not have a normalizer inside ".format(
                         clf_idx))
             self._objs_creation(clf_idx)
 
@@ -120,8 +120,8 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
                                  "a normalizer inside ".format(clf_idx))
             else:
                 if normalizer:
-                    self.logger.info("Test the {:} classifier when it do not  "
-                                     "has a normalizer inside ".format(
+                    self.logger.info("Test the {:} classifier when it does "
+                                     "not have a normalizer inside ".format(
                         clf_idx))
             self._objs_creation(clf_idx)
 

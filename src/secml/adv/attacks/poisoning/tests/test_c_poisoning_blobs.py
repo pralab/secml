@@ -28,10 +28,9 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
                 self.logger.info("Test the {:} classifier when it has "
                                  "a normalizer inside ".format(clf_idx))
             else:
-                if normalizer:
-                    self.logger.info("Test the {:} classifier when it do not  "
-                                     "has a normalizer inside ".format(
-                        clf_idx))
+                self.logger.info("Test the {:} classifier when it does "
+                                 "not have a normalizer inside ".format(
+                    clf_idx))
             self._objs_creation(clf_idx)
 
             pois_clf = self._clf_poisoning()[0]
@@ -91,8 +90,8 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
                                  "a normalizer inside ".format(clf_idx))
             else:
                 if normalizer:
-                    self.logger.info("Test the {:} classifier when it do not  "
-                                     "has a normalizer inside ".format(
+                    self.logger.info("Test the {:} classifier when it does "
+                                     "not have a normalizer inside ".format(
                         clf_idx))
             self._objs_creation(clf_idx)
 
