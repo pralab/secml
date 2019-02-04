@@ -60,7 +60,7 @@ class CPoisoningTestCases(object):
             self.grid_limits = [(self.lb - 0.1, self.ub + 0.1),
                                 (self.lb - 0.1, self.ub + 0.1)]
 
-        def _clf_creation(self, clf_idx):
+        def _clf_creation(self, clf_idx, normalizer=False):
 
             if clf_idx == 'logistic':
 
@@ -89,13 +89,17 @@ class CPoisoningTestCases(object):
             elif clf_idx == 'ridge':
 
                 self.classifier = CClassifierRidge(fit_intercept=True,
-                                                   alpha=1)  # 0.01
+                                                   alpha=1)
 
                 self.pois_class = CAttackPoisoningRidge
 
                 self.discr_f_level = 0
             else:
                 raise ValueError("classifier idx not managed!")
+
+            if normalizer:
+                normalizer = CNormalizerMinMax(-100, 100)
+                self.classifier.preprocess = normalizer
 
         def _pois_obj_creation(self):
 
@@ -129,7 +133,7 @@ class CPoisoningTestCases(object):
         def setUp(self):
 
             # Setting all defined parameter
-            self.plot = False
+            self.plot = True
             self.verbose = 2
             self._dataset_creation()
 
