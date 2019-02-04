@@ -64,6 +64,18 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
                 fig.savefig(clf_idx + "_2d_grad_pois", file_format='pdf')
 
     def _single_param_grad_check(self, xc, f_param, df_param, param_name):
+        """
+
+        Parameters
+        ----------
+        xc CArray
+            poisoning point
+        f_param function
+            the function that update the parameter value
+        df_param function
+            the function that compute the gradient value
+        param_name the parameter name
+        """
 
         # Compare analytical gradient with its numerical approximation
         check_grad_val = COptimizer(
@@ -79,8 +91,6 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
                             check_grad_val))
 
     def test_poisoning_grad_check(self):
-
-        self.logger.info("Create 2-dimensional plot")
 
         for clf_idx in self.clf_list():
             self.logger.info("Test the {:} classifier".format(clf_idx))
