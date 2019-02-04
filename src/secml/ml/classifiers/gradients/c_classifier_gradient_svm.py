@@ -40,7 +40,6 @@ class CClassifierGradientSVM(CClassifierGradient):
         H = CArray.ones(shape=(s + 1, s + 1))
         H[:s, :s] = svm.kernel.k(xs)
         H[-1, -1] = 0
-        H += 1e-9 * CArray.eye(s + 1)
 
         return H
 
