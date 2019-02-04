@@ -107,16 +107,16 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         xk = self._ts.X.atleast_2d()
         x = tr.X.atleast_2d()
 
+        H = clf.gradients.hessian(x, clf)
+
         grad_loss_fk = CArray(loss_grad.ravel()).T  # column vector
 
         # handle normalizer, if present
         xc = xc if clf.preprocess is None else clf.preprocess.normalize(xc)
         xc = xc.ravel().atleast_2d()
         xk = xk if clf.preprocess is None else clf.preprocess.normalize(xk)
-        x = x if clf.preprocess is None else clf.preprocess.normalize(x)
 
         # gt is the gradient in feature space
-        n = x.shape[0]  # num training samples
         k = xk.shape[0]  # num validation samples
         d = xk.shape[1]  # num features
 
@@ -125,16 +125,6 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         M += (clf.w.dot(xc.T) + clf.b - yc) * CArray.eye(d)
         db_xc = clf.w.T
         G = M.append(db_xc, axis=1)
-
-        # Hessian computation
-        H = CArray.zeros(shape=(d + 1, d + 1))
-        Sigma = (x.T).dot(x)
-        dww = Sigma + clf.alpha * self._g(d)
-        dwb = x.sum(axis=0)
-        H[:-1, :-1] = dww
-        H[-1, -1] = n  # + clf.alpha
-        H[-1, :-1] = dwb
-        H[:-1, -1] = dwb.T
 
         # add diagonal noise to the matrix that we are gong to invert
         H += 1e-9 * (CArray.eye(d + 1))
