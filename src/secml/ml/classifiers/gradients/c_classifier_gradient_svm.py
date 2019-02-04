@@ -1,5 +1,3 @@
-from abc import ABCMeta, abstractmethod, abstractproperty
-
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradient
 
