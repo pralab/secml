@@ -114,7 +114,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         # handle normalizer, if present
         xc = xc if clf.preprocess is None else clf.preprocess.normalize(xc)
         xc = xc.ravel().atleast_2d()
-        xk = xk if clf.preprocess is None else clf.preprocess.normalize(xk)
+        #xk = xk if clf.preprocess is None else clf.preprocess.normalize(xk)
 
         # gt is the gradient in feature space
         k = xk.shape[0]  # num validation samples
@@ -130,9 +130,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         H += 1e-9 * (CArray.eye(d + 1))
 
         # # compute the derivatives of the classifier discriminant function
-        fdw = xk.T
-        fdb = CArray.ones((1, k))
-        fd_params = fdw.append(fdb, axis=0)
+        fd_params = self.classifier.gradients.fd_params(xk, clf)
         grad_loss_params = fd_params.dot(grad_loss_fk)
 
         # import time
