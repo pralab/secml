@@ -43,7 +43,7 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
                     self.logger.info("Test the {:} classifier when it does "
                                      "not have a normalizer inside ".format(
                         clf_idx))
-            self._objs_creation(clf_idx)
+            self._objs_creation(clf_idx, normalizer=normalizer)
 
             pois_clf = self._clf_poisoning()[0]
 
@@ -124,7 +124,7 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
                     self.logger.info("Test the {:} classifier when it does "
                                      "not have a normalizer inside ".format(
                         clf_idx))
-            self._objs_creation(clf_idx)
+            self._objs_creation(clf_idx, normalizer=normalizer)
 
             pois_clf = self._clf_poisoning()[0]
 

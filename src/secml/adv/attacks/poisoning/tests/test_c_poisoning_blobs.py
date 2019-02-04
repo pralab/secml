@@ -31,7 +31,7 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
                 self.logger.info("Test the {:} classifier when it does "
                                  "not have a normalizer inside ".format(
                     clf_idx))
-            self._objs_creation(clf_idx)
+            self._objs_creation(clf_idx, normalizer)
 
             pois_clf = self._clf_poisoning()[0]
 
@@ -94,7 +94,7 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
                     self.logger.info("Test the {:} classifier when it does "
                                      "not have a normalizer inside ".format(
                         clf_idx))
-            self._objs_creation(clf_idx)
+            self._objs_creation(clf_idx, normalizer)
 
             x0 = self.xc  # starting poisoning point
             xc = self._clf_poisoning()[1]

@@ -29,7 +29,7 @@ class CPoisoningTestCases(object):
             self.n_classes = 2
 
             # Random state generator for the dataset
-            self.seed = 44
+            self.seed = 42
 
             if self.n_classes == 2:
                 loader = CDLRandomBlobs(
@@ -81,7 +81,8 @@ class CPoisoningTestCases(object):
 
             elif clf_idx == 'rbf-svm':
 
-                self.classifier = CClassifierSVM(kernel='rbf')
+                self.classifier = CClassifierSVM(kernel='rbf', C=10)
+                self.classifier.set('kernel.gamma', 1)
 
                 self.pois_class = CAttackPoisoningSVM
                 self.discr_f_level = 0
@@ -98,7 +99,7 @@ class CPoisoningTestCases(object):
                 raise ValueError("classifier idx not managed!")
 
             if normalizer:
-                normalizer = CNormalizerMinMax((-100, 100))
+                normalizer = CNormalizerMinMax((-10, 10))
                 self.classifier.preprocess = normalizer
 
         def _pois_obj_creation(self):
@@ -137,7 +138,7 @@ class CPoisoningTestCases(object):
             self.verbose = 2
             self._dataset_creation()
 
-        def _objs_creation(self, clf_idx, normalizer=True):
+        def _objs_creation(self, clf_idx, normalizer=False):
 
             self._clf_creation(clf_idx, normalizer)
 
@@ -307,7 +308,7 @@ class CPoisoningTestCases(object):
                                          return_decision_function=True)
             acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
             self.logger.info("Error on testing data: " + str(1 - acc))
-            self.assertGreater(acc, 0.7, "The trained classifier have an "
+            self.assertGreater(acc, 0.70, "The trained classifier have an "
                                          "accuracy that is too low to evaluate "
                                          "if the poisoning against this "
                                          "calssifier works")
