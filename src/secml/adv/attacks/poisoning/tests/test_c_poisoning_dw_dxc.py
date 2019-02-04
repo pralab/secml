@@ -80,7 +80,7 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
                 exp_idx += clf_idx
                 if normalizer:
                     exp_idx += "_norm"
-                fig.savefig(exp_idx, file_format='pdf')
+                fig.savefig(exp_idx+'.pdf', file_format='pdf')
 
     def _single_param_grad_check(self, xc, f_param, df_param, param_name):
         """

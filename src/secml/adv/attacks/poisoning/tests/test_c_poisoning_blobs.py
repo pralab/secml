@@ -69,7 +69,7 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
                 exp_idx += clf_idx
                 if normalizer:
                     exp_idx += "_norm"
-                fig.savefig(exp_idx, file_format='pdf')
+                fig.savefig(exp_idx+'.pdf', file_format='pdf')
 
     def test_poisoning_point_fobj_improvement(self):
         """
