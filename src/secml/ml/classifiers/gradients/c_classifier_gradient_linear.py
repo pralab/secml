@@ -14,14 +14,6 @@ from secml.ml.classifiers.clf_utils import convert_binary_labels
 class CClassifierGradientLinear(CClassifierGradient):
     class_type = 'grad_lin'
 
-    # todo: remove and use directly the classifier discriminant function
-    # nb: we will have to reshape it
-    def _s(self, x, w, b):
-        """
-        Classifier score
-        """
-        return x.dot(w) + b
-
     def fd_w(self, x):
         """
         Derivative of the discriminant function w.r.t. the classifier

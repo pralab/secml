@@ -40,16 +40,18 @@ class CClassifierGradientLogisticRegression(CClassifierGradientLinear):
         b = clf.b
         C = clf.C
 
-        # handle normalizer, if present
-        x = x if clf.preprocess is None else clf.preprocess.normalize(x)
-
         x = x.atleast_2d()
         n = x.shape[0]
         d = x.shape[1]
 
-        s = self._s(x, w, b)
+        # nb: we compute the score before the x normalization as decision
+        # function normalizes x
+        s = clf.decision_function(x, y=1).T
         sigm = self._sigm(y, s)
         z = sigm * (1 - sigm)
+
+        # handle normalizer, if present
+        x = x if clf.preprocess is None else clf.preprocess.normalize(x)
 
         # first derivative wrt b derived w.r.t. w
         diag = z * CArray.eye(n_rows=n, n_cols=n)
