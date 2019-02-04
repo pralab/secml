@@ -1,5 +1,4 @@
 from secml.array import CArray
-from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.ml.classifiers.gradients import CClassifierGradientLinear
 from secml.ml.classifiers.loss import CLossQuadratic
 from secml.ml.classifiers.regularizer import CRegularizerL2
