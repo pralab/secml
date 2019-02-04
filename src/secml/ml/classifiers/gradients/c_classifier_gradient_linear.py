@@ -88,8 +88,3 @@ class CClassifierGradientLinear(CClassifierGradient):
 
         return grad  # (d +1) * n_samples
 
-    def Ld_s(self, w, y, score):
-        """
-        Derivative of the classifier loss function w.r.t. the score
-        """
-        return self._loss.dloss(y, score)

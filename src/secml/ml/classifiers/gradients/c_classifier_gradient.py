@@ -5,7 +5,7 @@
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 """
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 from secml.core import CCreator
 
@@ -15,6 +15,9 @@ class CClassifierGradient(CCreator):
     """
     __metaclass__ = ABCMeta
     __super__ = 'CClassifierGradient'
+
+    def loss(self):
+        return self._loss
 
     @abstractmethod
     def hessian(self, x, y, clf):
@@ -38,16 +41,15 @@ class CClassifierGradient(CCreator):
         raise NotImplementedError()
 
     @abstractmethod
-    def Ld_params(self, x):
+    def L_tot_d_params(self, x):
         """
         Derivative of the classifier loss function (regularizer
         included) w.r.t. the classifier parameters
         """
         raise NotImplementedError()
 
-    @abstractmethod
-    def Ld_s(self):
+    def Ld_s(self, w, y, score):
         """
         Derivative of the classifier loss function w.r.t. the score
         """
-        raise NotImplementedError()
+        return self.loss.dloss(y, score)
