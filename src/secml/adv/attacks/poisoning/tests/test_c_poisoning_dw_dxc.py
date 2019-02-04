@@ -16,6 +16,7 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
 
     """
 
+    @property
     def clf_list(self):
         return ['logistic', 'ridge']
 
@@ -29,8 +30,19 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
         """
         self.logger.info("Create 2-dimensional plot")
 
-        for clf_idx in self.clf_list():
-            self.logger.info("Test the {:} classifier".format(clf_idx))
+        normalizer_vals = [False, True]
+        combinations_list = [(clf_idx, normalizer) for clf_idx in \
+                             self.clf_list for normalizer in normalizer_vals]
+
+        for clf_idx, normalizer in combinations_list:
+            if normalizer:
+                self.logger.info("Test the {:} classifier when it has "
+                                 "a normalizer inside ".format(clf_idx))
+            else:
+                if normalizer:
+                    self.logger.info("Test the {:} classifier when it do not  "
+                                     "has a normalizer inside ".format(
+                        clf_idx))
             self._objs_creation(clf_idx)
 
             pois_clf = self._clf_poisoning()[0]
@@ -92,8 +104,19 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
 
     def test_poisoning_grad_check(self):
 
-        for clf_idx in self.clf_list():
-            self.logger.info("Test the {:} classifier".format(clf_idx))
+        normalizer_vals = [False, True]
+        combinations_list = [(clf_idx, normalizer) for clf_idx in \
+                             self.clf_list for normalizer in normalizer_vals]
+
+        for clf_idx, normalizer in combinations_list:
+            if normalizer:
+                self.logger.info("Test the {:} classifier when it has "
+                                 "a normalizer inside ".format(clf_idx))
+            else:
+                if normalizer:
+                    self.logger.info("Test the {:} classifier when it do not  "
+                                     "has a normalizer inside ".format(
+                        clf_idx))
             self._objs_creation(clf_idx)
 
             pois_clf = self._clf_poisoning()[0]
