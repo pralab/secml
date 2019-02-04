@@ -54,6 +54,8 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
                 n_rows = 2
                 n_cols = 2
 
+                fig.title(clf_idx)
+
                 fig.subplot(n_rows, n_cols, grid_slot=1)
                 fig.sp.title('w1 wrt xc')
                 self._plot_param_sub(fig, debug_pois_obj.w1,
@@ -72,6 +74,7 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
                                      debug_pois_obj.gradient_b_xc,
                                      pois_clf)
 
+                fig.tight_layout()
                 fig.show()
                 exp_idx = clf_idx
                 if normalizer:
