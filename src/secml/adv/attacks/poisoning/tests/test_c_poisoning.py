@@ -98,7 +98,7 @@ class CPoisoningTestCases(object):
                 raise ValueError("classifier idx not managed!")
 
             if normalizer:
-                normalizer = CNormalizerMinMax(-100, 100)
+                normalizer = CNormalizerMinMax((-100, 100))
                 self.classifier.preprocess = normalizer
 
         def _pois_obj_creation(self):
@@ -137,9 +137,9 @@ class CPoisoningTestCases(object):
             self.verbose = 2
             self._dataset_creation()
 
-        def _objs_creation(self, clf_idx):
+        def _objs_creation(self, clf_idx, normalizer=True):
 
-            self._clf_creation(clf_idx)
+            self._clf_creation(clf_idx, normalizer)
 
             self.classifier.store_dual_vars = True
 

@@ -8,6 +8,7 @@ from secml.optimization.function import CFunction
 
 class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
 
+    @property
     def clf_list(self):
         return ['ridge', 'logistic', 'lin-svm', 'rbf-svm']
 
@@ -18,8 +19,19 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
     def _make_plot(self):
         self.logger.info("Create 2-dimensional plot")
 
-        for clf_idx in self.clf_list():
-            self.logger.info("Test the {:} classifier".format(clf_idx))
+        normalizer_vals = [False, True]
+        combinations_list = [(clf_idx, normalizer) for clf_idx in \
+                             self.clf_list for normalizer in normalizer_vals]
+
+        for clf_idx, normalizer in combinations_list:
+            if normalizer:
+                self.logger.info("Test the {:} classifier when it has "
+                                 "a normalizer inside ".format(clf_idx))
+            else:
+                if normalizer:
+                    self.logger.info("Test the {:} classifier when it do not  "
+                                     "has a normalizer inside ".format(
+                        clf_idx))
             self._objs_creation(clf_idx)
 
             pois_clf = self._clf_poisoning()[0]
@@ -54,7 +66,10 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
 
                 fig.tight_layout()
                 fig.show()
-                fig.savefig(clf_idx + "_2d_pois", file_format='pdf')
+                exp_idx = clf_idx
+                if normalizer:
+                    exp_idx += "_norm"
+                fig.savefig(exp_idx +"_2d_pois", file_format='pdf')
 
     def test_poisoning_point_fobj_improvement(self):
         """
@@ -66,8 +81,19 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
         self.logger.info("Test if the value of the attacker objective "
                          "function improves after the attack")
 
-        for clf_idx in self.clf_list():
-            self.logger.info("Test the {:} classifier".format(clf_idx))
+        normalizer_vals = [False, True]
+        combinations_list = [(clf_idx, normalizer) for clf_idx in \
+                             self.clf_list for normalizer in normalizer_vals]
+
+        for clf_idx, normalizer in combinations_list:
+            if normalizer:
+                self.logger.info("Test the {:} classifier when it has "
+                                 "a normalizer inside ".format(clf_idx))
+            else:
+                if normalizer:
+                    self.logger.info("Test the {:} classifier when it do not  "
+                                     "has a normalizer inside ".format(
+                        clf_idx))
             self._objs_creation(clf_idx)
 
             x0 = self.xc  # starting poisoning point
