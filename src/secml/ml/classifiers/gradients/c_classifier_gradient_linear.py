@@ -39,7 +39,7 @@ class CClassifierGradientLinear(CClassifierGradient):
         Derivative of the discriminant function w.r.t. the classifier
         parameters
         """
-        if clf.normalizer is not None:
+        if clf.preprocess is not None:
             x = clf.normalizer.normalize(x)
 
         fd_w = self.fd_w(x)
@@ -80,9 +80,9 @@ class CClassifierGradientLinear(CClassifierGradient):
         fd_w = self.fd_w(x)  # d * n_samples
         fd_b = self.fd_b(x)  # 1 * n_samples
 
-        grad_w = C * (self._loss.dloss(y=y, score=s).atleast_2d() * fd_w) + \
+        grad_w = C * (self._loss.dloss(y, score=s).atleast_2d() * fd_w) + \
                  self._reg.dregularizer(w)
-        grad_b = C * (self._loss.dloss(y=y, score=s).atleast_2d() * fd_b)
+        grad_b = C * (self._loss.dloss(y, score=s).atleast_2d() * fd_b)
 
         grad = grad_w.append(grad_b, axis=0)
 
