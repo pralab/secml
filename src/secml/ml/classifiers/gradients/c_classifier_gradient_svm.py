@@ -32,8 +32,7 @@ class CClassifierGradientSVM(CClassifierGradient):
         """
         svm = clf
 
-        xs, sv_idx = self._xs(
-            self._poisoned_clf)  # these points are already normalized
+        xs, sv_idx = self._xs(clf)  # these points are already normalized
 
         s = xs.shape[0]
 
@@ -43,5 +42,11 @@ class CClassifierGradientSVM(CClassifierGradient):
 
         return H
 
+    def fd_params(self, x, y, clf):
+        raise NotImplementedError()
+
     def Ld_params(self, x, y, clf):
+        raise NotImplementedError()
+
+    def Ld_s(self, x, y, clf):
         raise NotImplementedError()
