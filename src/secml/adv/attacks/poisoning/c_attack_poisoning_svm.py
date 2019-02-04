@@ -219,9 +219,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         Kks_ext[:, :s] = svm.kernel.k(xk, xs)
         grad_loss_params = -grad_loss_fk.dot(Kks_ext).T
 
-        H = CArray.ones(shape=(s + 1, s + 1))
-        H[:s, :s] = svm.kernel.k(xs)
-        H[-1, -1] = 0
+        H = clf.gradients.hessian(clf)
         H += 1e-9 * CArray.eye(s + 1)
 
         G = CArray.zeros(shape=(gt.size, s + 1))
