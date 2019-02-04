@@ -3,3 +3,4 @@ from c_classifier_gradient_linear import CClassifierGradientLinear
 from c_classifier_gradient_logistic_regression import \
     CClassifierGradientLogisticRegression
 from c_classifier_gradient_ridge import CClassifierGradientRidge
+from c_classifier_gradient_svm import CClassifierGradientSVM
