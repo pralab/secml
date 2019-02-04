@@ -18,10 +18,11 @@ class CClassifierGradientRidge(CClassifierGradientLinear):
         """
         return CArray.eye(d)
 
-    def hessian(self, x, y, clf):
+    def hessian(self, x, clf):
         """
         Compute hessian for the current parameters of the trained clf
         """
+
         alpha = clf.alpha
 
         x = x.atleast_2d()
