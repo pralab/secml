@@ -88,20 +88,21 @@ class CClassifierGradientSVM(CClassifierGradient):
         """
         # compute the loss derivative w.r.t. alpha
         fd_params = self.fd_params(x, clf)  # (s + 1) * n_samples
-        s = clf.decision_function(x)
-        dL_s = self._loss.dloss(y, score=s).atleast_2d()
+        scores = clf.decision_function(x)
+        dL_s = self._loss.dloss(y, score=scores).atleast_2d()
         dL_params = dL_s * fd_params  # (s + 1) * n_samples
 
         # compute the regularizer derivative w.r.t alpha
-        sv = clf.sv()
-        K = self.kernel.k(sv, sv)
-        d_reg = 2 * K.dot(clf.alpha)  # s * 1
+        sv = clf.sv
+        K = clf.kernel.k(sv, sv)
+        d_reg = 2 * K.dot(clf.alpha.T)  # s * 1
 
+        s = sv.shape[0]
         grad = clf.C * dL_params[:s, :] + d_reg
 
         return grad  # (s +1) * n_samples
 
-    def L_tot(self, x, y, clf):
+    def _L_tot(self, x, y, clf):
         """
         Classifier total loss
         L_tot = loss computed on the training samples + regularizer
@@ -109,12 +110,12 @@ class CClassifierGradientSVM(CClassifierGradient):
 
         # compute the loss on the training samples
         fd_params = self.fd_params(x, clf)  # (s + 1) * n_samples
-        s = clf.decision_function(x)
-        loss = self._loss.loss(y, score=s).atleast_2d()
+        scores = clf.decision_function(x)
+        loss = self._loss.loss(y, score=scores).atleast_2d()
 
         # compute the value of the regularizer
-        sv = clf.sv()
-        K = self.kernel.k(sv, sv)
+        sv = clf.sv
+        K = clf.kernel.k(sv, sv)
         reg = 1. / 2 * clf.alpha.atleast_2d().dot(K.dot(clf.alpha.T))
 
         loss = clf.C * loss + reg
