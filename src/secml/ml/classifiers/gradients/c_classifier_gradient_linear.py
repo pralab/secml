@@ -136,3 +136,9 @@ class CClassifierGradientLinear(CClassifierGradient):
         loss = C * self._loss.loss(y, score=s) + self._reg.regularizer(w)
 
         return loss
+
+    def _params(self, clf):
+        """
+        Classifier parameters
+        """
+        return clf.w.append(CArray([clf.b]), axis=None)
