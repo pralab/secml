@@ -118,3 +118,21 @@ class CClassifierGradientLinear(CClassifierGradient):
         grad = grad_w.append(grad_b, axis=0)
 
         return grad  # (d +1) * n_samples
+
+    def L_tot(self, x, y, clf):
+        """
+        Classifier total loss
+        L_tot = loss computed on the training samples + regularizer
+        """
+        y = y.ravel()
+
+        w = CArray(clf.w.ravel()).T  # column vector
+        C = clf.C
+
+        x = x.atleast_2d()
+
+        s = clf.decision_function(x)
+
+        loss = C * self._loss.loss(y, score=s) + self._reg.regularizer(w)
+
+        return loss
