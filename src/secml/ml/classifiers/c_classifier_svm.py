@@ -248,6 +248,29 @@ class CClassifierSVM(CClassifierLinear):
         """Support Vectors."""
         return self._sv
 
+    def s(self, tol=1e-6):
+        """Indices of margin support vectors."""
+        s = self.alpha.find(
+            (abs(self.alpha) >= tol) *
+            (abs(self.alpha) <= self.C - tol))
+        return CArray(s)
+
+    def xs(self):
+        """Margin support vectors"""
+        s = self._s()
+
+        if s.size == 0:
+            return None, None
+
+        xs = self.sv[s, :].atleast_2d()
+        return xs, s
+
+    def ys(self):
+        """Margin support vector labels"""
+        ys = self.alpha.sign()
+        ys = CArray(ys[self._s()])
+        return ys
+
     def fit(self, dataset, n_jobs=1):
         """Fit the SVM classifier.
 
