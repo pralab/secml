@@ -119,7 +119,7 @@ class CClassifierGradientLinear(CClassifierGradient):
 
         return grad  # (d +1) * n_samples
 
-    def L_tot(self, x, y, clf):
+    def _L_tot(self, x, y, clf):
         """
         Classifier total loss
         L_tot = loss computed on the training samples + regularizer
