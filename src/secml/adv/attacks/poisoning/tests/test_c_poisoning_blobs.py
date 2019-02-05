@@ -2,15 +2,14 @@ from secml.utils import CUnitTest
 from test_c_poisoning import CPoisoningTestCases
 
 from secml.figure import CFigure
-from secml.optimization import COptimizer
-from secml.optimization.function import CFunction
 
 
 class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
 
     @property
     def clf_list(self):
-        return ['ridge', 'logistic', 'lin-svm', 'rbf-svm']
+        #return ['ridge', 'logistic', 'lin-svm', 'rbf-svm']
+        return ['lin-svm', 'rbf-svm']
 
     def test_poisoning_2D_plot(self):
         if self.plot:
