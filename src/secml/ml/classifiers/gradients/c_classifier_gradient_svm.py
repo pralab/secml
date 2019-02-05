@@ -109,14 +109,13 @@ class CClassifierGradientSVM(CClassifierGradient):
         """
 
         # compute the loss on the training samples
-        fd_params = self.fd_params(x, clf)  # (s + 1) * n_samples
         scores = clf.decision_function(x)
         loss = self._loss.loss(y, score=scores).atleast_2d()
 
         # compute the value of the regularizer
         sv = clf.sv
         K = clf.kernel.k(sv, sv)
-        reg = 1. / 2 * clf.alpha.atleast_2d().dot(K.dot(clf.alpha.T))
+        reg = clf.alpha.atleast_2d().dot(K.dot(clf.alpha.T))
 
         loss = clf.C * loss + reg
 
@@ -129,7 +128,7 @@ class CClassifierGradientSVM(CClassifierGradient):
         margin_sv_idx = clf.s()  # get the idx of the margin support vector
         return clf.alpha[margin_sv_idx].append(CArray(clf.b), axis=None)
 
-    def _change_params(self,params, clf):
+    def _change_params(self, params, clf):
         """
         Changes the alpha of the margin support vector
         """
