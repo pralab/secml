@@ -60,7 +60,6 @@ class CClassifierGradientLinear(CClassifierGradient):
         """
         return self._reg.dregularizer(w)
 
-# fixme: qui usare la L_params
     def L_tot_d_params(self, x, y, clf):
         """
         Derivative of the classifier classifier loss function (regularizer
