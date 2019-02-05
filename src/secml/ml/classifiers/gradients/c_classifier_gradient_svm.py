@@ -132,5 +132,5 @@ class CClassifierGradientSVM(CClassifierGradient):
 
         new_clf = clf.deepcopy()
         new_clf._alpha = params[:-1]
-        new_clf._b = params[:1]
+        new_clf._b = params[-1]
         return new_clf
