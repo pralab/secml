@@ -1,13 +1,10 @@
 from secml.utils import CUnitTest
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 from secml.array import CArray
 from secml.ml.features.normalization import CNormalizerMinMax
 from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
 
-# fixme: add the test for the other gradient. as not all the classifier will
-#  be implemented we can check if the CCgradient class have that gradient to
-#  understand if we should or not execute that test function
 class CClassifierGradientTestCases(object):
     """Wrapper for TestCClassifierGradient to make unittest.main() work correctly."""
 
@@ -17,11 +14,15 @@ class CClassifierGradientTestCases(object):
 
         @abstractmethod
         def _dataset_creation(self):
-            raise NotImplementedError
+            raise NotImplementedError()
 
-        @abstractmethod
-        def _clfs_creation(self):
-            raise NotImplementedError
+        @abstractproperty
+        def clf_list(self):
+            raise NotImplementedError()
+
+        @abstractproperty
+        def clf_creation_function(self):
+            raise NotImplementedError()
 
         def setUp(self):
 
@@ -29,7 +30,6 @@ class CClassifierGradientTestCases(object):
 
             self._dataset_creation()
             self._set_tested_classes()
-            self._clfs_creation()
 
             self.logger.info("." * 50)
             self.logger.info("Number of Patterns: %s",
@@ -81,31 +81,20 @@ class CClassifierGradientTestCases(object):
             self.logger.info(
                 "Testing the gradient of the discriminant function")
 
-            for clf, clf_idx in zip(self.clfs, self.clf_ids):
-                self.logger.info(
-                    "Computing gradient for the classifier: %s when "
-                    "the classifier does not have a normalizer "
-                    "inside", clf_idx)
+            normalizer_vals = [False, True]
+            combinations_list = [(clf_idx, normalizer) for clf_idx in \
+                                 self.clf_list for normalizer in
+                                 normalizer_vals]
 
-                clf.fit(self.dataset)
-                self._clf_gradient_check(clf, clf_idx)
+            for clf_idx, normalizer in combinations_list:
+                if normalizer:
+                    self.logger.info("Test the {:} classifier when it has "
+                                     "a normalizer inside ".format(clf_idx))
+                else:
+                    self.logger.info("Test the {:} classifier when it does "
+                                     "not have a normalizer inside ".format(
+                        clf_idx))
+                clf = self.clf_creation_function(clf_idx, normalizer)
 
-        def test_f_norm_x_gradient(self):
-            """Test the gradient of the classifier discriminant function
-            when the classifier have a normalizer inside"""
-            self.logger.info(
-                "Testing the gradient of the discriminant function when the "
-                "classifier have a normalizer inside")
-
-            # create a normalizer
-            normalizer = CNormalizerMinMax(feature_range=(-100,100))
-
-            for clf, clf_idx in zip(self.clfs, self.clf_ids):
-                self.logger.info(
-                    "Computing gradient for the classifier: %s when "
-                    "the classifier have a normalizer "
-                    "inside", clf_idx)
-
-                clf.preprocess = normalizer
                 clf.fit(self.dataset)
                 self._clf_gradient_check(clf, clf_idx)

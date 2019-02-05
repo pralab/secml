@@ -2,16 +2,21 @@ from secml.utils import CUnitTest
 
 from test_c_classifier_gradient import CClassifierGradientTestCases
 from secml.data.loader import CDLRandom
-from secml.ml.classifiers.loss import CLossHinge
-from secml.ml.classifiers.regularizer import CRegularizerL2
-from secml.ml.classifiers import CClassifierSVM, CClassifierKDE, \
-    CClassifierSGD, CClassifierMCSLinear, CClassifierLogistic
-
+from secml.ml.classifiers.gradients.tests import binary_clf_creation
 
 class TestCClassifierGradientBinary(
     CClassifierGradientTestCases.TestCClassifierGradient):
     """Compare the analytical and the numerical gradient of binary
     classifiers."""
+
+    @property
+    def clf_list(self):
+        # return ['ridge', 'logistic', 'lin-svm', 'rbf-svm']
+        return ['lin-svm']
+
+    @property
+    def clf_creation_function(self):
+        return binary_clf_creation
 
     def _dataset_creation(self):
         # generate synthetic data
@@ -21,24 +26,6 @@ class TestCClassifierGradientBinary(
 
     def _set_tested_classes(self):
         self.classes = self.dataset.classes
-
-    def _clfs_creation(self):
-        self.clfs = [CClassifierSVM(), CClassifierSVM(kernel='rbf'),
-                     CClassifierLogistic(),
-                     CClassifierMCSLinear(CClassifierSVM(),
-                                          num_classifiers=3,
-                                          max_features=0.5,
-                                          max_samples=0.5,
-                                          random_state=0),
-                     CClassifierKDE(), CClassifierSGD(CLossHinge(),
-                                                      CRegularizerL2()),
-                     CClassifierSGD(CLossHinge(), CRegularizerL2(),
-                                    kernel='rbf')]
-
-        self.clf_ids = ['lin-SVM', 'rbf-SVM', 'logistic']
-
-        for clf in self.clfs:  # Enabling debug output for each classifier
-            clf.verbose = 2
 
 
 if __name__ == '__main__':

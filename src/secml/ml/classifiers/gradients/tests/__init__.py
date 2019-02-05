@@ -1,1 +1,3 @@
 from test_c_classifier_gradient import CClassifierGradientTestCases
+
+from binary_clf_creation import binary_clf_creation
