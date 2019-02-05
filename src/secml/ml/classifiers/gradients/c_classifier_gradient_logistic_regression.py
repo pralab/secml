@@ -20,6 +20,9 @@ class CClassifierGradientLogisticRegression(CClassifierGradientLinear):
         self._loss = CLossLogistic()
         self._reg = CRegularizerL2()
 
+    def _C(self, clf):
+        return clf.C
+
     def _sigm(self, y, s):
         """
         Sigmoid function

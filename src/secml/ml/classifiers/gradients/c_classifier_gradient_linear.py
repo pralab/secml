@@ -11,10 +11,14 @@ from abc import abstractmethod
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradient
 from secml.ml.classifiers.clf_utils import convert_binary_labels
-
+from abc import abstractmethod
 
 class CClassifierGradientLinear(CClassifierGradient):
     __class_type = 'linear'
+
+    @abstractmethod
+    def _C(self, clf):
+        raise NotImplementedError()
 
     @abstractmethod
     def _C(self, clf):
@@ -127,7 +131,7 @@ class CClassifierGradientLinear(CClassifierGradient):
         y = y.ravel()
 
         w = CArray(clf.w.ravel()).T  # column vector
-        C = clf.C
+        C = self._C(clf)
 
         x = x.atleast_2d()
 
