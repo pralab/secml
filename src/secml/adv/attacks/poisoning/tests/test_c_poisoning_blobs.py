@@ -8,7 +8,8 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
 
     @property
     def clf_list(self):
-        return ['ridge', 'logistic', 'lin-svm', 'rbf-svm']
+        #return ['ridge', 'logistic', 'lin-svm', 'rbf-svm']
+        return ['lin-svm', 'rbf-svm']
 
     def test_poisoning_2D_plot(self):
         self.plot = False
