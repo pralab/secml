@@ -101,23 +101,47 @@ class CClassifierGradientTestCases(object):
                 clf.fit(self.dataset)
                 self._clf_gradient_f_x_check(clf, clf_idx)
 
-        # functionalities to test the gradient of the loss
+        # functionalities to test the gradient of the loss :
 
-        def _fun_L_args(self, x, *args):
+        # fixme: remove this ugly trick as soon as the approx_frime will be
+        #  able to manage kwargs
+        def _change_clf_params_in_args(self, args, params):
+            """
+            Trick to change the parameters of the classifier in the args
+            """
+            print "original args ", args
+            new_args = {}
+            args_dict = args[0]
+            for arg_key in args_dict:
+                if arg_key != 'clf':
+                    new_args[arg_key] = args_dict[arg_key]
+                else:
+                    clf = self.clf.gradients._change_params(params, self.clf)
+                    new_args['clf'] = clf
+            new_args = (new_args,)
+            print "new args ",  new_args
+            return new_args
+
+        def _fun_L_args(self, params, *args):
             """
             Wrapper needed as the loss function have **kwargs
             """
-            return self.clf.gradients.L_tot(x, **args[0])
+            new_args = self._change_clf_params_in_args(args, params)
 
-        def _grad_L_params_args(self, x, *args):
+            return self.clf.gradients._L_tot(**new_args[0])
+
+        def _grad_L_params_args(self, params, *args):
             """
             Wrapper needed as the gradient function have **kwargs
             """
-            return self.clf.gradients.L_tot_d_params(x, **args[0])
+            new_args = self._change_clf_params_in_args(self, args, params)
+
+            return self.clf.gradients.L_tot_d_params( **new_args[0]).ravel()
 
         def _clf_gradient_L_params_check(self, clf, clf_idx):
 
             self.clf = clf
+            params = clf.gradients._params(clf)
 
             smpls_idx = CArray.arange(self.dataset.num_samples)
             i = self.dataset.X.randsample(smpls_idx, 1, random_state=self.seed)
@@ -132,11 +156,11 @@ class CClassifierGradientTestCases(object):
                                  "implmented yet for this classifier")
                 return
 
-            gradient = clf.gradients.L_tot_d_params(x, y, clf)
+            gradient = clf.gradients.L_tot_d_params(x, y, clf).ravel()
             num_gradient = COptimizer(
                 CFunction(self._fun_L_args,
-                          self._grad_L_params_args)).approx_fprime(x, 1e-8, (
-                {'y': y, 'clf': clf}))
+                          self._grad_L_params_args)).approx_fprime(
+                params, 1e-8, ({'x':x,'y': y, 'clf': clf}))
             error = (gradient - num_gradient).norm(order=1)
 
             self.logger.info("Analitic gradient %s", str(gradient))
