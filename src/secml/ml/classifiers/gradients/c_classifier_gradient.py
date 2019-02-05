@@ -41,7 +41,7 @@ class CClassifierGradient(CCreator):
         raise NotImplementedError()
 
     @abstractmethod
-    def L_tot_d_params(self, x):
+    def L_tot_d_params(self, x, y, clf):
         """
         Derivative of the classifier loss function (regularizer
         included) w.r.t. the classifier parameters
