@@ -93,12 +93,13 @@ class CClassifierGradientSVM(CClassifierGradient):
         dL_params = dL_s * fd_params  # (s + 1) * n_samples
 
         # compute the regularizer derivative w.r.t alpha
-        sv = clf.sv
-        K = clf.kernel.k(sv, sv)
-        d_reg = 2 * K.dot(clf.alpha.T)  # s * 1
+        xs, margin_sv_idx = clf.xs()
+        K = clf.kernel.k(xs, xs)
+        d_reg = 2 * K.dot(clf.alpha[margin_sv_idx].T)  # s * 1
 
-        s = sv.shape[0]
-        grad = clf.C * dL_params[:s, :] + d_reg
+        s = margin_sv_idx.size
+        grad = clf.C * dL_params
+        grad[:s, :] += d_reg
 
         return grad  # (s +1) * n_samples
 
@@ -112,10 +113,10 @@ class CClassifierGradientSVM(CClassifierGradient):
         scores = clf.decision_function(x)
         loss = self._loss.loss(y, score=scores).atleast_2d()
 
-        # compute the value of the regularizer
-        sv = clf.sv
-        K = clf.kernel.k(sv, sv)
-        reg = clf.alpha.atleast_2d().dot(K.dot(clf.alpha.T))
+        xs, margin_sv_idx = clf.xs()
+        Kss = clf.kernel.k(xs, xs)
+        alpha_s = clf.alpha[margin_sv_idx]
+        reg = alpha_s.atleast_2d().dot(Kss.dot(alpha_s.T))
 
         loss = clf.C * loss + reg
 
