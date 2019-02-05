@@ -44,7 +44,7 @@ class CClassifierGradientSVM(CClassifierGradient):
 
         xk = xk if clf.preprocess is None else clf.preprocess.normalize(xk)
 
-        s = xs.shape[0]
+        s = xs.shape[0]  # margin support vector
         k = xk.shape[0]
 
         Ksk_ext = CArray.ones(shape=(s + 1, k))
@@ -126,11 +126,15 @@ class CClassifierGradientSVM(CClassifierGradient):
         """
         Classifier parameters
         """
-        return clf.alpha.append(CArray(clf.b), axis=None)
+        margin_sv_idx = clf.s()  # get the idx of the margin support vector
+        return clf.alpha[margin_sv_idx].append(CArray(clf.b), axis=None)
 
     def _change_params(self,params, clf):
-
+        """
+        Changes the alpha of the margin support vector
+        """
         new_clf = clf.deepcopy()
-        new_clf._alpha = params[:-1]
+        margin_sv_idx = clf.s()  # get the idx of the margin support vector
+        new_clf._alpha[margin_sv_idx] = params[:-1]
         new_clf._b = params[-1]
         return new_clf
