@@ -11,8 +11,10 @@ class TestCClassifierGradientBinary(
 
     @property
     def clf_list(self):
-        # return ['ridge', 'logistic', 'lin-svm', 'rbf-svm']
-        return ['lin-svm']
+        return ['ridge', 'logistic', 'lin-svm', 'rbf-svm', 'lin-mcs']
+        # fixme: read those classifier as soon as we will have fix their
+        #  gradients
+        #'sgd-lin','sgd-rbf','kde',
 
     @property
     def clf_creation_function(self):
