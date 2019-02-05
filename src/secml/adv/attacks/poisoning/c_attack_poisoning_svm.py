@@ -92,6 +92,28 @@ class CAttackPoisoningSVM(CAttackPoisoning):
     #                  OBJECTIVE FUNCTION & GRAD COMPUTATION
     ###########################################################################
 
+    def _alpha_c(self, clf):
+        """
+        Returns alpha value of xc, assuming xc to be appended
+        as the last point in tr
+        """
+
+        # index of poisoning point within xc.
+        # This will be replaced by the input parameter xc
+        if self._idx is None:
+            idx = 0
+        else:
+            idx = self._idx
+
+        # index of the current poisoning point in the set self._xc
+        # as this set is appended to the training set, idx is shifted
+        idx += self._surrogate_data.num_samples
+
+        k = clf.sv_idx.find(clf.sv_idx == idx)
+        if len(k) == 1:  # if not empty
+            return clf.alpha[k]
+        return 0
+
     def alpha_xc(self, xc):
         """
         Parameters
@@ -125,50 +147,6 @@ class CAttackPoisoningSVM(CAttackPoisoning):
     #                            GRAD COMPUTATION
     ###########################################################################
 
-    def _s(self, tol=1e-6):
-        """Indices of margin support vectors."""
-        s = self._poisoned_clf.alpha.find(
-            (abs(self._poisoned_clf.alpha) >= tol) *
-            (abs(self._poisoned_clf.alpha) <= self._poisoned_clf.C - tol))
-        return CArray(s)
-
-    def _ys(self):
-        ys = self._poisoned_clf.alpha.sign()
-        ys = CArray(ys[self._s()])
-        return ys
-
-    def _xs(self):
-
-        s = self._s()
-
-        if s.size == 0:
-            return None, None
-
-        xs = self._poisoned_clf.sv[s, :].atleast_2d()
-        return xs, s
-
-    def _alpha_c(self):
-        """
-        Returns alpha value of xc, assuming xc to be appended
-        as the last point in tr
-        """
-
-        # index of poisoning point within xc.
-        # This will be replaced by the input parameter xc
-        if self._idx is None:
-            idx = 0
-        else:
-            idx = self._idx
-
-        # index of the current poisoning point in the set self._xc
-        # as this set is appended to the training set, idx is shifted
-        idx += self._surrogate_data.num_samples
-
-        k = self._poisoned_clf.sv_idx.find(self._poisoned_clf.sv_idx == idx)
-        if len(k) == 1:  # if not empty
-            return self._poisoned_clf.alpha[k]
-        return 0
-
     def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr):
         """
         Derivative of the classifier's discriminant function f(xk)
@@ -185,7 +163,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         d = xc.size
         grad = CArray.zeros(shape=(d,))  # gradient in input space
 
-        alpha_c = self._alpha_c()
+        alpha_c = self._alpha_c(clf)
 
         if abs(alpha_c) == 0:  # < svm.C:  # this include alpha_c == 0
             # self.logger.debug("Warning: xc is not an error vector.")
@@ -195,16 +173,12 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         xk = self._ts.X[abs(loss_grad) > 0, :].atleast_2d()
         grad_loss_fk = CArray(loss_grad[abs(loss_grad) > 0]).atleast_2d()
 
-        # handle normalizer, if present
-        xk = xk if svm.preprocess is None else svm.preprocess.normalize(xk)
-        xc = xc if svm.preprocess is None else svm.preprocess.normalize(xc)
-
         # gt is the gradient in feature space
         # this gradient component is the only one if margin SV set is empty
-        dKkc = svm.kernel.gradient(xk, xc)
-        gt = alpha_c * grad_loss_fk.dot(dKkc).ravel()
+        df_xc = svm.gradients.fd_x(alpha_c, xc, xk, clf)
+        gt = grad_loss_fk.dot(df_xc).ravel()
 
-        xs, sv_idx = self._xs()  # these points are already normalized
+        xs, sv_idx = clf.xs()  # these points are already normalized
 
         if xs is None:
             self.logger.debug("Warning: xs is empty "
@@ -213,15 +187,15 @@ class CAttackPoisoningSVM(CAttackPoisoning):
                 svm.preprocess.gradient(xc0, gt)
 
         s = xs.shape[0]
-        k = grad_loss_fk.size
 
-        Kks_ext = CArray.ones(shape=(k, s + 1))
-        Kks_ext[:, :s] = svm.kernel.k(xk, xs)
-        grad_loss_params = -grad_loss_fk.dot(Kks_ext).T
+        fd_params = svm.gradients.fd_params(xk, clf).T
+        grad_loss_params = fd_params.dot(-grad_loss_fk.T)
 
-        H = clf.gradients.hessian(clf)
+        H = clf.gradients.hessian(svm)
         H += 1e-9 * CArray.eye(s + 1)
 
+        # handle normalizer, if present
+        xc = xc if clf.preprocess is None else clf.preprocess.normalize(xc)
         G = CArray.zeros(shape=(gt.size, s + 1))
         G[:, :s] = svm.kernel.gradient(xs, xc).T
         G *= alpha_c
