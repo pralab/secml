@@ -75,6 +75,31 @@ class CClassifierRejectDetector(CClassifierReject):
         """Array containing already computed adversarial samples."""
         self._adv_x = value.atleast_2d()
 
+    @property
+    def classes(self):
+        """Return the list of classes on which training has been performed."""
+        return self._clf.classes
+
+    @property
+    def n_classes(self):
+        """Number of classes of training dataset."""
+        return self._clf.n_classes
+
+    @property
+    def n_features(self):
+        """Number of features"""
+        return self._clf.n_features
+
+    @property
+    def preprocess(self):
+        """Preprocess to be applied to input data by the inner classifier."""
+        return self._clf.preprocess
+
+    @preprocess.setter
+    def preprocess(self, value):
+        """Preprocess to be applied to input data by the inner classifier."""
+        self._clf.preprocess = value
+
     def _normalize_scores(self, orig_score):
         """Normalizes the scores using softmax."""
         return CSoftmax().softmax(orig_score)
@@ -82,12 +107,15 @@ class CClassifierRejectDetector(CClassifierReject):
     def fit(self, dataset, n_jobs=1):
         """Trains both the classifier and the detector.
 
+        If a preprocess has been specified,
+        input is normalized before training.
+
         Parameters
         ----------
         dataset : CDataset
             Training set. Must be a :class:`.CDataset` instance with
             patterns data and corresponding labels.
-        n_jobs : int
+        n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
 
@@ -97,23 +125,9 @@ class CClassifierRejectDetector(CClassifierReject):
             Instance of the classifier trained using input dataset.
 
         """
-        if not isinstance(dataset, CDataset):
-            raise TypeError(
-                "training set should be provided as a CDataset object.")
-
-        # Resetting the classifier
+        # Resetting the outer classifier
         self.clear()
-
-        # Storing dataset classes
-        self._classes = dataset.classes
-        self._n_features = dataset.num_features
-
-        data_x = dataset.X
-        # Preprocessing data if a preprocess is defined
-        if self.preprocess is not None:
-            data_x = self.preprocess.fit_normalize(dataset.X)
-
-        return self._fit(CDataset(data_x, dataset.Y), n_jobs=n_jobs)
+        return self._fit(dataset, n_jobs)
 
     def _fit(self, dataset, n_jobs=1):
         """Trains both the classifier and the detector.
@@ -123,7 +137,7 @@ class CClassifierRejectDetector(CClassifierReject):
         dataset : CDataset
             Training set. Must be a :class:`.CDataset` instance with
             patterns data and corresponding labels.
-        n_jobs : int
+        n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
 
