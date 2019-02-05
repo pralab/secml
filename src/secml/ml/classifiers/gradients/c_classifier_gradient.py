@@ -62,6 +62,14 @@ class CClassifierGradient(CCreator):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def L_tot(self, x, y, clf):
+        """
+        Classifier total loss
+        L_tot = loss computed on the training samples + regularizer
+        """
+        raise NotImplementedError()
+
     def Ld_s(self, w, y, score):
         """
         Derivative of the classifier loss function w.r.t. the score
