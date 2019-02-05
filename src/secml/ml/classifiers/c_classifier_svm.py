@@ -257,7 +257,7 @@ class CClassifierSVM(CClassifierLinear):
 
     def xs(self):
         """Margin support vectors"""
-        s = self._s()
+        s = self.s()
 
         if s.size == 0:
             return None, None
@@ -268,7 +268,7 @@ class CClassifierSVM(CClassifierLinear):
     def ys(self):
         """Margin support vector labels"""
         ys = self.alpha.sign()
-        ys = CArray(ys[self._s()])
+        ys = CArray(ys[self.s()])
         return ys
 
     def fit(self, dataset, n_jobs=1):
