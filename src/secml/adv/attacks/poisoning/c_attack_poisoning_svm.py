@@ -176,7 +176,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # gt is the gradient in feature space
         # this gradient component is the only one if margin SV set is empty
         df_xc = svm.gradients.fd_x(alpha_c, xc, xk, clf)
-        gt = df_xc.dot(grad_loss_fk).ravel() # gradient of the loss w.r.t. xc
+        gt = df_xc.dot(grad_loss_fk).ravel()  # gradient of the loss w.r.t. xc
 
         xs, sv_idx = clf.xs()  # these points are already normalized
 
@@ -189,7 +189,8 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         s = xs.shape[0]
 
         fd_params = svm.gradients.fd_params(xk, clf).T
-        grad_loss_params = fd_params.dot(-grad_loss_fk)
+        #grad_loss_params = fd_params.dot(-grad_loss_fk)
+        grad_loss_params = fd_params.dot(grad_loss_fk)
 
         H = clf.gradients.hessian(svm)
         H += 1e-9 * CArray.eye(s + 1)
@@ -214,7 +215,8 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # v = - self._compute_grad_solve(G, H, grad_loss_params, sym_pos=False)
 
         # solve using inverse/pseudoinverse of H
-        v = - self._compute_grad_inv(G, H, grad_loss_params)
+        #v = - self._compute_grad_inv(G, H, grad_loss_params)
+        v = self._compute_grad_inv(G, H, grad_loss_params)
 
         gt += v
 
