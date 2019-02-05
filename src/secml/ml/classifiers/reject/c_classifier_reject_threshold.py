@@ -59,7 +59,7 @@ class CClassifierRejectThreshold(CClassifierReject):
             self._clf = value
         else:
             raise ValueError(
-                "the inner classifier should be an istance of CClassifier")
+                "the inner classifier should be an instance of CClassifier")
 
     @property
     def threshold(self):
@@ -86,13 +86,21 @@ class CClassifierRejectThreshold(CClassifierReject):
         """Number of features"""
         return self._clf.n_features
 
+    @property
+    def preprocess(self):
+        """Preprocess to be applied to input data by the inner classifier."""
+        return self._clf.preprocess
+
+    @preprocess.setter
+    def preprocess(self, value):
+        """Preprocess to be applied to input data by the inner classifier."""
+        self._clf.preprocess = value
+
     def fit(self, dataset, n_jobs=1):
         """Trains the classifier.
 
         If a preprocess has been specified,
         input is normalized before training.
-
-        For multiclass case see `.CClassifierMulticlass`.
 
         Parameters
         ----------
@@ -109,6 +117,8 @@ class CClassifierRejectThreshold(CClassifierReject):
             Instance of the classifier trained using input dataset.
 
         """
+        # Resetting the outer classifier
+        self.clear()
         return self._fit(dataset, n_jobs)
 
     def _fit(self, dataset, n_jobs=1):
