@@ -48,8 +48,8 @@ class CClassifierGradientSVM(CClassifierGradient):
         k = xk.shape[0]
 
         Ksk_ext = CArray.ones(shape=(s + 1, k))
-        Ksk_ext[:s,:] = clf.kernel.k(xs, xk)
-        return Ksk_ext # (s + 1) * k
+        Ksk_ext[:s, :] = clf.kernel.k(xs, xk)
+        return Ksk_ext  # (s + 1) * k
 
     def fd_x(self, alpha_c, xc, xk, clf):
         """
@@ -75,4 +75,28 @@ class CClassifierGradientSVM(CClassifierGradient):
         return dKkc.T  # d * k
 
     def L_tot_d_params(self, x, y, clf):
-        raise NotImplementedError()
+        """
+        Derivative of the classifier classifier loss function (regularizer
+        included) w.r.t. the classifier parameters
+
+        dL / d_params = dL / df * df / d_params + dReg / d_params
+
+        x : CArray
+            features of the training sample
+        y :  CArray
+            features of the training samples
+        """
+        # compute the loss derivative w.r.t. alpha
+        fd_params = self.fd_params(x, clf)  # (s + 1) * n_samples
+        s = clf.decision_function(x)
+        dL_s = self._loss.dloss(y, score=s).atleast_2d()
+        dL_params = dL_s * fd_params  # (s + 1) * n_samples
+
+        # compute the regularizer derivative w.r.t alpha
+        sv = clf.sv()
+        K = self.kernel.k(sv, sv)
+        d_reg = 2 * K.dot(clf.alpha)  # s * 1
+
+        grad = clf.C * dL_params[:s, :] + d_reg
+
+        return grad  # (s +1) * n_samples
