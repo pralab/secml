@@ -60,6 +60,7 @@ class CClassifierGradientLinear(CClassifierGradient):
         """
         return self._reg.dregularizer(w)
 
+# fixme: qui usare la L_params
     def L_tot_d_params(self, x, y, clf):
         """
         Derivative of the classifier classifier loss function (regularizer
@@ -77,6 +78,9 @@ class CClassifierGradientLinear(CClassifierGradient):
 
         s = clf.decision_function(x)
 
+        if clf.preprocess is not None:
+            x = clf.preprocess.normalize(x)
+
         fd_w = self.fd_w(x)  # d * n_samples
         fd_b = self.fd_b(x)  # 1 * n_samples
 
@@ -87,4 +91,3 @@ class CClassifierGradientLinear(CClassifierGradient):
         grad = grad_w.append(grad_b, axis=0)
 
         return grad  # (d +1) * n_samples
-
