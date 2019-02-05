@@ -121,3 +121,9 @@ class CClassifierGradientSVM(CClassifierGradient):
         loss = clf.C * loss + reg
 
         return loss
+
+    def _params(self, clf):
+        """
+        Classifier parameters
+        """
+        return clf.alpha.append(CArray([clf.b]), axis=None)
