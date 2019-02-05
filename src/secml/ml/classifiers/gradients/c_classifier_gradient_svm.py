@@ -100,3 +100,23 @@ class CClassifierGradientSVM(CClassifierGradient):
         grad = clf.C * dL_params[:s, :] + d_reg
 
         return grad  # (s +1) * n_samples
+
+    def L_tot(self, x, y, clf):
+        """
+        Classifier total loss
+        L_tot = loss computed on the training samples + regularizer
+        """
+
+        # compute the loss on the training samples
+        fd_params = self.fd_params(x, clf)  # (s + 1) * n_samples
+        s = clf.decision_function(x)
+        loss = self._loss.loss(y, score=s).atleast_2d()
+
+        # compute the value of the regularizer
+        sv = clf.sv()
+        K = self.kernel.k(sv, sv)
+        reg = 1. / 2 * clf.alpha.atleast_2d().dot(K.dot(clf.alpha.T))
+
+        loss = clf.C * loss + reg
+
+        return loss
