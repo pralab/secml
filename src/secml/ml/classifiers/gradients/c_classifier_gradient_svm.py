@@ -29,6 +29,11 @@ class CClassifierGradientSVM(CClassifierGradient):
         """
         Derivative of the discriminant function w.r.t. the classifier
         parameters
+
+        Parameters
+        ----------
+        xk : CArray
+            features of a validation set
         """
         xs, sv_idx = clf.xs()  # these points are already normalized
 
@@ -49,13 +54,25 @@ class CClassifierGradientSVM(CClassifierGradient):
     def fd_x(self, alpha_c, xc, xk, clf):
         """
         Derivative of the discriminant function w.r.t. an input sample
+
+        Parameters
+        ----------
+        xk : CArray
+            features of a validation set
+        xc:  CArray
+            features of the training point w.r.t. the derivative has to be
+            computed
+        alpha_c:  integer
+            alpha value of the of the training point w.r.t. the derivative has
+            to be
+            computed
         """
         # handle normalizer, if present
         xc = xc if clf.preprocess is None else clf.preprocess.normalize(xc)
         xk = xk if clf.preprocess is None else clf.preprocess.normalize(xk)
 
         dKkc = alpha_c * clf.kernel.gradient(xk, xc)
-        return dKkc # k * d
+        return dKkc.T # d * k
 
     def L_tot_d_params(self, x, y, clf):
         raise NotImplementedError()
