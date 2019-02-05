@@ -17,6 +17,9 @@ class CClassifierGradientRidge(CClassifierGradientLinear):
         """
         return CArray.eye(d)
 
+    def _C(self, clf):
+        return 1.0 / clf.alpha
+
     def hessian(self, x, clf):
         """
         Compute hessian for the current parameters of the trained clf
