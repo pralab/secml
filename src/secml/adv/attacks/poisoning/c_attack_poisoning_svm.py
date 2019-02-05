@@ -171,12 +171,12 @@ class CAttackPoisoningSVM(CAttackPoisoning):
 
         # take only validation points with non-null loss
         xk = self._ts.X[abs(loss_grad) > 0, :].atleast_2d()
-        grad_loss_fk = CArray(loss_grad[abs(loss_grad) > 0]).atleast_2d()
+        grad_loss_fk = CArray(loss_grad[abs(loss_grad) > 0]).T
 
         # gt is the gradient in feature space
         # this gradient component is the only one if margin SV set is empty
         df_xc = svm.gradients.fd_x(alpha_c, xc, xk, clf)
-        gt = grad_loss_fk.dot(df_xc).ravel()
+        gt = df_xc.dot(grad_loss_fk).ravel() # gradient of the loss w.r.t. xc
 
         xs, sv_idx = clf.xs()  # these points are already normalized
 
@@ -189,7 +189,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         s = xs.shape[0]
 
         fd_params = svm.gradients.fd_params(xk, clf).T
-        grad_loss_params = fd_params.dot(-grad_loss_fk.T)
+        grad_loss_params = fd_params.dot(-grad_loss_fk)
 
         H = clf.gradients.hessian(svm)
         H += 1e-9 * CArray.eye(s + 1)
@@ -219,8 +219,9 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         gt += v
 
         # propagating gradient back to input space
-        return gt if clf.preprocess is None else gt.dot(clf.preprocess.gradient(
-            xc0)).ravel()
+        return gt if clf.preprocess is None else gt.dot(
+            clf.preprocess.gradient(
+                xc0)).ravel()
         # fixme: change when the preprocessor gradient will take again a
         #  w parameter
         # clf.preprocess.gradient(xc0, gt)
