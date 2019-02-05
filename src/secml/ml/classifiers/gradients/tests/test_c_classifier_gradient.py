@@ -1,9 +1,10 @@
-from secml.utils import CUnitTest
 from abc import ABCMeta, abstractmethod, abstractproperty
+
+from secml.utils import CUnitTest
 from secml.array import CArray
-from secml.ml.features.normalization import CNormalizerMinMax
 from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
+
 
 class CClassifierGradientTestCases(object):
     """Wrapper for TestCClassifierGradient to make unittest.main() work correctly."""
@@ -70,7 +71,7 @@ class CClassifierGradientTestCases(object):
 
                 self.logger.info(
                     "norm(grad - num_grad): %s", str(error))
-                self.assertLess(error, 1e-3,"problematic classifier is " +
+                self.assertLess(error, 1e-3, "problematic classifier is " +
                                 clf_idx)
 
                 for i, elm in enumerate(gradient):
