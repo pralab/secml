@@ -21,7 +21,8 @@ class TestCClassifierGradientBinary(
     def _dataset_creation(self):
         # generate synthetic data
         self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=2,
-                                 n_clusters_per_class=1, random_state=1).load()
+                                 n_clusters_per_class=1,
+                                 random_state=self.seed).load()
         self.dataset_sparse = self.dataset.tosparse()
 
     def _set_tested_classes(self):
