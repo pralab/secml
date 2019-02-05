@@ -27,7 +27,7 @@ class CClassifierGradientTestCases(object):
 
         def setUp(self):
 
-            self.seed = 0
+            self.seed = 2 # 0
 
             self._dataset_creation()
             self._set_tested_classes()
@@ -140,6 +140,12 @@ class CClassifierGradientTestCases(object):
 
         def _clf_gradient_L_params_check(self, clf, clf_idx):
 
+            if not hasattr(clf, 'gradients'):
+                self.logger.info("The computation of the loss fucntion "
+                                 "w.r.t. the parameter has not been "
+                                 "implmented yet for this classifier")
+                return
+
             self.clf = clf
             params = clf.gradients._params(clf)
 
@@ -150,12 +156,6 @@ class CClassifierGradientTestCases(object):
             self.logger.info("P {:}: x {:}, y {:}".format(i, x, y))
 
             # Compare the analytical grad with the numerical grad
-            if not hasattr(clf, 'gradients'):
-                self.logger.info("The computation of the loss fucntion "
-                                 "w.r.t. the parameter has not been "
-                                 "implmented yet for this classifier")
-                return
-
             gradient = clf.gradients.L_tot_d_params(x, y, clf).ravel()
             num_gradient = COptimizer(
                 CFunction(self._fun_L_args,
