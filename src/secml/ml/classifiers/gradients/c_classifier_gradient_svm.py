@@ -47,9 +47,9 @@ class CClassifierGradientSVM(CClassifierGradient):
         s = xs.shape[0]
         k = xk.shape[0]
 
-        Kks_ext = CArray.ones(shape=(k, s + 1))
-        Kks_ext[:, :s] = clf.kernel.k(xk, xs)
-        return Kks_ext
+        Ksk_ext = CArray.ones(shape=(s + 1, k))
+        Ksk_ext[:s,:] = clf.kernel.k(xs, xk)
+        return Ksk_ext # (s + 1) * k
 
     def fd_x(self, alpha_c, xc, xk, clf):
         """
@@ -72,7 +72,7 @@ class CClassifierGradientSVM(CClassifierGradient):
         xk = xk if clf.preprocess is None else clf.preprocess.normalize(xk)
 
         dKkc = alpha_c * clf.kernel.gradient(xk, xc)
-        return dKkc.T # d * k
+        return dKkc.T  # d * k
 
     def L_tot_d_params(self, x, y, clf):
         raise NotImplementedError()

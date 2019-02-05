@@ -188,7 +188,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
 
         s = xs.shape[0]
 
-        fd_params = svm.gradients.fd_params(xk, clf).T
+        fd_params = svm.gradients.fd_params(xk, clf)
         #grad_loss_params = fd_params.dot(-grad_loss_fk)
         grad_loss_params = fd_params.dot(grad_loss_fk)
 
