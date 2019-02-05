@@ -141,7 +141,7 @@ class CClassifierGradientLinear(CClassifierGradient):
         """
         Classifier parameters
         """
-        return clf.w.append(CArray([clf.b]), axis=None)
+        return clf.w.append(CArray(clf.b), axis=None)
 
     def _change_params(self, params, clf):
         new_clf = clf.deepcopy()
