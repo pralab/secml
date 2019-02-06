@@ -175,6 +175,8 @@ class CAttackPoisoningSVM(CAttackPoisoning):
 
         # gt is the gradient in feature space
         # this gradient component is the only one if margin SV set is empty
+        # gt is the derivative of the loss computed on a validation
+        # set w.r.t. xc
         Kd_xc = svm.gradients.Kd_xc(clf, alpha_c, xc, xk)
         gt = Kd_xc.dot(grad_loss_fk).ravel()  # gradient of the loss w.r.t. xc
 
@@ -188,6 +190,8 @@ class CAttackPoisoningSVM(CAttackPoisoning):
 
         s = xs.shape[0]
 
+        # derivative of the loss computed on a validation set w.r.t. the
+        # classifier params
         fd_params = svm.gradients.fd_params(clf, xk)
         #grad_loss_params = fd_params.dot(-grad_loss_fk)
         grad_loss_params = fd_params.dot(grad_loss_fk)
