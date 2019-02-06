@@ -41,10 +41,20 @@ class CClassifierGradient(CCreator):
         raise NotImplementedError()
 
     @abstractmethod
-    def L_tot_d_params(self, clf, x, y):
+    def L_tot_d_params(self, clf, x, y, loss=None):
         """
         Derivative of the classifier loss function (regularizer
         included) w.r.t. the classifier parameters
+
+        Parameters
+        ----------
+        x : CArray
+            features of the dataset on which the loss is computed
+        y :  CArray
+            features of the training samples
+        loss: None (default) or CLoss
+            If the loss is equal to None (default) the classifier loss is used
+            to compute the derivative.
         """
         raise NotImplementedError()
 
