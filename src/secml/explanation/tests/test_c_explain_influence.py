@@ -1,5 +1,3 @@
-
-
 from secml.explanation import CExplainerLocalInfluence
 from secml.array import CArray
 from secml.ml.classifiers import CClassifierSVM
