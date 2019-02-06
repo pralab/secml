@@ -20,28 +20,28 @@ class CClassifierGradient(CCreator):
         return self._loss
 
     @abstractmethod
-    def hessian(self, x, y, clf):
+    def hessian(self, clf, x, y):
         """
         Compute hessian of the loss w.r.t. the classifier parameters
         """
         raise NotImplementedError()
 
     @abstractmethod
-    def fd_params(self, x):
+    def fd_params(self, clf, x):
         """
         Derivative of the discriminant function w.r.t. the classifier
         parameters
         """
         raise NotImplementedError()
 
-    def fd_x(self, x=None, y=1):
+    def fd_x(self, clf, x=None, y=1):
         """
         Derivative of the discriminant function w.r.t. an input sample
         """
         raise NotImplementedError()
 
     @abstractmethod
-    def L_tot_d_params(self, x, y, clf):
+    def L_tot_d_params(self, clf, x, y):
         """
         Derivative of the classifier loss function (regularizer
         included) w.r.t. the classifier parameters

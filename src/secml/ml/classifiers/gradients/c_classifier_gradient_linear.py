@@ -38,7 +38,7 @@ class CClassifierGradientLinear(CClassifierGradient):
         d = CArray.ones((1, k))
         return d
 
-    def fd_params(self, x, clf):
+    def fd_params(self, clf, x):
         """
         Derivative of the discriminant function w.r.t. the classifier
         parameters
@@ -51,20 +51,20 @@ class CClassifierGradientLinear(CClassifierGradient):
         d = fd_w.append(fd_b, axis=0)
         return d
 
-    def fd_x(self, x=None, y=1):
+    def fd_x(self, clf, x=None, y=1):
         """
         Derivative of the discriminant function w.r.t. an input sample
         """
         # Gradient sign depends on input label (0/1)
-        return convert_binary_labels(y) * self.w
+        return convert_binary_labels(y) * clf.w
 
-    def dreg_s(self, w):
+    def dreg_s(self, clf):
         """
         Derivative of the regularizer w.r.t. the score
         """
-        return self._reg.dregularizer(w)
+        return self._reg.dregularizer(clf.w)
 
-    def L_tot_d_params(self, x, y, clf):
+    def L_tot_d_params(self, clf, x, y):
         """
         Derivative of the classifier classifier loss function (regularizer
         included) w.r.t. the classifier parameters

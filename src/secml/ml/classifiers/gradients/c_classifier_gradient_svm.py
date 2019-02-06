@@ -25,7 +25,7 @@ class CClassifierGradientSVM(CClassifierGradient):
 
         return H
 
-    def fd_params(self, xk, clf):
+    def fd_params(self, clf, xk):
         """
         Derivative of the discriminant function w.r.t. the classifier
         parameters
@@ -51,7 +51,7 @@ class CClassifierGradientSVM(CClassifierGradient):
         Ksk_ext[:s, :] = clf.kernel.k(xs, xk)
         return Ksk_ext  # (s + 1) * k
 
-    def fd_x(self, alpha_c, xc, xk, clf):
+    def fd_x(self, clf, alpha_c, xc, xk):
         """
         Derivative of the discriminant function w.r.t. an input sample
 
@@ -74,7 +74,7 @@ class CClassifierGradientSVM(CClassifierGradient):
         dKkc = alpha_c * clf.kernel.gradient(xk, xc)
         return dKkc.T  # d * k
 
-    def L_tot_d_params(self, x, y, clf):
+    def L_tot_d_params(self, clf, x, y):
         """
         Derivative of the classifier classifier loss function (regularizer
         included) w.r.t. the classifier parameters
@@ -87,7 +87,7 @@ class CClassifierGradientSVM(CClassifierGradient):
             features of the training samples
         """
         # compute the loss derivative w.r.t. alpha
-        fd_params = self.fd_params(x, clf)  # (s + 1) * n_samples
+        fd_params = self.fd_params(clf, x)  # (s + 1) * n_samples
         scores = clf.decision_function(x)
         dL_s = self._loss.dloss(y, score=scores).atleast_2d()
         dL_params = dL_s * fd_params  # (s + 1) * n_samples

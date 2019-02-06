@@ -31,7 +31,7 @@ class CClassifierGradientLogisticRegression(CClassifierGradientLinear):
         s = CArray(s)
         return 1.0 / (1.0 + (-y * s).exp())
 
-    def hessian(self, x, y, clf):
+    def hessian(self, clf, x, y):
         """
         Compute hessian of the loss w.r.t. the classifier parameters
         """
