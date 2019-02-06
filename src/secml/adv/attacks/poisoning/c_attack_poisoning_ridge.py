@@ -130,7 +130,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         H += 1e-9 * (CArray.eye(d + 1))
 
         # # compute the derivatives of the classifier discriminant function
-        fd_params = self.classifier.gradients.fd_params(xk, clf)
+        fd_params = self.classifier.gradients.fd_params(clf, xk)
         grad_loss_params = fd_params.dot(grad_loss_fk)
 
         # import time

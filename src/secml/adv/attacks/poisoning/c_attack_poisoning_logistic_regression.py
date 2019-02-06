@@ -120,7 +120,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
             raise ValueError("Error: The classifier does not have neither C "
                              "nor alpha")
 
-        H = clf.gradients.hessian(tr.X, tr.Y, clf)
+        H = clf.gradients.hessian(clf, tr.X, tr.Y)
 
         # change vector dimensions to match the mathematical formulation...
 
@@ -146,7 +146,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
 
         G = C * (dwx_c.append(dbx_c, axis=1))
 
-        fd_params = self.classifier.gradients.fd_params(xk, clf)
+        fd_params = self.classifier.gradients.fd_params(clf, xk)
         grad_loss_params = fd_params.dot(grad_loss_fk)
 
         gt = self._compute_grad_inv(G, H, grad_loss_params)
