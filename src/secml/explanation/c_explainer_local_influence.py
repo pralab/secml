@@ -115,7 +115,7 @@ class CExplainerLocalInfluence(CExplainerLocal):
             self._grad_inner_loss_params = self.grad_inner_loss_params(
                 self._tr.X, self._tr.Y)
 
-        v = self.grad_outer_loss_params(x_ts, y_ts).T.dot(self._inv_H).dot(
+        v = - self.grad_outer_loss_params(x_ts, y_ts).T.dot(self._inv_H).dot(
             self._grad_inner_loss_params)
 
         return v
