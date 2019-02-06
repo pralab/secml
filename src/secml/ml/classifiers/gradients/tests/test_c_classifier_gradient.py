@@ -4,7 +4,7 @@ from secml.utils import CUnitTest
 from secml.array import CArray
 from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
-
+from secml.ml.classifiers.gradients.tests.utils import CClassifierGradientTest
 
 class CClassifierGradientTestCases(object):
     """Wrapper for TestCClassifierGradient to make unittest.main() work correctly."""
@@ -116,7 +116,7 @@ class CClassifierGradientTestCases(object):
                 if arg_key != 'clf':
                     new_args[arg_key] = args_dict[arg_key]
                 else:
-                    clf = self.clf.gradients._change_params(params, self.clf)
+                    clf = self.clf_gradients.change_params(params, self.clf)
                     new_args['clf'] = clf
             new_args = (new_args,)
             print "new args ",  new_args
@@ -128,7 +128,7 @@ class CClassifierGradientTestCases(object):
             """
             new_args = self._change_clf_params_in_args(args, params)
 
-            return self.clf.gradients._L_tot(**new_args[0])
+            return self.clf_gradients.L_tot(**new_args[0])
 
         def _grad_L_params_args(self, params, *args):
             """
@@ -136,7 +136,7 @@ class CClassifierGradientTestCases(object):
             """
             new_args = self._change_clf_params_in_args(self, args, params)
 
-            return self.clf.gradients.L_tot_d_params( **new_args[0]).ravel()
+            return self.clf_gradients.L_tot_d_params( **new_args[0]).ravel()
 
         def _clf_gradient_L_params_check(self, clf, clf_idx):
 
@@ -147,7 +147,9 @@ class CClassifierGradientTestCases(object):
                 return
 
             self.clf = clf
-            params = clf.gradients._params(clf)
+            self.clf_gradients = CClassifierGradientTest.create(
+                clf.class_type,clf.gradients)
+            params = self.clf_gradients.params(clf)
 
             smpls_idx = CArray.arange(self.dataset.num_samples)
             i = self.dataset.X.randsample(smpls_idx, 1, random_state=self.seed)
