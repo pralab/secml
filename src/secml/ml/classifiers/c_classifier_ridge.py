@@ -11,7 +11,7 @@ from sklearn.linear_model import RidgeClassifier
 from secml.ml.classifiers import CClassifierLinear
 from secml.array import CArray
 from secml.ml.kernel import CKernel
-
+from secml.ml.classifiers.gradients import CClassifierGradientRidge
 
 class CClassifierRidge(CClassifierLinear):
     """Ridge Classifier.
@@ -43,6 +43,8 @@ class CClassifierRidge(CClassifierLinear):
 
         self._tr = None  # slot for the training data
 
+        self._gradients = CClassifierGradientRidge()
+
     def __clear(self):
         """Reset the object."""
         self._tr = None
@@ -57,6 +59,10 @@ class CClassifierRidge(CClassifierLinear):
             return False
 
         return True
+
+    @property
+    def gradients(self):
+        return self._gradients
 
     @property
     def kernel(self):

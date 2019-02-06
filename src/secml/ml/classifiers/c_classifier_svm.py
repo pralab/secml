@@ -12,6 +12,7 @@ from secml.array import CArray
 from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.ml.kernel import CKernel
+from secml.ml.classifiers.gradients import CClassifierGradientSVM
 
 
 class CClassifierSVM(CClassifierLinear):
@@ -84,6 +85,13 @@ class CClassifierSVM(CClassifierLinear):
         # slot for the computed kernel function (to speed up multiclass)
         # DO NOT CLEAR
         self._k = None
+
+        self._gradients = CClassifierGradientSVM()
+
+    @property
+    def gradients(self):
+        return self._gradients
+
 
     def __clear(self):
         """Reset the object."""
@@ -239,6 +247,29 @@ class CClassifierSVM(CClassifierLinear):
     def sv(self):
         """Support Vectors."""
         return self._sv
+
+    def s(self, tol=1e-6):
+        """Indices of margin support vectors."""
+        s = self.alpha.find(
+            (abs(self.alpha) >= tol) *
+            (abs(self.alpha) <= self.C - tol))
+        return CArray(s)
+
+    def xs(self):
+        """Margin support vectors"""
+        s = self.s()
+
+        if s.size == 0:
+            return None, None
+
+        xs = self.sv[s, :].atleast_2d()
+        return xs, s
+
+    def ys(self):
+        """Margin support vector labels"""
+        ys = self.alpha.sign()
+        ys = CArray(ys[self.s()])
+        return ys
 
     def fit(self, dataset, n_jobs=1):
         """Fit the SVM classifier.
