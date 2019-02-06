@@ -15,4 +15,4 @@ class CClassifierGradientTestLogisticRegression(CClassifierGradientTestLinear):
     This class implement different functionalities which are useful to test
     the CClassifierGradientLogisticRegression class.
     """
-    class_type = 'logistic'
+    __class_type = 'logistic'
