@@ -1,15 +1,11 @@
-from secml.utils import CUnitTest
-
-import numpy.testing as npt
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml.pytorch.classifiers import CClassifierPyTorchMLP
 from secml.data.loader import CDLRandom
 from secml.ml.peval.metrics import CMetricAccuracy
-from secml.optimization import COptimizer
-from secml.optimization.function import CFunction
 
 
-class TestCClassifierPyTorchMLP(CUnitTest):
+class TestCClassifierPyTorchMLP(CClassifierTestCases):
 
     def setUp(self):
 
@@ -193,13 +189,6 @@ class TestCClassifierPyTorchMLP(CUnitTest):
 
         self.logger.info("Output of get_layer_output:\n{:}".format(out))
 
-    def _fun_args(self, x, *args):
-        return self.clf.decision_function(x, **args[0])
-
-    def _grad_args(self, x, *args):
-        """Wrapper needed as gradient_f_x have **kwargs"""
-        return self.clf.gradient_f_x(x, **args[0])
-
     def test_gradient(self):
         """Test for extracting gradient."""
         self.clf.verbose = 0
@@ -211,24 +200,10 @@ class TestCClassifierPyTorchMLP(CUnitTest):
         layer = None
         self.logger.info("Testing gradients for layer: {:}".format(layer))
 
-        for c in self.ds.classes:
+        # Comparing with numerical gradient
+        self._test_gradient_numerical(self.clf, x, epsilon=1e-1)
 
-            self.logger.info("Gradient w.r.t. class {:}".format(c))
-
-            grad = self.clf.gradient_f_x(x, y=c, layer=layer)
-
-            self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
-
-            check_grad_val = COptimizer(
-                CFunction(self._fun_args, self._grad_args)).check_grad(
-                    x, ({'y': c}), epsilon=1e-1)
-            self.logger.info(
-                "norm(grad - num_grad): %s", str(check_grad_val))
-            self.assertLess(check_grad_val, 1e-3)
-
-            self.assertTrue(grad.is_vector_like)
-            self.assertEqual(x.size, grad.size)
-
+        # Test gradient at specific layer
         layer = 'linear1'
         self.logger.info("Returning output for layer: {:}".format(layer))
         out = self.clf.get_layer_output(x, layer=layer)
@@ -337,4 +312,4 @@ class TestCClassifierPyTorchMLP(CUnitTest):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CClassifierTestCases.main()

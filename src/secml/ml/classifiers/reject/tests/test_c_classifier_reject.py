@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from secml.utils import CUnitTest
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml import _NoValue
 from secml.array import CArray
@@ -9,10 +9,9 @@ from secml.ml.peval.metrics import CMetric
 
 
 class CClassifierRejectTestCases(object):
-    """Wrapper for TestCClassifierReject to make unittest.main() work correctly."""
 
-    class TestCClassifierReject(CUnitTest):
-        """Unit test for CClassifierSafetynet"""
+    class TestCClassifierReject(CClassifierTestCases):
+        """Unit test for CClassifierReject"""
         __metaclass__ = ABCMeta
 
         @abstractmethod
@@ -200,3 +199,15 @@ class CClassifierRejectTestCases(object):
                 rej_acc, acc, "The accuracy of the classifier that is allowed "
                               "to reject is lower than the one of the "
                               "classifier that is not allowed to reject")
+
+        # FIXME: RESTORE AFTER FIXING GRADIENT OF CCLASSSIFIERREJECTDETECTOR (#283)
+        # def test_gradient(self):
+        #     """Unittest for gradient_f_x method."""
+        #     # Training the classifier
+        #     clf = self.clf.fit(self.dataset)
+        #
+        #     import random
+        #     pattern = CArray(random.choice(self.dataset.X.get_data()))
+        #     self.logger.info("Randomly selected pattern:\n%s", str(pattern))
+        #
+        #     self._test_gradient_numerical(clf, pattern)
