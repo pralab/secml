@@ -11,7 +11,7 @@ class CExplainerLocalInfluence(CExplainerLocal):
     __metaclass__ = ABCMeta
     __super__ = "CExplainInfluence"
 
-    def __init__(self, clf, tr, outer_loss_idx='logistic'):
+    def __init__(self, clf, tr, outer_loss_idx='log'):
 
         self._clf = clf
         self._tr = tr
