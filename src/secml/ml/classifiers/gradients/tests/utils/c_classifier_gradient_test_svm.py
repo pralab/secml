@@ -15,7 +15,7 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
     This class implement different functionalities which are useful to test
     the CClassifierGradientSVM class.
     """
-    class_type = 'svm'
+    __class_type = 'svm'
 
     def _L_tot(self, x, y, clf):
         """

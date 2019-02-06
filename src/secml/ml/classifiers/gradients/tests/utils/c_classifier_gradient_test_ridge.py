@@ -15,4 +15,4 @@ class CClassifierGradientTestRidge(CClassifierGradientTestLinear):
     This class implement different functionalities which are useful to test
     the CClassifierGradientRidge class.
     """
-    class_type = 'ridge'
+    __class_type = 'ridge'
