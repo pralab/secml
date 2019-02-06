@@ -107,7 +107,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         xk = self._ts.X.atleast_2d()
         x = tr.X.atleast_2d()
 
-        H = clf.gradients.hessian(x, clf)
+        H = clf.gradients.hessian(clf, x)
 
         grad_loss_fk = CArray(loss_grad.ravel()).T  # column vector
 
