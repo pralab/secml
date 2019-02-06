@@ -1,6 +1,8 @@
+
+
 from secml.explanation import CExplainerLocalInfluence
 from secml.array import CArray
-from secml.ml.classifiers import CClassifierLogistic, CClassifierRidge, CClassifierSVM
+from secml.ml.classifiers import CClassifierSVM
 from secml.data.loader import CDataLoaderMNIST
 from secml.data.splitter import CDataSplitterKFold
 
@@ -31,15 +33,18 @@ def create_mnist_dataset(digits=[4, 9], n_tr=50, n_val=1000, n_ts=1000,
 
     return tr, val, ts
 
+
 tr, val, ts = create_mnist_dataset()
-#clf = CClassifierSVM()
-#clf.store_dual_vars = True
-#clf = CClassifierLogistic()
-clf = CClassifierRidge()
+clf = CClassifierSVM()
+clf.store_dual_vars = True
+# clf = CClassifierLogistic()
+# clf = CClassifierRidge()
 clf.fit(tr)
 
 clf_loss = clf.gradients._loss.class_type
 explanation = CExplainerLocalInfluence(clf, tr, outer_loss_idx=clf_loss)
+
+
 
 ts_sample_infl = explanation.explain(ts.X, ts.Y)
 
