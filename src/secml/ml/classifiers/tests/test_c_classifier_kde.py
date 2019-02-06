@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from . import CClassifierTestCases
 
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierKDE
@@ -8,7 +8,7 @@ from secml.ml.features.normalization import CNormalizerMinMax
 from secml.figure import CFigure
 
 
-class TestCClassifierKDE(CUnitTest):
+class TestCClassifierKDE(CClassifierTestCases):
     """Unit test for CClassifierKDE."""
 
     def setUp(self):
@@ -167,6 +167,18 @@ class TestCClassifierKDE(CUnitTest):
         self.assertFalse(
             (df_scores_pos != CArray(scores[:, 1]).ravel()).any())
 
+    def test_gradient(self):
+        """Unittest for `gradient_f_x` method."""
+
+        self.kde.fit(self.dataset)
+
+        import random
+        pattern = CArray(random.choice(self.dataset.X.get_data()))
+        self.logger.info("Randomly selected pattern:\n%s", str(pattern))
+
+        # Comparison with numerical gradient
+        self._test_gradient_numerical(self.kde, pattern)
+
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CClassifierTestCases.main()
