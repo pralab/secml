@@ -85,8 +85,8 @@ class CExplainerLocalInfluence(CExplainerLocal):
         """
         H = self.hessian(x_ts, y_ts)
 
-        d = x_ts.shape[1]
-        H += 1e-9 * (CArray.eye(d + 1))
+        p = H.shape[0]
+        H += 1e-9 * (CArray.eye(p))
 
         if self._inv_H is None:
             # compute hessian inverse
