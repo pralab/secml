@@ -22,14 +22,14 @@ class CClassifierGradientTest(CCreator):
         self.gradients = gradients
 
     @abstractproperty
-    def _params(self):
+    def params(self):
         """
         Classifier parameters
         """
         raise NotImplementedError()
 
     @abstractmethod
-    def _L_tot(self, x, y, clf):
+    def L_tot(self, x, y, clf):
         """
         Classifier total loss
         L_tot = loss computed on the training samples + regularizer
@@ -37,7 +37,7 @@ class CClassifierGradientTest(CCreator):
         raise NotImplementedError()
 
     @abstractmethod
-    def _change_params(self, params, clf):
+    def change_params(self, params, clf):
         """
         Return a deepcopy of the given classifier with the value of the
         parameters changed

@@ -17,7 +17,7 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
     """
     __class_type = 'svm'
 
-    def _L_tot(self, x, y, clf):
+    def L_tot(self, x, y, clf):
         """
         Classifier total loss
         L_tot = loss computed on the training samples + regularizer
@@ -36,14 +36,14 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
 
         return loss
 
-    def _params(self, clf):
+    def params(self, clf):
         """
         Classifier parameters
         """
         margin_sv_idx = clf.s()  # get the idx of the margin support vector
         return clf.alpha[margin_sv_idx].append(CArray(clf.b), axis=None)
 
-    def _change_params(self, params, clf):
+    def change_params(self, params, clf):
         """
         Return a deepcopy of the given classifier with the value of the
         parameters changed

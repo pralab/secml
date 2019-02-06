@@ -16,7 +16,7 @@ class CClassifierGradientTestLinear(CClassifierGradientTest):
     the CClassifierGradientSVM class.
     """
 
-    def _L_tot(self, x, y, clf):
+    def L_tot(self, x, y, clf):
         """
         Classifier total loss
         L_tot = loss computed on the training samples + regularizer
@@ -36,13 +36,13 @@ class CClassifierGradientTestLinear(CClassifierGradientTest):
 
         return loss
 
-    def _params(self, clf):
+    def params(self, clf):
         """
         Classifier parameters
         """
         return clf.w.append(CArray(clf.b), axis=None)
 
-    def _change_params(self, params, clf):
+    def change_params(self, params, clf):
         """
         Return a deepcopy of the given classifier with the value of the
         parameters changed
