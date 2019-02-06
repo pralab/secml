@@ -175,8 +175,8 @@ class CAttackPoisoningSVM(CAttackPoisoning):
 
         # gt is the gradient in feature space
         # this gradient component is the only one if margin SV set is empty
-        df_xc = svm.gradients.fd_x(clf, alpha_c, xc, xk)
-        gt = df_xc.dot(grad_loss_fk).ravel()  # gradient of the loss w.r.t. xc
+        Kd_xc = svm.gradients.Kd_xc(clf, alpha_c, xc, xk)
+        gt = Kd_xc.dot(grad_loss_fk).ravel()  # gradient of the loss w.r.t. xc
 
         xs, sv_idx = clf.xs()  # these points are already normalized
 

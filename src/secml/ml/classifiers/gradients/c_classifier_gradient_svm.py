@@ -51,9 +51,9 @@ class CClassifierGradientSVM(CClassifierGradient):
         Ksk_ext[:s, :] = clf.kernel.k(xs, xk)
         return Ksk_ext  # (s + 1) * k
 
-    def fd_x(self, clf, alpha_c, xc, xk):
+    def Kd_xc(self, clf, alpha_c, xc, xk):
         """
-        Derivative of the discriminant function w.r.t. an input sample
+        Derivative of the kernel w.r.t. a training sample xc
 
         Parameters
         ----------
@@ -103,3 +103,8 @@ class CClassifierGradientSVM(CClassifierGradient):
 
         return grad  # (s +1) * n_samples
 
+    def fd_x(self, clf, x):
+        """
+        Derivative of the discriminant function w.r.t. a test sample
+        """
+        return NotImplementedError()
