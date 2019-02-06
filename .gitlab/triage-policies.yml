@@ -19,18 +19,6 @@ resource_rules:
             - m.melis
           comment: |
             {{author}} This issue is unlabelled after 5 days. It needs attention. Please take care of this before the end of #{2.days.from_now.strftime('%Y-%m-%d')}
-          summarize:
-            title: |
-              #{resource[:type].capitalize} require labels
-            item: |
-              - [ ] [{{title}}]({{web_url}}) {{labels}}
-            redact_confidential_resources: false
-            summary: |
-              The following issues require labels:
-
-              {{items}}
-
-              Please take care of them before the end of #{7.days.from_now.strftime('%Y-%m-%d')}
       - name: RemovePriorityAfterClosing
         conditions:
           date:
