@@ -18,8 +18,8 @@ class CClassifierGradientTest(CCreator):
     __metaclass__ = ABCMeta
     __super__ = 'CClassifierGradientTest'
 
-    def __init__(self, grads_obj):
-        self.grads_obj = grads_obj
+    def __init__(self, gradients):
+        self.gradients = gradients
 
     @abstractproperty
     def _params(self):
