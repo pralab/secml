@@ -1,13 +1,21 @@
-from secml.data.loader import CDLRandom
-from secml.ml.classifiers import CClassifierSVM
-from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.utils import CUnitTest
+
+from secml.data.loader import CDLRandom
+from secml.ml.classifiers.gradients.tests import multiclass_clf_creation
 from test_c_classifier_gradient import CClassifierGradientTestCases
 
 
 class TestCClassifierGradientMulticlass(
     CClassifierGradientTestCases.TestCClassifierGradient):
-    """Test of binary classifiers gradients."""
+    """Test of multiclass classifiers gradients."""
+
+    @property
+    def clf_list(self):
+        return ['OVA']
+
+    @property
+    def clf_creation_function(self):
+        return multiclass_clf_creation
 
     def _dataset_creation(self):
         # generate synthetic data
@@ -16,13 +24,8 @@ class TestCClassifierGradientMulticlass(
 
         self.dataset_sparse = self.dataset.tosparse()
 
-    def _clfs_creation(self):
-        self.clfs = [CClassifierMulticlassOVA(CClassifierSVM)]
-        self.clf_ids = ['OVA']
-
-        for clf in self.clfs:  # Enabling debug output for each classifier
-            clf.verbose = 2
-
+    def _set_tested_classes(self):
+        self.classes = self.dataset.classes
 
 if __name__ == '__main__':
     CUnitTest.main()
