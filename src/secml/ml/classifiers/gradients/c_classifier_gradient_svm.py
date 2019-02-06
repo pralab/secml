@@ -9,7 +9,7 @@ class CClassifierGradientSVM(CClassifierGradient):
     def __init__(self):
         self._loss = CLossHinge()
 
-    def hessian(self, clf):
+    def hessian(self, clf, x, y):
         """
         Compute hessian of the loss w.r.t. the classifier parameters
         """
