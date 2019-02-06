@@ -5,7 +5,7 @@
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 
 from secml.core import CCreator
 
@@ -48,23 +48,9 @@ class CClassifierGradient(CCreator):
         """
         raise NotImplementedError()
 
-    @abstractmethod
-    def _L_tot(self, x, y, clf):
-        """
-        Classifier total loss
-        L_tot = loss computed on the training samples + regularizer
-        """
-        raise NotImplementedError()
-
     def Ld_s(self, w, y, score):
         """
         Derivative of the classifier loss function w.r.t. the score
         """
         return self.loss.dloss(y, score)
 
-    @abstractproperty
-    def _params(self):
-        """
-        Classifier parameters
-        """
-        raise NotImplementedError()
