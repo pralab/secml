@@ -33,7 +33,7 @@ class CClassifierGradientSVM(CClassifierGradient):
         Parameters
         ----------
         xk : CArray
-            features of a validation set
+            features of a dataset
         """
         xs, sv_idx = clf.xs()  # these points are already normalized
 
@@ -82,7 +82,7 @@ class CClassifierGradientSVM(CClassifierGradient):
         dL / d_params = dL / df * df / d_params + dReg / d_params
 
         x : CArray
-            features of the training sample
+            features of the dataset on which the loss is computed
         y :  CArray
             features of the training samples
         """
