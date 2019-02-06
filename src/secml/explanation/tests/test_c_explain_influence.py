@@ -32,9 +32,10 @@ def create_mnist_dataset(digits=[4, 9], n_tr=50, n_val=1000, n_ts=1000,
     return tr, val, ts
 
 tr, val, ts = create_mnist_dataset()
-clf = CClassifierSVM()
+#clf = CClassifierSVM()
+#clf.store_dual_vars = True
 #clf = CClassifierLogistic()
-#clf = CClassifierRidge()
+clf = CClassifierRidge()
 clf.fit(tr)
 
 clf_loss = clf.gradients._loss.class_type
