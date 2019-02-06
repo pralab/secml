@@ -74,22 +74,31 @@ class CClassifierGradientSVM(CClassifierGradient):
         dKkc = alpha_c * clf.kernel.gradient(xk, xc)
         return dKkc.T  # d * k
 
-    def L_tot_d_params(self, clf, x, y):
+    def L_tot_d_params(self, clf, x, y, loss=None):
         """
         Derivative of the classifier classifier loss function (regularizer
         included) w.r.t. the classifier parameters
 
         dL / d_params = dL / df * df / d_params + dReg / d_params
 
+        Parameters
+        ----------
         x : CArray
             features of the dataset on which the loss is computed
         y :  CArray
             features of the training samples
+        loss: None (default) or CLoss
+            If the loss is equal to None (default) the classifier loss is used
+            to compute the derivative.
         """
+
+        if loss is None:
+            loss = self._loss
+
         # compute the loss derivative w.r.t. alpha
         fd_params = self.fd_params(clf, x)  # (s + 1) * n_samples
         scores = clf.decision_function(x)
-        dL_s = self._loss.dloss(y, score=scores).atleast_2d()
+        dL_s = loss.dloss(y, score=scores).atleast_2d()
         dL_params = dL_s * fd_params  # (s + 1) * n_samples
 
         # compute the regularizer derivative w.r.t alpha
