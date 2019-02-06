@@ -42,12 +42,20 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
         self._tr, self._val, self._ts = self._create_mnist_dataset()
 
         self._clf_creation()
+        self._clf.fit(self._tr)
 
         clf_loss = self._clf.gradients._loss.class_type
         explanation = CExplainerLocalInfluence(self._clf, self._tr,
                                                outer_loss_idx=clf_loss)
 
         self.influences = explanation.explain(self._ts.X, self._ts.Y)
+
+
+    def _test_explanation(self):
+
+        self.assertEqual(self.influences.shape,
+                         (self._ts.num_samples,self._tr.num_samples),
+                         "The shape of the influences is wrong!")
 
 
 if __name__ == '__main__':
