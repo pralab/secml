@@ -36,7 +36,7 @@ class CExplainerLocalInfluence(CExplainerLocal):
                                               regularized=False)
         return grad
 
-    def grad_inner_loss_params(self, x, y, clf):
+    def grad_inner_loss_params(self, x, y):
         """
         Compute derivative of the inner training loss function
         for all training points.
