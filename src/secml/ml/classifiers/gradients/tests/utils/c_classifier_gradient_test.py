@@ -35,3 +35,13 @@ class CClassifierGradientTest(CCreator):
         L_tot = loss computed on the training samples + regularizer
         """
         raise NotImplementedError()
+
+    @abstractmethod
+    def _change_params(self, params, clf):
+        """
+        Return a deepcopy of the given classifier with the value of the
+        parameters changed
+        vector
+        """
+        raise NotImplementedError()
+
