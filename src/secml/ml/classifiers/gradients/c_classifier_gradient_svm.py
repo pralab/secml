@@ -1,3 +1,12 @@
+"""
+.. module:: CClassifierGradientSVM
+   :synopsis: Class to compute the gradient of the SVM classifier
+
+    @author: Battista Biggio
+    @author: Ambra Demontis
+
+"""
+
 from secml.array import CArray
 from secml.ml.classifiers.loss import CLossHinge
 from secml.ml.classifiers.gradients import CClassifierGradient
