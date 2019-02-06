@@ -3,14 +3,11 @@ from abc import ABCMeta
 from scipy import linalg
 
 from secml.array import CArray
-from secml.ml.classifiers.gradients import CClassifierGradient
 from secml.ml.classifiers.loss import CLoss
 from secml.explanation import CExplainerLocal
 
 
-# fixme: reckeck if everything is correct where there is a normalizer
-# inside the classifier
-class CExplainInfluence(CExplainerLocal):
+class CExplainerLocalInfluence(CExplainerLocal):
     __metaclass__ = ABCMeta
     __super__ = "CExplainInfluence"
 
@@ -25,21 +22,19 @@ class CExplainInfluence(CExplainerLocal):
         self._outer_loss = CLoss.create(outer_loss_idx,
                                         extend_binary_labels=True)
 
-        self._clf_gradient = CClassifierGradient.create(clf.class_type)
-
     def grad_outer_loss_params(self, x_ts, y_ts):
         """
         Compute derivate of the outer validation loss at test point(s) x
         This is typically not regularized (just an empirical loss function)
+
         :param x: a test point
         :param y: its label
-        :return: dL_params, CArray of shape (d+1) * n_samples
+        :return: dL_params, CArray of shape (n_params +1 ) * n_samples
         """
-        f = self._clf.discriminant_function(x_ts)
-        dl_df = self._outer_loss.dloss(y_ts, f)  # (n_samples,)
-        df_dparams = self._clf_gradient.fd_params(x_ts, self._clf)  # (d+1) *
-        # n_samples
-        return df_dparams * dl_df.atleast_2d()
+        grad = self._clf.gradients.L_d_params(self._clf, x_ts, y_ts,
+                                              loss=self._outer_loss,
+                                              regularized=False)
+        return grad
 
     def grad_inner_loss_params(self, x, y, clf):
         """
@@ -48,7 +43,10 @@ class CExplainInfluence(CExplainerLocal):
         This is normally a regularized loss.
         :return:
         """
-        return self._clf_gradient.Ld_params(x, y, clf)
+        grad = self._clf.gradients.L_d_params(self._clf, x, y,
+                                              loss=self._outer_loss,
+                                              regularized=True)
+        return grad
 
     def hessian(self, x, y):
         """
@@ -56,7 +54,7 @@ class CExplainInfluence(CExplainerLocal):
         :param w:
         :return:
         """
-        return self._clf_gradient.hessian(x, y, self._clf)
+        return self._clf.gradients.hessian(self._clf, x, y)
 
     @property
     def clf(self):
