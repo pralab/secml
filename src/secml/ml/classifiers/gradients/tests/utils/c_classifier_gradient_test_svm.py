@@ -25,7 +25,7 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
 
         # compute the loss on the training samples
         scores = clf.decision_function(x)
-        loss = self._loss.loss(y, score=scores).atleast_2d()
+        loss = self.gradients._loss.loss(y, score=scores).atleast_2d()
 
         xs, margin_sv_idx = clf.xs()
         Kss = clf.kernel.k(xs, xs)

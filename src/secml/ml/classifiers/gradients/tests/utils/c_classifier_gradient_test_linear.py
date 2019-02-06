@@ -24,13 +24,15 @@ class CClassifierGradientTestLinear(CClassifierGradientTest):
         y = y.ravel()
 
         w = CArray(clf.w.ravel()).T  # column vector
-        C = self._C(clf)
+        C = self.gradients._C(clf)
 
         x = x.atleast_2d()
 
         s = clf.decision_function(x)
 
-        loss = C * self._loss.loss(y, score=s) + self._reg.regularizer(w)
+        loss = C * self.gradients._loss.loss(y,
+                                             score=s) + self.gradients._reg.regularizer(
+            w)
 
         return loss
 
