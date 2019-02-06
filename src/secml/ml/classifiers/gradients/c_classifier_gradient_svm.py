@@ -74,7 +74,7 @@ class CClassifierGradientSVM(CClassifierGradient):
         dKkc = alpha_c * clf.kernel.gradient(xk, xc)
         return dKkc.T  # d * k
 
-    def L_tot_d_params(self, clf, x, y, loss):
+    def L_tot_d_params(self, clf, x, y, loss=None):
         """
         Derivative of the classifier classifier loss function (regularizer
         included) w.r.t. the classifier parameters

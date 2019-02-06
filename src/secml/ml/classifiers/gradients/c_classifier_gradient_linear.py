@@ -64,7 +64,7 @@ class CClassifierGradientLinear(CClassifierGradient):
         """
         return self._reg.dregularizer(clf.w)
 
-    def L_tot_d_params(self, clf, x, y, loss):
+    def L_tot_d_params(self, clf, x, y, loss=None):
         """
         Derivative of the classifier classifier loss function (regularizer
         included) w.r.t. the classifier parameters
