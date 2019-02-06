@@ -1,9 +1,9 @@
 """
-.. module:: CClassifierGradientLinear
-   :synopsis: Common interface for the implementations of the logistic
-   regression classifier gradients
+.. module:: CClassifierGradientSVM
+   :synopsis: Class to compute the gradient of the logistic classifier
 
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+    @author: Ambra Demontis
+
 """
 
 from secml.array import CArray

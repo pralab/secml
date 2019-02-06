@@ -1,3 +1,12 @@
+"""
+.. module:: CClassifierGradientSVM
+   :synopsis: Class to compute the gradient of the SVM classifier
+
+    @author: Battista Biggio
+    @author: Ambra Demontis
+
+"""
+
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientLinear
 from secml.ml.classifiers.loss import CLossQuadratic
@@ -20,7 +29,7 @@ class CClassifierGradientRidge(CClassifierGradientLinear):
     def _C(self, clf):
         return 1.0 / clf.alpha
 
-    def hessian(self, clf, x, y):
+    def hessian(self, clf, x, y=None):
         """
         Compute hessian for the current parameters of the trained clf
         """

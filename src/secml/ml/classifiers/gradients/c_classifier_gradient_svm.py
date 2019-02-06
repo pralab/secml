@@ -1,3 +1,12 @@
+"""
+.. module:: CClassifierGradientSVM
+   :synopsis: Class to compute the gradient of the SVM classifier
+
+    @author: Battista Biggio
+    @author: Ambra Demontis
+
+"""
+
 from secml.array import CArray
 from secml.ml.classifiers.loss import CLossHinge
 from secml.ml.classifiers.gradients import CClassifierGradient
@@ -9,7 +18,7 @@ class CClassifierGradientSVM(CClassifierGradient):
     def __init__(self):
         self._loss = CLossHinge()
 
-    def hessian(self, clf, x, y):
+    def hessian(self, clf, x=None, y=None):
         """
         Compute hessian of the loss w.r.t. the classifier parameters
         """
