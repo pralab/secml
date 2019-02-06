@@ -1,5 +1,7 @@
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
+
 from secml.core import CCreator
+
 
 class CExplainer(CCreator):
     """
@@ -11,5 +13,6 @@ class CExplainer(CCreator):
     def __init__(self, clf):
         self._clf = clf
 
+    @abstractmethod
     def explain(self):
         NotImplementedError()
