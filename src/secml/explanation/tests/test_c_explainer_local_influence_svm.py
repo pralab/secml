@@ -9,11 +9,12 @@ class TestCExplainerLocalInfluenceSVM(CExplainerLocalInfluenceTestCases):
     def _clf_creation(self):
         self._clf = CClassifierSVM()
         self._clf.store_dual_vars = True
-        self._clf.fit(self._tr)
 
     def test_explanation(self):
+        self.logger.info("Explain the decisions of an SVM classifier and "
+                         "test if they are reasonable")
+        self._test_explanation()
 
-        self.logger.info(self.influences.shape)
 
 if __name__ == '__main__':
     TestCExplainerLocalInfluenceSVM.main()
