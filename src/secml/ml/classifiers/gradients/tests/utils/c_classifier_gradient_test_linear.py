@@ -43,6 +43,11 @@ class CClassifierGradientTestLinear(CClassifierGradientTest):
         return clf.w.append(CArray(clf.b), axis=None)
 
     def _change_params(self, params, clf):
+        """
+        Return a deepcopy of the given classifier with the value of the
+        parameters changed
+        vector
+        """
         new_clf = clf.deepcopy()
         new_clf._w = params[:-1]
         new_clf._b = params[-1]
