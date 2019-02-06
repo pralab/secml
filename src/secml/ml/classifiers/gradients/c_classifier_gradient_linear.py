@@ -6,10 +6,12 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 """
 
+from abc import abstractmethod
+
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradient
 from secml.ml.classifiers.clf_utils import convert_binary_labels
-from abc import abstractmethod
+
 
 class CClassifierGradientLinear(CClassifierGradient):
     class_type = 'grad_lin'
@@ -64,7 +66,7 @@ class CClassifierGradientLinear(CClassifierGradient):
         """
         return self._reg.dregularizer(clf.w)
 
-    def L_tot_d_params(self, clf, x, y, loss=None):
+    def L_d_params(self, clf, x, y, loss=None, regularized=True):
         """
         Derivative of the classifier classifier loss function (regularizer
         included) w.r.t. the classifier parameters
@@ -83,6 +85,10 @@ class CClassifierGradientLinear(CClassifierGradient):
         loss: None (default) or CLoss
             If the loss is equal to None (default) the classifier loss is used
             to compute the derivative.
+        regularized: boolean
+            If True (default) the loss on which the derivative is computed
+            is the loss on the given samples + the regularizer,
+            which is not considered if the argument is False
         """
 
         if loss is None:
@@ -103,11 +109,12 @@ class CClassifierGradientLinear(CClassifierGradient):
         fd_w = self.fd_w(x)  # d * n_samples
         fd_b = self.fd_b(x)  # 1 * n_samples
 
-        grad_w = C * (loss.dloss(y, score=s).atleast_2d() * fd_w) + \
-                 self._reg.dregularizer(w)
+        grad_w = C * (loss.dloss(y, score=s).atleast_2d() * fd_w)
         grad_b = C * (loss.dloss(y, score=s).atleast_2d() * fd_b)
+
+        if regularized:
+            grad_w += self._reg.dregularizer(w)
 
         grad = grad_w.append(grad_b, axis=0)
 
         return grad  # (d +1) * n_samples
-

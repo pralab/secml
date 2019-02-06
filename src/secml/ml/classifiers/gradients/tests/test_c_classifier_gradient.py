@@ -158,7 +158,7 @@ class CClassifierGradientTestCases(object):
             self.logger.info("P {:}: x {:}, y {:}".format(i, x, y))
 
             # Compare the analytical grad with the numerical grad
-            gradient = clf.gradients.L_tot_d_params(clf, x, y).ravel()
+            gradient = clf.gradients.L_d_params(clf, x, y).ravel()
             num_gradient = COptimizer(
                 CFunction(self._fun_L_args,
                           self._grad_L_params_args)).approx_fprime(

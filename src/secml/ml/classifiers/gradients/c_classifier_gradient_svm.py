@@ -74,7 +74,7 @@ class CClassifierGradientSVM(CClassifierGradient):
         dKkc = alpha_c * clf.kernel.gradient(xk, xc)
         return dKkc.T  # d * k
 
-    def L_tot_d_params(self, clf, x, y, loss=None):
+    def L_d_params(self, clf, x, y, loss=None, regularized=True):
         """
         Derivative of the classifier classifier loss function (regularizer
         included) w.r.t. the classifier parameters
@@ -90,6 +90,10 @@ class CClassifierGradientSVM(CClassifierGradient):
         loss: None (default) or CLoss
             If the loss is equal to None (default) the classifier loss is used
             to compute the derivative.
+        regularized: boolean
+            If True (default) the loss on which the derivative is computed
+            is the loss on the given samples + the regularizer,
+            which is not considered if the argument is False
         """
 
         if loss is None:
@@ -101,14 +105,17 @@ class CClassifierGradientSVM(CClassifierGradient):
         dL_s = loss.dloss(y, score=scores).atleast_2d()
         dL_params = dL_s * fd_params  # (s + 1) * n_samples
 
-        # compute the regularizer derivative w.r.t alpha
-        xs, margin_sv_idx = clf.xs()
-        K = clf.kernel.k(xs, xs)
-        d_reg = 2 * K.dot(clf.alpha[margin_sv_idx].T)  # s * 1
-
-        s = margin_sv_idx.size
         grad = clf.C * dL_params
-        grad[:s, :] += d_reg
+
+        if regularized:
+            # compute the regularizer derivative w.r.t alpha
+            xs, margin_sv_idx = clf.xs()
+            K = clf.kernel.k(xs, xs)
+            d_reg = 2 * K.dot(clf.alpha[margin_sv_idx].T)  # s * 1
+
+            # add the regularizer to the gradient of the alphas
+            s = margin_sv_idx.size
+            grad[:s, :] += d_reg
 
         return grad  # (s +1) * n_samples
 
