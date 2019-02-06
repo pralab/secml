@@ -19,8 +19,7 @@ class CExplainerLocalInfluence(CExplainerLocal):
         self._inv_H = None  # inverse hessian matrix
         self._grad_inner_loss_params = None
 
-        self._outer_loss = CLoss.create(outer_loss_idx,
-                                        extend_binary_labels=True)
+        self._outer_loss = CLoss.create(outer_loss_idx)
 
     def grad_outer_loss_params(self, x_ts, y_ts):
         """
