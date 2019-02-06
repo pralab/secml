@@ -8,10 +8,12 @@
 """
 from abc import abstractmethod
 
+from abc import abstractmethod
+
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradient
 from secml.ml.classifiers.clf_utils import convert_binary_labels
-from abc import abstractmethod
+
 
 class CClassifierGradientLinear(CClassifierGradient):
     __class_type = 'linear'
@@ -122,4 +124,3 @@ class CClassifierGradientLinear(CClassifierGradient):
         grad = grad_w.append(grad_b, axis=0)
 
         return grad  # (d +1) * n_samples
-
