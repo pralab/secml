@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from . import CClassifierTestCases
 
 import numpy as np
 from sklearn.svm import SVC
@@ -10,11 +10,9 @@ from secml.array import CArray
 from secml.ml.classifiers import CClassifierSVM
 from secml.figure import CFigure
 from secml.ml.kernel import *
-from secml.optimization import COptimizer
-from secml.optimization.function import CFunction
 
 
-class TestCClassifierSVM(CUnitTest):
+class TestCClassifierSVM(CClassifierTestCases):
 
     def setUp(self):
 
@@ -221,23 +219,12 @@ class TestCClassifierSVM(CUnitTest):
             svm.fit(self.dataset)
 
             for i in random.sample(xrange(self.dataset.num_samples), 10):
+                # Randomly extract a pattern to test
                 pattern = self.dataset.X[i, :]
-
                 self.logger.info("P {:}: {:}".format(i, pattern))
-
-                # Compare the analytical grad with the numerical grad
-                gradient = svm.gradient_f_x(pattern, y=1)
-                self.logger.info("Gradient: %s", str(gradient))
-                check_grad_val = COptimizer(
-                    CFunction(svm.decision_function,
-                              svm._gradient_f)).check_grad(pattern)
-                self.logger.info(
-                    "norm(grad - num_grad): %s", str(check_grad_val))
-                self.assertLess(check_grad_val, 1e-3,
-                                "problematic kernel is " +
-                                svm.kernel.class_type)
-                for i, elm in enumerate(gradient):
-                    self.assertIsInstance(elm, float)
+                # Run the comparison with numerical gradient
+                # (all classes will be tested)
+                self._test_gradient_numerical(svm, pattern)
 
     def test_margin(self):
         self.logger.info("Testing margin separation of SVM...")
@@ -481,4 +468,4 @@ class TestCClassifierSVM(CUnitTest):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CClassifierTestCases.main()

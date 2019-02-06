@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 import torchvision.transforms as transforms
 
@@ -10,12 +10,12 @@ from secml.pytorch.classifiers import CClassifierPyTorchDenseNetCifar
 from secml.pytorch.models import dl_pytorch_model
 
 
-class TestCClassifierPyTorchDenseNetCifar(CUnitTest):
+class TestCClassifierPyTorchDenseNetCifar(CClassifierTestCases):
 
     @classmethod
     def setUpClass(cls):
 
-        CUnitTest.setUpClass()
+        CClassifierTestCases.setUpClass()
 
         cls._run_train = False  # Training is a long process for dnn, skip
 
@@ -311,4 +311,4 @@ class TestCClassifierPyTorchDenseNetCifar(CUnitTest):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CClassifierTestCases.main()
