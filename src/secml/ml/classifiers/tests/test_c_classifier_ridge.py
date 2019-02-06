@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from . import CClassifierTestCases
 
 from secml.array import CArray
 from secml.ml.classifiers import CClassifierRidge, CClassifierSVM
@@ -9,7 +9,7 @@ from secml.ml.peval.metrics import CMetric
 from secml.figure import CFigure
 
 
-class TestCClassifierRidge(CUnitTest):
+class TestCClassifierRidge(CClassifierTestCases):
     """Unit test for Ridge Classifier."""
 
     def setUp(self):
@@ -240,6 +240,32 @@ class TestCClassifierRidge(CUnitTest):
             with self.assertRaises(ValueError):
                 ridge._decision_function(p_norm, y=0)
 
+    def test_gradient(self):
+        """Unittests for gradient_f_x."""
+        self.logger.info("Testing Ridge.gradient_f_x() method")
+
+        i = 5  # IDX of the point to test
+
+        # Randomly extract a pattern to test
+        pattern = self.dataset.X[i, :]
+        self.logger.info("P {:}: {:}".format(i, pattern))
+
+        for ridge in self.ridges:
+
+            self.logger.info(
+                "Checking gradient for Ridge with kernel: %s", ridge.kernel)
+
+            if hasattr(ridge.kernel, 'gamma'):  # set gamma for poly and rbf
+                ridge.set('gamma', 1e-5)
+            if hasattr(ridge.kernel, 'degree'):  # set degree for poly
+                ridge.set('degree', 3)
+
+            ridge.fit(self.dataset)
+
+            # Run the comparison with numerical gradient
+            # (all classes will be tested)
+            self._test_gradient_numerical(ridge, pattern)
+
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CClassifierTestCases.main()
