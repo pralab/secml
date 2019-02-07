@@ -32,6 +32,8 @@ class CExplainerLocalInfluence(CExplainerLocal):
         self._inv_H = None  # inverse hessian matrix
         self._grad_inner_loss_params = None
 
+        inner_loss_idx = self._clf.gradients._loss.class_type
+        self._inner_loss = CLoss.create(inner_loss_idx)
         self._outer_loss = CLoss.create(outer_loss_idx)
 
     def grad_outer_loss_params(self, x_ts, y_ts):
@@ -56,7 +58,7 @@ class CExplainerLocalInfluence(CExplainerLocal):
         :return:
         """
         grad = self._clf.gradients.L_d_params(self._clf, x, y,
-                                              loss=self._outer_loss,
+                                              loss=self._inner_loss,
                                               regularized=True)
         return grad
 
