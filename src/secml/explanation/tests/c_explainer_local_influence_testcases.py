@@ -112,16 +112,16 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
             less influent
         """
         acc_without_p_infl = self._check_influence(p_inf_idx)
-        self.logger.info("The acc without the point {:} supposed to be "
+        self.logger.info("The loss without the point {:} supposed to be "
                          "one of the most influent is {:}".format(p_inf_idx,
                                                                   acc_without_p_infl))
         acc_without_p_not_infl = self._check_influence(p_not_inf_idx)
-        self.logger.info("The acc without the point {:} supposed to be "
+        self.logger.info("The loss without the point {:} supposed to be "
                          "one of the less influent is {:}".format(
             p_not_inf_idx,
             acc_without_p_not_infl))
 
-        self.assertLess(acc_without_p_infl, acc_without_p_not_infl,
+        self.assertGreater(acc_without_p_infl, acc_without_p_not_infl,
                         "The point that is supposed to be between the "
                         "less influent has a higher influence of the "
                         "point supposed to be between one of the most "
@@ -138,7 +138,7 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
         # in the las ones
         avg_infl_idx = average_influence.argsort()
 
-        n_check = 3
+        n_check = 10
         for i in xrange(1, n_check + 1):
             not_infl_idx = avg_infl_idx[i - 1].item()
             infl_idx = avg_infl_idx[-i].item()
