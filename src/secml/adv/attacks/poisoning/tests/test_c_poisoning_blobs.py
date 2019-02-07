@@ -67,7 +67,7 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
                 exp_idx += clf_idx
                 if normalizer:
                     exp_idx += "_norm"
-                fig.savefig(exp_idx+'.pdf', file_format='pdf')
+                fig.savefig(exp_idx + '.pdf', file_format='pdf')
 
     def test_poisoning_point_fobj_improvement(self):
         """
@@ -99,6 +99,11 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
 
             fobj_x0 = self.poisoning._objective_function(xc=x0)
             fobj_xc = self.poisoning._objective_function(xc=xc)
+
+            self.logger.info(
+                "Objective function before the attack {:}".format(fobj_x0))
+            self.logger.info(
+                "Objective function after the attack {:}".format(fobj_xc))
 
             self.assertLess(fobj_x0, fobj_xc,
                             "The attack does not increase the objective "
