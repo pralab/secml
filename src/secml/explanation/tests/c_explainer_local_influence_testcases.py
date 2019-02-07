@@ -13,7 +13,7 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
 
     def _create_mnist_dataset(self, digits=[4, 9], n_tr=100, n_val=1000,
                               n_ts=1000,
-                              seed=10):
+                              seed=4): #10
         loader = CDataLoaderMNIST()
 
         tr = loader.load('training', digits=digits)
@@ -39,11 +39,20 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
 
         return tr, val, ts
 
+    def _check_accuracy(self):
+        preds = self._clf.predict(self._ts.X)
+        acc = self._metric.performance_score(y_true=self._ts.Y, y_pred=preds)
+        self.logger.info("Classifier accuracy: {:} ".format(acc))
+        self.assertGreater(acc, 0.70)
+
     def setUp(self):
         self._tr, self._val, self._ts = self._create_mnist_dataset()
 
         self._clf_creation()
         self._clf.fit(self._tr)
+
+        self._metric = CMetricAccuracy()
+        self._check_accuracy()
 
         clf_loss = self._clf.gradients._loss.class_type
         explanation = CExplainerLocalInfluence(self._clf, self._tr,
