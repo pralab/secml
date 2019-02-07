@@ -6,6 +6,7 @@ from secml.data.loader import CDataLoaderMNIST
 from secml.data.splitter import CDataSplitterKFold
 from secml.ml.peval.metrics import CMetricAccuracy
 from secml.ml.classifiers.gradients.tests.utils import CClassifierGradientTest
+from secml.ml.features.normalization import CNormalizerMinMax
 
 
 class CExplainerLocalInfluenceTestCases(CUnitTest):
@@ -13,7 +14,7 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
 
     def _create_mnist_dataset(self, digits=[4, 9], n_tr=100, n_val=1000,
                               n_ts=1000,
-                              seed=4): #10
+                              seed=4):  # 10
         loader = CDataLoaderMNIST()
 
         tr = loader.load('training', digits=digits)
@@ -99,9 +100,9 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
         clf_copy.fit(new_dataset)
 
         loss = (1.0 / self._ts.num_samples) * self.clf_gradients.L(self._ts.X,
-                                                                self._ts.Y,
-                                                                clf_copy,
-                                                                regularized=False).sum(
+                                                                   self._ts.Y,
+                                                                   clf_copy,
+                                                                   regularized=False).sum(
             axis=None)
 
         return loss
@@ -131,10 +132,10 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
             acc_without_p_not_infl))
 
         self.assertGreater(acc_without_p_infl, acc_without_p_not_infl,
-                        "The point that is supposed to be between the "
-                        "less influent has a higher influence of the "
-                        "point supposed to be between one of the most "
-                        "influent")
+                           "The point that is supposed to be between the "
+                           "less influent has a higher influence of the "
+                           "point supposed to be between one of the most "
+                           "influent")
 
     def _test_explanation(self):
         self.assertEqual(self.influences.shape,
@@ -152,6 +153,48 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
             not_infl_idx = avg_infl_idx[i - 1].item()
             infl_idx = avg_infl_idx[-i].item()
             self._check_prototype_pair(infl_idx, not_infl_idx)
+
+    def _test_explanation_simple_clf(self):
+        self.logger.info("Explain the decisions of a {:} classifier and "
+                         "test if they are reasonable".format(self._clf_idx))
+        self._test_explanation()
+
+    def _test_explanation_with_normalization(self):
+        self.logger.info("Explain the decisions of a {:} classifier with a "
+                         "normalizer inside and "
+                         "test if they are reasonable".format(self._clf_idx))
+
+        normalizer = CNormalizerMinMax(feature_range=(-10, 10))
+        normalizer.fit(self._tr.X)
+        self._clf.preprocess = normalizer
+
+        self._test_explanation()
+
+    def _test_explanation_with_feat_nn_extraction(self):
+        self.logger.info("Explain the decisions of a {:} classifier with a "
+                         "neural network feature extractor inside and "
+                         "test if they are reasonable".format(self._clf_idx))
+
+        try:
+            from secml.pytorch.normalization import CNormalizerPyTorch
+            from secml.pytorch.classifiers import CClassifierPyTorchMLP
+
+            nn = CClassifierPyTorchMLP(input_dims=20, hidden_dims=(40,),
+                                       output_dims=3,
+                                       weight_decay=0, epochs=10,
+                                       learning_rate=1e-1,
+                                       momentum=0, random_state=0)
+            nn.fit(self._tr)
+            normalizer = CNormalizerPyTorch(nn)
+            normalizer.fit(self._tr.X)
+            self._clf.preprocess = normalizer
+
+            self._test_explanation()
+
+        except:
+            pass
+
+        self._test_explanation()
 
 
 if __name__ == '__main__':
