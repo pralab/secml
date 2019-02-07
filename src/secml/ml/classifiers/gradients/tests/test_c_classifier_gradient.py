@@ -109,7 +109,6 @@ class CClassifierGradientTestCases(object):
             """
             Trick to change the parameters of the classifier in the args
             """
-            print "original args ", args
             new_args = {}
             args_dict = args[0]
             for arg_key in args_dict:
@@ -119,7 +118,6 @@ class CClassifierGradientTestCases(object):
                     clf = self.clf_gradients.change_params(params, self.clf)
                     new_args['clf'] = clf
             new_args = (new_args,)
-            print "new args ",  new_args
             return new_args
 
         def _fun_L_args(self, params, *args):
