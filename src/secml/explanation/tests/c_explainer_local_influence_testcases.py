@@ -169,8 +169,10 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
                          "normalizer inside and "
                          "test if they are reasonable".format(self._clf_idx))
 
-        normalizer = CNormalizerMinMax(feature_range=(-10, 10))
-        normalizer.fit(self._tr.X)
+        self.logger.info("dataset feature min {:}, max{:}".format(
+            self._tr.X.min(axis=None), self._tr.X.max(axis=None)))
+
+        normalizer = CNormalizerMinMax(feature_range=(-2, 2))
         self._clf.preprocess = normalizer
 
         self._test_explanation()
