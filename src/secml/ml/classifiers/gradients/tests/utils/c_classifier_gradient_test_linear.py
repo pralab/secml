@@ -16,10 +16,9 @@ class CClassifierGradientTestLinear(CClassifierGradientTest):
     the CClassifierGradientSVM class.
     """
 
-    def L_tot(self, x, y, clf):
+    def L(self, x, y, clf, regularized = True):
         """
-        Classifier total loss
-        L_tot = loss computed on the training samples + regularizer
+        Classifier loss
         """
         y = y.ravel()
 
@@ -31,8 +30,10 @@ class CClassifierGradientTestLinear(CClassifierGradientTest):
         s = clf.decision_function(x)
 
         loss = C * self.gradients._loss.loss(y,
-                                             score=s) + self.gradients._reg.regularizer(
-            w)
+                                             score=s)
+
+        if regularized:
+            loss += self.gradients._reg.regularizer(w)
 
         return loss
 

@@ -29,10 +29,9 @@ class CClassifierGradientTest(CCreator):
         raise NotImplementedError()
 
     @abstractmethod
-    def L_tot(self, x, y, clf):
+    def L(self, x, y, clf, regularized = True):
         """
-        Classifier total loss
-        L_tot = loss computed on the training samples + regularizer
+        Classifier loss
         """
         raise NotImplementedError()
 

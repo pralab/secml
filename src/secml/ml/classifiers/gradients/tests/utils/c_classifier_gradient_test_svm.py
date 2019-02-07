@@ -17,10 +17,9 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
     """
     __class_type = 'svm'
 
-    def L_tot(self, x, y, clf):
+    def L(self, x, y, clf, regularized = True):
         """
-        Classifier total loss
-        L_tot = loss computed on the training samples + regularizer
+        Classifier  loss
         """
 
         # compute the loss on the training samples
@@ -32,7 +31,10 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
         alpha_s = clf.alpha[margin_sv_idx]
         reg = alpha_s.atleast_2d().dot(Kss.dot(alpha_s.T))
 
-        loss = clf.C * loss + reg
+        loss = clf.C * loss \
+
+        if regularized:
+            loss += reg
 
         return loss
 
