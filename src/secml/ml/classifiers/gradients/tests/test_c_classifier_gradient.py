@@ -128,7 +128,7 @@ class CClassifierGradientTestCases(object):
             """
             new_args = self._change_clf_params_in_args(args, params)
 
-            return self.clf_gradients.L_tot(**new_args[0])
+            return self.clf_gradients.L(**new_args[0])
 
         def _grad_L_params_args(self, params, *args):
             """
@@ -136,7 +136,7 @@ class CClassifierGradientTestCases(object):
             """
             new_args = self._change_clf_params_in_args(self, args, params)
 
-            return self.clf_gradients.L_tot_d_params( **new_args[0]).ravel()
+            return self.clf_gradients.L_d_params( **new_args[0]).ravel()
 
         def _clf_gradient_L_params_check(self, clf, clf_idx):
 
@@ -180,7 +180,7 @@ class CClassifierGradientTestCases(object):
             """Test the gradient of the loss function w.r.t. the classifier
             parameters"""
             self.logger.info(
-                "Testing the gradient of the discriminant function")
+                "Testing the gradient of the loss function")
 
             normalizer_vals = [False, True]
             combinations_list = [(clf_idx, normalizer) for clf_idx in \
