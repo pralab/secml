@@ -7,7 +7,7 @@ class TestCExplainerLocalInfluenceRbfSVM(CExplainerLocalInfluenceTestCases):
     """Unit test for CExplainerLocalInfluenceSVM."""
 
     def _clf_creation(self):
-        self._clf = CClassifierSVM(kernel='rbf', C=0.1)
+        self._clf = CClassifierSVM(kernel='rbf', C=10)
         self._clf.kernel.gamma = 0.01
         self._clf.store_dual_vars = True
 
