@@ -5,6 +5,7 @@ from secml.array import CArray
 from secml.data.loader import CDataLoaderMNIST
 from secml.data.splitter import CDataSplitterKFold
 from secml.ml.peval.metrics import CMetricAccuracy
+from secml.ml.classifiers.gradients.tests.utils import CClassifierGradientTest
 
 
 class CExplainerLocalInfluenceTestCases(CUnitTest):
@@ -50,6 +51,9 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
 
         self.influences = explanation.explain(self._ts.X, self._ts.Y)
 
+        self.clf_gradients = CClassifierGradientTest.create(
+            self._clf.class_type, self._clf.gradients)
+
     def _get_tr_without_point(self, p_idx):
         """
         Given the idx of a point return a copy of the training dataset
@@ -73,8 +77,8 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
 
     def _check_influence(self, point_idx):
         """
-        This function learn the classifier without a point and check the
-        classifier accuracy on the test set.
+        This function learn the classifier without a point and return the
+        classifier loss on the test set.
 
         Parameters
         ----------
@@ -84,9 +88,14 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
         clf_copy = self._clf.deepcopy()
         new_dataset = self._get_tr_without_point(point_idx)
         clf_copy.fit(new_dataset)
-        preds = clf_copy.predict(self._ts.X)
-        acc = self._metric.performance_score(y_true=self._ts.Y, y_pred=preds)
-        return acc
+
+        loss = (1.0 / self._ts.num_samples) * self.clf_gradients.L(self._ts.X,
+                                                                self._ts.Y,
+                                                                clf_copy,
+                                                                regularized=False).sum(
+            axis=None)
+
+        return loss
 
     def _check_prototype_pair(self, p_inf_idx, p_not_inf_idx):
         """
@@ -129,10 +138,8 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
         # in the las ones
         avg_infl_idx = average_influence.argsort()
 
-        self._metric = CMetricAccuracy()
-
         n_check = 3
-        for i in xrange(1, n_check+1):
+        for i in xrange(1, n_check + 1):
             not_infl_idx = avg_infl_idx[i - 1].item()
             infl_idx = avg_infl_idx[-i].item()
             self._check_prototype_pair(infl_idx, not_infl_idx)
