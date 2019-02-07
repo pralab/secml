@@ -655,7 +655,7 @@ class CDLRandomToy(CDataLoader):
                 raise ValueError("you are try to convert to 0 1 label for a "
                                  "dataset with more than 2 classes")
             else:
-                class_list = class_list.sort()
+                class_list.sort()
                 sel_labels[sel_labels == class_list[0]] = 0
                 sel_labels[sel_labels == class_list[1]] = 1
 
