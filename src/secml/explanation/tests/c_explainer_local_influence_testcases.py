@@ -47,20 +47,22 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
         self.assertGreater(acc, 0.70)
 
     def setUp(self):
+
         self._tr, self._val, self._ts = self._create_mnist_dataset()
 
         self._clf_creation()
-        self._clf.fit(self._tr)
+        self._clf_loss = self._clf.gradients._loss.class_type
 
         self._metric = CMetricAccuracy()
+
+    def _compute_influences(self):
+
+        self._clf.fit(self._tr)
         self._check_accuracy()
 
-        clf_loss = self._clf.gradients._loss.class_type
         explanation = CExplainerLocalInfluence(self._clf, self._tr,
-                                               outer_loss_idx=clf_loss)
-
+                                               outer_loss_idx=self._clf_loss)
         self.influences = explanation.explain(self._ts.X, self._ts.Y)
-
         self.clf_gradients = CClassifierGradientTest.create(
             self._clf.class_type, self._clf.gradients)
 
@@ -138,6 +140,9 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
                            "influent")
 
     def _test_explanation(self):
+
+        self._compute_influences()
+
         self.assertEqual(self.influences.shape,
                          (self._ts.num_samples, self._tr.num_samples),
                          "The shape of the influences is wrong!")
