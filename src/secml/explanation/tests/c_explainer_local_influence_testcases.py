@@ -11,7 +11,7 @@ from secml.ml.classifiers.gradients.tests.utils import CClassifierGradientTest
 class CExplainerLocalInfluenceTestCases(CUnitTest):
     """Unittests interface for CExplainerLocalInfluence."""
 
-    def _create_mnist_dataset(self, digits=[4, 9], n_tr=50, n_val=1000,
+    def _create_mnist_dataset(self, digits=[4, 9], n_tr=100, n_val=1000,
                               n_ts=1000,
                               seed=10):
         loader = CDataLoaderMNIST()
