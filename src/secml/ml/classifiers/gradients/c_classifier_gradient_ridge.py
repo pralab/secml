@@ -9,7 +9,7 @@
 
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientLinear
-from secml.ml.classifiers.loss import CLossQuadratic
+from secml.ml.classifiers.loss import CLossSquare
 from secml.ml.classifiers.regularizer import CRegularizerL2
 
 
@@ -17,7 +17,7 @@ class CClassifierGradientRidge(CClassifierGradientLinear):
     class_type = 'ridge'
 
     def __init__(self):
-        self._loss = CLossQuadratic()
+        self._loss = CLossSquare()
         self._reg = CRegularizerL2()
 
     def _g(self, d):
