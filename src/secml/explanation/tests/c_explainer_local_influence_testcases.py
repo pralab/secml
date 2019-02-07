@@ -138,7 +138,7 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
         # in the las ones
         avg_infl_idx = average_influence.argsort()
 
-        n_check = 10
+        n_check = 5
         for i in xrange(1, n_check + 1):
             not_infl_idx = avg_infl_idx[i - 1].item()
             infl_idx = avg_infl_idx[-i].item()
