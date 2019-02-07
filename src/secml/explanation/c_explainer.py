@@ -4,15 +4,25 @@ from secml.core import CCreator
 
 
 class CExplainer(CCreator):
-    """
-    Abstract class for the explainability methods.
-    """
+    """Abstract interface for Explainable ML methods."""
     __metaclass__ = ABCMeta
     __super__ = 'CExplainer'
 
-    def __init__(self, clf):
+    def __init__(self, clf, tr_ds=None):
         self._clf = clf
+        self._tr_ds = tr_ds
+
+    @property
+    def clf(self):
+        """Classifier to explain."""
+        return self._clf
+
+    @property
+    def tr_ds(self):
+        """Training dataset."""
+        return self._tr_ds
 
     @abstractmethod
-    def explain(self):
-        NotImplementedError()
+    def explain(self, *args, **kwargs):
+        """Computes the explanation."""
+        raise NotImplementedError
