@@ -9,6 +9,7 @@ class TestCExplainerLocalInfluenceLogisticRegression(
     def _clf_creation(self):
         self._clf = CClassifierLogistic()
         self._clf_idx = 'logistic regression'
+        self._param_values = {}
 
     def test_explanation(self):
         self._test_explanation_simple_clf()
