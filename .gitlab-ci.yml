@@ -182,7 +182,7 @@ triage:run:
   only:
     - schedules
 
-triage:dry-run:
+triage:run:dry:
   stage: triage
   extends: .triage
   script:
