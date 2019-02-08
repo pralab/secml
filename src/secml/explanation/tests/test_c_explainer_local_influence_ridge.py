@@ -8,6 +8,7 @@ class TestCExplainerLocalInfluenceRidge(CExplainerLocalInfluenceTestCases):
     def _clf_creation(self):
         self._clf = CClassifierRidge()
         self._clf_idx = 'Ridge'
+        self._param_values = {}
 
     def test_explanation(self):
         self._test_explanation_simple_clf()
