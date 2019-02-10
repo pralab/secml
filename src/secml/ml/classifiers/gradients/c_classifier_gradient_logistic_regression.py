@@ -43,7 +43,6 @@ class CClassifierGradientLogisticRegression(CClassifierGradientLinear):
 
         x = x.atleast_2d()
         n = x.shape[0]
-        d = x.shape[1]
 
         # nb: we compute the score before the x normalization as decision
         # function normalizes x
@@ -53,6 +52,8 @@ class CClassifierGradientLogisticRegression(CClassifierGradientLinear):
 
         # handle normalizer, if present
         x = x if clf.preprocess is None else clf.preprocess.normalize(x)
+
+        d = x.shape[1] # number of features in the normalized space
 
         # first derivative wrt b derived w.r.t. w
         diag = z * CArray.eye(n_rows=n, n_cols=n)
