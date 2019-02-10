@@ -38,10 +38,11 @@ class CClassifierGradientRidge(CClassifierGradientLinear):
 
         x = x.atleast_2d()
         n = x.shape[0]
-        d = x.shape[1]
 
         # handle normalizer, if present
         x = x if clf.preprocess is None else clf.preprocess.normalize(x)
+
+        d = x.shape[1]  # number of features in the normalized space
 
         H = CArray.zeros(shape=(d + 1, d + 1))
         Sigma = (x.T).dot(x)
