@@ -838,6 +838,62 @@ class CPlot(CCreator):
             (left, height, width, bottom))
         return self._sp.bar(left, height, width, bottom, *args, **kwargs)
 
+    def barh(self, bottom, width, height=0.8, left=None, *args, **kwargs):
+        """Horizontal bar plot.
+
+        Parameters
+        ----------
+        bottom : sequence of scalars
+            y coordinates of the bars.
+        width : sequence of scalars
+            width(s) of the bars.
+        height : scalar or array-like, optional, default: 0.8
+            height(s) of the bars.
+        left : scalar or array-like, optional, default: None
+            x coordinate(s) of the bars.
+        color : scalar or array-like, optional
+            Colors of the bar faces.
+        edgecolor : scalar or array-like, optional
+            Colors of the bar edges.
+        linewidth : scalar or array-like, optional, default: None
+            Width of bar edge(s). If None, use default linewidth;
+            If 0, don't draw edges.
+        xerr : scalar or array-like, optional, default: None
+            If not None, will be used to generate errorbar(s)
+            on the bar chart.
+        yerr : scalar or array-like, optional, default: None
+            If not None, will be used to generate errorbar(s)
+            on the bar chart.
+        ecolor : scalar or array-like, optional, default: None
+            Specifies the color of errorbar(s)
+        capsize : integer, optional, default: 3
+            Determines the length in points of the error bar caps.
+        error_kw : dict
+            dictionary of kwargs to be passed to errorbar method.
+            ecolor and capsize may be specified here rather than
+            independent kwargs.
+        align : ['edge' | 'center'], optional, default: 'edge'
+            If edge, aligns bars by their left edges (for vertical
+            bars) and by their bottom edges (for horizontal bars).
+            If center, interpret the left argument as the coordinates
+            of the centers of the bars.
+        orientation : 'vertical' | 'horizontal', optional, default: 'vertical'
+            The orientation of the bars.
+        log : boolean, optional, default: False
+            If true, sets the axis to be log scale.
+
+        Returns
+        -------
+        bar_list : list of bar type objects
+
+        """
+        if 'linewidth' not in kwargs:
+            kwargs['linewidth'] = self._params['lines.linewidth']
+        # Convert sequences inside tuple to ndarray
+        bottom, width, height, left = tuple_sequence_tondarray(
+            (bottom, width, height, left))
+        return self._sp.barh(bottom, width, height, left, *args, **kwargs)
+
     def hist(self, x, *args, **kwargs):
         """Plot a histogram.
 
