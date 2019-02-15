@@ -73,7 +73,7 @@ class CDense(_CArrayInterface):
     @property
     def nnz_indices(self):
         """Return a list of list that contain index of non zero elements."""
-        return self.find(self != 0)
+        return map(list, np.nonzero(self.atleast_2d().tondarray()))
 
     @property
     def nnz_data(self):
