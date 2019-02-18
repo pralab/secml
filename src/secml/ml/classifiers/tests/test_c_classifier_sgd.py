@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from . import CClassifierTestCases
 
 import numpy as np
 
@@ -13,7 +13,7 @@ from secml.ml.peval.metrics import CMetric
 from secml.figure import CFigure
 
 
-class TestCClassifierSGD(CUnitTest):
+class TestCClassifierSGD(CClassifierTestCases):
     """Unit test for SGD Classifier."""
 
     def setUp(self):
@@ -36,7 +36,7 @@ class TestCClassifierSGD(CUnitTest):
             kernel=kernel() if kernel is not None else None)
                 for kernel in kernel_types]
         self.logger.info(
-            "Testing SGD with kernel unctions: %s", str(kernel_types))
+            "Testing SGD with kernel functions: %s", str(kernel_types))
 
         for sgd in self.sgds:
             sgd.verbose = 2  # Enabling debug output for each classifier
@@ -282,6 +282,32 @@ class TestCClassifierSGD(CUnitTest):
             with self.assertRaises(ValueError):
                 sgd._decision_function(p_norm, y=0)
 
+    def test_gradient(self):
+        """Unittests for gradient_f_x."""
+        self.logger.info("Testing SGD.gradient_f_x() method")
+
+        i = 5  # IDX of the point to test
+
+        # Randomly extract a pattern to test
+        pattern = self.dataset.X[i, :]
+        self.logger.info("P {:}: {:}".format(i, pattern))
+
+        for sgd in self.sgds:
+
+            self.logger.info(
+                "Checking gradient for SGD with kernel: %s", sgd.kernel)
+
+            if hasattr(sgd.kernel, 'gamma'):  # set gamma for poly and rbf
+                sgd.set('gamma', 1e-5)
+            if hasattr(sgd.kernel, 'degree'):  # set degree for poly
+                sgd.set('degree', 3)
+
+            sgd.fit(self.dataset)
+
+            # Run the comparison with numerical gradient
+            # (all classes will be tested)
+            self._test_gradient_numerical(sgd, pattern)
+
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CClassifierTestCases.main()

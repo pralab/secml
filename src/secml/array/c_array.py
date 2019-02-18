@@ -174,7 +174,7 @@ class CArray(_CArrayInterface):
 
     @property
     def nnz(self):
-        """Number of non-zero array elements.
+        """Number of non-zero values in the array.
 
         Examples
         --------
@@ -239,7 +239,7 @@ class CArray(_CArrayInterface):
           (0, 1)	3)
 
         """
-        return _instance_data(self._data.nnz_data)
+        return self.__class__(self._data.nnz_data).ravel()
 
     @property
     def T(self):
@@ -305,12 +305,7 @@ class CArray(_CArrayInterface):
         False
 
         """
-        if len(self._data.shape) == 1:
-            return True
-        elif len(self._data.shape) == 2 and self._data.shape[0] == 1:
-            return True
-        else:
-            return False
+        return self._data.is_vector_like
 
     # --------------------------- #
     # # # # # # CASTING # # # # # #
@@ -527,19 +522,26 @@ class CArray(_CArrayInterface):
         """Prepare input `idx` for __getitem__ and __setitem__ functions.
 
         If input `idx` is:
-         - tuple, for each CArray in tuple extract buffer (CDense, CSparse)
-         - CArray, extract buffer (CDense, CSparse)
+         - tuple, for each CArray in tuple extract buffer (CDense,
+                  CSparse to be converted to CDense if CArray is dense)
+         - CArray, extract buffer (CDense,
+                   CSparse to be converted to CDense if CArray is dense)
 
         Otherwise return input as is.
 
         """
         if isinstance(idx, tuple):
             # Extracting buffer from CArrays and rebuilding the tuple
-            idx_data = tuple(dim._data if isinstance(dim, self.__class__)
-                             else dim for dim in idx)
+            # idx will be converted to dense if self is dense
+            idx_data = []
+            for dim in idx:
+                if isinstance(dim, self.__class__):
+                    dim = dim.todense()._data if self.isdense else dim._data
+                idx_data.append(dim)
+            idx_data = tuple(idx_data)
 
-        elif isinstance(idx, self.__class__):  # CArray list-like
-            idx_data = idx._data
+        elif isinstance(idx, self.__class__):  # CArray boolean mask
+            idx_data = idx.todense()._data if self.isdense else idx._data
 
         else:  # Nothing to convert
             idx_data = idx
@@ -2719,6 +2721,40 @@ class CArray(_CArrayInterface):
     # ------------- #
     # DATA ANALYSIS #
     # ------------- #
+
+    def get_nnz(self, axis=None):
+        """Counts the number of non-zero values in the array.
+
+        Parameters
+        ----------
+        axis : bool or None, optional
+            Axis or tuple of axes along which to count non-zeros.
+            Default is None, meaning that non-zeros will be counted
+            along a flattened version of the array.
+
+        Returns
+        -------
+        count : CArray or int
+            Number of non-zero values in the array along a given axis.
+            Otherwise, the total number of non-zero values in the
+            array is returned.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> a = CArray([[1,2],[0,5],[0,0],[2,0]])
+        >>> print a.get_nnz()  # Total number of non-zero elements
+        4
+        >>> print a.get_nnz(axis=0)  # Number of non-zero elements for each column
+        CArray([2 2])
+        >>> print a.get_nnz(axis=1)  # Number of non-zero elements for each row
+        CArray([2 1 0 1])
+
+        """
+        out = self._data.get_nnz(axis=axis)
+        # Return a scalar if axis is None, CArray otherwise
+        return out if axis is None else self.__class__(out)
 
     def unique(self, return_index=False,
                return_inverse=False, return_counts=False):

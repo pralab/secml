@@ -9,6 +9,7 @@
 """
 from sklearn.linear_model import RidgeClassifier
 from secml.ml.classifiers import CClassifierLinear
+from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.array import CArray
 from secml.ml.kernel import CKernel
 from secml.ml.classifiers.gradients import CClassifierGradientRidge
@@ -38,7 +39,7 @@ class CClassifierRidge(CClassifierLinear):
         self.fit_intercept = fit_intercept
 
         # Similarity function (bound) to use for computing features
-        # Keep private (not a param of SGD)
+        # Keep private (not a param of RIDGE)
         self._kernel = kernel if kernel is None else CKernel.create(kernel)
 
         self._tr = None  # slot for the training data
@@ -59,6 +60,18 @@ class CClassifierRidge(CClassifierLinear):
             return False
 
         return True
+
+    def is_linear(self):
+        """Return True if the classifier is linear."""
+        if super(CClassifierRidge, self).is_linear() and self.is_kernel_linear():
+            return True
+        return False
+
+    def is_kernel_linear(self):
+        """Return True if the kernel is None or linear."""
+        if self.kernel is None or self.kernel.class_type == 'linear':
+            return True
+        return False
 
     @property
     def gradients(self):
@@ -135,7 +148,7 @@ class CClassifierRidge(CClassifierLinear):
             self._tr = dataset.X
 
         # Storing the training matrix for kernel mapping
-        if self.kernel is None:
+        if self.is_kernel_linear():
             # Training classifier
             ridge.fit(dataset.X.get_data(), dataset.Y.tondarray())
         else:
@@ -170,6 +183,57 @@ class CClassifierRidge(CClassifierLinear):
         """
         x = x.atleast_2d()  # Ensuring input is 2-D
         # Compute decision function in kernel space if necessary
-        k = x if self.kernel is None else CArray(self.kernel.k(x, self._tr))
+        k = x if self.is_kernel_linear() else CArray(self.kernel.k(x, self._tr))
         # Scores are given by the linear model
         return CClassifierLinear._decision_function(self, k, y=y)
+
+    def _gradient_f(self, x=None, y=1):
+        """Computes the gradient of the linear classifier's decision function
+         wrt decision function input.
+
+        For linear classifiers, the gradient wrt input is equal
+        to the weights vector w. The point x can be in fact ignored.
+
+        Parameters
+        ----------
+        x : CArray or None, optional
+            The gradient is computed in the neighborhood of x.
+        y : int, optional
+            Binary index of the class wrt the gradient must be computed.
+            Default is 1, corresponding to the positive class.
+
+        Returns
+        -------
+        gradient : CArray
+            The gradient of the linear classifier's decision function
+            wrt decision function input. Vector-like array.
+
+        """
+        x = x.atleast_2d()
+
+        if self.is_kernel_linear():  # Simply return w for a linear Ridge
+            return CClassifierLinear._gradient_f(self, y=y)
+
+        # Point is required in the case of non-linear Ridge
+        if x is None:
+            raise ValueError("point 'x' is required to compute the gradient")
+
+        gradient = self.kernel.gradient(self._tr, x).atleast_2d()
+
+        # Few shape check to ensure broadcasting works correctly
+        if gradient.shape != (self._tr.shape[0], self.n_features):
+            raise ValueError("Gradient shape must be ({:}, {:})".format(
+                x.shape[0], self.n_features))
+
+        w_2d = self.w.atleast_2d()
+        if gradient.issparse is True:  # To ensure the sparse dot is used
+            w_2d = w_2d.tosparse()
+        if w_2d.shape != (1, self._tr.shape[0]):
+            raise ValueError("Weight vector shape must be ({:}, {:}) "
+                             "or ravel equivalent".format(1, self._tr.shape[0]))
+
+        gradient = w_2d.dot(gradient)
+
+        # Gradient sign depends on input label (0/1)
+        return convert_binary_labels(y) * gradient.ravel()
+

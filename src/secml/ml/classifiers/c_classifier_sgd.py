@@ -13,8 +13,9 @@ from secml.core.constants import inf
 from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.loss import CLoss
 from secml.ml.classifiers.regularizer import CRegularizer
-from secml.ml.kernel import CKernel
 from secml.ml.classifiers.clf_utils import convert_binary_labels
+from secml.ml.kernel import CKernel
+
 
 class CClassifierSGD(CClassifierLinear):
     """Stochastic Gradient Descent Classifier.
@@ -77,6 +78,18 @@ class CClassifierSGD(CClassifierLinear):
             return False
 
         return True
+
+    def is_linear(self):
+        """Return True if the classifier is linear."""
+        if super(CClassifierSGD, self).is_linear() and self.is_kernel_linear():
+            return True
+        return False
+
+    def is_kernel_linear(self):
+        """Return True if the kernel is None or linear."""
+        if self.kernel is None or self.kernel.class_type == 'linear':
+            return True
+        return False
 
     @property
     def loss(self):
@@ -208,7 +221,7 @@ class CClassifierSGD(CClassifierLinear):
             self._tr = dataset.X
 
         # Storing the training matrix for kernel mapping
-        if self.kernel is None:
+        if self.is_kernel_linear():
             # Training SGD classifier
             sgd.fit(self._tr.get_data(), dataset.Y.tondarray())
         else:
@@ -248,15 +261,9 @@ class CClassifierSGD(CClassifierLinear):
         """
         x = x.atleast_2d()  # Ensuring input is 2-D
         # Compute decision function in kernel space if necessary
-        k = x if self.kernel is None else CArray(self.kernel.k(x, self._tr))
+        k = x if self.is_kernel_linear() else CArray(self.kernel.k(x, self._tr))
         # Scores are given by the linear model
         return CClassifierLinear._decision_function(self, k, y=y)
-
-    def is_kernel_linear(self):
-        """Return True if the kernel is None or linear."""
-        if self.kernel.class_type == 'linear':
-            return True
-        return False
 
     def _gradient_f(self, x=None, y=1):
         """Computes the gradient of the linear classifier's decision function

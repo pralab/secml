@@ -73,25 +73,30 @@ class TestCArrayIndexing(CArrayTestCases.TestCArray):
             self.logger.info("Testing getters for matrix: \n" + str(array))
 
             selectors_unique = [2, np.ravel(2)[0], [2, 2], CArray([2, 2]),
-                                slice(1, 3), [False, True, True], CArray([False, True, True])]
+                                CArray([[2, 2]]), CArray([2, 2], tosparse=True),
+                                slice(1, 3), [False, True, True],
+                                CArray([False, True, True])]
             selectors = itertools.product(selectors_unique, repeat=2)
 
             targets_a = [CArray([[0]]), CArray([[0]]),   # 2
                          CArray([[0, 0]]), CArray([[0, 0]]),
+                         CArray([[0, 0]]), CArray([[0, 0]]),
                          CArray([[6, 0]]), CArray([[6, 0]]), CArray([[6, 0]])
                          ]
             targets_b = [CArray([[0], [0]]), CArray([[0], [0]]),   # [2, 2]
-                         CArray([[0, 0], [0, 0]]),
-                         CArray([[0, 0], [0, 0]]), CArray([[6, 0], [6, 0]]),
+                         CArray([[0, 0], [0, 0]]), CArray([[0, 0], [0, 0]]),
+                         CArray([[0, 0], [0, 0]]), CArray([[0, 0], [0, 0]]),
+                         CArray([[6, 0], [6, 0]]),
                          CArray([[6, 0], [6, 0]]), CArray([[6, 0], [6, 0]])
                          ]
             targets_c = [CArray([[6], [0]]), CArray([[6], [0]]),   # [False, True, True]
-                         CArray([[6, 6], [0, 0]]),
-                         CArray([[6, 6], [0, 0]]), CArray([[4, 6], [6, 0]]),
+                         CArray([[6, 6], [0, 0]]), CArray([[6, 6], [0, 0]]),
+                         CArray([[6, 6], [0, 0]]), CArray([[6, 6], [0, 0]]),
+                         CArray([[4, 6], [6, 0]]),
                          CArray([[4, 6], [6, 0]]), CArray([[4, 6], [6, 0]])
                          ]
 
-            targets = 2 * targets_a + 2 * targets_b + 3 * targets_c
+            targets = 2 * targets_a + 4 * targets_b + 3 * targets_c
 
             test_selectors(array, selectors, targets)
 
@@ -221,20 +226,23 @@ class TestCArrayIndexing(CArrayTestCases.TestCArray):
 
             self.logger.info("Testing setters for matrix: \n" + str(array))
 
-            selectors_unique = [2, np.ravel(2)[0], [1, 2], CArray([1, 2]),
-                                slice(1, 3), [False, True, True], CArray([False, True, True])]
+            selectors_unique = [2, np.ravel(2)[0],
+                                [1, 2], CArray([1, 2]),
+                                CArray([[1, 2]]), CArray([1, 2], tosparse=True),
+                                slice(1, 3), [False, True, True],
+                                CArray([False, True, True])]
             selectors = itertools.product(selectors_unique, repeat=2)
 
-            assignments_a = [10, 10] + 3 * [CArray([[10, 20]])] + 2 * [CArray([10, 20])]
+            assignments_a = [10, 10] + 5 * [CArray([[10, 20]])] + 2 * [CArray([10, 20])]
             assignments_b = [CArray([[10], [20]])] + [CArray([[10], [20]], tosparse=True)] + \
-                            5 * [CArray([[10, 20], [30, 40]])]
-            assignments = 2 * assignments_a + 5 * assignments_b
+                             7 * [CArray([[10, 20], [30, 40]])]
+            assignments = 2 * assignments_a + 7 * assignments_b
 
             targets_a = 2 * [CArray([[1, 2, 0], [2, 4, 6], [0, 6, 10]])] + \
-                        5 * [CArray([[1, 2, 0], [2, 4, 6], [0, 10, 20]])]
+                        7 * [CArray([[1, 2, 0], [2, 4, 6], [0, 10, 20]])]
             targets_b = 2 * [CArray([[1, 2, 0], [2, 4, 10], [0, 6, 20]])] + \
-                        5 * [CArray([[1, 2, 0], [2, 10, 20], [0, 30, 40]])]
-            targets = 2 * targets_a + 5 * targets_b
+                        7 * [CArray([[1, 2, 0], [2, 10, 20], [0, 30, 40]])]
+            targets = 2 * targets_a + 7 * targets_b
 
             test_selectors(array, selectors, assignments, targets)
 
