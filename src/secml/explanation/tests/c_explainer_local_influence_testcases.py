@@ -167,19 +167,6 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
                          "test if they are reasonable".format(self._clf_idx))
         self._test_explanation()
 
-    def _test_explanation_with_normalization(self):
-        self.logger.info("Explain the decisions of a {:} classifier with a "
-                         "normalizer inside and "
-                         "test if they are reasonable".format(self._clf_idx))
-
-        self.logger.info("dataset feature min {:}, max {:}".format(
-            self._tr.X.min(axis=None), self._tr.X.max(axis=None)))
-
-        normalizer = CNormalizerMinMax(feature_range=(-10, 10))
-        self._clf.preprocess = normalizer
-
-        self._test_explanation()
-
     def _test_explanation_with_feat_nn_extraction(self):
         self.logger.info("Explain the decisions of a {:} classifier with a "
                          "neural network feature extractor inside and "
