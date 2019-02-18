@@ -10,7 +10,6 @@ class TestCExplainerLocalInfluenceLinSVM(CExplainerLocalInfluenceTestCases):
         self._clf = CClassifierSVM()
         self._clf.store_dual_vars = True
         self._clf_idx = 'lin-svm'
-        self._param_values = {}
 
     def test_explanation(self):
         self._test_explanation_simple_clf()
@@ -20,7 +19,6 @@ class TestCExplainerLocalInfluenceLinSVM(CExplainerLocalInfluenceTestCases):
 
     def test_explanation_with_feat_nn_extraction(self):
         self._test_explanation_with_feat_nn_extraction()
-
         self._test_explanation()
 
 
