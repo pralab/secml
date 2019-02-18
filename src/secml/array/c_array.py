@@ -305,12 +305,7 @@ class CArray(_CArrayInterface):
         False
 
         """
-        if len(self._data.shape) == 1:
-            return True
-        elif len(self._data.shape) == 2 and self._data.shape[0] == 1:
-            return True
-        else:
-            return False
+        return self._data.is_vector_like
 
     # --------------------------- #
     # # # # # # CASTING # # # # # #
@@ -527,19 +522,26 @@ class CArray(_CArrayInterface):
         """Prepare input `idx` for __getitem__ and __setitem__ functions.
 
         If input `idx` is:
-         - tuple, for each CArray in tuple extract buffer (CDense, CSparse)
-         - CArray, extract buffer (CDense, CSparse)
+         - tuple, for each CArray in tuple extract buffer (CDense,
+                  CSparse to be converted to CDense if CArray is dense)
+         - CArray, extract buffer (CDense,
+                   CSparse to be converted to CDense if CArray is dense)
 
         Otherwise return input as is.
 
         """
         if isinstance(idx, tuple):
             # Extracting buffer from CArrays and rebuilding the tuple
-            idx_data = tuple(dim._data if isinstance(dim, self.__class__)
-                             else dim for dim in idx)
+            # idx will be converted to dense if self is dense
+            idx_data = []
+            for dim in idx:
+                if isinstance(dim, self.__class__):
+                    dim = dim.todense()._data if self.isdense else dim._data
+                idx_data.append(dim)
+            idx_data = tuple(idx_data)
 
-        elif isinstance(idx, self.__class__):  # CArray list-like
-            idx_data = idx._data
+        elif isinstance(idx, self.__class__):  # CArray boolean mask
+            idx_data = idx.todense()._data if self.isdense else idx._data
 
         else:  # Nothing to convert
             idx_data = idx

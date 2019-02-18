@@ -87,6 +87,26 @@ class CDense(_CArrayInterface):
         """Transpose array data"""
         return self.transpose()
 
+    @property
+    def is_vector_like(self):
+        """True if array is vector-like.
+
+        An array is vector-like when 1-Dimensional or
+        2-Dimensional with shape[0] == 1.
+
+        Returns
+        -------
+        bool
+            True if array is vector-like.
+
+        """
+        if len(self.shape) == 1:
+            return True
+        elif len(self.shape) == 2 and self.shape[0] == 1:
+            return True
+        else:
+            return False
+
     # --------------------------- #
     # # # # # # CASTING # # # # # #
     # ----------------------------#
@@ -250,7 +270,9 @@ class CDense(_CArrayInterface):
             for e_i, e in enumerate(idx_list):
                 # Check each tuple element and convert to ndarray
                 if isinstance(e, CDense):
-                    idx_list[e_i] = e.tondarray()
+                    if not e.is_vector_like:
+                        raise IndexError("invalid index shape")
+                    idx_list[e_i] = e.tondarray().ravel()
                     # Check the size of any boolean array inside tuple
                     t = [None, None]  # Fake index for booleans check
                     t[e_i] = idx_list[e_i]
