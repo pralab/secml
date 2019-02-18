@@ -239,7 +239,7 @@ class CArray(_CArrayInterface):
           (0, 1)	3)
 
         """
-        return _instance_data(self._data.nnz_data)
+        return self.__class__(self._data.nnz_data).ravel()
 
     @property
     def T(self):

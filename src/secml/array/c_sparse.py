@@ -73,8 +73,8 @@ class CSparse(_CArrayInterface):
     def nnz_data(self):
         """Return non zero elements."""
         if len(self.nnz_indices[0]) == 0:
-            return self.__class__([])
-        return self[self.nnz_indices]
+            return CDense([])
+        return self[self.nnz_indices].todense()
 
     @property
     def T(self):
