@@ -45,7 +45,7 @@ class _CArrayInterface(object):
 
     @abstractproperty
     def nnz(self):
-        """Number of non-zero array elements."""
+        """Number of non-zero values in the array."""
         raise NotImplementedError
 
     @abstractproperty
@@ -432,6 +432,11 @@ class _CArrayInterface(object):
     # ------------- #
     # DATA ANALYSIS #
     # ------------- #
+
+    @abstractmethod
+    def get_nnz(self, axis=None):
+        """Counts the number of non-zero values in the array."""
+        raise NotImplementedError
 
     @abstractmethod
     def unique(self, return_index=False,

@@ -61,7 +61,7 @@ class CSparse(_CArrayInterface):
 
     @property
     def nnz(self):
-        """Returns the number of non-zero elements."""
+        """Number of non-zero values in the array."""
         return self._data.nnz
 
     @property
@@ -1225,6 +1225,28 @@ class CSparse(_CArrayInterface):
     # ------------- #
     # DATA ANALYSIS #
     # ------------- #
+
+    def get_nnz(self, axis=None):
+        """Counts the number of non-zero values in the array.
+
+        Parameters
+        ----------
+        axis : bool or None, optional
+            Axis or tuple of axes along which to count non-zeros.
+            Default is None, meaning that non-zeros will be counted
+            along a flattened version of the array.
+
+        Returns
+        -------
+        count : CDense or int
+            Number of non-zero values in the array along a given axis.
+            Otherwise, the total number of non-zero values in the
+            array is returned.
+
+        """
+        # Result is dense (one element for each row/column)
+        res = self.tocsr().getnnz(axis=axis)
+        return CDense(res) if axis is not None else res
 
     def unique(self, return_index=False,
                return_inverse=False, return_counts=False):
