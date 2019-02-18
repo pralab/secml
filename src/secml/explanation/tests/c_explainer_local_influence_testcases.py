@@ -58,11 +58,6 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
 
     def _compute_influences(self):
 
-        self._clf.estimate_parameters(self._val,
-                                      parameters=self._param_values,
-                                      splitter=self._splitter,
-                                      metric=self._metric)
-
         self._clf.fit(self._tr)
 
         self._check_accuracy()
@@ -107,10 +102,6 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
         clf_copy = self._clf.deepcopy()
         new_dataset = self._get_tr_without_point(point_idx)
 
-        clf_copy.estimate_parameters(self._val,
-                                     parameters=self._param_values,
-                                     splitter=self._splitter,
-                                     metric=self._metric)
         clf_copy.fit(new_dataset)
 
         loss = (1.0 / self._ts.num_samples) * self.clf_gradients.L(self._ts.X,
