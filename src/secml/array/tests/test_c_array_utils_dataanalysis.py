@@ -11,6 +11,49 @@ from secml.core.constants import nan, inf
 class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
     """Unit test for CArray UTILS - DATA ANALYSIS methods."""
 
+    def test_get_nnz(self):
+        """Test for CArray.get_nnz()."""
+        self.logger.info("Testing CArray.get_nnz() method")
+
+        def check_nnz(array, expected):
+            self.logger.info("array:\n{:}".format(array))
+            for ax_i, ax in enumerate((None, 0, 1)):
+                res = array.get_nnz(axis=ax)
+                self.logger.info("get_nnz(axis={:}):\n{:}".format(ax, res))
+
+                if ax is None:
+                    self.assertIsInstance(res, int)
+                    self.assertEquals(res, expected[ax_i])
+                else:
+                    self.assertIsInstance(res, CArray)
+                    self.assertEqual(1, res.ndim)
+                    if ax == 0:
+                        self.assertEqual(array.shape[1], res.size)
+                    elif ax == 1:
+                        self.assertEqual(array.shape[0], res.size)
+                    self.assertFalse((res != expected[ax_i]).any())
+
+        check_nnz(self.array_sparse,
+                  (6, CArray([3, 2, 0, 1]), CArray([2, 2, 2])))
+        check_nnz(self.row_sparse,
+                  (2, CArray([1, 0, 1]), CArray([2])))
+        check_nnz(self.column_sparse,
+                  (2, CArray([2]), CArray([1, 0, 1])))
+
+        check_nnz(self.array_dense,
+                  (6, CArray([3, 2, 0, 1]), CArray([2, 2, 2])))
+        check_nnz(self.row_dense,
+                  (2, CArray([1, 0, 1]), CArray([2])))
+        check_nnz(self.column_dense,
+                  (2, CArray([2]), CArray([1, 0, 1])))
+
+        check_nnz(self.single_dense, (1, CArray([1]), CArray([1])))
+        check_nnz(self.single_sparse, (1, CArray([1]), CArray([1])))
+
+        # Empty arrays have shape (1, 0)
+        check_nnz(self.empty_dense, (0, CArray([]), CArray([0])))
+        check_nnz(self.empty_sparse, (0, CArray([]), CArray([0])))
+
     def test_unique(self):
         """Test for CArray.unique() method."""
         self.logger.info("Test for CArray.unique() method")
