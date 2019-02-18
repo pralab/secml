@@ -13,7 +13,7 @@ class TestCExplainerLocalInfluenceRbfSVM(CExplainerLocalInfluenceTestCases):
 
     def test_explanation(self):
         self._clf.C = 10
-        set._clf.kernel.gamma= 0.01
+        self._clf.kernel.gamma= 0.01
         self._test_explanation_simple_clf()
 
     # def test_explanation_with_normalization(self):
