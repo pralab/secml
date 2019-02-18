@@ -79,8 +79,7 @@ class CSparse(_CArrayInterface):
     @property
     def nnz_indices(self):
         """Return a list of list that contain index of non zero elements."""
-        return [self.nnz_row_indices.tolist(),
-                self.nnz_column_indices.tolist()]
+        return map(list, self.tocsr().nonzero())
 
     @property
     def nnz_data(self):
