@@ -14,9 +14,6 @@ class TestCExplainerLocalInfluenceLinSVM(CExplainerLocalInfluenceTestCases):
     def test_explanation(self):
         self._test_explanation_simple_clf()
 
-    # def test_explanation_with_normalization(self):
-    #     self._test_explanation_with_normalization()
-
     def test_explanation_with_feat_nn_extraction(self):
         self._test_explanation_with_feat_nn_extraction()
         self._test_explanation()
