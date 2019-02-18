@@ -62,7 +62,7 @@ class CSparse(_CArrayInterface):
     @property
     def nnz(self):
         """Number of non-zero values in the array."""
-        return self._data.nnz
+        return self.get_nnz()
 
     @property
     def nnz_indices(self):
