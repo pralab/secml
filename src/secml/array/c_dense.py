@@ -1484,6 +1484,28 @@ class CDense(_CArrayInterface):
         return self.__class__(out).ravel() if \
             self.ndim <= 1 or keepdims is False else self.__class__(out)
 
+    def sha1(self):
+        """Calculate the sha1 hexadecimal hash of array.
+
+        Returns
+        -------
+        hash : str
+            Hexadecimal hash of array.
+
+        """
+        import hashlib
+        x = self.tondarray()
+
+        h = hashlib.new('sha1')
+
+        # Hash by taking into account shape and data
+        h.update(str(x.shape))
+        # The returned sha1 could be different for same data
+        # but different memory order. Use C order to be consistent
+        h.update(np.ascontiguousarray(x))
+
+        return h.hexdigest()
+
     # ----------------- #
     # MATH ELEMENT-WISE #
     # ----------------- #
