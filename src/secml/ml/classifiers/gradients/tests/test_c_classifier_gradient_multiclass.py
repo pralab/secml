@@ -27,5 +27,6 @@ class TestCClassifierGradientMulticlass(
     def _set_tested_classes(self):
         self.classes = self.dataset.classes
 
+
 if __name__ == '__main__':
     CUnitTest.main()

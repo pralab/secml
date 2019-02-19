@@ -14,6 +14,7 @@ from secml.array import CArray
 from secml.ml.kernel import CKernel
 from secml.ml.classifiers.gradients import CClassifierGradientRidge
 
+
 class CClassifierRidge(CClassifierLinear):
     """Ridge Classifier.
 

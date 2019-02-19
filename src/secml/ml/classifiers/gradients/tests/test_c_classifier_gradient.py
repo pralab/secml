@@ -6,6 +6,7 @@ from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
 from secml.ml.classifiers.gradients.tests.utils import CClassifierGradientTest
 
+
 class CClassifierGradientTestCases(object):
     """Wrapper for TestCClassifierGradient to make unittest.main() work correctly."""
 

@@ -92,7 +92,6 @@ class CClassifierSVM(CClassifierLinear):
     def gradients(self):
         return self._gradients
 
-
     def __clear(self):
         """Reset the object."""
         self._n_sv = None

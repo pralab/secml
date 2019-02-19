@@ -4,6 +4,7 @@ from test_c_classifier_gradient import CClassifierGradientTestCases
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers.gradients.tests import binary_clf_creation
 
+
 class TestCClassifierGradientBinary(
     CClassifierGradientTestCases.TestCClassifierGradient):
     """Compare the analytical and the numerical gradient of binary
