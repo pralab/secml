@@ -1228,6 +1228,70 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
         with self.assertRaises(NotImplementedError):
             self.array_sparse.median()
 
+    def test_sha1(self):
+        """Test for CArray.sha1() method."""
+        self.logger.info("Test for CArray.prod() method.")
+
+        def _check_sha1(array):
+            self.logger.info("Array:\n{:}".format(array))
+
+            sha1 = array.sha1()
+            self.logger.info("array.sha1():\n{:}".format(sha1))
+
+            self.assertIsInstance(sha1, str)
+
+            # Transpose the array and check if sha1 changes if shape changes
+            array_mod = array.T
+            self.logger.info(
+                "Checking hash after transpose:\n{:}".format(array_mod))
+            sha1_mod = array_mod.sha1()
+            self.logger.info("array_mod.sha1():\n{:}".format(sha1_mod))
+            if array_mod.shape != array.shape:
+                self.assertNotEqual(sha1, sha1_mod)
+            else:  # If shape didn't change (empty or single elem array)
+                self.assertEqual(sha1, sha1_mod)
+
+            # Change dtype and check if sha1 changes if data changes
+            newtype = int if array.dtype != int else float
+            array_mod = array.astype(newtype)
+            self.logger.info("Checking hash after changing dtype to "
+                             "{:}:\n{:}".format(newtype, array_mod))
+            sha1_mod = array_mod.sha1()
+            self.logger.info("array_mod.sha1():\n{:}".format(sha1_mod))
+            if array_mod.size > 0:
+                self.assertNotEqual(sha1, sha1_mod)
+            else:  # Empty array, no data to change. has should be the same
+                self.assertEqual(sha1, sha1_mod)
+
+            return sha1
+
+        sha1_list = [
+            _check_sha1(self.array_sparse),
+            _check_sha1(self.array_dense),
+            _check_sha1(self.array_dense_bool),
+            _check_sha1(self.array_sparse_bool),
+            _check_sha1(self.row_flat_dense),
+            _check_sha1(self.row_dense),
+            _check_sha1(self.row_sparse),
+            _check_sha1(self.column_dense),
+            _check_sha1(self.column_sparse),
+            _check_sha1(self.single_flat_dense),
+            _check_sha1(self.single_dense),
+            _check_sha1(self.single_sparse),
+            _check_sha1(self.single_bool_flat_dense),
+            _check_sha1(self.single_bool_dense),
+            _check_sha1(self.single_bool_sparse),
+            _check_sha1(self.empty_flat_dense),
+            _check_sha1(self.empty_dense),
+            _check_sha1(self.empty_sparse)
+        ]
+
+        # We now check that all the collected hashes are different
+        # as each test case was different
+        import itertools
+        for a, b in itertools.combinations(sha1_list, 2):
+            self.assertNotEqual(a, b)
+
 
 if __name__ == '__main__':
     CUnitTest.main()

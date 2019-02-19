@@ -539,6 +539,11 @@ class _CArrayInterface(object):
         """Compute the standard deviation along the specified axis."""
         raise NotImplementedError
 
+    @abstractmethod
+    def sha1(self):
+        """Calculate the sha1 hexadecimal hash of array."""
+        raise NotImplementedError
+
     # ----------------- #
     # MATH ELEMENT-WISE #
     # ----------------- #
