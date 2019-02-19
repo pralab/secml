@@ -47,5 +47,5 @@ class CExplainerLocalLinear(CExplainer):
         """
         attr = self.clf.w.deepcopy()  # Attributions are just the weights
         self.logger.debug(
-            "Attributions:\n{:}".format(attr.tolist()))
+            "Attributions:\n{:}".format(attr))
         return attr
