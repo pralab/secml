@@ -97,7 +97,7 @@ class CExplainerLocalIntegratedGradients(CExplainer):
             a = (x - reference) * (1.0 / m) * riemman_approx
 
             self.logger.debug(
-                "Attributions for class {:}:\n{:}".format(c, attr.tolist()))
+                "Attributions for class {:}:\n{:}".format(c, attr))
 
             # Checks prop 1: attr should adds up to the difference between
             # the score at the input and that at the reference
