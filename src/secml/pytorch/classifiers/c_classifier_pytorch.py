@@ -982,7 +982,7 @@ class CClassifierPyTorch(CClassifier):
         if layer is None and self.softmax_outputs is True:
             out_carray = CArray(
                 out.squeeze(0).data.cpu().numpy()).astype(float)
-            softmax_grad = CSoftmax().gradient(out_carray, pos_label=y)
+            softmax_grad = CSoftmax().gradient(out_carray, y=y)
             w_in *= self._to_tensor(softmax_grad.atleast_2d()).unsqueeze(0)
         elif w is not None and y is not None:
             # Inform the user y has not been used
