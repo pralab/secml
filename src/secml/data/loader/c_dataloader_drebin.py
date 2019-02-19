@@ -69,6 +69,13 @@ class CDataLoaderDrebin(CDataLoader):
     __class_type = 'drebin'
     __lock = Lock()  # Lock to prevent multiple parallel download/extraction
 
+    # Dataset specific infos
+    FEAT_FAMILY_MAPPING = FEAT_FAMILY_MAPPING
+    FEAT_FAMILY_MAPPING_INVERTED = FEAT_FAMILY_MAPPING_INVERTED
+    DEXCODE_FAMILIES = DEXCODE_FAMILIES
+    MANIFEST_FAMILIES = MANIFEST_FAMILIES
+    OBFUSCATION_MAPPING = OBFUSCATION_MAPPING
+
     def __init__(self):
 
         # Path dataset files
