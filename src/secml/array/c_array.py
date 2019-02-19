@@ -3922,6 +3922,24 @@ class CArray(_CArrayInterface):
         else:
             return self.__class__(out)
 
+    def sha1(self):
+        """Calculate the sha1 hexadecimal hash of array.
+
+        Returns
+        -------
+        hash : str
+            Hexadecimal hash of array.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> print CArray([0,1,3]).sha1()
+        e2c9088d290d4817e38dc7adfef9c984fbab1a6a
+
+        """
+        return self._data.sha1()
+
     # ----------------- #
     # MATH ELEMENT-WISE #
     # ----------------- #
