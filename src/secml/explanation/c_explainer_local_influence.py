@@ -17,6 +17,11 @@ class CExplainerLocalInfluence(CExplainerLocal):
     """
     Compute the influence function as it has been defined in:
     "Understanding Black-box Predictions via Influence Functions" by Koh et al.
+    
+    Attributes
+    ----------
+    class_type : 'influence'
+    
     """
     __class_type = 'influence'
 
