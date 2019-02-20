@@ -11,9 +11,7 @@ from secml.array import CArray
 
 
 class CAttackPoisoningSVM(CAttackPoisoning):
-    """Class providing a common interface to CSolver classes."""
-
-    class_type = 'kkt-svm'
+    __class_type = 'kkt-svm'
 
     def __init__(self, classifier,
                  training_data,

@@ -13,7 +13,7 @@ from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
 class CAttackPoisoningRidge(CAttackPoisoning):
-    class_type = 'kkt-ridge'
+    __class_type = 'kkt-ridge'
 
     def __init__(self, classifier,
                  training_data,

@@ -12,7 +12,7 @@ from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
 class CAttackPoisoningLogisticRegression(CAttackPoisoning):
-    class_type = 'kkt-lr'
+    __class_type = 'kkt-lr'
 
     def __init__(self, classifier,
                  training_data,
