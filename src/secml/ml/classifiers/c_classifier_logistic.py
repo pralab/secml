@@ -17,7 +17,7 @@ from secml.ml.classifiers.gradients import \
 
 class CClassifierLogistic(CClassifierLinear):
     """Gradient Descent Classifier."""
-    class_type = 'logistic'
+    __class_type = 'logistic'
 
     def __init__(self, C=1.0, max_iter=100, random_seed=None, preprocess=None):
 
