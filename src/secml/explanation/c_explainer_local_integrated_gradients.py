@@ -38,7 +38,12 @@ class CExplainerLocalIntegratedGradients(CExplainer):
     tr_ds : CDataset
         Training dataset of the classifier to explain.
 
+    Attributes
+    ----------
+    class_type : 'integrated-gradients'
+
     """
+    __class_type = 'integrated-gradients'
 
     def explain(self, x, reference=None, m=50, classes='all'):
         """Computes the explanation for input sample.
