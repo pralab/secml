@@ -6,9 +6,6 @@
 .. moduleauthor:: Battista Biggio <battista.biggiodemontis@diee.unica.it>
 
 """
-
-from abc import ABCMeta
-
 from scipy import linalg
 
 from secml.array import CArray
@@ -21,8 +18,7 @@ class CExplainerLocalInfluence(CExplainerLocal):
     Compute the influence function as it has been defined in:
     "Understanding Black-box Predictions via Influence Functions" by Koh et al.
     """
-    __metaclass__ = ABCMeta
-    __super__ = "CExplainInfluence"
+    __class_type = 'influence'
 
     def __init__(self, clf, tr, outer_loss_idx='log'):
 
