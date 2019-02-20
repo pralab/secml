@@ -14,7 +14,7 @@ from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
 class CClassifierGradientLogisticRegression(CClassifierGradientLinear):
-    class_type = 'logistic'
+    __class_type = 'logistic'
 
     def __init__(self):
         self._loss = CLossLogistic()

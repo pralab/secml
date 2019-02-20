@@ -13,7 +13,7 @@ from secml.ml.classifiers.gradients import CClassifierGradient
 
 
 class CClassifierGradientSVM(CClassifierGradient):
-    class_type = 'svm'
+    __class_type = 'svm'
 
     def __init__(self):
         self._loss = CLossHinge()

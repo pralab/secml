@@ -14,7 +14,7 @@ from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
 class CClassifierGradientLinear(CClassifierGradient):
-    class_type = 'grad_lin'
+    __class_type = 'linear'
 
     @abstractmethod
     def _C(self, clf):

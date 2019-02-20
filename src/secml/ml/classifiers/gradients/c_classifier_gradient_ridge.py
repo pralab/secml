@@ -14,7 +14,7 @@ from secml.ml.classifiers.regularizer import CRegularizerL2
 
 
 class CClassifierGradientRidge(CClassifierGradientLinear):
-    class_type = 'ridge'
+    __class_type = 'ridge'
 
     def __init__(self):
         self._loss = CLossSquare()
