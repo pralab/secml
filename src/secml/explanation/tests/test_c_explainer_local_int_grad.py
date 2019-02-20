@@ -1,7 +1,9 @@
 from secml.utils import CUnitTest
 
 from secml.explanation import CExplainerLocalIntegratedGradients
-from secml.pytorch.classifiers import CClassifierPyTorchMLP
+from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
+from secml.ml.classifiers import CClassifierSVM
+from secml.ml.kernel import CKernelRBF
 from secml.data.loader import CDLRandomToy
 from secml.array import CArray
 from secml.figure import CFigure
@@ -18,11 +20,8 @@ class TestCExplainerLocalIntegratedGradients(CUnitTest):
         # 100 samples, 2 classes, 20 features
         cls.ds = CDLRandomToy('digits').load()
 
-        cls.clf = CClassifierPyTorchMLP(
-            input_dims=64, hidden_dims=(100, ), output_dims=10,
-            weight_decay=0, epochs=10, learning_rate=1e-2,
-            momentum=0.5, softmax_outputs=True, random_state=0)
-        cls.clf.verbose = 1
+        cls.clf = CClassifierMulticlassOVA(
+            CClassifierSVM, kernel=CKernelRBF(gamma=1e-3))
 
         # Training classifier
         cls.clf.fit(cls.ds)

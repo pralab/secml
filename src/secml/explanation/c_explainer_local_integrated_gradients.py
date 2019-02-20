@@ -84,15 +84,15 @@ class CExplainerLocalIntegratedGradients(CExplainer):
             raise TypeError("`classes` can be a CArray with the list of "
                             "classes, a single class id or 'all'")
 
+        # Compute the linear interpolation from reference to input
+        ret = self.linearly_interpolate(x, reference, m)
+
         attr = CArray.empty(shape=(0, x.shape[1]), dtype=x.dtype)
         for c in classes:  # Compute attributions for each class
 
             if c not in self.clf.classes:
                 raise ValueError(
                     "class to explain {:} is invalid".format(c))
-
-            # Compute the linear interpolation from reference to input
-            ret = self.linearly_interpolate(x, reference, m)
 
             # Compute the Riemman approximation of the integral
             riemman_approx = CArray.zeros(x.shape, dtype=x.dtype)
@@ -102,7 +102,7 @@ class CExplainerLocalIntegratedGradients(CExplainer):
             a = (x - reference) * (1.0 / m) * riemman_approx
 
             self.logger.debug(
-                "Attributions for class {:}:\n{:}".format(c, attr))
+                "Attributions for class {:}:\n{:}".format(c, a))
 
             # Checks prop 1: attr should adds up to the difference between
             # the score at the input and that at the reference
