@@ -23,7 +23,13 @@ class CExplainerLocalLinear(CExplainer):
     tr_ds : CDataset
         Training dataset of the classifier to explain.
 
+    Attributes
+    ----------
+    class_type : 'linear'
+
     """
+    __class_type = 'linear'
+
     def __init__(self, clf, tr_ds=None):
 
         if not isinstance(clf, CClassifierLinear) or not clf.is_linear():
