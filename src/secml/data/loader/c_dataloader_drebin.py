@@ -9,6 +9,7 @@ import tarfile
 from collections import OrderedDict
 from itertools import izip
 from multiprocessing import Lock
+import csv
 import numpy as np
 
 from secml.data.loader import CDataLoader, CDataLoaderSvmLight
@@ -103,6 +104,10 @@ class CDataLoaderDrebin(CDataLoader):
          - 'feat_family_idx': for each feature, the index of the family
                 relative to the CDataLoaderDrebin.FEAT_FAMILY_MAPPING
          - 'feat_desc': dict with the description of each original feature
+         - 'app_family_map': dict with the id of each app family (0 is Benign,
+                others are malware)
+         - 'mal_family': dict with the app family id for
+                each malware (hash). The hash can be retrieved from 'infos'.
 
         Parameters
         ----------
@@ -157,10 +162,30 @@ class CDataLoaderDrebin(CDataLoader):
         feat_desc_str = CArray(feat_mapping[:, 1])
         feat_desc = {k: v for k, v in izip(feat_desc_idx, feat_desc_str)}
 
+        self.logger.info(
+            "Loading malware families from {:}".format(self.families_path))
+
+        # Create dictionary which maps each app family to a number
+        # (0 is Benign, others are malware). In the same loop create
+        # a dict with the family ID for each malware (hash)
+        mal_fam = dict()
+        mal_fam_map = {'Benign': 0}
+        with open(self.families_path, 'rb') as csvfile:
+            mal_fam_reader = csv.reader(csvfile)
+            mal_fam_reader.next()  # Skipping the first header line
+            for row in mal_fam_reader:
+                if row[1] not in mal_fam_map:
+                    mal_fam_map[row[1]] = len(mal_fam_map)
+                mal_fam[row[0]] = mal_fam_map[row[1]]
+        # The next is the inverted dict with app family number as key
+        mal_fam_map_inverted = {k[1]: k[0] for k in mal_fam_map.items()}
+
         # Adding the extra parameters to the dataset object
         ds.original_idx = original_idx
         ds.feat_family_idx = feat_family_idx
         ds.feat_desc = feat_desc
+        ds.app_family_map = mal_fam_map_inverted
+        ds.mal_family = mal_fam
 
         return ds
 
