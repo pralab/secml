@@ -5,20 +5,65 @@ from secml.array import CArray
 from secml.data.loader import CDataLoaderMNIST
 from secml.data.splitter import CDataSplitterKFold
 from secml.ml.peval.metrics import CMetricAccuracy
+from secml.ml.classifiers import \
+    CClassifierSVM, CClassifierLogistic, CClassifierRidge
+from secml.ml.kernel import CKernelRBF
 from secml.ml.classifiers.gradients.tests.utils import CClassifierGradientTest
-from secml.ml.features.normalization import CNormalizerMinMax
 
 
-class CExplainerLocalInfluenceTestCases(CUnitTest):
-    """Unittests interface for CExplainerLocalInfluence."""
+class TestCExplainerLocalInfluence(CUnitTest):
+    """Unit test for CExplainerLocalInfluence."""
 
-    def _create_mnist_dataset(self, digits=[4, 9], n_tr=100, n_val=1000,
-                              n_ts=1000,
-                              seed=4):  # 10
+    @classmethod
+    def setUpClass(cls):
+
+        CUnitTest.setUpClass()
+
+        cls._tr, cls._val, cls._ts = cls._create_mnist_dataset()
+        cls._metric = CMetricAccuracy()
+
+    def test_explanation_svm(self):
+        self._clf = CClassifierSVM()
+        self._clf.store_dual_vars = True
+        self._clf_idx = 'lin-svm'
+
+        self._test_explanation_simple_clf()
+
+    def test_explanation_logistic(self):
+
+        self._clf = CClassifierLogistic()
+        self._clf_idx = 'logistic regression'
+
+        self._test_explanation_simple_clf()
+
+    def test_explanation_svm_rbf(self):
+        self._clf = CClassifierSVM(kernel=CKernelRBF(gamma=0.01), C=10)
+        self._clf.kernel.gamma = 0.01
+        self._clf.store_dual_vars = True
+        self._clf_idx = 'rbf-svm'
+
+        self._test_explanation_simple_clf()
+
+    def test_explanation_ridge(self):
+        self._clf = CClassifierRidge()
+        self._clf_idx = 'Ridge'
+
+        self._test_explanation_simple_clf()
+
+    def test_explanation_with_feat_nn_extraction(self):
+
+        self._clf = CClassifierSVM(kernel=CKernelRBF())
+        self._clf.store_dual_vars = True
+        self._clf_idx = 'lin-rbf'
+
+        self._test_explanation_with_feat_nn_extraction()
+
+    @staticmethod
+    def _create_mnist_dataset(
+            digits=[4, 9], n_tr=100, n_val=200, n_ts=200, seed=4):  # 10
         loader = CDataLoaderMNIST()
 
         tr = loader.load('training', digits=digits)
-
         ts = loader.load('testing', digits=digits, num_samples=n_ts)
 
         # start train and validation dataset split
@@ -46,17 +91,9 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
         self.logger.info("Classifier accuracy: {:} ".format(acc))
         self.assertGreater(acc, 0.70)
 
-    def setUp(self):
-
-        self._tr, self._val, self._ts = self._create_mnist_dataset()
-
-        self._clf_creation()
-        self._clf_loss = self._clf.gradients._loss.class_type
-
-        self._metric = CMetricAccuracy()
-        self._splitter = CDataSplitterKFold()
-
     def _compute_influences(self):
+
+        self._clf_loss = self._clf.gradients._loss.class_type
 
         self._clf.fit(self._tr)
 
@@ -104,11 +141,8 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
 
         clf_copy.fit(new_dataset)
 
-        loss = (1.0 / self._ts.num_samples) * self.clf_gradients.L(self._ts.X,
-                                                                   self._ts.Y,
-                                                                   clf_copy,
-                                                                   regularized=False).sum(
-            axis=None)
+        loss = (1.0 / self._ts.num_samples) * self.clf_gradients.L(
+            self._ts.X, self._ts.Y, clf_copy, regularized=False).sum(axis=None)
 
         return loss
 
@@ -172,24 +206,19 @@ class CExplainerLocalInfluenceTestCases(CUnitTest):
                          "neural network feature extractor inside and "
                          "test if they are reasonable".format(self._clf_idx))
 
-        try:
-            from secml.pytorch.normalization import CNormalizerPyTorch
-            from secml.pytorch.classifiers import CClassifierPyTorchMLP
+        from secml.pytorch.normalization import CNormalizerPyTorch
+        from secml.pytorch.classifiers import CClassifierPyTorchMLP
 
-            nn = CClassifierPyTorchMLP(input_dims=20, hidden_dims=(40,),
-                                       output_dims=3,
-                                       weight_decay=0, epochs=10,
-                                       learning_rate=1e-1,
-                                       momentum=0, random_state=0)
-            nn.fit(self._tr)
-            normalizer = CNormalizerPyTorch(nn)
-            normalizer.fit(self._tr.X)
-            self._clf.preprocess = normalizer
-
-            self._test_explanation()
-
-        except:
-            pass
+        nn = CClassifierPyTorchMLP(input_dims=784, hidden_dims=(40,),
+                                   output_dims=2,
+                                   weight_decay=0, epochs=10,
+                                   learning_rate=1e-1,
+                                   momentum=0, random_state=0)
+        nn.verbose = 1
+        nn.fit(self._tr)
+        normalizer = CNormalizerPyTorch(nn)
+        normalizer.fit(self._tr.X)
+        self._clf.preprocess = normalizer
 
         self._test_explanation()
 
