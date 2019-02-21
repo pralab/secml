@@ -1,11 +1,10 @@
 """
-.. module:: CClassifierGradientSVM
+.. module:: CClassifierGradientLogistic
    :synopsis: Class to compute the gradient of the logistic classifier
 
-    @author: Ambra Demontis
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientLinear
 from secml.ml.classifiers.loss import CLossLogistic
@@ -13,7 +12,7 @@ from secml.ml.classifiers.regularizer import CRegularizerL2
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
-class CClassifierGradientLogisticRegression(CClassifierGradientLinear):
+class CClassifierGradientLogistic(CClassifierGradientLinear):
     __class_type = 'logistic'
 
     def __init__(self):

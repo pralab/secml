@@ -88,10 +88,6 @@ class CClassifierSVM(CClassifierLinear):
 
         self._gradients = CClassifierGradientSVM()
 
-    @property
-    def gradients(self):
-        return self._gradients
-
     def __clear(self):
         """Reset the object."""
         self._n_sv = None
@@ -126,6 +122,10 @@ class CClassifierSVM(CClassifierLinear):
         if self.kernel.class_type == 'linear':
             return True
         return False
+
+    @property
+    def gradients(self):
+        return self._gradients
 
     @property
     def C(self):
@@ -239,7 +239,7 @@ class CClassifierSVM(CClassifierLinear):
 
     @property
     def sv_idx(self):
-        """Indices of Support Vectors whitin the training dataset."""
+        """Indices of Support Vectors within the training dataset."""
         return self._sv_idx
 
     @property
@@ -247,16 +247,46 @@ class CClassifierSVM(CClassifierLinear):
         """Support Vectors."""
         return self._sv
 
-    def s(self, tol=1e-6):
-        """Indices of margin support vectors."""
+    def sv_margin_idx(self, tol=1e-6):
+        """Indices of Margin Support Vectors.
+
+        Parameters
+        ----------
+        tol : float
+            Alpha value threshold for considering a
+            Support Vector on the margin.
+
+        Returns
+        -------
+        indices : CArray
+            Flat array with the indices of the Margin Support Vectors.
+
+        """
         s = self.alpha.find(
             (abs(self.alpha) >= tol) *
             (abs(self.alpha) <= self.C - tol))
         return CArray(s)
 
-    def xs(self):
-        """Margin support vectors"""
-        s = self.s()
+    def sv_margin(self, tol=1e-6):
+        """Margin Support Vectors.
+
+        Parameters
+        ----------
+        tol : float
+            Alpha value threshold for considering a
+            Support Vector on the margin.
+
+        Returns
+        -------
+        CArray or None
+            Margin support vector, 2D CArray.
+            If no margin support vector are found, return None.
+        indices : CArray or None
+            Flat array with the indices of the margin support vectors.
+            If no margin support vector are found, return None.
+
+        """
+        s = self.sv_margin_idx(tol=tol)
 
         if s.size == 0:
             return None, None
@@ -264,11 +294,23 @@ class CClassifierSVM(CClassifierLinear):
         xs = self.sv[s, :].atleast_2d()
         return xs, s
 
-    def ys(self):
-        """Margin support vector labels"""
+    def sv_margin_y(self, tol=1e-6):
+        """Margin Support Vectors class (-1/+1).
+
+        Parameters
+        ----------
+        tol : float
+            Alpha value threshold for considering a
+            Support Vector on the margin.
+
+        Returns
+        -------
+        CArray
+            Flat CArray with the class (-1/+1) of the Margin Support Vectors.
+
+        """
         ys = self.alpha.sign()
-        ys = CArray(ys[self.s()])
-        return ys
+        return ys[self.sv_margin_idx(tol=tol)]
 
     def fit(self, dataset, n_jobs=1):
         """Fit the SVM classifier.

@@ -1,12 +1,11 @@
 """
-.. module:: CClassifierGradientSVM
-   :synopsis: Class to compute the gradient of the SVM classifier
+.. module:: CClassifierGradientRidge
+   :synopsis: Class to compute the gradient of the Ridge classifier
 
-    @author: Battista Biggio
-    @author: Ambra Demontis
+.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientLinear
 from secml.ml.classifiers.loss import CLossSquare

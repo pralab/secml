@@ -1,9 +1,10 @@
 """
 .. module:: CClassifierGradient
-   :synopsis: Common interface for the implementations of the classifier
-   gradients
+   :synopsis: Common interface for the implementations of the
+              classifier gradients
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+
 """
 from abc import ABCMeta, abstractmethod
 
@@ -24,7 +25,7 @@ class CClassifierGradient(CCreator):
         """
         Compute hessian of the loss w.r.t. the classifier parameters
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @abstractmethod
     def fd_params(self, clf, x):
@@ -32,13 +33,13 @@ class CClassifierGradient(CCreator):
         Derivative of the discriminant function w.r.t. the classifier
         parameters
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def fd_x(self, clf, x=None, y=1):
         """
         Derivative of the discriminant function w.r.t. an input sample
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     @abstractmethod
     def L_d_params(self, clf, x, y, loss=None, regularized=True):
@@ -59,11 +60,10 @@ class CClassifierGradient(CCreator):
             is the loss on the given samples + the regularizer,
             which is not considered if the argument is False
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def Ld_s(self, w, y, score):
         """
         Derivative of the classifier loss function w.r.t. the score
         """
         return self.loss.dloss(y, score)
-

@@ -8,6 +8,7 @@
 
 """
 from sklearn.linear_model import RidgeClassifier
+
 from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.array import CArray

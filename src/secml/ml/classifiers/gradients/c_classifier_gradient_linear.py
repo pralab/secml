@@ -1,11 +1,11 @@
 """
 .. module:: CClassifierGradientLinear
    :synopsis: Common interface for the implementations of linear classifier
-   gradients
+              gradients
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
-"""
 
+"""
 from abc import abstractmethod
 
 from secml.array import CArray

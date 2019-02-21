@@ -26,7 +26,7 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
         scores = clf.decision_function(x)
         loss = self.gradients._loss.loss(y, score=scores).atleast_2d()
 
-        xs, margin_sv_idx = clf.xs()
+        xs, margin_sv_idx = clf.sv_margin()
         Kss = clf.kernel.k(xs, xs)
         alpha_s = clf.alpha[margin_sv_idx]
         reg = alpha_s.atleast_2d().dot(Kss.dot(alpha_s.T))
@@ -42,7 +42,7 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
         """
         Classifier parameters
         """
-        margin_sv_idx = clf.s()  # get the idx of the margin support vector
+        margin_sv_idx = clf.sv_margin_idx()  # get the idx of the margin support vector
         return clf.alpha[margin_sv_idx].append(CArray(clf.b), axis=None)
 
     def change_params(self, params, clf):
@@ -52,7 +52,7 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
         vector
         """
         new_clf = clf.deepcopy()
-        margin_sv_idx = clf.s()  # get the idx of the margin support vector
+        margin_sv_idx = clf.sv_margin_idx()  # get the idx of the margin support vector
         new_clf._alpha[margin_sv_idx] = params[:-1]
         new_clf._b = params[-1]
         return new_clf

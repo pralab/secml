@@ -178,10 +178,10 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         Kd_xc = svm.gradients.Kd_xc(clf, alpha_c, xc, xk)
         gt = Kd_xc.dot(grad_loss_fk).ravel()  # gradient of the loss w.r.t. xc
 
-        xs, sv_idx = clf.xs()  # these points are already normalized
+        xs, sv_idx = clf.sv_margin()  # these points are already normalized
 
         if xs is None:
-            self.logger.debug("Warning: xs is empty "
+            self.logger.debug("Warning: sv_margin is empty "
                               "(all points are error vectors).")
             return gt if svm.preprocess is None else \
                 svm.preprocess.gradient(xc0, gt)

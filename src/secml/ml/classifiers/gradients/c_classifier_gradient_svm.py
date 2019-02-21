@@ -6,7 +6,6 @@
     @author: Ambra Demontis
 
 """
-
 from secml.array import CArray
 from secml.ml.classifiers.loss import CLossHinge
 from secml.ml.classifiers.gradients import CClassifierGradient
@@ -24,7 +23,7 @@ class CClassifierGradientSVM(CClassifierGradient):
         """
         svm = clf
 
-        xs, sv_idx = clf.xs()  # these points are already normalized
+        xs, sv_idx = clf.sv_margin()  # these points are already normalized
 
         s = xs.shape[0]
 
@@ -44,10 +43,10 @@ class CClassifierGradientSVM(CClassifierGradient):
         xk : CArray
             features of a dataset
         """
-        xs, sv_idx = clf.xs()  # these points are already normalized
+        xs, sv_idx = clf.sv_margin()  # these points are already normalized
 
         if xs is None:
-            self.logger.debug("Warning: xs is empty "
+            self.logger.debug("Warning: sv_margin is empty "
                               "(all points are error vectors).")
             return None
 
@@ -118,7 +117,7 @@ class CClassifierGradientSVM(CClassifierGradient):
 
         if regularized:
             # compute the regularizer derivative w.r.t alpha
-            xs, margin_sv_idx = clf.xs()
+            xs, margin_sv_idx = clf.sv_margin()
             K = clf.kernel.k(xs, xs)
             d_reg = 2 * K.dot(clf.alpha[margin_sv_idx].T)  # s * 1
 
@@ -132,4 +131,4 @@ class CClassifierGradientSVM(CClassifierGradient):
         """
         Derivative of the discriminant function w.r.t. a test sample
         """
-        return NotImplementedError()
+        raise NotImplementedError

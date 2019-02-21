@@ -12,7 +12,7 @@ from secml.array import CArray
 from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.loss import CLoss
 from secml.ml.classifiers.gradients import \
-    CClassifierGradientLogisticRegression
+    CClassifierGradientLogistic
 
 
 class CClassifierLogistic(CClassifierLinear):
@@ -32,7 +32,7 @@ class CClassifierLogistic(CClassifierLinear):
         self._init_w = None
         self._init_b = None
 
-        self._gradients = CClassifierGradientLogisticRegression()
+        self._gradients = CClassifierGradientLogistic()
 
     @property
     def gradients(self):

@@ -13,6 +13,6 @@ from secml.ml.classifiers.gradients.tests.utils import \
 class CClassifierGradientTestLogisticRegression(CClassifierGradientTestLinear):
     """
     This class implement different functionalities which are useful to test
-    the CClassifierGradientLogisticRegression class.
+    the CClassifierGradientLogistic class.
     """
     __class_type = 'logistic'
