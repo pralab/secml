@@ -384,8 +384,10 @@ class CDense(_CArrayInterface):
         """Redefinition of the get operation."""
         if is_list_of_lists(idx):
             # Natively supported for multi-dimensional (not flat) arrays
+            # The list of lists must be passed as a tuple
             return self.__class__(
-                np.ndarray.__getitem__(self.atleast_2d().tondarray(), idx))
+                np.ndarray.__getitem__(
+                    self.atleast_2d().tondarray(), tuple(idx)))
 
         # Check index for all other cases
         idx = self._check_index(idx)
@@ -404,7 +406,9 @@ class CDense(_CArrayInterface):
 
         if is_list_of_lists(idx):
             # Natively supported for multi-dimensional (not flat) arrays
-            np.ndarray.__setitem__(self.atleast_2d().tondarray(), idx, value)
+            # The list of lists must be passed as a tuple
+            np.ndarray.__setitem__(
+                self.atleast_2d().tondarray(), tuple(idx), value)
             return
 
         # Check index for all other cases

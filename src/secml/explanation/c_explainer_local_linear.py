@@ -23,7 +23,13 @@ class CExplainerLocalLinear(CExplainer):
     tr_ds : CDataset
         Training dataset of the classifier to explain.
 
+    Attributes
+    ----------
+    class_type : 'linear'
+
     """
+    __class_type = 'linear'
+
     def __init__(self, clf, tr_ds=None):
 
         if not isinstance(clf, CClassifierLinear) or not clf.is_linear():
@@ -47,5 +53,5 @@ class CExplainerLocalLinear(CExplainer):
         """
         attr = self.clf.w.deepcopy()  # Attributions are just the weights
         self.logger.debug(
-            "Attributions:\n{:}".format(attr.tolist()))
+            "Attributions:\n{:}".format(attr))
         return attr

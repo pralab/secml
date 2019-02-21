@@ -38,7 +38,12 @@ class CExplainerLocalIntegratedGradients(CExplainer):
     tr_ds : CDataset
         Training dataset of the classifier to explain.
 
+    Attributes
+    ----------
+    class_type : 'integrated-gradients'
+
     """
+    __class_type = 'integrated-gradients'
 
     def explain(self, x, reference=None, m=50, classes='all'):
         """Computes the explanation for input sample.
@@ -79,15 +84,15 @@ class CExplainerLocalIntegratedGradients(CExplainer):
             raise TypeError("`classes` can be a CArray with the list of "
                             "classes, a single class id or 'all'")
 
+        # Compute the linear interpolation from reference to input
+        ret = self.linearly_interpolate(x, reference, m)
+
         attr = CArray.empty(shape=(0, x.shape[1]), dtype=x.dtype)
         for c in classes:  # Compute attributions for each class
 
             if c not in self.clf.classes:
                 raise ValueError(
                     "class to explain {:} is invalid".format(c))
-
-            # Compute the linear interpolation from reference to input
-            ret = self.linearly_interpolate(x, reference, m)
 
             # Compute the Riemman approximation of the integral
             riemman_approx = CArray.zeros(x.shape, dtype=x.dtype)
@@ -97,7 +102,7 @@ class CExplainerLocalIntegratedGradients(CExplainer):
             a = (x - reference) * (1.0 / m) * riemman_approx
 
             self.logger.debug(
-                "Attributions for class {:}:\n{:}".format(c, attr.tolist()))
+                "Attributions for class {:}:\n{:}".format(c, a))
 
             # Checks prop 1: attr should adds up to the difference between
             # the score at the input and that at the reference
