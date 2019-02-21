@@ -160,6 +160,22 @@ class TestCClassifierLogistic(CClassifierTestCases):
         with self.assertRaises(ValueError):
             self.log._decision_function(p_norm, y=0)
 
+    def test_gradient(self):
+        """Unittests for gradient_f_x."""
+        self.logger.info("Testing log.gradient_f_x() method")
+
+        i = 5  # IDX of the point to test
+
+        # Randomly extract a pattern to test
+        pattern = self.dataset.X[i, :]
+        self.logger.info("P {:}: {:}".format(i, pattern))
+
+        self.log.fit(self.dataset)
+
+        # Run the comparison with numerical gradient
+        # (all classes will be tested)
+        self._test_gradient_numerical(self.log, pattern)
+
 
 if __name__ == '__main__':
     CClassifierTestCases.main()
