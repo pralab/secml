@@ -183,7 +183,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         xs, sv_idx = clf.sv_margin()  # these points are already normalized
 
         if xs is None:
-            self.logger.debug("Warning: xs is empty "
+            self.logger.debug("Warning: sv_margin is empty "
                               "(all points are error vectors).")
             return gt if svm.preprocess is None else \
                 gt.dot(svm.preprocess.gradient(xc0)).ravel()

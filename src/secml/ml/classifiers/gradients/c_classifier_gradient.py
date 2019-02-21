@@ -67,4 +67,3 @@ class CClassifierGradient(CCreator):
         Derivative of the classifier loss function w.r.t. the score
         """
         return self.loss.dloss(y, score)
-
