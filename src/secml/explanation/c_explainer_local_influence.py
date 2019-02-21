@@ -25,19 +25,18 @@ class CExplainerLocalInfluence(CExplainerLocal):
     """
     __class_type = 'influence'
 
-    def __init__(self, clf, tr, outer_loss_idx='log'):
+    def __init__(self, clf, tr_ds, outer_loss_idx='log'):
 
-        self._clf = clf
-        self._tr = tr
+        super(CExplainerLocalInfluence, self).__init__(clf=clf, tr_ds=tr_ds)
 
         self._inv_H = None  # inverse hessian matrix
         self._grad_inner_loss_params = None
 
-        inner_loss_idx = self._clf.gradients._loss.class_type
+        inner_loss_idx = self.clf.gradients.loss().class_type
         self._inner_loss = CLoss.create(inner_loss_idx)
         self._outer_loss = CLoss.create(outer_loss_idx)
 
-    def grad_outer_loss_params(self, x_ts, y_ts):
+    def grad_outer_loss_params(self, x, y):
         """
         Compute derivate of the outer validation loss at test point(s) x
         This is typically not regularized (just an empirical loss function)
@@ -46,9 +45,9 @@ class CExplainerLocalInfluence(CExplainerLocal):
         :param y: its label
         :return: dL_params, CArray of shape (n_params +1 ) * n_samples
         """
-        grad = self._clf.gradients.L_d_params(self._clf, x_ts, y_ts,
-                                              loss=self._outer_loss,
-                                              regularized=False)
+        grad = self.clf.gradients.L_d_params(self.clf, x, y,
+                                             loss=self._outer_loss,
+                                             regularized=False)
         return grad
 
     def grad_inner_loss_params(self, x, y):
@@ -58,9 +57,9 @@ class CExplainerLocalInfluence(CExplainerLocal):
         This is normally a regularized loss.
         :return:
         """
-        grad = self._clf.gradients.L_d_params(self._clf, x, y,
-                                              loss=self._inner_loss,
-                                              regularized=True)
+        grad = self.clf.gradients.L_d_params(self.clf, x, y,
+                                             loss=self._inner_loss,
+                                             regularized=True)
         return grad
 
     def hessian(self, x, y):
@@ -69,37 +68,15 @@ class CExplainerLocalInfluence(CExplainerLocal):
         :param w:
         :return:
         """
-        return self._clf.gradients.hessian(self._clf, x, y)
+        return self.clf.gradients.hessian(self._clf, x, y)
 
-    @property
-    def clf(self):
-        return self._clf
-
-    @clf.setter
-    def clf(self, value):
-        self._clf = value
-        self.__clear()
-
-    @property
-    def tr(self):
-        return self._tr
-
-    @tr.setter
-    def tr(self, value):
-        self._tr = value
-        self.__clear()
-
-    def __clear(self):
-        """Reset the object."""
-        self._grad_inner_loss_params = None
-
-    def explain(self, x_ts, y_ts):
+    def explain(self, x, y):
         """
         Compute influence of test sample x against all training samples
         :param x: the test sample
         :return: influence function values comparing x to all training samples
         """
-        H = self.hessian(x_ts, y_ts)
+        H = self.hessian(x, y)
 
         p = H.shape[0]
         H += 1e-9 * (CArray.eye(p))
@@ -112,13 +89,13 @@ class CExplainerLocalInfluence(CExplainerLocal):
             else:
                 self._inv_H = CArray(linalg.inv(H.tondarray()))
 
-        x_ts = x_ts.atleast_2d()
+        x = x.atleast_2d()
 
         if self._grad_inner_loss_params is None:
             self._grad_inner_loss_params = self.grad_inner_loss_params(
-                self._tr.X, self._tr.Y)
+                self.tr_ds.X, self.tr_ds.Y)
 
-        v = self.grad_outer_loss_params(x_ts, y_ts).T.dot(self._inv_H).dot(
+        v = self.grad_outer_loss_params(x, y).T.dot(self._inv_H).dot(
             self._grad_inner_loss_params)
 
         return v
