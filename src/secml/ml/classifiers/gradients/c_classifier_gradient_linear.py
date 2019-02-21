@@ -8,8 +8,6 @@
 """
 from abc import abstractmethod
 
-from abc import abstractmethod
-
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradient
 from secml.ml.classifiers.clf_utils import convert_binary_labels
@@ -17,10 +15,6 @@ from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 class CClassifierGradientLinear(CClassifierGradient):
     __class_type = 'linear'
-
-    @abstractmethod
-    def _C(self, clf):
-        raise NotImplementedError()
 
     @abstractmethod
     def _C(self, clf):
