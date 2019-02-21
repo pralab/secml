@@ -188,13 +188,11 @@ class CSecEval(CCreator):
             y_pred, scores, adv_ds, fobj = attack_result[:4]
 
             if self.save_adv_ds is True:
+                adv_ds = adv_ds.deepcopy() if adv_ds is not None else None
                 if self._sec_eval_data.adv_ds is not None:
-                    self._sec_eval_data.adv_ds.append(adv_ds.deepcopy())
+                    self._sec_eval_data.adv_ds.append(adv_ds)
                 else:
-                    if adv_ds:
-                        self._sec_eval_data.adv_ds = [adv_ds.deepcopy()]
-                    else:
-                        self._sec_eval_data.adv_ds = [None]
+                    self._sec_eval_data.adv_ds = [adv_ds]
 
             self._sec_eval_data.Y_pred[k] = y_pred
             self._sec_eval_data.scores[k] = scores

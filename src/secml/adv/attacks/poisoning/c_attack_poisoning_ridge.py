@@ -6,7 +6,6 @@
     @author: Battista Biggio
 
 """
-
 from secml.adv.attacks.poisoning import CAttackPoisoning
 from secml.array import CArray
 from secml.ml.classifiers.clf_utils import convert_binary_labels
@@ -85,9 +84,10 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         """
         return CArray.eye(d)
 
-    # le differenze con la classe generale di attacco ai loss quadratici sono
-    #  il calcolo di _g e il fatto che qui il bias e' regolarizzato (
-    # dovrebbe essere solo M l'altra differenza)
+    # the differences with the general attack class for quadratic losses are
+    # the computing of _g and the fact that here the bias is regularized
+    # (only M should be the other difference)
+    # FIXME: SIGNATURE DOES NOT MATCH PARENT
     def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr):
         """
         Derivative of the classifier's discriminant function f(xk)
@@ -145,8 +145,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         # print "time: ", end - start
 
         # propagating gradient back to input space
-        return gt if clf.preprocess is None else gt.dot(clf.preprocess.gradient(
-            xc0)).ravel()
+        return gt if clf.preprocess is None else \
+            gt.dot(clf.preprocess.gradient(xc0)).ravel()
         # fixme: change when the preprocessor gradient will take again a
         #  w parameter
-        # clf.preprocess.gradient(xc0, gt)

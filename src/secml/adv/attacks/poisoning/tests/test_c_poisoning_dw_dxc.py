@@ -21,6 +21,7 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
         return ['logistic', 'ridge']
 
     def test_gradient_2D_plot(self):
+        self.plot = False
         if self.plot:
             self._make_plot()
 
@@ -41,8 +42,7 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
             else:
                 if normalizer:
                     self.logger.info("Test the {:} classifier when it does "
-                                     "not have a normalizer inside ".format(
-                        clf_idx))
+                                     "not have a normalizer inside ".format(clf_idx))
             self._objs_creation(clf_idx, normalizer=normalizer)
 
             pois_clf = self._clf_poisoning()[0]
@@ -98,13 +98,10 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
 
         # Compare analytical gradient with its numerical approximation
         check_grad_val = COptimizer(
-            CFunction(f_param,
-                      df_param)
-        ).check_grad(xc, epsilon=10)
+            CFunction(f_param, df_param)).check_grad(xc, epsilon=100)
         self.logger.info("Gradient difference between analytical {:} "
-                         "gradient and numerical gradient: %s".format(
-            param_name),
-            str(check_grad_val))
+                         "gradient and numerical gradient: %s".format(param_name),
+                         str(check_grad_val))
         self.assertLess(check_grad_val, 1,
                         "poisoning gradient is wrong {:}".format(
                             check_grad_val))
@@ -122,8 +119,7 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
             else:
                 if normalizer:
                     self.logger.info("Test the {:} classifier when it does "
-                                     "not have a normalizer inside ".format(
-                        clf_idx))
+                                     "not have a normalizer inside ".format(clf_idx))
             self._objs_creation(clf_idx, normalizer=normalizer)
 
             pois_clf = self._clf_poisoning()[0]

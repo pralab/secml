@@ -11,6 +11,7 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
         return ['ridge', 'logistic', 'lin-svm', 'rbf-svm']
 
     def test_poisoning_2D_plot(self):
+        self.plot = False
         if self.plot:
             self._make_plot()
 
@@ -27,8 +28,7 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
                                  "a normalizer inside ".format(clf_idx))
             else:
                 self.logger.info("Test the {:} classifier when it does "
-                                 "not have a normalizer inside ".format(
-                    clf_idx))
+                                 "not have a normalizer inside ".format(clf_idx))
             self._objs_creation(clf_idx, normalizer)
 
             pois_clf = self._clf_poisoning()[0]
@@ -90,8 +90,7 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
             else:
                 if normalizer:
                     self.logger.info("Test the {:} classifier when it does "
-                                     "not have a normalizer inside ".format(
-                        clf_idx))
+                                     "not have a normalizer inside ".format(clf_idx))
             self._objs_creation(clf_idx, normalizer)
 
             x0 = self.xc  # starting poisoning point

@@ -5,7 +5,6 @@
     @author: Battista Biggio
 
 """
-
 import warnings
 from abc import ABCMeta, abstractmethod
 
@@ -21,11 +20,11 @@ from secml.optimization.function import CFunction
 
 class CAttackPoisoning(CAttack):
     """Class providing a common interface to CSolver classes."""
-
     __metaclass__ = ABCMeta
     __super__ = 'CAttackPoisoning'
 
     # fixme: use always the softmax loss as attacker loss
+    # FIXME: FOLLOW THE THE CATTACK SIGNATURE OR CHANGE IT (LSP ANYONE?)
     def __init__(self, classifier,
                  training_data,
                  surrogate_classifier,
@@ -87,13 +86,10 @@ class CAttackPoisoning(CAttack):
 
         # fixme: use the cross-entropy for all the classifier poisoning
         if classifier.class_type == 'svm':
-            print "POISONING ATTACK WITH HINGE LOSS"
             loss_name = 'hinge'
         elif classifier.class_type == 'logistic':
-            print "POISONING ATTACK WITH LOGISTIC LOSS"
             loss_name = 'log'
         elif classifier.class_type == 'ridge':
-            print "POISONING ATTACK WITH QUADRATIC LOSS"
             loss_name = 'square'
         else:
             raise NotImplementedError("We cannot poisoning that classifier")
@@ -202,8 +198,7 @@ class CAttackPoisoning(CAttack):
         ub = self._x0 if self.ub == 'x0' else self.ub
         bounds = CConstraint.create('box', lb=lb, ub=ub)
 
-        constr = CConstraint.create(self.distance, center=0,
-                                    radius=1e12)
+        constr = CConstraint.create(self.distance, center=0, radius=1e12)
 
         return bounds, constr
 
@@ -234,8 +229,8 @@ class CAttackPoisoning(CAttack):
         self._solver.verbose = 0  # 1
         self._warm_start = None
 
-    def _rnd_init_poisoning_points(self, n_points=None, init_from_val=True,
-                                   val=None):
+    def _rnd_init_poisoning_points(
+            self, n_points=None, init_from_val=True, val=None):
         """
         Returns a set of n_points poisoning points randomly drawn
         from surrogate_data with flipped labels.
@@ -325,7 +320,7 @@ class CAttackPoisoning(CAttack):
             # we assume that normalizer is not changing w.r.t xc!
             # so we avoid re-training the normalizer on dataset including xc
 
-            if not self.classifier.preprocess is None:
+            if self.classifier.preprocess is not None:
                 self._poisoned_clf.retrain_normalizer = train_normalizer
 
             self._poisoned_clf.fit(tr)
@@ -413,11 +408,10 @@ class CAttackPoisoning(CAttack):
         grad = CArray.zeros((xc.size,))
 
         if clf.n_classes <= 2:
-            loss_grad = self._attacker_loss.dloss(y_ts, CArray(score[:,
-                                                               1]).ravel())
-            grad = self._gradient_fk_xc(self._xc[idx, :],
-                                        self._yc[idx],
-                                        clf, loss_grad, tr)
+            loss_grad = self._attacker_loss.dloss(
+                y_ts, CArray(score[:, 1]).ravel())
+            grad = self._gradient_fk_xc(
+                self._xc[idx, :], self._yc[idx], clf, loss_grad, tr)
         else:
             # compute the gradient as a sum of the gradient for each class
             for c in xrange(clf.n_classes):
@@ -486,10 +480,9 @@ class CAttackPoisoning(CAttack):
     #                              PUBLIC METHODS
     ###########################################################################
 
-    def run(self, x, y, ds_init=None, max_iter=2):  # 2 #10
-        # max_iter=10 #5
-        """
-        Runs poisoning on multiple points.
+    def run(self, x, y, ds_init=None, max_iter=2):
+        """Runs poisoning on multiple points.
+
         It reads n_points (previously set), initializes xc, yc at random,
         and then optimizes the poisoning points xc.
 
@@ -506,12 +499,12 @@ class CAttackPoisoning(CAttack):
         y_pred: predicted labels for all ts samples by targeted classifier
         scores: scores for all ts samples by targeted classifier
         adv_xc: manipulated poisoning points xc (for subsequents warm starts)
-        """
 
+        """
         if self._n_points is None or self._n_points == 0:
             # evaluate performance on x,y
-            y_pred, scores = self._classifier.predict(x,
-                                                      return_decision_function=True)
+            y_pred, scores = self._classifier.predict(
+                x, return_decision_function=True)
             return y_pred, scores, ds_init, 0
 
         # n_points > 0
@@ -521,8 +514,8 @@ class CAttackPoisoning(CAttack):
         elif self.init_type == 'loss_based':
             xc, yc = self._loss_based_init_poisoning_points()
         else:
-            raise NotImplementedError("Unknown poisoning point initialization "
-                                      "strategy.")
+            raise NotImplementedError(
+                "Unknown poisoning point initialization strategy.")
 
         # re-set previously-optimized points if passed as input
         if ds_init is not None:
@@ -551,21 +544,20 @@ class CAttackPoisoning(CAttack):
                 xc[idx, :] = self._run(xc, yc, idx=idx)
                 # optimizing poisoning point 0
                 self.logger.info(
-                    "poisoning point {:} optimization fopt: {:}".format(i,
-                                                                        self._f_opt))
+                    "poisoning point {:} optimization fopt: {:}".format(
+                        i, self._f_opt))
 
-                y_pred, scores = self._poisoned_clf.predict(x,
-                                                            return_decision_function=True)
+                y_pred, scores = self._poisoned_clf.predict(
+                    x, return_decision_function=True)
                 acc = metric.performance_score(y_true=y, y_pred=y_pred)
-                self.logger.info(
-                    "Poisoned classifier accuracy on test data {:}".format(
-                        acc))
+                self.logger.info("Poisoned classifier accuracy "
+                                 "on test data {:}".format(acc))
 
             delta = (xc_prv - xc).norm_2d()
             self.logger.info(
                 "Optimization with n points: " + str(self._n_points) +
-                " iter: " + str(k) + ", delta: " + str(
-                    delta) + ", fopt: " + str(self._f_opt))
+                " iter: " + str(k) + ", delta: " +
+                str(delta) + ", fopt: " + str(self._f_opt))
             k += 1
 
         # re-train the targeted classifier (copied) on poisoned data
@@ -586,8 +578,7 @@ class CAttackPoisoning(CAttack):
 
     def add_discrete_perturbation(self, xc):
 
-        # fixme: eta era un parametro del solver mentre cosi'
-        # diventa un parametro di c_attack_poisoning
+        # FIXME: ETA WAS A SOLVER PARAM BUT NOW IS A C_ATTACK_POISONING PARAM
         eta = self.eta
 
         # for each poisoning point
@@ -630,7 +621,6 @@ class CAttackPoisoning(CAttack):
                 else:
                     xc[p_idx, :] = c_xc
                     break
-                print "NO FEASIBLE PERTURBATION"
 
         return xc
 

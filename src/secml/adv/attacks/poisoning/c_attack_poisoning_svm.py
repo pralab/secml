@@ -5,7 +5,6 @@
     @author: Battista Biggio
 
 """
-
 from secml.adv.attacks.poisoning import CAttackPoisoning
 from secml.array import CArray
 
@@ -137,14 +136,17 @@ class CAttackPoisoningSVM(CAttackPoisoning):
             raise TypeError("xc is not a single sample!")
 
         self._xc[idx, :] = xc
+        # FIXME: UNUSED OUTPUT
         svm, tr = self._update_poisoned_clf()
 
+        # FIXME: PARAMETER CLF UNFILLED
         return self._alpha_c()
 
     ###########################################################################
     #                            GRAD COMPUTATION
     ###########################################################################
 
+    # FIXME: SIGNATURE DOES NOT MATCH WITH PARENT
     def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr):
         """
         Derivative of the classifier's discriminant function f(xk)
@@ -181,10 +183,10 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         xs, sv_idx = clf.sv_margin()  # these points are already normalized
 
         if xs is None:
-            self.logger.debug("Warning: sv_margin is empty "
+            self.logger.debug("Warning: xs is empty "
                               "(all points are error vectors).")
             return gt if svm.preprocess is None else \
-                svm.preprocess.gradient(xc0, gt)
+                gt.dot(svm.preprocess.gradient(xc0)).ravel()
 
         s = xs.shape[0]
 
@@ -223,9 +225,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         gt += v
 
         # propagating gradient back to input space
-        return gt if clf.preprocess is None else gt.dot(
-            clf.preprocess.gradient(
-                xc0)).ravel()
+        return gt if clf.preprocess is None else \
+            gt.dot(clf.preprocess.gradient(xc0)).ravel()
         # fixme: change when the preprocessor gradient will take again a
         #  w parameter
-        # clf.preprocess.gradient(xc0, gt)

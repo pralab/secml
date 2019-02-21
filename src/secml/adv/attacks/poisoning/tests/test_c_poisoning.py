@@ -25,7 +25,7 @@ class CPoisoningTestCases(object):
             self.n_features = 2  # Number of dataset features
 
             self.n_tr = 50
-            self.n_ts = 1000
+            self.n_ts = 100
             self.n_classes = 2
 
             # Random state generator for the dataset
@@ -222,7 +222,7 @@ class CPoisoningTestCases(object):
             fig.sp.plot_fobj(
                 func=func,
                 grid_limits=self.grid_limits, plot_levels=False,
-                n_grid_points=20, colorbar=True, **func_kwargs)
+                n_grid_points=10, colorbar=True, **func_kwargs)
 
         def _plot_obj_grads(self, fig, func, **func_kwargs):
             """Plot poisoning attacker objective function gradient"""
@@ -270,15 +270,13 @@ class CPoisoningTestCases(object):
             fig.sp.plot_fobj(lambda x: clf.predict(x),
                              multipoint=True, cmap='Set2',
                              grid_limits=self.grid_limits,
-                             colorbar=False, n_grid_points=100,
+                             colorbar=False, n_grid_points=10,
                              plot_levels=True,
                              plot_background=background, levels=[0, 1, 2],
                              levels_color=line_color, levels_style='--')
 
             fig.sp.xlim(x_bounds[0] - .05, x_bounds[1] + .05)
             fig.sp.ylim(y_bounds[0] - .05, y_bounds[1] + .05)
-
-            fig.sp.legend(loc=9, ncol=3, mode="expand", handletextpad=.1)
 
             return fig
 
@@ -298,7 +296,7 @@ class CPoisoningTestCases(object):
             box = CConstraintBox(lb=self.lb, ub=self.ub)
             fig.sp.plot_fobj(func=box.constraint,
                              plot_background=False,
-                             n_grid_points=20,
+                             n_grid_points=10,
                              grid_limits=self.grid_limits,
                              levels=[self.discr_f_level], colorbar=False)
 
