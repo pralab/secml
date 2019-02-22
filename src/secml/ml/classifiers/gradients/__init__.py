@@ -1,0 +1,6 @@
+from c_classifier_gradient import CClassifierGradient
+from c_classifier_gradient_linear import CClassifierGradientLinear
+from c_classifier_gradient_logistic import \
+    CClassifierGradientLogistic
+from c_classifier_gradient_ridge import CClassifierGradientRidge
+from c_classifier_gradient_svm import CClassifierGradientSVM

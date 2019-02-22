@@ -79,9 +79,12 @@ class CEvasionTestCases(object):
                 self.logger.info("Converting data to sparse...")
                 self.dataset = self.dataset.tosparse()
 
+            if self.surrogate_classifier.is_clear():
+                self.surrogate_classifier.fit(self.dataset)
+
             params = {
                 "classifier": self.classifier,
-                "surrogate_classifier": self.classifier,
+                "surrogate_classifier": self.surrogate_classifier,
                 "surrogate_data": self.dataset,
                 "distance": self.type_dist,
                 "dmax": self.dmax,
@@ -89,15 +92,13 @@ class CEvasionTestCases(object):
                 "ub": self.ub,
                 "discrete": self.discrete,
                 "attack_classes": CArray([1]),
-                "y_target": None,
+                "y_target": 0,
                 "solver_type": self.solver_type,
                 "solver_params": self.solver_params
             }
 
             self.evasion = CAttackEvasion(**params)
             self.evasion.verbose = 2
-
-            print self.evasion._xk
 
         # ####################################################################
         #                             TESTED METHODS
@@ -141,6 +142,9 @@ class CEvasionTestCases(object):
             else:
                 y_pred, score, x = evas.run(self.x0, self.y0)[:3]
             self.logger.info("Is sparse?: " + str(x.issparse))
+            if self.evasion._xk is not None:
+                self.logger.info(
+                    "Alternative init point(s):\n{:}".format(self.evasion._xk))
             final_time = time.time() - start_time
             self.logger.info("Starting score: " + str(
                 self.classifier.decision_function(self.x0, y=1).item()))

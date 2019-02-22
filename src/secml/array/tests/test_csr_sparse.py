@@ -27,7 +27,8 @@ class TestCSparse(CUnitTest):
         try:
             fm.remove_file(test_file)
         except (OSError, IOError) as e:
-            self.logger.info(e.message)
+            if e.errno != 2:
+                raise e
 
         self.logger.info(
             "UNITTEST - CSparse - Testing save/load for sparse matrix")
@@ -58,7 +59,8 @@ class TestCSparse(CUnitTest):
         try:
             fm.remove_file(test_file)
         except (OSError, IOError) as e:
-            self.logger.info(e.message)
+            if e.errno != 2:
+                raise e
 
     def mixed_tests(self):
 

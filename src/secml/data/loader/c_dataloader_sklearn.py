@@ -7,6 +7,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from multiprocessing import Lock
+
 from secml.data.loader import CDataLoader
 from secml.data import CDataset
 from secml.array import CArray
@@ -623,6 +625,7 @@ class CDLRandomToy(CDataLoader):
 
     """
     __class_type = 'toy'
+    __lock = Lock()  # Lock to prevent multiple parallel download/extraction
 
     def __init__(self, toy, class_list=None, zero_one=False):
 
@@ -652,7 +655,7 @@ class CDLRandomToy(CDataLoader):
                 raise ValueError("you are try to convert to 0 1 label for a "
                                  "dataset with more than 2 classes")
             else:
-                class_list = class_list.sort()
+                class_list.sort()
                 sel_labels[sel_labels == class_list[0]] = 0
                 sel_labels[sel_labels == class_list[1]] = 1
 
@@ -667,20 +670,21 @@ class CDLRandomToy(CDataLoader):
             The randomly generated dataset.
 
         """
-        if self.toy == 'iris':
-            from sklearn.datasets import load_iris
-            toy_data = load_iris()
-        elif self.toy == 'digits':
-            from sklearn.datasets import load_digits
-            toy_data = load_digits()
-        elif self.toy == 'boston':
-            from sklearn.datasets import load_boston
-            toy_data = load_boston()
-        elif self.toy == 'diabetes':
-            from sklearn.datasets import load_diabetes
-            toy_data = load_diabetes()
-        else:
-            raise ValueError("toy dataset {:} if not available.".format(self.toy))
+        with CDLRandomToy.__lock:
+            if self.toy == 'iris':
+                from sklearn.datasets import load_iris
+                toy_data = load_iris()
+            elif self.toy == 'digits':
+                from sklearn.datasets import load_digits
+                toy_data = load_digits()
+            elif self.toy == 'boston':
+                from sklearn.datasets import load_boston
+                toy_data = load_boston()
+            elif self.toy == 'diabetes':
+                from sklearn.datasets import load_diabetes
+                toy_data = load_diabetes()
+            else:
+                raise ValueError("toy dataset {:} if not available.".format(self.toy))
 
         # Returning a CDataset
         if self.class_list is None:

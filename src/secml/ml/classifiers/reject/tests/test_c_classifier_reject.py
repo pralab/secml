@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from secml.utils import CUnitTest
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml import _NoValue
 from secml.array import CArray
@@ -9,43 +9,31 @@ from secml.ml.peval.metrics import CMetric
 
 
 class CClassifierRejectTestCases(object):
-    """Wrapper for TestCClassifierReject to make unittest.main() work correctly."""
 
-    class TestCClassifierReject(CUnitTest):
-        """Unit test for CClassifierSafetynet"""
+    class TestCClassifierReject(CClassifierTestCases):
+        """Unit test for CClassifierReject"""
         __metaclass__ = ABCMeta
 
-        @abstractmethod
-        def setUp(self):
-            raise NotImplementedError()
-
-        # fixme: move this plot on an example file
         def test_draw(self):
             """ Compare the classifiers graphically"""
             self.logger.info("Testing classifiers graphically")
-
-            # generate 2D synthetic data
-            dataset = self.dataset
-
-            clf = self.clf.deepcopy()
-            clf.fit(dataset)
 
             fig = CFigure(width=10, markersize=8)
             # Plot dataset points
             fig.switch_sptype(sp_type='ds')
 
             # mark the rejected samples
-            y = clf.predict(dataset.X)
+            y = self.clf.predict(self.dataset.X)
             fig.sp.plot_ds(
-                dataset[y == -1, :], colors=['k', 'k'], markersize=12)
+                self.dataset[y == -1, :], colors=['k', 'k'], markersize=12)
 
             # plot the dataset
-            fig.sp.plot_ds(dataset)
+            fig.sp.plot_ds(self.dataset)
 
             # Plot objective function
             fig.switch_sptype(sp_type='function')
-            fig.sp.plot_fobj(clf.decision_function,
-                             grid_limits=dataset.get_bounds(), y=1)
+            fig.sp.plot_fobj(self.clf.decision_function,
+                             grid_limits=self.dataset.get_bounds(), y=1)
             fig.sp.title('Classifier with reject threshold')
 
             fig.show()
@@ -200,3 +188,14 @@ class CClassifierRejectTestCases(object):
                 rej_acc, acc, "The accuracy of the classifier that is allowed "
                               "to reject is lower than the one of the "
                               "classifier that is not allowed to reject")
+
+        def test_gradient(self):
+            """Unittest for gradient_f_x method."""
+            # Training the classifier
+            clf = self.clf.fit(self.dataset)
+
+            import random
+            pattern = CArray(random.choice(self.dataset.X.get_data()))
+            self.logger.info("Randomly selected pattern:\n%s", str(pattern))
+
+            self._test_gradient_numerical(clf, pattern, extra_classes=[-1])

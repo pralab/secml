@@ -1,4 +1,5 @@
 variables:
+    CI_PROJECT_DOMAIN: "https://pragit.diee.unica.it"
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
     SECML_HOME_DIR: "$CI_PROJECT_DIR/secml-lib-data"
     TOX_WORKDIR: "$CI_PROJECT_DIR/.tox"
@@ -13,14 +14,15 @@ cache:
     - "$CI_PROJECT_DIR/secml-lib-data"
 
 stages:
-  - test
   - package
+  - test
   - install
   - deploy
+  - triage
 
 .test:
-  image: ubuntu:xenial
   stage: test
+  image: ubuntu:xenial
   before_script:
     - echo $CI_PROJECT_DIR
     - sh .gitlab-ci-extra.sh > /dev/null
@@ -33,6 +35,8 @@ stages:
       - requirements.txt
       - setup.py
       - tox.ini
+  except:
+    - schedules
 
 test:min:
   extends: .test
@@ -51,15 +55,11 @@ test:py27-n15:
   script: tox -e py27-n15
 
 package:
-  image: ubuntu:xenial
   stage: package
-  when: always
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/python2-setuptools:latest
   before_script:
     - echo $CI_PROJECT_DIR
   script:
-    - apt-get update -yq > /dev/null
-    - apt-get install -yq python-pip > /dev/null
-    - pip install -U setuptools
     - python setup.py sdist --formats=zip
   only:
     changes:
@@ -72,14 +72,17 @@ package:
       - requirements.txt
       - setup.py
       - tox.ini
+  except:
+    - schedules
+  cache: {}  # No cache needed for `package` job
   artifacts:
     name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
     paths:
       - ${CI_PROJECT_DIR}/dist/SecML-Lib-*.zip
 
 .install:
-  image: ubuntu:xenial
   stage: install
+  image: ubuntu:xenial
   before_script:
     - echo $CI_PROJECT_DIR
     - sh .gitlab-ci-extra.sh > /dev/null
@@ -102,6 +105,8 @@ package:
       - requirements.txt
       - setup.py
       - tox.ini
+  except:
+    - schedules
 
 #install:pypi:
 #  extends: .install
@@ -161,3 +166,27 @@ install:unzip-extras:
 #  when:manual
 #  script:
 #    - echo "DEPLOY"
+
+.triage:
+  image: ruby:2.4
+  cache: {}
+  before_script:
+    - gem install gitlab-triage
+    - export SSL_CERT_FILE=$CI_SERVER_TLS_CA_FILE
+
+triage:run:
+  stage: triage
+  extends: .triage
+  script:
+    - gitlab-triage --debug --host-url $CI_PROJECT_DOMAIN --token $TRIAGE_API_TOKEN --project-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
+  only:
+    - schedules
+
+triage:run:dry:
+  stage: triage
+  extends: .triage
+  script:
+    - gitlab-triage --dry-run --debug --host-url $CI_PROJECT_DOMAIN --token $TRIAGE_API_TOKEN --project-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
+  only:
+    - schedules
+  when: manual

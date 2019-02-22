@@ -540,7 +540,7 @@ class CClassifierPyTorch(CClassifier):
         state_dict['input_shape'] = self.input_shape
         return state_dict
 
-    def fit(self, dataset, warm_start=False, n_jobs=1):
+    def fit(self, dataset, warm_start=False, store_best_params=True, n_jobs=1):
         """Trains the classifier.
 
         If specified, train_transform is applied to data.
@@ -552,8 +552,11 @@ class CClassifierPyTorch(CClassifier):
             patterns data and corresponding labels.
         warm_start : bool, optional
             If False (default) model will be reinitialized before training.
-            Otherwise the state of the model will be preserved and training
-            will continue from the loaded state epoch.
+            Otherwise the state of the model will be preserved.
+        store_best_params : bool, optional
+            If True (default) the best parameters by classification accuracy
+             found during the training process are stored.
+            Otherwise, the parameters from the last epoch are stored.
         n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
@@ -595,9 +598,9 @@ class CClassifierPyTorch(CClassifier):
             # Reinitialize the optimizer as we are starting clean
             self.init_optimizer()
 
-        return self._fit(dataset, n_jobs=n_jobs)
+        return self._fit(dataset, store_best_params, n_jobs=n_jobs)
 
-    def _fit(self, dataset, n_jobs=1):
+    def _fit(self, dataset, store_best_params=True, n_jobs=1):
         """Trains the classifier.
 
         If specified, train_transform is applied to data.
@@ -607,6 +610,10 @@ class CClassifierPyTorch(CClassifier):
         dataset : CDataset
             Training set. Must be a :class:`.CDataset` instance with
             patterns data and corresponding labels.
+        store_best_params : bool, optional
+            If True (default) the best parameters by classification accuracy
+             found during the training process are stored.
+            Otherwise, the parameters from the last epoch are stored.
         n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
@@ -619,7 +626,7 @@ class CClassifierPyTorch(CClassifier):
         Warnings
         --------
         preprocess is not applied to data before training. This behaviour
-         will change in the feature.
+         will change in the future.
 
         """
         if self.start_epoch >= self.epochs:
@@ -708,16 +715,23 @@ class CClassifierPyTorch(CClassifier):
             # Average accuracy after epoch FIXME: ON TRAINING SET
             self._acc = acc.avg
 
-            # Store the current epoch as best one if accuracy is higher
-            # If equal accuracy, the last epoch should have better loss
-            if self.acc >= self.best_acc:
+            # If the best parameters should be stored, store the current epoch
+            # as best one only if accuracy is higher or at least same
+            # (as the loss should be better anyway for latest epoch)
+            if store_best_params is True and self.acc < self.best_acc:
+                continue  # Otherwise do not store the current epoch
+            else:  # Better accuracy or we should store the latest epoch anyway
                 self._best_acc = self.acc
                 best_epoch = self.start_epoch
                 best_state_dict = deepcopy(self.state_dict())
 
-        self.logger.info(
-            "Best accuracy {:} obtained on epoch {:}".format(
-                self.best_acc, best_epoch + 1))
+        if store_best_params is True:
+            self.logger.info(
+                "Best accuracy {:} obtained on epoch {:}".format(
+                    self.best_acc, best_epoch + 1))
+
+        # Restoring the final state to use
+        # (could be the best by accuracy score or the latest)
         self.load_state(best_state_dict)
 
         return self
@@ -968,7 +982,7 @@ class CClassifierPyTorch(CClassifier):
         if layer is None and self.softmax_outputs is True:
             out_carray = CArray(
                 out.squeeze(0).data.cpu().numpy()).astype(float)
-            softmax_grad = CSoftmax().gradient(out_carray, pos_label=y)
+            softmax_grad = CSoftmax().gradient(out_carray, y=y)
             w_in *= self._to_tensor(softmax_grad.atleast_2d()).unsqueeze(0)
         elif w is not None and y is not None:
             # Inform the user y has not been used

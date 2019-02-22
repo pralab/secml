@@ -98,7 +98,8 @@ class CEvasionRejectTestCases(object):
             self.solver_type = 'gradient-descent'
             self.solver_params = {'eta': 0.5, 'max_iter': 3}
 
-            eva = CAttackEvasion(self.multiclass, self.multiclass,
+            eva = CAttackEvasion(classifier=self.multiclass,
+                                 surrogate_classifier=self.multiclass,
                                  surrogate_data=self.ds,
                                  distance='l2', dmax=dmax, lb=lb, ub=ub,
                                  solver_type=self.solver_type,

@@ -1,6 +1,6 @@
 """
 .. module:: CSoftmax
-   :synopsis: Cross Entropy Loss and SoftMax function
+   :synopsis: Cross Entropy Loss and Softmax function
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
@@ -11,15 +11,19 @@ from secml.array import CArray
 
 
 class CSoftmax(CCreator):
-    """SoftMax function."""
+    """Softmax function."""
 
     def softmax(self, s):
-        """Apply the SoftMax function to input.
+        """Apply the softmax function to input.
 
-        The SoftMax function is defined for a single sample
+        The softmax function is defined for the vector `s`
         and for the i-th class as:
 
-          \text{SoftMax}(y, s) = \frac{e^{s_i}}{\sum_{k=1}^N e^s_k}
+          \text{SoftMax}(y, s) = [a_1,..,a_n] -> [s_1,..,s_n]
+
+        where:
+          \text s_y = \frac{e^{a_j}}{\sum_{i=1}^N e^a_i} \forall 1=1..N
+
 
         Parameters
         ----------
@@ -29,7 +33,7 @@ class CSoftmax(CCreator):
         Returns
         -------
         CArray
-            SoftMax function. Same shape of input array.
+            Softmax function. Same shape of input array.
 
         Examples
         --------
@@ -49,14 +53,20 @@ class CSoftmax(CCreator):
 
         return s_exp / s_exp_sum
 
-    def gradient(self, s, pos_label):
+    def gradient(self, s, y):
         """Gradient of the softmax function.
 
-        The derivative of the i-th element of the vector s is:
+        The derivative of the y-th output of the
+        softmax function w.r.t. all the inputs is given by:
 
-            sigma = softmax(s);
-            grad_i = sigma_{s_\text{pos_label}} * (t - sigma_{s_i})
-                            where t = 1 if i == pos_label, t = 0 elsewhere
+          [\frac{\prime s_y}{\prime a_1},..,\frac{\prime s_y}{\prime a_n}]
+
+        where:
+          \text {\prime s_y}{\prime a_i} = s_y (\delta - s_i)
+
+        with:
+          \text \delta = 1 if i = j
+          \text \delta = 0 if i \ne j
 
         Parameters
         ----------
@@ -77,9 +87,9 @@ class CSoftmax(CCreator):
 
         sigma_s = self.softmax(s)
 
-        # - sigma_{s_i} * sigma_{s_\text{pos_label}}
-        grad = -sigma_s * sigma_s[pos_label]
-        # += sigma_{s_\text{pos_label}} if i == pos_label
-        grad[pos_label] += sigma_s[pos_label]
+        # - sigma_{s_i} * sigma_{s_y}
+        grad = -sigma_s * sigma_s[y]
+        # += sigma_{s_y} if i == y
+        grad[y] += sigma_s[y]
 
         return grad.ravel()
