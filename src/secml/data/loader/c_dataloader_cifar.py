@@ -7,6 +7,7 @@
 """
 import tarfile
 import cPickle
+from multiprocessing import Lock
 from abc import ABCMeta, abstractmethod, abstractproperty
 import numpy as np
 
@@ -34,6 +35,7 @@ class CDataLoaderCIFAR(CDataLoader):
 
     """
     __metaclass__ = ABCMeta
+    __lock = Lock()  # Lock to prevent multiple parallel download/extraction
 
     def __init__(self):
 
@@ -43,13 +45,14 @@ class CDataLoaderCIFAR(CDataLoader):
         # Path to the downloaded dataset file
         data_file_path = fm.join(CIFAR_PATH, self.data_file)
 
-        # Download (if needed) data and extract it
-        if not fm.file_exist(data_file_path) or \
-                md5(data_file_path) != self.data_md5:
-            self._get_data(self.data_url, CIFAR_PATH)
-        elif not fm.folder_exist(self.data_path):
-            # Downloaded datafile seems valid, extract only
-            self._get_data(self.data_url, CIFAR_PATH, extract_only=True)
+        with CDataLoaderCIFAR.__lock:
+            # Download (if needed) data and extract it
+            if not fm.file_exist(data_file_path) or \
+                    md5(data_file_path) != self.data_md5:
+                self._get_data(self.data_url, CIFAR_PATH)
+            elif not fm.folder_exist(self.data_path):
+                # Downloaded datafile seems valid, extract only
+                self._get_data(self.data_url, CIFAR_PATH, extract_only=True)
 
     @abstractproperty
     def data_url(self):

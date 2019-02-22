@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
@@ -11,7 +11,7 @@ from secml.ml.peval.metrics import CMetric
 from secml.figure import CFigure
 
 
-class TestCClassifierMultiOVA(CUnitTest):
+class TestCClassifierMultiOVA(CClassifierTestCases):
     """Unittests for CClassifierMultiOVA."""
 
     def setUp(self):
@@ -128,7 +128,7 @@ class TestCClassifierMultiOVA(CUnitTest):
 
         multi = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                          class_weight='balanced',
-                                         preprocess='minmax')
+                                         preprocess='min-max')
         multi.fit(self.dataset)
         pred_y = multi.predict(self.dataset.X)
 
@@ -149,18 +149,8 @@ class TestCClassifierMultiOVA(CUnitTest):
         pattern = CArray(random.choice(self.dataset.X.get_data()))
         self.logger.info("Randomly selected pattern:\n%s", str(pattern))
 
-        # Get predicted label
-        sample_label = multiclass.predict(pattern).item()
-        # Return the gradient of the label^th sub-classifier
-        ova_grad = multiclass.binary_classifiers[
-            sample_label].gradient_f_x(pattern)
-
-        gradient = multiclass.gradient_f_x(pattern, y=sample_label)
-        self.logger.info("Gradient:\n%s", str(gradient))
-
-        self.assertEquals(gradient.dtype, float)
-
-        self.assertFalse((gradient != ova_grad).any())
+        # Compare with numerical gradient
+        self._test_gradient_numerical(multiclass, pattern)
 
         # Check if we can return the i_th classifier
         for i in xrange(multiclass.num_classifiers):
@@ -173,6 +163,11 @@ class TestCClassifierMultiOVA(CUnitTest):
 
             self.assertFalse((gradient != ova_grad).any())
 
+        with self.assertRaises(ValueError):
+            multiclass.gradient_f_x(pattern, y=-1)
+        with self.assertRaises(ValueError):
+            multiclass.gradient_f_x(pattern, y=100)
+
     def test_plot_decision_function(self):
         """Test plot of multiclass classifier decision function."""
         # generate synthetic data
@@ -183,7 +178,7 @@ class TestCClassifierMultiOVA(CUnitTest):
         multiclass = CClassifierMulticlassOVA(
             classifier=CClassifierSVM,
             class_weight='balanced',
-            preprocess='minmax')
+            preprocess='min-max')
 
         # Training and classification
         multiclass.fit(ds)
@@ -384,4 +379,4 @@ class TestCClassifierMultiOVA(CUnitTest):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CClassifierTestCases.main()

@@ -7,6 +7,7 @@ from secml.adv.attacks import CAttackEvasion
 from secml.adv.defenses import CClassifierRejectDetector
 from secml.adv.seceval import CSecEval
 from secml.array import CArray
+from secml.ml.kernel import CKernelRBF
 from secml.data.loader import CDLRandomBlobs
 from secml.utils import fm
 
@@ -18,9 +19,9 @@ class TestCClassifierRejectDetector(
     def setUp(self):
         """Test for init and fit methods."""
         # generate synthetic data
-        self.dataset = CDLRandomBlobs(n_features=2, n_samples=100,
-                                      centers=((0, 0), (10, 10)),
-                                      cluster_std=5.0, random_state=0).load()
+        self.dataset = CDLRandomBlobs(n_features=2, n_samples=50,
+                                      centers=((-1, -1), (1, 1)),
+                                      cluster_std=0.75, random_state=0).load()
 
         self.lb = self.dataset.X.min(axis=0)
         self.ub = self.dataset.X.max(axis=0)
@@ -33,23 +34,21 @@ class TestCClassifierRejectDetector(
 
         self.clf_norej.fit(self.dataset)
 
-        det = CClassifierSVM(kernel='rbf')
-
+        det = CClassifierSVM(kernel=CKernelRBF(gamma=10))
         self._set_eva_params()
 
         self.adv_x = self._generate_advx()
 
         self.clf = CClassifierRejectDetector(
             self.clf_norej, det=det, adv_x=self.adv_x)
-        self.clf.verbose = 2  # Enabling debug output for each classifier
         self.clf.fit(self.dataset)
 
     def _set_eva_params(self):
 
-        self.dmax_lst = [5.5, 6.0]
+        self.dmax_lst = [1, 1.5]
         self.discrete = False
         self.type_dist = 'l2'
-        self.solver_type = 'gradient-descent'
+        self.solver_type = 'descent-direction'
         self.solver_params = {'eta': 0.1}
 
     def _generate_advx(self):
@@ -77,9 +76,11 @@ class TestCClassifierRejectDetector(
             }
 
             self.evasion = CAttackEvasion(**params)
+            self.evasion.verbose = 1
             self.sec_eval = CSecEval(attack=self.evasion, param_name='dmax',
                                      param_values=self.dmax_lst,
                                      save_adv_ds=True)
+            self.sec_eval.verbose = 1
             self.sec_eval.run_sec_eval(self.dataset)
 
             adv_dts_lst = self.sec_eval.sec_eval_data.adv_ds
@@ -96,6 +97,19 @@ class TestCClassifierRejectDetector(
             adv_dts_X.save(self.adv_file)
 
         return adv_dts_X
+
+    def test_gradient(self):
+        """Unittest for gradient_f_x method."""
+        # Training the classifier
+        clf = self.clf.fit(self.dataset)
+
+        idx_test = 7
+        x = self.dataset.X[idx_test, :]
+
+        self.logger.info("Test pattern {:}:\n{:}".format(idx_test, x))
+
+        self._test_gradient_numerical(
+            clf, x, extra_classes=[-1], th=0.1, epsilon=0.01)
 
 
 if __name__ == '__main__':

@@ -45,7 +45,7 @@ class _CArrayInterface(object):
 
     @abstractproperty
     def nnz(self):
-        """Number of non-zero array elements."""
+        """Number of non-zero values in the array."""
         raise NotImplementedError
 
     @abstractproperty
@@ -434,6 +434,11 @@ class _CArrayInterface(object):
     # ------------- #
 
     @abstractmethod
+    def get_nnz(self, axis=None):
+        """Counts the number of non-zero values in the array."""
+        raise NotImplementedError
+
+    @abstractmethod
     def unique(self, return_index=False,
                return_inverse=False, return_counts=False):
         """Find the unique elements of an array."""
@@ -532,6 +537,11 @@ class _CArrayInterface(object):
     @abstractmethod
     def std(self, axis=None, ddof=0, keepdims=True):
         """Compute the standard deviation along the specified axis."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def sha1(self):
+        """Calculate the sha1 hexadecimal hash of array."""
         raise NotImplementedError
 
     # ----------------- #

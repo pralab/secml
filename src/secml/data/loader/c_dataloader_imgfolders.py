@@ -33,8 +33,11 @@ class CDataLoaderImgFolders(CDataLoader):
              label_re=None, label_dtype=None, load_data=True):
         """Load all images of specified format inside given path.
 
-        'id' (last `ds_path` folder), 'img_w', 'img_h' will be added
-        as custom CDataset attributes.
+        The following custom CDataset attributes are available:
+        - 'id' (last `ds_path` folder)
+        - 'img_w' (image width)
+        - 'img_h' (image height)
+        - 'img_c' (image number of channels)
 
         Any other custom attribute is retrieved from 'attributes.txt' file.
 
@@ -60,11 +63,12 @@ class CDataLoaderImgFolders(CDataLoader):
         # Dimensions of each image
         img_w = CArray([], dtype=int)
         img_h = CArray([], dtype=int)
+        img_c = CArray([], dtype=int)
 
         # Each directory inside the provided path will be explored recursively
         # and, if leaf, contained images will be loaded
-        patterns, labels, img_w, img_h = self._explore_dir(
-            ds_path, img_w, img_h, img_ext,
+        patterns, labels, img_w, img_h, img_c = self._explore_dir(
+            ds_path, img_w, img_h, img_c, img_ext,
             label_re=label_re, load_data=load_data)
 
         if label_dtype is not None:  # Converting labels if requested
@@ -84,9 +88,9 @@ class CDataLoaderImgFolders(CDataLoader):
             patterns.shape[0], ds_path))
 
         return CDataset(patterns, labels, id=fm.split(ds_path)[1],
-                        img_w=img_w, img_h=img_h, **attributes)
+                        img_w=img_w, img_h=img_h, img_c=img_c, **attributes)
 
-    def _explore_dir(self, dir_path, img_w, img_h, img_ext,
+    def _explore_dir(self, dir_path, img_w, img_h, img_c, img_ext,
                      label_re=None, load_data=True):
         """Explore input directory and load files if leaf."""
         # Folders/files will be loaded in alphabetical order
@@ -98,7 +102,7 @@ class CDataLoaderImgFolders(CDataLoader):
 
         if leaf is True:  # Leaf directory, time to load files!
             return self._load_files(
-                dir_path, img_w, img_h, img_ext,
+                dir_path, img_w, img_h, img_c, img_ext,
                 label_re=label_re, load_data=load_data)
 
         # Placeholder for patterns/labels CArray
@@ -113,8 +117,8 @@ class CDataLoaderImgFolders(CDataLoader):
                 continue
 
             # Explore next subfolder
-            patterns_new, labels_new, img_w, img_h = self._explore_dir(
-                subdir_path, img_w, img_h, img_ext,
+            patterns_new, labels_new, img_w, img_h, img_c = self._explore_dir(
+                subdir_path, img_w, img_h, img_c, img_ext,
                 label_re=label_re, load_data=load_data)
 
             patterns = patterns.append(patterns_new, axis=0) \
@@ -122,9 +126,9 @@ class CDataLoaderImgFolders(CDataLoader):
             labels = labels.append(labels_new) \
                 if labels is not None else labels_new
 
-        return patterns, labels, img_w, img_h
+        return patterns, labels, img_w, img_h, img_c
 
-    def _load_files(self, dir_path, img_w, img_h, img_ext,
+    def _load_files(self, dir_path, img_w, img_h, img_c, img_ext,
                     label_re=None, load_data=True):
         """Loads any file with given extension inside input folder."""
         # Folders/files will be loaded in alphabetical order
@@ -144,13 +148,14 @@ class CDataLoaderImgFolders(CDataLoader):
                 img = Image.open(file_path)
 
                 # Storing image dimensions...
-                img_w = img_w.append(img.size[0])
-                img_h = img_h.append(img.size[1])
+                img_w = img_w.append(img.width)
+                img_h = img_h.append(img.height)
+                img_c = img_c.append(len(img.getbands()))
 
                 # If load_data is True, store features, else store path
                 if load_data is True:
                     # Storing image as a 2D CArray
-                    array_img = CArray([img.getdata()])
+                    array_img = CArray(img.getdata()).ravel().atleast_2d()
                 else:
                     array_img = CArray([[file_path]])
 
@@ -169,4 +174,4 @@ class CDataLoaderImgFolders(CDataLoader):
                 self.logger.debug("{:} has been loaded..."
                                   "".format(fm.join(dir_path, file_name)))
 
-        return patterns, labels, img_w, img_h
+        return patterns, labels, img_w, img_h, img_c

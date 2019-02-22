@@ -34,8 +34,8 @@ class CClassifierRejectThreshold(CClassifierReject):
 
     def __init__(self, clf, threshold):
 
-        self._clf = clf
-        self._threshold = threshold
+        self.clf = clf
+        self.threshold = threshold
 
         super(CClassifierRejectThreshold, self).__init__()
 
@@ -46,6 +46,20 @@ class CClassifierRejectThreshold(CClassifierReject):
     def __is_clear(self):
         """Returns True if object is clear."""
         return self._clf.is_clear()
+
+    @property
+    def clf(self):
+        """Returns the inner classifier."""
+        return self._clf
+
+    @clf.setter
+    def clf(self, value):
+        """Sets the inner classifier."""
+        if isinstance(value, CClassifier):
+            self._clf = value
+        else:
+            raise ValueError(
+                "the inner classifier should be an instance of CClassifier")
 
     @property
     def threshold(self):
@@ -72,13 +86,21 @@ class CClassifierRejectThreshold(CClassifierReject):
         """Number of features"""
         return self._clf.n_features
 
+    @property
+    def preprocess(self):
+        """Preprocess to be applied to input data by the inner classifier."""
+        return self._clf.preprocess
+
+    @preprocess.setter
+    def preprocess(self, value):
+        """Preprocess to be applied to input data by the inner classifier."""
+        self._clf.preprocess = value
+
     def fit(self, dataset, n_jobs=1):
         """Trains the classifier.
 
         If a preprocess has been specified,
         input is normalized before training.
-
-        For multiclass case see `.CClassifierMulticlass`.
 
         Parameters
         ----------
@@ -95,6 +117,8 @@ class CClassifierRejectThreshold(CClassifierReject):
             Instance of the classifier trained using input dataset.
 
         """
+        # Resetting the outer classifier
+        self.clear()
         return self._fit(dataset, n_jobs)
 
     def _fit(self, dataset, n_jobs=1):
@@ -116,7 +140,8 @@ class CClassifierRejectThreshold(CClassifierReject):
             Instance of the classifier trained using input dataset.
 
         """
-        return self._clf.fit(dataset, n_jobs=n_jobs)
+        self._clf.fit(dataset, n_jobs=n_jobs)
+        return self
 
     def decision_function(self, x, y):
         """Computes the decision function for each pattern in x.

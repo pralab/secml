@@ -144,3 +144,27 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
         # Getting predicted scores for classifier associated with y
         # The decision function is always computed wrt positive class (1)
         return self.binary_classifiers[y].decision_function(x, y=1)
+
+    def _gradient_f(self, x, y):
+        """Computes the gradient of the classifier's decision function
+         wrt decision function input.
+
+        For a multiclass OVA classifier, the gradient of the y^th
+        binary classifier is returned.
+
+        Parameters
+        ----------
+        x : CArray
+            The gradient is computed in the neighborhood of x.
+        y : int
+            Index of the binary classifier of which the gradient
+            of the decision function should be returned.
+
+        Returns
+        -------
+        gradient : CArray
+            Gradient of the classifier's df wrt its input. Vector-like array.
+
+        """
+        self._check_clf_index(y)  # Check the binary classifier input index
+        return self.binary_classifiers[y].gradient_f_x(x).ravel()

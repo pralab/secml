@@ -1,13 +1,13 @@
 """
-Class CEvasion
+.. module:: CAttackEvasion
+   :synopsis: Class performs evasion attacks against a classifier,
+                under different constraints.
 
-@author: Battista Biggio
-
-This class performs evasion attacks
-against a classifier, under different constraints.
+.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-
 from secml.adv.attacks import CAttack
 from secml.adv.attacks.evasion.solvers import CSolver
 from secml.array import CArray
@@ -66,7 +66,9 @@ class CAttackEvasion(CAttack):
         self._x0 = None
         self._y0 = None
 
-        # this is an alternative init point. See _get_point_with_min_f_obj()
+        # this is an alternative init point. This could be a single point
+        # (targeted evasion) or an array of multiple points, one for each
+        # class (indiscriminate evasion). See _get_point_with_min_f_obj()
         self._xk = None
 
         CAttack.__init__(self, classifier=classifier,
@@ -95,6 +97,16 @@ class CAttackEvasion(CAttack):
         if self._xk is not None:
             return False
         return True
+
+    @property
+    def y_target(self):
+        return self._y_target
+
+    @y_target.setter
+    def y_target(self, value):
+        self._y_target = value
+        # If y_target changes, we need to reset the alternative init point
+        self._xk = None
 
     ###########################################################################
     #                              PRIVATE METHODS
@@ -257,9 +269,14 @@ class CAttackEvasion(CAttack):
     # TODO: add probability as in c_attack_poisoning
     # (we could also move this directly in c_attack)
     def _get_point_with_min_f_obj(self, y_pred, scores):
-        """
-        Retrieves the data point x with minimum value of objective function
-        from surrogate data.
+        """Returns the surrogate sample having the minimum value of objective function.
+
+        Parameters
+        ----------
+        y_pred : CArray
+            Predictions on surrogate data of the solver classifier.
+        scores : CArray
+            Predictions scores on surrogate data of the solver classifier.
 
         Returns
         -------
@@ -267,27 +284,20 @@ class CAttackEvasion(CAttack):
             Surrogate data point with minimum value of objective function.
 
         """
-        if self._surrogate_data is None:
-            raise ValueError('Surrogate data has not been set!')
-
         f_objs = self._objective_function_pred_scores(y_pred, scores)
         k = f_objs.argmin()
         return self._surrogate_data.X[k, :].ravel()
 
-    # TODO: better to override setters for surrogate classifier and data
-    # or use another mechanism
-    def _set_solver_classifier(self):
-        """Overriding to additionally compute xk."""
-        super(CAttackEvasion, self)._set_solver_classifier()
+    def _set_alternative_init(self):
+        """Set the alternative init point."""
+        self.logger.info("Computing an alternative init point...")
 
-        # TODO: better to isolate this function below from the rest
-        # check if solver_clf and surrogate data are set
-        if self._solver_clf is None or self._surrogate_data is None:
-            return
+        # Compute predictions on surrogate data if necessary
+        if self._surrogate_labels is None or self._surrogate_scores is None:
+            self._set_solver_surrogate_predictions()
 
-        self.logger.info("Classification of surrogate data...")
-        y_pred, scores = self._solver_clf.predict(
-            self.surrogate_data.X, return_decision_function=True)
+        y_pred = self._surrogate_labels
+        scores = self._surrogate_scores
 
         # for targeted evasion, this does not depend on the data label y0
         if self.y_target is not None:
@@ -301,37 +311,52 @@ class CAttackEvasion(CAttack):
                                        self.surrogate_data.num_features),
                                 sparse=self.surrogate_data.issparse,
                                 dtype=self.surrogate_data.X.dtype)
+        y0 = self._y0  # Backup last y0
         for i in xrange(self.surrogate_data.num_classes):
             self._y0 = i
             self._xk[i, :] = self._get_point_with_min_f_obj(
                 y_pred, scores.deepcopy())
-        self._y0 = None
+        self._y0 = y0  # Restore last y0
+
+    def _clear_solver_surrogate_predictions(self):
+        """Reset the predictions on surrogate data using solver classifier."""
+        super(CAttackEvasion, self)._clear_solver_surrogate_predictions()
+        # After resetting predictions on surr data,
+        # also reset the alternative init point
+        self._xk = None
 
     ###########################################################################
     #                              PUBLIC METHODS
     ###########################################################################
 
     def _run(self, x0, y0, x_init=None):
-        """
-        Perform evasion for a given dmax on a single pattern
+        """Perform evasion for a given dmax on a single pattern.
+
         It solves:
             min_x g(x),
             s.t. c(x,x0) <= dmax
 
-        Parameters:
-        ------
-        x0: initial malicious sample
-        y0: the true label of x0
-        x_init: init point (if None, set to x0)
+        Parameters
+        ----------
+        x0 : CArray
+            Initial sample.
+        y0 : int or CArray
+            The true label of x0.
+        x_init : CArray or None, optional
+            Initialization point. If None, it is set to x0.
 
-        Returns:
-        ------
-        x_opt: evasion sample
-        y_opt: classification label assigned to x_opt
-        f_opt: value of objective function (from surrogate learner)
+        Returns
+        -------
+        x_opt : CArray
+            Evasion sample
+        f_opt : float
+            Value of objective function on x_opt (from surrogate learner).
 
+        Notes
+        -----
         Internally, this class stores the values of
-        the objective function and sequence of attack points (if enabled).
+         the objective function and sequence of attack points (if enabled).
+
         """
         self._f_eval = 0
         self._grad_eval = 0
@@ -373,7 +398,8 @@ class CAttackEvasion(CAttack):
         # we run an evasion attempt using (as the init sample)
         # the sample xk with the minimum objective function from surrogate data
         if self._xk is None:
-            raise ValueError('xk not set!')
+            # Choose the alternative init point if not already done
+            self._set_alternative_init()
 
         # xk depends on whether evasion is targeted/indiscriminate
         xk = self._xk if self.y_target is not None else self._xk[self._y0, :]
@@ -400,24 +426,32 @@ class CAttackEvasion(CAttack):
 
         return self._x_opt, self._f_opt
 
-    def run(self, X, Y, ds_init=None):
-        """
-        Runs evasion on a dataset.
+    def run(self, x, y, ds_init=None):
+        """Runs evasion on a dataset.
 
         Parameters
         ----------
-        x: data points (more than one)
-        y: true labels
-        ds_init: for warm starts
+        x : CArray
+            Data points.
+        y : CArray
+            True labels.
+        ds_init : CDataset
+            Dataset for warm starts.
 
         Returns
         -------
-        y_pred: predicted labels for all ds samples by targeted classifier
-        scores: scores for all ds samples by targeted classifier
-        adv_ds: manipulated ds sample dataset
+        y_pred : CArray
+            Predicted labels for all ds samples by target classifier.
+        scores : CArray
+            Scores for all ds samples by target classifier.
+        adv_ds : CDataset
+            Dataset of manipulated samples.
+        f_obj : float
+            Average value of the objective function computed on each data point.
+
         """
-        x = CArray(X).atleast_2d()
-        y = CArray(Y).atleast_2d()
+        x = CArray(x).atleast_2d()
+        y = CArray(y).atleast_2d()
         x_init = None if ds_init is None else CArray(ds_init.X).atleast_2d()
 
         # only consider samples that can be manipulated
@@ -431,7 +465,7 @@ class CAttackEvasion(CAttack):
         adv_ds = CDataset(x.deepcopy(), y.deepcopy())
 
         # If dataset is sparse, set the proper attribute
-        if X.issparse is True:
+        if x.issparse is True:
             self._issparse = True
 
         # array in which the value of the optimization function are stored

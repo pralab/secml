@@ -11,6 +11,49 @@ from secml.core.constants import nan, inf
 class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
     """Unit test for CArray UTILS - DATA ANALYSIS methods."""
 
+    def test_get_nnz(self):
+        """Test for CArray.get_nnz()."""
+        self.logger.info("Testing CArray.get_nnz() method")
+
+        def check_nnz(array, expected):
+            self.logger.info("array:\n{:}".format(array))
+            for ax_i, ax in enumerate((None, 0, 1)):
+                res = array.get_nnz(axis=ax)
+                self.logger.info("get_nnz(axis={:}):\n{:}".format(ax, res))
+
+                if ax is None:
+                    self.assertIsInstance(res, int)
+                    self.assertEquals(res, expected[ax_i])
+                else:
+                    self.assertIsInstance(res, CArray)
+                    self.assertEqual(1, res.ndim)
+                    if ax == 0:
+                        self.assertEqual(array.shape[1], res.size)
+                    elif ax == 1:
+                        self.assertEqual(array.shape[0], res.size)
+                    self.assertFalse((res != expected[ax_i]).any())
+
+        check_nnz(self.array_sparse,
+                  (6, CArray([3, 2, 0, 1]), CArray([2, 2, 2])))
+        check_nnz(self.row_sparse,
+                  (2, CArray([1, 0, 1]), CArray([2])))
+        check_nnz(self.column_sparse,
+                  (2, CArray([2]), CArray([1, 0, 1])))
+
+        check_nnz(self.array_dense,
+                  (6, CArray([3, 2, 0, 1]), CArray([2, 2, 2])))
+        check_nnz(self.row_dense,
+                  (2, CArray([1, 0, 1]), CArray([2])))
+        check_nnz(self.column_dense,
+                  (2, CArray([2]), CArray([1, 0, 1])))
+
+        check_nnz(self.single_dense, (1, CArray([1]), CArray([1])))
+        check_nnz(self.single_sparse, (1, CArray([1]), CArray([1])))
+
+        # Empty arrays have shape (1, 0)
+        check_nnz(self.empty_dense, (0, CArray([]), CArray([0])))
+        check_nnz(self.empty_sparse, (0, CArray([]), CArray([0])))
+
     def test_unique(self):
         """Test for CArray.unique() method."""
         self.logger.info("Test for CArray.unique() method")
@@ -852,8 +895,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                             res_expected = res_expected.ravel()
                         self.assertEqual(res.shape, res_expected.shape)
                     # use numpy.testing to proper compare arrays with nans
-                    np.testing.assert_equal(CArray(res).tondarray(),
-                                            CArray(res_expected).tondarray())
+                    self.assert_array_equal(res, res_expected)
 
         # array_dense = CArray([[1, 0, 0, 5], [2, 4, 0, 0], [3, 6, 0, 0]]
         # row_flat_dense = CArray([4, 0, 6])
@@ -1018,9 +1060,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
             self.assertIsInstance(argmin_res, int)
             min_res = array.nanmin(axis=None)
             # use numpy.testing to proper compare arrays with nans
-            np.testing.assert_equal(
-                CArray(array.ravel()[argmin_res]).tondarray(),
-                CArray(min_res).tondarray())
+            self.assert_array_equal(array.ravel()[argmin_res], min_res)
 
             self.logger.info("a: \n{:}".format(array))
             if array.shape[0] == 1:
@@ -1038,9 +1078,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                 argmin_res = [
                     argmin_res.ravel().tolist(), range(array.shape[1])]
                 # use numpy.testing to proper compare arrays with nans
-                np.testing.assert_equal(
-                    CArray(array[argmin_res]).tondarray(),
-                    CArray(min_res).tondarray())
+                self.assert_array_equal(array[argmin_res], min_res)
 
             self.logger.info("a: \n{:}".format(array))
             if array.shape[1] == 1:
@@ -1058,9 +1096,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                 argmin_res = [
                     range(array.shape[0]), argmin_res.ravel().tolist()]
                 # use numpy.testing to proper compare arrays with nans
-                np.testing.assert_equal(
-                    CArray(array[argmin_res]).tondarray(),
-                    CArray(min_res).tondarray())
+                self.assert_array_equal(array[argmin_res], min_res)
 
         _check_nanargmin(self.array_dense)
         _check_nanargmin(self.row_dense)
@@ -1090,9 +1126,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                 "a.nanargmax(axis=None): \n{:}".format(argmax_res))
             self.assertIsInstance(argmax_res, int)
             max_res = array.nanmax(axis=None)
-            np.testing.assert_equal(
-                CArray(array.ravel()[argmax_res]).tondarray(),
-                CArray(max_res).tondarray())
+            self.assert_array_equal(array.ravel()[argmax_res], max_res)
 
             self.logger.info("a: \n{:}".format(array))
             if array.shape[0] == 1:
@@ -1109,9 +1143,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                 max_res = max_res.ravel()
                 argmax_res = [
                     argmax_res.ravel().tolist(), range(array.shape[1])]
-                np.testing.assert_equal(
-                    CArray(array[argmax_res]).tondarray(),
-                    CArray(max_res).tondarray())
+                self.assert_array_equal(array[argmax_res], max_res)
 
             self.logger.info("a: \n{:}".format(array))
             if array.shape[1] == 1:
@@ -1128,9 +1160,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                 max_res = max_res.ravel()
                 argmax_res = [
                     range(array.shape[0]), argmax_res.ravel().tolist()]
-                np.testing.assert_equal(
-                    CArray(array[argmax_res]).tondarray(),
-                    CArray(max_res).tondarray())
+                self.assert_array_equal(array[argmax_res], max_res)
 
         _check_nanargmax(self.array_dense)
         _check_nanargmax(self.row_dense)
@@ -1197,6 +1227,70 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
 
         with self.assertRaises(NotImplementedError):
             self.array_sparse.median()
+
+    def test_sha1(self):
+        """Test for CArray.sha1() method."""
+        self.logger.info("Test for CArray.prod() method.")
+
+        def _check_sha1(array):
+            self.logger.info("Array:\n{:}".format(array))
+
+            sha1 = array.sha1()
+            self.logger.info("array.sha1():\n{:}".format(sha1))
+
+            self.assertIsInstance(sha1, str)
+
+            # Transpose the array and check if sha1 changes if shape changes
+            array_mod = array.T
+            self.logger.info(
+                "Checking hash after transpose:\n{:}".format(array_mod))
+            sha1_mod = array_mod.sha1()
+            self.logger.info("array_mod.sha1():\n{:}".format(sha1_mod))
+            if array_mod.shape != array.shape:
+                self.assertNotEqual(sha1, sha1_mod)
+            else:  # If shape didn't change (empty or single elem array)
+                self.assertEqual(sha1, sha1_mod)
+
+            # Change dtype and check if sha1 changes if data changes
+            newtype = int if array.dtype != int else float
+            array_mod = array.astype(newtype)
+            self.logger.info("Checking hash after changing dtype to "
+                             "{:}:\n{:}".format(newtype, array_mod))
+            sha1_mod = array_mod.sha1()
+            self.logger.info("array_mod.sha1():\n{:}".format(sha1_mod))
+            if array_mod.size > 0:
+                self.assertNotEqual(sha1, sha1_mod)
+            else:  # Empty array, no data to change. has should be the same
+                self.assertEqual(sha1, sha1_mod)
+
+            return sha1
+
+        sha1_list = [
+            _check_sha1(self.array_sparse),
+            _check_sha1(self.array_dense),
+            _check_sha1(self.array_dense_bool),
+            _check_sha1(self.array_sparse_bool),
+            _check_sha1(self.row_flat_dense),
+            _check_sha1(self.row_dense),
+            _check_sha1(self.row_sparse),
+            _check_sha1(self.column_dense),
+            _check_sha1(self.column_sparse),
+            _check_sha1(self.single_flat_dense),
+            _check_sha1(self.single_dense),
+            _check_sha1(self.single_sparse),
+            _check_sha1(self.single_bool_flat_dense),
+            _check_sha1(self.single_bool_dense),
+            _check_sha1(self.single_bool_sparse),
+            _check_sha1(self.empty_flat_dense),
+            _check_sha1(self.empty_dense),
+            _check_sha1(self.empty_sparse)
+        ]
+
+        # We now check that all the collected hashes are different
+        # as each test case was different
+        import itertools
+        for a, b in itertools.combinations(sha1_list, 2):
+            self.assertNotEqual(a, b)
 
 
 if __name__ == '__main__':

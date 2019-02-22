@@ -61,37 +61,41 @@ class CSparse(_CArrayInterface):
 
     @property
     def nnz(self):
-        """Returns the number of non-zero elements."""
-        return self._data.nnz
-
-    @property
-    def nnz_row_indices(self):
-        """Return indices of the rows where nz elements are."""
-        return CDense([ptr_idx for ptr_idx in xrange(
-            self._data.indptr.size - 1) for elem in xrange(
-            self._data.indptr[ptr_idx], self._data.indptr[ptr_idx + 1])])
-
-    @property
-    def nnz_column_indices(self):
-        """Return indices of the columns where nz elements are."""
-        return CDense(self._data.indices)
+        """Number of non-zero values in the array."""
+        return self.get_nnz()
 
     @property
     def nnz_indices(self):
         """Return a list of list that contain index of non zero elements."""
-        return [self.nnz_row_indices.tolist(),
-                self.nnz_column_indices.tolist()]
+        return map(list, self.tocsr().nonzero())
 
     @property
     def nnz_data(self):
         """Return non zero elements."""
         if len(self.nnz_indices[0]) == 0:
-            return self.__class__([])
-        return self[self.nnz_indices]
+            return CDense([])
+        return self[self.nnz_indices].todense()
 
     @property
     def T(self):
         return self.transpose()
+
+    @property
+    def is_vector_like(self):
+        """True if array is vector-like.
+
+        An array is vector-like when shape[0] == 1.
+
+        Returns
+        -------
+        bool
+            True if array is vector-like.
+
+        """
+        if self.shape[0] == 1:
+            return True
+        else:
+            return False
 
     # --------------------------- #
     # # # # # # CASTING # # # # # #
@@ -177,7 +181,7 @@ class CSparse(_CArrayInterface):
             # SPECIAL CASE: Matlab-like indexing
             idx = np.ix_(*idx)
 
-            # Workround for scipy indexing when 2 integer-like are passed
+            # Workaround for scipy indexing when 2 integer-like are passed
             if idx[1].size == 1:
                 idx = tuple(elem.ravel()[0] for elem in idx)
 
@@ -211,8 +215,15 @@ class CSparse(_CArrayInterface):
                 raise IndexError("vector-like indexing is only applicable "
                                  "to arrays with shape[0] == 1.")
 
+            # Empty lists are converted to float by numpy,
+            # special handling needed
+            if len(idx) == 0:
+                idx = np.asarray(idx, dtype=int)
+            else:  # Otherwise we leave np decide
+                idx = np.asarray(idx)
+
             # Fake 2D index. Use ndarrays to mimic Matlab-like indexing
-            idx = (np.asarray([0]), np.asarray(idx))
+            idx = (np.asarray([0]), idx)
 
             # Check the size of any boolean array inside tuple
             self._check_index_bool(idx)
@@ -220,7 +231,7 @@ class CSparse(_CArrayInterface):
             # SPECIAL CASE: Matlab-like indexing
             idx = np.ix_(*idx)
 
-            # Workround for scipy indexing when 2 integer-like are passed
+            # Workaround for scipy indexing when 2 integer-like are passed
             if idx[1].size == 1:
                 idx = tuple(elem.ravel()[0] for elem in idx)
 
@@ -242,14 +253,21 @@ class CSparse(_CArrayInterface):
             for e_i, e in enumerate(idx_list):
                 # Check each tuple element and convert to ndarray
                 if isinstance(e, CDense) or isinstance(e, CSparse):
-                    idx_list[e_i] = e.tondarray()
+                    if not e.is_vector_like:
+                        raise IndexError("invalid index shape")
+                    idx_list[e_i] = e.tondarray().ravel()
                     # Check the size of any boolean array inside tuple
                     t = [None, None]  # Fake index for booleans check
                     t[e_i] = idx_list[e_i]
                     self._check_index_bool(tuple(t))
 
                 elif is_list(e):
-                    idx_list[e_i] = np.asarray(e)
+                    # Empty lists are converted to float by numpy,
+                    # special handling needed
+                    if len(e) == 0:
+                        idx_list[e_i] = np.asarray(e, dtype=int)
+                    else:  # Otherwise we leave np decide
+                        idx_list[e_i] = np.asarray(e)
                     # Check the size of any boolean array inside tuple
                     t = [None, None]  # Fake index for booleans check
                     t[e_i] = idx_list[e_i]
@@ -279,7 +297,7 @@ class CSparse(_CArrayInterface):
             if all(is_ndarray(elem) for elem in idx):
                 idx = np.ix_(*idx)
 
-            # Workround for scipy indexing when 2 integer-like are passed
+            # Workaround for scipy indexing when 2 integer-like are passed
             if all(is_intlike(elem) for elem in idx):
                 idx = tuple(elem.ravel()[0] for elem in idx)
 
@@ -1079,14 +1097,14 @@ class CSparse(_CArrayInterface):
 
         Parameters
         ----------
-        array : CSparse or array_like
+        array : CSparse
             The array like object holding the elements to compare
             current array with. Must have the same shape of first
             array.
 
         Returns
         -------
-        out_and : CSparse or bool
+        CSparse
             The element-wise logical AND between the two arrays.
 
         Examples
@@ -1106,21 +1124,28 @@ class CSparse(_CArrayInterface):
 
         """
         if self.shape != array.shape:
-            raise ValueError("array to compare must be {:}".format(self.shape))
+            raise ValueError(
+                "array to compare must have shape {:}".format(self.shape))
 
+        # This create an empty sparse matrix (basically full of zeros)
         and_result = self.__class__(self.shape, dtype=bool)
 
-        for el_idx, el in enumerate(self._data.data):
+        # Iterate over non-zero elements
+        # This also works for any explicitly stored zero
+        for e_i, e in enumerate(self._data.data):
             # Get indices of current element
-            this_elem_row = self.nnz_row_indices[0, el_idx]
-            this_elem_col = self.nnz_column_indices[0, el_idx]
-            # Check is second array has an element in the same position
-            y_same_bool = (array.nnz_row_indices == this_elem_row).logical_and(
-                array.nnz_column_indices == this_elem_col)
-            if y_same_bool.any() == True:  # found an element in same position!
+            this_elem_row = self.nnz_indices[0][e_i]
+            this_elem_col = self.nnz_indices[1][e_i]
+            # Check if the 2nd array has an element in the same position
+            y_same_bool = \
+                (CDense(array.nnz_indices[0]) == this_elem_row).logical_and(
+                    CDense(array.nnz_indices[1]) == this_elem_col)
+            if y_same_bool.any():  # Found a corresponding element
+                # Now extract the value to compare from second array
                 same_position_val = int(
                     array._data.data[y_same_bool.tondarray()])
-                if np.logical_and(el, same_position_val):
+                # Compare element from self with the one from 2nd array
+                if np.logical_and(e, same_position_val):
                     and_result[this_elem_row, this_elem_col] = True
 
         return and_result
@@ -1161,29 +1186,31 @@ class CSparse(_CArrayInterface):
 
         """
         if self.shape != array.shape:
-            raise ValueError("array to compare must be {:}".format(self.shape))
+            raise ValueError(
+                "array to compare must have shape {:}".format(self.shape))
 
-        or_matrix = self.astype(bool)
+        # All non-zero elements will be replaced with True, otherwise False
+        out = self.astype(bool)
+
+        # We now need to set as True the elements corresponding
+        # to non-zeros in the 2nd array
+
         # Be sure there are only non-zeros in 2nd array
         array.eliminate_zeros()
-        # add True for each non-zero element of second array
-        or_matrix[[array.nnz_row_indices.tolist(),
-                   array.nnz_column_indices.tolist()]] = True
 
-        return or_matrix
+        # Set as True any non-zero element of 2nd array
+        out[array.nnz_indices] = True
+
+        return out
 
     def logical_not(self):
         """Element-wise logical NOT of array elements."""
         # Be sure there are only non-zeros in array
         self.eliminate_zeros()
-        # Storing indices of elements will be zeros
-        old_nnz_row_indices = self.nnz_row_indices.tolist()
-        old_nnz_column_indices = self.nnz_column_indices.tolist()
-
         # Create an array full of Trues (VERY expensive!)
         new_not = self.__class__(CDense.ones(self.shape)).astype(bool)
         # All old nonzeros should be zeros!
-        new_not[[old_nnz_row_indices, old_nnz_column_indices]] = False
+        new_not[self.nnz_indices] = False
         # Eliminate newly created zeros from internal csr_matrix structures
         new_not.eliminate_zeros()
 
@@ -1217,6 +1244,28 @@ class CSparse(_CArrayInterface):
     # ------------- #
     # DATA ANALYSIS #
     # ------------- #
+
+    def get_nnz(self, axis=None):
+        """Counts the number of non-zero values in the array.
+
+        Parameters
+        ----------
+        axis : bool or None, optional
+            Axis or tuple of axes along which to count non-zeros.
+            Default is None, meaning that non-zeros will be counted
+            along a flattened version of the array.
+
+        Returns
+        -------
+        count : CDense or int
+            Number of non-zero values in the array along a given axis.
+            Otherwise, the total number of non-zero values in the
+            array is returned.
+
+        """
+        # Result is dense (one element for each row/column)
+        res = self.tocsr().getnnz(axis=axis)
+        return CDense(res) if axis is not None else res
 
     def unique(self, return_index=False,
                return_inverse=False, return_counts=False):
@@ -1252,16 +1301,16 @@ class CSparse(_CArrayInterface):
             unique_index = CDense(dtype=int)
             if n_zeros > 0:  # ... if any!
                 for i in xrange(flat_a.size):
-                    # If a column is missing for nnz_column_indices,
-                    # means that a zero is there!
-                    if i + 1 > flat_a.nnz_column_indices.size or \
-                            flat_a.nnz_column_indices[i] != i:
+                    # If a element is missing for indices[1]
+                    # (nz column indices), means there is a zero there!
+                    if i + 1 > len(flat_a.nnz_indices[1]) or \
+                            flat_a.nnz_indices[1][i] != i:
                         unique_index = CDense([i])
                         break
 
-            # Let's get the indices of the nnz elements (columns indices)
+            # Let's get the indices of the nz elements (columns indices)
             unique_index = unique_index.append(
-                flat_a.nnz_column_indices[CDense(out[1])])
+                CDense(flat_a.nnz_indices[1])[CDense(out[1])])
             # Add result to the list of returned items
             outputs.append(unique_index)
 
@@ -1363,13 +1412,13 @@ class CSparse(_CArrayInterface):
                     return self.__class__(0.0, dtype=dtype)
             elif axis == 0:
                 out = CSparse((1, self.shape[1]), dtype=dtype)
-                c_bincount = self.nnz_column_indices.bincount()
+                c_bincount = CDense(self.nnz_indices[1]).bincount()
                 for e_idx, e in enumerate(c_bincount == self.shape[0]):
                     if bool(e) is True:
                         out[0, e_idx] = self[:, e_idx].todense().prod()
             elif axis == 1 or axis == -1:
                 out = CSparse((self.shape[0], 1), dtype=dtype)
-                c_bincount = self.nnz_row_indices.bincount()
+                c_bincount = CDense(self.nnz_indices[0]).bincount()
                 for e_idx, e in enumerate(c_bincount == self.shape[1]):
                     if bool(e) is True:
                         out[e_idx, 0] = self[e_idx, :].todense().prod()
@@ -1445,16 +1494,16 @@ class CSparse(_CArrayInterface):
             raise ValueError("attempt to get argmin of an empty sequence")
 
         # Preparing data
-        if axis is None or axis == 1 or axis == -1:
+        if axis is None or axis == 1 or axis == -1:  # max for row
             array = self.ravel() if axis is None else self
-            axis_elem_num = array.shape[0]  # max for row
-            this_indices = array.nnz_row_indices
-            other_axis_indices = array.nnz_column_indices
-        elif axis == 0:
+            axis_elem_num = array.shape[0]
+            this_indices = CDense(array.nnz_indices[0])
+            other_axis_indices = CDense(array.nnz_indices[1])
+        elif axis == 0:  # max for column
             array = self
-            axis_elem_num = array.shape[1]  # max for column
-            this_indices = array.nnz_column_indices
-            other_axis_indices = array.nnz_row_indices
+            axis_elem_num = array.shape[1]
+            this_indices = CDense(array.nnz_indices[1])
+            other_axis_indices = CDense(array.nnz_indices[0])
         else:
             raise ValueError("{:} is not a valid axis.")
 
@@ -1470,7 +1519,7 @@ class CSparse(_CArrayInterface):
                 current_elem = array._data.data[i_indices]
                 elem_max_idx = current_elem.argmax()
                 nnz_max = current_elem[elem_max_idx]
-                nnz_max_idx = other_axis_indices[0, i_indices][0, elem_max_idx]
+                nnz_max_idx = other_axis_indices[i_indices][elem_max_idx]
             else:
                 nnz_max = 0
                 nnz_max_idx = 0
@@ -1540,13 +1589,13 @@ class CSparse(_CArrayInterface):
         if axis is None or axis == 1 or axis == -1:
             array = self.ravel() if axis is None else self
             axis_elem_num = array.shape[0]  # min for row
-            this_indices = array.nnz_row_indices
-            other_axis_indices = array.nnz_column_indices
+            this_indices = CDense(array.nnz_indices[0])
+            other_axis_indices = CDense(array.nnz_indices[1])
         elif axis == 0:
             array = self
             axis_elem_num = array.shape[1]  # min for column
-            this_indices = array.nnz_column_indices
-            other_axis_indices = array.nnz_row_indices
+            this_indices = CDense(array.nnz_indices[1])
+            other_axis_indices = CDense(array.nnz_indices[0])
         else:
             raise ValueError("{:} is not a valid axis.")
 
@@ -1625,6 +1674,30 @@ class CSparse(_CArrayInterface):
         variance = (1.0 / (float(n) - ddof)) * (centered_array ** 2)
 
         return CDense(variance.sum(axis=axis, keepdims=keepdims).sqrt())
+
+    def sha1(self):
+        """Calculate the sha1 hexadecimal hash of array.
+
+        Returns
+        -------
+        hash : str
+            Hexadecimal hash of array.
+
+        """
+        import hashlib
+        x = self.tocsr()
+
+        h = hashlib.new('sha1')
+
+        # Hash by taking into account shape and sparse matrix internals
+        h.update(str(x.shape))
+        # The returned sha1 could be different for same data
+        # but different memory order. Use C order to be consistent
+        h.update(np.ascontiguousarray(x.indices))
+        h.update(np.ascontiguousarray(x.indptr))
+        h.update(np.ascontiguousarray(x.data))
+
+        return h.hexdigest()
 
     # ----------------- #
     # MATH ELEMENT-WISE #
