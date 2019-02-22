@@ -15,7 +15,7 @@ class TestEvasionNonLinearL2(CEvasionTestCases.TestCEvasion):
         self.type_dist = 'l2'
         self.sparse = False
 
-        self.dmax = 1.0
+        self.dmax = 1.5
 
         self.discrete = False
         self.eta = 0.1
@@ -23,15 +23,12 @@ class TestEvasionNonLinearL2(CEvasionTestCases.TestCEvasion):
         self.eta_max = None
 
         self.normalizer = CNormalizerMinMax(feature_range=(-1, 1))
-        self.classifier = CClassifierSVM(
-            kernel=CKernel.create('chebyshev-dist', gamma=1.0), C=1.0,
-            preprocess=self.normalizer)
-        self.classifier.gamma = 0.01
-        # self.classifier = CClassifierKDE(kernel='rbf', preprocess='minmax')
+        self.classifier = CClassifierSVM(kernel='rbf', C=1,
+                                         preprocess=self.normalizer)
 
-        self.seed = None  # Random state generator for the dataset
-        # self.seed = 879858889
-        # self.seed = 308757615
+        self.surrogate_classifier = self.classifier
+
+        self.seed = 534513  # Random state generator for the dataset
 
         self.n_clusters = 2  # Number of dataset clusters
         self.n_features = 2  # Number of dataset features

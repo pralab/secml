@@ -35,9 +35,17 @@ class CClassifierRejectDetector(CClassifierReject):
 
     def __init__(self, clf, det, adv_x):
 
+        if not isinstance(clf, CClassifier):
+            raise TypeError("`clf` must be an instance of `CClassifier`")
         self._clf = clf
+        if not isinstance(det, CClassifier):
+            raise TypeError("`det` must be an instance of `CClassifier`")
         self._det = det
+
         self.adv_x = adv_x
+
+        # A softmax object that will be used for scores scaling
+        self._softmax = CSoftmax()
 
         super(CClassifierRejectDetector, self).__init__()
 
@@ -49,6 +57,16 @@ class CClassifierRejectDetector(CClassifierReject):
     def __is_clear(self):
         """Returns True if object is clear."""
         return self._det.is_clear() and self._clf.is_clear()
+
+    @property
+    def clf(self):
+        """Return the inner classifier."""
+        return self._clf
+
+    @property
+    def det(self):
+        """Return the inner detector."""
+        return self._det
 
     @property
     def adv_x(self):
@@ -75,19 +93,32 @@ class CClassifierRejectDetector(CClassifierReject):
         """Number of features"""
         return self._clf.n_features
 
+    @property
+    def preprocess(self):
+        """Preprocess to be applied to input data by the inner classifier."""
+        return self._clf.preprocess
+
+    @preprocess.setter
+    def preprocess(self, value):
+        """Preprocess to be applied to input data by the inner classifier."""
+        self._clf.preprocess = value
+
     def _normalize_scores(self, orig_score):
         """Normalizes the scores using softmax."""
-        return CSoftmax().softmax(orig_score)
+        return self._softmax.softmax(orig_score)
 
     def fit(self, dataset, n_jobs=1):
         """Trains both the classifier and the detector.
+
+        If a preprocess has been specified,
+        input is normalized before training.
 
         Parameters
         ----------
         dataset : CDataset
             Training set. Must be a :class:`.CDataset` instance with
             patterns data and corresponding labels.
-        n_jobs : int
+        n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
 
@@ -97,23 +128,9 @@ class CClassifierRejectDetector(CClassifierReject):
             Instance of the classifier trained using input dataset.
 
         """
-        if not isinstance(dataset, CDataset):
-            raise TypeError(
-                "training set should be provided as a CDataset object.")
-
-        # Resetting the classifier
+        # Resetting the outer classifier
         self.clear()
-
-        # Storing dataset classes
-        self._classes = dataset.classes
-        self._n_features = dataset.num_features
-
-        data_x = dataset.X
-        # Preprocessing data if a preprocess is defined
-        if self.preprocess is not None:
-            data_x = self.preprocess.fit_normalize(dataset.X)
-
-        return self._fit(CDataset(data_x, dataset.Y), n_jobs=n_jobs)
+        return self._fit(dataset, n_jobs)
 
     def _fit(self, dataset, n_jobs=1):
         """Trains both the classifier and the detector.
@@ -123,7 +140,7 @@ class CClassifierRejectDetector(CClassifierReject):
         dataset : CDataset
             Training set. Must be a :class:`.CDataset` instance with
             patterns data and corresponding labels.
-        n_jobs : int
+        n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
 
@@ -207,7 +224,8 @@ class CClassifierRejectDetector(CClassifierReject):
         if y == -1:
             # get the detector decision function
             scores = self._det.predict(x, return_decision_function=True)[1]
-            # normalize the scores
+            # normalize the scores given by the detector
+            # (binary, always extract positive class)
             return (self._normalize_scores(scores)[:, 1]).ravel()
 
         elif y < self.n_classes:
@@ -323,11 +341,19 @@ class CClassifierRejectDetector(CClassifierReject):
             # (it's binary so always return y=1)
             grad = self._det.gradient_f_x(x, y=1)
 
+            # compute the gradient of the softmax used to rescale the scores
+            scores = self._det.predict(x, return_decision_function=True)[1]
+            softmax_grad = self._softmax.gradient(scores, y=1)[1]
+
         elif y < self.n_classes:
             grad = self._clf.gradient_f_x(x, y=y)
+
+            # compute the gradient of the softmax used to rescale the scores
+            scores = self._clf.predict(x, return_decision_function=True)[1]
+            softmax_grad = self._softmax.gradient(scores, y=y)[y]
 
         else:
             raise ValueError("The index of the class wrt the gradient must "
                              "be computed is wrong.")
 
-        return grad.ravel()
+        return softmax_grad.item() * grad.ravel()

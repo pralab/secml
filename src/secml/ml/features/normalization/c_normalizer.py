@@ -1,5 +1,5 @@
 """
-.. module:: ArrayNormalizers
+.. module:: FeatureNormalizer
    :synopsis: Common interface for array normalizers.
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

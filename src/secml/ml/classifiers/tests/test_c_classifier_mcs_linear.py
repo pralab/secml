@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from . import CClassifierTestCases
 
 from sklearn.svm import SVC
 from sklearn.ensemble import BaggingClassifier
@@ -10,7 +10,7 @@ from secml.ml.classifiers import CClassifierMCSLinear, CClassifierSVM
 from secml.ml.peval.metrics import CMetric
 
 
-class TestCClassifierMCSLinear(CUnitTest):
+class TestCClassifierMCSLinear(CClassifierTestCases):
     """Unit test for CClassifierMCSLinear."""
 
     def setUp(self):
@@ -202,6 +202,22 @@ class TestCClassifierMCSLinear(CUnitTest):
         with self.assertRaises(ValueError):
             mcs._decision_function(p_norm, y=0)
 
+    def test_gradient(self):
+        """Unittest for `gradient_f_x` method."""
+
+        mcs = CClassifierMCSLinear(CClassifierSVM(), num_classifiers=10,
+                                   max_features=0.5, max_samples=0.5,
+                                   random_state=0)
+        mcs.fit(self.dataset)
+        self.logger.info("Trained MCS.")
+
+        import random
+        pattern = CArray(random.choice(self.dataset.X.get_data()))
+        self.logger.info("Randomly selected pattern:\n%s", str(pattern))
+
+        # Comparison with numerical gradient
+        self._test_gradient_numerical(mcs, pattern)
+
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CClassifierTestCases.main()

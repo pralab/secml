@@ -20,7 +20,7 @@ __all__ = [
 # Disallow reloading this module so as to preserve the identities of the
 # classes defined here.
 if '_is_loaded' in globals():
-    raise RuntimeError('Reloading numpy._globals is not allowed')
+    raise RuntimeError('Reloading secml._globals is not allowed')
 _is_loaded = True
 
 

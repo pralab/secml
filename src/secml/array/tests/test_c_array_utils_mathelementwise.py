@@ -25,8 +25,7 @@ class TestCArrayUtilsMathElementWise(CArrayTestCases.TestCArray):
             self.assertEqual(res.issparse, expected.issparse)
             self.assertEqual(res.shape, expected.shape)
             self.assertEqual(res.dtype, expected.dtype)
-            np.testing.assert_almost_equal(
-                res.tondarray(), expected.tondarray(), decimal=4)
+            self.assert_array_almost_equal(res, expected, decimal=4)
 
         # array_dense = CArray([[1, 0, 0, 5], [2, 4, 0, 0], [3, 6, 0, 0]]
         # row_flat_dense = CArray([4, 0, 6])

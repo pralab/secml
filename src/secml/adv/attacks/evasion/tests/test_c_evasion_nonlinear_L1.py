@@ -30,6 +30,8 @@ class TestEvasionNonLinearL1(CEvasionTestCases.TestCEvasion):
                                          preprocess=normalizer)
         self.classifier.gamma = 2
 
+        self.surrogate_classifier = self.classifier
+
         # self.seed = None  # Random state generator for the dataset
         self.seed = 87985889
 

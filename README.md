@@ -5,8 +5,9 @@ SecML-Lib is an open-source Python library for the **security evaluation** of Ma
 It comes with a set of powerful features:
 - **Dense/Sparse data support.** We provide full, transparent support for both dense (through `numpy` library) and sparse data (through `scipy` library) in a single data structure.
 - **Wide range of supported ML algorithms.** All supervised learning algorithms supported by `scikit-learn` are available, as well as Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform (optional).
-- **Built-in attack algorithms.** Evasion and poisoning (*available soon*) attacks based on gradient-descent optimization.
+- **Built-in attack algorithms.** Evasion and poisoning attacks based on a custom-developed solver.
 - **Visualize your results.** We provide visualization and plotting framework based on the widely-known library [`matplotlib`](https://matplotlib.org/).
+- **Explain your results.** Explainable ML methods to interpret model decisions via influential features and prototypes.  
 - **Extensible.** Easily create new wrappers for ML models or attack algorithms extending our abstract interfaces.
 - **Multi-processing.** Do you want to save time further? We provide full compatibility with all the multi-processing features of `scikit-learn` and `pytorch`, along with built-in support of the [`joblib`](https://joblib.readthedocs.io/) library.
 
@@ -119,9 +120,11 @@ The primary data class is the `secml.array.CArray`, multi-dimensional (currently
 
 The `secml.ml` package contains all the Machine Learning algorithms and support classes, including classifiers, loss and regularizer functions, kernels and performance evaluation functions.
 
-The `secml.adv` package contains evasion and poisoning (*available soon*) attacks based on gradient-descent optimization, along with classes to easily perform security evaluation of Machine Learning algorithms.
+The `secml.adv` package contains evasion and poisoning attacks based on a custom-developed solver, along with classes to easily perform security evaluation of Machine Learning algorithms.
 
 The `secml.figure` package contains a visualization and plotting framework based on [`matplotlib`](https://matplotlib.org/).
+
+The `secml.explanation` package contains few different explainable Machine Learning methods that allow interpreting classifiers decisions by analyzing the relevant components such as features or training prototypes.
 
 The `secml.pytorch` package contains support classes for the [PyTorch](https://pytorch.org/) deep learning platform. This package will be available only if the extra component `pytorch` has been specified during installation.
 
@@ -133,7 +136,7 @@ Authors (Mail to: `<name>.<surname>@diee.unica.it`):
 - Ambra Demontis
 - Battista Biggio
 
-Contributors:
+Past contributors:
 - Davide Maiorca
 - Igino Corona
 - Paolo Russu

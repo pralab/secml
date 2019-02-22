@@ -34,14 +34,16 @@ class TestCArrayProperties(CArrayTestCases.TestCArray):
         non_zero_indices(self, "dense", self.array_dense, self.row_sparse,
                          self.column_dense)
 
-    def test_non_zero(self):
-        """Test for CArray.nnz, CArray.nnz_data properties."""
+    def test_nnz(self):
+        """Test for CArray.nnz property."""
         self.logger.info("Testing CArray.nnz property")
 
         def check_nnz(array):
             self.logger.info("array:\n{:}".format(array))
-            self.logger.info("nnz: {:}".format(array.nnz))
-            self.assertEquals(array.nnz, array.nnz_data.size)
+            res = array.nnz
+            self.logger.info("nnz: {:}".format(res))
+            self.assertIsInstance(res, int)
+            self.assertEquals(res, array.nnz_data.size)
 
         check_nnz(self.array_sparse)
         check_nnz(self.row_sparse)
@@ -50,9 +52,17 @@ class TestCArrayProperties(CArrayTestCases.TestCArray):
         check_nnz(self.row_dense)
         check_nnz(self.column_dense)
 
+    def test_nnz_data(self):
+        """Test for CArray.nnz_data property."""
+
         def check_nnz_data(array, expected_nnz):
             self.logger.info("array:\n{:}".format(array))
-            self.logger.info("nnz: {:}".format(array.nnz))
+
+            res = array.nnz_data
+            self.logger.info("nnz_data:\n{:}".format(array.nnz_data))
+            self.assertIsInstance(res, CArray)
+            self.assertEqual(1, res.ndim)
+            self.assertEqual(array.nnz, res.size)
             self.assertFalse((array.nnz_data != expected_nnz).any())
 
         self.logger.info("Testing CArray.nnz_data property")

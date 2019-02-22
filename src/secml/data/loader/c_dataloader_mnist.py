@@ -5,17 +5,18 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+import gzip
+import struct
+from array import array
+from multiprocessing import Lock
+import numpy as np
+
 from secml.data.loader import CDataLoader
 from secml.data import CDataset
 from secml.array import CArray
 from secml.utils import fm
 from secml.utils.download_utils import dl_file, md5
 from secml.settings import SECML_DS_DIR
-
-import gzip
-import struct
-from array import array
-import numpy as np
 
 
 TRAIN_DATA_URL = 'http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz'
@@ -45,6 +46,7 @@ class CDataLoaderMNIST(CDataLoader):
 
     """
     __class_type = 'mnist'
+    __lock = Lock()  # Lock to prevent multiple parallel download/extraction
 
     def __init__(self):
 
@@ -54,20 +56,21 @@ class CDataLoaderMNIST(CDataLoader):
         self.test_data_path = fm.join(MNIST_PATH, 't10k-images-idx3-ubyte')
         self.test_labels_path = fm.join(MNIST_PATH, 't10k-labels-idx1-ubyte')
 
-        # For each file check if already downloaded and extracted
-        if not fm.file_exist(self.train_data_path) or \
-                md5(self.train_data_path) != TRAIN_DATA_MD5:
-            self._get_data(TRAIN_DATA_URL, MNIST_PATH, self.train_data_path)
-        if not fm.file_exist(self.train_labels_path) or \
-                md5(self.train_labels_path) != TRAIN_LABELS_MD5:
-            self._get_data(
-                TRAIN_LABELS_URL, MNIST_PATH, self.train_labels_path)
-        if not fm.file_exist(self.test_data_path) or \
-                md5(self.test_data_path) != TEST_DATA_MD5:
-            self._get_data(TEST_DATA_URL, MNIST_PATH, self.test_data_path)
-        if not fm.file_exist(self.test_labels_path) or \
-                md5(self.test_labels_path) != TEST_LABELS_MD5:
-            self._get_data(TEST_LABELS_URL, MNIST_PATH, self.test_labels_path)
+        with CDataLoaderMNIST.__lock:
+            # For each file check if already downloaded and extracted
+            if not fm.file_exist(self.train_data_path) or \
+                    md5(self.train_data_path) != TRAIN_DATA_MD5:
+                self._get_data(TRAIN_DATA_URL, MNIST_PATH, self.train_data_path)
+            if not fm.file_exist(self.train_labels_path) or \
+                    md5(self.train_labels_path) != TRAIN_LABELS_MD5:
+                self._get_data(
+                    TRAIN_LABELS_URL, MNIST_PATH, self.train_labels_path)
+            if not fm.file_exist(self.test_data_path) or \
+                    md5(self.test_data_path) != TEST_DATA_MD5:
+                self._get_data(TEST_DATA_URL, MNIST_PATH, self.test_data_path)
+            if not fm.file_exist(self.test_labels_path) or \
+                    md5(self.test_labels_path) != TEST_LABELS_MD5:
+                self._get_data(TEST_LABELS_URL, MNIST_PATH, self.test_labels_path)
 
     def load(self, ds, digits=(xrange(0, 10)), num_samples=None):
         """Load all images of specified format inside given path.

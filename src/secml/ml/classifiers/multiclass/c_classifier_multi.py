@@ -5,7 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 
 from secml.ml.classifiers import CClassifier
 from secml.array import CArray
@@ -16,7 +16,7 @@ class CClassifierMulticlass(CClassifier):
 
     Parameters
     ----------
-    classifier : unbound class
+    classifier : CClassifier.__class__
         Unbound (not initialized) CClassifier subclass.
     preprocess : str or CNormalizer
         Features preprocess to applied to input data.
@@ -162,6 +162,19 @@ class CClassifierMulticlass(CClassifier):
         # Delete binary classifiers in excess
         del self._binary_classifiers[num_classes:]
 
+    def _check_clf_index(self, y):
+        """Raise error if index y is outside [0, num_classifiers) range.
+
+        Parameters
+        ----------
+        y : int
+            Index of the binary classifier.
+
+        """
+        if y < 0 or y >= self.num_classifiers:
+            raise ValueError(
+                "binary classifier index {:} is out of range".format(y))
+
     def estimate_parameters(self, dataset, parameters, splitter, metric,
                             pick='first', perf_evaluator='xval', n_jobs=1):
         """Estimate parameter that give better result respect a chose metric.
@@ -295,6 +308,8 @@ class CClassifierMulticlass(CClassifier):
         if self.preprocess is not None:
             x = self.preprocess.normalize(x)
 
+        self._check_clf_index(y)  # Check the binary classifier input index
+
         return self._decision_function(x, y)
 
     def apply_method(self, method, *args, **kwargs):
@@ -310,26 +325,3 @@ class CClassifierMulticlass(CClassifier):
         for clf in self.binary_classifiers:
             # Unbound method: First argument is the instance to apply method to
             method(clf, *args, **kwargs)
-
-    def _gradient_f(self, x, y):
-        """Computes the gradient of the classifier's decision function
-         wrt decision function input.
-
-        For a multiclass classifier, the gradient of the y^th
-        binary classifier is returned.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-        y : int
-            Index of the binary classifier of which the gradient
-            of the decision function should be returned.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the classifier's df wrt its input. Vector-like array.
-
-        """
-        return CArray(self.binary_classifiers[y].gradient_f_x(x)).ravel()

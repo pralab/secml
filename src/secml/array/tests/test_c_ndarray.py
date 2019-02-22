@@ -17,7 +17,8 @@ class TestCDense(CUnitTest):
         try:
             fm.remove_file(test_file)
         except (OSError, IOError) as e:
-            self.logger.info(e.message)
+            if e.errno != 2:
+                raise e
 
         a = CDense().zeros((1000, 1000))
 
@@ -90,7 +91,8 @@ class TestCDense(CUnitTest):
         try:
             fm.remove_file(test_file)
         except (OSError, IOError) as e:
-            self.logger.info(e.message)
+            if e.errno != 2:
+                raise e
 
        
 if __name__ == '__main__':

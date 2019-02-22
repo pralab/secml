@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml.pytorch.classifiers import CClassifierPyTorch
 from secml.pytorch.models import mlp
@@ -6,7 +6,7 @@ from secml.data.loader import CDLRandom
 from secml.utils import fm
 
 
-class TestCClassifierPyTorc(CUnitTest):
+class TestCClassifierPyTorch(CClassifierTestCases):
 
     def setUp(self):
 
@@ -42,4 +42,4 @@ class TestCClassifierPyTorc(CUnitTest):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CClassifierTestCases.main()

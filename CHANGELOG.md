@@ -1,3 +1,67 @@
+## v0.3-dev (22/02/2019)
+- #69 Added Poisoning attacks for SVM, Ridge and Logistic classifiers.
+- #188 Implemented a framework for Explainable Machine Learning methods. Added explanation methods based on relevant features and relevant prototypes.
+- #287 Added 2nd order gradients for linear, SVM, Ridge and Logistic classifiers as part of the new `ml.classifiers.gradients` framework.
+
+### Added (12 changes)
+- #69 Added `CAttackPoisoning` to perform training-time attacks. Added `svm`, `ridge` and `logistic` specializations.
+- #287 Added `CClassifierGradient` to compute the gradients of the classifiers. Added specifications for `linear`, `svm`, `ridge`, `logistic`. All gradient functionality will be progressively moved to `CClassifierGradient` and subclasses.
+- #291 Added `CExplainer` and `CExplainerLocal` abstract interfaces for Explainable ML methods.
+- #291 Added `CExplainerLocalLinear` to explain linear classifier via their weights vector.
+- #286 Added `CExplainerLocalInfluence` to compute the local explanations via relevant prototypes.
+- #299 Added `CExplainerLocalIntegratedGradients` class which implements the Integrated Gradients method for local explanations (*Axiomatic Attribution for Deep Networks, Sundararajan et al., ICML 2017*).
+- #314 Added `CClassifierLogistic` which implements Logistic Regression (aka logit, MaxEnt) classifier.
+- #297 Added methods `is_linear` and `is_kernel_linear` to `CClassifierRidge`.
+- #248 Added methods `is_linear` and `is_kernel_linear` to `CClassifierSGD`.
+- #305 Added method `barh` to `CPlot` which produces a horizontal bar plot.
+- #156 Added `CArray.sha1` method which computes the `sha1` hexadecimal hash of array.
+- #304 Added method `CArray.get_nnz` which returns the number of non-zero elements along a given axis or the entire array.
+
+### Improved (13 changes)
+- #309 vector-like `CArray`s of sparse format and 2-D vector-like `CArray`s of dense format can now be used for indexing.
+- #310 `CArray`s of sparse format can now be used to index a CArray of dense format.
+- #192 Improved compatibility with `numpy` when using a list of lists as index to `CArray` (find-like indexing).
+- #303 Now using `csr_matrix.nonzero` to return `CSparse.nnz_indices`.
+- #279 Error is now raised in CClassifierMulticlass and subclasses if index y is outside [0, num_classifiers) range.
+- #55 `CDataLoader` subclasses now acquire multiprocessing lock if they need to download/extract files.
+- #280 Overriding preprocess getter/setter in `CClassifierRejectDetector` and `CClassifierRejectThreshold` to handle the preprocessor of the inner classifier.
+- #280 Added missing properties `classes`, `n_classes` and `n_features` to CClassifierRejectDetector and changed fit function to avoid double setting `classes`, `n_classes`, `n_features` and `preprocess`.
+- #282 Added a getter for the internal classifier and detector in `CClassifierRejectDetector`.
+- #281 Added a setter/getter for the inner classifier in `CClassifierRejectThreshold`.
+- #271 Added an option to the fit method of `CClassifierPyTorch` to decide whether or not to use the best parameters by accuracy score at the end of the training process.
+- #253 `CDataLoaderImgFolders` and `CDataLoaderImgClients` now store the number of channels for each image.
+- #292 Default configuration file `secml-lib.conf` is now copied to `$SECML_HOME_DIR` if not already there.
+
+### Changed (4 changes)
+- #285 Moved `CClassifierMulticlass._gradient_f` implementation to `CClassifierMulticlassOVA` as it works only in case of OVA scheme.
+- #155 The surrogate classifier passed to `CAttack` must now be differentiable (must implement `gradient_f_x`) and must be already trained on surrogate data.
+- #304 `CArray.nnz` now calls respective `get_nnz` method with `axis=None`.
+- #284 Renamed parameter `pos_label` of `CSoftmax.gradient` to `y`.
+
+### Fixed (13 changes)
+- #255 Fixed a bug of `is_intlike` and `is_floatlike` returning True for 0-sized arrays.
+- #258 `type_utils.is_list_of_lists` now returns False for empty lists.
+- #306 `CArray.nnz_data` now always returns a dense flat array as expected.
+- #257 Empty lists used as indices are now explicitly converted to `ndarrays` of int dtype.
+- #301 Fixed `CDLRandomToy` raising `TypeError` when `zero_one` parameter is set to True.
+- #297 Fixed `CClassifierRidge.gradient_f_x` not taking into account the kernel function.
+- #294 Fixed a crash in `CPlotRoc.plot_mean()` when a style is passed and `plot_std` is True.
+- #290 Keyword raise is now used in `CReducer` to raise errors.
+- #316 `CClassifierRejectThreshold.fit` now correctly returns an instance of itself.
+- #283 `CClassifierRejectDetector.gradient_f_x` now takes into account the softmax function.
+- #248 Fixed `CClassifierSGD.gradient_f_x` not taking into account the kernel function.
+- #277 Now the alternative init point in `CAttackEvasion` is always computed using the correct `y_target`.
+- #253 Fixed images loading in `CDataLoaderImgFolders` and `CDataLoaderImgClients` by raveling them on load.
+
+### Documentation (1 change)
+- #188 Updated `README` to introduce the `explanation` package.
+
+### Removed (3 changes)
+- #155 Removed automatic training of a SVM with RBF Kernel from `CAttack` if the surrogate classifier is not differentiable.
+- #303 Removed `CSparse.nnz_row_indices` and `CSparse.nnz_column_indices` properties. Updated related methods to use `CSparse.nnz_indices` directly.
+- #282 Removed redundant getters `classes`, `n_classes` and `n_features` from `CClassifierRejectDetector`.
+
+
 ## v0.2.2-dev (30/01/2019)
 
 ### Bugfix (4 changes)

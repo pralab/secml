@@ -168,6 +168,13 @@ if not fm.folder_exist(SECML_HOME_DIR):
 
 """Name of the configuration file (default `secml-lib.conf`)."""
 SECML_CONFIG_FNAME = 'secml-lib.conf'
+if not fm.file_exist(fm.join(SECML_HOME_DIR, SECML_CONFIG_FNAME)):
+    def_config = fm.normpath(fm.join(fm.abspath(__file__), SECML_CONFIG_FNAME))
+    home_config = fm.join(SECML_HOME_DIR, SECML_CONFIG_FNAME)
+    # Copy the default config file to SECML_HOME_DIR if not already available
+    fm.copy_file(def_config, home_config)
+    CLog(level='INFO', logger_id=__name__).info(
+        'Default configuration file copied to: {:}'.format(home_config))
 
 
 def _config_fpath():
@@ -203,8 +210,7 @@ def _config_fpath():
             yield secml_config
             yield fm.join(secml_config, 'SECML_CONFIG_FNAME')
         yield fm.join(SECML_HOME_DIR, SECML_CONFIG_FNAME)
-        yield fm.normpath(
-            fm.join(fm.abspath(__file__), '..', SECML_CONFIG_FNAME))
+        yield fm.normpath(fm.join(fm.abspath(__file__), SECML_CONFIG_FNAME))
 
     candidates = []
     for fname in gen_candidates():
