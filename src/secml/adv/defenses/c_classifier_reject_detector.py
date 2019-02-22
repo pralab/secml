@@ -343,14 +343,14 @@ class CClassifierRejectDetector(CClassifierReject):
 
             # compute the gradient of the softmax used to rescale the scores
             scores = self._det.predict(x, return_decision_function=True)[1]
-            softmax_grad = self._softmax.gradient(scores, pos_label=1)[1]
+            softmax_grad = self._softmax.gradient(scores, y=1)[1]
 
         elif y < self.n_classes:
             grad = self._clf.gradient_f_x(x, y=y)
 
             # compute the gradient of the softmax used to rescale the scores
             scores = self._clf.predict(x, return_decision_function=True)[1]
-            softmax_grad = self._softmax.gradient(scores, pos_label=y)[y]
+            softmax_grad = self._softmax.gradient(scores, y=y)[y]
 
         else:
             raise ValueError("The index of the class wrt the gradient must "
