@@ -140,7 +140,8 @@ class CClassifierRejectThreshold(CClassifierReject):
             Instance of the classifier trained using input dataset.
 
         """
-        return self._clf.fit(dataset, n_jobs=n_jobs)
+        self._clf.fit(dataset, n_jobs=n_jobs)
+        return self
 
     def decision_function(self, x, y):
         """Computes the decision function for each pattern in x.

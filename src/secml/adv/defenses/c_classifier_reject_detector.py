@@ -44,6 +44,9 @@ class CClassifierRejectDetector(CClassifierReject):
 
         self.adv_x = adv_x
 
+        # A softmax object that will be used for scores scaling
+        self._softmax = CSoftmax()
+
         super(CClassifierRejectDetector, self).__init__()
 
     def __clear(self):
@@ -102,7 +105,7 @@ class CClassifierRejectDetector(CClassifierReject):
 
     def _normalize_scores(self, orig_score):
         """Normalizes the scores using softmax."""
-        return CSoftmax().softmax(orig_score)
+        return self._softmax.softmax(orig_score)
 
     def fit(self, dataset, n_jobs=1):
         """Trains both the classifier and the detector.
@@ -221,7 +224,8 @@ class CClassifierRejectDetector(CClassifierReject):
         if y == -1:
             # get the detector decision function
             scores = self._det.predict(x, return_decision_function=True)[1]
-            # normalize the scores
+            # normalize the scores given by the detector
+            # (binary, always extract positive class)
             return (self._normalize_scores(scores)[:, 1]).ravel()
 
         elif y < self.n_classes:
@@ -337,11 +341,19 @@ class CClassifierRejectDetector(CClassifierReject):
             # (it's binary so always return y=1)
             grad = self._det.gradient_f_x(x, y=1)
 
+            # compute the gradient of the softmax used to rescale the scores
+            scores = self._det.predict(x, return_decision_function=True)[1]
+            softmax_grad = self._softmax.gradient(scores, pos_label=1)[1]
+
         elif y < self.n_classes:
             grad = self._clf.gradient_f_x(x, y=y)
+
+            # compute the gradient of the softmax used to rescale the scores
+            scores = self._clf.predict(x, return_decision_function=True)[1]
+            softmax_grad = self._softmax.gradient(scores, pos_label=y)[y]
 
         else:
             raise ValueError("The index of the class wrt the gradient must "
                              "be computed is wrong.")
 
-        return grad.ravel()
+        return softmax_grad.item() * grad.ravel()

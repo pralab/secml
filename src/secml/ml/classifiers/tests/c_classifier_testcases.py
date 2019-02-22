@@ -8,13 +8,18 @@ from secml.core.constants import eps
 class CClassifierTestCases(CUnitTest):
     """Unittests interface for CClassifier."""
 
-    def _test_gradient_numerical(self, clf, x, epsilon=eps, **kwargs):
+    def _test_gradient_numerical(
+            self, clf, x, extra_classes=None, th=1e-3, epsilon=eps, **kwargs):
         """Test for clf.gradient_f_x comparing to numerical gradient.
 
         Parameters
         ----------
         clf : CClassifier
         x : CArray
+        extra_classes : list or None
+        th : float
+        epsilon : float
+        **kwargs
 
         """
         def _fun_args(sample, classifier, *f_args):
@@ -29,7 +34,12 @@ class CClassifierTestCases(CUnitTest):
         if 'y' in kwargs:
             raise ValueError("`y` cannot be passed to this unittest.")
 
-        for c in clf.classes:
+        if extra_classes is not None:
+            classes = clf.classes.append(extra_classes)
+        else:
+            classes = clf.classes
+
+        for c in classes:
 
             # TODO: REMOVE AFTER y IS A REQUIRED PARAM OF gradient
             kwargs['y'] = c  # Appending class to test_f_x
@@ -54,7 +64,7 @@ class CClassifierTestCases(CUnitTest):
                 "Numeric gradient wrt. class {:}:\n{:}".format(c, num_gradient))
 
             self.logger.info("norm(grad - num_grad): {:}".format(error))
-            self.assertLess(error, 1e-3)
+            self.assertLess(error, th)
 
             for i, elm in enumerate(gradient):
                 self.assertIsInstance(elm, float)
