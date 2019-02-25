@@ -151,9 +151,11 @@ release:
   image: ${CI_REGISTRY}/pralab/docker-helper-images/alpine-curl:latest
   before_script:
     - apk add unzip
+    - echo $CI_PROJECT_ID
+    - echo $CI_COMMIT_TAG
   script:
-    - 'curl -s --request GET --header "PRIVATE-TOKEN: $PRAGIT_BOT_TOKEN" --location --output artifacts.zip "$CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/v0.3-dev/download?job=package"'
-    - unzip artifacts.zip -d release
+    - 'curl -s --request GET --header "PRIVATE-TOKEN: $PRAGIT_BOT_TOKEN" --location --output release.zip "$CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/$CI_COMMIT_TAG/download?job=package"'
+    - unzip release.zip -d release
     - DIST_FILE=$(find release -iname \*.zip -exec basename {} \;)
     - echo $DIST_FILE
     - 'curl -s --request POST --header "PRIVATE-TOKEN: $PRAGIT_BOT_TOKEN" --data name="$DIST_FILE" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_FILE?job=package" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
