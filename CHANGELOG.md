@@ -1,3 +1,7 @@
+## v0.3.1-dev (25/02/2019)
+- Internal (improvements to release process)
+
+
 ## v0.3-dev (22/02/2019)
 - #69 Added Poisoning attacks for SVM, Ridge and Logistic classifiers.
 - #188 Implemented a framework for Explainable Machine Learning methods. Added explanation methods based on relevant features and relevant prototypes.
