@@ -17,6 +17,7 @@ stages:
   - package
   - test
   - install
+  - release
   - deploy
   - triage
 
@@ -144,6 +145,20 @@ install:unzip-extras:
   after_script:
     - python -c "import secml"
     - python -c "import secml.pytorch"
+
+release:
+  stage: release
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/alpine-curl:latest
+  before_script:
+    - apk add unzip
+  script:
+    - 'curl -s --request GET --header "PRIVATE-TOKEN: $PRAGIT_BOT_TOKEN" --location --output artifacts.zip "$CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/v0.3-dev/download?job=package"'
+    - unzip artifacts.zip -d release
+    - DIST_FILE=$(find release -iname \*.zip -exec basename {} \;)
+    - echo $DIST_FILE
+    - 'curl -s --request POST --header "PRIVATE-TOKEN: $PRAGIT_BOT_TOKEN" --data name="$DIST_FILE" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_FILE?job=package" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
+  only:
+    - tags
 
 #install:repo:
 #  extends: .install
