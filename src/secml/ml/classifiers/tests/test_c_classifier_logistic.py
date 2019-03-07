@@ -1,4 +1,4 @@
-from . import CClassifierTestCases
+from c_classifier_testcases import CClassifierTestCases
 
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierLogistic
@@ -16,7 +16,7 @@ class TestCClassifierLogistic(CClassifierTestCases):
         self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
                                  n_clusters_per_class=1, random_state=99).load()
 
-        self.dataset.X = CNormalizerMinMax().fit_normalize(self.dataset.X)
+        self.dataset.X = CNormalizerMinMax().fit_transform(self.dataset.X)
 
         self.logger.info("Testing classifier creation ")
         
@@ -71,8 +71,8 @@ class TestCClassifierLogistic(CClassifierTestCases):
 
         # Preprocessing data if a preprocess is defined
         if self.log.preprocess is not None:
-            x_norm = self.log.preprocess.normalize(x)
-            p_norm = self.log.preprocess.normalize(p)
+            x_norm = self.log.preprocess.transform(x)
+            p_norm = self.log.preprocess.transform(p)
 
         # Testing decision_function on multiple points
 
@@ -175,6 +175,22 @@ class TestCClassifierLogistic(CClassifierTestCases):
         # Run the comparison with numerical gradient
         # (all classes will be tested)
         self._test_gradient_numerical(self.log, pattern)
+
+    def test_preprocess(self):
+        """Test classifier with preprocessors inside."""
+        ds = CDLRandom().load()
+
+        # All linear transformations with gradient implemented
+        self._test_preprocess(ds, self.log,
+                              ['min-max', 'mean-std'],
+                              [{'feature_range': (-1, 1)}, {}])
+        self._test_preprocess_grad(ds, self.log,
+                                   ['min-max', 'mean-std'],
+                                   [{'feature_range': (-1, 1)}, {}])
+
+        self.logger.info("The following case will skip the gradient test")
+        # Mixed linear/nonlinear transformations without gradient
+        self._test_preprocess(ds, self.log, ['pca', 'unit-norm'], [{}, {}])
 
 
 if __name__ == '__main__':

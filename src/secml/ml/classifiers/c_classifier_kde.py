@@ -22,6 +22,10 @@ class CClassifierKDE(CClassifier):
         Instance of a CKernel subclass to be used for computing
         similarity between patterns. If None (default), a linear
         SVM will be created.
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
 
     Attributes
     ----------
@@ -143,9 +147,8 @@ class CClassifierKDE(CClassifier):
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Preprocessing data if a preprocess is defined
-        if self.preprocess is not None:
-            x = self.preprocess.normalize(x)
+        # Transform data if a preprocess is defined
+        x = self._preprocess_data(x)
 
         return self._decision_function(x, y=y)
 
@@ -179,6 +182,28 @@ class CClassifierKDE(CClassifier):
             return CArray(self.kernel.k(x, self._training_samples)).mean(
                                                         keepdims=False, axis=1)
 
+    def gradient_f_x(self, x, y=1, **kwargs):
+        """Computes the gradient of the classifier's output wrt input.
+
+        Parameters
+        ----------
+        x : CArray
+            The gradient is computed in the neighborhood of x.
+        y : int, optional
+            Index of the class wrt the gradient must be computed. Default 1.
+        **kwargs
+            Optional parameters for the function that computes the
+            gradient of the decision function. See the description of
+            each classifier for a complete list of optional parameters.
+
+        Returns
+        -------
+        gradient : CArray
+            Gradient of the classifier's output wrt input. Vector-like array.
+
+        """
+        return super(CClassifierKDE, self).gradient_f_x(x, y, **kwargs)
+
     def _gradient_f(self, x, y=1):
         """Computes the gradient of the KDE classifier's decision function
          wrt decision function input.
@@ -200,4 +225,4 @@ class CClassifierKDE(CClassifier):
         """
         k = self.kernel.gradient(self._training_samples, x)
         # Gradient sign depends on input label (0/1)
-        return - convert_binary_labels(y) * k.mean(axis=0)
+        return - convert_binary_labels(y) * k.mean(axis=0, keepdims=False)

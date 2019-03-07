@@ -50,7 +50,7 @@ class CClassifierGradientLogistic(CClassifierGradientLinear):
         z = sigm * (1 - sigm)
 
         # handle normalizer, if present
-        x = x if clf.preprocess is None else clf.preprocess.normalize(x)
+        x = x if clf.preprocess is None else clf.preprocess.transform(x)
 
         d = x.shape[1] # number of features in the normalized space
 

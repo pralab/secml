@@ -39,6 +39,10 @@ class CNormalizerMinMax(CNormalizerLinear):
         `feature_range[0]` is the minimum and `feature_range[1]` is
         the maximum value. If feature_range is None, features will be
         scaled using (0., 1.) range.
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
 
     Attributes
     ----------
@@ -48,7 +52,7 @@ class CNormalizerMinMax(CNormalizerLinear):
     -----
     Differently from numpy, we manage flat vectors as 2-Dimensional of
     shape (1, array.size). This means that normalizing a flat vector is
-    equivalent to normalize array.atleast_2d(). To obtain a numpy-style
+    equivalent to transform array.atleast_2d(). To obtain a numpy-style
     normalization of flat vectors, transpose array first.
 
     Examples
@@ -57,12 +61,12 @@ class CNormalizerMinMax(CNormalizerLinear):
     >>> from secml.ml.features.normalization import CNormalizerMinMax
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-    >>> print CNormalizerMinMax().fit_normalize(array)
+    >>> print CNormalizerMinMax().fit_transform(array)
     CArray([[ 0.5       0.        1.      ]
      [ 1.        0.5       0.333333]
      [ 0.        1.        0.      ]])
 
-    >>> print CNormalizerMinMax(feature_range=(-1,1)).fit_normalize(array)
+    >>> print CNormalizerMinMax(feature_range=(-1,1)).fit_transform(array)
     CArray([[ 0.       -1.        1.      ]
      [ 1.        0.       -0.333333]
      [-1.        1.       -1.      ]])
@@ -70,7 +74,7 @@ class CNormalizerMinMax(CNormalizerLinear):
     """
     __class_type = 'min-max'
 
-    def __init__(self, feature_range=None):
+    def __init__(self, feature_range=None, preprocess=None):
         """Class constructor"""
         # The following SHOULD NOT be reset:
         # _n, _v and _feature_range does not depends on training
@@ -86,6 +90,8 @@ class CNormalizerMinMax(CNormalizerLinear):
         # we split them to easily manage feature_range
         self._m = None
         self._q = None
+
+        super(CNormalizerMinMax, self).__init__(preprocess=preprocess)
 
     def __clear(self):
         """Reset the object."""
@@ -164,7 +170,7 @@ class CNormalizerMinMax(CNormalizerLinear):
             self._n = self.feature_range[1] - self.feature_range[0]
             self._v = self.feature_range[0]
 
-    def fit(self, x):
+    def _fit(self, x, y=None):
         """Compute the minimum and maximum to be used for scaling.
 
         Parameters
@@ -172,11 +178,14 @@ class CNormalizerMinMax(CNormalizerLinear):
         x : CArray
             Array to be used as training set. Each row must correspond to
             one single patterns, so each column is a different feature.
+        y : CArray or None, optional
+            Flat array with the label of each pattern.
+            Can be None if not required by the preprocessing algorithm.
 
         Returns
         -------
         CNormalizerMinMax
-            Normalizer trained using input data.
+            Instance of the trained normalizer.
 
         Examples
         --------
@@ -193,8 +202,6 @@ class CNormalizerMinMax(CNormalizerLinear):
         CArray([ 2.  1.  2.])
 
         """
-        self.clear()  # Reset trained normalizer
-
         if x.issparse:
             raise NotImplementedError(
                 "normalization of sparse arrays is not yet supported!")
@@ -212,7 +219,7 @@ class CNormalizerMinMax(CNormalizerLinear):
 
         return self
 
-    def normalize(self, x):
+    def _transform(self, x):
         """Scales array features according to feature_range.
 
         Parameters
@@ -237,27 +244,27 @@ class CNormalizerMinMax(CNormalizerLinear):
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
         >>> normalizer = CNormalizerMinMax().fit(array)
-        >>> print normalizer.normalize(array)
+        >>> print normalizer.transform(array)
         CArray([[ 0.5       0.        1.      ]
          [ 1.        0.5       0.333333]
          [ 0.        1.        0.      ]])
 
-        >>> print normalizer.normalize(CArray([-1,5,1]))
-        CArray([-0.5         3.          0.66666667])
-        >>> normalizer.normalize(CArray([-1,5,1]).T)  # We trained on 3 features
+        >>> print normalizer.transform(CArray([-1,5,1]))
+        CArray([-0.5       3.        0.666667])
+        >>> normalizer.transform(CArray([-1,5,1]).T)  # We trained on 3 features
         Traceback (most recent call last):
             ...
         ValueError: array to normalize must have 3 features (columns).
 
         """
-        data_scaled = super(CNormalizerMinMax, self).normalize(x)
+        data_scaled = super(CNormalizerMinMax, self)._transform(x)
 
         # replacing any nan
         data_scaled.nan_to_num()
 
         return data_scaled
 
-    def gradient(self, x):
+    def _gradient(self, x, w=None):
         """Returns the gradient wrt data.
 
         Gradient of the min-max scaler wrt each row `i` in data is given by:
@@ -269,11 +276,16 @@ class CNormalizerMinMax(CNormalizerLinear):
         ----------
         x : CArray
             Data array, 2-Dimensional or ravel.
+        w : CArray or None, optional
+            If CArray, will be left-multiplied to the gradient
+            of the preprocessor.
 
         Returns
         -------
         gradient : CArray
             Gradient of min-max normalizer wrt input data.
+            Array of shape (x.shape[1], x.shape[1]) if `w` is None,
+            otherwise an array of shape (w.shape[0], x.shape[1]).
 
         Examples
         --------
@@ -288,7 +300,7 @@ class CNormalizerMinMax(CNormalizerLinear):
          [ 0.        0.        0.333333]])
 
         """
-        data_gradient = super(CNormalizerMinMax, self).gradient(x)
+        data_gradient = super(CNormalizerMinMax, self)._gradient(x, w=w)
 
         # Replacing any inf with proper values
         data_gradient[data_gradient == -inf] = self.feature_range[0]

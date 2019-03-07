@@ -1,16 +1,15 @@
-from secml.utils import CUnitTest
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml.data.loader import CDLRandomToy
 from secml.ml.classifiers import CClassifierDecisionTree
 from secml.array import CArray
 
 
-class TestCClassifierDecisionTree(CUnitTest):
+class TestCClassifierDecisionTree(CClassifierTestCases):
     """Unit test for CDecisionTree."""
 
     def setUp(self):
         self.dataset = CDLRandomToy('iris').load()
-
         self.dec_tree = CClassifierDecisionTree()
 
     def test_classify(self):
@@ -73,10 +72,10 @@ class TestCClassifierDecisionTree(CUnitTest):
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Preprocessing data if a preprocess is defined
+        # Transform data if a preprocess is defined
         if self.dec_tree.preprocess is not None:
-            x_norm = self.dec_tree.preprocess.normalize(x)
-            p_norm = self.dec_tree.preprocess.normalize(p)
+            x_norm = self.dec_tree.preprocess.transform(x)
+            p_norm = self.dec_tree.preprocess.transform(p)
 
         # Testing decision_function on multiple points
 
@@ -190,6 +189,17 @@ class TestCClassifierDecisionTree(CUnitTest):
         self.assertFalse(
             (df_scores_2 != CArray(scores[:, 2]).ravel()).any())
 
+    def test_preprocess(self):
+        """Test classifier with preprocessors inside."""
+        # All linear transformations
+        self._test_preprocess(self.dataset, self.dec_tree,
+                              ['min-max', 'mean-std'],
+                              [{'feature_range': (-1, 1)}, {}])
+
+        # Mixed linear/nonlinear transformations
+        self._test_preprocess(self.dataset, self.dec_tree,
+                              ['pca', 'unit-norm'], [{}, {}])
+
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CClassifierTestCases.main()

@@ -7,8 +7,10 @@ from secml.adv.attacks import CAttackEvasion
 from secml.adv.defenses import CClassifierRejectDetector
 from secml.adv.seceval import CSecEval
 from secml.array import CArray
-from secml.ml.kernel import CKernelRBF
+from secml.data import CDataset
 from secml.data.loader import CDLRandomBlobs
+from secml.ml.kernel import CKernelRBF
+from secml.ml.features import CPreProcess
 from secml.utils import fm
 
 
@@ -110,6 +112,40 @@ class TestCClassifierRejectDetector(
 
         self._test_gradient_numerical(
             clf, x, extra_classes=[-1], th=0.1, epsilon=0.01)
+
+    def _create_preprocess_test(self, ds, clf, pre_id_list, kwargs_list):
+        """Fit 2 clf, one with internal preprocessor chain
+        and another using pre-transformed data."""
+        pre1 = CPreProcess.create_chain(pre_id_list, kwargs_list)
+        data_pre = pre1.fit_transform(ds.X)
+
+        pre2 = CPreProcess.create_chain(pre_id_list, kwargs_list)
+        clf_pre = clf.deepcopy()
+        clf_pre.preprocess = pre2
+
+        # We should preprocess adv_x too
+        clf.adv_x = pre1.transform(clf.adv_x)
+
+        clf_pre.fit(ds)
+        clf.fit(CDataset(data_pre, ds.Y))
+
+        return pre1, data_pre, clf_pre, clf
+
+    def test_preprocess(self):
+        """Test classifier with preprocessors inside."""
+        # All linear transformations with gradient implemented
+        self._test_preprocess(self.dataset, self.clf,
+                              ['min-max', 'mean-std'],
+                              [{'feature_range': (-1, 1)}, {}])
+        self._test_preprocess_grad(self.dataset, self.clf,
+                                   ['min-max', 'mean-std'],
+                                   [{'feature_range': (-1, 1)}, {}],
+                                   extra_classes=[-1],
+                                   check_numerical=False)
+
+        # Mixed linear/nonlinear transformations without gradient
+        self._test_preprocess(
+            self.dataset, self.clf, ['pca', 'unit-norm'], [{}, {}])
 
 
 if __name__ == '__main__':

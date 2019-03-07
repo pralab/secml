@@ -1,4 +1,4 @@
-from . import CClassifierTestCases
+from c_classifier_testcases import CClassifierTestCases
 
 import numpy as np
 from sklearn.svm import SVC
@@ -201,31 +201,6 @@ class TestCClassifierSVM(CClassifierTestCases):
 
             _check_sparsedata(pred_y, pred_score, pred_y_sparse, pred_score_sparse)
 
-    def test_gradient(self):
-        """Performs tests on gradient."""
-        self.logger.info("Testing SVM.gradient() method")
-
-        import random
-        for svm in self.svms:
-
-            self.logger.info("Computing gradient for SVM with kernel: %s",
-                             svm.kernel.class_type)
-
-            if hasattr(svm.kernel, 'gamma'):  # set gamma for poly and rbf
-                svm.set('gamma', 1e-5)
-            if hasattr(svm.kernel, 'degree'):  # set degree for poly
-                svm.set('degree', 3)
-
-            svm.fit(self.dataset)
-
-            for i in random.sample(xrange(self.dataset.num_samples), 10):
-                # Randomly extract a pattern to test
-                pattern = self.dataset.X[i, :]
-                self.logger.info("P {:}: {:}".format(i, pattern))
-                # Run the comparison with numerical gradient
-                # (all classes will be tested)
-                self._test_gradient_numerical(svm, pattern)
-
     def test_margin(self):
         self.logger.info("Testing margin separation of SVM...")
 
@@ -265,32 +240,6 @@ class TestCClassifierSVM(CClassifierTestCases):
         fig.sp.legend()
 
         fig.show()
-
-    def test_normalizer(self):
-
-        from secml.ml.features.normalization import CNormalizerMinMax
-
-        data = CDLRandom().load()
-        norm = CNormalizerMinMax()
-        data_norm = norm.fit_normalize(data.X)
-
-        svm1 = CClassifierSVM(preprocess='min-max')
-        svm2 = CClassifierSVM()
-
-        svm1.fit(data)
-        y1, score1 = svm1.predict(data.X, return_decision_function=True)
-
-        svm2.fit(CDataset(data_norm, data.Y))
-        y2, score2 = svm2.predict(data_norm, return_decision_function=True)
-
-        self.assertTrue((y1 == y2).all())
-        self.assertTrue((score1[:, 0] == score2[:, 0]).all())
-
-        svm1_grad = svm1.gradient_f_x(data.X[0, :])
-        svm2_grad = svm2.gradient_f_x(data_norm[0, :]) * norm.gradient(
-            data_norm[0, :]).diag()
-
-        self.assertTrue((svm1_grad == svm2_grad).all())
 
     def test_store_dual_vars(self):
         """Test of parameters that control storing of dual space variables."""
@@ -374,10 +323,10 @@ class TestCClassifierSVM(CClassifierTestCases):
             x = x_norm = self.dataset.X
             p = p_norm = self.dataset.X[0, :].ravel()
 
-            # Preprocessing data if a preprocess is defined
+            # Transform data if a preprocess is defined
             if svm.preprocess is not None:
-                x_norm = svm.preprocess.normalize(x)
-                p_norm = svm.preprocess.normalize(p)
+                x_norm = svm.preprocess.transform(x)
+                p_norm = svm.preprocess.transform(p)
 
             # Testing decision_function on multiple points
 
@@ -465,6 +414,47 @@ class TestCClassifierSVM(CClassifierTestCases):
                 svm._decision_function(x_norm, y=0)
             with self.assertRaises(ValueError):
                 svm._decision_function(p_norm, y=0)
+
+    def test_gradient(self):
+        """Performs tests on gradient."""
+        self.logger.info("Testing SVM.gradient() method")
+
+        import random
+        for svm in self.svms:
+
+            self.logger.info("Computing gradient for SVM with kernel: %s",
+                             svm.kernel.class_type)
+
+            if hasattr(svm.kernel, 'gamma'):  # set gamma for poly and rbf
+                svm.set('gamma', 1e-5)
+            if hasattr(svm.kernel, 'degree'):  # set degree for poly
+                svm.set('degree', 3)
+
+            svm.fit(self.dataset)
+
+            for i in random.sample(xrange(self.dataset.num_samples), 10):
+                # Randomly extract a pattern to test
+                pattern = self.dataset.X[i, :]
+                self.logger.info("P {:}: {:}".format(i, pattern))
+                # Run the comparison with numerical gradient
+                # (all classes will be tested)
+                self._test_gradient_numerical(svm, pattern)
+
+    def test_preprocess(self):
+        """Test classifier with preprocessors inside."""
+        ds = CDLRandom().load()
+        clf = CClassifierSVM()
+
+        # All linear transformations with gradient implemented
+        self._test_preprocess(ds, clf,
+                              ['min-max', 'mean-std'],
+                              [{'feature_range': (-1, 1)}, {}])
+        self._test_preprocess_grad(ds, clf,
+                                   ['min-max', 'mean-std'],
+                                   [{'feature_range': (-1, 1)}, {}])
+
+        # Mixed linear/nonlinear transformations without gradient
+        self._test_preprocess(ds, clf, ['pca', 'unit-norm'], [{}, {}])
 
 
 if __name__ == '__main__':

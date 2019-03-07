@@ -17,6 +17,13 @@ from sklearn.metrics import pairwise_distances
 class CClassifierNearestCentroid(CClassifier):
     """CClassifierNearestCentroid.
 
+    Parameters
+    ----------
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
+
     Attributes
     ----------
     class_type : 'nrst-centroid'
@@ -111,9 +118,8 @@ class CClassifierNearestCentroid(CClassifier):
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Preprocessing data if a preprocess is defined
-        if self.preprocess is not None:
-            x = self.preprocess.normalize(x)
+        # Transform data if a preprocess is defined
+        x = self._preprocess_data(x)
 
         sign = convert_binary_labels(y)  # Sign depends on input label (0/1)
 

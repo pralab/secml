@@ -50,7 +50,7 @@ class CClassifierGradientSVM(CClassifierGradient):
                               "(all points are error vectors).")
             return None
 
-        xk = xk if clf.preprocess is None else clf.preprocess.normalize(xk)
+        xk = xk if clf.preprocess is None else clf.preprocess.transform(xk)
 
         s = xs.shape[0]  # margin support vector
         k = xk.shape[0]
@@ -76,8 +76,8 @@ class CClassifierGradientSVM(CClassifierGradient):
             computed
         """
         # handle normalizer, if present
-        xc = xc if clf.preprocess is None else clf.preprocess.normalize(xc)
-        xk = xk if clf.preprocess is None else clf.preprocess.normalize(xk)
+        xc = xc if clf.preprocess is None else clf.preprocess.transform(xc)
+        xk = xk if clf.preprocess is None else clf.preprocess.transform(xk)
 
         dKkc = alpha_c * clf.kernel.gradient(xk, xc)
         return dKkc.T  # d * k

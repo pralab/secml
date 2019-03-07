@@ -18,10 +18,10 @@ class CClassifierMulticlass(CClassifier):
     ----------
     classifier : CClassifier.__class__
         Unbound (not initialized) CClassifier subclass.
-    preprocess : str or CNormalizer
-        Features preprocess to applied to input data.
-        Can be a CNormalizer subclass or a string with the desired
-        preprocess type. If None, input data is used as is.
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
     clf_params : kwargs
         Any other construction parameter for the binary classifiers.
 
@@ -304,9 +304,8 @@ class CClassifierMulticlass(CClassifier):
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Preprocessing data if a preprocess is defined
-        if self.preprocess is not None:
-            x = self.preprocess.normalize(x)
+        # Transform data if a preprocess is defined
+        x = self._preprocess_data(x)
 
         self._check_clf_index(y)  # Check the binary classifier input index
 

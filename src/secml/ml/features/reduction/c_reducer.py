@@ -1,118 +1,92 @@
 """
-.. module:: ArrayReduction
-   :synopsis: Common interface for matrix reduction algorithms.
+.. module:: FeatureReducer
+   :synopsis: Common interface for feature reduction algorithms.
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta
 
-from secml.core import CCreator
+from secml.ml.features import CPreProcess
 
 
-class CReducer(CCreator):
-    """Common interface for matrix reduction algorithms.
-
-    Most of the reduction algorithms, such as PCA or LDA, can
-    be regarded as dimensionality reduction techniques.
-
-    """
+class CReducer(CPreProcess):
+    """Common interface for feature reduction algorithms."""
     __metaclass__ = ABCMeta
     __super__ = 'CReducer'
 
-    @abstractmethod
-    def fit(self, data, y):
-        """Fit reduction algorithm using data.
+    # FIXME: REDUCERS DO NOT SUPPORT THE DEPRECATED clear FRAMEWORK.
+    #  REMOVE ALL THE FOLLOWING METHODS AFTER REMOVING THE FRAMEWORK
+
+    def transform(self, x):
+        """Apply the transformation algorithm on data.
 
         Parameters
         ----------
-        data : CArray
-            Array to be used for training reduction algorithm.
-            Shape of input array depends on the algorithm itself.
-        y : CArray
-            Flat CArray with target values. This is not used by all
-            reduction algorithms.
-
-        Returns
-        -------
-        self_trained : CReducer
-            Instance of the reduction algorithm trained using
-            input data.
-
-        """
-        raise NotImplementedError(
-            "this is an abstract method. Must be overridden in subclass.")
-
-    @abstractmethod
-    def transform(self, data):
-        """Apply the reduction algorithm on data.
-
-        Parameters
-        ----------
-        data : CArray
-            Array to be transformed using reduction algorithm.
+        x : CArray
+            Array to be transformed.
             Shape of input array depends on the algorithm itself.
 
         Returns
         -------
-        data_transformed : CArray
-            Input data transformed using reduction algorithm.
+        CArray
+            Transformed input data.
 
         """
-        raise NotImplementedError(
-            "this is an abstract method. Must be overridden in subclass.")
+        # Transform data using inner preprocess, if defined
+        x = self._preprocess_data(x)
+        return self._transform(x)
 
-    def fit_transform(self, data, y=None):
-        """Fit reduction algorithm using data and then transform data.
-
-        This method is equivalent to call fit(data) and transform(data)
-        in sequence, but it's useful when data is both the training array
-        and the array to transform.
+    def revert(self, x):
+        """Revert data to original form.
 
         Parameters
         ----------
-        data : CArray
-            Array to be transformed using reduction algorithm.
-            Each row must correspond to one single pattern, so each
-            column is a different feature.
-        y : CArray
-            Flat CArray with target values. This is not used by all
-            reduction algorithms.
-
-        Returns
-        -------
-        data_transformed : CArray
-            Input data transformed using reduction algorithm.
-
-        See Also
-        --------
-        fit : fit the reduction algorithm on input data.
-        transform : transform input data according training data.
-
-        """
-        self.fit(data, y)  # training reduction first
-        return self.transform(data)
-
-    def revert(self, data):
-        """Revert array to original form.
-
-        Parameters
-        ----------
-        data : CArray
+        x : CArray
             Transformed array to be reverted to original form.
             Shape of input array depends on the algorithm itself.
 
         Returns
         -------
-        data_original : CArray
+        CArray
             Original input data.
 
-        Notes
-        -----
+        Warnings
+        --------
         Reverting a transformed array is not always possible.
-        Thus, revert method is not an abstractmethod and should
-        be implemented only if applicable.
+        See description of each preprocessor for details.
 
         """
-        raise NotImplementedError(
-            "this is a placeholder method. Override if necessary.")
+        v = self._revert(x)
+
+        # Revert data using the inner preprocess, if defined
+        if self.preprocess is not None:
+            return self.preprocess.revert(v)
+
+        return v
+
+    def gradient(self, x, w=None):
+        """Returns the preprocessor gradient wrt data.
+
+        Parameters
+        ----------
+        x : CArray
+            Data array, 2-Dimensional or ravel.
+        w : CArray or None, optional
+            If CArray, will be left-multiplied to
+            the gradient of the preprocessor.
+
+        Returns
+        -------
+        gradient : CArray
+            Gradient of the preprocessor wrt input data.
+            If `w` is CArray, will be a vector-like array of size `n_features`.
+            Otherwise, the shape depends on the preprocess algorithm.
+
+        """
+        out = self._gradient(x, w=w)
+
+        if self.preprocess is not None:
+            return self.preprocess.gradient(x, w=out)
+
+        return out

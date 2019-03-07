@@ -133,7 +133,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         # validation points
         xk = self.ts.X.atleast_2d()
         # handle normalizer, if present
-        xc = xc if clf.preprocess is None else clf.preprocess.normalize(xc)
+        xc = xc if clf.preprocess is None else clf.preprocess.transform(xc)
 
         s_c = self._s(xc, w, b)
         sigm_c = self._sigm(yc, s_c)

@@ -6,12 +6,12 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 
 from secml.core import CCreator
 from secml.array import CArray
 from secml.data import CDataset
-from secml.ml.features.normalization import CNormalizer
+from secml.ml.features import CPreProcess
 from secml.parallel import parfor2
 
 
@@ -50,10 +50,10 @@ class CClassifier(CCreator):
 
     Parameters
     ----------
-    preprocess : str or CNormalizer
-        Features preprocess to applied to input data.
-        Can be a CNormalizer subclass or a string with the desired
-        preprocess type. If None, input data is used as is.
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
 
     """
     __metaclass__ = ABCMeta
@@ -66,7 +66,7 @@ class CClassifier(CCreator):
         self._n_features = None
         # Data preprocess
         self.preprocess = preprocess if preprocess is None \
-            else CNormalizer.create(preprocess)
+            else CPreProcess.create(preprocess)
 
     def __clear(self):
         """Reset the object."""
@@ -103,6 +103,25 @@ class CClassifier(CCreator):
     def is_linear(self):
         """Return true for linear classifiers, false otherwise"""
         return False
+
+    def _preprocess_data(self, x):
+        """Apply the preprocess to input, if defined.
+
+        Parameters
+        ----------
+        x : CArray
+            Data to be transformed using preprocess, if defined.
+
+        Returns
+        -------
+        CArray
+            If preprocess is defined, will be the transformed data.
+            Otherwise input data is returned as is.
+
+        """
+        if self.preprocess is not None:
+            return self.preprocess.transform(x)
+        return x
 
     @abstractmethod
     def _fit(self, dataset):
@@ -158,9 +177,9 @@ class CClassifier(CCreator):
         self._n_features = dataset.num_features
 
         data_x = dataset.X
-        # Preprocessing data if a preprocess is defined
+        # Transform data if a preprocess is defined
         if self.preprocess is not None:
-            data_x = self.preprocess.fit_normalize(dataset.X)
+            data_x = self.preprocess.fit_transform(dataset.X)
 
         # Data is ready: fit the classifier
         try:  # Try to use parallelization
@@ -231,9 +250,8 @@ class CClassifier(CCreator):
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Preprocessing data if a preprocess is defined
-        if self.preprocess is not None:
-            x = self.preprocess.normalize(x)
+        # Transform data if a preprocess is defined
+        x = self._preprocess_data(x)
 
         score = CArray.ones(shape=x.shape[0])
         for i in xrange(x.shape[0]):
@@ -360,13 +378,15 @@ class CClassifier(CCreator):
 
         return best_params
 
-    def gradient_f_x(self, x, **kwargs):
+    def gradient_f_x(self, x, y, **kwargs):
         """Computes the gradient of the classifier's output wrt input.
 
         Parameters
         ----------
         x : CArray
             The gradient is computed in the neighborhood of x.
+        y : int
+            Index of the class wrt the gradient must be computed.
         **kwargs
             Optional parameters for the function that computes the
             gradient of the decision function. See the description of
@@ -378,39 +398,35 @@ class CClassifier(CCreator):
             Gradient of the classifier's output wrt input. Vector-like array.
 
         """
-        if self.preprocess is not None:
-            # Normalize data before compute the classifier gradient
-            x_pre = self.preprocess.normalize(x)
-        else:  # Data will not be preprocessed
-            x_pre = x
+        x_in = x  # Original data
+
+        # If preprocess is defined, transform data before computing the grad
+        x = self._preprocess_data(x)
 
         try:  # Get the derivative of decision_function
-            grad_f = self._gradient_f(x_pre, **kwargs)
+            grad_f = self._gradient_f(x, y, **kwargs)  # May accept kwargs
         except NotImplementedError:
             raise NotImplementedError("{:} does not implement `gradient_f_x`"
                                       "".format(self.__class__.__name__))
 
-        # Get the derivative of the preprocess (if defined)
-        if self.preprocess is None:  # preprocess not defined... placeholder
-            grad_norm = CArray([1])
-        else:
-            try:  # We try to pass the classifier gradient to preprocess
-                grad_norm = self.preprocess.gradient(x, w=grad_f)
-                # preprocess gradient will be accumulated in grad_f
-                # and can be directly returned
-                return grad_norm.ravel()
-            except TypeError:  # preprocess does not support w probably
-                grad_norm = self.preprocess.gradient(x)
+        # The derivative of decision_function should be a vector
+        # as we are computing the gradient wrt a class `y`
+        if not grad_f.is_vector_like:
+            raise ValueError("`_gradient_f` must return a vector like array")
 
-            # We need to left multiply clf gradient and preprocess gradient
-            if self.preprocess.is_linear():
-                # Gradient of linear normalizers is an 'I * w' array
-                # To avoid returning all the zeros, extract the main diagonal
-                grad_norm = grad_norm.diag()
-            else:
-                grad_norm = grad_norm.ravel()
+        grad_f = grad_f.ravel()
 
-        return (grad_f * grad_norm).ravel()
+        # backpropagate the clf gradient to the preprocess (if defined)
+        if self.preprocess is not None:
+            # preprocess gradient will be accumulated in grad_f
+            # and a vector-like array should be returned
+            grad_p = self.preprocess.gradient(x_in, w=grad_f)
+            if not grad_p.is_vector_like:
+                raise ValueError(
+                    "`preprocess.gradient` must return a vector like array")
+            return grad_p.ravel()
+
+        return grad_f  # No preprocess defined... return the clf grad
 
     def gradient_loss_params(self, **kwargs):
         """Computed the gradient of the classifier's loss wrt train parameters.

@@ -32,10 +32,10 @@ class CClassifierSVM(CClassifierLinear):
         weight one. The 'balanced' mode uses the values of labels to
         automatically adjust weights inversely proportional to
         class frequencies as `n_samples / (n_classes * np.bincount(y))`.
-    preprocess : str or CNormalizer
-        Features preprocess to applied to input data.
-        Can be a CNormalizer subclass or a string with the desired
-        preprocess type. If None, input data is used as is.
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
     grad_sampling : float
         Percentage in (0.0, 1.0] of the alpha weights to be considered
         when computing the classifier gradient.

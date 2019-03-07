@@ -167,4 +167,4 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
 
         """
         self._check_clf_index(y)  # Check the binary classifier input index
-        return self.binary_classifiers[y].gradient_f_x(x).ravel()
+        return self.binary_classifiers[y].gradient_f_x(x, y=1).ravel()

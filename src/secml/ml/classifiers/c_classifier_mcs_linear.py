@@ -33,6 +33,10 @@ class CClassifierMCSLinear(CClassifierLinear):
     random_state : int or None, optional
         If int, random_state is the seed used by the random number generator.
         If None, no fixed seed will be set.
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
 
     Attributes
     ----------

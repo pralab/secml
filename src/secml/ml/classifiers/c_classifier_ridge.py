@@ -19,6 +19,13 @@ from secml.ml.classifiers.gradients import CClassifierGradientRidge
 class CClassifierRidge(CClassifierLinear):
     """Ridge Classifier.
 
+    Parameters
+    ----------
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
+
     Attributes
     ----------
     class_type : 'ridge'

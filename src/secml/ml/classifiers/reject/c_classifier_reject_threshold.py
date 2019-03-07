@@ -8,6 +8,7 @@
 """
 from secml import _NoValue
 from secml.array import CArray
+from secml.data import CDataset
 from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.reject import CClassifierReject
 
@@ -28,16 +29,24 @@ class CClassifierRejectThreshold(CClassifierReject):
         Classifier to which we would like to apply a reject threshold.
     threshold : float
         Rejection threshold.
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
 
     """
     __class_type = 'reject-threshold'
 
-    def __init__(self, clf, threshold):
+    def __init__(self, clf, threshold, preprocess=None):
 
         self.clf = clf
         self.threshold = threshold
 
-        super(CClassifierRejectThreshold, self).__init__()
+        if self.clf.preprocess is not None:
+            raise ValueError(
+                "the preprocessor should be passed to the outer classifier.")
+
+        super(CClassifierRejectThreshold, self).__init__(preprocess=preprocess)
 
     def __clear(self):
         """Reset the object."""
@@ -86,16 +95,6 @@ class CClassifierRejectThreshold(CClassifierReject):
         """Number of features"""
         return self._clf.n_features
 
-    @property
-    def preprocess(self):
-        """Preprocess to be applied to input data by the inner classifier."""
-        return self._clf.preprocess
-
-    @preprocess.setter
-    def preprocess(self, value):
-        """Preprocess to be applied to input data by the inner classifier."""
-        self._clf.preprocess = value
-
     def fit(self, dataset, n_jobs=1):
         """Trains the classifier.
 
@@ -119,7 +118,13 @@ class CClassifierRejectThreshold(CClassifierReject):
         """
         # Resetting the outer classifier
         self.clear()
-        return self._fit(dataset, n_jobs)
+
+        data_x = dataset.X
+        # Transform data if a preprocess is defined
+        if self.preprocess is not None:
+            data_x = self.preprocess.fit_transform(dataset.X)
+
+        return self._fit(CDataset(data_x, dataset.Y), n_jobs=n_jobs)
 
     def _fit(self, dataset, n_jobs=1):
         """Private method that trains the One-Vs-All classifier.
@@ -169,6 +174,14 @@ class CClassifierRejectThreshold(CClassifierReject):
             Dense flat array of shape (n_patterns,).
 
         """
+        if self.is_clear():
+            raise ValueError("make sure the classifier is trained first.")
+
+        x = x.atleast_2d()  # Ensuring input is 2-D
+
+        # Transform data if a preprocess is defined
+        x = self._preprocess_data(x)
+
         return self._decision_function(x, y)
 
     def _decision_function(self, x, y):
@@ -250,11 +263,17 @@ class CClassifierRejectThreshold(CClassifierReject):
         if n_jobs is not _NoValue:
             raise ValueError("`n_jobs` is not supported.")
 
+        x_in = x  # Original data
+
+        # Transform data if a preprocess is defined
+        x = self._preprocess_data(x)
+
         labels, scores = self._clf.predict(x, return_decision_function=True)
 
-        # Apply reject :
+        # Apply reject
+
         # compute the score of the reject class
-        rej_scores = self.decision_function(x, y=-1).T
+        rej_scores = self.decision_function(x_in, y=-1).T
 
         # find the maximum score
         scores_max = scores.max(axis=1)
@@ -282,8 +301,8 @@ class CClassifierRejectThreshold(CClassifierReject):
         x : CArray
             The gradient is computed in the neighborhood of x.
         y : int
-            Index of the class wrt the gradient must be computed, -1 to
-            have the gradient w.r.t. the reject class
+            Index of the class wrt the gradient must be computed.
+            Use -1 to output the gradient w.r.t. the reject class.
 
         Returns
         -------
