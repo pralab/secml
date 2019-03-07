@@ -1,5 +1,5 @@
 """
-.. module:: PCA
+.. module:: CPCA
    :synopsis: Principal Component Analysis (PCA)
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -9,10 +9,10 @@
 from secml.array import CArray
 from secml.ml.features.reduction import CReducer
 
-__all__ = ['CPca']
+__all__ = ['CPCA']
 
 
-class CPca(CReducer):
+class CPCA(CReducer):
     """Principal Component Analysis (PCA).
 
     Properties
@@ -60,10 +60,10 @@ class CPca(CReducer):
         Examples
         --------
         >>> from secml.array import CArray
-        >>> from secml.ml.features.reduction import CPca
+        >>> from secml.ml.features.reduction import CPCA
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> CPca().fit_transform(array)
+        >>> CPCA().fit_transform(array)
         CArray([[ -4.07872199e+00   2.47826647e+00   0.00000000e+00]
          [ -2.72723183e+00  -2.82960262e+00   5.55111512e-17]
          [  6.80595382e+00   3.51336152e-01  -2.22044605e-16]])
@@ -77,7 +77,7 @@ class CPca(CReducer):
         self._explained_variance = None
         self._explained_variance_ratio = None
 
-        super(CPca, self).__init__(preprocess=preprocess)
+        super(CPCA, self).__init__(preprocess=preprocess)
 
     @property
     def eigenval(self):
@@ -129,16 +129,16 @@ class CPca(CReducer):
 
         Returns
         -------
-        CPca
+        CPCA
             Instance of the trained transformer.
 
         Examples
         --------
         >>> from secml.array import CArray
-        >>> from secml.ml.features.reduction import CPca
+        >>> from secml.ml.features.reduction import CPCA
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> pca = CPca().fit(array)
+        >>> pca = CPCA().fit(array)
         >>> pca.eigenval
         CArray([  8.39015935e+00   3.77781588e+00   1.90957046e-17])
         >>> pca.eigenvec
@@ -228,10 +228,10 @@ class CPca(CReducer):
         Examples
         --------
         >>> from secml.array import CArray
-        >>> from secml.ml.features.reduction import CPca
+        >>> from secml.ml.features.reduction import CPCA
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> pca = CPca().fit(array)
+        >>> pca = CPCA().fit(array)
         >>> pca.transform(CArray.concatenate(array, [4., 2., -6.], axis=0))
         CArray([[ -4.07872199e+00   2.47826647e+00   0.00000000e+00]
          [ -2.72723183e+00  -2.82960262e+00   5.55111512e-17]
@@ -271,10 +271,10 @@ class CPca(CReducer):
         Examples
         --------
         >>> from secml.array import CArray
-        >>> from secml.ml.features.reduction import CPca
+        >>> from secml.ml.features.reduction import CPCA
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> pca = CPca().fit(array)
+        >>> pca = CPCA().fit(array)
         >>> array_pca = pca.transform(array)
         >>> pca.revert(array_pca).round(6)
         CArray([[ 1. -0.  2.]
