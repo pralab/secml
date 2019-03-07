@@ -15,6 +15,13 @@ __all__ = ['CPca']
 class CPca(CReducer):
     """Principal Component Analysis (PCA).
 
+    Properties
+    ----------
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
+
     Attributes
     ----------
     class_type : 'pca'
@@ -22,7 +29,7 @@ class CPca(CReducer):
     """
     __class_type = 'pca'
 
-    def __init__(self, n_components=None):
+    def __init__(self, n_components=None, preprocess=None):
         """Principal Component Analysis (PCA)
 
         Apply a linear transformation at data, project it into
@@ -70,6 +77,8 @@ class CPca(CReducer):
         self._explained_variance = None
         self._explained_variance_ratio = None
 
+        super(CPca, self).__init__(preprocess=preprocess)
+
     @property
     def eigenval(self):
         """Eigenvalues estimated from the training data."""
@@ -105,20 +114,23 @@ class CPca(CReducer):
         """
         return self._explained_variance_ratio
 
-    def fit(self, data, y=None):
+    def _fit(self, x, y=None):
         """Fit the PCA using input data.
 
         Parameters
         ----------
-        data : array_like
+        x : array_like
             Training data, 2-Dim array like object with shape
             (n_patterns, n_features), where each row is a pattern
             of n_features columns.
+        y : CArray or None, optional
+            Flat array with the label of each pattern.
+            Can be None if not required by the preprocessing algorithm.
 
         Returns
         -------
-        trained_PCA : CPca
-            Instance of the PCA trained on input data.
+        CPca
+            Instance of the trained transformer.
 
         Examples
         --------
@@ -139,7 +151,7 @@ class CPca(CReducer):
         CArray([  8.31434337e-01   1.68565663e-01   4.30684173e-36])
 
         """
-        data_carray = CArray(data).todense().atleast_2d()
+        data_carray = CArray(x).todense().atleast_2d()
         # Max number of components is the number of patterns available (rows)
         n_samples = data_carray.shape[0]
         n_features = data_carray.shape[1]
@@ -198,20 +210,19 @@ class CPca(CReducer):
 
         return self
 
-    def transform(self, data):
+    def _transform(self, x):
         """Apply the reduction algorithm on data.
 
         Parameters
         ----------
-        data : array_like
-            Training data, 2-Dim array like object with shape
-            (n_patterns, n_features), where each row is a pattern
-            of n_features columns. n_features must be equal to
+        x : array_like
+            Array to be transformed. 2-D array object of shape
+            (n_patterns, n_features). n_features must be equal to
             n_components parameter set before or during training.
 
         Returns
         --------
-        data_mapped : CArray
+        CArray
             Input data mapped to PCA space.
 
         Examples
@@ -236,24 +247,25 @@ class CPca(CReducer):
         if self._mean is None:
             raise ValueError("fit PCA first.")
 
-        data_carray = CArray(data).todense().atleast_2d()
+        data_carray = CArray(x).todense().atleast_2d()
         if data_carray.shape[1] != self.mean.size:
-            raise ValueError("array to transform must have {:} features (columns).".format(self.mean.size))
+            raise ValueError("array to transform must have {:} "
+                             "features (columns).".format(self.mean.size))
 
         out = CArray((data_carray - self.mean).dot(self._components.T))
-        return out.atleast_2d() if data.ndim >= 2 else out
+        return out.atleast_2d() if x.ndim >= 2 else out
 
-    def revert(self, data):
+    def _revert(self, x):
         """Map data back to its original space.
 
         Parameters
         ----------
-        data : array_like
+        x : CArray
             Array to transform back to its original space.
 
         Returns
         --------
-        data_origin : CArray
+        CArray
             Input array mapped back to its original space.
 
         Examples
@@ -273,9 +285,11 @@ class CPca(CReducer):
         if self._mean is None:
             raise ValueError("fit PCA first.")
 
-        data_carray = CArray(data).atleast_2d()
+        data_carray = CArray(x).atleast_2d()
         if data_carray.shape[1] != self.n_components:
-            raise ValueError("array to revert must have {:} features (columns).".format(self.n_components))
+            raise ValueError("array to revert must have {:} "
+                             "features (columns).".format(self.n_components))
 
         out = CArray(data_carray.dot(self._components) + self.mean)
-        return out.atleast_2d() if data.ndim >= 2 else out
+
+        return out.atleast_2d() if x.ndim >= 2 else out

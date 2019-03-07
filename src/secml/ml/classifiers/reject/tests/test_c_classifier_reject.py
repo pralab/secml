@@ -65,10 +65,10 @@ class CClassifierRejectTestCases(object):
             x = x_norm = self.dataset.X
             p = p_norm = self.dataset.X[0, :].ravel()
 
-            # Preprocessing data if a preprocess is defined
+            # Transform data if a preprocess is defined
             if self.clf.preprocess is not None:
-                x_norm = self.clf.preprocess.normalize(x)
-                p_norm = self.clf.preprocess.normalize(p)
+                x_norm = self.clf.preprocess.transform(x)
+                p_norm = self.clf.preprocess.transform(p)
 
             # Testing decision_function on multiple points
 
@@ -199,3 +199,18 @@ class CClassifierRejectTestCases(object):
             self.logger.info("Randomly selected pattern:\n%s", str(pattern))
 
             self._test_gradient_numerical(clf, pattern, extra_classes=[-1])
+
+        def test_preprocess(self):
+            """Test classifier with preprocessors inside."""
+            # All linear transformations with gradient implemented
+            self._test_preprocess(self.dataset, self.clf,
+                                  ['min-max', 'mean-std'],
+                                  [{'feature_range': (-1, 1)}, {}])
+            self._test_preprocess_grad(self.dataset, self.clf,
+                                       ['min-max', 'mean-std'],
+                                       [{'feature_range': (-1, 1)}, {}],
+                                       extra_classes=[-1])
+
+            # Mixed linear/nonlinear transformations without gradient
+            self._test_preprocess(
+                self.dataset, self.clf, ['pca', 'unit-norm'], [{}, {}])

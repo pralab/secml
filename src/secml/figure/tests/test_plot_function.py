@@ -13,7 +13,7 @@ class TestCPlot(CUnitTest):
         self.clf = CClassifierSVM()
         self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
                                  n_clusters_per_class=1).load()
-        self.dataset.X = CNormalizerMinMax().fit_normalize(self.dataset.X)
+        self.dataset.X = CNormalizerMinMax().fit_transform(self.dataset.X)
         self.clf.fit(self.dataset)
 
     def test_fobj(self):

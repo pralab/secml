@@ -45,6 +45,10 @@ class CNormalizerMeanSTD(CNormalizerLinear):
     with_std : bool, optional
         If True (default), normalizer scales array using std too.
         If False, `std` parameter is ignored.
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
 
     Attributes
     ----------
@@ -53,7 +57,7 @@ class CNormalizerMeanSTD(CNormalizerLinear):
     """
     __class_type = 'mean-std'
 
-    def __init__(self, mean=None, std=None, with_std=True):
+    def __init__(self, mean=None, std=None, with_std=True, preprocess=None):
 
         if mean is not None:
             self._mean = (mean, ) if is_scalar(mean) else tuple(mean)
@@ -82,6 +86,8 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         # Properties of the linear normalizer
         self._w = None
         self._b = None
+
+        super(CNormalizerMeanSTD, self).__init__(preprocess=preprocess)
 
     def __clear(self):
         """Reset the object."""
@@ -129,7 +135,7 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         """True if normalizer should transform array using variance too."""
         return self._with_std
 
-    def fit(self, x):
+    def _fit(self, x, y=None):
         """Compute the mean and standard deviation to be used for scaling.
 
         Parameters
@@ -137,11 +143,14 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         x : CArray
             Array to be used as training set. Each row must correspond to
             one single patterns, so each column is a different feature.
+        y : CArray or None, optional
+            Flat array with the label of each pattern.
+            Can be None if not required by the preprocessing algorithm.
 
         Returns
         -------
         CNormalizerMeanSTD
-            Scaler trained using input array.
+            Instance of the trained normalizer.
 
         Examples
         --------
@@ -155,19 +164,19 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         >>> print normalizer.std
         CArray([ 0.2  0.2  0.2])
 
-        >>> print normalizer.normalize(array)
+        >>> print normalizer.transform(array)
         CArray([[ 2.5 -7.5  7.5]
          [ 7.5 -2.5 -2.5]
          [-2.5  2.5 -7.5]])
 
         >>> normalizer = CNormalizerMeanSTD((0.5, 0.5, 0.2), (0.2, 0.1, 0.1)).fit(array)
 
-        >>> print normalizer.normalize(array)
+        >>> print normalizer.transform(array)
         CArray([[  2.5 -15.   18. ]
          [  7.5  -5.   -2. ]
          [ -2.5   5.  -12. ]])
 
-        >>> out = CNormalizerMeanSTD().fit_normalize(array)
+        >>> out = CNormalizerMeanSTD().fit_transform(array)
         >>> # Expected zero mean and unit variance
         >>> print out.mean(axis=0, keepdims=False)
         CArray([ 0.  0.  0.])
@@ -175,8 +184,6 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         CArray([ 1.  1.  1.])
 
         """
-        self.clear()  # Reset trained normalizer
-
         n_feats = x.shape[1]
 
         # Setting the mean

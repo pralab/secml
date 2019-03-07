@@ -8,6 +8,7 @@
 """
 import unittest
 import pytest
+import numpy as np
 import numpy.testing as npt
 
 from secml.utils import CLog
@@ -93,6 +94,24 @@ class CUnitTest(unittest.TestCase):
         return npt.assert_approx_equal(
             actual, des, significant, err_msg, verbose)
     assert_approx_equal.__doc__ = npt.assert_approx_equal.__doc__
+
+    @staticmethod
+    def assertIsSubDtype(actual, desired):
+        """
+        Raises an AssertionError if the first dtype is NOT a typecode
+        lower/equal in type hierarchy.
+
+        Parameters
+        ----------
+        actual : dtype or str
+            dtype or string representing a typecode.
+        desired : dtype or str
+            dtype or string representing a typecode.
+
+        """
+        if not np.issubdtype(actual, desired):
+            raise AssertionError("{:} is not lower/equal to {:} in the type "
+                                 "hierarchy.".format(actual, desired))
 
     # Skip something
     skip = pytest.mark.skip

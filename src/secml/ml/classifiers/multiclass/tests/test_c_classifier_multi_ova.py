@@ -119,7 +119,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         from secml.ml.features.normalization import CNormalizerMinMax
         from secml.data import CDataset
 
-        ds_norm_x = CNormalizerMinMax().fit_normalize(self.dataset.X)
+        ds_norm_x = CNormalizerMinMax().fit_transform(self.dataset.X)
 
         multi_nonorm = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                                 class_weight='balanced')
@@ -138,35 +138,6 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
             "Predictions with external norm:\n{:}".format(pred_y_nonorm))
 
         self.assertFalse((pred_y_nonorm != pred_y).any())
-
-    def test_gradient(self):
-        """Unittests for gradient() function."""
-        multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,
-                                              class_weight='balanced')
-        multiclass.fit(self.dataset)
-
-        import random
-        pattern = CArray(random.choice(self.dataset.X.get_data()))
-        self.logger.info("Randomly selected pattern:\n%s", str(pattern))
-
-        # Compare with numerical gradient
-        self._test_gradient_numerical(multiclass, pattern)
-
-        # Check if we can return the i_th classifier
-        for i in xrange(multiclass.num_classifiers):
-
-            ova_grad = multiclass.binary_classifiers[i].gradient_f_x(pattern)
-
-            gradient = multiclass.gradient_f_x(pattern, y=i)
-            self.logger.info(
-                "Gradient of {:}^th sub-clf is:\n{:}".format(i, gradient))
-
-            self.assertFalse((gradient != ova_grad).any())
-
-        with self.assertRaises(ValueError):
-            multiclass.gradient_f_x(pattern, y=-1)
-        with self.assertRaises(ValueError):
-            multiclass.gradient_f_x(pattern, y=100)
 
     def test_plot_decision_function(self):
         """Test plot of multiclass classifier decision function."""
@@ -262,10 +233,10 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Preprocessing data if a preprocess is defined
+        # Transform data if a preprocess is defined
         if mc.preprocess is not None:
-            x_norm = mc.preprocess.normalize(x)
-            p_norm = mc.preprocess.normalize(p)
+            x_norm = mc.preprocess.transform(x)
+            p_norm = mc.preprocess.transform(p)
 
         # Testing decision_function on multiple points
 
@@ -376,6 +347,52 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
             (df_scores_1 != CArray(scores[:, 1]).ravel()).any())
         self.assertFalse(
             (df_scores_2 != CArray(scores[:, 2]).ravel()).any())
+
+    def test_gradient(self):
+        """Unittests for gradient() function."""
+        multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,
+                                              class_weight='balanced')
+        multiclass.fit(self.dataset)
+
+        import random
+        pattern = CArray(random.choice(self.dataset.X.get_data()))
+        self.logger.info("Randomly selected pattern:\n%s", str(pattern))
+
+        # Compare with numerical gradient
+        self._test_gradient_numerical(multiclass, pattern)
+
+        # Check if we can return the i_th classifier
+        for i in xrange(multiclass.num_classifiers):
+
+            ova_grad = multiclass.binary_classifiers[i].gradient_f_x(pattern)
+
+            gradient = multiclass.gradient_f_x(pattern, y=i)
+            self.logger.info(
+                "Gradient of {:}^th sub-clf is:\n{:}".format(i, gradient))
+
+            self.assertFalse((gradient != ova_grad).any())
+
+        with self.assertRaises(ValueError):
+            multiclass.gradient_f_x(pattern, y=-1)
+        with self.assertRaises(ValueError):
+            multiclass.gradient_f_x(pattern, y=100)
+
+    def test_preprocess(self):
+        """Test classifier with preprocessors inside."""
+        multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,
+                                              class_weight='balanced')
+
+        # All linear transformations with gradient implemented
+        self._test_preprocess(self.dataset, multiclass,
+                              ['min-max', 'mean-std'],
+                              [{'feature_range': (-1, 1)}, {}])
+        self._test_preprocess_grad(self.dataset, multiclass,
+                                   ['min-max', 'mean-std'],
+                                   [{'feature_range': (-1, 1)}, {}])
+
+        # Mixed linear/nonlinear transformations without gradient
+        self._test_preprocess(
+            self.dataset, multiclass, ['pca', 'unit-norm'], [{}, {}])
 
 
 if __name__ == '__main__':

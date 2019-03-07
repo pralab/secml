@@ -29,11 +29,16 @@ class CClassifierRejectDetector(CClassifierReject):
         samples.
     adv_x : CArray
         Array containing already computed adversarial samples.
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
+        The detector classifier can have an additional preprocessing chain.
 
     """
     __class_type = 'reject-detector'
 
-    def __init__(self, clf, det, adv_x):
+    def __init__(self, clf, det, adv_x, preprocess=None):
 
         if not isinstance(clf, CClassifier):
             raise TypeError("`clf` must be an instance of `CClassifier`")
@@ -47,7 +52,11 @@ class CClassifierRejectDetector(CClassifierReject):
         # A softmax object that will be used for scores scaling
         self._softmax = CSoftmax()
 
-        super(CClassifierRejectDetector, self).__init__()
+        if self.clf.preprocess is not None:
+            raise ValueError(
+                "the preprocessor should be passed to the outer classifier.")
+
+        super(CClassifierRejectDetector, self).__init__(preprocess=preprocess)
 
     def __clear(self):
         """Reset the object."""
@@ -93,16 +102,6 @@ class CClassifierRejectDetector(CClassifierReject):
         """Number of features"""
         return self._clf.n_features
 
-    @property
-    def preprocess(self):
-        """Preprocess to be applied to input data by the inner classifier."""
-        return self._clf.preprocess
-
-    @preprocess.setter
-    def preprocess(self, value):
-        """Preprocess to be applied to input data by the inner classifier."""
-        self._clf.preprocess = value
-
     def _normalize_scores(self, orig_score):
         """Normalizes the scores using softmax."""
         return self._softmax.softmax(orig_score)
@@ -130,7 +129,17 @@ class CClassifierRejectDetector(CClassifierReject):
         """
         # Resetting the outer classifier
         self.clear()
-        return self._fit(dataset, n_jobs)
+
+        # Storing dataset classes
+        self._classes = dataset.classes
+        self._n_features = dataset.num_features
+
+        data_x = dataset.X
+        # Transform data if a preprocess is defined
+        if self.preprocess is not None:
+            data_x = self.preprocess.fit_transform(dataset.X)
+
+        return self._fit(CDataset(data_x, dataset.Y), n_jobs=n_jobs)
 
     def _fit(self, dataset, n_jobs=1):
         """Trains both the classifier and the detector.
@@ -156,11 +165,12 @@ class CClassifierRejectDetector(CClassifierReject):
         # samples and the negative one are the adversarial samples
 
         # store the dataset samples as positive class
+        adv_x = self.adv_x
+        # Transform adv_x if a preprocess is defined
+        adv_x = self._preprocess_data(adv_x)
         dataset = dataset.deepcopy()
         dataset.Y[:] = 0
-        adv_x = self.adv_x
-        n_adv_x = adv_x.shape[0]
-        adv_dts = CDataset(adv_x, CArray.ones(n_adv_x))
+        adv_dts = CDataset(adv_x, CArray.ones(adv_x.shape[0]))
 
         dataset = dataset.append(adv_dts)
 
@@ -197,6 +207,11 @@ class CClassifierRejectDetector(CClassifierReject):
         """
         if self.is_clear():
             raise ValueError("make sure the classifier is trained first.")
+
+        x = x.atleast_2d()  # Ensuring input is 2-D
+
+        # Transform data if a preprocess is defined
+        x = self._preprocess_data(x)
 
         return self._decision_function(x, y)
 
@@ -279,6 +294,9 @@ class CClassifierRejectDetector(CClassifierReject):
         if n_jobs is not _NoValue:
             raise ValueError("`n_jobs` is not supported.")
 
+        # Transform data if a preprocess is defined
+        x = self._preprocess_data(x)
+
         # detector prediction
         det_pred, det_scores = self._det.predict(
             x, return_decision_function=True)
@@ -327,8 +345,8 @@ class CClassifierRejectDetector(CClassifierReject):
         x : CArray
             The gradient is computed in the neighborhood of x.
         y : int
-            Index of the class wrt the gradient must be computed, -1 if to
-            have the gradient w.r.t. the reject class
+            Index of the class wrt the gradient must be computed.
+            Use -1 to output the gradient w.r.t. the reject class.
 
         Returns
         -------

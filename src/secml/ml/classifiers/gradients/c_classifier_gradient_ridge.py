@@ -39,7 +39,7 @@ class CClassifierGradientRidge(CClassifierGradientLinear):
         n = x.shape[0]
 
         # handle normalizer, if present
-        x = x if clf.preprocess is None else clf.preprocess.normalize(x)
+        x = x if clf.preprocess is None else clf.preprocess.transform(x)
 
         d = x.shape[1]  # number of features in the normalized space
 

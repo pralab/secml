@@ -25,10 +25,10 @@ class CClassifierLinear(CClassifier):
 
     Parameters
     ----------
-    preprocess : str or CNormalizer
-        Features preprocess to applied to input data.
-        Can be a CNormalizer subclass or a string with the desired
-        preprocess type. If None, input data is used as is.
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
 
     """
 
@@ -155,9 +155,8 @@ class CClassifierLinear(CClassifier):
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Preprocessing data if a preprocess is defined
-        if self.preprocess is not None:
-            x = self.preprocess.normalize(x)
+        # Transform data if a preprocess is defined
+        x = self._preprocess_data(x)
 
         sign = convert_binary_labels(y)  # Sign depends on input label (0/1)
 
@@ -204,6 +203,28 @@ class CClassifierLinear(CClassifier):
         labels = scores.argmax(axis=1).ravel()
 
         return (labels, scores) if return_decision_function is True else labels
+
+    def gradient_f_x(self, x, y=1, **kwargs):
+        """Computes the gradient of the classifier's output wrt input.
+
+        Parameters
+        ----------
+        x : CArray
+            The gradient is computed in the neighborhood of x.
+        y : int, optional
+            Index of the class wrt the gradient must be computed. Default 1.
+        **kwargs
+            Optional parameters for the function that computes the
+            gradient of the decision function. See the description of
+            each classifier for a complete list of optional parameters.
+
+        Returns
+        -------
+        gradient : CArray
+            Gradient of the classifier's output wrt input. Vector-like array.
+
+        """
+        return super(CClassifierLinear, self).gradient_f_x(x, y, **kwargs)
 
     def _gradient_f(self, x=None, y=1):
         """Computes the gradient of the linear classifier's decision function

@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierNearestCentroid
@@ -7,7 +7,7 @@ from secml.figure import CFigure
 from secml.ml.features.normalization import CNormalizerMinMax
 
 
-class TestCClassifierNearestCentroid(CUnitTest):
+class TestCClassifierNearestCentroid(CClassifierTestCases):
     """Unit test for CClassifierNearestCentroid."""
 
     def setUp(self):
@@ -16,7 +16,7 @@ class TestCClassifierNearestCentroid(CUnitTest):
         self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
                                  n_clusters_per_class=1).load()
 
-        self.dataset.X = CNormalizerMinMax().fit_normalize(self.dataset.X)
+        self.dataset.X = CNormalizerMinMax().fit_transform(self.dataset.X)
 
         self.nc = CClassifierNearestCentroid()
 
@@ -67,10 +67,10 @@ class TestCClassifierNearestCentroid(CUnitTest):
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Preprocessing data if a preprocess is defined
+        # Transform data if a preprocess is defined
         if self.nc.preprocess is not None:
-            x_norm = self.nc.preprocess.normalize(x)
-            p_norm = self.nc.preprocess.normalize(p)
+            x_norm = self.nc.preprocess.transform(x)
+            p_norm = self.nc.preprocess.transform(p)
 
         # Testing decision_function on multiple points
 
@@ -158,6 +158,19 @@ class TestCClassifierNearestCentroid(CUnitTest):
         with self.assertRaises(ValueError):
             self.nc._decision_function(p_norm, y=0)
 
+    def test_preprocess(self):
+        """Test classifier with preprocessors inside."""
+        ds = CDLRandom().load()
+
+        # All linear transformations
+        self._test_preprocess(ds, self.nc,
+                              ['min-max', 'mean-std'],
+                              [{'feature_range': (-1, 1)}, {}])
+
+        # Mixed linear/nonlinear transformations
+        self._test_preprocess(ds, self.nc,
+                              ['pca', 'unit-norm'], [{}, {}])
+
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CClassifierTestCases.main()

@@ -1,4 +1,4 @@
-from . import CClassifierTestCases
+from c_classifier_testcases import CClassifierTestCases
 
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierKDE
@@ -17,10 +17,10 @@ class TestCClassifierKDE(CClassifierTestCases):
         self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
                                  n_clusters_per_class=1).load()
 
-        self.dataset.X = CNormalizerMinMax().fit_normalize(self.dataset.X)
+        self.dataset.X = CNormalizerMinMax().fit_transform(self.dataset.X)
 
         self.logger.info("Testing classifier creation ")
-        k = CKernelRBF(gamma=1e1)
+        k = CKernelRBF(gamma=1e-3)
         # k = CKernelLinear
         self.kde = CClassifierKDE(k)
 
@@ -73,10 +73,10 @@ class TestCClassifierKDE(CClassifierTestCases):
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Preprocessing data if a preprocess is defined
+        # Transform data if a preprocess is defined
         if self.kde.preprocess is not None:
-            x_norm = self.kde.preprocess.normalize(x)
-            p_norm = self.kde.preprocess.normalize(p)
+            x_norm = self.kde.preprocess.transform(x)
+            p_norm = self.kde.preprocess.transform(p)
 
         # Testing decision_function on multiple points
 
@@ -169,7 +169,6 @@ class TestCClassifierKDE(CClassifierTestCases):
 
     def test_gradient(self):
         """Unittest for `gradient_f_x` method."""
-
         self.kde.fit(self.dataset)
 
         import random
@@ -178,6 +177,22 @@ class TestCClassifierKDE(CClassifierTestCases):
 
         # Comparison with numerical gradient
         self._test_gradient_numerical(self.kde, pattern)
+
+    def test_preprocess(self):
+        """Test classifier with preprocessors inside."""
+        ds = CDLRandom().load()
+
+        # All linear transformations with gradient implemented
+        self._test_preprocess(ds, self.kde,
+                              ['min-max', 'mean-std'],
+                              [{'feature_range': (-1, 1)}, {}])
+        self._test_preprocess_grad(ds, self.kde,
+                                   ['min-max', 'mean-std'],
+                                   [{'feature_range': (-1, 1)}, {}])
+
+        self.logger.info("The following case will skip the gradient test")
+        # Mixed linear/nonlinear transformations without gradient
+        self._test_preprocess(ds, self.kde, ['pca', 'unit-norm'], [{}, {}])
 
 
 if __name__ == '__main__':

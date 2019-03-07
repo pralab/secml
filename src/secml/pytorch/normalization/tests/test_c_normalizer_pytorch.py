@@ -1,7 +1,5 @@
 from secml.utils import CUnitTest
 
-import numpy.testing as npt
-
 from secml.pytorch.normalization import CNormalizerPyTorch
 from secml.pytorch.classifiers import CClassifierPyTorchMLP
 from secml.data.loader import CDLRandom
@@ -31,7 +29,7 @@ class TestCNormalizerPyTorch(CUnitTest):
 
         self.logger.info("Testing normalization at last layer")
 
-        out_norm = self.norm.normalize(x)
+        out_norm = self.norm.transform(x)
         out_net = self.net.get_layer_output(x, layer=None)
 
         self.logger.info("Output of normalize:\n{:}".format(out_norm))
@@ -44,13 +42,19 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.logger.info(
             "Testing normalization at layer {:}".format(self.norm.out_layer))
 
-        out_norm = self.norm.normalize(x)
+        out_norm = self.norm.transform(x)
         out_net = self.net.get_layer_output(x, layer=self.norm.out_layer)
 
         self.logger.info("Output of normalize:\n{:}".format(out_norm))
         self.logger.info("Output of net:\n{:}".format(out_net))
 
         self.assert_allclose(out_norm, out_net)
+
+    def test_chain(self):
+        """Test for preprocessors chain."""
+        # Inner preprocessors should be passed to the pytorch clf
+        with self.assertRaises(ValueError):
+            CNormalizerPyTorch(pytorch_clf=self.net, preprocess='min-max')
 
     def test_gradient(self):
         """Test for gradient."""
@@ -89,6 +93,15 @@ class TestCNormalizerPyTorch(CUnitTest):
         """Test for normalizer used as preprocess."""
         from secml.ml.classifiers import CClassifierSVM
         from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
+
+        self.net = CClassifierPyTorchMLP(
+            input_dims=20, hidden_dims=(40, ), output_dims=3,
+            weight_decay=0, epochs=10, learning_rate=1e-1,
+            momentum=0, random_state=0, preprocess='min-max')
+        self.net.fit(self.ds)
+
+        self.norm = CNormalizerPyTorch(pytorch_clf=self.net)
+
         self.clf = CClassifierMulticlassOVA(
             classifier=CClassifierSVM, preprocess=self.norm)
 
@@ -110,7 +123,7 @@ class TestCNormalizerPyTorch(CUnitTest):
 
             self.logger.info("Gradient w.r.t. class {:}".format(c))
 
-            grad = self.clf.gradient_f_x(x, y=c)  # y is required for multiclassova
+            grad = self.clf.gradient_f_x(x, y=c)
 
             self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
 

@@ -20,6 +20,13 @@ from secml.ml.kernel import CKernel
 class CClassifierSGD(CClassifierLinear):
     """Stochastic Gradient Descent Classifier.
 
+    Parameters
+    ----------
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
+
     Attributes
     ----------
     class_type : 'sgd'

@@ -1,4 +1,4 @@
-from . import CClassifierTestCases
+from c_classifier_testcases import CClassifierTestCases
 
 from sklearn.svm import SVC
 from sklearn.ensemble import BaggingClassifier
@@ -19,14 +19,15 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
                                  n_clusters_per_class=1,
                                  random_state=0).load()
 
+        self.mcs = CClassifierMCSLinear(CClassifierSVM(),
+                                        num_classifiers=10,
+                                        max_features=0.5,
+                                        max_samples=0.5,
+                                        random_state=0)
+
     def test_classification(self):
 
         with self.timer():
-            self.mcs = CClassifierMCSLinear(CClassifierSVM(),
-                                            num_classifiers=10,
-                                            max_features=0.5,
-                                            max_samples=0.5,
-                                            random_state=0)
             self.mcs.fit(self.dataset)
             self.logger.info("Trained MCS.")
 
@@ -35,7 +36,8 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
                                                      n_estimators=10,
                                                      max_samples=0.5,
                                                      max_features=0.5,
-                                                     bootstrap=False)
+                                                     bootstrap=False,
+                                                     random_state=0)
             self.sklearn_bagging.fit(self.dataset.X.get_data(),
                                      self.dataset.Y.tondarray())
             self.logger.info("Trained Sklearn Bagging + SVC.")
@@ -63,7 +65,8 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
 
         self.logger.info("Training MCS on 2D Dataset... ")
         self.mcs = CClassifierMCSLinear(CClassifierSVM(),
-                                        max_features=0.5, max_samples=0.5)
+                                        max_features=0.5,
+                                        max_samples=0.5)
         self.mcs.fit(self.dataset)
 
         fig = CFigure()
@@ -100,30 +103,24 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
             self.assertEqual(int, l.dtype)
             self.assertEqual(float, s.dtype)
 
-        mcs = CClassifierMCSLinear(CClassifierSVM(),
-                                   num_classifiers=10,
-                                   max_features=0.5,
-                                   max_samples=0.5,
-                                   random_state=0)
-
-        mcs.fit(self.dataset)
+        self.mcs.fit(self.dataset)
 
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Preprocessing data if a preprocess is defined
-        if mcs.preprocess is not None:
-            x_norm = mcs.preprocess.normalize(x)
-            p_norm = mcs.preprocess.normalize(p)
+        # Transform data if a preprocess is defined
+        if self.mcs.preprocess is not None:
+            x_norm = self.mcs.preprocess.transform(x)
+            p_norm = self.mcs.preprocess.transform(p)
 
         # Testing decision_function on multiple points
 
-        df_scores_neg = mcs.decision_function(x, y=0)
+        df_scores_neg = self.mcs.decision_function(x, y=0)
         self.logger.info(
             "decision_function(x, y=0):\n{:}".format(df_scores_neg))
         _check_df_scores(df_scores_neg, self.dataset.num_samples)
 
-        df_scores_pos = mcs.decision_function(x, y=1)
+        df_scores_pos = self.mcs.decision_function(x, y=1)
         self.logger.info(
             "decision_function(x, y=1):\n{:}".format(df_scores_pos))
         _check_df_scores(df_scores_pos, self.dataset.num_samples)
@@ -133,7 +130,7 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
 
         # Testing _decision_function on multiple points
 
-        ds_priv_scores = mcs._decision_function(x_norm, y=1)
+        ds_priv_scores = self.mcs._decision_function(x_norm, y=1)
         self.logger.info("_decision_function(x_norm, y=1):\n"
                          "{:}".format(ds_priv_scores))
         _check_df_scores(ds_priv_scores, self.dataset.num_samples)
@@ -144,11 +141,11 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
 
         # Testing predict on multiple points
 
-        labels, scores = mcs.predict(x, return_decision_function=True)
+        labels, scores = self.mcs.predict(x, return_decision_function=True)
         self.logger.info(
             "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
         _check_classify_scores(
-            labels, scores, self.dataset.num_samples, mcs.n_classes)
+            labels, scores, self.dataset.num_samples, self.mcs.n_classes)
 
         # Comparing output of decision_function and predict
 
@@ -157,12 +154,12 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
 
         # Testing decision_function on single point
 
-        df_scores_neg = mcs.decision_function(p, y=0)
+        df_scores_neg = self.mcs.decision_function(p, y=0)
         self.logger.info(
             "decision_function(p, y=0):\n{:}".format(df_scores_neg))
         _check_df_scores(df_scores_neg, 1)
 
-        df_scores_pos = mcs.decision_function(p, y=1)
+        df_scores_pos = self.mcs.decision_function(p, y=1)
         self.logger.info(
             "decision_function(p, y=1):\n{:}".format(df_scores_pos))
         _check_df_scores(df_scores_pos, 1)
@@ -172,7 +169,7 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
 
         # Testing _decision_function on single point
 
-        df_priv_scores = mcs._decision_function(p_norm, y=1)
+        df_priv_scores = self.mcs._decision_function(p_norm, y=1)
         self.logger.info("_decision_function(p_norm, y=1):\n"
                          "{:}".format(df_priv_scores))
         _check_df_scores(df_priv_scores, 1)
@@ -183,10 +180,10 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
 
         self.logger.info("Testing predict on single point")
 
-        labels, scores = mcs.predict(p, return_decision_function=True)
+        labels, scores = self.mcs.predict(p, return_decision_function=True)
         self.logger.info(
             "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
-        _check_classify_scores(labels, scores, 1, mcs.n_classes)
+        _check_classify_scores(labels, scores, 1, self.mcs.n_classes)
 
         # Comparing output of decision_function and predict
 
@@ -198,17 +195,13 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
         # Testing error raising
 
         with self.assertRaises(ValueError):
-            mcs._decision_function(x_norm, y=0)
+            self.mcs._decision_function(x_norm, y=0)
         with self.assertRaises(ValueError):
-            mcs._decision_function(p_norm, y=0)
+            self.mcs._decision_function(p_norm, y=0)
 
     def test_gradient(self):
         """Unittest for `gradient_f_x` method."""
-
-        mcs = CClassifierMCSLinear(CClassifierSVM(), num_classifiers=10,
-                                   max_features=0.5, max_samples=0.5,
-                                   random_state=0)
-        mcs.fit(self.dataset)
+        self.mcs.fit(self.dataset)
         self.logger.info("Trained MCS.")
 
         import random
@@ -216,7 +209,22 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
         self.logger.info("Randomly selected pattern:\n%s", str(pattern))
 
         # Comparison with numerical gradient
-        self._test_gradient_numerical(mcs, pattern)
+        self._test_gradient_numerical(self.mcs, pattern)
+
+    def test_preprocess(self):
+        """Test classifier with preprocessors inside."""
+        ds = CDLRandom().load()
+
+        # All linear transformations with gradient implemented
+        self._test_preprocess(ds, self.mcs,
+                              ['min-max', 'mean-std'],
+                              [{'feature_range': (-1, 1)}, {}])
+        self._test_preprocess_grad(ds, self.mcs,
+                                   ['min-max', 'mean-std'],
+                                   [{'feature_range': (-1, 1)}, {}])
+
+        # Mixed linear/nonlinear transformations without gradient
+        self._test_preprocess(ds, self.mcs, ['pca', 'unit-norm'], [{}, {}])
 
 
 if __name__ == '__main__':

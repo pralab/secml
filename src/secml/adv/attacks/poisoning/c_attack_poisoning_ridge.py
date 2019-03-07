@@ -112,9 +112,9 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         grad_loss_fk = CArray(loss_grad.ravel()).T  # column vector
 
         # handle normalizer, if present
-        xc = xc if clf.preprocess is None else clf.preprocess.normalize(xc)
+        xc = xc if clf.preprocess is None else clf.preprocess.transform(xc)
         xc = xc.ravel().atleast_2d()
-        #xk = xk if clf.preprocess is None else clf.preprocess.normalize(xk)
+        #xk = xk if clf.preprocess is None else clf.preprocess.transform(xk)
 
         # gt is the gradient in feature space
         k = xk.shape[0]  # num validation samples

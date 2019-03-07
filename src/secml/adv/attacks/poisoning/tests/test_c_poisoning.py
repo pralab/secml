@@ -51,8 +51,8 @@ class CPoisoningTestCases(object):
             self.ts = dataset[splitter.ts_idx[0], :]
 
             normalizer = CNormalizerMinMax(feature_range=(-1, 1))
-            self.tr.X = normalizer.fit_normalize(self.tr.X)
-            self.ts.X = normalizer.normalize(self.ts.X)
+            self.tr.X = normalizer.fit_transform(self.tr.X)
+            self.ts.X = normalizer.transform(self.ts.X)
 
             self.lb = -1
             self.ub = 1

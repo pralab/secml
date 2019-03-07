@@ -1,17 +1,16 @@
-from secml.utils import CUnitTest
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 import numpy as np
 import pylab as pl
 from matplotlib.colors import ListedColormap
 
 from secml.ml.classifiers import CClassifierKNN
-from secml.data import CDataset
 from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.ml.peval.metrics import CMetricAccuracy
 
 
-class TestCClassifierKNN(CUnitTest):
+class TestCClassifierKNN(CClassifierTestCases):
     """Unit test for CClassifierKNN."""
 
     def setUp(self):
@@ -133,10 +132,10 @@ class TestCClassifierKNN(CUnitTest):
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Preprocessing data if a preprocess is defined
+        # Transform data if a preprocess is defined
         if self.knn.preprocess is not None:
-            x_norm = self.knn.preprocess.normalize(x)
-            p_norm = self.knn.preprocess.normalize(p)
+            x_norm = self.knn.preprocess.transform(x)
+            p_norm = self.knn.preprocess.transform(p)
 
         # Testing decision_function on multiple points
 
@@ -248,6 +247,18 @@ class TestCClassifierKNN(CUnitTest):
         self.assertFalse(
             (df_scores_2 != CArray(scores[:, 2]).ravel()).any())
 
+    def test_preprocess(self):
+        """Test classifier with preprocessors inside."""
+        knn = CClassifierKNN(n_neighbors=3)
+        # All linear transformations
+        self._test_preprocess(self.dataset, knn,
+                              ['min-max', 'mean-std'],
+                              [{'feature_range': (-1, 1)}, {}])
+
+        # Mixed linear/nonlinear transformations
+        self._test_preprocess(self.dataset, knn,
+                              ['pca', 'unit-norm'], [{}, {}])
+
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CClassifierTestCases.main()

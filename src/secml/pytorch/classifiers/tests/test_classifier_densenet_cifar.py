@@ -131,10 +131,10 @@ class TestCClassifierPyTorchDenseNetCifar(CClassifierTestCases):
         x = x_norm = self.ts.X[:5, :]
         p = p_norm = self.ts.X[0, :].ravel()
         
-        # Preprocessing data if a preprocess is defined
+        # Transform data if a preprocess is defined
         if self.clf.preprocess is not None:
-            x_norm = self.clf.preprocess.normalize(x)
-            p_norm = self.clf.preprocess.normalize(p)
+            x_norm = self.clf.preprocess.transform(x)
+            p_norm = self.clf.preprocess.transform(p)
 
         # Testing decision_function on multiple points
 

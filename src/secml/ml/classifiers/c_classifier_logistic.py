@@ -16,7 +16,16 @@ from secml.ml.classifiers.gradients import \
 
 
 class CClassifierLogistic(CClassifierLinear):
-    """Logistic Regression (aka logit, MaxEnt) classifier."""
+    """Logistic Regression (aka logit, MaxEnt) classifier.
+
+    Parameters
+    ----------
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
+
+    """
     __class_type = 'logistic'
 
     def __init__(self, C=1.0, max_iter=100, random_seed=None, preprocess=None):

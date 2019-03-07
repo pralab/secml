@@ -1,133 +1,20 @@
 """
 .. module:: FeatureNormalizer
-   :synopsis: Common interface for array normalizers.
+   :synopsis: Common interface for feature normalizers.
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta
 
-from secml.core import CCreator
+from secml.ml.features import CPreProcess
 
 
-class CNormalizer(CCreator):
-    """Common interface for normalization preprocessing algorithms.
-
-    Normalization techniques include features scalers, e.g. MinMaxScaler,
-    standardizers, e.g. MeanRemover, or features binarizers.
-
-    """
+class CNormalizer(CPreProcess):
+    """Common interface for normalization preprocessing algorithms."""
     __metaclass__ = ABCMeta
     __super__ = 'CNormalizer'
 
     def is_linear(self):
         """Returns True for linear normalizers."""
         return False
-
-    @abstractmethod
-    def fit(self, x):
-        """Fit normalization algorithm using data.
-
-        Parameters
-        ----------
-        x : CArray
-            Array to be used for training normalization algorithm.
-            Shape of input array depends on the algorithm itself.
-
-        Returns
-        -------
-        CNormalizer
-            Instance of the normalization algorithm trained using
-            input data.
-
-        """
-        raise NotImplementedError(
-            "this is an abstract method. Must be overridden in subclass.")
-
-    @abstractmethod
-    def normalize(self, x):
-        """Apply the normalization algorithm on data.
-
-        Parameters
-        ----------
-        x : CArray
-            Array to be normalized using normalization algorithm.
-            Shape of input array depends on the algorithm itself.
-
-        Returns
-        -------
-        x_transformed : CArray
-            Input data normalized using normalization algorithm.
-
-        """
-        raise NotImplementedError(
-            "this is an abstract method. Must be overridden in subclass.")
-
-    def fit_normalize(self, x):
-        """Fit normalizer using data and then normalize data.
-
-        This method is equivalent to call fit(data) and normalize(data)
-        in sequence, but it's useful when data is both the training array
-        and the array to normalize.
-
-        Parameters
-        ----------
-        x : CArray
-            Array to be normalized using normalization algorithm.
-            Each row must correspond to one single patterns, so each
-            column is a different feature.
-
-        Returns
-        -------
-        x_normalized : CArray
-            Input data normalized using normalization algorithm.
-
-        See Also
-        --------
-        fit : fit the normalizer on input data.
-        normalize : normalize input data according training data.
-
-        """
-        self.fit(x)  # training normalizer first
-        return self.normalize(x)
-
-    def revert(self, x):
-        """Revert array to original form.
-
-        Parameters
-        ----------
-        x : CArray
-            Normalized array to be reverted to original form.
-            Shape of input array depends on the algorithm itself.
-
-        Returns
-        -------
-        x_original : CArray
-            Original input data.
-
-        Notes
-        -----
-        Reverting a normalized array is not always possible.
-        Thus, revert method is not an abstractmethod and should
-        be implemented only if applicable.
-
-        """
-        raise NotImplementedError(
-            "this is a placeholder method. Override if necessary.")
-
-    def gradient(self, x):
-        """Returns the normalizer gradient wrt data.
-
-        Parameters
-        ----------
-        x : CArray
-            Data array, 2-Dimensional or ravel.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the normalizer wrt input data.
-
-        """
-        raise NotImplementedError("gradient is not implemented for {:}"
-                                  "".format(self.__class__.__name__))

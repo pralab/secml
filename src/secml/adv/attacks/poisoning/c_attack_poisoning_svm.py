@@ -200,7 +200,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         H += 1e-9 * CArray.eye(s + 1)
 
         # handle normalizer, if present
-        xc = xc if clf.preprocess is None else clf.preprocess.normalize(xc)
+        xc = xc if clf.preprocess is None else clf.preprocess.transform(xc)
         G = CArray.zeros(shape=(gt.size, s + 1))
         G[:, :s] = svm.kernel.gradient(xs, xc).T
         G *= alpha_c

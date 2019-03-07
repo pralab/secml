@@ -63,24 +63,24 @@ class CClassifierReject(CClassifier):
             Will be returned only if `return_decision_function` is True.
 
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
-    @abstractmethod
     def _gradient_f(self, x, y):
-        """Computes the gradient of the classifier's output wrt input.
+        """Computes the gradient of the classifier's decision function
+         wrt decision function input.
 
         Parameters
         ----------
         x : CArray
             The gradient is computed in the neighborhood of x.
         y : int
-            Index of the class wrt the gradient must be computed, -1 to
-            have the gradient w.r.t. the reject class
+            Index of the class wrt the gradient must be computed.
+            Use -1 to output the gradient w.r.t. the reject class.
 
         Returns
         -------
         gradient : CArray
-            Gradient of the classifier's output wrt input. Vector-like array.
+            Gradient of the classifier's df wrt its input. Vector-like array.
 
         """
-        raise NotImplementedError()
+        raise NotImplementedError

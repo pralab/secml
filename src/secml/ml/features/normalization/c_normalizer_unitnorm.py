@@ -26,6 +26,10 @@ class CNormalizerUnitNorm(CNormalizer):
         Order of the norm to normalize each pattern with. Only
         1 ('l1') and 2 ('l2') norm are supported. 2 ('l2') is default.
         For sparse arrays, only 2nd order norm is supported.
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
 
     Attributes
     ----------
@@ -35,7 +39,7 @@ class CNormalizerUnitNorm(CNormalizer):
     -----
     Differently from numpy, we manage flat vectors as 2-Dimensional of
     shape (1, array.size). This means that normalizing a flat vector is
-    equivalent to normalize array.atleast_2d(). To obtain a numpy-style
+    equivalent to transform array.atleast_2d(). To obtain a numpy-style
     normalization of flat vectors, transpose array first.
 
     Examples
@@ -44,13 +48,13 @@ class CNormalizerUnitNorm(CNormalizer):
     >>> from secml.ml.features.normalization import CNormalizerUnitNorm
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-    >>> dense_normalized = CNormalizerUnitNorm().fit_normalize(array)
+    >>> dense_normalized = CNormalizerUnitNorm().fit_transform(array)
     >>> print dense_normalized
     CArray([[ 0.408248 -0.408248  0.816497]
      [ 1.        0.        0.      ]
      [ 0.        0.707107 -0.707107]])
 
-    >>> print CNormalizerUnitNorm(order=1).fit_normalize(array)
+    >>> print CNormalizerUnitNorm(order=1).fit_transform(array)
     CArray([[ 0.25 -0.25  0.5 ]
      [ 1.    0.    0.  ]
      [ 0.    0.5  -0.5 ]])
@@ -58,13 +62,15 @@ class CNormalizerUnitNorm(CNormalizer):
     """
     __class_type = 'unit-norm'
 
-    def __init__(self, order=2):
+    def __init__(self, order=2, preprocess=None):
         """Class constructor"""
         if order != 1 and order != 2:
             raise ValueError("Norm of order {:} is not supported.".format(order))
         self._order = order
 
         self._norm = None
+
+        super(CNormalizerUnitNorm, self).__init__(preprocess=preprocess)
 
     def __clear(self):
         """Reset the object."""
@@ -84,11 +90,11 @@ class CNormalizerUnitNorm(CNormalizer):
         """Returns the norm of each training array's patterns."""
         return self._norm
 
-    def fit(self, x):
-        """Fit the normalizer. Does reset only.
+    def _fit(self, x, y=None):
+        """Fit the normalizer.
 
         For the Row normalizer, no training routine is needed, so using
-        fit_normalize() method is suggested for clarity. Use fit() method,
+        fit_transform() method is suggested for clarity. Use fit() method,
         which does nothing, only to streamline a pipelined environment.
 
         Parameters
@@ -96,19 +102,28 @@ class CNormalizerUnitNorm(CNormalizer):
         x : CArray
             Array to be used as training set.
             Each row must correspond to one different pattern.
+        y : CArray or None, optional
+            Flat array with the label of each pattern.
+            Can be None if not required by the preprocessing algorithm.
 
         Returns
         -------
         CNormalizerRow
-            Trained normalizer.
+            Instance of the trained normalizer.
 
         """
-        self.clear()  # Reset trained normalizer
-
         return self
 
-    def normalize(self, x):
-        """Scales array patterns to have unit norm.
+    # FIXME: remove this method after removing clear DEPRECATED framework
+    def transform(self, x):
+
+        # Transform data using inner preprocess, if defined
+        x = self._preprocess_data(x)
+
+        return self._transform(x)
+
+    def _transform(self, x):
+        """Transform array patterns to have unit norm.
 
         Parameters
         ----------
@@ -117,7 +132,7 @@ class CNormalizerUnitNorm(CNormalizer):
 
         Returns
         -------
-        scaled_array : CArray
+        CArray
             Array with patterns normalized to have unit norm.
 
         Examples
@@ -127,7 +142,7 @@ class CNormalizerUnitNorm(CNormalizer):
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]], tosparse=True)
 
         >>> normalizer = CNormalizerUnitNorm().fit(array)
-        >>> array_normalized = normalizer.normalize(array)
+        >>> array_normalized = normalizer.transform(array)
         >>> print array_normalized  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	0.408248290464
           (0, 1)	-0.408248290464
@@ -163,7 +178,7 @@ class CNormalizerUnitNorm(CNormalizer):
 
         return x
 
-    def revert(self, x):
+    def _revert(self, x):
         """Undo the normalization of data according to training data.
 
         Parameters
@@ -193,7 +208,7 @@ class CNormalizerUnitNorm(CNormalizer):
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]], tosparse=True)
 
         >>> normalizer = CNormalizerUnitNorm().fit(array)
-        >>> array_normalized = normalizer.normalize(array)
+        >>> array_normalized = normalizer.transform(array)
         >>> print normalizer.revert(array_normalized)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1.0
           (0, 1)	-1.0
