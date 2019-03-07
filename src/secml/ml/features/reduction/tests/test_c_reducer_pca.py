@@ -1,12 +1,12 @@
 from secml.ml.features.tests import CPreProcessTestCases
 
 from secml.array import CArray
-from secml.ml.features.reduction import CPca
+from secml.ml.features.reduction import CPCA
 from sklearn.decomposition import PCA
 
 
 class TestCPca(CPreProcessTestCases):
-    """Unittests for CPca."""
+    """Unittests for CPCA."""
 
     def test_pca(self):
         """Test for PCA. This compares sklearn equivalent to our method."""
@@ -18,7 +18,7 @@ class TestCPca(CPreProcessTestCases):
             sklearn_pca = PCA().fit(array.tondarray())
             target = CArray(sklearn_pca.transform(array.tondarray()))
             # Our normalizer
-            pca = CPca().fit(array)
+            pca = CPCA().fit(array)
             result = pca.transform(array)
 
             self.logger.info("Sklearn result is:\n{:}".format(target))

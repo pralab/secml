@@ -3,12 +3,12 @@ from secml.ml.features.tests import CPreProcessTestCases
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 from secml.array import CArray
-from secml.ml.features.reduction import CLda
+from secml.ml.features.reduction import CLDA
 from secml.figure import CFigure
 
 
 class TestCLda(CPreProcessTestCases):
-    """Unittests for CLda."""
+    """Unittests for CLDA."""
 
     def test_lda(self):
         """Test for LDA. This compares sklearn equivalent to our method."""
@@ -21,7 +21,7 @@ class TestCLda(CPreProcessTestCases):
                 array.tondarray(), y.tondarray())
             target = CArray(sklearn_lda.transform(array.tondarray()))
             # Our normalizer
-            lda = CLda().fit(array, y)
+            lda = CLDA().fit(array, y)
             result = lda.transform(array)
 
             self.logger.info("Sklearn result is:\n{:}".format(target))
@@ -52,7 +52,7 @@ class TestCLda(CPreProcessTestCases):
         patterns = CArray(iris_db.data)
         labels = CArray(iris_db.target)
 
-        lda = CLda()
+        lda = CLDA()
         lda.fit(patterns, labels)
         # store dataset reduced with pca
         red_dts = lda.fit_transform(patterns, labels)

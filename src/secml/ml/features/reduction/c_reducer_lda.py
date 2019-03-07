@@ -1,5 +1,5 @@
 """
-.. module:: LDA
+.. module:: CLDA
    :synopsis: Linear Discriminant Analysis (LDA)
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -11,7 +11,7 @@ from secml.ml.features.reduction import CReducer
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 
-class CLda(CReducer):
+class CLDA(CReducer):
     """Linear Discriminant Analysis (LDA).
 
     Properties
@@ -52,10 +52,10 @@ class CLda(CReducer):
         --------
         >>> from secml.array import CArray
         >>> from secml.data import CDataset
-        >>> from secml.ml.features.reduction import CLda
+        >>> from secml.ml.features.reduction import CLDA
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
-        >>> CLda().fit_transform(ds.X, ds.Y)
+        >>> CLDA().fit_transform(ds.X, ds.Y)
         CArray([[-4.07872199]
          [-2.72723183]
          [ 6.80595382]])
@@ -68,7 +68,7 @@ class CLda(CReducer):
         self._classes = None
         self._lda = None
 
-        super(CLda, self).__init__(preprocess=preprocess)
+        super(CLDA, self).__init__(preprocess=preprocess)
 
     @property
     def eigenvec(self):
@@ -100,17 +100,17 @@ class CLda(CReducer):
 
         Returns
         -------
-        trained_LDA : CLda
+        trained_LDA : CLDA
             Instance of the trained transformer.
 
         Examples
         --------
         >>> from secml.array import CArray
         >>> from secml.data import CDataset
-        >>> from secml.ml.features.reduction import CLda
+        >>> from secml.ml.features.reduction import CLDA
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
-        >>> lda = CLda().fit(ds.X, ds.Y)
+        >>> lda = CLDA().fit(ds.X, ds.Y)
         >>> lda.eigenvec
         CArray([[ 0.47140452]
         [ 0.0942809 ]
@@ -155,10 +155,10 @@ class CLda(CReducer):
         --------
         >>> from secml.array import CArray
         >>> from secml.data import CDataset
-        >>> from secml.ml.features.reduction import CLda
+        >>> from secml.ml.features.reduction import CLDA
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
-        >>> lda = CLda().fit(ds.X, ds.Y)
+        >>> lda = CLDA().fit(ds.X, ds.Y)
         >>> lda.transform(CArray.concatenate(ds.X, [4., 2., -6.], axis=0))
         CArray([[-1.20993827]
         [ 0.20427529]
