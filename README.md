@@ -109,6 +109,9 @@ All the installation procedures via `pip` described above allow definition of th
 ### Available extra components
   - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
     Will install the following libraries: `torch == 0.4.*`, `torchvision >= 0.1.8`
+  - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
+    a Python library to benchmark machine learning systems' vulnerability to adversarial examples.
+    Will install the following libraries: `tensorflow >= 1.5.*, < 2`, `cleverhans`
 
 ## Usage Guide
 
@@ -127,6 +130,9 @@ The `secml.figure` package contains a visualization and plotting framework based
 The `secml.explanation` package contains few different explainable Machine Learning methods that allow interpreting classifiers decisions by analyzing the relevant components such as features or training prototypes.
 
 The `secml.pytorch` package contains support classes for the [PyTorch](https://pytorch.org/) deep learning platform. This package will be available only if the extra component `pytorch` has been specified during installation.
+
+The `secml.tf.clvhs` package contains support classes for the [CleverHans](https://github.com/tensorflow/cleverhans) library for benchmarking machine learning systems' vulnerability to adversarial examples. 
+This package will be available only if the extra component `cleverhans` has been specified during installation.
 
 ## Credits
 SecML has been developed by [PRALab](https://pralab.diee.unica.it) - Pattern Recognition and Applications lab under [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html) license. Copyright 2019.
