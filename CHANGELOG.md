@@ -34,7 +34,7 @@
 - #281 Added a setter/getter for the inner classifier in `CClassifierRejectThreshold`.
 - #271 Added an option to the fit method of `CClassifierPyTorch` to decide whether or not to use the best parameters by accuracy score at the end of the training process.
 - #253 `CDataLoaderImgFolders` and `CDataLoaderImgClients` now store the number of channels for each image.
-- #292 Default configuration file `secml-lib.conf` is now copied to `$SECML_HOME_DIR` if not already there.
+- #292 Default configuration file `secml.conf` is now copied to `$SECML_HOME_DIR` if not already there.
 
 ### Changed (4 changes)
 - #285 Moved `CClassifierMulticlass._gradient_f` implementation to `CClassifierMulticlassOVA` as it works only in case of OVA scheme.
@@ -174,7 +174,7 @@
 - Added has_private and get_private functions to attr_utils to allow easier work with private attrs.
 - Added "SECML_" prefix to each global variable to avoid name conflicts.
 - secml home directory is now named secml-lib-data
-- Renamed settings.txt file to secml-lib.conf
+- Renamed settings.txt file to secml.conf
 - Small update to configuration file. Main section called "secml-lib"
 - PYTORCH_DATA_DIR is now called `python-data`
 - Added all definable parameters to configuration file.

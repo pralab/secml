@@ -152,13 +152,13 @@ def _parse_env_config(name, conf_files, section, parameter,
 """Main directory for storing datasets, experiments, temporary files.
 
 This is set by default to:
-    * Unix -> '$HOME/secml-lib-data'
-    * Windows -> ($HOME, $USERPROFILE, $HOMEPATH, $HOMEDRIVE)/secml-lib-data'
+    * Unix -> '$HOME/secml-data'
+    * Windows -> ($HOME, $USERPROFILE, $HOMEPATH, $HOMEDRIVE)/secml-data'
 
 """
 SECML_HOME_DIR = _parse_env('SECML_HOME_DIR',
                             default=os.path.join(os.path.expanduser('~'),
-                                                 'secml-lib-data'))
+                                                 'secml-data'))
 if not fm.folder_exist(SECML_HOME_DIR):
     # Creating the home directory if not already available
     fm.make_folder(SECML_HOME_DIR)
@@ -166,8 +166,8 @@ if not fm.folder_exist(SECML_HOME_DIR):
         'New `SECML_HOME_DIR` created: {:}'.format(SECML_HOME_DIR))
 
 
-"""Name of the configuration file (default `secml-lib.conf`)."""
-SECML_CONFIG_FNAME = 'secml-lib.conf'
+"""Name of the configuration file (default `secml.conf`)."""
+SECML_CONFIG_FNAME = 'secml.conf'
 if not fm.file_exist(fm.join(SECML_HOME_DIR, SECML_CONFIG_FNAME)):
     def_config = fm.normpath(fm.join(fm.abspath(__file__), SECML_CONFIG_FNAME))
     home_config = fm.join(SECML_HOME_DIR, SECML_CONFIG_FNAME)
@@ -182,13 +182,13 @@ def _config_fpath():
 
     The list of active configuration files is sorted from the highest
     to the lowest priority, as follows:
-     - `$PWD/secml-lib.conf`
+     - `$PWD/secml.conf`
      - `$SECML_CONFIG` if it is not a directory
-     - `$SECML_CONFIG/secml-lib.conf`
-     - `$SECML_HOME_DIR/secml-lib.conf`
-        - On Unix, `$HOME/secml-lib-data/secml-lib.conf`
-        - On Windows, `($HOME, $USERPROFILE, $HOMEPATH, $HOMEDRIVE)/secml-lib-data/secml-lib.conf`
-     - Lastly, it looks in `INSTALL/secml-lib/secml-lib.conf` for a
+     - `$SECML_CONFIG/secml.conf`
+     - `$SECML_HOME_DIR/secml.conf`
+        - On Unix, `$HOME/secml-data/secml.conf`
+        - On Windows, `($HOME, $USERPROFILE, $HOMEPATH, $HOMEDRIVE)/secml-data/secml.conf`
+     - Lastly, it looks in `INSTALL/secml/secml.conf` for a
        system-defined copy.
        INSTALL is something like /usr/lib/python3.5/site-packages on Linux,
        and maybe C:\Python35\Lib\site-packages on Windows.
@@ -220,13 +220,13 @@ def _config_fpath():
     return candidates
 
 
-"""Active configuration files `secml-lib.conf`."""
+"""Active configuration files `secml.conf`."""
 SECML_CONFIG = _config_fpath()
 
 
-# ----------- #
-# [SECML-LIB] #
-# ----------- #
+# ------- #
+# [SECML] #
+# ------- #
 
 """Main directory for storing datasets, subdirectory of SECML_HOME_DIR.
 
@@ -234,7 +234,7 @@ This is set by default to: 'SECML_HOME_DIR/datasets'
 
 """
 SECML_DS_DIR = _parse_env_config(
-    'SECML_DS_DIR', SECML_CONFIG, 'secml-lib', 'ds_dir',
+    'SECML_DS_DIR', SECML_CONFIG, 'secml', 'ds_dir',
     dtype=str, default=os.path.join(SECML_HOME_DIR, 'datasets')
 )
 
@@ -244,6 +244,6 @@ This is set by default to: 'SECML_HOME_DIR/experiments'
 
 """
 SECML_EXP_DIR = _parse_env_config(
-    'SECML_EXP_DIR', SECML_CONFIG, 'secml-lib', 'exp_dir',
+    'SECML_EXP_DIR', SECML_CONFIG, 'secml', 'exp_dir',
     dtype=str, default=os.path.join(SECML_HOME_DIR, 'experiments')
 )

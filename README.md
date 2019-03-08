@@ -47,15 +47,15 @@ The setup process is managed by the Python package `setuptools`. Be sure
 Once the environment is set up, SecML can installed and run by
  multiple means:
  1. Install from official PyPI repository **(not yet supported)**
-    - `pip install secml-lib`
+    - `pip install secml`
  2. Install from zip/wheel package:
     - `pip install <package-file>`
  3. Install from local GitLab repository:
     - Clone the project repository in a directory of your choice
     - Run installation as: `pip install .`
  4. Install from remote GitLab repository. In this case, given
-    `{repourl}` in the format, es., `pragit.diee.unica.it/secml/secml-lib`:
-    - `pip install git+ssh://git@{repourl}.git[@branch]#egg=secml-lib`
+    `{repourl}` in the format, es., `pragit.diee.unica.it/secml/secml`:
+    - `pip install git+ssh://git@{repourl}.git[@branch]#egg=secml`
     A specific branch to install can be specified using `[@branch]` parameter.
     If omitted, the default branch will be installed.
 
@@ -69,8 +69,8 @@ To update a current installation using any of the previous methods, add the
  `-U` parameter after the `pip install` directive.
 
 SecML can be added as a dependency for other libraries/project.
-Just add `secml-lib` (**not yet supported**) or the full repository
-path command `git+ssh://git@{repourl}.git[@branch]#egg=secml-lib` to
+Just add `secml` (**not yet supported**) or the full repository
+path command `git+ssh://git@{repourl}.git[@branch]#egg=secml` to
 your `requirements.txt` file.
 
 #### Editable Installation (development mode)
@@ -88,8 +88,8 @@ Two common scenarios are listed below:
     - Navigate to the repository directory
     - Run `python setup.py develop`
 2. Editable install from remote repository
-    - Run `pip install -e git+ssh://git@{repourl}.git[@branch]#egg=secml-lib`
-    - Project will be cloned automatically in `<venv path>/src/secml-lib`
+    - Run `pip install -e git+ssh://git@{repourl}.git[@branch]#egg=secml`
+    - Project will be cloned automatically in `<venv path>/src/secml`
     - The new repository can then be updated using standard `git` commands
 
 Editable installs are also available while using SecML as a
@@ -102,7 +102,7 @@ SecML comes with a set of extras components that can be installed if desired.
 
 To specify the extra components to install, add the section `[extras]` while calling `pip install`.
 `extras` will be a comma-separated list of components you want to install. Example:
-- `pip install secml-lib[extra1,extra2]`
+- `pip install secml[extra1,extra2]`
 
 All the installation procedures via `pip` described above allow definition of the `[extras]` section.
 
