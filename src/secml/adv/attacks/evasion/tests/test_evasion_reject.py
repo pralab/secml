@@ -41,7 +41,7 @@ class CEvasionRejectTestCases(object):
                                                                self.ub))
             self.normalizer = None
             if self.normalizer is not None:
-                self.ds.X = self.normalizer.fit_normalize(self.ds.X)
+                self.ds.X = self.normalizer.fit_transform(self.ds.X)
 
         def setUp(self):
 

@@ -44,7 +44,7 @@ class TestEvasionMulticlass(CUnitTest):
         self.normalizer = CNormalizerMinMax()
         self.normalizer = None
         if self.normalizer is not None:
-            self.ds.X = self.normalizer.fit_normalize(self.ds.X)
+            self.ds.X = self.normalizer.fit_transform(self.ds.X)
 
         self.multiclass = CClassifierMulticlassOVA(
             classifier=CClassifierSVM, class_weight='balanced',

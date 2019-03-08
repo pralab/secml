@@ -1,17 +1,17 @@
-from secml.utils import CUnitTest
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml.data.loader import CDLRandomToy
 from secml.ml.classifiers import CClassifierRandomForest
 from secml.array import CArray
 
 
-class TestCClassifierRandomForest(CUnitTest):
+class TestCClassifierRandomForest(CClassifierTestCases):
     """Unit test for CRandomForest."""
 
     def setUp(self):
         self.dataset = CDLRandomToy('iris').load()
 
-        self.rnd_forest = CClassifierRandomForest()
+        self.rnd_forest = CClassifierRandomForest(random_state=0)
        
     def test_classify(self):
 
@@ -73,10 +73,10 @@ class TestCClassifierRandomForest(CUnitTest):
         x = x_norm = self.dataset.X
         p = p_norm = self.dataset.X[0, :].ravel()
 
-        # Preprocessing data if a preprocess is defined
+        # Transform data if a preprocess is defined
         if self.rnd_forest.preprocess is not None:
-            x_norm = self.rnd_forest.preprocess.normalize(x)
-            p_norm = self.rnd_forest.preprocess.normalize(p)
+            x_norm = self.rnd_forest.preprocess.transform(x)
+            p_norm = self.rnd_forest.preprocess.transform(p)
 
         # Testing decision_function on multiple points
 
@@ -188,6 +188,17 @@ class TestCClassifierRandomForest(CUnitTest):
         self.assertFalse(
             (df_scores_2 != CArray(scores[:, 2]).ravel()).any())
 
+    def test_preprocess(self):
+        """Test classifier with preprocessors inside."""
+        # All linear transformations
+        self._test_preprocess(self.dataset, self.rnd_forest,
+                              ['min-max', 'mean-std'],
+                              [{'feature_range': (-1, 1)}, {}])
+
+        # Mixed linear/nonlinear transformations
+        self._test_preprocess(self.dataset, self.rnd_forest,
+                              ['pca', 'unit-norm'], [{}, {}])
+
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CClassifierTestCases.main()

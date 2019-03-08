@@ -1,5 +1,5 @@
 """
-.. module:: LDA
+.. module:: CLDA
    :synopsis: Linear Discriminant Analysis (LDA)
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -11,8 +11,15 @@ from secml.ml.features.reduction import CReducer
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 
-class CLda(CReducer):
+class CLDA(CReducer):
     """Linear Discriminant Analysis (LDA).
+
+    Properties
+    ----------
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
 
     Attributes
     ----------
@@ -21,7 +28,7 @@ class CLda(CReducer):
     """
     __class_type = 'lda'
 
-    def __init__(self, n_components=None):
+    def __init__(self, n_components=None, preprocess=None):
         """Linear Discriminant Analysis (LDA)
 
         A classifier with a linear decision boundary, generated
@@ -45,10 +52,10 @@ class CLda(CReducer):
         --------
         >>> from secml.array import CArray
         >>> from secml.data import CDataset
-        >>> from secml.ml.features.reduction import CLda
+        >>> from secml.ml.features.reduction import CLDA
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
-        >>> CLda().fit_transform(ds.X, ds.Y)
+        >>> CLDA().fit_transform(ds.X, ds.Y)
         CArray([[-4.07872199]
          [-2.72723183]
          [ 6.80595382]])
@@ -60,6 +67,8 @@ class CLda(CReducer):
         self._scalings = None
         self._classes = None
         self._lda = None
+
+        super(CLDA, self).__init__(preprocess=preprocess)
 
     @property
     def eigenvec(self):
@@ -77,40 +86,39 @@ class CLda(CReducer):
         """Unique targets used for training."""
         return self._classes
 
-    def fit(self, data, targets):
+    def _fit(self, x, y):
         """Fit the LDA using input data.
 
         Parameters
         ----------
-        data : array_like
+        x : CArray
             Training data, 2-Dim array like object with shape
             (n_patterns, n_features), where each row is a pattern
             of n_features columns.
-        target : array_like
-            Flat dense array of shape (data.shape[0], ) with the
-            labels corresponding to each data's pattern.
+        y : CArray
+            Flat array with the label of each pattern.
 
         Returns
         -------
-        trained_LDA : CLda
-            Instance of the LDA trained on input data.
+        trained_LDA : CLDA
+            Instance of the trained transformer.
 
         Examples
         --------
         >>> from secml.array import CArray
         >>> from secml.data import CDataset
-        >>> from secml.ml.features.reduction import CLda
+        >>> from secml.ml.features.reduction import CLDA
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
-        >>> lda = CLda().fit(ds.X, ds.Y)
+        >>> lda = CLDA().fit(ds.X, ds.Y)
         >>> lda.eigenvec
         CArray([[ 0.47140452]
         [ 0.0942809 ]
          [-0.23570226]])
 
         """
-        data_carray = CArray(data).todense().atleast_2d()
-        targets = CArray(targets)
+        data_carray = CArray(x).todense().atleast_2d()
+        targets = CArray(y)
 
         self._classes = targets.unique()
 
@@ -118,38 +126,39 @@ class CLda(CReducer):
             self.n_components = (self._classes.size - 1)
         else:
             if self.n_components > (self.classes.size - 1):
-                raise ValueError("Maximum number of components is {:}".format(self.classes.size - 1))
+                raise ValueError("Maximum number of components is {:}"
+                                 "".format(self.classes.size - 1))
 
         self._lda = LinearDiscriminantAnalysis(n_components=self.n_components)
         self._lda.fit(data_carray.tondarray(), targets.tondarray())
         self._eigenvec = CArray(self._lda.scalings_)
         self._mean = CArray(self._lda.xbar_)
+
         return self
 
-    def transform(self, data):
+    def _transform(self, x):
         """Apply the reduction algorithm on data.
 
         Parameters
         ----------
-        data : array_like
-            Training data, 2-Dim array like object with shape
-            (n_patterns, n_features), where each row is a pattern
-            of n_features columns. n_features must be equal to
+        x : CArray
+            Array to be transformed. 2-D array object of shape
+            (n_patterns, n_features). n_features must be equal to
             n_components parameter set before or during training.
 
         Returns
         --------
-        data_mapped : CArray
+        CArray
             Input data mapped to LDA space.
 
         Examples
         --------
         >>> from secml.array import CArray
         >>> from secml.data import CDataset
-        >>> from secml.ml.features.reduction import CLda
+        >>> from secml.ml.features.reduction import CLDA
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
-        >>> lda = CLda().fit(ds.X, ds.Y)
+        >>> lda = CLDA().fit(ds.X, ds.Y)
         >>> lda.transform(CArray.concatenate(ds.X, [4., 2., -6.], axis=0))
         CArray([[-1.20993827]
         [ 0.20427529]
@@ -165,46 +174,10 @@ class CLda(CReducer):
         if self.mean is None:
             raise ValueError("fit LDA first.")
 
-        data_carray = CArray(data).todense().atleast_2d()
+        data_carray = CArray(x).todense().atleast_2d()
         if data_carray.shape[1] != self.mean.size:
-            raise ValueError("array to transform must have {:} features (columns).".format(self.mean.size))
+            raise ValueError("array to transform must have {:} features "
+                             "(columns).".format(self.mean.size))
 
         out = CArray(self._lda.transform(data_carray.tondarray()))
-        return out.atleast_2d() if data.ndim >= 2 else out
-
-    def revert(self, data):
-        """Map data back to its original space.
-
-        Parameters
-        ----------
-        data : array_like
-            Array to transform back to its original space.
-
-        Returns
-        --------
-        data_origin : CArray
-            Input array mapped back to its original space.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-        >>> from secml.data import CDataset
-        >>> from secml.ml.features.reduction import CLda
-
-        >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
-        >>> lda = CLda().fit(ds.X, ds.Y)
-        >>> array_lda = lda.transform(ds.X)
-        >>> lda.revert(array_lda)
-        CArray([[ 0.42962963  1.88592593 -2.04814815]
-        [ 1.0962963   2.01925926 -2.38148148]
-        [ 1.47407407  2.09481481 -2.57037037]])
-        """
-        if self._mean is None:
-            raise ValueError("fit LDA first.")
-
-        data_carray = CArray(data).atleast_2d()
-        if data_carray.shape[1] != self.n_components:
-            raise ValueError("array to revert must have {:} features (columns).".format(self.n_components))
-
-        out = CArray(data_carray.dot(self.eigenvec.T) + self.mean)
-        return out.atleast_2d() if data.ndim >= 2 else out
+        return out.atleast_2d() if x.ndim >= 2 else out

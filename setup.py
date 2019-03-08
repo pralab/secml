@@ -138,7 +138,7 @@ Operating System :: MacOS
 """
 
 setup(
-    name='SecML-Lib',
+    name='SecML',
     version=find_version("src", "secml", "VERSION"),
     description='A library for Secure Machine Learning',
     long_description=LONG_DESCRIPTION,
@@ -147,7 +147,7 @@ setup(
     platforms=["Linux", "Mac OS-X", "Unix"],
     url='https://sec-ml.pluribus-one.it/lib/',
     download_url=
-        'git+ssh://git@pragit.diee.unica.it/secml/secml-lib.git#egg=secml-lib',
+        'git+ssh://git@pragit.diee.unica.it/secml/secml.git#egg=secml',
     maintainer='Marco Melis',
     maintainer_email='marco.melis@diee.unica.it',
     packages=find_packages('src', exclude=["*.tests", "*.tests.*",
@@ -157,7 +157,8 @@ setup(
     python_requires='==2.7.*',
     install_requires=REQ_PKGS,
     extras_require={
-        'pytorch': ["torch==0.4.*", "torchvision>=0.1.8"]
+        'pytorch': ["torch>=0.4.*", "torchvision>=0.1.8"],
+        'cleverhans': ["tensorflow>=1.5.*,<2", "cleverhans"]
     },
     zip_safe=False
 )

@@ -8,6 +8,7 @@
 """
 from secml import _NoValue
 from secml.array import CArray
+from secml.data import CDataset
 from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.reject import CClassifierReject
 
@@ -28,16 +29,24 @@ class CClassifierRejectThreshold(CClassifierReject):
         Classifier to which we would like to apply a reject threshold.
     threshold : float
         Rejection threshold.
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
 
     """
     __class_type = 'reject-threshold'
 
-    def __init__(self, clf, threshold):
+    def __init__(self, clf, threshold, preprocess=None):
 
         self.clf = clf
         self.threshold = threshold
 
-        super(CClassifierRejectThreshold, self).__init__()
+        if self.clf.preprocess is not None:
+            raise ValueError(
+                "the preprocessor should be passed to the outer classifier.")
+
+        super(CClassifierRejectThreshold, self).__init__(preprocess=preprocess)
 
     def __clear(self):
         """Reset the object."""
@@ -86,16 +95,6 @@ class CClassifierRejectThreshold(CClassifierReject):
         """Number of features"""
         return self._clf.n_features
 
-    @property
-    def preprocess(self):
-        """Preprocess to be applied to input data by the inner classifier."""
-        return self._clf.preprocess
-
-    @preprocess.setter
-    def preprocess(self, value):
-        """Preprocess to be applied to input data by the inner classifier."""
-        self._clf.preprocess = value
-
     def fit(self, dataset, n_jobs=1):
         """Trains the classifier.
 
@@ -119,7 +118,13 @@ class CClassifierRejectThreshold(CClassifierReject):
         """
         # Resetting the outer classifier
         self.clear()
-        return self._fit(dataset, n_jobs)
+
+        data_x = dataset.X
+        # Transform data if a preprocess is defined
+        if self.preprocess is not None:
+            data_x = self.preprocess.fit_transform(dataset.X)
+
+        return self._fit(CDataset(data_x, dataset.Y), n_jobs=n_jobs)
 
     def _fit(self, dataset, n_jobs=1):
         """Private method that trains the One-Vs-All classifier.
@@ -146,6 +151,10 @@ class CClassifierRejectThreshold(CClassifierReject):
     def decision_function(self, x, y):
         """Computes the decision function for each pattern in x.
 
+        The discriminant function of the reject class is a vector with all its
+        values equal to :math:`\theta`, being :math:`\theta` the reject
+        threshold.
+
         If a preprocess has been specified, input is normalized
         before computing the decision function.
 
@@ -165,6 +174,14 @@ class CClassifierRejectThreshold(CClassifierReject):
             Dense flat array of shape (n_patterns,).
 
         """
+        if self.is_clear():
+            raise ValueError("make sure the classifier is trained first.")
+
+        x = x.atleast_2d()  # Ensuring input is 2-D
+
+        # Transform data if a preprocess is defined
+        x = self._preprocess_data(x)
+
         return self._decision_function(x, y)
 
     def _decision_function(self, x, y):
@@ -186,19 +203,14 @@ class CClassifierRejectThreshold(CClassifierReject):
             Dense flat array of shape (n_patterns,).
 
         """
+        x = x.atleast_2d()
+
         if y == -1:
-            # compute the score of the predicted class
-            pred_labels, scores = self._clf.predict(
-                x, return_decision_function=True)
-
-            # compute the score of the reject class
-            max_scores = scores.max(axis=1).ravel()
-
-            # return -1 * the score of the predicted class
-            return -max_scores
+            # the score of the reject class is a vector with all the elements
+            # equals to the reject threshold
+            return CArray.ones(x.shape[0]) * self.threshold
 
         elif y < self.n_classes:
-
             return self._clf.decision_function(x, y)
 
         else:
@@ -208,11 +220,20 @@ class CClassifierRejectThreshold(CClassifierReject):
     def predict(self, x, return_decision_function=False, n_jobs=_NoValue):
         """Perform classification of each pattern in x.
 
+        The score matrix of this classifier is equal to the predicted outputs
+        plus a column (corresponding to the reject class) with all its values
+        equal to :math:`\theta`, being :math:`\theta` the reject threshold.
+
+        The predicted class is therefore:
+
+        .. math:: c = \arg\max_k f_k(x)
+
+        where :math:`c` correspond to the rejection class (i.e., :math:`c=-1`)
+        only when the maximum taken over the other classes (excluding the
+        reject one) is not greater than the reject threshold :math:`\theta`.
+
         If a preprocess has been specified,
          input is normalized before classification.
-
-        The samples for which the higher score is lower than a certain
-        threshold are rejected by the classifier
 
         Parameters
         ----------
@@ -242,17 +263,23 @@ class CClassifierRejectThreshold(CClassifierReject):
         if n_jobs is not _NoValue:
             raise ValueError("`n_jobs` is not supported.")
 
+        x_in = x  # Original data
+
+        # Transform data if a preprocess is defined
+        x = self._preprocess_data(x)
+
         labels, scores = self._clf.predict(x, return_decision_function=True)
 
-        # Apply reject :
+        # Apply reject
+
         # compute the score of the reject class
-        rej_scores = self.decision_function(x, y=-1).T
+        rej_scores = self.decision_function(x_in, y=-1).T
 
         # find the maximum score
         scores_max = scores.max(axis=1)
 
         # Assign -1 to rejected sample labels
-        labels[CArray(scores_max.ravel() <= self.threshold).ravel()] = -1
+        labels[CArray(scores_max.ravel() < self.threshold).ravel()] = -1
 
         # Return the expected type for labels (CArray)
         labels = labels.ravel()
@@ -266,13 +293,16 @@ class CClassifierRejectThreshold(CClassifierReject):
         """Computes the gradient of the classifier's decision function
          wrt decision function input.
 
+        The gradient taken w.r.t. the reject class can be thus set to 0,
+        being its output constant regardless of the input sample x.
+
         Parameters
         ----------
         x : CArray
             The gradient is computed in the neighborhood of x.
         y : int
-            Index of the class wrt the gradient must be computed, -1 to
-            have the gradient w.r.t. the reject class
+            Index of the class wrt the gradient must be computed.
+            Use -1 to output the gradient w.r.t. the reject class.
 
         Returns
         -------
@@ -280,16 +310,11 @@ class CClassifierRejectThreshold(CClassifierReject):
             Gradient of the classifier's df wrt its input. Vector-like array.
 
         """
+        x = x.atleast_2d()
+
         if y == -1:
-
-            # Compute the gradient w.r.t. the reject class, which is -1 *
-            # the gradient of the predicted class.
-
-            # find the predicted class
-            label, score = self._clf.predict(x, return_decision_function=True)
-
-            # return -1 * the gradient of the predicted class
-            return -self._clf.gradient_f_x(x, y=label.item())
+            # the gradient is a vector with all the elements equal to zero
+            return CArray.zeros(x.shape[1])
 
         elif y < self.n_classes:
             return self._clf.gradient_f_x(x, y=y)

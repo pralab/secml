@@ -99,9 +99,9 @@ class CSecEvalTestCases(object):
 
             normalizer = CNormalizerMinMax(feature_range=(self.lb, self.ub))
 
-            self.tr.X = normalizer.fit_normalize(self.tr.X)
-            self.val.X = normalizer.normalize(self.val.X)
-            self.ts.X = normalizer.normalize(self.ts.X)
+            self.tr.X = normalizer.fit_transform(self.tr.X)
+            self.val.X = normalizer.transform(self.val.X)
+            self.ts.X = normalizer.transform(self.ts.X)
 
             # self.val = self.tr
 

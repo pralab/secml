@@ -12,7 +12,7 @@ from secml.ml.features.normalization import CNormalizer
 
 # TODO: ADD SPARSE ARRAYS SUPPORT
 class CNormalizerLinear(CNormalizer):
-    """Standardizes array by scaling linearly each feature.
+    """Standardizes array by linearly scaling each feature.
 
     Input data must have one row for each patterns,
     so features to scale are on each array's column.
@@ -33,7 +33,7 @@ class CNormalizerLinear(CNormalizer):
 
     Differently from numpy, we manage flat vectors as 2-Dimensional of
     shape (1, array.size). This means that normalizing a flat vector is
-    equivalent to normalize array.atleast_2d(). To obtain a numpy-style
+    equivalent to transform array.atleast_2d(). To obtain a numpy-style
     normalization of flat vectors, transpose array first.
 
     """
@@ -53,33 +53,28 @@ class CNormalizerLinear(CNormalizer):
         # b must be a CArray
         raise NotImplementedError("Linear normalizer should define the bias.")
 
-    def normalize(self, x):
-        """Linearly scales array features.
+    def _transform(self, x):
+        """Linearly scales features.
 
         Parameters
         ----------
         x : CArray
-            Array to be scaled. Must have the same number of features
-            (i.e. the number of columns) of training array.
+            Array with features to be scaled. Must have the same number
+            of features (i.e. the number of columns) of training array.
 
         Returns
         -------
-        scaled_array : CArray
-            Array with features linearly scaled.
-            Shape of returned array is the same of the original array.
+        Array with features linearly scaled.
+        Shape of returned array is the same of the original array.
 
         """
-        # Training first!
-        if self.is_clear():
-            raise ValueError("fit the normalizer first.")
-
         if x.atleast_2d().shape[1] != self.w.size:
             raise ValueError("array to normalize must have {:} "
                              "features (columns).".format(self.w.size))
 
         return self.w * x + self.b
 
-    def revert(self, x):
+    def _revert(self, x):
         """Undo the linear normalization of input data.
 
         Parameters
@@ -94,9 +89,6 @@ class CNormalizerLinear(CNormalizer):
             Array with features scaled back to original values.
 
         """
-        # Training first!
-        if self.is_clear():
-            raise ValueError("fit the normalizer first.")
         if x.atleast_2d().shape[1] != self.w.size:
             raise ValueError("array to revert must have {:} "
                              "features (columns).".format(self.w.size))
@@ -113,7 +105,7 @@ class CNormalizerLinear(CNormalizer):
 
         return v
 
-    def gradient(self, x):
+    def _gradient(self, x, w=None):
         """Returns the gradient wrt data.
 
         Parameters
@@ -121,20 +113,23 @@ class CNormalizerLinear(CNormalizer):
         x : CArray
             Pattern with respect to which the gradient will be computed.
             Shape (1, n_features) or (n_features, ).
+        w : CArray or None, optional
+            If CArray, will be left-multiplied to the gradient
+            of the preprocessor.
 
         Returns
         -------
         gradient : CArray
-            Gradient of linear normalizer wrt input data.
-            Diagonal matrix of shape (self.w.size, self.w.size).
+            Gradient of the linear normalizer wrt input data.
+            Array of shape (x.shape[1], x.shape[1]) if `w` is None,
+            otherwise an array of shape (w.shape[0], x.shape[1]).
 
         """
-        # Training first!
-        if self.is_clear():
-            raise ValueError("fit the normalizer first.")
-
         if x.atleast_2d().shape[1] != self.w.size:
             raise ValueError("input data must have {:} features (columns)."
                              "".format(self.w.size))
 
-        return self.w.diag()
+        grad = self.w.diag()  # I * self.w
+
+        # Left multiply input `w` with normalizer gradient
+        return w.dot(grad) if w is not None else grad

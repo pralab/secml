@@ -1,7 +1,7 @@
 variables:
     CI_PROJECT_DOMAIN: "https://pragit.diee.unica.it"
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-    SECML_HOME_DIR: "$CI_PROJECT_DIR/secml-lib-data"
+    SECML_HOME_DIR: "$CI_PROJECT_DIR/secml-data"
     TOX_WORKDIR: "$CI_PROJECT_DIR/.tox"
     TOX_TESTENV_PASSENV: "PIP_CACHE_DIR SECML_HOME_DIR"
     TOX_USEDEVELOP: "False"
@@ -11,12 +11,11 @@ cache:
   paths:
     - "$CI_PROJECT_DIR/.cache/pip"
     - "$CI_PROJECT_DIR/.vendor/apt"
-    - "$CI_PROJECT_DIR/secml-lib-data"
+    - "$CI_PROJECT_DIR/secml-data"
 
 stages:
   - package
   - test
-  - install
   - release
   - deploy
   - triage
@@ -79,10 +78,10 @@ package:
   artifacts:
     name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
     paths:
-      - ${CI_PROJECT_DIR}/dist/SecML-Lib-*.zip
+      - ${CI_PROJECT_DIR}/dist/SecML-*.zip
 
-.install:
-  stage: install
+.test:install:
+  stage: test
   image: ubuntu:xenial
   before_script:
     - echo $CI_PROJECT_DIR
@@ -109,42 +108,43 @@ package:
   except:
     - schedules
 
-#install:pypi:
-#  extends: .install
+#test:install:pypi:
+#  extends: .test:install
 #  script:
-#    - pip install secml-lib
+#    - pip install secml
 
-#install:pypi-extras:
-#  extends: .install
+#test:install:pypi-extras:
+#  extends: .test:install
 #  script:
-#    - pip install secml-lib[pytorch]
+#    - pip install secml[pytorch]
 #  after_script:
 #    - python -c "import secml"
 #    - python -c "import secml.pytorch"
 
-install:zip:
-  extends: .install
+test:install:zip:
+  extends: .test:install
   script:
-    - pip install ${CI_PROJECT_DIR}/dist/SecML-Lib-*.zip
+    - pip install ${CI_PROJECT_DIR}/dist/SecML-*.zip
 
-install:unzip:
-  extends: .install
+test:install:unzip:
+  extends: .test:install
   script:
     - apt-get install -yq unzip > /dev/null
-    - unzip ${CI_PROJECT_DIR}/dist/SecML-Lib-*.zip
-    - cd SecML-Lib-*
+    - unzip ${CI_PROJECT_DIR}/dist/SecML-*.zip
+    - cd SecML-*
     - pip install .
 
-install:unzip-extras:
-  extends: .install
+test:install:unzip-extras:
+  extends: .test:install
   script:
     - apt-get install -yq unzip > /dev/null
-    - unzip ${CI_PROJECT_DIR}/dist/SecML-Lib-*.zip
-    - cd SecML-Lib-*
-    - pip install .[pytorch]
+    - unzip ${CI_PROJECT_DIR}/dist/SecML-*.zip
+    - cd SecML-*
+    - pip install .[pytorch,cleverhans]
   after_script:
     - python -c "import secml"
     - python -c "import secml.pytorch"
+    - python -c "import secml.tf.clvhs"
 
 release:
   stage: release
@@ -154,11 +154,9 @@ release:
     - echo $CI_PROJECT_ID
     - echo $CI_COMMIT_TAG
   script:
-    - 'curl -s --request GET --header "PRIVATE-TOKEN: $PRAGIT_BOT_TOKEN" --location --output release.zip "$CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/$CI_COMMIT_TAG/download?job=package"'
-    - unzip release.zip -d release
-    - DIST_FILE=$(find release -iname \*.zip -exec basename {} \;)
-    - echo $DIST_FILE
-    - 'curl -s --request POST --header "PRIVATE-TOKEN: $PRAGIT_BOT_TOKEN" --data name="$DIST_FILE" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_FILE?job=package" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
+    - DIST_ZIP=$(find $CI_PROJECT_DIR/dist -iname \*.zip -exec basename {} \;)
+    - echo $DIST_ZIP
+    - 'curl -s --request POST --header "PRIVATE-TOKEN: $PRAGIT_BOT_TOKEN" --data name="$DIST_ZIP" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_ZIP?job=package" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
   only:
     - tags
 
@@ -166,13 +164,13 @@ release:
 #  extends: .install
 #  script:
 #    - apt-get install -yq git > /dev/null
-#    - pip install git+${CI_REPOSITORY_URL}@${CI_COMMIT_REF_NAME}#egg=secml-lib
+#    - pip install git+${CI_REPOSITORY_URL}@${CI_COMMIT_REF_NAME}#egg=secml
 
 #install:repo-extras:
 #  extends: .install
 #  script:
 #    - apt-get install -yq git > /dev/null
-#    - pip install git+${CI_REPOSITORY_URL}@${CI_COMMIT_REF_NAME}#egg=secml-lib[pytorch]
+#    - pip install git+${CI_REPOSITORY_URL}@${CI_COMMIT_REF_NAME}#egg=secml[pytorch]
 #  after_script:
 #    - python -c "import secml"
 #    - python -c "import secml.pytorch"

@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.ml.features.tests import CPreProcessTestCases
 
 from sklearn.preprocessing import StandardScaler
 
@@ -6,21 +6,8 @@ from secml.array import CArray
 from secml.ml.features.normalization import CNormalizerMeanSTD
 
 
-class TestCNormalizerMeanStd(CUnitTest):
+class TestCNormalizerMeanStd(CPreProcessTestCases):
     """Unittest for CNormalizerMeanStd"""
-
-    def setUp(self):
-        """Code to run before each test."""
-        self.array_dense = CArray([[1, 0, 0, 5],
-                                   [2, 4, 0, 0],
-                                   [3, 6, 0, 0]])
-        self.array_sparse = CArray(self.array_dense.deepcopy(), tosparse=True)
-
-        self.row_dense = CArray([4, 0, 6])
-        self.column_dense = self.row_dense.deepcopy().T
-
-        self.row_sparse = CArray(self.row_dense.deepcopy(), tosparse=True)
-        self.column_sparse = self.row_sparse.deepcopy().T
 
     def test_zscore(self):
         """Test for CNormalizerMeanStd to obtain zero mean and unit variance"""
@@ -31,32 +18,28 @@ class TestCNormalizerMeanStd(CUnitTest):
 
             # Sklearn normalizer
             target = CArray(StandardScaler().fit_transform(
-                array.astype(float).tondarray())).round(4)
+                array.astype(float).tondarray()))
             # Our normalizer
             n = CNormalizerMeanSTD().fit(array)
-            result = n.normalize(array).round(4)
+            result = n.transform(array)
 
             self.logger.info("Correct result is:\n{:}".format(target))
             self.logger.info("Our result is:\n{:}".format(result))
 
-            self.assertFalse((target != result).any(),
-                             "\n{:}\nis different from target\n"
-                             "{:}".format(result, target))
+            self.assert_array_almost_equal(target, result)
 
             self.logger.info("Testing without std")
             # Sklearn normalizer
             target = CArray(StandardScaler(with_std=False).fit_transform(
-                array.astype(float).tondarray())).round(4)
+                array.astype(float).tondarray()))
             # Our normalizer
             n = CNormalizerMeanSTD(with_std=False).fit(array)
-            result = n.normalize(array).round(4)
+            result = n.transform(array)
 
             self.logger.info("Correct result is:\n{:}".format(target))
             self.logger.info("Our result is:\n{:}".format(result))
 
-            self.assertFalse((target != result).any(),
-                             "\n{:}\nis different from target\n"
-                             "{:}".format(result, target))
+            self.assert_array_almost_equal(target, result)
 
         sklearn_comp(self.array_dense)
         sklearn_comp(self.array_sparse)
@@ -77,7 +60,7 @@ class TestCNormalizerMeanStd(CUnitTest):
                     "Normalizing using mean: {:} std: {:}".format(mean, std))
 
                 n = CNormalizerMeanSTD(mean=mean, std=std).fit(array)
-                out = n.normalize(array)
+                out = n.transform(array)
 
                 self.logger.info("Result is:\n{:}".format(out))
 
@@ -87,10 +70,34 @@ class TestCNormalizerMeanStd(CUnitTest):
                 self.logger.info("Result mean is:\n{:}".format(out_mean))
                 self.logger.info("Result std is:\n{:}".format(out_std))
 
-                rev = n.revert(out).round(4)
-                self.assertFalse((array != rev).any(),
-                                 "Reverted array not equal to original")
+                rev = n.revert(out)
+
+                self.assert_array_almost_equal(array, rev)
+
+    def test_chain(self):
+        """Test a chain of preprocessors."""
+        x_chain = self._test_chain(
+            self.array_dense,
+            ['min-max', 'pca', 'mean-std'],
+            [{'feature_range': (-5, 5)}, {}, {}]
+        )
+
+        # Expected shape is (3, 3), as pca max n_components is 4-1
+        self.assertEqual((self.array_dense.shape[0],
+                          self.array_dense.shape[1]-1), x_chain.shape)
+
+    def test_chain_gradient(self):
+        """Check gradient of a chain of preprocessors."""
+        grad = self._test_chain_gradient(
+            self.array_dense,
+            ['min-max', 'mean-std'],
+            [{'feature_range': (-5, 5)}, {}]
+        )
+
+        # Expected shape is (n_feats, n_feats), so (4, 4)
+        self.assertEqual((self.array_dense.shape[1],
+                          self.array_dense.shape[1]), grad.shape)
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CPreProcessTestCases.main()

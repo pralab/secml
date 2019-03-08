@@ -65,7 +65,7 @@ class CClassifierPyTorch(CClassifier):
         If fit.warm_start is True, this parameter has no effect.
     train_transform : torchvision.transform or None, optional
         Transformation to be applied before training.
-    preprocess : CNormalizer or None, optional
+    preprocess : CPreProcess or str or None, optional
         Preprocessing for data. If not None and model state will be loaded
         using `.load_state()`, this should be an already-trained preprocessor
         or `.preprocess.fit(x)` should be called after `.load_state(x)`
@@ -418,8 +418,23 @@ class CClassifierPyTorch(CClassifier):
             x = x.cuda()
         return x
 
+    def _get_train_input_loader(self, x, y, n_jobs=1):
+        """Return a loader for training data."""
+        # Convert to CDatasetPyTorch and use a dataloader that returns batches
+        dl = DataLoader(CDatasetPyTorch(x, y, transform=self.train_transform),
+                        batch_size=self.batch_size,
+                        shuffle=True,
+                        num_workers=n_jobs-1)
+
+        if dl.dataset.transform is None:
+            # Add a transformation that reshape samples to (C x H x W)
+            dl.dataset.transform = transforms.Lambda(
+                lambda p: p.reshape(self.input_shape))
+
+        return dl
+
     def _get_test_input_loader(self, x, n_jobs=1):
-        """Return a loader for input test data."""
+        """Return a loader for test data."""
         # Convert to CDatasetPyTorch and use a dataloader that returns batches
         dl = DataLoader(CDatasetPyTorch(x),
                         batch_size=self.batch_size,
@@ -576,12 +591,6 @@ class CClassifierPyTorch(CClassifier):
             raise TypeError(
                 "training set should be provided as a CDataset object.")
 
-        if self.preprocess is not None:
-            # TODO: CHANGE THIS BEHAVIOUR
-            self.logger.warning(
-                "preprocess is not applied to training data. "
-                "Use `train_transform` parameter if necessary.")
-
         if warm_start is False:
             # Resetting the classifier
             self.clear()
@@ -597,6 +606,22 @@ class CClassifierPyTorch(CClassifier):
             self._acc = 0
             # Reinitialize the optimizer as we are starting clean
             self.init_optimizer()
+            # Fit the inner preprocess, if defined. This will not be used
+            # for classifier training if a `train_transform` is defined,
+            # but the preprocessor should be fitted using training data anyway
+            if self.preprocess is not None:
+                self.preprocess.fit(dataset.X)
+
+        # Transform to training data if preprocess is defined,
+        # but no `train_transform` is defined
+        if self.preprocess is not None:
+            if self.train_transform is None:
+                dataset = CDataset(
+                    self.preprocess.transform(dataset.X), dataset.Y)
+            else:  # Warn the user about preprocess behavior
+                self.logger.warning(
+                    "preprocess is not applied to training "
+                    "data as `train_transform` is defined.")
 
         return self._fit(dataset, store_best_params, n_jobs=n_jobs)
 
@@ -637,12 +662,8 @@ class CClassifierPyTorch(CClassifier):
         # Binarize labels using a OVA scheme
         ova_labels = dataset.get_labels_asbinary()
 
-        # Convert to CDatasetPyTorch and use a dataloader that returns batches
-        ds_loader = DataLoader(CDatasetPyTorch(dataset.X, ova_labels,
-                                               transform=self.train_transform),
-                               batch_size=self.batch_size,
-                               shuffle=True,
-                               num_workers=n_jobs-1)
+        # Create a dataloader that returns batches
+        ds_loader = self._get_train_input_loader(dataset.X, ova_labels)
 
         # Switch to training mode
         self._model.train()
@@ -762,9 +783,8 @@ class CClassifierPyTorch(CClassifier):
         """
         x = x.atleast_2d()  # Ensuring input is 2-D
 
-        # Preprocessing data if a preprocess is defined
-        if self.preprocess is not None:
-            x = self.preprocess.normalize(x)
+        # Transform data if a preprocess is defined
+        x = self._preprocess_data(x)
 
         return self._decision_function(x, y, n_jobs=n_jobs)
 
@@ -866,9 +886,8 @@ class CClassifierPyTorch(CClassifier):
 
         x_carray = CArray(x).atleast_2d()
 
-        # Preprocessing data if a preprocess is defined
-        if self.preprocess is not None:
-            x_carray = self.preprocess.normalize(x_carray)
+        # Transform data if a preprocess is defined
+        x_carray = self._preprocess_data(x_carray)
 
         x_loader = self._get_test_input_loader(x_carray, n_jobs=n_jobs)
 
@@ -908,6 +927,42 @@ class CClassifierPyTorch(CClassifier):
         labels = scores.argmax(axis=1).ravel()
 
         return (labels, scores) if return_decision_function is True else labels
+
+    def gradient_f_x(self, x, y=None, w=None, layer=None, **kwargs):
+        """Computes the gradient of the classifier's output wrt input.
+
+        Parameters
+        ----------
+        x : CArray
+            The gradient is computed in the neighborhood of x.
+        y : int or None, optional
+            Index of the class wrt the gradient must be computed.
+            This is not required if:
+             - `w` is passed and the last layer is used but
+              softmax_outputs is False
+             - an intermediate layer is used
+        w : CArray or None, optional
+            If CArray, will be passed to backward and must have a proper shape
+            depending on the chosen output layer (the last one if `layer`
+            is None). This is required if `layer` is not None.
+        layer : str or None, optional
+            Name of the layer.
+            If None, the gradient at the last layer will be returned
+             and `y` is required if `w` is None or softmax_outputs is True.
+            If not None, `w` of proper shape is required.
+        **kwargs
+            Optional parameters for the function that computes the
+            gradient of the decision function. See the description of
+            each classifier for a complete list of optional parameters.
+
+        Returns
+        -------
+        gradient : CArray
+            Gradient of the classifier's output wrt input. Vector-like array.
+
+        """
+        return super(CClassifierPyTorch, self).gradient_f_x(
+            x, y, w=w, layer=layer, **kwargs)
 
     def _gradient_f(self, x, y=None, w=None, layer=None):
         """Computes the gradient of the classifier's decision function
@@ -1048,6 +1103,10 @@ class CClassifierPyTorch(CClassifier):
             Output of the desired layer.
 
         """
+        x = CArray(x).atleast_2d()
+        # Transform data if a preprocess is defined
+        x = self._preprocess_data(x)
+
         x_loader = self._get_test_input_loader(x)
 
         out = None

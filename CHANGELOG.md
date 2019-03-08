@@ -1,3 +1,43 @@
+## v0.4-dev (08/03/2019)
+- #329 The project is now officially called `SecML`.
+- #210 Added new package `tf.clvhs` which provides a wrapper for [CleverHans](https://github.com/tensorflow/cleverhans).
+- #261 Complete revision of data preprocessing routines in `CClassifier` and subclasses. Added new superclass `CPreProcess` which provides an interface for all data transformation methods, like feature normalizers and feature reducers.
+- #174 `torch` (**PyTorch**) version `>=1.0.*` is now officially supported.
+- Improvements to release process.
+
+### Added (7 changes)
+- #261 Added new superclass `CPreProcess` which provides an interface for all data transformation methods, like feature normalizers and feature reducers. `CNormalizer` and `CReducer` now inherit from `CPreProcess`.
+- #261 Normalizers now accept `w` as a backpropagation vector to be left-multiplied to their gradient.
+- #261 All `CPreProcess` subclasses now accept `preprocess` as an optional init parameter.
+- #333 Added parameter `random_state` to `CClassifierRandomForest`.
+- #264 Added `CClassifierPyTorchCNNMNIST` implementing the CNN model for MNIST digits dataset from N. Carlini and D. A. Wagner, "Adversarial examples are not easily detected: Bypassing ten detection methods", 10th ACM Workshop on Artificial Intelligence and Security. ACM, 2017.
+- #210 Added new package `tf.clvhs` which provides a wrapper for [CleverHans](https://github.com/tensorflow/cleverhans), a Python library to benchmark machine learning systems' vulnerability to adversarial examples. In this first iteration, it is included the class `CCleverhansAttack`, which wraps the Cleverhans attacks in a `CAttackEvasion` object. For a list of all supported Cleverhans attacks, see `c_attack_evasion_cleverhans.SUPPORTED_ATTACKS`.
+- #210 As preliminary support for `tensorflow` library, added different function to convert SecML classifiers' methods to `tensorflow` PyFunctions.
+
+### Improved (3 changes)
+- #261 Trainin data is now preprocessed (if a `preprocess` is defined) in `CClassifierPyTorch.fit` if no `train_transform` is defined.
+- #266 Output of `CNormalizerPyTorch.gradient` method is now always a raveled vector.
+- #280 Revised preprocess application in `CClassifierRejectThreshold` and `CClassifierRejectDetector` to make it consistent between fit, decision_function, predict, gradient.
+
+### Changed (7 changes)
+- #174 Raised minimum requirements for `torch` (**PyTorch**) to `>=0.4.*`.
+- #329 The default paths of data and configuration files have changed accordingly. The new default `SECML_HOME_DIR` is `secml-data`. The new default name of the configuration file is `secml.conf`. Please follow the update guide to keep existing data while using the new version of the library.
+- #230, #337 Renamed `CPca` and `CLda` to `CPCA` and `CLDA`, respectively.
+- #261 `CClassifier` now expect a generic `CPreProcess` instance (or string with class type) as input to `preprocess` parameter.
+- #266 `CClassifier` gradient is now backpropagated to preprocess inside `gradient_f_x`.
+- #266 `y`, the label of the desired class wrt compute the gradient of the decision function, is now a required parameter of `CClassifier` and subclasses.
+- #288 Renamed `normalize` and `fit_normalize` methods of `CNormalizer` to `transform` and `fit_transform`.
+
+### Fixed (4 changes)
+- #332 The value of the discriminant function of `CClassifierRejectThreshold` in the case of rejected samples is now correctly equal to the reject threshold. Also updated the gradient value accordingly.
+- #327 In the case of indiscriminate evasion attack, the true class is now correctly excluded from the choice of the competing class (even if the sample is rejected).
+- #290 Keyword raise is now correctly used in `CReducer` to raise errors instead of return.
+- #334 Fixed data not being preprocessed in `CClassifierPyTorch.get_layer_output`.
+
+### Removed (1 change)
+- #261 Removed bugged LDA `revert` method.
+
+
 ## v0.3.1-dev (25/02/2019)
 - Internal (improvements to release process)
 
@@ -34,7 +74,7 @@
 - #281 Added a setter/getter for the inner classifier in `CClassifierRejectThreshold`.
 - #271 Added an option to the fit method of `CClassifierPyTorch` to decide whether or not to use the best parameters by accuracy score at the end of the training process.
 - #253 `CDataLoaderImgFolders` and `CDataLoaderImgClients` now store the number of channels for each image.
-- #292 Default configuration file `secml-lib.conf` is now copied to `$SECML_HOME_DIR` if not already there.
+- #292 Default configuration file `secml.conf` is now copied to `$SECML_HOME_DIR` if not already there.
 
 ### Changed (4 changes)
 - #285 Moved `CClassifierMulticlass._gradient_f` implementation to `CClassifierMulticlassOVA` as it works only in case of OVA scheme.
@@ -174,7 +214,7 @@
 - Added has_private and get_private functions to attr_utils to allow easier work with private attrs.
 - Added "SECML_" prefix to each global variable to avoid name conflicts.
 - secml home directory is now named secml-lib-data
-- Renamed settings.txt file to secml-lib.conf
+- Renamed settings.txt file to secml.conf
 - Small update to configuration file. Main section called "secml-lib"
 - PYTORCH_DATA_DIR is now called `python-data`
 - Added all definable parameters to configuration file.

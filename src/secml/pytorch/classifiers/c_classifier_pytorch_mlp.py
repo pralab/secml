@@ -50,7 +50,7 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
         If fit.warm_start is True, this parameter has no effect.
     train_transform : torchvision.transform or None, optional
         Transformation to be applied before training.
-    preprocess : CNormalizer or None, optional
+    preprocess : CPreProcess or str or None, optional
         Preprocessing for data. If not None and model state will be loaded
         using `.load_state()`, this should be an already-trained preprocessor
         or `.preprocess.fit(x)` should be called after `.load_state(x)`
@@ -71,7 +71,7 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
     def __init__(self, input_dims=1000, hidden_dims=(100, 100), output_dims=10,
                  learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
                  epochs=100, gamma=0.1, lr_schedule=(50, 75),
-                 batch_size=5,  regularize_bias=True, train_transform=None,
+                 batch_size=5, regularize_bias=True, train_transform=None,
                  preprocess=None, softmax_outputs=True, random_state=None):
 
         super(CClassifierPyTorchMLP, self).__init__(

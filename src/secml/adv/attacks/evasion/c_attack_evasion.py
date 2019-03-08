@@ -130,14 +130,21 @@ class CAttackEvasion(CAttack):
 
             # if the sample is not rejected k is the true class
             k[:] = self._y0
-            # for the rejected samples k is the reject class
-            k[y_pred == -1] = -1
 
             # c is neither k nor the reject class
             smpls_idx = CArray.arange(n_samples).tolist()
+
+            # set to nan the score of the true classes to exclude it by
+            # the successive choice of the competing classes
             scores[[smpls_idx, k.tolist()]] = nan
+
             if issubclass(self._solver_clf.__class__, CClassifierReject):
+                # set to nan the score of the reject classes to exclude it by
+                # the successive choice of the competing classes
                 scores[:, -1] = nan
+
+            # for the rejected samples k is the reject class
+            k[y_pred == -1] = -1
 
         else:  # targeted attack
 

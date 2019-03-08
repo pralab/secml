@@ -1,4 +1,4 @@
-from . import CClassifierTestCases
+from c_classifier_testcases import CClassifierTestCases
 
 from secml.array import CArray
 from secml.ml.classifiers import CClassifierRidge, CClassifierSVM
@@ -15,16 +15,16 @@ class TestCClassifierRidge(CClassifierTestCases):
     def setUp(self):
         """Test for init and fit methods."""
         # generate synthetic data
-        self.dataset = CDLRandom(n_features=1000, n_redundant=200,
-                                 n_informative=250,
+        self.dataset = CDLRandom(n_features=100, n_redundant=20,
+                                 n_informative=25,
                                  n_clusters_per_class=2,
                                  random_state=0).load()
 
-        self.dataset.X = CNormalizerMinMax().fit_normalize(self.dataset.X)
+        self.dataset.X = CNormalizerMinMax().fit_transform(self.dataset.X)
 
         kernel_types = (None, CKernelLinear, CKernelRBF, CKernelPoly)
         self.ridges = [CClassifierRidge(
-            alpha=1, kernel=kernel() if kernel is not None else None)
+            kernel=kernel() if kernel is not None else None)
                 for kernel in kernel_types]
         self.logger.info(
             "Testing RIDGE with kernel unctions: %s", str(kernel_types))
@@ -59,7 +59,7 @@ class TestCClassifierRidge(CClassifierTestCases):
         # generate 2D synthetic data
         dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=2,
                             n_clusters_per_class=1, random_state=0).load()
-        dataset.X = CNormalizerMinMax().fit_normalize(dataset.X)
+        dataset.X = CNormalizerMinMax().fit_transform(dataset.X)
 
         self.ridges[0].fit(dataset)
 
@@ -149,10 +149,10 @@ class TestCClassifierRidge(CClassifierTestCases):
             x = x_norm = self.dataset.X
             p = p_norm = self.dataset.X[0, :].ravel()
 
-            # Preprocessing data if a preprocess is defined
+            # Transform data if a preprocess is defined
             if ridge.preprocess is not None:
-                x_norm = ridge.preprocess.normalize(x)
-                p_norm = ridge.preprocess.normalize(p)
+                x_norm = ridge.preprocess.transform(x)
+                p_norm = ridge.preprocess.transform(p)
 
             # Testing decision_function on multiple points
 
@@ -265,6 +265,22 @@ class TestCClassifierRidge(CClassifierTestCases):
             # Run the comparison with numerical gradient
             # (all classes will be tested)
             self._test_gradient_numerical(ridge, pattern)
+
+    def test_preprocess(self):
+        """Test classifier with preprocessors inside."""
+        ds = CDLRandom().load()
+        clf = CClassifierRidge()
+
+        # All linear transformations with gradient implemented
+        self._test_preprocess(ds, clf,
+                              ['min-max', 'mean-std'],
+                              [{'feature_range': (-1, 1)}, {}])
+        self._test_preprocess_grad(ds, clf,
+                                   ['min-max', 'mean-std'],
+                                   [{'feature_range': (-1, 1)}, {}])
+
+        # Mixed linear/nonlinear transformations without gradient
+        self._test_preprocess(ds, clf, ['pca', 'unit-norm'], [{}, {}])
 
 
 if __name__ == '__main__':

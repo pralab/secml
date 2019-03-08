@@ -4,7 +4,7 @@ Please read this!
 Before opening a new issue, make sure to search for keywords in the issues
 filtered by the "direction" label.
 
-- https://pragit.diee.unica.it/secml/secml-lib/issues?label_name%5B%5D=direction
+- https://pragit.diee.unica.it/secml/secml/issues?label_name%5B%5D=direction
 
 and verify the issue you're about to submit isn't a duplicate.
 --->

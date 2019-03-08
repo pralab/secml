@@ -1,5 +1,5 @@
 """
-.. module:: PCA
+.. module:: CPCA
    :synopsis: Principal Component Analysis (PCA)
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -9,11 +9,18 @@
 from secml.array import CArray
 from secml.ml.features.reduction import CReducer
 
-__all__ = ['CPca']
+__all__ = ['CPCA']
 
 
-class CPca(CReducer):
+class CPCA(CReducer):
     """Principal Component Analysis (PCA).
+
+    Properties
+    ----------
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
 
     Attributes
     ----------
@@ -22,7 +29,7 @@ class CPca(CReducer):
     """
     __class_type = 'pca'
 
-    def __init__(self, n_components=None):
+    def __init__(self, n_components=None, preprocess=None):
         """Principal Component Analysis (PCA)
 
         Apply a linear transformation at data, project it into
@@ -53,10 +60,10 @@ class CPca(CReducer):
         Examples
         --------
         >>> from secml.array import CArray
-        >>> from secml.ml.features.reduction import CPca
+        >>> from secml.ml.features.reduction import CPCA
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> CPca().fit_transform(array)
+        >>> CPCA().fit_transform(array)
         CArray([[ -4.07872199e+00   2.47826647e+00   0.00000000e+00]
          [ -2.72723183e+00  -2.82960262e+00   5.55111512e-17]
          [  6.80595382e+00   3.51336152e-01  -2.22044605e-16]])
@@ -69,6 +76,8 @@ class CPca(CReducer):
         self._mean = None
         self._explained_variance = None
         self._explained_variance_ratio = None
+
+        super(CPCA, self).__init__(preprocess=preprocess)
 
     @property
     def eigenval(self):
@@ -105,28 +114,31 @@ class CPca(CReducer):
         """
         return self._explained_variance_ratio
 
-    def fit(self, data, y=None):
+    def _fit(self, x, y=None):
         """Fit the PCA using input data.
 
         Parameters
         ----------
-        data : array_like
+        x : array_like
             Training data, 2-Dim array like object with shape
             (n_patterns, n_features), where each row is a pattern
             of n_features columns.
+        y : CArray or None, optional
+            Flat array with the label of each pattern.
+            Can be None if not required by the preprocessing algorithm.
 
         Returns
         -------
-        trained_PCA : CPca
-            Instance of the PCA trained on input data.
+        CPCA
+            Instance of the trained transformer.
 
         Examples
         --------
         >>> from secml.array import CArray
-        >>> from secml.ml.features.reduction import CPca
+        >>> from secml.ml.features.reduction import CPCA
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> pca = CPca().fit(array)
+        >>> pca = CPCA().fit(array)
         >>> pca.eigenval
         CArray([  8.39015935e+00   3.77781588e+00   1.90957046e-17])
         >>> pca.eigenvec
@@ -139,7 +151,7 @@ class CPca(CReducer):
         CArray([  8.31434337e-01   1.68565663e-01   4.30684173e-36])
 
         """
-        data_carray = CArray(data).todense().atleast_2d()
+        data_carray = CArray(x).todense().atleast_2d()
         # Max number of components is the number of patterns available (rows)
         n_samples = data_carray.shape[0]
         n_features = data_carray.shape[1]
@@ -198,29 +210,28 @@ class CPca(CReducer):
 
         return self
 
-    def transform(self, data):
+    def _transform(self, x):
         """Apply the reduction algorithm on data.
 
         Parameters
         ----------
-        data : array_like
-            Training data, 2-Dim array like object with shape
-            (n_patterns, n_features), where each row is a pattern
-            of n_features columns. n_features must be equal to
+        x : array_like
+            Array to be transformed. 2-D array object of shape
+            (n_patterns, n_features). n_features must be equal to
             n_components parameter set before or during training.
 
         Returns
         --------
-        data_mapped : CArray
+        CArray
             Input data mapped to PCA space.
 
         Examples
         --------
         >>> from secml.array import CArray
-        >>> from secml.ml.features.reduction import CPca
+        >>> from secml.ml.features.reduction import CPCA
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> pca = CPca().fit(array)
+        >>> pca = CPCA().fit(array)
         >>> pca.transform(CArray.concatenate(array, [4., 2., -6.], axis=0))
         CArray([[ -4.07872199e+00   2.47826647e+00   0.00000000e+00]
          [ -2.72723183e+00  -2.82960262e+00   5.55111512e-17]
@@ -236,33 +247,34 @@ class CPca(CReducer):
         if self._mean is None:
             raise ValueError("fit PCA first.")
 
-        data_carray = CArray(data).todense().atleast_2d()
+        data_carray = CArray(x).todense().atleast_2d()
         if data_carray.shape[1] != self.mean.size:
-            raise ValueError("array to transform must have {:} features (columns).".format(self.mean.size))
+            raise ValueError("array to transform must have {:} "
+                             "features (columns).".format(self.mean.size))
 
         out = CArray((data_carray - self.mean).dot(self._components.T))
-        return out.atleast_2d() if data.ndim >= 2 else out
+        return out.atleast_2d() if x.ndim >= 2 else out
 
-    def revert(self, data):
+    def _revert(self, x):
         """Map data back to its original space.
 
         Parameters
         ----------
-        data : array_like
+        x : CArray
             Array to transform back to its original space.
 
         Returns
         --------
-        data_origin : CArray
+        CArray
             Input array mapped back to its original space.
 
         Examples
         --------
         >>> from secml.array import CArray
-        >>> from secml.ml.features.reduction import CPca
+        >>> from secml.ml.features.reduction import CPCA
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
-        >>> pca = CPca().fit(array)
+        >>> pca = CPCA().fit(array)
         >>> array_pca = pca.transform(array)
         >>> pca.revert(array_pca).round(6)
         CArray([[ 1. -0.  2.]
@@ -273,9 +285,11 @@ class CPca(CReducer):
         if self._mean is None:
             raise ValueError("fit PCA first.")
 
-        data_carray = CArray(data).atleast_2d()
+        data_carray = CArray(x).atleast_2d()
         if data_carray.shape[1] != self.n_components:
-            raise ValueError("array to revert must have {:} features (columns).".format(self.n_components))
+            raise ValueError("array to revert must have {:} "
+                             "features (columns).".format(self.n_components))
 
         out = CArray(data_carray.dot(self._components) + self.mean)
-        return out.atleast_2d() if data.ndim >= 2 else out
+
+        return out.atleast_2d() if x.ndim >= 2 else out
