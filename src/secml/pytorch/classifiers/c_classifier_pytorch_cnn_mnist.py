@@ -1,30 +1,28 @@
 """
-.. module:: PyTorchClassifierMLP
-   :synopsis: Classifier with PyTorch Multi-layer Perceptron
+.. module:: CClassifierPyTorchCNNMNIST
+   :synopsis: Classifier with a CNN for the MNIST dataset
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from . import CClassifierPyTorch
-from ..models import mlp
+from secml.pytorch.classifiers import CClassifierPyTorch
+from secml.pytorch.models.mnist import cnn_mnist_model
 
 
-class CClassifierPyTorchMLP(CClassifierPyTorch):
-    """PyTorch Multi-layer Perceptron Classifier.
+class CClassifierPyTorchCNNMNIST(CClassifierPyTorch):
+    """
+    The CNN learned on the MNIST dataset by Carlini in the paper:
+    N. Carlini and D. A. Wagner, "Adversarial examples are not easily
+    detected: Bypassing ten detection methods"
 
-    Multi-layer Perceptron neural network with ReLU as activation function.
+    Original code:
+    - https://github.com/carlini/nn_breaking_detection/blob/master/setup_mnist.py
 
     Loss function for training: cross-entropy (includes softmax)
 
     Parameters
     ----------
-    input_dims : int, optional
-        Size of the input layer. Default 1000.
-    hidden_dims : tuple, optional
-        Size of the hidden layers. Each value in the tuple represents
-        an hidden layer. Default (100, 100), so a network with
-        two hidden layers and 100 neurons each.
-    output_dims : int, optional
+    num_classes : int, optional
         Size of the output layer. Default 10.
     learning_rate : float, optional
         Learning rate. Default 1e-2.
@@ -34,7 +32,7 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
         Weight decay (L2 penalty). Control parameters regularization.
         Default 1e-4.
     epochs : int, optional
-        Maximum number of epochs of the training process. Default 100.
+        Number of epochs. Default 100.
     gamma : float, optional
         Multiplicative factor of learning rate decay. Default: 0.1.
     lr_schedule : list, optional
@@ -42,7 +40,7 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
         The current learning rate will be multiplied by gamma
         once the number of epochs reaches each index.
     batch_size : int, optional
-        Size of the batch for grouping samples. Default 5.
+        Size of the batch for grouping samples. Default 64.
     regularize_bias : bool, optional
         If False, L2 regularization will NOT be applied to biases.
         Default True, so regularization will be applied to all parameters.
@@ -56,26 +54,25 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
         or `.preprocess.fit(x)` should be called after `.load_state(x)`
         with appropriate input.
     softmax_outputs : bool, optional
-        If True, apply softmax function to the outputs. Default True.
+        If True, apply softmax function to the outputs. Default False.
     random_state : int or None, optional
         If int, random_state is the seed used by the random number generator.
         If None, no fixed seed will be set.
 
     Attributes
     ----------
-    class_type : 'pytorch-mlp'
+    class_type : 'pytorch-cnn-mnist'
 
     """
-    __class_type = 'pytorch-mlp'
+    __class_type = 'pytorch-cnn-mnist'
 
-    def __init__(self, input_dims=1000, hidden_dims=(100, 100), output_dims=10,
-                 learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
-                 epochs=100, gamma=0.1, lr_schedule=(50, 75),
-                 batch_size=5, regularize_bias=True, train_transform=None,
-                 preprocess=None, softmax_outputs=True, random_state=None):
+    def __init__(self, num_classes=10, learning_rate=0.1, momentum=0.9,
+                 weight_decay=0, epochs=30, gamma=1.0, lr_schedule=(),
+                 batch_size=128, regularize_bias=True, train_transform=None,
+                 preprocess=None, softmax_outputs=False, random_state=None):
 
-        super(CClassifierPyTorchMLP, self).__init__(
-            model=mlp,
+        super(CClassifierPyTorchCNNMNIST, self).__init__(
+            model=cnn_mnist_model,
             learning_rate=learning_rate,
             momentum=momentum,
             weight_decay=weight_decay,
@@ -87,10 +84,8 @@ class CClassifierPyTorchMLP(CClassifierPyTorch):
             regularize_bias=regularize_bias,
             train_transform=train_transform,
             preprocess=preprocess,
-            input_shape=(1, input_dims),
+            input_shape=(1, 28, 28),
             softmax_outputs=softmax_outputs,
             random_state=random_state,
-            input_dims=input_dims,
-            hidden_dims=hidden_dims,
-            output_dims=output_dims,
+            num_classes=num_classes
         )
