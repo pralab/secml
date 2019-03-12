@@ -10,7 +10,6 @@ class TestEvasionLinearL1(CEvasionTestCases.TestCEvasion):
     """Evasion with linear classifier and L1 distance constraint."""
 
     def param_setter(self):
-
         self.type_dist = 'l1'
 
         self.dmax = 5.0  # On un-normalized data
@@ -36,7 +35,7 @@ class TestEvasionLinearL1(CEvasionTestCases.TestCEvasion):
         self.ub = +5.0
 
         self.grid_limits = [(-5.5, 5.5), (-5.5, 5.5)]
-        self.name_file = fm.join(fm.abspath(__file__), 'L1_linear.pdf')
+        self.filename = 'test_c_evasion_linear_L1.pdf'
 
 
 if __name__ == '__main__':
