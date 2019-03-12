@@ -34,8 +34,7 @@ class TestEvasionTreeL1(CEvasionTestCases.TestCEvasion):
         self.ub = +1.5
 
         self.grid_limits = [(-2, 2), (-2, 2)]
-        self.name_file = fm.join(fm.abspath(__file__), 'L1_tree.pdf')
-
+        self.filename = 'test_c_evasion_tree_L1.pdf'
 
 if __name__ == '__main__':
     CUnitTest.main()

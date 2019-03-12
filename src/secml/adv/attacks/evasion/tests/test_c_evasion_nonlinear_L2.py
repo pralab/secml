@@ -37,7 +37,7 @@ class TestEvasionNonLinearL2(CEvasionTestCases.TestCEvasion):
         self.ub = 2
 
         self.grid_limits = [(-2.5, 2.5), (-2.5, 2.5)]
-        self.name_file = fm.join(fm.abspath(__file__), 'L2_nonlinear.pdf')
+        self.filename = 'test_c_evasion_nonlinear_L2.pdf'
 
 
 if __name__ == '__main__':

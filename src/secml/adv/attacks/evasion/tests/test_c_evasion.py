@@ -8,6 +8,7 @@ from secml.core.type_utils import is_list
 from secml.array import CArray
 from secml.data.loader import CDLRandomBlobs
 from secml.figure import CFigure
+from secml.utils import fm
 
 from secml.adv.attacks.evasion import CAttackEvasion
 from secml.optimization.constraints import \
@@ -164,8 +165,8 @@ class CEvasionTestCases(object):
             fig.subplot(n_rows=1, n_cols=1, grid_slot=1)
             self._plot_clf(self.evasion, fig, self.x_evas)
             # self._plot_clf_grad(fig)
-            fig.savefig(self.name_file, file_format='pdf')
-            fig.show()
+            fig.savefig(fm.join(fm.abspath(__file__), self.filename), 
+                        file_format='pdf')
 
         def _distance(self, x):
             """Rescale distance for plot"""

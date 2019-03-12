@@ -10,7 +10,6 @@ class TestEvasionLinearL2(CEvasionTestCases.TestCEvasion):
     """Evasion with linear classifier and L2 distance constraint."""
 
     def param_setter(self):
-
         self.type_dist = 'l2'
         self.sparse = True
 
@@ -35,7 +34,7 @@ class TestEvasionLinearL2(CEvasionTestCases.TestCEvasion):
         self.ub = +1.5
 
         self.grid_limits = [(-1.5, 1.5), (-1.5, 1.5)]
-        self.name_file = fm.join(fm.abspath(__file__), 'L2_linear.pdf')
+        self.filename = 'test_c_evasion_linear_L2.pdf'
 
 
 if __name__ == '__main__':
