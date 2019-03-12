@@ -333,5 +333,5 @@ class CSolverDescDir(CSolver):
         if d.ravel().norm() < 1e-20:
             return x, fx
 
-        z, fz = self._explorer._line_search.line_search(x, d, grad, fx=fx)
+        z, fz = self._explorer._line_search.line_search(x, d, fx=fx)
         return z, fz
