@@ -66,10 +66,21 @@ class CArrayTestCases(object):
             self.single_sparse = CArray(
                 self.single_dense.deepcopy(), tosparse=True)
 
+            self.single_flat_dense_zero = CArray([0])
+            self.single_dense_zero = self.single_flat_dense_zero.atleast_2d()
+            self.single_sparse_zero = CArray(
+                self.single_dense_zero.deepcopy(), tosparse=True)
+
             self.single_bool_flat_dense = CArray([True])
             self.single_bool_dense = self.single_bool_flat_dense.atleast_2d()
             self.single_bool_sparse = CArray(
                 self.single_bool_dense.deepcopy(), tosparse=True)
+
+            self.single_bool_flat_dense_false = CArray([False])
+            self.single_bool_dense_false = \
+                self.single_bool_flat_dense_false.atleast_2d()
+            self.single_bool_sparse_false = CArray(
+                self.single_bool_dense_false.deepcopy(), tosparse=True)
 
             self.empty_flat_dense = CArray([], tosparse=False)
             self.empty_dense = CArray([[]], tosparse=False)
@@ -88,7 +99,7 @@ class CArrayTestCases(object):
             # Every item is equal to each other, return True
             return True
 
-        def _test_cycle(self, totest_op, totest_items, totest_result):
+        def _test_operator_cycle(self, totest_op, totest_items, totest_result):
             """Check if operator return the expected result on given items.
 
             totest_op: list of operators
@@ -111,3 +122,15 @@ class CArrayTestCases(object):
                         "Result: {:}".format(result._data.__class__.__name__))
                     to_check.append(result)
                 self.assertTrue(self._test_multiple_eq(to_check))
+
+        def _test_operator_notimplemented(self, totest_op, totest_items):
+            """Check if operator is not implemented for given items.
+
+            totest_op: list of operators
+            totest_items: list of items PAIR to test
+
+            """
+            for operator in totest_op:
+                for pair in totest_items:
+                    with self.assertRaises(NotImplementedError):
+                        operator(pair[0], pair[1])

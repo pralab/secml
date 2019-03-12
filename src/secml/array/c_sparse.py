@@ -380,20 +380,26 @@ class CSparse(_CArrayInterface):
 
         """
         if is_scalar(other) or is_bool(other):
-            raise NotImplementedError("adding a nonzero scalar "
-                                      "to a sparse array is not supported")
+            if other == 0:
+                return self.deepcopy()
+            raise NotImplementedError(
+                "adding a nonzero scalar or a boolean True to a "
+                "sparse array is not supported. Convert to dense if needed.")
         elif isinstance(other, CSparse):  # Sparse + Sparse = Sparse
             return self.__class__(self._data.__add__(other.tocsr()))
-        elif isinstance(other, CDense) \
-                and other.size > 1:  # Sparse + Dense = Dense
-            return CDense(self._data.__add__(other.tondarray()))
+        elif isinstance(other, CDense):  # Sparse + Dense = Dense
+            if other.size == 1:  # scalar-like
+                raise NotImplementedError(
+                    "adding an array of size one to a sparse array "
+                    "is not supported. Convert to dense if needed.")
+            else:  # direct operation or broadcast
+                return CDense(self._data.__add__(other.tondarray()))
         else:
             return NotImplemented
 
     def __radd__(self, other):
         """Element-wise (inverse) addition."""
-        raise NotImplementedError(
-            "adding a nonzero scalar to a sparse array is not supported")
+        return self.__add__(other)
 
     def __sub__(self, other):
         """Element-wise subtraction.
@@ -411,20 +417,33 @@ class CSparse(_CArrayInterface):
 
         """
         if is_scalar(other) or is_bool(other):
-            raise NotImplementedError("subtracting a nonzero scalar "
-                                      "to a sparse array is not supported")
+            if other == 0:
+                return self.deepcopy()
+            raise NotImplementedError(
+                "subtracting a nonzero scalar or a boolean True from a "
+                "sparse array is not supported. Convert to dense if needed.")
         elif isinstance(other, CSparse):  # Sparse - Sparse = Sparse
             return self.__class__(self._data.__sub__(other.tocsr()))
-        elif isinstance(other, CDense) \
-                and other.size > 1:  # Sparse + Dense = Dense
-            return CDense(self._data.__sub__(other.tondarray()))
+        elif isinstance(other, CDense):  # Sparse - Dense = Dense
+            if other.size == 1:  # scalar-like
+                raise NotImplementedError(
+                    "subtracting an array of size one from a sparse array "
+                    "is not supported. Convert to dense if needed.")
+            else:  # direct operation or broadcast
+                return CDense(self._data.__sub__(other.tondarray()))
         else:
             return NotImplemented
 
     def __rsub__(self, other):
         """Element-wise (inverse) subtraction."""
-        raise NotImplementedError(
-            "subtracting a nonzero scalar to a sparse array is not supported")
+        if is_scalar(other) or is_bool(other):
+            if other == 0:
+                return -self.deepcopy()
+            raise NotImplementedError(
+                "subtracting a sparse array from a nonzero scalar or from "
+                "a boolean True is not supported. Convert to dense if needed.")
+        else:
+            return NotImplemented
 
     def __mul__(self, other):
         """Element-wise product.
@@ -598,6 +617,10 @@ class CSparse(_CArrayInterface):
 
         """
         if is_scalar(power) or is_bool(power):
+            if power == 0:
+                raise NotImplementedError(
+                    "using zero or a boolean False as power is not supported "
+                    "for sparse arrays. Convert to dense if needed.")
             return self.__class__((pow(self._data.data, power),
                                    self._data.indices, self._data.indptr),
                                   shape=self.shape)
