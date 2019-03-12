@@ -36,8 +36,7 @@ class CExploreDescentDirection(CCreator):
             eta=eta,
             eta_min=eta_min,
             eta_max=eta_max,
-            max_iter=max_iter,
-            stop_criterion='armijo-goldstein')
+            max_iter=max_iter)
 
         # TODO fix verbose - this is hardcoded
         self._line_search.verbose = 2
@@ -296,7 +295,7 @@ class CExploreDescentDirection(CCreator):
 
             # line search executed in feature space
             v, fv = self._line_search.line_search(
-                x=x, d=-d, grad=self._descent_direction, fx=score)
+                x=x, d=-d, fx=score)
 
             # update subset and continue exploration
             self._update_current_subset()
