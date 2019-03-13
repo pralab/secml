@@ -3,7 +3,6 @@ from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM
 from secml.ml.classifiers.loss.c_softmax import CSoftmax
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
-from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
 from secml.utils import CUnitTest
 
@@ -80,10 +79,9 @@ class TestCSoftmax(CUnitTest):
 
             self.logger.info("ANALITICAL GRAD: {:}".format(grad))
 
-            approx = COptimizer(
-                CFunction(_sigma_pos_label,
-                          _grad_wrapper)
-            ).approx_fprime(score, 1e-5, pos_label)
+            approx = CFunction(
+                _sigma_pos_label, _grad_wrapper).approx_fprime(
+                score, 1e-5, pos_label)
 
             self.logger.info("NUMERICAL GRADIENT: {:}".format(approx))
 

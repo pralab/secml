@@ -4,10 +4,10 @@
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+
 """
 from secml.array import CArray
-from secml.adv.attacks.evasion.solvers import CSolver
-from secml.core.constants import nan, inf
+from secml.optimization.optimizers import CSolver
 
 
 class CSolverGradDesc(CSolver):

@@ -5,6 +5,7 @@
    In this sense, it is an extension of the classical line-search approach.
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+
 """
 from secml.core import CCreator
 from secml.optimization.line_search import CLineSearch

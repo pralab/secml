@@ -5,11 +5,12 @@
    In this sense, it is an extension of the classical line-search approach.
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+
 """
-from secml.adv.attacks.evasion.solvers.descent_direction.explorer import \
+from secml.optimization.optimizers.descent_direction.explorer import \
     CExploreDescentDirection
 from secml.array import CArray
-from secml.adv.attacks.evasion.solvers import CSolver
+from secml.optimization.optimizers import CSolver
 
 
 class CSolverDescDir(CSolver):

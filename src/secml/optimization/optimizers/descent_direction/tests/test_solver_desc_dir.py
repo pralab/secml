@@ -1,12 +1,11 @@
-import unittest
 from secml.utils import CUnitTest
 
-from secml.adv.attacks.evasion.solvers import CSolverDescDir
+from secml.optimization.optimizers import CSolverDescDir
 from secml.optimization.function import CFunction
 from secml.optimization.constraints import CConstraintL2, CConstraintBox
-
 from secml.array import CArray
 from secml.figure import CFigure
+from secml.utils import fm
 
 
 class TestCSolverDescDir(CUnitTest):
@@ -16,11 +15,10 @@ class TestCSolverDescDir(CUnitTest):
         self.eta = 1e-6
         self.eta_min = 1e-4
         self.eps = 1e-12
+        self.filename = 'test_solver_desc_dir'
 
-        pass
-
-    def _plot_optimization(self, solver, grid_limits, g_min, title,
-                           vmin=None, vmax=None):
+    def _plot_optimization(self, function_name, solver, grid_limits, g_min,
+                           title, vmin=None, vmax=None):
         """Plots the optimization problem."""
         fig = CFigure(markersize=12)
         fig.switch_sptype(sp_type='function')
@@ -47,15 +45,15 @@ class TestCSolverDescDir(CUnitTest):
         fig.sp.plot_path(solver.x_seq)
 
         fig.sp.title(title)
-
-        fig.show()
+        fig.savefig(fm.join(fm.abspath(__file__),
+                            self.filename + '_' + function_name + '.pdf'),
+                    file_format='pdf')
 
     def test_rosenbrock(self):
         """Test solver on rosenbrock function."""
         fun = CFunction.create('rosenbrock')
         g_min = CArray([1, 1])
 
-        # x_init = CArray([-1, 1])  # FIXME: DESCENT STOPS AT INIT
         x_init = CArray([-1, -1])
 
         constr = CConstraintL2(center=x_init, radius=3)
@@ -74,8 +72,8 @@ class TestCSolverDescDir(CUnitTest):
         grid_limits = [(-1.1, 1.1), (-1.1, 1.1)]
         title = "Rosenbrock function - " \
                 "Global Minimum @ {:}".format(g_min.tolist())
-        self._plot_optimization(solver, grid_limits, g_min, title,
-                                vmin=0, vmax=10)
+        self._plot_optimization('rosenbrock', solver, grid_limits, g_min,
+                                title, vmin=0, vmax=10)
 
     def test_mccormick(self):
         """Test solver on mccormick function."""
@@ -101,7 +99,7 @@ class TestCSolverDescDir(CUnitTest):
         grid_limits = [(-2, 3), (-3, 2)]
         title = "McCormick function - " \
                 "Global Minimum @ {:}".format(g_min.tolist())
-        self._plot_optimization(solver, grid_limits, g_min, title,
+        self._plot_optimization('mccormick', solver, grid_limits, g_min, title,
                                 vmin=-2, vmax=2)
 
     def test_beale(self):
@@ -127,7 +125,7 @@ class TestCSolverDescDir(CUnitTest):
 
         grid_limits = [(-4.5, 4.5), (-4.5, 4.5)]
         title = "Beale function - Global Minimum @ {:}".format(g_min.tolist())
-        self._plot_optimization(solver, grid_limits, g_min, title,
+        self._plot_optimization('beale', solver, grid_limits, g_min, title,
                                 vmin=0, vmax=5)
 
     def test_3hcamel(self):
@@ -135,7 +133,6 @@ class TestCSolverDescDir(CUnitTest):
         fun = CFunction.create('3h-camel')
         g_min = CArray([0, 0])
 
-        # x_init = CArray([4, 4])  # FIXME: WRONG (STOPS AT LOCAL MINIMUM?)
         x_init = CArray([1, 2])
 
         constr = CConstraintL2(center=x_init, radius=8)
@@ -154,9 +151,9 @@ class TestCSolverDescDir(CUnitTest):
         grid_limits = [(-5, 5), (-5, 5)]
         title = "Three-Hump Camel function - " \
                 "Global Minimum @ {:}".format(g_min.tolist())
-        self._plot_optimization(solver, grid_limits, g_min, title,
+        self._plot_optimization('3hcamel', solver, grid_limits, g_min, title,
                                 vmin=0, vmax=5)
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

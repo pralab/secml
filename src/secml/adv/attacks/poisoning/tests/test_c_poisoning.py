@@ -11,7 +11,6 @@ from secml.data import CDataset
 from secml.ml.classifiers import CClassifierSVM, CClassifierRidge
 from secml.ml.classifiers import CClassifierLogistic
 from secml.ml.peval.metrics import CMetric
-from secml.optimization import COptimizer
 from secml.optimization.constraints import CConstraintBox
 from secml.optimization.function import CFunction
 
@@ -156,10 +155,9 @@ class CPoisoningTestCases(object):
 
         def grad_check(self, xc):
             # Compare analytical gradient with its numerical approximation
-            check_grad_val = COptimizer(
-                CFunction(self.poisoning._objective_function,
-                          self.poisoning._objective_function_gradient)
-            ).check_grad(xc)
+            check_grad_val = CFunction(
+                self.poisoning._objective_function,
+                self.poisoning._objective_function_gradient).check_grad(xc)
             self.logger.info("Gradient difference between analytical svm "
                              "gradient and numerical gradient: %s",
                              str(check_grad_val))
@@ -306,7 +304,7 @@ class CPoisoningTestCases(object):
                                          return_decision_function=True)
             acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
             self.logger.info("Error on testing data: " + str(1 - acc))
-            self.assertGreater(acc, 0.70, "The trained classifier have an "
-                                         "accuracy that is too low to evaluate "
-                                         "if the poisoning against this "
-                                         "calssifier works")
+            self.assertGreater(
+                acc, 0.70, "The trained classifier have an accuracy that "
+                           "is too low to evaluate if the poisoning against "
+                           "this classifier works")
