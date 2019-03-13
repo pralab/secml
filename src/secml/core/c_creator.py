@@ -12,6 +12,7 @@ from functools import wraps
 from secml.core.attr_utils import is_public, extract_attr, \
     as_public, as_private, get_private
 from secml.core.type_utils import is_str
+from secml.core.decorators import deprecated
 import secml.utils.pickle_utils as pck
 from secml.utils.list_utils import find_duplicates
 from secml.utils import CLog, SubLevelsDict
@@ -263,6 +264,7 @@ class CCreator(object):
         raise NameError("no class of type `{:}` found within the package "
                         "of class '{:}'".format(class_type, cls.__module__))
 
+    @deprecated("will be removed no later than in v0.6-dev")
     def clear(self):
         """Resets internal attributes of all the hierarchy.
 
@@ -280,6 +282,7 @@ class CCreator(object):
             if hasattr(base, as_private(base, 'clear')):
                 getattr(self, as_private(base, 'clear'))()
 
+    @deprecated("will be removed no later than in v0.6-dev")
     def is_clear(self):
         """Returns True if object is clear.
 
