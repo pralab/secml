@@ -15,9 +15,9 @@ class deprecated(object):
 
     Note: to use this with the default value for extra,
     put in an empty of parentheses:
-    >>> from sklearn.utils import deprecated
+    >>> from secml.core.decorators import deprecated
     >>> deprecated() # doctest: +ELLIPSIS
-    <sklearn.utils.deprecation.deprecated object at ...>
+    <secml.core.decorators.deprecated object at ...>
 
     >>> @deprecated()
     ... def some_function(): pass
@@ -53,7 +53,7 @@ class deprecated(object):
 
     def _decorate_class(self, cls):
         """Decorate class clf."""
-        msg = "Class %s is deprecated" % cls.__name__
+        msg = "class `%s` is deprecated" % cls.__name__
         if self.extra:
             msg += "; %s" % self.extra
 
@@ -76,7 +76,7 @@ class deprecated(object):
 
     def _decorate_fun(self, fun):
         """Decorate function fun."""
-        msg = "Function %s is deprecated" % fun.__name__
+        msg = "function `%s` is deprecated" % fun.__name__
         if self.extra:
             msg += "; %s" % self.extra
 
