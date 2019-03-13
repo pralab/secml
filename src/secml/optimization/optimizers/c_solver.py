@@ -1,13 +1,13 @@
 """
 .. module:: CSolver
    :synopsis: Abstract class providing a common interface
-    to implement inherited evasion solvers
+    to implement inherited evasion optimizers
     (available now: only descent_direction).
 
-    @author: Battista Biggio
+.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 
 from secml.core import CCreator
 from secml.optimization.function import CFunction
@@ -36,13 +36,10 @@ class CSolver(CCreator):
     __metaclass__ = ABCMeta
     __super__ = 'CSolver'
 
-    def __init__(self,
-                 fun,
-                 constr=None,
-                 bounds=None,
-                 discrete=False):
+    def __init__(self, fun, constr=None, bounds=None, discrete=False):
 
         # this is the function passed by the user to be maximized or minimized
+        # FIXME: THESE ARE NO MORE NEEDED IN LATEST PYCHARM VERSIONS
         self._f = None
         self._constr = None
         self._bounds = None
@@ -50,6 +47,7 @@ class CSolver(CCreator):
 
         # this is the internal function to be always minimized
         self._fun = None  # by default, minimize f(x), so fun=f
+        self._f_seq = None
 
         # calling setters to check types
         self.f = fun  # this will set both f and fun

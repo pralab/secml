@@ -11,6 +11,9 @@ from secml.core import CCreator
 from secml.core.type_utils import is_scalar
 from secml.array import CArray
 
+from scipy import optimize as sc_opt
+from secml.core.constants import eps
+
 
 class CFunction(CCreator):
     """Class that handles generic mathematical functions.
@@ -223,3 +226,134 @@ class CFunction(CCreator):
 
         """
         raise NotImplementedError
+
+    def approx_fprime(self, x, epsilon, *args):
+        """Finite-difference approximation of the gradient of a scalar function.
+
+        Wrapper for scipy function :func:`scipy.optimize.approx_fprime`.
+
+        Parameters
+        ----------
+        x : CArray
+            The flat dense vector with the point at which to determine
+            the gradient of `fun`.
+        epsilon : scalar or CArray
+            Increment of `x` to use for determining the function gradient.
+            If a scalar, uses the same finite difference delta for all partial
+            derivatives.
+            If an array, should contain one value per element of `x`.
+        *args : args, optional
+            Any other arguments that are to be passed to `fun`.
+
+        Returns
+        -------
+        grad : CArray
+            The gradient of `fun` at `x`.
+
+        See Also
+        --------
+        `.check_grad` : Check correctness of function gradient
+            against `approx_fprime`.
+
+        Notes
+        -----
+        The function gradient is determined by the forward finite difference
+        formula::
+
+                     fun(xk[i] + epsilon[i]) - f(xk[i])
+           fun'[i] = -----------------------------------
+                                epsilon[i]
+
+        The main use of `approx_fprime` is to determine numerically
+        the Jacobian of a function.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+        >>> from secml.optimization.function import CFunction
+        >>> from secml.core.constants import eps
+
+        >>> def func(x, c0, c1):
+        ...     "Coordinate vector `x` should be an array of size two."
+        ...     return c0 * x[0]**2 + c1*x[1]**2
+
+        >>> c0, c1 = (1, 200)
+        >>> CFunction(func).approx_fprime(CArray.ones(2), [eps, (200 ** 0.5) * eps], c0, c1)
+        CArray(2,)(dense: [   2.        400.000042])
+
+        """
+        if x.issparse is True or x.is_vector_like is False:
+            raise ValueError("x0 must be a dense flat array")
+
+        # double casting to always have a CArray
+        xk_ndarray = CArray(x).ravel().tondarray()
+
+        epsilon = epsilon.tondarray() if isinstance(epsilon, CArray) else epsilon
+
+        return CArray(
+            sc_opt.approx_fprime(xk_ndarray, self.fun_ndarray, epsilon, *args))
+
+    def check_grad(self, x, *args, **epsilon):
+        """Check the correctness of a gradient function by comparing
+         it against a (forward) finite-difference approximation of
+         the gradient.
+
+        Parameters
+        ----------
+        x : CArray
+            Flat dense pattern to check function gradient against
+            forward difference approximation of function gradient.
+        epsilon : scalar or CArray
+            Increment to `x` to use for determining the function gradient.
+            If a scalar, uses the same finite difference delta for all partial
+            derivatives.  If an array, should contain one value per element of
+            `x`.
+        *args : *args, optional
+            Extra arguments passed to `fun` and `fprime`.
+
+        Returns
+        -------
+        err : float
+            The square root of the sum of squares (i.e. the l2-norm) of the
+            difference between ``fprime(x, *args)`` and the finite difference
+            approximation of `fprime` at the points `x`.
+
+        Notes
+        -----
+        `epsilon` is the only keyword argument accepted by the function. Any
+        other optional argument for `fun` and `fprime` should be passed as
+        non-keyword.
+
+        See Also
+        --------
+        `.approx_fprime` : Finite-difference approximation of the gradient of a scalar function.
+
+        Examples
+        --------
+        >>> from secml.optimization.function import CFunction
+
+        >>> def func(x):
+        ...     return x[0]**2 - 0.5 * x[1]**3
+        >>> def grad(x):
+        ...     return [2 * x[0], -1.5 * x[1]**2]
+
+        >>> fun = CFunction(func, grad)
+        >>> fun.check_grad(CArray([1.5, -1.5]))
+        2.9802322387695312e-08
+
+        """
+        if x.issparse is True or x.is_vector_like is False:
+            raise ValueError("x0 must be a dense flat array")
+
+        # We now extract 'epsilon' if passed by the user
+        if 'epsilon' in epsilon:
+            epsilon = epsilon.pop('epsilon', eps)
+        else:
+            epsilon = eps
+
+        # real value of the gradient on x
+        grad = self.gradient(x, *args)
+        # value of the approximated gradient on x
+        approx = self.approx_fprime(x, epsilon, *args)
+
+        return (grad - approx).norm()

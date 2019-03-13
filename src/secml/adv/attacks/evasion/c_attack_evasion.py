@@ -9,7 +9,7 @@
 
 """
 from secml.adv.attacks import CAttack
-from secml.adv.attacks.evasion.solvers import CSolver
+from secml.optimization.optimizers import CSolver
 from secml.array import CArray
 from secml.data import CDataset
 from secml.core.constants import nan

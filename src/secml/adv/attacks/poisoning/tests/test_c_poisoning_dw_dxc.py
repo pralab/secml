@@ -2,7 +2,6 @@ from secml.utils import CUnitTest
 from test_c_poisoning import CPoisoningTestCases
 from secml.adv.attacks.poisoning.tests import CAttackPoisoningLinTest
 from secml.figure import CFigure
-from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
 
 
@@ -97,8 +96,8 @@ class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):
         """
 
         # Compare analytical gradient with its numerical approximation
-        check_grad_val = COptimizer(
-            CFunction(f_param, df_param)).check_grad(xc, epsilon=100)
+        check_grad_val = CFunction(
+            f_param, df_param).check_grad(xc, epsilon=100)
         self.logger.info("Gradient difference between analytical {:} "
                          "gradient and numerical gradient: %s".format(param_name),
                          str(check_grad_val))

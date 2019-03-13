@@ -1,7 +1,7 @@
 from secml.utils import CUnitTest
 
 from secml.array import CArray
-from secml.optimization import COptimizer
+from secml.optimization.optimizers import CSolverScipy
 from secml.optimization.function import CFunction
 
 
@@ -29,7 +29,7 @@ class TestCOptimizer(CUnitTest):
             self.logger.info(
                 "Testing minimization of {:}".format(fun.__class__.__name__))
 
-            opt = COptimizer(fun)
+            opt = CSolverScipy(fun)
             min_x, jac, fun_val, res = opt.minimize(
                 x0, method='BFGS', options={'gtol': 1e-6, 'disp': True})
 
@@ -56,8 +56,7 @@ class TestCOptimizer(CUnitTest):
             self.logger.info(
                 "Testing grad approx of {:}".format(fun.__class__.__name__))
 
-            opt = COptimizer(fun)
-            grad_err = opt.check_grad(x0)
+            grad_err = fun.check_grad(x0)
 
             self.logger.info(
                 "(Real grad - approx).norm(): {:}".format(grad_err))
@@ -106,17 +105,15 @@ class TestCOptimizer(CUnitTest):
             "Testing when the function and the gradient have two parameter")
 
         fun = CFunction(fun=self._fun_2_params, gradient=self._dfun_2_params)
-        opt = COptimizer(fun)
-
         self.logger.info("Testing check_grad")
 
-        grad_err = opt.check_grad(x0, 1)
+        grad_err = fun.check_grad(x0, 1)
         self.logger.info("Grad error: {:}".format(grad_err))
         self.assertEqual(0, grad_err)
 
         self.logger.info("Testing approx_fprime")
 
-        grad_err = opt.approx_fprime(x0, epsilon, 1).item()
+        grad_err = fun.approx_fprime(x0, epsilon, 1).item()
         self.logger.info("Grad error: {:}".format(grad_err))
         self.assertEqual(0, grad_err)
 
@@ -125,17 +122,16 @@ class TestCOptimizer(CUnitTest):
             " as second parameter")
 
         fun = CFunction(fun=self._fun_args, gradient=self._dfun_args)
-        opt = COptimizer(fun)
 
         self.logger.info("Testing check_grad ")
 
-        grad_err = opt.check_grad(x0, {'y': 1})
+        grad_err = fun.check_grad(x0, {'y': 1})
         self.logger.info("Grad error: {:}".format(grad_err))
         self.assertEqual(0, grad_err)
 
         self.logger.info("Testing approx_fprime ")
 
-        grad_err = opt.approx_fprime(x0, epsilon, ({'y': 1}))
+        grad_err = fun.approx_fprime(x0, epsilon, ({'y': 1}))
         self.logger.info("Grad error: {:}".format(grad_err))
         self.assertEqual(0, grad_err)
 

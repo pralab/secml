@@ -3,7 +3,6 @@ from secml.utils import CUnitTest
 from secml.ml.kernel import *
 from secml.array import CArray
 from secml.data.loader import CDLRandom
-from secml.optimization import COptimizer
 from secml.optimization.function import CFunction
 
 
@@ -50,9 +49,9 @@ class TestKernelGradient(CUnitTest):
         for kernel in self.kernels:
             self.logger.info("kernel type: %s", kernel.class_type)
 
-            grad_error = COptimizer(
-                CFunction(kern_f_for_test, kern_grad_for_test)).check_grad(
-                    self.p2_dense, self.p1_dense, kernel)
+            grad_error = CFunction(
+                kern_f_for_test, kern_grad_for_test).check_grad(
+                self.p2_dense, self.p1_dense, kernel)
 
             self.logger.info("error committed into own grad calc is {:}"
                              "".format(grad_error))

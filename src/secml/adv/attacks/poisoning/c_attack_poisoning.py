@@ -9,7 +9,7 @@ import warnings
 from abc import ABCMeta, abstractmethod
 
 from secml.adv.attacks import CAttack
-from secml.adv.attacks.evasion.solvers import CSolver
+from secml.optimization.optimizers import CSolver
 from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.classifiers.loss import CLoss
