@@ -181,7 +181,7 @@ class TestCClassifierPyTorchDenseNetCifar(CClassifierTestCases):
         labels, scores = self.clf.predict(x, return_decision_function=True)
         self.logger.info(
             "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
-        _check_classify_scores(labels, scores, 5, self.clf.n_classes)
+        _check_classify_scores(labels, scores, 5, self.ts.num_classes)
 
         # Comparing output of decision_function and predict
 
@@ -234,7 +234,7 @@ class TestCClassifierPyTorchDenseNetCifar(CClassifierTestCases):
         labels, scores = self.clf.predict(p, return_decision_function=True)
         self.logger.info(
             "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
-        _check_classify_scores(labels, scores, 1, self.clf.n_classes)
+        _check_classify_scores(labels, scores, 1, self.ts.num_classes)
 
         # Comparing output of decision_function and predict
 

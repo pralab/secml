@@ -93,20 +93,6 @@ class CNormalizerMinMax(CNormalizerLinear):
 
         super(CNormalizerMinMax, self).__init__(preprocess=preprocess)
 
-    def __clear(self):
-        """Reset the object."""
-        self._data_min = None
-        self._data_max = None
-        # Properties of the linear normalizer
-        # we split them to easily manage feature_range
-        self._m = None
-        self._q = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return self.min is None and self.max is None and \
-            self._m is None and self._q is None
-
     @property
     def w(self):
         """Returns the slope of the linear normalizer."""

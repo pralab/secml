@@ -61,6 +61,18 @@ class CPreProcess(CCreator):
 
         return chain
 
+    @abstractmethod
+    def _check_is_fitted(self):
+        """Check if the preprocessor is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the preprocessor is not fitted.
+
+        """
+        raise NotImplementedError
+
     def _preprocess_data(self, x):
         """Apply the inner preprocess to input, if defined.
 
@@ -102,8 +114,6 @@ class CPreProcess(CCreator):
             Instance of the trained preprocessor.
 
         """
-        self.clear()  # Reset trained normalizer  TODO: clear is DEPRECATED
-
         if self.preprocess is not None:
             x = self.preprocess.fit_transform(x, y)
 
@@ -161,9 +171,7 @@ class CPreProcess(CCreator):
             Transformed input data.
 
         """
-        # Training first!  # TODO: is_clear is DEPRECATED
-        if self.is_clear():
-            raise ValueError("fit the normalizer first.")
+        self._check_is_fitted()
 
         # Transform data using inner preprocess, if defined
         x = self._preprocess_data(x)
@@ -196,9 +204,7 @@ class CPreProcess(CCreator):
         See description of each preprocessor for details.
 
         """
-        # Training first!  # TODO: is_clear is DEPRECATED
-        if self.is_clear():
-            raise ValueError("fit the normalizer first.")
+        self._check_is_fitted()
 
         v = self._revert(x)
 
@@ -234,9 +240,7 @@ class CPreProcess(CCreator):
             If `w.shape[0]` is 1, result will be raveled.
 
         """
-        # Training first!
-        if self.is_clear():  # TODO: is_clear is DEPRECATED
-            raise ValueError("fit the normalizer first.")
+        self._check_is_fitted()
 
         x_in = x  # Original input data (not transformed by inner preprocess)
 

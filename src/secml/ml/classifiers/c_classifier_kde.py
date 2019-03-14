@@ -11,6 +11,7 @@ from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.clf_utils import \
     check_binary_labels, convert_binary_labels
 from secml.ml.kernel import CKernel
+from secml.utils.mixed_utils import check_is_fitted
 
 
 class CClassifierKDE(CClassifier):
@@ -49,17 +50,10 @@ class CClassifierKDE(CClassifier):
 
         self._training_samples = None  # slot store training samples
 
-    def __clear(self):
-        self._training_samples = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return self._training_samples is None
-
     def is_linear(self):
         """Return True if the classifier is linear."""
         if (self.preprocess is None or self.preprocess is not None and
-            self.preprocess.is_linear()) and self.is_kernel_linear():
+                self.preprocess.is_linear()) and self.is_kernel_linear():
             return True
         return False
 
@@ -68,6 +62,18 @@ class CClassifierKDE(CClassifier):
         if self.kernel is None or self.kernel.class_type == 'linear':
             return True
         return False
+
+    def _check_is_fitted(self):
+        """Check if the classifier is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier is not fitted.
+
+        """
+        check_is_fitted(self, 'training_samples')
+        super(CClassifierKDE, self)._check_is_fitted()
 
     @property
     def kernel(self):
@@ -142,8 +148,7 @@ class CClassifierKDE(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
-        if self.is_clear():
-            raise ValueError("make sure the classifier is trained first.")
+        self._check_is_fitted()
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 

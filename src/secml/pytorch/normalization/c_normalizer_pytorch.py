@@ -8,6 +8,7 @@
 from secml import _NoValue
 from secml.array import CArray
 from secml.ml.features.normalization import CNormalizer
+from secml.core.exceptions import NotFittedError
 
 
 class CNormalizerPyTorch(CNormalizer):
@@ -39,6 +40,10 @@ class CNormalizerPyTorch(CNormalizer):
         self._pytorch_clf = pytorch_clf
         self.out_layer = out_layer
 
+        if not self.pytorch_clf.is_fitted():
+            raise NotFittedError(
+                "the PyTorch classifier should be already trained.")
+
         if preprocess is not _NoValue:
             raise ValueError("any additional `preprocess` should be passed "
                              "to the PyTorch classifier.")
@@ -46,16 +51,21 @@ class CNormalizerPyTorch(CNormalizer):
         # No preprocess should be passed to super
         super(CNormalizerPyTorch, self).__init__(preprocess=None)
 
-    # DO NOT clear the inner pytorch_clf as must be passed already trained
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return self.pytorch_clf.is_clear()
-
     @property
     def pytorch_clf(self):
         """The PyTorch Classifier."""
         return self._pytorch_clf
+
+    def _check_is_fitted(self):
+        """Check if the preprocessor is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the preprocessor is not fitted.
+
+        """
+        pass  # This preprocessor does not require training
 
     def _fit(self, x, y=None):
         """Fit normalization algorithm using data.
@@ -80,13 +90,7 @@ class CNormalizerPyTorch(CNormalizer):
         return self
 
     def fit(self, x, y=None):
-        # Training first!  # TODO: is_clear is DEPRECATED
-        if self.is_clear():
-            raise ValueError(
-                "fit the normalizer and the PyTorch classifier first.")
-
         # The inner preprocessor is managed by the inner PyTorch classifier
-
         return self._fit(x, y)
 
     fit.__doc__ = _fit.__doc__  # Same doc of the protected method
@@ -112,13 +116,8 @@ class CNormalizerPyTorch(CNormalizer):
         return self.pytorch_clf.get_layer_output(x, self.out_layer)
 
     def transform(self, x):
-        # Training first!  # TODO: is_clear is DEPRECATED
-        if self.is_clear():
-            raise ValueError(
-                "fit the normalizer and the PyTorch classifier first.")
-
+        self._check_is_fitted()
         # The inner preprocessor is managed by the inner PyTorch classifier
-
         return self._transform(x)
 
     transform.__doc__ = _transform.__doc__  # Same doc of the protected method
@@ -143,10 +142,7 @@ class CNormalizerPyTorch(CNormalizer):
             Gradient of the normalizer wrt input data. Vector-like array.
 
         """
-        # Training first!
-        if self.is_clear() is True:  # TODO: is_clear is DEPRECATED
-            raise ValueError(
-                "fit the normalizer and the PyTorch classifier first.")
+        self._check_is_fitted()
 
         if not x.is_vector_like:
             raise ValueError('Gradient available only wrt a single point!')

@@ -72,14 +72,6 @@ class CNormalizerUnitNorm(CNormalizer):
 
         super(CNormalizerUnitNorm, self).__init__(preprocess=preprocess)
 
-    def __clear(self):
-        """Reset the object."""
-        self._norm = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return self.norm is None
-
     @property
     def order(self):
         """Returns the order of the norm used for patterns normalization."""
@@ -89,6 +81,17 @@ class CNormalizerUnitNorm(CNormalizer):
     def norm(self):
         """Returns the norm of each training array's patterns."""
         return self._norm
+
+    def _check_is_fitted(self):
+        """Check if the preprocessor is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the preprocessor is not fitted.
+
+        """
+        pass  # This preprocessor does not require training
 
     def _fit(self, x, y=None):
         """Fit the normalizer.
@@ -113,14 +116,6 @@ class CNormalizerUnitNorm(CNormalizer):
 
         """
         return self
-
-    # FIXME: remove this method after removing clear DEPRECATED framework
-    def transform(self, x):
-
-        # Transform data using inner preprocess, if defined
-        x = self._preprocess_data(x)
-
-        return self._transform(x)
 
     def _transform(self, x):
         """Transform array patterns to have unit norm.

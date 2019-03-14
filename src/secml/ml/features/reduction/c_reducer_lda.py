@@ -6,9 +6,11 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+
 from secml.array import CArray
 from secml.ml.features.reduction import CReducer
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from secml.utils.mixed_utils import check_is_fitted
 
 
 class CLDA(CReducer):
@@ -85,6 +87,17 @@ class CLDA(CReducer):
     def classes(self):
         """Unique targets used for training."""
         return self._classes
+
+    def _check_is_fitted(self):
+        """Check if the preprocessor is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the preprocessor is not fitted.
+
+        """
+        check_is_fitted(self, ['_lda', 'mean'])
 
     def _fit(self, x, y):
         """Fit the LDA using input data.
@@ -171,9 +184,6 @@ class CLDA(CReducer):
         ValueError: array to transform must have 3 features (columns).
 
         """
-        if self.mean is None:
-            raise ValueError("fit LDA first.")
-
         data_carray = CArray(x).todense().atleast_2d()
         if data_carray.shape[1] != self.mean.size:
             raise ValueError("array to transform must have {:} features "

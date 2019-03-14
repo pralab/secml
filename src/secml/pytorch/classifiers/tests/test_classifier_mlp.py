@@ -302,7 +302,7 @@ class TestCClassifierPyTorchMLP(CClassifierTestCases):
         self.assertEqual(self.clf.n_features, clf2.n_features)
 
         self.assertEqual(3, clf2.classes.size)
-        self.assertEqual(21, clf2.n_features)
+        self.assertEqual(20, clf2.n_features)
 
         self.assertEqual(self.clf.start_epoch, clf2.start_epoch)
 

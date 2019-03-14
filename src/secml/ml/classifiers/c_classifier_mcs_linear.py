@@ -59,13 +59,6 @@ class CClassifierMCSLinear(CClassifierLinear):
         self.max_samples = max_samples
         self.max_features = max_features
         self.random_state = random_state
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        # CClassifierLinear attributes
-        if self._w is not None or self._b is not None:
-            return False
-        return True
     
     @property
     def classifier(self):

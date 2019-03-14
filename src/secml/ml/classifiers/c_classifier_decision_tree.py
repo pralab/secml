@@ -11,6 +11,7 @@ from sklearn import tree
 
 from secml.array import CArray
 from secml.ml.classifiers import CClassifier
+from secml.utils.mixed_utils import check_is_fitted
 
 
 class CClassifierDecisionTree(CClassifier):
@@ -42,15 +43,7 @@ class CClassifierDecisionTree(CClassifier):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
 
-        self._dt = None
-
-    def __clear(self):
-        """Reset the object."""
-        self._dt = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return self._dt is None
+        self._dt = None  # sklearn decision tree classifier
 
     @property
     def min_samples_split(self):
@@ -61,6 +54,18 @@ class CClassifierDecisionTree(CClassifier):
     def min_samples_split(self, value):
         """Return decision tree min_samples_split."""
         self._min_samples_split = int(value)
+
+    def _check_is_fitted(self):
+        """Check if the classifier is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier is not fitted.
+
+        """
+        check_is_fitted(self, ['_dt'])
+        super(CClassifierDecisionTree, self)._check_is_fitted()
 
     def _fit(self, dataset):
         """Trains the Decision Tree classifier."""

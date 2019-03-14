@@ -6,11 +6,13 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from sklearn.neighbors import NearestCentroid
+from sklearn.metrics import pairwise_distances
+
 from secml.array import CArray
 from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.clf_utils import convert_binary_labels
-from sklearn.neighbors import NearestCentroid
-from sklearn.metrics import pairwise_distances
+from secml.utils.mixed_utils import check_is_fitted
 
 
 # TODO: EXPAND CLASS DOCSTRING
@@ -43,15 +45,6 @@ class CClassifierNearestCentroid(CClassifier):
         self._nc = None
         self._centroids = None
 
-    def __clear(self):
-        """Reset the object."""
-        self._nc = None
-        self._centroids = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return self._nc is None and self._centroids is None
-
     @property
     def metric(self):
         return self._metric
@@ -59,6 +52,18 @@ class CClassifierNearestCentroid(CClassifier):
     @property
     def centroids(self):
         return self._centroids
+
+    def _check_is_fitted(self):
+        """Check if the classifier is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier is not fitted.
+
+        """
+        check_is_fitted(self, 'centroids')
+        super(CClassifierNearestCentroid, self)._check_is_fitted()
 
     def _fit(self, dataset):
         """Trains classifier 
@@ -113,8 +118,7 @@ class CClassifierNearestCentroid(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
-        if self.is_clear():
-            raise ValueError("make sure the classifier is trained first.")
+        self._check_is_fitted()
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 

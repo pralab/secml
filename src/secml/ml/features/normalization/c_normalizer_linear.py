@@ -6,8 +6,10 @@
 
 """
 from abc import abstractproperty
+
 from secml.array import CArray
 from secml.ml.features.normalization import CNormalizer
+from secml.utils.mixed_utils import check_is_fitted
 
 
 # TODO: ADD SPARSE ARRAYS SUPPORT
@@ -52,6 +54,17 @@ class CNormalizerLinear(CNormalizer):
         """Returns the bias of the linear normalizer."""
         # b must be a CArray
         raise NotImplementedError("Linear normalizer should define the bias.")
+
+    def _check_is_fitted(self):
+        """Check if the preprocessor is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the preprocessor is not fitted.
+
+        """
+        check_is_fitted(self, ['w', 'b'])
 
     def _transform(self, x):
         """Linearly scales features.
