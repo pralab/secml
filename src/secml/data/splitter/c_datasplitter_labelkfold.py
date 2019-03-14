@@ -60,12 +60,13 @@ class CDataSplitterLabelKFold(CDataSplitter):
 
         Returns
         -------
-        splitter : CDataSplitterLabelKFold
+        CDataSplitter
             Instance of the dataset splitter with tr/ts indices.
 
         """
         # Resetting indices
-        self.clear()
+        self._tr_idx = []
+        self._ts_idx = []
 
         unique_labels, labels = dataset.Y.unique(return_inverse=True)
         n_labels = unique_labels.size

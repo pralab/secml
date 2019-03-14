@@ -150,8 +150,7 @@ class CPerfEvaluator(CCreator):
         self.logger.info("Best params: {:} - Value: {:}".format(
             best_params_dict, best_value))
 
-        # Clear estimator and restore original parameters
-        estimator.clear()
+        # Restore original parameters of classifier
         for param in original_estimator.__dict__:
             estimator.__dict__[param] = original_estimator.__dict__[param]
 

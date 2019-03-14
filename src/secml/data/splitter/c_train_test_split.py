@@ -92,11 +92,6 @@ class CTrainTestSplit(CCreator):
         self._tr_idx = None  # Training set indices
         self._ts_idx = None  # Test set indices
 
-    def __clear(self):
-        """Reset the object."""
-        self._tr_idx = None
-        self._ts_idx = None
-
     @property
     def tr_idx(self):
         """Training set indices obtained with the split of the data."""
@@ -115,13 +110,12 @@ class CTrainTestSplit(CCreator):
         dataset : CDataset
             Dataset to split.
 
-        Notes
-        -----
-        Calling this method will reset the tr/ts indices computed by .split().
+        Returns
+        -------
+        tr_idx, ts_idx : CArray
+            Flat arrays with the tr/ts indices.
 
         """
-        self.clear()
-
         min_set_perc = 1.0 / dataset.num_samples
         if (is_float(self.train_size) and self.train_size < min_set_perc) or \
                 (is_int(self.train_size) and self.train_size < 1):
@@ -156,13 +150,8 @@ class CTrainTestSplit(CCreator):
         ds_train, ds_test : CDataset
             Train and Test datasets.
 
-        Notes
-        -----
-        Calling this method will reset the tr/ts indices computed
-         by .compute_indices().
-
         """
-        # Computing splitting indices (will call .clear() too)
+        # Computing splitting indices
         tr_idx, ts_idx = self.compute_indices(dataset)
 
         return dataset[tr_idx, :], dataset[ts_idx, :]

@@ -98,12 +98,13 @@ class CDataSplitterShuffle(CDataSplitter):
 
         Returns
         -------
-        splitter : CDataSplitterShuffle
+        CDataSplitter
             Instance of the dataset splitter with tr/ts indices.
 
         """
         # Resetting indices
-        self.clear()
+        self._tr_idx = []
+        self._ts_idx = []
 
         sk_splitter = ShuffleSplit(n_splits=self.num_folds,
                                    train_size=self.train_size,
