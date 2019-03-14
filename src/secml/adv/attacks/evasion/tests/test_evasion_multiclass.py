@@ -8,7 +8,7 @@ from secml.ml.kernel import CKernelRBF
 from secml.utils import fm
 
 from secml.figure import CFigure
-from secml.optimization.constraints import CConstraintL2
+from secml.optim.constraints import CConstraintL2
 from secml.ml.features.normalization import CNormalizerMinMax
 
 from secml.adv.attacks.evasion import CAttackEvasion

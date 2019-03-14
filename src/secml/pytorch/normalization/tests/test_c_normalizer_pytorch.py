@@ -3,7 +3,7 @@ from secml.utils import CUnitTest
 from secml.pytorch.normalization import CNormalizerPyTorch
 from secml.pytorch.classifiers import CClassifierPyTorchMLP
 from secml.data.loader import CDLRandom
-from secml.optimization.function import CFunction
+from secml.optim.function import CFunction
 
 
 class TestCNormalizerPyTorch(CUnitTest):

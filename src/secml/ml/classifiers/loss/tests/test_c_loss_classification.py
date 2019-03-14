@@ -5,7 +5,7 @@ from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM
 from secml.array import CArray
 from secml.figure import CFigure
-from secml.optimization.function import CFunction
+from secml.optim.function import CFunction
 
 
 class TestCLossClassification(CUnitTest):

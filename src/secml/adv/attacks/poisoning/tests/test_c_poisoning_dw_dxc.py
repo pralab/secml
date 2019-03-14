@@ -2,7 +2,7 @@ from secml.utils import CUnitTest
 from test_c_poisoning import CPoisoningTestCases
 from secml.adv.attacks.poisoning.tests import CAttackPoisoningLinTest
 from secml.figure import CFigure
-from secml.optimization.function import CFunction
+from secml.optim.function import CFunction
 
 
 class TestCPoisoning_dw_dxc(CPoisoningTestCases.TestCPoisoning):

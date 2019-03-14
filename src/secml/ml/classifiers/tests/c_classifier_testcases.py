@@ -2,7 +2,7 @@ from secml.utils import CUnitTest
 
 from secml.data import CDataset
 from secml.ml.features import CPreProcess
-from secml.optimization.function import CFunction
+from secml.optim.function import CFunction
 from secml.core.constants import eps
 
 

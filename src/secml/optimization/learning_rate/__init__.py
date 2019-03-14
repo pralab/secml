@@ -1,5 +1,0 @@
-from secml.optimization.learning_rate.c_step import CStep
-from secml.optimization.learning_rate.c_step_constant import CStepConstant
-from secml.optimization.learning_rate.c_step_optimal import CStepOptimal
-from secml.optimization.learning_rate.c_step_invscaling import CStepInvscaling
-from secml.optimization.learning_rate.c_step_exponential import CStepExponential

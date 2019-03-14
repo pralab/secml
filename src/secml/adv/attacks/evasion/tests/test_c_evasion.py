@@ -11,7 +11,7 @@ from secml.figure import CFigure
 from secml.utils import fm
 
 from secml.adv.attacks.evasion import CAttackEvasion
-from secml.optimization.constraints import \
+from secml.optim.constraints import \
     CConstraintBox, CConstraintL1, CConstraintL2
 
 

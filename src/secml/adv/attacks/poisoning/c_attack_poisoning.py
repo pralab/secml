@@ -9,22 +9,20 @@ import warnings
 from abc import ABCMeta, abstractmethod
 
 from secml.adv.attacks import CAttack
-from secml.optimization.optimizers import CSolver
+from secml.optim.optimizers import COptimizer
 from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.classifiers.loss import CLoss
 from secml.ml.peval.metrics import CMetric
-from secml.optimization.constraints import CConstraint
-from secml.optimization.function import CFunction
+from secml.optim.constraints import CConstraint
+from secml.optim.function import CFunction
 
 
 class CAttackPoisoning(CAttack):
-    """Class providing a common interface to CSolver classes."""
+    """Class for implementing poisoning attacks."""
     __metaclass__ = ABCMeta
     __super__ = 'CAttackPoisoning'
 
-    # fixme: use always the softmax loss as attacker loss
-    # FIXME: FOLLOW THE THE CATTACK SIGNATURE OR CHANGE IT (LSP ANYONE?)
     def __init__(self, classifier,
                  training_data,
                  surrogate_classifier,
@@ -85,6 +83,7 @@ class CAttackPoisoning(CAttack):
                 "Poisoning in discrete space is not implemented yet!")
 
         # fixme: use the cross-entropy for all the classifier poisoning
+        # fixme: Bat - WHY!? I don't think we should use a single loss
         if classifier.class_type == 'svm':
             loss_name = 'hinge'
         elif classifier.class_type == 'logistic':
@@ -219,7 +218,7 @@ class CAttackPoisoning(CAttack):
         if solver_type is None:
             solver_type = 'gradient-descent'
 
-        self._solver = CSolver.create(
+        self._solver = COptimizer.create(
             solver_type,
             fun=fun, constr=constr,
             bounds=bounds,
@@ -543,7 +542,7 @@ class CAttackPoisoning(CAttack):
                 xc[idx, :] = self._run(xc, yc, idx=idx)
                 # optimizing poisoning point 0
                 self.logger.info(
-                    "poisoning point {:} optimization fopt: {:}".format(
+                    "poisoning point {:} optim fopt: {:}".format(
                         i, self._f_opt))
 
                 y_pred, scores = self._poisoned_clf.predict(

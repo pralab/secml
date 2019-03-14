@@ -11,8 +11,8 @@ from secml.data import CDataset
 from secml.ml.classifiers import CClassifierSVM, CClassifierRidge
 from secml.ml.classifiers import CClassifierLogistic
 from secml.ml.peval.metrics import CMetric
-from secml.optimization.constraints import CConstraintBox
-from secml.optimization.function import CFunction
+from secml.optim.constraints import CConstraintBox
+from secml.optim.function import CFunction
 
 
 class CPoisoningTestCases(object):

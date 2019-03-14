@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 
 from secml.utils import CUnitTest
 from secml.array import CArray
-from secml.optimization.function import CFunction
+from secml.optim.function import CFunction
 from secml.ml.classifiers.gradients.tests.utils import CClassifierGradientTest
 
 

@@ -9,12 +9,12 @@
 
 """
 from secml.adv.attacks import CAttack
-from secml.optimization.optimizers import CSolver
+from secml.optim.optimizers import COptimizer
 from secml.array import CArray
 from secml.data import CDataset
 from secml.core.constants import nan
-from secml.optimization.function import CFunction
-from secml.optimization.constraints import CConstraint
+from secml.optim.function import CFunction
+from secml.optim.constraints import CConstraint
 from secml.ml.classifiers.reject import CClassifierReject
 
 
@@ -263,7 +263,7 @@ class CAttackEvasion(CAttack):
 
         bounds = CConstraint.create('box', lb=lb, ub=ub)
 
-        self._solver = CSolver.create(
+        self._solver = COptimizer.create(
             solver_type,
             fun=fun, constr=constr,
             bounds=bounds,

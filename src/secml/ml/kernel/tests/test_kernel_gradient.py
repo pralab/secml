@@ -3,7 +3,7 @@ from secml.utils import CUnitTest
 from secml.ml.kernel import *
 from secml.array import CArray
 from secml.data.loader import CDLRandom
-from secml.optimization.function import CFunction
+from secml.optim.function import CFunction
 
 
 class TestKernelGradient(CUnitTest):
