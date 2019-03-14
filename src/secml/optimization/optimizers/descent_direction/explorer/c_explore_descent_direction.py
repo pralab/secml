@@ -149,7 +149,7 @@ class CExploreDescentDirection(CCreator):
             self._set_random_descent_direction(x)
 
         # remove features that, if modified, violate the box constraint
-        x_feas = self._filter_descent_direction(x)
+        x_feasible = self._filter_descent_direction(x)
 
         # if we are optimizing all features at once,
         # there's no need of sorting to find the best ones
@@ -162,7 +162,7 @@ class CExploreDescentDirection(CCreator):
 
         # TODO: this may be not required now.
         self._ff_idx_top_feat = self._idx_top_feat[
-            x_feas[self._idx_top_feat] == 1]
+            x_feasible[self._idx_top_feat.ravel()] == 1]
 
         self._ff_n_feat = self._ff_idx_top_feat.size
 
@@ -174,21 +174,21 @@ class CExploreDescentDirection(CCreator):
         if self._descent_direction is None:
             return
 
-        x_lb = 1 - (
-            (self._descent_direction > 0)).logical_and(
-            x.round(12) == self.bounds.lb.round(12)).astype(int)
+        # feature manipulations that violate box
+        x_lb = (self._descent_direction > 0).logical_and(
+            x.round(6) == self.bounds.lb.round(6)).astype(int)
 
-        x_ub = 1 - (
-            (self._descent_direction < 0)).logical_and(
-            x.round(12) == self.bounds.ub.round(12)).astype(int)
+        x_ub = (self._descent_direction < 0).logical_and(
+            x.round(6) == self.bounds.ub.round(6)).astype(int)
 
-        # feasible feature manipulations that do not violate box
-        x_feas = x_lb * x_ub
+        # feature manipulations that do not violate box
+        # TODO: think of more efficient implementation for sparse data (if any)
+        x_feasible = (x_lb + x_ub) < 1
 
         # reset gradient for unfeasible features
-        self._descent_direction[x_feas == 0] = 0
+        self._descent_direction *= x_feasible
 
-        return x_feas
+        return x_feasible
 
     def _set_gradient_descent_direction(self, x):
         """Sets the descent direction to the gradient of fun"""

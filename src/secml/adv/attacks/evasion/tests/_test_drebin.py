@@ -9,6 +9,8 @@ from secml.utils import fm, pickle_utils
 
 # ATTENTION!
 # NB: THIS IS A DRAFT OF A TEST USING DREBIN (BOOLEAN FEATURES)
+# FIXME: THIS SCRIPT IMPORTS DREBIN, WHICH IS AN INTERNAL-ONLY DATASET.
+#  SHOULD BE REMOVED FROM MAIN BRANCH
 
 
 if not fm.file_exist('ds.gz'):
@@ -29,7 +31,7 @@ if not fm.file_exist('ds.gz'):
 else:
     tr, ts = pickle_utils.load('ds.gz')
 
-mal_idx = ts.Y.find(ts.Y == 1)[:10]
+mal_idx = ts.Y.find(ts.Y == 1)[:3]
 adv_ds = ts[mal_idx, :]
 
 if not fm.file_exist('clf.gz'):
@@ -48,7 +50,7 @@ lb = 'x0'  # None
 ub = 1     # None
 distance = 'l1'
 discrete = True
-dmax = 30
+dmax = 5
 dmax_step = 1
 
 y_target = None
@@ -83,3 +85,5 @@ sec_eval = CSecEval(
 
 
 sec_eval.run_sec_eval(adv_ds)
+
+print sec_eval.sec_eval_data.adv_ds[0].X[0, :] != sec_eval.sec_eval_data.adv_ds[-1].X[0, :]
