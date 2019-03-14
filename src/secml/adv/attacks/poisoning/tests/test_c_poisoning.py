@@ -189,7 +189,6 @@ class CPoisoningTestCases(object):
             tr = self.tr.append(CDataset(xc, self.yc))
 
             pois_clf = self.classifier.deepcopy()
-            pois_clf.clear()
 
             pois_clf.fit(tr)
             y_pred, scores = pois_clf.predict(self.ts.X,

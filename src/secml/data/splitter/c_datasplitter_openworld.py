@@ -73,14 +73,6 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
 
         self._tr_classes = []
 
-    def __clear(self):
-        """Reset the object."""
-        self._tr_classes = []
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return len(self._tr_classes) == 0
-
     @property
     def tr_classes(self):
         """List of training classes obtained with the split of the data."""
@@ -96,12 +88,14 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
 
         Returns
         -------
-        splitter : CDataSplitterOpenWorldKFold
+        CDataSplitter
             Instance of the dataset splitter with tr/ts indices.
 
         """
         # Resetting indices
-        self.clear()
+        self._tr_idx = []
+        self._ts_idx = []
+        self._tr_classes = []
 
         # If no custom number of training classes is selected,
         # use half of the classes

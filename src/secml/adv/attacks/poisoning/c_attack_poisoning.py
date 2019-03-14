@@ -315,7 +315,6 @@ class CAttackPoisoning(CAttack):
             # hash is stored only if update_poisoned_clf() is called w/out pars
             self._xc_hash = xc_hash if xc_hash_is_valid else None
             self._poisoned_clf = clf.deepcopy()
-            self._poisoned_clf.clear()
 
             # we assume that normalizer is not changing w.r.t xc!
             # so we avoid re-training the normalizer on dataset including xc
