@@ -75,14 +75,15 @@ def parse_config(conf_files, section, parameter, default=None, dtype=None):
             # Use default if config file does not exists
             # or does not have the desired section
             return default
-        raise RuntimeError("check that section `[{:}]` exists in {:}"
-                           "".format(section, conf_files))
+        raise RuntimeError(
+            "no section `[{:}]` found in configuration files.".format(section))
     except NoOptionError:
         if default is not None:
             # Use default if desired parameter is not specified under section
             return default
-        raise RuntimeError("parameter `{:}` not found under section `[{:}]` "
-                           "of {:}".format(parameter, section, conf_files))
+        raise RuntimeError(
+            "parameter `{:}` not found under section `[{:}]` in "
+            "configuration files.".format(parameter, section))
 
     return param
 
