@@ -80,14 +80,6 @@ class CClassifierLogistic(CClassifierLinear):
             warm_start=False,
         )
 
-    def __clear(self):
-        """Reset the object."""
-        pass
-
-    def is_clear(self):
-        """Returns True if object is clear."""
-        pass
-
     @property
     def C(self):
         """Penalty parameter C of the error term."""

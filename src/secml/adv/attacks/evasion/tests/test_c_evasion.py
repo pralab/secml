@@ -80,7 +80,7 @@ class CEvasionTestCases(object):
                 self.logger.info("Converting data to sparse...")
                 self.dataset = self.dataset.tosparse()
 
-            if self.surrogate_classifier.is_clear():
+            if not self.surrogate_classifier.is_fitted():
                 self.surrogate_classifier.fit(self.dataset)
 
             params = {

@@ -13,6 +13,7 @@ from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.ml.kernel import CKernel
 from secml.ml.classifiers.gradients import CClassifierGradientSVM
+from secml.utils.mixed_utils import check_is_fitted
 
 
 class CClassifierSVM(CClassifierLinear):
@@ -88,29 +89,6 @@ class CClassifierSVM(CClassifierLinear):
 
         self._gradients = CClassifierGradientSVM()
 
-    def __clear(self):
-        """Reset the object."""
-        self._n_sv = None
-        self._sv_idx = None
-        self._alpha = None
-        self._sv = None
-        self._k = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        if self.n_sv is not None or self.sv_idx is not None:
-            return False
-        if self.alpha is not None or self.sv is not None:
-            return False
-
-        # Following are special cases as SVM can be both linear and nonlinear
-        if self.b is not None:
-            return False
-        if self.is_kernel_linear() is True and self.w is not None:
-            return False
-
-        return True
-
     def is_linear(self):
         """Return True if the classifier is linear."""
         if super(CClassifierSVM, self).is_linear() and self.is_kernel_linear():
@@ -122,6 +100,24 @@ class CClassifierSVM(CClassifierLinear):
         if self.kernel.class_type == 'linear':
             return True
         return False
+
+    def _check_is_fitted(self):
+        """Check if the classifier is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier is not fitted.
+
+        """
+        if not self.is_kernel_linear() or self.store_dual_vars is True:
+            check_is_fitted(self, 'sv')  # Checking the SVs is enough
+        # SVM is a special case, is not set '_w' if kernel is not linear
+        # so we cannot call the superclass `_check_is_fitted`
+        if self.is_kernel_linear():
+            check_is_fitted(self, 'w')
+        # Then check the attributes of CClassifier
+        check_is_fitted(self, ['classes', 'n_features'])
 
     @property
     def gradients(self):
@@ -380,6 +376,7 @@ class CClassifierSVM(CClassifierLinear):
         self.logger.debug("Classifier SVM bias: {:}".format(self._b))
 
         # Updating SVM parameters
+        self._w = None  # Resetting `_w` to leave it None next cond is False
         if self.is_kernel_linear():  # Linear SVM
             self._w = CArray(
                 CArray(classifier.coef_, tosparse=dataset.issparse).ravel())
@@ -396,6 +393,11 @@ class CClassifierSVM(CClassifierLinear):
             self._sv = CArray(dataset.X[self.sv_idx, :])
             self.logger.debug("Classifier SVM dual weights (alphas): "
                               "\n{:}".format(self._alpha))
+        else:  # Resetting the dual parameters
+            self._n_sv = None
+            self._sv_idx = None
+            self._alpha = None
+            self._sv = None
 
         return classifier
 
@@ -427,8 +429,7 @@ class CClassifierSVM(CClassifierLinear):
                 self, x, y=y)
 
         # Non-linear SVM
-        if self.is_clear():
-            raise ValueError("make sure the classifier is trained first.")
+
         if y != 1:
             raise ValueError(
                 "decision function is always computed wrt positive class.")

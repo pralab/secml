@@ -5,11 +5,12 @@
 .. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
 
 """
-
 from sklearn import neighbors
 import numpy as np
+
 from secml.array import CArray
 from secml.ml.classifiers import CClassifier
+from secml.utils.mixed_utils import check_is_fitted
 
 
 class CClassifierKNN(CClassifier):
@@ -48,22 +49,6 @@ class CClassifierKNN(CClassifier):
         self._n_samples_training = 0
         self._tr_dataset = None
         self._KNC = None
-
-    def __clear(self):
-        """Reset the object."""
-        self._n_samples_training = 0
-        self._tr_dataset = None
-        self._KNC = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        if self._n_samples_training != 0:
-            return False
-        if self._tr_dataset is not None:
-            return False
-        if self._KNC is not None:
-            return False
-        return True
 
     @property
     def n_neighbors(self):
@@ -134,6 +119,18 @@ class CClassifierKNN(CClassifier):
     def metric_params(self, value):
         """Sets classifier metric_params."""
         self._metric_params = value
+
+    def _check_is_fitted(self):
+        """Check if the classifier is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier is not fitted.
+
+        """
+        check_is_fitted(self, ['_KNC', '_tr_dataset'])
+        super(CClassifierKNN, self)._check_is_fitted()
 
     def _fit(self, dataset):
         """Trains the KNeighbors classifier.

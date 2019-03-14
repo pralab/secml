@@ -15,6 +15,7 @@ from secml.ml.classifiers.loss import CLoss
 from secml.ml.classifiers.regularizer import CRegularizer
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.ml.kernel import CKernel
+from secml.utils.mixed_utils import check_is_fitted
 
 
 class CClassifierSGD(CClassifierLinear):
@@ -69,23 +70,6 @@ class CClassifierSGD(CClassifierLinear):
 
         self._tr = None  # slot for the training data
 
-    def __clear(self):
-        """Reset the object."""
-        self._tr = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        if self._tr is not None:
-            return False
-
-        # Following are attributes from CClassifierLinear
-        if self._w is not None:
-            return False
-        if self.fit_intercept is True and self._b is not None:
-            return False
-
-        return True
-
     def is_linear(self):
         """Return True if the classifier is linear."""
         if super(CClassifierSGD, self).is_linear() and self.is_kernel_linear():
@@ -97,6 +81,19 @@ class CClassifierSGD(CClassifierLinear):
         if self.kernel is None or self.kernel.class_type == 'linear':
             return True
         return False
+
+    def _check_is_fitted(self):
+        """Check if the classifier is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier is not fitted.
+
+        """
+        if not self.is_kernel_linear():
+            check_is_fitted(self, '_tr')
+        super(CClassifierSGD, self)._check_is_fitted()
 
     @property
     def loss(self):
@@ -224,13 +221,12 @@ class CClassifierSGD(CClassifierLinear):
         sgd.set_params(**self.regularizer.get_params())
 
         # Storing training dataset (will be used by decision function)
-        if self._tr is None:  # Do this once to speed up multiclass
-            self._tr = dataset.X
+        self._tr = dataset.X if not self.is_kernel_linear() else None
 
         # Storing the training matrix for kernel mapping
         if self.is_kernel_linear():
             # Training SGD classifier
-            sgd.fit(self._tr.get_data(), dataset.Y.tondarray())
+            sgd.fit(dataset.X.get_data(), dataset.Y.tondarray())
         else:
             # Training SGD classifier with kernel mapping
             sgd.fit(CArray(

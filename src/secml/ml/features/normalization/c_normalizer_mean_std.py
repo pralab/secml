@@ -89,19 +89,6 @@ class CNormalizerMeanSTD(CNormalizerLinear):
 
         super(CNormalizerMeanSTD, self).__init__(preprocess=preprocess)
 
-    def __clear(self):
-        """Reset the object."""
-        self._x_mean = None
-        self._x_std = None
-        # Properties of the linear normalizer
-        self._w = None
-        self._b = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return self.mean is None and self.std is None and \
-            self._w is None and self._b is None
-
     @property
     def w(self):
         """Returns the slope of the linear normalizer."""

@@ -39,18 +39,6 @@ class CClassifierMulticlass(CClassifier):
         # List of binary classifiers
         self._binary_classifiers = [classifier(**clf_params)]
 
-    def __clear(self):
-        """Reset the object."""
-        for clf in self._binary_classifiers:
-            clf.clear()
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        for clf in self._binary_classifiers:
-            if not clf.is_clear():
-                return False
-        return True
-
     @CClassifier.verbose.setter
     def verbose(self, level):
         """Set verbosity level and propagate to trained classifiers."""
@@ -299,8 +287,7 @@ class CClassifierMulticlass(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
-        if self.is_clear():
-            raise ValueError("make sure the classifier is trained first.")
+        self._check_is_fitted()
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 

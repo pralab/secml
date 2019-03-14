@@ -10,6 +10,7 @@ from abc import ABCMeta, abstractmethod
 
 from secml.core import CCreator
 from secml.core.type_utils import is_int
+from secml.core.exceptions import NotFittedError
 from secml.array import CArray
 from secml.ml.classifiers import CClassifier
 from secml.data import CDataset
@@ -269,8 +270,10 @@ class CAttack(CCreator):
         #  CLASSIFIER IS DIFFERENTIABLE. `_run` WILL CRASH ANYWAY LATER
         #  IF `_gradient_f` IS NOT DEFINED
 
-        if clf.is_clear():
-            raise RuntimeError("surrogate classifier must be already trained")
+        # TODO: MAYBE WE CAN REMOVE THIS? AN ERROR WILL BE RAISED LATER ANYWAY
+        if not clf.is_fitted():
+            raise NotFittedError(
+                "the surrogate classifier must be already trained")
 
         self._surrogate_classifier = clf
 

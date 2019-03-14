@@ -12,6 +12,7 @@ from cleverhans.model import Model
 from secml.tf.clvhs.utils import convert_cclassifier_to_tf
 
 from secml.ml.classifiers.reject import CClassifierReject
+from secml.core.exceptions import NotFittedError
 
 
 class CClassifierCleverhans(Model):
@@ -37,9 +38,8 @@ class CClassifierCleverhans(Model):
             raise ValueError("classifier with reject cannot be "
                              "converted as tensoflow model")
 
-        if clf.is_clear():  # FIXME: is_clear is DEPRECATED
-            raise ValueError(
-                "The classifier should be already trained!")
+        if not clf.is_fitted():
+            raise NotFittedError("The classifier should be already trained!")
 
         self._out_dims = out_dims
 

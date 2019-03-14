@@ -48,14 +48,6 @@ class CClassifierRejectThreshold(CClassifierReject):
 
         super(CClassifierRejectThreshold, self).__init__(preprocess=preprocess)
 
-    def __clear(self):
-        """Reset the object."""
-        self._clf.clear()
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return self._clf.is_clear()
-
     @property
     def clf(self):
         """Returns the inner classifier."""
@@ -116,9 +108,6 @@ class CClassifierRejectThreshold(CClassifierReject):
             Instance of the classifier trained using input dataset.
 
         """
-        # Resetting the outer classifier
-        self.clear()
-
         data_x = dataset.X
         # Transform data if a preprocess is defined
         if self.preprocess is not None:
@@ -174,8 +163,7 @@ class CClassifierRejectThreshold(CClassifierReject):
             Dense flat array of shape (n_patterns,).
 
         """
-        if self.is_clear():
-            raise ValueError("make sure the classifier is trained first.")
+        self._check_is_fitted()
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
