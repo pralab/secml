@@ -145,26 +145,22 @@ class CSolverGradDesc(CSolver):
             self._x_seq[i, :] = x
             self._f_seq[i] = self._fun.fun(x)
 
-            # if i > 0 and abs(self.f_seq[i - 1] - self.f_seq[i]) < self.eps:
-            #     # if i > 0 and self.f_seq[i - 1] - self.f_seq[i] < self.eps:
-            #     self.logger.debug("Flat region, exiting... {:}  {:}".format(
-            #         self._f_seq[i],
-            #         self._f_seq[i - 1]))
-            #     self._x_seq = self.x_seq[:i, :]
-            #     self._f_seq = CArray(self.f_seq[:i])
-            #     self._x_opt = self._x_seq[-1, :]
-            #     return self._x_opt
+            if i > 0 and abs(self.f_seq[i - 1] - self.f_seq[i]) < self.eps:
+                self.logger.debug("Flat region, exiting... {:}  {:}".format(
+                    self._f_seq[i], self._f_seq[i - 1]))
+                self._x_seq = self.x_seq[:i, :]
+                self._f_seq = self.f_seq[:i]
+                self._x_opt = self._x_seq[-1, :]
+                return self._x_opt
 
-            if i > 6:
-                if self.f_seq[-3:].mean() < self.f_seq[-6:-3].mean():
-                    self.logger.debug("Decreasing function, exiting... {:}  {:}".format(
-                        self.f_seq[-3:].mean(),
-                        self.f_seq[-6:-3].mean()
-                    ))
-                    self._x_seq = self.x_seq[:i-3, :]
-                    self._f_seq = self.f_seq[:i-3]
-                    self._x_opt = self._x_seq[-4, :]
-                    return self._x_opt
+            if i > 6 and self.f_seq[-3:].mean() < self.f_seq[-6:-3].mean():
+                self.logger.debug(
+                    "Decreasing function, exiting... {:}  {:}".format(
+                        self.f_seq[-3:].mean(), self.f_seq[-6:-3].mean()))
+                self._x_seq = self.x_seq[:i-3, :]
+                self._f_seq = self.f_seq[:i-3]
+                self._x_opt = self._x_seq[-4, :]
+                return self._x_opt
 
             grad = self._fun.gradient(x)
 
