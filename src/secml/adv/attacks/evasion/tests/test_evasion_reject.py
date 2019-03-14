@@ -8,7 +8,7 @@ from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.figure import CFigure
 from secml.ml.features.normalization import CNormalizerMinMax
-from secml.optimization.constraints import CConstraintL2
+from secml.optim.constraints import CConstraintL2
 from secml.utils import fm
 
 

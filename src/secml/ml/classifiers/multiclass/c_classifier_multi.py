@@ -301,7 +301,7 @@ class CClassifierMulticlass(CClassifier):
     def apply_method(self, method, *args, **kwargs):
         """Apply input method to all trained classifers.
 
-        Useful to perform a routine after training (e.g. reduction, optimization)
+        Useful to perform a routine after training (e.g. reduction, optim)
 
         `method` is an unbound method to apply, e.g. CCLassiferSVM.set
         Any other argument for `method` can be passed in.

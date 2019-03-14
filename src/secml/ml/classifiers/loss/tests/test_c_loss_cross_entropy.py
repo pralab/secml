@@ -5,7 +5,7 @@ from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.array import CArray
-from secml.optimization.function import CFunction
+from secml.optim.function import CFunction
 from secml.core.constants import eps
 
 
