@@ -166,10 +166,7 @@ class CNormalizerUnitNorm(CNormalizer):
             for e_idx, e in enumerate(scale):
                 x[e_idx, :] /= e
         else:
-            # Normalizing array and removing any 'nan'
             x /= scale  # This creates a copy
-
-        x.nan_to_num()  # Avoid storing nans/inf
 
         return x
 
@@ -215,9 +212,9 @@ class CNormalizerUnitNorm(CNormalizer):
         """
         x = x.atleast_2d()
 
-        # Training first!
-        if self.norm is None:
-            raise ValueError("fit the normalizer first.")
+        if self.norm is None:  # special case of "check_is_fitted"
+            raise ValueError(
+                "call `.transform` at least one time before using `.revert`.")
 
         if x.shape[0] != self.norm.size:
             raise ValueError("array to revert must have {:} patterns (rows)."

@@ -106,17 +106,11 @@ class CNormalizerLinear(CNormalizer):
             raise ValueError("array to revert must have {:} "
                              "features (columns).".format(self.w.size))
 
-        v = (x - self.b) / self.w
+        v = (x - self.b).atleast_2d()
 
-        # set nan/inf to zero
-        zeros_feats = self.w.find(self.w == 0)
-        if len(zeros_feats) > 0:
-            if v.ndim == 1:
-                v[zeros_feats] = 0
-            else:
-                v[:, zeros_feats] = 0
+        v[:, self.w != 0] /= self.w[self.w != 0]  # avoids division by zero
 
-        return v
+        return v.ravel() if x.ndim <= 1 else v
 
     def _gradient(self, x, w=None):
         """Returns the gradient wrt data.
