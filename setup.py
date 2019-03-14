@@ -138,7 +138,7 @@ Operating System :: MacOS
 """
 
 setup(
-    name='SecML',
+    name='secml',
     version=find_version("src", "secml", "VERSION"),
     description='A library for Secure Machine Learning',
     long_description=LONG_DESCRIPTION,
