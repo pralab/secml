@@ -1321,8 +1321,14 @@ class CDense(_CArrayInterface):
             self.tondarray(), return_index, return_inverse, return_counts)
         if not any([return_index, return_inverse, return_counts]):
             return self.__class__(out)
-        else:
-            return tuple([self.__class__(elem) for elem in out])
+        else:  # unique returned multiple elements
+            out_list = []
+            # All elements must have int dtype apart from the first one
+            for elem_i, elem in enumerate(out):
+                elem = self.__class__(elem)
+                elem = elem.astype(int) if elem_i > 0 else elem
+                out_list.append(elem)
+            return tuple(out_list)
 
     def bincount(self):
         """Count the number of occurrences of each non-negative int."""

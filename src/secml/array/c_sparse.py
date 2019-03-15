@@ -1333,7 +1333,7 @@ class CSparse(_CArrayInterface):
 
             # Let's get the indices of the nz elements (columns indices)
             unique_index = unique_index.append(
-                CDense(flat_a.nnz_indices[1])[CDense(out[1])])
+                CDense(flat_a.nnz_indices[1], dtype=int)[CDense(out[1])])
             # Add result to the list of returned items
             outputs.append(unique_index)
 
@@ -1350,7 +1350,7 @@ class CSparse(_CArrayInterface):
 
             # size of the out tuple depends on the number of extra params
             unique_counts = CDense(
-                counts_zeros + out[min(3, num_params)].tolist())
+                counts_zeros + out[min(3, num_params)].tolist(), dtype=int)
             # Add result to the list of returned items
             outputs.append(unique_counts)
 

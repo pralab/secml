@@ -94,10 +94,13 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
             self.assertTrue(unique_ok)
 
             # unique_indices construct unique array from original FLAT one
+            self.assertEqual(array_unique.size, u_indices.size)
+            self.assertEqual(u_indices.dtype, int)
             self.assertFalse(
                 (array.ravel()[u_indices] != array_unique).any())
 
             self.assertEqual(array_unique.size, u_counts.size)
+            self.assertEqual(u_counts.dtype, int)
             for e_idx, e in enumerate(array_unique):
                 self.assertEqual(u_counts[e_idx], sum(array == e))
 
