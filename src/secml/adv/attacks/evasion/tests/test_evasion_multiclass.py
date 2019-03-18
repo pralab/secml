@@ -1,5 +1,7 @@
 from secml.utils import CUnitTest
 
+import matplotlib
+
 from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM
@@ -83,7 +85,7 @@ class TestEvasionMulticlass(CUnitTest):
             lb = None
             ub = None
 
-        dmax = 5
+        dmax = 4
 
         self.solver_type = 'descent-direction'
         self.solver_params = {'eta': 1e-1, 'eta_min': 0.1}
@@ -146,10 +148,9 @@ class TestEvasionMulticlass(CUnitTest):
 
         # PLOT SECTION
         if self.show_plot:
+            self._make_plots(x_seq, dmax, eva, x0, y0, scores, f_seq)
 
-            self._make_plots(x_seq, dmax,eva, x0, scores, f_seq)
-
-    def _make_plots(self, x_seq, dmax,eva, x0, scores, f_seq):
+    def _make_plots(self, x_seq, dmax, eva, x0, y0, scores, f_seq):
 
         fig = CFigure(height=9, width=10, markersize=6, fontsize=12)
 
@@ -167,24 +168,26 @@ class TestEvasionMulticlass(CUnitTest):
         fig.subplot(2, 2, 1)
         fig = self._plot_decision_function(fig)
 
-        fig.sp.plot_path(x_seq, path_style='-',
-                         start_style='o', start_facecolor='w',
-                         start_edgewidth=2, final_style='o',
-                         final_facecolor='k', final_edgewidth=2)
+        styles = self._get_style()
+
+        fig.sp.plot_path(x_seq, path_style='-', path_width=2.5,
+                         start_style='o', start_facecolor=styles[y0][0],
+                         start_edgecolor='k',
+                         start_edgewidth=1.5, final_style='D',
+                         final_facecolor='r', final_edgecolor='k',
+                         final_edgewidth=1.7)
 
         # plot distance constraint
-        # for d_idx, d in enumerate([dmax]):
-        for d in xrange(1, dmax + 1):
-            fig.sp.plot_fobj(func=self._rescaled_distance,
-                             multipoint=True,
-                             plot_background=False,
-                             n_grid_points=100, levels_color='gray',
-                             grid_limits=ds_bounds,
-                             levels=[0], colorbar=False,
-                             levels_style=':',
-                             alpha_levels=.4, c=x0, r=d)
+        fig.sp.plot_fobj(func=self._rescaled_distance,
+                         multipoint=True,
+                         plot_background=False,
+                         n_grid_points=100, levels_color='k',
+                         grid_limits=ds_bounds,
+                         levels=[0], colorbar=False,
+                         levels_linewidth=2.0, levels_style=':',
+                         alpha_levels=.4, c=x0, r=dmax)
 
-        fig.sp.grid(linestyle='--', alpha=.5, zorder=0)
+        fig.sp.grid(grid_on=False)
 
         # Plotting multiclass evasion objective function
         fig.subplot(2, 2, 2)
@@ -198,22 +201,22 @@ class TestEvasionMulticlass(CUnitTest):
                            grid_limits=ds_bounds, n_grid_points=50,
                            color='k', alpha=.5)
 
-        fig.sp.plot_path(x_seq, path_style='-',
-                         start_style='o', start_facecolor='w',
-                         start_edgewidth=2, final_style='o',
-                         final_facecolor='k', final_edgewidth=2)
+        fig.sp.plot_path(x_seq, path_style='-', path_width=2.5,
+                         start_style='o', start_facecolor=styles[y0][0],
+                         start_edgecolor='k',
+                         start_edgewidth=1.5, final_style='D',
+                         final_facecolor='r', final_edgecolor='k',
+                         final_edgewidth=1.7)
 
         # plot distance constraint
-        # for d_idx, d in enumerate([dmax]):
-        for d in xrange(1, dmax + 1):
-            fig.sp.plot_fobj(func=self._rescaled_distance,
-                             multipoint=True,
-                             plot_background=False,
-                             n_grid_points=100, levels_color='w',
-                             grid_limits=ds_bounds,
-                             levels=[0], colorbar=False,
-                             levels_style=':',
-                             alpha_levels=.5, c=x0, r=d)
+        fig.sp.plot_fobj(func=self._rescaled_distance,
+                         multipoint=True,
+                         plot_background=False,
+                         n_grid_points=100, levels_color='w',
+                         grid_limits=ds_bounds,
+                         levels=[0], colorbar=False,
+                         levels_style=':', levels_linewidth=2.0,
+                         alpha_levels=.5, c=x0, r=dmax)
 
         fig.sp.plot_fobj(lambda x: eva._objective_function(x),
                          multipoint=True,
@@ -221,7 +224,7 @@ class TestEvasionMulticlass(CUnitTest):
                          colorbar=False, n_grid_points=100,
                          plot_levels=False)
 
-        fig.sp.grid(linestyle='--', alpha=.5, zorder=0)
+        fig.sp.grid(grid_on=False)
 
         fig.subplot(2, 2, 3)
         if self.y_target is not None:
@@ -231,6 +234,7 @@ class TestEvasionMulticlass(CUnitTest):
         fig.sp.plot(scores)
 
         fig.sp.grid()
+        fig.sp.xticks(CArray.arange(dmax+1))
         fig.sp.xlim(0, dmax)
         fig.sp.xlabel("dmax")
 
@@ -239,6 +243,7 @@ class TestEvasionMulticlass(CUnitTest):
         fig.sp.plot(f_seq)
 
         fig.sp.grid()
+        fig.sp.xticks(CArray.arange(dmax+1))
         fig.sp.xlim(0, dmax)
         fig.sp.xlabel("dmax")
 
@@ -266,53 +271,61 @@ class TestEvasionMulticlass(CUnitTest):
         constr = CConstraintL2(center=c, radius=r)
         return constr.constraint(x)
 
+    def _get_style(self):
+        """
+        This function define the style vector for the different classes
+        Returns
+        -------
+
+        """
+        if self.ds.num_classes == 3:
+            styles = [('b', 'o', '-'), ('g', 'p', '--'), ('r', 's', '-.')]
+        elif self.ds.num_classes == 4:
+            styles = [('b', 'o', '-','cornflowerblue'), ('r', 'p', '--',
+                                                     'lightcoral'),
+                      ('y', 's', '-.', 'lemonchiffon'), ('g', 'D',
+                                                                 '--',
+                                                     'lightgreen')]
+        else:
+            styles = [('saddlebrown', 'o', '-'), ('g', 'p', '--'),
+                      ('y', 's', '-.'), ('gray', 'D', '--'),
+                      ('c', '-.'), ('m', '-'), ('y', '-.')]
+
+        return styles
+
     def _plot_decision_function(self, fig):
         """Plot the decision function of a multiclass classifier."""
-
-        def plot_hyperplane(img, clf, min_v, max_v, linestyle, label):
-            """Plot the hyperplane associated to the OVA clf."""
-            xx = CArray.linspace(
-                min_v - 5, max_v + 5)  # make sure the line is long enough
-            # get the separating hyperplane
-            yy = -(clf.w[0] * xx + clf.b) / clf.w[1]
-            img.sp.plot(xx, yy, linestyle, label=label)
 
         fig.sp.title('{:} ({:})'.format(self.multiclass.__class__.__name__,
                                         self.multiclass.classifier.__name__))
 
         x_bounds, y_bounds = self.ds.get_bounds()
 
-        if self.ds.num_classes == 3:
-            styles = [('b', 'o', '-'), ('g', 'p', '--'), ('r', 's', '-.')]
-        elif self.ds.num_classes == 4:
-            styles = [('saddlebrown', 'o', '-'), ('g', 'p', '--'),
-                      ('y', 's', '-.'), ('gray', 'D', '--')]
-        else:
-            styles = [('saddlebrown', 'o', '-'), ('g', 'p', '--'),
-                      ('y', 's', '-.'), ('gray', 'D', '--'),
-                      ('c', '-.'), ('m', '-'), ('y', '-.')]
+        styles = self._get_style()
 
         for c_idx, c in enumerate(self.ds.classes):
-            # Plot boundary and predicted label for each OVA classifier
-
-            # plot_hyperplane(fig, self.multiclass.trained_classifiers[c_idx],
-            #                 x_bounds[0], x_bounds[1], styles[c_idx],
-            #                 'Boundary class {:}'.format(c))
 
             fig.sp.scatter(self.ds.X[self.ds.Y == c, 0],
                            self.ds.X[self.ds.Y == c, 1],
-                           s=70, c=styles[c_idx][0], edgecolors='k',
+                           s=20, c=styles[c_idx][0], edgecolors='k',
                            facecolors='none', linewidths=1,
                            label='c {:}'.format(c))
 
         # Plotting multiclass decision function
         fig.switch_sptype('function')
+
+        colors = [style[3] for style in styles]
+        # TODO: IMPLEMENT THIS IN CFIGURE
+        cmap = matplotlib.colors.ListedColormap(
+            colors, name='from_list', N=None)
+
         fig.sp.plot_fobj(lambda x: self.multiclass.predict(x),
-                         multipoint=True, cmap='Set2',
+                         multipoint=True, cmap=cmap,
                          grid_limits=self.ds.get_bounds(offset=5),
                          colorbar=False, n_grid_points=300, plot_levels=True,
                          plot_background=True, levels=[-1, 0, 1, 2],
-                         levels_color='gray', levels_style='--')
+                         levels_color='k', levels_style='-', alpha=.9,
+                         levels_linewidth=0.9)
 
         fig.sp.xlim(x_bounds[0] - .05, x_bounds[1] + .05)
         fig.sp.ylim(y_bounds[0] - .05, y_bounds[1] + .05)
