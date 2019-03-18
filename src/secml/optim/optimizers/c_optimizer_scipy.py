@@ -78,6 +78,7 @@ class COptimizerScipy(COptimizer):
                     Maximum number of iterations to perform.
                 disp : bool
                     Set to True to print convergence messages.
+                    Equivalent of setting `COptimizerScipy.verbose = 2`.
             For method-specific options, see :func:`show_options()`.
 
         Returns
@@ -127,6 +128,9 @@ class COptimizerScipy(COptimizer):
                                    self.bounds.ub.tondarray())
         kwargs['bounds'] = bounds
 
+        if self.verbose >= 2:  # Override verbosity options
+            kwargs['options']['disp'] = True
+
         # call minimize now
         sc_opt_out = sc_opt.minimize(self.f.fun_ndarray,
                                      x_init.ravel().tondarray(),
@@ -135,6 +139,8 @@ class COptimizerScipy(COptimizer):
         if sc_opt_out.status != 0:
             self.logger.warning(
                 "Optimization has not terminated successfully!")
+        elif self.verbose >= 1:
+            self.logger.info(sc_opt_out.message)
 
         self._f_seq = CArray(sc_opt_out.fun)  # only last iter available
 

@@ -31,15 +31,15 @@ class TestCOptimizer(CUnitTest):
                 "Testing minimization of {:}".format(fun.__class__.__name__))
 
             opt = COptimizerScipy(fun)
+            opt.verbose = 1
 
             if fun.class_type == 'mc-cormick':
                 # set bounds
-                lb,ub = fun.bounds()
-                opt.bounds = CConstraintBox(lb,ub)
+                lb, ub = fun.bounds()
+                opt.bounds = CConstraintBox(lb, ub)
 
             min_x = opt.minimize(
-                x0, method='L-BFGS-B',
-                options={'gtol': 1e-6, 'disp': True})
+                x0, method='L-BFGS-B', options={'gtol': 1e-6})
 
             self.logger.info("Found minimum: {:}".format(min_x))
             self.logger.info("Fun value @ minimum: {:}".format(opt.f_opt))
