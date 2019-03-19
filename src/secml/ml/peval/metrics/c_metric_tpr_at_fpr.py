@@ -33,7 +33,7 @@ class CMetricTPRatFPR(CMetric):
     >>> from secml.array import CArray
 
     >>> peval = CMetricTPRatFPR(fpr=0.5)
-    >>> print peval.performance_score(CArray([0, 1, 0, 0]), score=CArray([0, 0, 0, 0]))
+    >>> print(peval.performance_score(CArray([0, 1, 0, 0]), score=CArray([0, 0, 0, 0])))
     0.5
 
     """

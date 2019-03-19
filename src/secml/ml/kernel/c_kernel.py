@@ -91,21 +91,21 @@ class CKernel(CCreator):
 
         >>> array1 = CArray([[15,25],[45,55]])
         >>> array2 = CArray([[10,20],[40,50]])
-        >>> print CKernelRBF().k(array1, array2)
+        >>> print(CKernelRBF().k(array1, array2))
         CArray([[  1.92874985e-22   0.00000000e+00]
          [  0.00000000e+00   1.92874985e-22]])
 
-        >>> print CKernelRBF().k(array1)
+        >>> print(CKernelRBF().k(array1))
         CArray([[ 1.  0.]
          [ 0.  1.]])
 
         >>> vector = CArray([15,25])
-        >>> print CKernelRBF().k(vector, array1)
+        >>> print(CKernelRBF().k(vector, array1))
         CArray([[ 1.  0.]])
-        >>> print CKernelRBF().k(array1, vector)
+        >>> print(CKernelRBF().k(array1, vector))
         CArray([[ 1.]
          [ 0.]])
-        >>> print CKernelRBF().k(vector, vector)
+        >>> print(CKernelRBF().k(vector, vector))
         1.0
 
         """
@@ -199,11 +199,11 @@ class CKernel(CCreator):
 
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])
-        >>> print CKernelRBF(gamma=1e-4).gradient(array, vector)
+        >>> print(CKernelRBF(gamma=1e-4).gradient(array, vector))
         CArray([[ 0.00245619  0.00377875]
          [ 0.00556703  0.00647329]])
 
-        >>> print CKernelRBF().gradient(vector, vector)
+        >>> print(CKernelRBF().gradient(vector, vector))
         CArray([ 0.  0.])
 
         """

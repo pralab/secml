@@ -61,12 +61,12 @@ class CNormalizerMinMax(CNormalizerLinear):
     >>> from secml.ml.features.normalization import CNormalizerMinMax
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-    >>> print CNormalizerMinMax().fit_transform(array)
+    >>> print(CNormalizerMinMax().fit_transform(array))
     CArray([[ 0.5       0.        1.      ]
      [ 1.        0.5       0.333333]
      [ 0.        1.        0.      ]])
 
-    >>> print CNormalizerMinMax(feature_range=(-1,1)).fit_transform(array)
+    >>> print(CNormalizerMinMax(feature_range=(-1,1)).fit_transform(array))
     CArray([[ 0.       -1.        1.      ]
      [ 1.        0.       -0.333333]
      [-1.        1.       -1.      ]])
@@ -182,9 +182,9 @@ class CNormalizerMinMax(CNormalizerLinear):
         >>> normalizer = CNormalizerMinMax().fit(array)
         >>> normalizer.feature_range
         (0.0, 1.0)
-        >>> print normalizer.min
+        >>> print(normalizer.min)
         CArray([ 0. -1. -1.])
-        >>> print normalizer.max
+        >>> print(normalizer.max)
         CArray([ 2.  1.  2.])
 
         """

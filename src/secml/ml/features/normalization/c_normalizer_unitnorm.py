@@ -49,12 +49,12 @@ class CNormalizerUnitNorm(CNormalizer):
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
     >>> dense_normalized = CNormalizerUnitNorm().fit_transform(array)
-    >>> print dense_normalized
+    >>> print(dense_normalized)
     CArray([[ 0.408248 -0.408248  0.816497]
      [ 1.        0.        0.      ]
      [ 0.        0.707107 -0.707107]])
 
-    >>> print CNormalizerUnitNorm(order=1).fit_transform(array)
+    >>> print(CNormalizerUnitNorm(order=1).fit_transform(array))
     CArray([[ 0.25 -0.25  0.5 ]
      [ 1.    0.    0.  ]
      [ 0.    0.5  -0.5 ]])
@@ -138,14 +138,14 @@ class CNormalizerUnitNorm(CNormalizer):
 
         >>> normalizer = CNormalizerUnitNorm().fit(array)
         >>> array_normalized = normalizer.transform(array)
-        >>> print array_normalized  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(array_normalized)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	0.408248290464
           (0, 1)	-0.408248290464
           (0, 2)	0.816496580928
           (1, 0)	1.0
           (2, 1)	0.707106781187
           (2, 2)	-0.707106781187)
-        >>> print array_normalized.todense().norm_2d(order=normalizer.order, axis=1)
+        >>> print(array_normalized.todense().norm_2d(order=normalizer.order, axis=1))
         CArray([[ 1.]
          [ 1.]
          [ 1.]])
@@ -201,7 +201,7 @@ class CNormalizerUnitNorm(CNormalizer):
 
         >>> normalizer = CNormalizerUnitNorm().fit(array)
         >>> array_normalized = normalizer.transform(array)
-        >>> print normalizer.revert(array_normalized)  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(normalizer.revert(array_normalized))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1.0
           (0, 1)	-1.0
           (0, 2)	2.0

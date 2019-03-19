@@ -52,11 +52,11 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
     ...     num_folds=3, n_train_samples=2, random_state=0).compute_indices(ds)
     >>> kfold.num_folds
     3
-    >>> print kfold.tr_idx
+    >>> print(kfold.tr_idx)
     [CArray(2,)(dense: [2 5]), CArray(2,)(dense: [1 4]), CArray(2,)(dense: [0 2])]
-    >>> print kfold.ts_idx
+    >>> print(kfold.ts_idx)
     [CArray(6,)(dense: [0 1 3 4 6 7]), CArray(6,)(dense: [0 2 3 5 6 7]), CArray(6,)(dense: [1 3 4 5 6 7])]
-    >>> print kfold.tr_classes  # Class 2 is skipped as there are not enough samples (at least 3)
+    >>> print(kfold.tr_classes)  # Class 2 is skipped as there are not enough samples (at least 3)
     [CArray(1,)(dense: [1]), CArray(1,)(dense: [0]), CArray(1,)(dense: [1])]
 
     """

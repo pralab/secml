@@ -2,7 +2,8 @@ from secml.figure.plots import CPlot
 from secml.ml.peval.metrics import CMetric
 from secml.array import CArray
 
-#fixme: da pulire
+
+#FIXME: CLEANUP NEEDED
 class CPlotSecEval(CPlot):
     """Plots Classifier Security Evaluation results.
 
@@ -36,7 +37,7 @@ class CPlotSecEval(CPlot):
     """
     __class_type = 'sec-eval'
 
-    # fixme: gestire i params di def ecc
+    # FIXME: manage default params
     def __init__(self, sp, default_params=None):
 
         # Calling CPlot constructor
@@ -355,7 +356,6 @@ class CPlotSecEval(CPlot):
         if not self._ylabel:
             self._ylabel = metric.class_type
 
-        print sec_eval_data[0]
         samples_idx = CArray.arange(sec_eval_data[0].Y.size)
 
         perf, perf_std = self._compute_sec_eval_curve(

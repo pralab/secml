@@ -146,28 +146,28 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]],tosparse=True)
 
         >>> normalizer = CNormalizerMeanSTD(0.5, 0.2).fit(array)
-        >>> print normalizer.mean
+        >>> print(normalizer.mean)
         CArray([ 0.5  0.5  0.5])
-        >>> print normalizer.std
+        >>> print(normalizer.std)
         CArray([ 0.2  0.2  0.2])
 
-        >>> print normalizer.transform(array)
+        >>> print(normalizer.transform(array))
         CArray([[ 2.5 -7.5  7.5]
          [ 7.5 -2.5 -2.5]
          [-2.5  2.5 -7.5]])
 
         >>> normalizer = CNormalizerMeanSTD((0.5, 0.5, 0.2), (0.2, 0.1, 0.1)).fit(array)
 
-        >>> print normalizer.transform(array)
+        >>> print(normalizer.transform(array))
         CArray([[  2.5 -15.   18. ]
          [  7.5  -5.   -2. ]
          [ -2.5   5.  -12. ]])
 
         >>> out = CNormalizerMeanSTD().fit_transform(array)
         >>> # Expected zero mean and unit variance
-        >>> print out.mean(axis=0, keepdims=False)
+        >>> print(out.mean(axis=0, keepdims=False))
         CArray([ 0.  0.  0.])
-        >>> print out.std(axis=0, keepdims=False)
+        >>> print(out.std(axis=0, keepdims=False))
         CArray([ 1.  1.  1.])
 
         """

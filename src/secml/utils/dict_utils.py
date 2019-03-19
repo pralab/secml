@@ -91,11 +91,11 @@ def invert_dict(d):
     >>> from secml.utils.dict_utils import invert_dict
 
     >>> a = {'k1': 2, 'k2': 2, 'k3': 1}
-    >>> print invert_dict(a)
+    >>> print(invert_dict(a))
     {1: 'k3', 2: ['k1', 'k2']}
 
     >>> a = {'k1': 2, 'k2': [2,3,1], 'k3': 1}
-    >>> print invert_dict(a)
+    >>> print(invert_dict(a))
     {1: ['k2', 'k3'], 2: ['k1', 'k2'], 3: 'k2'}
 
     """
@@ -188,13 +188,13 @@ class SubLevelsDict(MutableMapping):
 
     >>> li = SubLevelsDict({'attr1': Foo()})
 
-    >>> print type(li['attr1'])
+    >>> print(type(li['attr1']))
     <class 'dict_utils.Foo'>
-    >>> print li['attr1.attr2']
+    >>> print(li['attr1.attr2'])
     5
 
     >>> li['attr1.attr2'] = 10  # Subattributes can be set in the same way
-    >>> print li['attr1.attr2']
+    >>> print(li['attr1.attr2'])
     10
 
     """

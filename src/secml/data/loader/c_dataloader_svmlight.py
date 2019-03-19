@@ -86,14 +86,14 @@ class CDataLoaderSvmLight(CDataLoader):
         >>> labels = CArray ([0, 1])
         >>> CDataLoaderSvmLight.dump(CDataset(patterns,labels), "myfile.libsvm")
         >>> new_dataset = CDataLoaderSvmLight.load("myfile.libsvm", remove_all_zero=True)
-        >>> print new_dataset.X  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(new_dataset.X)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 1)	2.0
           (0, 0)	1.0
           (1, 1)	5.0
           (1, 0)	4.0)
-        >>> print new_dataset.Y
+        >>> print(new_dataset.Y)
         CArray([ 0.  1.])
-        >>> print new_dataset.idx_mapping
+        >>> print(new_dataset.idx_mapping)
         CArray([0 2])
 
         """

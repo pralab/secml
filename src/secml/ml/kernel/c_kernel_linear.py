@@ -32,11 +32,11 @@ class CKernelLinear(CKernel):
     >>> from secml.array import CArray
     >>> from secml.ml.kernel.c_kernel_linear import CKernelLinear
 
-    >>> print CKernelLinear().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
+    >>> print(CKernelLinear().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
     CArray([[  50.  110.]
      [ 110.  250.]])
 
-    >>> print CKernelLinear().k(CArray([[1,2],[3,4]]))
+    >>> print(CKernelLinear().k(CArray([[1,2],[3,4]])))
     CArray([[  5.  11.]
      [ 11.  25.]])
 
@@ -98,11 +98,11 @@ class CKernelLinear(CKernel):
 
         >>> array = CArray([[15, 25], [45, 55]])
         >>> vector = CArray([2, 5])
-        >>> print CKernelLinear().gradient(array, vector)
+        >>> print(CKernelLinear().gradient(array, vector))
         CArray([[15 25]
          [45 55]])
 
-        >>> print CKernelLinear().gradient(vector, vector)
+        >>> print(CKernelLinear().gradient(vector, vector))
         CArray([ 4 10])
 
         """

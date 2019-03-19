@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from secml.adv.attacks import CAttackEvasion
 from secml.adv.seceval import CSecEval
 
@@ -14,7 +16,7 @@ from secml.utils import fm, pickle_utils
 
 
 if not fm.file_exist('ds.gz'):
-    print "Creating the dataset"
+    print("Creating the dataset")
 
     ds = CDataLoaderDrebin().load()
 
@@ -35,7 +37,7 @@ mal_idx = ts.Y.find(ts.Y == 1)[:3]
 adv_ds = ts[mal_idx, :]
 
 if not fm.file_exist('clf.gz'):
-    print "Training the classifier"
+    print("Training the classifier")
 
     clf = CClassifierSVM()
     clf.verbose = 1
@@ -86,4 +88,4 @@ sec_eval = CSecEval(
 
 sec_eval.run_sec_eval(adv_ds)
 
-print sec_eval.sec_eval_data.adv_ds[0].X[0, :] != sec_eval.sec_eval_data.adv_ds[-1].X[0, :]
+print(sec_eval.sec_eval_data.adv_ds[0].X[0, :] != sec_eval.sec_eval_data.adv_ds[-1].X[0, :])
