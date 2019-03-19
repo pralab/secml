@@ -42,11 +42,11 @@ class CDataSplitterKFold(CDataSplitter):
 
     >>> ds = CDataset([[1,2],[3,4],[5,6]],[1,0,1])
     >>> kfold = CDataSplitterKFold(num_folds=3, random_state=0).compute_indices(ds)
-    >>> print kfold.num_folds
+    >>> print(kfold.num_folds)
     3
-    >>> print kfold.tr_idx
+    >>> print(kfold.tr_idx)
     [CArray(2,)(dense: [0 1]), CArray(2,)(dense: [0 2]), CArray(2,)(dense: [1 2])]
-    >>> print kfold.ts_idx
+    >>> print(kfold.ts_idx)
     [CArray(1,)(dense: [2]), CArray(1,)(dense: [1]), CArray(1,)(dense: [0])]
 
     """

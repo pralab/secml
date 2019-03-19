@@ -32,7 +32,7 @@ but generally yelds approximately 1.49e-08.
 Examples
 --------
 >>> from secml.core.constants import eps
->>> print eps
+>>> print(eps)
 1.4901161193847656e-08
 
 """
@@ -44,7 +44,7 @@ eps = np.sqrt(np.finfo(float).eps)
 Examples
 --------
 >>> from secml.core.constants import e
->>> print e
+>>> print(e)
 2.718281828459045
 
 """

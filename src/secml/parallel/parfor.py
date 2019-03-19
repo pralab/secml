@@ -1,3 +1,4 @@
+from __future__ import print_function
 from multiprocessing import Pool, cpu_count
 from joblib import Parallel, delayed
 
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     arguments = range(10)
     res = [factorial(z) for z in arguments]
     parres = parfor(factorial, 2, arguments)
-    print parres
+    print(parres)
 
     def element_wise_power(idx, list_of_scalars):
         print("Repetition {:} started...".format(idx))
@@ -83,4 +84,4 @@ if __name__ == "__main__":
         return list_of_scalars_pow
 
     parout = parfor2(element_wise_power, 4, 2, ([j for j in range(10)]))
-    print parout
+    print(parout)

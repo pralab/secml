@@ -33,14 +33,14 @@ def is_intlike(x):
     --------
     >>> from secml.core.type_utils import is_intlike
 
-    >>> print is_intlike(0)  # Standard int
+    >>> print(is_intlike(0))  # Standard int
     True
-    >>> print is_intlike(0.1)  # Standard float
+    >>> print(is_intlike(0.1))  # Standard float
     False
 
-    >>> print is_intlike(np.array([0]))  # ndarray with one int
+    >>> print(is_intlike(np.array([0])))  # ndarray with one int
     True
-    >>> print is_intlike(np.array([0.1]))  # ndarray with one float
+    >>> print(is_intlike(np.array([0.1])))  # ndarray with one float
     False
 
     """
@@ -65,14 +65,14 @@ def is_floatlike(x):
     --------
     >>> from secml.core.type_utils import is_floatlike
 
-    >>> print is_floatlike(0.1)  # Standard float
+    >>> print(is_floatlike(0.1))  # Standard float
     True
-    >>> print is_floatlike(0)  # Standard int
+    >>> print(is_floatlike(0))  # Standard int
     False
 
-    >>> print is_floatlike(np.array([0.1]))  # ndarray with one float
+    >>> print(is_floatlike(np.array([0.1])))  # ndarray with one float
     True
-    >>> print is_floatlike(np.array([0]))  # ndarray with one int
+    >>> print(is_floatlike(np.array([0])))  # ndarray with one int
     False
 
     """

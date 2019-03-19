@@ -71,11 +71,11 @@ class OrderedFlexibleClass(object):
     >>> from secml.utils import OrderedFlexibleClass
 
     >>> c = OrderedFlexibleClass(('attr1', None), ('attr2', 5))
-    >>> print tuple(attr for attr in c)
+    >>> print(tuple(attr for attr in c))
     (None, 5)
 
     >>> c.attr3 = 123
-    >>> print tuple(attr for attr in c)
+    >>> print(tuple(attr for attr in c))
     (None, 5, 123)
 
     """

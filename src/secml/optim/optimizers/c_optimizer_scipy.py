@@ -106,9 +106,9 @@ class COptimizerScipy(COptimizer):
                  Iterations: 32
                  Function evaluations: 39
                  Gradient evaluations: 39
-        >>> print x_opt
+        >>> print(x_opt)
         CArray([1. 1.])
-        >>> print opt.f_opt
+        >>> print(opt.f_opt)
         9.29438398164e-19
 
         """

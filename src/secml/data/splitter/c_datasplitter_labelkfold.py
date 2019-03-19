@@ -36,11 +36,11 @@ class CDataSplitterLabelKFold(CDataSplitter):
     >>> from secml.data.splitter import CDataSplitterLabelKFold
     >>> ds = CDataset([[1,2],[3,4],[5,6],[7,8]], [1,0,1,2])
     >>> kfold = CDataSplitterLabelKFold(num_folds=3).compute_indices(ds)
-    >>> print kfold.num_folds
+    >>> print(kfold.num_folds)
     3
-    >>> print kfold.tr_idx
+    >>> print(kfold.tr_idx)
     [CArray(2,)(dense: [1 3]), CArray(3,)(dense: [0 1 2]), CArray(3,)(dense: [0 2 3])]
-    >>> print kfold.ts_idx
+    >>> print(kfold.ts_idx)
     [CArray(2,)(dense: [0 2]), CArray(1,)(dense: [3]), CArray(1,)(dense: [1])]
 
     """

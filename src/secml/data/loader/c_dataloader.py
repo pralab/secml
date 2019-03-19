@@ -52,10 +52,10 @@ class CDataLoader(CCreator):
         >>> from secml.data.loader import CDataLoader
         >>> patterns = CArray([[1,0,2], [4,0,5]])
         >>> patterns, mapping = CDataLoader._remove_all_zero_features(patterns)
-        >>> print patterns
+        >>> print(patterns)
         CArray([[1 2]
          [4 5]])
-        >>> print mapping
+        >>> print(mapping)
         CArray([0 2])
 
         """

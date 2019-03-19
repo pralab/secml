@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 
 from secml.utils import CUnitTest, fm
@@ -62,7 +63,7 @@ class TestCSparse(CUnitTest):
             if e.errno != 2:
                 raise e
 
-    def mixed_tests(self):
+    def test_mixed(self):
 
         print(self.sparse_matrix[np.ravel(0)[0], np.ravel(0)[0]])
         print(type(self.sparse_matrix[np.ravel(0)[0], np.ravel(0)[0]]))

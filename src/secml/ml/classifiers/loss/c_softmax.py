@@ -41,7 +41,7 @@ class CSoftmax(CCreator):
         >>> from secml.ml.classifiers.loss import CSoftmax
 
         >>> a = CArray([[1, 2, 3], [2, 4, 5]])
-        >>> print CSoftmax().softmax(a)
+        >>> print(CSoftmax().softmax(a))
         CArray([[ 0.090031  0.244728  0.665241]
          [ 0.035119  0.259496  0.705385]])
 

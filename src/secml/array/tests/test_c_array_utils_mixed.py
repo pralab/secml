@@ -99,7 +99,7 @@ class TestCArrayUtilsMixed(CArrayTestCases.TestCArray):
 
         with self.assertRaises(ValueError):
             # k is higher/lower than array shape
-            print self.array_dense.diag(k=4)
+            self.array_dense.diag(k=4)
         with self.assertRaises(ValueError):
             # k is higher/lower than array shape
             self.array_dense.diag(k=-3)
@@ -112,7 +112,7 @@ class TestCArrayUtilsMixed(CArrayTestCases.TestCArray):
 
         with self.assertRaises(ValueError):
             # k is higher/lower than array shape
-            print self.array_sparse.diag(k=4)
+            self.array_sparse.diag(k=4)
         with self.assertRaises(ValueError):
             # k is higher/lower than array shape
             self.array_sparse.diag(k=-3)

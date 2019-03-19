@@ -307,7 +307,7 @@ def split(path):
     >>> path = fm.join('dir1','dir2','dir3')
     >>> path
     'dir1/dir2/dir3'
-    >>> print fm.split(path)
+    >>> print(fm.split(path))
     ('dir1/dir2', 'dir3')
 
     """
@@ -336,13 +336,13 @@ def splitext(path):
     >>> path = fm.join('dir1','file.gz')
     >>> path
     'dir1/file.gz'
-    >>> print fm.splitext(path)
+    >>> print(fm.splitext(path))
     ('dir1/file', '.gz')
 
     >>> path = fm.join('dir1','file.tar.gz')
     >>> path
     'dir1/file.tar.gz'
-    >>> print fm.splitext(path)  # Only the first (real) extension is returned
+    >>> print(fm.splitext(path))  # Only the first (real) extension is returned
     ('dir1/file.tar', '.gz')
 
     """

@@ -24,7 +24,7 @@ def find_duplicates(l):
     --------
     >>> from secml.utils.list_utils import find_duplicates
     >>> l = ['1', '1', 2, '3', 2]
-    >>> print find_duplicates(l)
+    >>> print(find_duplicates(l))
     set(['1', 2])
 
     References

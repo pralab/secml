@@ -464,7 +464,7 @@ class CAttackEvasion(CAttack):
         # only consider samples that can be manipulated
         v = self.is_attack_class(y)
         idx = CArray(v.find(v)).ravel()
-        # print v, idx
+        # print(v, idx)
 
         # number of modifiable samples
         n_mod_samples = idx.size

@@ -1850,16 +1850,16 @@ class CSparse(_CArrayInterface):
         --------
         >>> from secml.array.c_sparse import CSparse
         >>> array = CSparse.eye(2)
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         (0, 0)	1.0
         (1, 1)	1.0
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 2)
 
         >>> array = CSparse.eye(2, k=1, dtype=int)
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         (0, 1)	1
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 2)
 
         """

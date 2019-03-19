@@ -7,6 +7,7 @@
 .. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
 
 """
+from __future__ import print_function
 import numpy as np
 import numpy.matlib
 from numpy.linalg import inv, pinv
@@ -928,7 +929,7 @@ class CDense(_CArrayInterface):
             np.savetxt(
                 datafile, self.atleast_2d().tondarray(), delimiter=' ', fmt=fmt)
         except IOError as e:  # Prevent stopping after standard IOError
-            print e
+            print(e)
 
     @classmethod
     def load(cls, datafile, dtype=float, startrow=0, skipend=0, cols=None):
@@ -1262,13 +1263,13 @@ class CDense(_CArrayInterface):
         --------
         >>> from secml.array.c_dense import CDense
 
-        >>> print CDense([[0,0.1],[0.4,1.0]]).binary_search(0.3)
+        >>> print(CDense([[0,0.1],[0.4,1.0]]).binary_search(0.3))
         2
 
-        >>> print CDense([1,2,3,4]).binary_search(10)
+        >>> print(CDense([1,2,3,4]).binary_search(10))
         3
 
-        >>> print CDense([1,2,3,4]).binary_search(CDense([-10,1,2.2,10]))
+        >>> print(CDense([1,2,3,4]).binary_search(CDense([-10,1,2.2,10])))
         [0 0 1 3]
 
         """
@@ -1726,16 +1727,16 @@ class CDense(_CArrayInterface):
         --------
         >>> from secml.array.c_dense import CDense
         >>> array = CDense.empty(2)
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         [  6.94292784e-310   6.94292784e-310]
-        >>> print array.shape
+        >>> print(array.shape)
         (2,)
 
         >>> array = CDense.empty((2, 1), dtype=int)
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         [[              0]
          [140526427175696]]
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 1)
 
         """
@@ -1759,16 +1760,16 @@ class CDense(_CArrayInterface):
         --------
         >>> from secml.array.c_dense import CDense
         >>> array = CDense.zeros(2)
-        >>> print array
+        >>> print(array)
         [ 0.  0.]
-        >>> print array.shape
+        >>> print(array.shape)
         (2,)
 
         >>> array = CDense.zeros((2, 1), dtype=int)
-        >>> print array
+        >>> print(array)
         [[0]
          [0]]
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 1)
 
         """
@@ -1792,16 +1793,16 @@ class CDense(_CArrayInterface):
         --------
         >>> from secml.array.c_dense import CDense
         >>> array = CDense.ones(2)
-        >>> print array
+        >>> print(array)
         [ 1.  1.]
-        >>> print array.shape
+        >>> print(array.shape)
         (2,)
 
         >>> array = CDense.ones((2, 1), dtype=int)
-        >>> print array
+        >>> print(array)
         [[1]
          [1]]
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 1)
 
         """
@@ -1828,17 +1829,17 @@ class CDense(_CArrayInterface):
         --------
         >>> from secml.array.c_dense import CDense
         >>> array = CDense.eye(2)
-        >>> print array
+        >>> print(array)
         [[ 1.  0.]
          [ 0.  1.]]
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 2)
 
         >>> array = CDense.eye(2, k=1, dtype=int)
-        >>> print array
+        >>> print(array)
         [[0 1]
          [0 0]]
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 2)
 
         """

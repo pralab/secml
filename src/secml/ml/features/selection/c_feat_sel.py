@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from secml.core import CCreator
 
 
@@ -20,7 +22,7 @@ class CFeatSel(CCreator):
             return self._feat_sel_only_manifest(dataset, *args)
 
         else:
-            print self.criterion
+            print(self.criterion)
             raise ValueError("Unknown criterion for feature selection.")
 
     def _feat_sel(self, dataset):

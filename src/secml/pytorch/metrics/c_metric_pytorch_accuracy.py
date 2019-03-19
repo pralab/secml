@@ -35,7 +35,7 @@ class CMetricPyTorchAccuracy(object):
     # Prediction @k=1 are: [[2], [1], [2]]
     # Prediction @k=2 are: [[2,0], [1,2], [2,0]]
     # Prediction @k=3 are: [[2,0,1], [1,2,0], [2,0,1]]
-    >>> print peval.performance_score(y_true, score, topk=(1,2,3))
+    >>> print(peval.performance_score(y_true, score, topk=(1,2,3)))
     [tensor(33.3333), tensor(66.6667), tensor(100.)]
 
     """

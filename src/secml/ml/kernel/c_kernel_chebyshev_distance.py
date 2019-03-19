@@ -33,11 +33,11 @@ class CKernelChebyshevDistance(CKernel):
     >>> from secml.array import CArray
     >>> from secml.ml.kernel.c_kernel_chebyshev_distance import CKernelChebyshevDistance
 
-    >>> print CKernelChebyshevDistance().k(CArray([[1,2],[3,4]]), CArray([[5,6],[7,8]]))
+    >>> print(CKernelChebyshevDistance().k(CArray([[1,2],[3,4]]), CArray([[5,6],[7,8]])))
     CArray([[ 4.  6.]
      [ 2.  4.]])
 
-    >>> print CKernelChebyshevDistance().k(CArray([[1,2],[3,4]]))
+    >>> print(CKernelChebyshevDistance().k(CArray([[1,2],[3,4]])))
     CArray([[ 0.  2.]
      [ 2.  0.]])
 

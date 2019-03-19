@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import scipy.sparse as scs
 import operator as op
@@ -525,13 +526,13 @@ class TestCArraySystemOverloads(CArrayTestCases.TestCArray):
         self.logger.info("D logical_and C -> " + str(d.logical_and(c)))
 
         with self.assertRaises(ValueError):
-            print d and c
+            print(d and c)
         with self.assertRaises(ValueError):
-            print c and d
+            print(c and d)
         with self.assertRaises(ValueError):
-            print d or c
+            print(d or c)
         with self.assertRaises(ValueError):
-            print c or d
+            print(c or d)
 
         a = CArray(True)
         b = CArray(False)
