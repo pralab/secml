@@ -6,18 +6,19 @@
 
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
+import six
 from copy import deepcopy
 
 from secml.core.type_utils import to_builtin
 
 
+@six.add_metaclass(ABCMeta)
 class _CArrayInterface(object):
     """Interface for array classes.
 
     For extensive definition of each method, see `secml.array.CArray`.
 
     """
-    __metaclass__ = ABCMeta
 
     # ------------------------------ #
     # # # # # # PROPERTIES # # # # # #

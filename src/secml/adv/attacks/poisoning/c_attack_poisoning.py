@@ -7,6 +7,7 @@
 """
 import warnings
 from abc import ABCMeta, abstractmethod
+import six
 
 from secml.adv.attacks import CAttack
 from secml.optim.optimizers import COptimizer
@@ -18,9 +19,9 @@ from secml.optim.constraints import CConstraint
 from secml.optim.function import CFunction
 
 
+@six.add_metaclass(ABCMeta)
 class CAttackPoisoning(CAttack):
     """Class for implementing poisoning attacks."""
-    __metaclass__ = ABCMeta
     __super__ = 'CAttackPoisoning'
 
     def __init__(self, classifier,

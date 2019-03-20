@@ -1,4 +1,5 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
+import six
 
 from secml.ml.classifiers.tests import CClassifierTestCases
 
@@ -10,9 +11,9 @@ from secml.ml.peval.metrics import CMetric
 
 class CClassifierRejectTestCases(object):
 
+    @six.add_metaclass(ABCMeta)
     class TestCClassifierReject(CClassifierTestCases):
         """Unit test for CClassifierReject"""
-        __metaclass__ = ABCMeta
 
         def test_draw(self):
             """ Compare the classifiers graphically"""

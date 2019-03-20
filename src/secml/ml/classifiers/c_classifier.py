@@ -7,6 +7,7 @@
 
 """
 from abc import ABCMeta, abstractmethod
+import six
 
 from secml.core import CCreator
 from secml.array import CArray
@@ -40,6 +41,7 @@ def _classify_one(tr_class_idx, clf, test_x, verbose):
     return clf.decision_function(test_x, y=tr_class_idx)
 
 
+@six.add_metaclass(ABCMeta)
 class CClassifier(CCreator):
     """Abstract class that defines basic methods for Classifiers.
 
@@ -58,7 +60,6 @@ class CClassifier(CCreator):
         desired preprocessor. If None, input data is used as is.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CClassifier'
 
     def __init__(self, preprocess=None):

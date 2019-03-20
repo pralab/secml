@@ -6,11 +6,13 @@
 
 """
 from abc import ABCMeta, abstractmethod
+import six
 
 from secml.ml.classifiers import CClassifier
 from secml.array import CArray
 
 
+@six.add_metaclass(ABCMeta)
 class CClassifierMulticlass(CClassifier):
     """Generic interface for Multiclass Classifiers.
 
@@ -26,7 +28,6 @@ class CClassifierMulticlass(CClassifier):
         Any other construction parameter for the binary classifiers.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CClassifierMulticlass'
 
     def __init__(self, classifier, preprocess=None, **clf_params):

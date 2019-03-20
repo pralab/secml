@@ -6,12 +6,14 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
+import six
 
 from secml.core import CCreator
 from secml.array import CArray
 
 
+@six.add_metaclass(ABCMeta)
 class CKernel(CCreator):
     """Abstract class that defines basic methods for kernels.
 
@@ -28,7 +30,6 @@ class CKernel(CCreator):
     cache_size : int, size of the cache used for kernel computation. Default 100.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CKernel'
 
     cache_size = 100

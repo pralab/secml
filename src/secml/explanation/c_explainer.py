@@ -7,10 +7,12 @@
 
 """
 from abc import ABCMeta, abstractmethod
+import six
 
 from secml.core import CCreator
 
 
+@six.add_metaclass(ABCMeta)
 class CExplainer(CCreator):
     """Abstract interface for Explainable ML methods.
 
@@ -22,7 +24,6 @@ class CExplainer(CCreator):
         Training dataset of the classifier to explain.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CExplainer'
 
     def __init__(self, clf, tr_ds=None):

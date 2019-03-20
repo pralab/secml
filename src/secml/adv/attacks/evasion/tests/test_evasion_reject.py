@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+import six
 
 from secml.utils import CUnitTest
 
@@ -15,9 +16,9 @@ from secml.utils import fm
 class CEvasionRejectTestCases(object):
     """Wrapper for TestCEvasion to make unittest.main() work correctly."""
 
+    @six.add_metaclass(ABCMeta)
     class TestCEvasionReject(CUnitTest):
         """Unit test for CEvasion."""
-        __metaclass__ = ABCMeta
 
         @abstractmethod
         def _classifier_creation(self):

@@ -5,12 +5,14 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
+import six
 import inspect
 
 from secml.core import CCreator
 
 
+@six.add_metaclass(ABCMeta)
 class CMetric(CCreator):
     """Performance evaluation metrics.
 
@@ -41,7 +43,6 @@ class CMetric(CCreator):
     0.3
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CMetric'
 
     best_value = None
