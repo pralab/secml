@@ -165,16 +165,18 @@ test:install:unzip:
   extends: .test:install
   script:
     - apt-get install -yq unzip > /dev/null
-    - unzip ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
-    - cd ${CI_PROJECT_NAME}-*
+    - cd ${CI_PROJECT_DIR}/dist
+    - unzip ${CI_PROJECT_NAME}-*.zip
+    - cd $(find -maxdepth 1 -type d -iname ${CI_PROJECT_NAME}-\*)
     - pip install .
 
 test:install:unzip-extras:
   extends: .test:install
   script:
     - apt-get install -yq unzip > /dev/null
-    - unzip ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
-    - cd ${CI_PROJECT_NAME}-*
+    - cd ${CI_PROJECT_DIR}/dist
+    - unzip ${CI_PROJECT_NAME}-*.zip
+    - cd $(find -maxdepth 1 -type d -iname ${CI_PROJECT_NAME}-\*)
     - pip install .[pytorch,cleverhans]
   after_script:
     - python -c "import secml"
