@@ -6,10 +6,12 @@
 
 """
 from abc import abstractmethod, ABCMeta
+import six
 
 from secml.ml.classifiers import CClassifier
 
 
+@six.add_metaclass(ABCMeta)
 class CClassifierReject(CClassifier):
     """Abstract class that defines basic methods for Classifiers with reject.
 
@@ -28,7 +30,6 @@ class CClassifierReject(CClassifier):
         preprocess type. If None, input data is used as is.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CClassifierReject'
 
     @abstractmethod

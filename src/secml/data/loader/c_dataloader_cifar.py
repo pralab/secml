@@ -9,6 +9,7 @@ import tarfile
 import cPickle
 from multiprocessing import Lock
 from abc import ABCMeta, abstractmethod, abstractproperty
+import six
 import numpy as np
 
 from secml.data.loader import CDataLoader
@@ -28,13 +29,13 @@ CIFAR10_PATH = fm.join(CIFAR_PATH, 'cifar-10-batches-py')
 CIFAR100_PATH = fm.join(CIFAR_PATH, 'cifar-100-python')
 
 
+@six.add_metaclass(ABCMeta)
 class CDataLoaderCIFAR(CDataLoader):
     """Loads the CIFAR tiny images datasets.
 
     Available at: https://www.cs.toronto.edu/~kriz/cifar.html
 
     """
-    __metaclass__ = ABCMeta
     __lock = Lock()  # Lock to prevent multiple parallel download/extraction
 
     def __init__(self):

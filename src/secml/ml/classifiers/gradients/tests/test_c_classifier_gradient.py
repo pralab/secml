@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
+import six
 
 from secml.utils import CUnitTest
 from secml.array import CArray
@@ -9,9 +10,9 @@ from secml.ml.classifiers.gradients.tests.utils import CClassifierGradientTest
 class CClassifierGradientTestCases(object):
     """Wrapper for TestCClassifierGradient to make unittest.main() work correctly."""
 
+    @six.add_metaclass(ABCMeta)
     class TestCClassifierGradient(CUnitTest):
         """Unit test for the classifier gradients."""
-        __metaclass__ = ABCMeta
 
         @abstractmethod
         def _dataset_creation(self):

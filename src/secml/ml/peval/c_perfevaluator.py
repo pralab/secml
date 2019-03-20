@@ -6,7 +6,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
+import six
 from collections import OrderedDict
 from copy import deepcopy
 
@@ -62,6 +63,7 @@ def _evaluate_one(
     return eval_score
 
 
+@six.add_metaclass(ABCMeta)
 class CPerfEvaluator(CCreator):
     """Evaluate the best parameters for input estimator.
 
@@ -73,7 +75,6 @@ class CPerfEvaluator(CCreator):
         Name of the metric that we want maximize / minimize.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CPerfEvaluator'
 
     def __init__(self, splitter, metric):

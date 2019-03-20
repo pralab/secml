@@ -10,6 +10,7 @@ TODO: Add assertEquals statements to check the correctness of the test
 
 """
 from abc import ABCMeta, abstractmethod
+import six
 
 from secml.utils import CUnitTest
 from secml.adv.seceval import CSecEval
@@ -24,11 +25,11 @@ class CSecEvalTestCases(object):
     Wrapper for TestCSecEval to make unittest.main() work correctly
     """
 
+    @six.add_metaclass(ABCMeta)
     class TestCSecEval(CUnitTest):
         """
         SecEval unittest
         """
-        __metaclass__ = ABCMeta
 
         @abstractmethod
         def attack_params_setter(self):

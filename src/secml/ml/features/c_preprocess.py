@@ -7,9 +7,12 @@
 
 """
 from abc import ABCMeta, abstractmethod
+import six
+
 from secml.core import CCreator
 
 
+@six.add_metaclass(ABCMeta)
 class CPreProcess(CCreator):
     """Common interface for feature preprocessing algorithms.
 
@@ -21,7 +24,6 @@ class CPreProcess(CCreator):
         desired preprocessor. If None, input data is used as is.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CPreProcess'
 
     def __init__(self, preprocess=None):

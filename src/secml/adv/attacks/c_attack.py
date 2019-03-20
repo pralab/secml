@@ -7,6 +7,7 @@
 
 """
 from abc import ABCMeta, abstractmethod
+import six
 
 from secml.core import CCreator
 from secml.core.type_utils import is_int
@@ -16,6 +17,7 @@ from secml.ml.classifiers import CClassifier
 from secml.data import CDataset
 
 
+@six.add_metaclass(ABCMeta)
 class CAttack(CCreator):
     """Interface class for evasion and poisoning attacks.
 
@@ -37,7 +39,6 @@ class CAttack(CCreator):
          'all' (default) if all classes can be manipulated.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CAttack'
 
     def __init__(self, classifier,

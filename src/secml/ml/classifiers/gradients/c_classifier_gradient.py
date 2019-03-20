@@ -7,14 +7,14 @@
 
 """
 from abc import ABCMeta, abstractmethod
+import six
 
 from secml.core import CCreator
 
 
+@six.add_metaclass(ABCMeta)
 class CClassifierGradient(CCreator):
-    """Abstract class that defines basic methods for CClassifierGradient.
-    """
-    __metaclass__ = ABCMeta
+    """Abstract class that defines basic methods for CClassifierGradient."""
     __super__ = 'CClassifierGradient'
 
     def loss(self):

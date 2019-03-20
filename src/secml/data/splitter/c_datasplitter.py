@@ -6,11 +6,13 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
+import six
 
 from secml.core import CCreator
 
 
+@six.add_metaclass(ABCMeta)
 class CDataSplitter(CCreator):
     """Abstract class that defines basic methods for dataset splitting.
 
@@ -25,7 +27,6 @@ class CDataSplitter(CCreator):
         If None, is the RandomState instance used by np.random.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CDataSplitter'
 
     def __init__(self, num_folds=3, random_state=None):

@@ -6,16 +6,17 @@
 
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
+import six
 
 from secml.core import CCreator
 
 
+@six.add_metaclass(ABCMeta)
 class CClassifierGradientTest(CCreator):
     """
     This class implement different functionalities which are useful to test
     the CClassifierGradient class.
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CClassifierGradientTest'
 
     def __init__(self, gradients):

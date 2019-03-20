@@ -1,5 +1,6 @@
 from secml.utils import CUnitTest
 from abc import ABCMeta, abstractmethod
+import six
 
 from numpy import *
 import time
@@ -18,9 +19,9 @@ from secml.optim.constraints import \
 class CEvasionTestCases(object):
     """Wrapper for TestCEvasion to make unittest.main() work correctly."""
 
+    @six.add_metaclass(ABCMeta)
     class TestCEvasion(CUnitTest):
         """Unit test for CEvasion."""
-        __metaclass__ = ABCMeta
 
         @abstractmethod
         def param_setter(self):

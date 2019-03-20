@@ -6,13 +6,15 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
 """
+from abc import ABCMeta, abstractmethod
+import six
+
 from secml.core import CCreator
 from secml.optim.function import CFunction
 from secml.optim.constraints import CConstraint
 
-from abc import ABCMeta, abstractmethod
 
-
+@six.add_metaclass(ABCMeta)
 class COptimizer(CCreator):
     """
     Class serving as interface to define optimization problems in the form:
@@ -29,7 +31,6 @@ class COptimizer(CCreator):
         (if available).
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'COptimizer'
 
     def __init__(self, fun, constr=None, bounds=None, discrete=False):

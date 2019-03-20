@@ -3,18 +3,19 @@ This module implements the generic constraint class
 Implements equality/inequality constraints in the canonic form
     c(x) <= 0
 
-@author: Battista Biggio
-"""
+.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
-from abc import ABCMeta, abstractmethod, abstractproperty
+"""
+from abc import ABCMeta, abstractmethod
+import six
 
 from secml.core import CCreator
 from secml.array import CArray
 
 
+@six.add_metaclass(ABCMeta)
 class CConstraint(CCreator):
     """Abstract class that defines basic methods for constraints."""
-    __metaclass__ = ABCMeta
     __super__ = 'CConstraint'
 
     # This is not abstract as some constraints may not be differentiable
