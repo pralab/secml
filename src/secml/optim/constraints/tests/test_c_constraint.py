@@ -30,6 +30,10 @@ class CConstraintTestCases(object):
         def _set_constr_name(self):
             raise NotImplementedError
 
+        @abstractmethod
+        def _set_norm_order(self):
+            raise NotImplementedError
+
         def _create_test_points(self):
             # create a point that lies inside the constraint
             self._p1_inside = CArray([0, 0])
@@ -90,7 +94,7 @@ class CConstraintTestCases(object):
                                                   "active` should be "
                                                   "True")
 
-        def _test_is_violated(self):
+        def test_is_violated(self):
             """
             Check the `is_violated` function of the constraint object.
             (It should return True if the point lies outside the
@@ -106,15 +110,15 @@ class CConstraintTestCases(object):
 
             self.assertLessEqual(p1_violated, False, "The point lies "
                                                      "inside the constraint "
-                                                     "therefore the value of the funciton `is_"
+                                                     "therefore the value of the function `is_"
                                                      "violated` should be False")
             self.assertLessEqual(p2_violated, True, "The point lies "
                                                     "inside the constraint "
-                                                    "therefore the value of the funciton `is_"
+                                                    "therefore the value of the function `is_"
                                                     "violated` should be True")
             self.assertLessEqual(p3_violated, False, "The point lies "
                                                      "on the constraint "
-                                                     "therefore the value of the funciton `is_"
+                                                     "therefore the value of the function `is_"
                                                      "violated` should be "
                                                      "False")
 
@@ -146,27 +150,51 @@ class CConstraintTestCases(object):
                                         "therefore the value of the constraint "
                                         "function should be equal to zero")
 
-        # TODO: READD
-        def _test_gradient(self):
+        def test_gradient(self):
             """
             Test the gradient of the constraint function
             """
             # Compare the analytical grad with the numerical grad
-            gradient = self._constr.gradient(self._p1_inside)
-            num_gradient = CFunction(self._constr.constraint,
-                                     self._constr.gradient).approx_fprime(
-                self._p1_inside, 1e-8)
-            error = (gradient - num_gradient).norm(order=1)
-            self.logger.info("Analitic gradient {:}".format(str(gradient)))
-            self.logger.info(
-                "Numerical gradient {:}".format(str(num_gradient)))
+            if self._constr_name != 'L-inf':
+                gradient = self._constr.gradient(self._p1_inside)
+                num_gradient = CFunction(self._constr.constraint,
+                                         self._constr.gradient).approx_fprime(
+                    self._p1_inside, 1e-8)
+                error = (gradient - num_gradient).norm(order=2)
+                self.logger.info("Analitic gradient {:}".format(str(gradient)))
+                self.logger.info(
+                    "Numerical gradient {:}".format(str(num_gradient)))
 
-            self.logger.info(
-                "norm(grad - num_grad): %s", str(error))
-            self.assertLess(error, 1e-3, "the gradient function of the "
-                                         "constraint object does not work")
+                self.logger.info(
+                    "norm(grad - num_grad): %s", str(error))
+                self.assertLess(error, 1e-3, "the gradient function of the "
+                                             "constraint object does not work")
 
         def test_projection(self):
+            """
+            Test the `projection` function of the constraint object.
+            This function should project a point that lies outside the
+            constraint inside the constraint. It should return exactly
+            the same point if it does not violate the constraint.
+            """
+            pin_proj = self._constr.projection(self._p1_inside)
+            error = (pin_proj - self._p1_inside).norm(order=2)
+            self.logger.info(
+                "norm(projected point inside the constraint -  "
+                "point inside the constraint): %s", str(error))
+            self.assertLess(error, 1e-3, "the projection function change a "
+                                         "point that is already inside the "
+                                         "constraint")
+
+            pon_proj = self._constr.projection(self._p3_on)
+            error = (pon_proj - self._p3_on).norm(order=2)
+            self.logger.info(
+                "norm(projected point inside the constraint -  "
+                "point inside the constraint): %s", str(error))
+            self.assertLess(error, 1e-3, "the projection function change a "
+                                         "point that is on the "
+                                         "constraint")
+
             pout = CArray([0, 2])
             real_proj_pout = CArray([0, 1])
             pout_proj = self._constr.projection(pout)
@@ -177,8 +205,29 @@ class CConstraintTestCases(object):
             self.assertLess(error, 1e-3, "the projection function is not "
                                          "working correclty")
 
+
+            pout_proj = self._constr.projection(self._p2_outside)
+            self.logger.info(
+                "projected point {:}".format(pout_proj))
+            center = CArray([0,0])
+            proj_dist = (pout_proj - center).norm(order=self._norm_order)
+            self.logger.info(
+                "The radius of the constraint is: %s",
+                str(self._constr.radius))
+            self.logger.info(
+                "The distance of the projected point from the center is: %s",
+                str(proj_dist))
+            self.assertAlmostEqual(
+                proj_dist, self._constr.radius,  msg="The distance of "
+                                                          "the "
+                                                   "projected "
+                                         "point is "
+                                "different from the "
+                "constraint radius", places=2)
+
         def setUp(self):
             self._constr_creation()
+            self._set_norm_order()
             self._set_constr_name()
 
             self._create_test_points()  # creates the point that we will use
