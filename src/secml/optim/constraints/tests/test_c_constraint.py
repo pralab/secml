@@ -64,7 +64,11 @@ class CConstraintTestCases(object):
 
 
         def test_is_active(self):
-
+            """
+            Check the `is_active` function of the constraint object.
+            (It should return True if the point lies on the
+            constraint and False otherwise).
+            """
             p1_active = self._constr.is_active(self._p1_inside)
             p2_active = self._constr.is_active(self._p2_outside)
             p3_active = self._constr.is_active(self._p3_on)
@@ -115,6 +119,12 @@ class CConstraintTestCases(object):
                                                      "False")
 
         def test_constraint(self):
+            """
+            Check the `constraint` function of the constraint object.
+            (It should return True a positive value if point lies outside the
+            constraint, zero if it is lies on the contraint and a negative
+            value otherwise).
+            """
             p1_out = self._constr.constraint(self._p1_inside)
             p2_out = self._constr.constraint(self._p2_outside)
             p3_out = self._constr.constraint(self._p3_on)
