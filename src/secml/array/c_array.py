@@ -6,12 +6,15 @@
 
 """
 from copy import deepcopy
+from six.moves import range
 import numpy as np
 import scipy.sparse as scs
 
-from c_array_interface import _CArrayInterface
-from c_dense import CDense
-from c_sparse import CSparse
+from .c_array_interface import _CArrayInterface
+
+from .c_dense import CDense
+from .c_sparse import CSparse
+
 from secml.core.type_utils import \
     is_int, is_scalar, is_bool, is_ndarray, is_scsarray, to_builtin
 
@@ -1355,8 +1358,8 @@ class CArray(_CArrayInterface):
         # But as .ravel() can return a copy, we prefer this
         n_rows = 1 if self.is_vector_like else self.shape[0]
         n_columns = self.size if self.is_vector_like else self.shape[1]
-        for row_id in xrange(n_rows):
-            for column_id in xrange(n_columns):
+        for row_id in range(n_rows):
+            for column_id in range(n_columns):
                 yield self[row_id, column_id].item()
 
     def __str__(self):
@@ -2164,11 +2167,11 @@ class CArray(_CArrayInterface):
         # Preallocate output array
         if axis == 0:
             out = CArray.zeros(self.shape[1])
-            for i in xrange(self.shape[1]):
+            for i in range(self.shape[1]):
                 out[i] = func(data_2d[:, i], *args, **kwargs)
         elif axis == 1:
             out = CArray.zeros(self.shape[0])
-            for i in xrange(self.shape[0]):
+            for i in range(self.shape[0]):
                 out[i] = func(data_2d[i, :], *args, **kwargs)
         else:
             raise ValueError("`apply_along_axis` currently available "

@@ -8,6 +8,7 @@
 """
 from abc import ABCMeta, abstractmethod
 import six
+from six.moves import range
 
 from secml.core import CCreator
 
@@ -49,7 +50,7 @@ class CDataSplitter(CCreator):
 
     def __iter__(self):
         """Return a train/test indices pair for each fold."""
-        for f in xrange(self.num_folds):
+        for f in range(self.num_folds):
             yield self._tr_idx[f], self._ts_idx[f]
 
     @abstractmethod

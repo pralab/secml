@@ -1,11 +1,10 @@
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+from secml.array.tests import CArrayTestCases
 
 from secml.utils import fm
 from secml.array import CArray
 
 
-class TestCArraySaveLoad(CArrayTestCases.TestCArray):
+class TestCArraySaveLoad(CArrayTestCases):
     """Unit test for CArray SAVE/LOAD methods."""
 
     def test_save_load(self):
@@ -67,4 +66,4 @@ class TestCArraySaveLoad(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

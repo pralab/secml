@@ -7,12 +7,15 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from six.moves import range
 import scipy.sparse as scs
 from scipy.sparse.linalg import inv, norm
 import numpy as np
 
-from c_array_interface import _CArrayInterface
-from c_dense import CDense
+from .c_array_interface import _CArrayInterface
+
+from .c_dense import CDense
+
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_intlike, is_int, is_bool
 from secml.core.constants import inf
@@ -802,8 +805,8 @@ class CSparse(_CArrayInterface):
 
     def __iter__(self):
         """Yields array elements in raster-scan order."""
-        for row_id in xrange(self.shape[0]):
-            for column_id in xrange(self.shape[1]):
+        for row_id in range(self.shape[0]):
+            for column_id in range(self.shape[1]):
                 yield self[row_id, column_id]
 
     def __str__(self):
@@ -1010,12 +1013,12 @@ class CSparse(_CArrayInterface):
         tosort = self if inplace is True else self.deepcopy()
 
         if axis == 1 or axis == -1:
-            for i in xrange(tosort.shape[0]):
+            for i in range(tosort.shape[0]):
                 row = tosort[i, :].todense()
                 row.sort(axis=1, inplace=True)
                 tosort[i, :] = row
         elif axis == 0:
-            for i in xrange(tosort.shape[1]):
+            for i in range(tosort.shape[1]):
                 column = tosort[:, i].todense()
                 column.sort(axis=0, inplace=True)
                 tosort[:, i] = column
@@ -1051,7 +1054,7 @@ class CSparse(_CArrayInterface):
         index_matrix = CDense().zeros(array.shape, dtype=int)
 
         axis_element = None
-        for i in xrange(axis_elem_num):
+        for i in range(axis_elem_num):
 
             if axis == 1 or axis == -1 or axis is None:
                 axis_element = array[i, :]  # order for row
@@ -1098,8 +1101,8 @@ class CSparse(_CArrayInterface):
         n: the number of times that we want repeat a alog axis 1 (orizontal)
         """
         self_csr = self.tocsr()
-        rows = [self_csr for _ in xrange(n)]
-        blocks = [rows for _ in xrange(m)]
+        rows = [self_csr for _ in range(n)]
+        blocks = [rows for _ in range(m)]
         if len(blocks) == 0:  # To manage the m = 0 case
             blocks = [[]]
         return self.__class__(scs.bmat(blocks, format='csr', dtype=self.dtype))
@@ -1323,7 +1326,7 @@ class CSparse(_CArrayInterface):
             # Let's get the index of the first zero...
             unique_index = CDense(dtype=int)
             if n_zeros > 0:  # ... if any!
-                for i in xrange(flat_a.size):
+                for i in range(flat_a.size):
                     # If a element is missing for indices[1]
                     # (nz column indices), means there is a zero there!
                     if i + 1 > len(flat_a.nnz_indices[1]) or \
@@ -1532,7 +1535,7 @@ class CSparse(_CArrayInterface):
 
         index_matrix = CDense.zeros(axis_elem_num, dtype=array.dtype)
 
-        for i in xrange(axis_elem_num):
+        for i in range(axis_elem_num):
 
             # search maximum between non zero element for current row/column
             i_indices = this_indices.find(this_indices == i)[1]
@@ -1624,7 +1627,7 @@ class CSparse(_CArrayInterface):
 
         index_matrix = CDense.zeros(axis_elem_num, dtype=array.dtype)
 
-        for i in xrange(axis_elem_num):
+        for i in range(axis_elem_num):
 
             # search minimum between non zero element for current row/column
             i_indices = this_indices.find(this_indices == i)[1]
@@ -1885,6 +1888,11 @@ class CSparse(_CArrayInterface):
     @classmethod
     def randuniform(cls, low=0.0, high=1.0, shape=None, random_state=None):
         """Return random samples from low (inclusive) to high (exclusive)."""
+        raise NotImplementedError
+
+    @classmethod
+    def randint(cls, low, high=None, shape=None, random_state=None):
+        """Return random integers from low (inclusive) to high (exclusive)."""
         raise NotImplementedError
 
     @classmethod

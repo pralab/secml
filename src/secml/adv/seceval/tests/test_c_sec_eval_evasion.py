@@ -8,11 +8,11 @@ This module tests the CSecEval class, which performs an attacks on
 a dataset w.r.t increasing attack power
 TODO: Add assertEquals statements to check the correctness of the test
 """
-import unittest
-from secml.array import CArray
+from secml.utils import CUnitTest
+from secml.adv.seceval.tests import CSecEvalTestCases
 
 from secml.adv.attacks.evasion import CAttackEvasion
-from test_c_sec_eval import CSecEvalTestCases
+from secml.array import CArray
 
 
 class TestCSecEvalEvasion(CSecEvalTestCases.TestCSecEval):
@@ -57,4 +57,4 @@ class TestCSecEvalEvasion(CSecEvalTestCases.TestCSecEval):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

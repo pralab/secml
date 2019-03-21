@@ -7,7 +7,7 @@
 """
 import tarfile
 from collections import OrderedDict
-from itertools import izip
+from six.moves import zip
 from multiprocessing import Lock
 import csv
 import numpy as np
@@ -160,7 +160,7 @@ class CDataLoaderDrebin(CDataLoader):
         # and the corresponding description as value
         feat_desc_idx = CArray(feat_mapping[:, 0].astype(int))
         feat_desc_str = CArray(feat_mapping[:, 1])
-        feat_desc = {k: v for k, v in izip(feat_desc_idx, feat_desc_str)}
+        feat_desc = {k: v for k, v in zip(feat_desc_idx, feat_desc_str)}
 
         self.logger.info(
             "Loading malware families from {:}".format(self.families_path))

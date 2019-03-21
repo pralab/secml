@@ -1,5 +1,6 @@
 from secml.utils import CUnitTest
 
+from six.moves import range
 import sklearn.metrics as skm
 import numpy as np
 
@@ -97,12 +98,12 @@ class TestCPerfEvaluator(CUnitTest):
         parameters_combination = [
             [1, 1], [1, 50], [10, 1], [10, 50], [100, 1], [100, 50]]
         par_comb_score = CArray.zeros(len(parameters_combination))
-        for comb in xrange(len(parameters_combination)):
+        for comb in range(len(parameters_combination)):
 
             this_fold_score = []
             num_xval_fold = len(xval_splitter.tr_idx)
 
-            for f in xrange(num_xval_fold):
+            for f in range(num_xval_fold):
 
                 self.svm.set("C", parameters_combination[comb][0])
                 self.svm.kernel.gamma = parameters_combination[comb][1]

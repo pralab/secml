@@ -1,3 +1,5 @@
+from six.moves import range
+
 from secml.figure.plots import CPlot
 from secml.ml.peval.metrics import CMetric
 from secml.array import CArray
@@ -396,7 +398,7 @@ class CPlotSecEval(CPlot):
         :param metric: CMetric
         """
         perf = CArray.zeros(shape=(sngl_sec_eval_data.param_values.size,))
-        for k in xrange(sngl_sec_eval_data.param_values.size):
+        for k in range(sngl_sec_eval_data.param_values.size):
             s = sngl_sec_eval_data.scores[k]  # (num_samples, num_classes)
             # consider only sample with idx in samples_idx
             s = s[samples_idx, :].ravel()

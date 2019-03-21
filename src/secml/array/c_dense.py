@@ -8,6 +8,7 @@
 
 """
 from __future__ import print_function
+from six.moves import range
 import numpy as np
 import numpy.matlib
 from numpy.linalg import inv, pinv
@@ -16,7 +17,8 @@ import scipy.sparse as scs
 
 from copy import deepcopy
 
-from c_array_interface import _CArrayInterface
+from .c_array_interface import _CArrayInterface
+
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_int, is_bool
 from secml.core.constants import inf
@@ -861,8 +863,8 @@ class CDense(_CArrayInterface):
         # But as .ravel() can return a copy, we prefer this
         n_rows = 1 if self.ndim == 1 else self.shape[0]
         n_columns = self.size if self.ndim == 1 else self.shape[1]
-        for row_id in xrange(n_rows):
-            for column_id in xrange(n_columns):
+        for row_id in range(n_rows):
+            for column_id in range(n_columns):
                 yield self[row_id, column_id]
 
     def __str__(self):
@@ -2056,7 +2058,7 @@ class CDense(_CArrayInterface):
         if len(arrays) > 1:  # More than 1 list to combine, recursion!
             # Rebuild the list of lists and call recursively
             out[0:m, 1:] = cls.comblist([x.tolist() for x in arrays[1:]])
-            for j in xrange(1, arrays[0].size):
+            for j in range(1, arrays[0].size):
                 out[j * m:(j + 1) * m, 1:] = out[0:m, 1:]
 
         return out

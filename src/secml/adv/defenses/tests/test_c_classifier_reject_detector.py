@@ -1,4 +1,5 @@
 import os
+from six.moves import range
 
 from secml.utils import CUnitTest
 from secml.ml.classifiers.reject.tests import CClassifierRejectTestCases
@@ -87,7 +88,7 @@ class TestCClassifierRejectDetector(
 
             adv_dts_lst = self.sec_eval.sec_eval_data.adv_ds
 
-            for adv_dts_idx in xrange(len(adv_dts_lst)):
+            for adv_dts_idx in range(len(adv_dts_lst)):
                 if adv_dts_idx > 0:
                     if adv_dts_idx == 1:
                         adv_dts_X = adv_dts_lst[adv_dts_idx].X

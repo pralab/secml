@@ -1,6 +1,7 @@
 from secml.utils import CUnitTest
-from test_c_poisoning import CPoisoningTestCases
+from secml.adv.attacks.poisoning.tests import CPoisoningTestCases
 from secml.adv.attacks.poisoning.tests import CAttackPoisoningLinTest
+
 from secml.figure import CFigure
 from secml.optim.function import CFunction
 

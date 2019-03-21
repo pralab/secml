@@ -6,9 +6,10 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-import cPickle
+from six.moves import cPickle
 import gzip
-import c_file_manager as fm
+
+from secml.utils import fm
 
 # Remember to add any new method to following list
 __all__ = ['save', 'load']

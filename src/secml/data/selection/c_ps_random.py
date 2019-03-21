@@ -5,7 +5,9 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from c_prototypes_selector import CPrototypesSelector
+from six.moves import range
+
+from secml.data.selection import CPrototypesSelector
 from secml.array import CArray
 
 
@@ -39,7 +41,7 @@ class CPSRandom(CPrototypesSelector):
             Dataset with selected prototypes.
 
         """
-        sel_idx = CArray.randsample(xrange(dataset.num_samples),
+        sel_idx = CArray.randsample(range(dataset.num_samples),
                                     shape=n_prototypes,
                                     random_state=random_state)
 

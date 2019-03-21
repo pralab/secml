@@ -1,1 +1,1 @@
-from c_function_testcases import CFunctionTestCases
+from .c_function_testcases import CFunctionTestCases

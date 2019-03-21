@@ -6,6 +6,8 @@
 .. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
 
 """
+from six.moves import range
+
 from secml.array import CArray
 from secml.core.attr_utils import extract_attr
 
@@ -396,7 +398,7 @@ class CDataset(object):
             new_labels = CArray.zeros((self.num_samples, self.num_classes),
                                       dtype=self.Y.dtype)
             # We use list of list indexing (find-like)
-            new_labels[[list(xrange(self.num_samples)),
+            new_labels[[list(range(self.num_samples)),
                         CArray(self.Y).tolist()]] = 1
             return new_labels
 
@@ -427,7 +429,7 @@ class CDataset(object):
         x_min = self.X.min(axis=0) - offset
         x_max = self.X.max(axis=0) + offset
         boundary = []
-        for f_idx in xrange(self.num_features):
+        for f_idx in range(self.num_features):
             boundary.append((x_min[0, f_idx].item(), x_max[0, f_idx].item()))
         return boundary
 

@@ -8,6 +8,7 @@
 """
 from abc import ABCMeta, abstractmethod
 import six
+from six.moves import range
 from collections import OrderedDict
 from copy import deepcopy
 
@@ -131,7 +132,7 @@ class CPerfEvaluator(CCreator):
                 raise TypeError("values for parameter `{:}` must be "
                                 "specified as a list.".format(param_name))
             # Add an index for each parameter's value
-            params_idx.append(xrange(len(parameters[param_name])))
+            params_idx.append(range(len(parameters[param_name])))
 
         # this is a matrix of indices.... e.g. [[1,1] [1,2], ..]
         # each row corresponds to the indices of parameters to be set

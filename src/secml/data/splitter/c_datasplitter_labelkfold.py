@@ -5,6 +5,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from six.moves import range
+
 from secml.array import CArray
 from secml.data.splitter import CDataSplitter
 
@@ -98,7 +100,7 @@ class CDataSplitterLabelKFold(CDataSplitter):
 
         fold_labels = label_to_fold[labels]
 
-        for fold_idx in xrange(self.num_folds):
+        for fold_idx in range(self.num_folds):
             test_indices = fold_labels.find(fold_labels == fold_idx)
             train_indices = fold_labels.find(fold_labels != fold_idx)
             self._ts_idx.append(CArray(test_indices))

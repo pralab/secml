@@ -7,6 +7,7 @@
 
 """
 from copy import deepcopy
+from six.moves import range
 
 import torch
 from torch.utils.data import DataLoader
@@ -688,7 +689,7 @@ class CClassifierPyTorch(CClassifier):
         best_epoch = self.start_epoch
         best_state_dict = deepcopy(self.state_dict())
 
-        for self._start_epoch in xrange(self.start_epoch, self.epochs):
+        for self._start_epoch in range(self.start_epoch, self.epochs):
 
             scheduler.step()  # Adjust the learning rate
             losses = AverageMeter()  # Logger of the loss value
@@ -1082,7 +1083,7 @@ class CClassifierPyTorch(CClassifier):
                 # HAS ANY SPECIAL OPERATION INSIDE (LIKE DENSENET)
             # Manual iterate the network and stop at desired layer
             # Use _model to iterate over first level modules only
-            for m_k, m in self._model._modules.iteritems():
+            for m_k, m in self._model._modules.items():
                 s = m(s)  # Forward input trough module
                 if m_k == layer:
                     # We found the desired layer

@@ -1,5 +1,6 @@
-from c_classifier_testcases import CClassifierTestCases
+from secml.ml.classifiers.tests import CClassifierTestCases
 
+from six.moves import range
 import numpy as np
 from sklearn.svm import SVC
 import sklearn.metrics as skm
@@ -432,7 +433,7 @@ class TestCClassifierSVM(CClassifierTestCases):
 
             svm.fit(self.dataset)
 
-            for i in random.sample(xrange(self.dataset.num_samples), 10):
+            for i in random.sample(range(self.dataset.num_samples), 10):
                 # Randomly extract a pattern to test
                 pattern = self.dataset.X[i, :]
                 self.logger.info("P {:}: {:}".format(i, pattern))

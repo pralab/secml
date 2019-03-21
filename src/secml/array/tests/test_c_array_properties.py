@@ -1,16 +1,16 @@
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+from secml.array.tests import CArrayTestCases
 
 from secml.array import CArray
 
 
-class TestCArrayProperties(CArrayTestCases.TestCArray):
+class TestCArrayProperties(CArrayTestCases):
     """Unit test for CArray PROPERTIES."""
 
     def test_non_zero_indices(self):
         """Property test non_zero_indices."""
         self.logger.info("Testing non_zero_indices property")
 
+        # FIXME: UPDATE UNITTESTS
         def non_zero_indices(self, structure_name, matrix, row_vector,
                              column_vector):
             self.logger.info("nnz_indices: matrix \n" + str(matrix))
@@ -75,4 +75,4 @@ class TestCArrayProperties(CArrayTestCases.TestCArray):
     
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

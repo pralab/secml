@@ -6,6 +6,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from six.moves import range
+
 from secml.ml.peval import CPerfEvaluator
 from secml.array import CArray
 from secml.core.type_utils import is_scalar
@@ -50,7 +52,7 @@ class CPerfEvaluatorXVal(CPerfEvaluator):
         splits_score = CArray.zeros(fold_number)
 
         # estimate the performance of the estimator on each fold
-        for split_idx in xrange(fold_number):
+        for split_idx in range(fold_number):
 
             train_dataset = dataset[self.splitter.tr_idx[split_idx], :]
             test_dataset = dataset[self.splitter.ts_idx[split_idx], :]
@@ -123,7 +125,7 @@ class CPerfEvaluatorXVal(CPerfEvaluator):
 
         # Build the list of candidate parameters
         best_params_list = []
-        for c_idx in xrange(best_params_idx.shape[0]):
+        for c_idx in range(best_params_idx.shape[0]):
             # For each candidate get corresponding parameters
             best_params_dict = dict()
             for j, par in enumerate(params):

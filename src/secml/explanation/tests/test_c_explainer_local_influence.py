@@ -1,3 +1,5 @@
+from six.moves import range
+
 from secml.utils import CUnitTest
 
 from secml.explanation import CExplainerLocalInfluence
@@ -191,7 +193,7 @@ class TestCExplainerLocalInfluence(CUnitTest):
         avg_infl_idx = average_influence.argsort()
 
         n_check = 2
-        for i in xrange(1, n_check + 1):
+        for i in range(1, n_check + 1):
             not_infl_idx = avg_infl_idx[i - 1].item()
             infl_idx = avg_infl_idx[-i].item()
             self._check_prototype_pair(infl_idx, not_infl_idx)

@@ -8,6 +8,7 @@
 """
 from abc import ABCMeta, abstractmethod
 import six
+from six.moves import range
 
 from secml.core import CCreator
 from secml.array import CArray
@@ -120,8 +121,8 @@ class CKernel(CCreator):
         kernel = CArray.empty(
             shape=(x_carray_2d.shape[0], y_carray_2d.shape[0]))
 
-        # cache_size is the xrange step
-        for patterns_done in xrange(0, x_carray_2d.shape[0], self.cache_size):
+        # cache_size is the range step
+        for patterns_done in range(0, x_carray_2d.shape[0], self.cache_size):
 
             # This avoids indexing errors during computation of the last fold
             nxt_pattern_idx = min(
@@ -219,7 +220,7 @@ class CKernel(CCreator):
         # Instancing an empty array to avoid return errors
         grad = CArray([], tosparse=x_carray.issparse)
         # Kernel gradient can be dense or sparse depending on `x_carray`
-        for i in xrange(x_carray.shape[0]):
+        for i in range(x_carray.shape[0]):
             grad_i = self._gradient(x_carray[i, :], v_carray)
             grad = grad_i if i == 0 else grad.append(grad_i, axis=0)
 

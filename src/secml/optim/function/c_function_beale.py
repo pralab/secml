@@ -5,7 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from c_function import CFunction
+from secml.optim.function.c_function import CFunction
 from secml.array import CArray
 
 

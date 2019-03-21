@@ -1,3 +1,5 @@
+from six.moves import range
+
 from secml.ml.classifiers.tests import CClassifierTestCases
 
 from sklearn.multiclass import OneVsRestClassifier
@@ -87,7 +89,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
 
         # Setting parameter in single trained_classifiers
         multiclass.binary_classifiers[0].kernel.gamma = 300
-        for i in xrange(1, multiclass.num_classifiers):
+        for i in range(1, multiclass.num_classifiers):
             self.assertNotEqual(
                 multiclass.binary_classifiers[i].kernel.gamma, 300.0)
 
@@ -111,7 +113,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         multiclass.apply_method(CClassifierSVM.set, param_name='C',
                                 param_value=150)
 
-        for i in xrange(multiclass.num_classifiers):
+        for i in range(multiclass.num_classifiers):
             self.assertEqual(multiclass.binary_classifiers[i].C, 150)
 
     def test_normalization(self):
@@ -362,7 +364,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         self._test_gradient_numerical(multiclass, pattern)
 
         # Check if we can return the i_th classifier
-        for i in xrange(multiclass.num_classifiers):
+        for i in range(multiclass.num_classifiers):
 
             ova_grad = multiclass.binary_classifiers[i].gradient_f_x(pattern)
 

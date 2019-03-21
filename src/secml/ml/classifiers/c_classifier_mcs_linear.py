@@ -6,6 +6,8 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
 """
+from six.moves import range
+
 from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.classifiers import CClassifierLinear
@@ -125,7 +127,7 @@ class CClassifierMCSLinear(CClassifierLinear):
         self._w = CArray.zeros(dataset.num_features)
         self._b = CArray(0.0)
         
-        for i in xrange(self.n_classifiers):
+        for i in range(self.n_classifiers):
 
             # generate random indices for features and samples
             idx_samples = CArray.randsample(dataset.num_samples, num_samples,

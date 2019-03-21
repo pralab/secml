@@ -1,13 +1,12 @@
+from secml.array.tests import CArrayTestCases
+
 import numpy as np
 import itertools
-
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
 
 from secml.array import CArray
 
 
-class TestCArrayIndexing(CArrayTestCases.TestCArray):
+class TestCArrayIndexing(CArrayTestCases):
     """Unit test for CArray INDEXING methods."""
 
     def test_getter(self):
@@ -360,4 +359,4 @@ class TestCArrayIndexing(CArrayTestCases.TestCArray):
     
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

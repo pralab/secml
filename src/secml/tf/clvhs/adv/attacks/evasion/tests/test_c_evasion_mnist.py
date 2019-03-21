@@ -1,5 +1,7 @@
 from secml.utils import CUnitTest
 
+from six.moves import range
+
 from cleverhans.attacks import FastGradientMethod, CarliniWagnerL2, \
     ElasticNetMethod, SPSA, LBFGS, \
     ProjectedGradientDescent, SaliencyMapMethod, \
@@ -244,7 +246,7 @@ class TestEvasionMNISTCleverhansAttack(CUnitTest):
             labels
 
         """
-        for atk_idx in xrange(len(self.clvh_attacks)):
+        for atk_idx in range(len(self.clvh_attacks)):
 
             attack_idx = self.clvh_attacks[atk_idx]['class'].__name__
 

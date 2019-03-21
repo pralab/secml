@@ -8,6 +8,7 @@
 
 """
 from multiprocessing import Lock
+from six.moves import range
 
 from secml.data.loader import CDataLoader
 from secml.data import CDataset
@@ -348,7 +349,7 @@ class CDLRandomBlobsRegression(CDataLoader):
         from secml.ml.stats import CDistributionGaussian
         d = X.shape[1]  # number of features
         Y = self.bias
-        for gauss_idx in xrange(len(self.centers)):
+        for gauss_idx in range(len(self.centers)):
             Y += self.w[gauss_idx] * \
                  CDistributionGaussian(mean=self.centers[gauss_idx],
                                        cov=self.cluster_std[gauss_idx] *

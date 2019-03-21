@@ -8,6 +8,7 @@
 """
 from abc import ABCMeta, abstractmethod
 import six
+from six.moves import range
 
 from secml.core import CCreator
 from secml.array import CArray
@@ -263,7 +264,7 @@ class CClassifier(CCreator):
         x = self._preprocess_data(x)
 
         score = CArray.ones(shape=x.shape[0])
-        for i in xrange(x.shape[0]):
+        for i in range(x.shape[0]):
             score[i] = self._decision_function(x[i, :], y)
 
         return score
@@ -317,7 +318,7 @@ class CClassifier(CCreator):
                       n_jobs, self, x, self.verbose)
 
         # Build results array by extracting the scores for each training class
-        for i in xrange(self.n_classes):
+        for i in range(self.n_classes):
             scores[:, i] = CArray(res[i]).T
 
         # The classification label is the label of the class

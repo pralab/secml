@@ -12,6 +12,7 @@
 
 """
 from random import getrandbits
+from six.moves import range
 
 import tensorflow as tf
 import numpy as np
@@ -144,7 +145,7 @@ def convert_cclassifier_to_tf(model, out_dims=1):
                 grads = model.gradient_f_x(x_carray, y=y).atleast_2d()
         else:
             # otherwise we have to compute the gradient w.r.t all the classes
-            for c in xrange(n_classes):
+            for c in range(n_classes):
                 cgrad = model.gradient_f_x(
                     x_carray[0, :], y=c)
                 grads[0, :] += (

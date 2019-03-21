@@ -1,1 +1,1 @@
-from c_creator import CCreator
+from .c_creator import CCreator

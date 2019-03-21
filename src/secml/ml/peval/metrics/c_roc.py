@@ -6,6 +6,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from six.moves import range, zip
+
 from secml.array import CArray
 
 
@@ -176,7 +178,7 @@ class CBaseRoc(object):
         # Counting the fpr and the tpr
         fp_list = []
         tp_list = []
-        for i in xrange(th.size):
+        for i in range(th.size):
             fp_i = (n >= th[i]).sum() if n.size != 0 else 0
             tp_i = (p >= th[i]).sum() if p.size != 0 else 0
             fp_list.append(fp_i)
@@ -384,7 +386,7 @@ class CRoc(CBaseRoc):
         self._std_dev_tpr = None
 
         if n_ytrue == 1:  # Use the same true labels vs all scores
-            for score_idx in xrange(n_score):
+            for score_idx in range(n_score):
                 rep = CBaseRoc().compute(y_true_list[0],
                                          score_list[score_idx],
                                          positive_label)
@@ -392,7 +394,7 @@ class CRoc(CBaseRoc):
                 self._data.append(rep)
 
         else:  # Use each true labels vs corresponding scores
-            for score_idx in xrange(n_score):
+            for score_idx in range(n_score):
                 rep = CBaseRoc().compute(y_true_list[score_idx],
                                          score_list[score_idx],
                                          positive_label)

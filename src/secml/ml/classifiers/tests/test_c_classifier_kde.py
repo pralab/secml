@@ -1,4 +1,4 @@
-from c_classifier_testcases import CClassifierTestCases
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierKDE

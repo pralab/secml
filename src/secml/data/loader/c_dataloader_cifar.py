@@ -6,7 +6,8 @@
 
 """
 import tarfile
-import cPickle
+from six.moves import cPickle
+from six.moves import range
 from multiprocessing import Lock
 from abc import ABCMeta, abstractmethod, abstractproperty
 import six
@@ -323,7 +324,7 @@ class CDataLoaderCIFAR10(CDataLoaderCIFAR):
         # The CIFAR-10 dataset has 5 different batches for train data
         # and one single batch for test data
         # The metafile is called `batches.meta` and the labels `labels`
-        train_files = ['data_batch_' + str(i) for i in xrange(1, 6)]
+        train_files = ['data_batch_' + str(i) for i in range(1, 6)]
         test_files = ['test_batch']
         meta_file = 'batches.meta'
         labels_key = 'labels'

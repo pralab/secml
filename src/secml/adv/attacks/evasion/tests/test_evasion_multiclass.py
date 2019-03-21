@@ -1,5 +1,6 @@
 from secml.utils import CUnitTest
 
+from six.moves import range
 import matplotlib
 
 from secml.array import CArray
@@ -122,7 +123,7 @@ class TestEvasionMulticlass(CUnitTest):
         f_seq = CArray([])
 
         x = x0
-        for d_idx, d in enumerate(xrange(0, dmax + 1)):
+        for d_idx, d in enumerate(range(0, dmax + 1)):
 
             self.logger.info("Evasion at dmax: " + str(d))
 

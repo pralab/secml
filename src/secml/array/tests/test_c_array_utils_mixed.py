@@ -1,12 +1,11 @@
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+from secml.array.tests import CArrayTestCases
 
 from secml.array import CArray
 from secml.array.c_dense import CDense
 from secml.array.c_sparse import CSparse
 
 
-class TestCArrayUtilsMixed(CArrayTestCases.TestCArray):
+class TestCArrayUtilsMixed(CArrayTestCases):
     """Unit test for CArray UTILS - MIXED methods."""
 
     def test_sign(self):
@@ -226,4 +225,4 @@ class TestCArrayUtilsMixed(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

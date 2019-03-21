@@ -6,6 +6,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from six.moves import range
+
 from secml.array import CArray
 from secml.optim.optimizers import COptimizer
 
@@ -140,7 +142,7 @@ class CSolverGradDesc(COptimizer):
         self._x_seq = CArray.zeros((self._max_iter, x.size))
         self._f_seq = CArray.zeros(self._max_iter)
 
-        for i in xrange(self._max_iter):
+        for i in range(self._max_iter):
 
             self._x_seq[i, :] = x
             self._f_seq[i] = self._fun.fun(x)

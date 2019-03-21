@@ -1,1 +1,1 @@
-from c_feat_sel import CFeatSel
+from .c_feat_sel import CFeatSel

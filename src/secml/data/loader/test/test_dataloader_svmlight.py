@@ -1,3 +1,5 @@
+from six.moves import range
+
 from secml.utils import CUnitTest
 
 from secml.data import CDataset
@@ -21,7 +23,7 @@ class TestCDataLoaderSvmLight(CUnitTest):
         """
         col_num = array.shape[1]
         non_zero_col = CArray([], dtype=int)
-        for c in xrange(col_num):
+        for c in range(col_num):
             col = array[:, c]
             if col.any() == True:
                 non_zero_col = non_zero_col.append(c)

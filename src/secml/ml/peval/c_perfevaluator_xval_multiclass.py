@@ -5,6 +5,8 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from six.moves import range
+
 from secml.ml.peval import CPerfEvaluator
 from secml.array import CArray
 from secml.core.type_utils import is_scalar
@@ -50,7 +52,7 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
         test_scores = CArray.zeros(shape=(num_folds, dataset.num_classes))
 
         # estimate the performance of the estimator on each fold
-        for split_idx in xrange(num_folds):
+        for split_idx in range(num_folds):
 
             train_dataset = dataset[self.splitter.tr_idx[split_idx], :]
             test_dataset = dataset[self.splitter.ts_idx[split_idx], :]
@@ -60,7 +62,7 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
 
             # Get the classification performance of each binary estimator
             split_scores = []
-            for class_idx in xrange(dataset.num_classes):
+            for class_idx in range(dataset.num_classes):
                 # Binarize dataset
                 test_binary_ds = estimator.binarize_dataset(
                     class_idx, test_dataset)
@@ -121,7 +123,7 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
         best_params_list = []
         best_score = []
         # Get the best parameters for each binary classifier
-        for i in xrange(res_vect.shape[1]):
+        for i in range(res_vect.shape[1]):
 
             # diff has one row for each parameters combination and
             # one column for each binary classifier
@@ -136,7 +138,7 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
 
             # Build the list of candidate parameters for binary clf
             clf_best_params_list = []
-            for c_idx in xrange(best_params_idx.shape[0]):
+            for c_idx in range(best_params_idx.shape[0]):
                 # For each candidate get corresponding parameters
                 best_params_dict = dict()
                 for j, par in enumerate(params):

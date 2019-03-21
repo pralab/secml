@@ -6,7 +6,8 @@
 
 """
 import os
-from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
+from six.moves.configparser import \
+    SafeConfigParser, NoSectionError, NoOptionError
 
 from secml.utils import fm, CLog
 

@@ -1,3 +1,5 @@
+from six.moves import range
+
 from secml.figure.plots import CPlot
 from secml.array import CArray
 from secml.core.constants import inf
@@ -228,7 +230,7 @@ class CPlotFunction(CPlot):
         n_vals = pad_grid_point_features.shape[0]
         grad_point_values = CArray.zeros((n_vals, 2))
         # compute gradient on each grid point
-        for p_idx in xrange(n_vals):
+        for p_idx in range(n_vals):
             grad_point_values[p_idx, :] = gradf(
                 pad_grid_point_features[p_idx, :].ravel(),
                 *func_args, **func_kwargs)
