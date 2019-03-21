@@ -1,1 +1,1 @@
-from .c_classifier_cleverhans import CClassifierCleverhans
+from .c_model_cleverhans import CModelCleverhans

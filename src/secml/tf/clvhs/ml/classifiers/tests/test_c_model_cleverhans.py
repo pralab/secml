@@ -2,7 +2,7 @@ import tensorflow as tf
 from six.moves import range
 
 from secml.utils import CUnitTest
-from secml.tf.clvhs.ml.classifiers import CClassifierCleverhans
+from secml.tf.clvhs.ml.classifiers import CModelCleverhans
 from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM
@@ -10,8 +10,8 @@ from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.ml.features.normalization import CNormalizerMinMax
 
 
-class TestCClassifierCleverhans(CUnitTest):
-    """Unittests for CClassifierCleverhans."""
+class TestCModelCleverhans(CUnitTest):
+    """Unittests for CModelCleverhans."""
 
     def _dataset_creation(self):
         # generate synthetic data
@@ -47,7 +47,7 @@ class TestCClassifierCleverhans(CUnitTest):
         self.clf.fit(self.tr)
 
         # given a CClassifier, cree a CClassifierCleverhans
-        self.clvh_clf = CClassifierCleverhans(
+        self.clvh_clf = CModelCleverhans(
             self.clf, out_dims=self.n_classes)
 
         self._sess = tf.Session()
