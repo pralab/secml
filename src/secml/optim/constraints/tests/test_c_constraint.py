@@ -15,6 +15,13 @@ class CConstraintTestCases(object):
         """Unit test for CConstraint."""
         __metaclass__ = ABCMeta
 
+        _fun_value_str = "The value of the function {:} is {:} "
+        _fun_value_p_in_str = _fun_value_str + "for a point inside the constraint"
+        _fun_value_p_out_str = _fun_value_str + "for a point outside the " \
+                                                "constraint"
+        _fun_value_p_on_str = _fun_value_str + "for a point on the " \
+                                                "constraint"
+
         @abstractmethod
         def _constr_creation(self):
             raise NotImplementedError
@@ -47,32 +54,37 @@ class CConstraintTestCases(object):
 
             fig.savefig(file_name)
 
+        def _print_funct_outputs(self, fun_name, v_in, v_out, v_on):
+            self.logger.info(self._fun_value_p_in_str.format(fun_name,
+                                                             v_in))
+            self.logger.info(self._fun_value_p_out_str.format(fun_name,
+                                                             v_out))
+            self.logger.info(self._fun_value_p_on_str.format(fun_name,
+                                                             v_on))
+
+
         def test_is_active(self):
+
             p1_active = self._constr.is_active(self._p1_inside)
             p2_active = self._constr.is_active(self._p2_outside)
             p3_active = self._constr.is_active(self._p3_on)
 
-            self.logger.info("The value of the function `active` is {:} for "
-                             "a point inside the constraint".format(p1_active))
-            self.logger.info("The value of the function `active` is {:} for "
-                             "a point outside the constraint".format(
-                p2_active))
-            self.logger.info("The value of the function `active` is {:} for "
-                             "a point that lies on the constraint".format(
-                p3_active))
+            fun_name = '`is_active`'
+            self._print_funct_outputs(fun_name, p1_active, p2_active, p3_active)
 
             self.assertLessEqual(p1_active, False, "The point lies "
-                                                     "inside the constraint, therefore the value of the funciton is "
-                                                     "active should be False")
+                                                   "inside the constraint, therefore the value of the funciton `is_"
+                                                   "active` should be False")
             self.assertLessEqual(p2_active, False, "The point lies "
-                                                     "inside the constraint, "
-                                                     "therefore the value of the funciton is "
-                                                     "active should be False")
+                                                   "inside the constraint, "
+                                                   "therefore the value of the funciton `is_"
+                                                   "active` should be False")
             self.assertLessEqual(p3_active, True, "The point lies "
-                                                    "on the constraint, "
-                                                    "therefore the value of the funciton is "
-                                                    "active should be "
-                                                    "True")
+                                                  "on the constraint, "
+                                                  "therefore the value of "
+                                                  "the funciton `is_"
+                                                  "active` should be "
+                                                  "True")
 
         def _test_is_violated(self):
             """
@@ -84,45 +96,47 @@ class CConstraintTestCases(object):
             p2_violated = self._constr.is_violated(self._p2_outside)
             p3_violated = self._constr.is_violated(self._p3_on)
 
+            fun_name = '`is_violated`'
+            self._print_funct_outputs(fun_name, p1_violated, p2_violated,
+                                      p3_violated)
+
             self.assertLessEqual(p1_violated, False, "The point lies "
-                                                     "inside the constraint therefore the value of the funciton is "
-                                                     "violated should be False")
+                                                     "inside the constraint "
+                                                     "therefore the value of the funciton `is_"
+                                                     "violated` should be False")
             self.assertLessEqual(p2_violated, True, "The point lies "
-                                                    "inside the constraint therefore the value of the funciton is "
-                                                    "violated should be True")
+                                                    "inside the constraint "
+                                                    "therefore the value of the funciton `is_"
+                                                    "violated` should be True")
             self.assertLessEqual(p3_violated, False, "The point lies "
                                                      "on the constraint "
-                                                     "therefore the value of the funciton is "
-                                                     "violated should be "
+                                                     "therefore the value of the funciton `is_"
+                                                     "violated` should be "
                                                      "False")
 
         def test_constraint(self):
-
             p1_out = self._constr.constraint(self._p1_inside)
             p2_out = self._constr.constraint(self._p2_outside)
             p3_out = self._constr.constraint(self._p3_on)
 
-            self.logger.info("The value of the constraint for the point {:} "
-                             "is {:}".format(self._p1_inside, p1_out))
-            self.logger.info("The value of the constraint for the point {:} "
-                             "is {:}".format(self._p2_outside, p2_out))
-            self.logger.info("The value of the constraint for the point {:} "
-                             "is {:}".format(self._p3_on, p3_out))
+            fun_name = '`constraint`'
+            self._print_funct_outputs(fun_name, p1_out, p2_out,
+                                      p3_out)
 
             self.assertLess(p1_out, 0, "The point lies "
-                                                     "inside the constraint "
+                                       "inside the constraint "
                                        "therefore the value of the constraint "
                                        "function should be negative")
             self.assertGreater(p2_out, 0, "The point lies "
-                                                     "outside the constraint "
-                                       "therefore the value of the constraint "
-                                       "function should be positive")
+                                          "outside the constraint "
+                                          "therefore the value of the constraint "
+                                          "function should be positive")
             self.assertEqual(p3_out, 0, "The point lies "
-                                                     "on the constraint "
-                                       "therefore the value of the constraint "
-                                       "function should be equal to zero")
+                                        "on the constraint "
+                                        "therefore the value of the constraint "
+                                        "function should be equal to zero")
 
-    # TODO: READD
+        # TODO: READD
         def _test_gradient(self):
             """
             Test the gradient of the constraint function
@@ -143,9 +157,8 @@ class CConstraintTestCases(object):
                                          "constraint object does not work")
 
         def test_projection(self):
-
-            pout = CArray([0,2])
-            real_proj_pout = CArray([0,1])
+            pout = CArray([0, 2])
+            real_proj_pout = CArray([0, 1])
             pout_proj = self._constr.projection(pout)
 
             error = (real_proj_pout - pout_proj).norm(order=2)
@@ -158,5 +171,5 @@ class CConstraintTestCases(object):
             self._constr_creation()
             self._set_constr_name()
 
-            self._create_test_points() # creates the point that we will use
+            self._create_test_points()  # creates the point that we will use
             # to test the constraint functionalities
