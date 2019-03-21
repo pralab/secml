@@ -64,7 +64,7 @@ class CConstraintL2(CConstraint):
             Value of the constraint.
 
         """
-        return float((x - self._center).norm() - self._radius)
+        return float((x - self._center).norm(order=2) - self._radius)
 
     def _projection(self, x):
         """Project x onto the feasible domain."""
@@ -72,4 +72,5 @@ class CConstraintL2(CConstraint):
             (x - self._center).norm()
 
     def _gradient(self, x):
+        """Returns the gradient of the constraint function at x."""
         return (x - self._center).ravel() / (x - self._center).norm(order=2)

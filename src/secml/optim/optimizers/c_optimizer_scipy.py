@@ -11,6 +11,8 @@ from scipy import optimize as sc_opt
 from secml.array import CArray
 from secml.optim.optimizers import COptimizer
 
+SUPPORTED_METHODS = ['BFGS', 'L-BFGS-B']
+
 
 class COptimizerScipy(COptimizer):
     """Implements optimizers from scipy.
@@ -21,6 +23,29 @@ class COptimizerScipy(COptimizer):
 
     """
     __class_type = 'scipy-opt'
+
+    def _bounds_to_scipy(self):
+        """Converts bounds to scipy format.
+
+        Returns
+        -------
+        scipy.optimize.Bounds
+            Bounds constraint in scipy-compatible format.
+
+        """
+        if self.bounds is None:
+            return None
+
+        # vector-like bounds
+        lb = self.bounds.lb.tondarray()
+        ub = self.bounds.ub.tondarray()
+
+        # scalar bounds (have to be scalars)
+        lb = lb if lb.size > 1 else float(lb)
+        ub = ub if ub.size > 1 else float(ub)
+
+        # return scipy bounds
+        return sc_opt.Bounds(lb, ub)
 
     def minimize(self, x_init, *args, **kwargs):
         """Minimize function.
@@ -40,27 +65,13 @@ class COptimizerScipy(COptimizer):
 
         method : str or callable, optional
             Type of solver.  Should be one of
-                - 'Nelder-Mead' :ref:`(see here) <optimize.minimize-neldermead>`
-                - 'Powell'      :ref:`(see here) <optimize.minimize-powell>`
-                - 'CG'          :ref:`(see here) <optimize.minimize-cg>`
                 - 'BFGS'        :ref:`(see here) <optimize.minimize-bfgs>`
-                - 'Newton-CG'   :ref:`(see here) <optimize.minimize-newtoncg>`
                 - 'L-BFGS-B'    :ref:`(see here) <optimize.minimize-lbfgsb>`
-                - 'TNC'         :ref:`(see here) <optimize.minimize-tnc>`
-                - 'COBYLA'      :ref:`(see here) <optimize.minimize-cobyla>`
-                - 'SLSQP'       :ref:`(see here) <optimize.minimize-slsqp>`
-                - 'trust-constr':ref:`(see here) <optimize.minimize-trustconstr>`
-                - 'dogleg'      :ref:`(see here) <optimize.minimize-dogleg>`
-                - 'trust-ncg'   :ref:`(see here) <optimize.minimize-trustncg>`
-                - 'trust-exact' :ref:`(see here) <optimize.minimize-trustexact>`
-                - 'trust-krylov' :ref:`(see here) <optimize.minimize-trustkrylov>`
-                - custom - a callable object.
-            If not given, chosen to be one of ``BFGS``, ``L-BFGS-B``, ``SLSQP``,
-            depending if the problem has constraints or bounds.
+            If not given, chosen to be one of ``BFGS`` or ``L-BFGS-B``
+             depending if the problem has constraints or bounds.
+            See `c_optimizer_scipy.SUPPORTED_METHODS` for the full list.
         jac : {'2-point', '3-point', 'cs', bool}, optional
-            Method for computing the gradient vector. Only for CG, BFGS,
-            Newton-CG, L-BFGS-B, TNC, SLSQP, dogleg, trust-ncg, trust-krylov,
-            trust-exact and trust-constr.
+            Method for computing the gradient vector.
             The function in `self.fun.gradient` will be used (if defined).
             Alternatively, the keywords {'2-point', '3-point', 'cs'} select a
             finite difference scheme for numerical estimation of the gradient.
@@ -68,6 +79,9 @@ class COptimizerScipy(COptimizer):
             If `jac` is a Boolean and is True, `fun` is assumed to return the
             gradient along with the objective function. If False, the gradient
             will be estimated using '2-point' finite difference estimation.
+        bounds : scipy.optimize.Bounds, optional
+            A bound constraint in scipy.optimize format. If defined, bounds
+            of `COptimizerScipy` will be ignored.
         tol : float, optional
             Tolerance for termination. For detailed control,
             use solver-specific options.
@@ -115,17 +129,28 @@ class COptimizerScipy(COptimizer):
         if x_init.issparse is True or x_init.is_vector_like is False:
             raise ValueError("x0 must be a dense flat array")
 
+        # select method
+        method = kwargs['method'] if 'method' in kwargs else None
+        if method is None:
+            method = 'BFGS' if self.bounds is not None else 'L-BFGS-B'
+        # check if method is supported
+        if method not in SUPPORTED_METHODS:
+            raise NotImplementedError("selected method is not supported.")
+        # set method
+        kwargs['method'] = method
+
+        # we're not supporting any solver with constraints at this stage
+        if self.constr is not None:
+            raise NotImplementedError("constraints are not supported.")
+
         # converting input parameters to scipy
-        # 1) jac
+        # 1) gradient (jac)
         jac = kwargs['jac'] if 'jac' in kwargs else self.f.gradient_ndarray
         kwargs['jac'] = jac
-
         # 2) bounds
         bounds = kwargs['bounds'] if 'bounds' in kwargs else None
-        if bounds is None and self.bounds is not None:
-            # set our bounds
-            bounds = sc_opt.Bounds(self.bounds.lb.tondarray(),
-                                   self.bounds.ub.tondarray())
+        if bounds is None:
+            bounds = self._bounds_to_scipy()
         kwargs['bounds'] = bounds
 
         if self.verbose >= 2:  # Override verbosity options
@@ -136,12 +161,25 @@ class COptimizerScipy(COptimizer):
                                      x_init.ravel().tondarray(),
                                      args=args, **kwargs)
 
-        if sc_opt_out.status != 0:
+        if not sc_opt_out.success:
             self.logger.warning(
-                "Optimization has not terminated successfully!")
-        elif self.verbose >= 1:
-            self.logger.info(sc_opt_out.message)
+                "Optimization has not exited successfully!\n")
+
+        if self.verbose >= 1:
+            self.logger.info(sc_opt_out.message + "\n")
 
         self._f_seq = CArray(sc_opt_out.fun)  # only last iter available
 
-        return CArray(sc_opt_out.x)
+        x_opt = CArray(sc_opt_out.x)
+
+        # check if point is valid
+        # i.e., if the selected solver does not ignore the constraints
+        if self.constr is not None and self.constr.is_violated(x_opt):
+            self.logger.warning("Constraints are not satisfied. "
+                                "The scipy solver may be ignoring them.\n")
+
+        if self.bounds is not None and self.bounds.is_violated(x_opt):
+            self.logger.warning("Bounds are not satisfied. "
+                                "The scipy solver may be ignoring them.\n")
+
+        return x_opt
