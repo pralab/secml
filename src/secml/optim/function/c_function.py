@@ -7,11 +7,10 @@
 .. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
 
 """
-from secml.core import CCreator
-from secml.core.type_utils import is_scalar
-from secml.array import CArray
-
 from scipy import optimize as sc_opt
+
+from secml.core import CCreator
+from secml.array import CArray
 from secml.core.constants import eps
 
 
@@ -24,16 +23,17 @@ class CFunction(CCreator):
 
     Parameters
     ----------
-    fun : any callable or None
-        Any python function.
-    gradient : any callable or None
-        Any python function that returns the gradient of `fun`.
-    n_dim : int or None
+    fun : callable or None
+        Any python callable. Required if `gradient` is None.
+    gradient : callable or None
+        Any python callable that returns the gradient of `fun`.
+        Required if `fun` is None.
+    n_dim : int or None, optional
         Expected space dimensions.
 
     Attributes
     ----------
-    class_type : 'standard'
+    class_type : 'generic'
 
     """
     __super__ = 'CFunction'
@@ -50,7 +50,7 @@ class CFunction(CCreator):
         if gradient is not None:  # sets gradient of function
             self._gradient = gradient
 
-        # sets expected size of input point `x`
+        # sets expected number of dimensions of input `x`
         self._n_dim = n_dim
 
         self._n_fun_eval = 0
@@ -80,8 +80,16 @@ class CFunction(CCreator):
         """Returns the expected function's space dimensions."""
         return self._n_dim
 
+    def _check_ndim(self, x):
+        """Check if input has the expected dimension."""
+        n_dim = x.atleast_2d().shape[1]
+        if self.n_dim is not None and n_dim != self.n_dim:
+            raise ValueError(
+                "unexpected dimension of input. "
+                "Got {:}, expected {:}".format(n_dim, self.n_dim))
+
     def fun(self, x, *args, **kwargs):
-        """Evaluates function at point x.
+        """Evaluates function on x.
 
         Parameters
         ----------
@@ -92,41 +100,34 @@ class CFunction(CCreator):
 
         Returns
         -------
-        out_fun : scalar
-            Function output, single scalar.
+        out_fun : scalar or CArray
+            Function output, scalar or CArray depending
+            on the inner function.
 
         """
+        self._check_ndim(x)
+
         out_fun = self._fun(x, *args, **kwargs)
 
-        # Function can return a CArray of size 1 or a scalar
-        if isinstance(out_fun, CArray):
-            if out_fun.size != 1:
-                raise ValueError("`_fun` must return a CArray of size 1!")
-            out_fun = out_fun.item()
-        elif is_scalar(out_fun):
-            pass  # Returned a scalar, OK
-        else:
-            raise TypeError(
-                "`_fun` must return a scalar or a CArray of size 1. "
-                "Returned a {:}".format(type(out_fun)))
+        self._n_fun_eval += x.atleast_2d().shape[0]
 
-        self._n_fun_eval += 1
         return out_fun
 
     def fun_ndarray(self, x, *args, **kwargs):
-        """Evaluates function at point x (ndarray).
+        """Evaluates function on x (ndarray).
 
         Parameters
         ----------
-        x : ndarray
+        x : np.ndarray
             Argument of fun as ndarray.
         args, kwargs : any
             Other optional parameter of the function.
 
         Returns
         -------
-        out_fun : scalar
-            Function output, single scalar.
+        out_fun : scalar or CArray
+            Function output, scalar or CArray depending
+            on the inner function.
 
         """
         return self.fun(CArray(x), *args, **kwargs)
@@ -137,7 +138,7 @@ class CFunction(CCreator):
         Parameters
         ----------
         x : CArray
-            Argument of gradient.
+            Argument of gradient. Single point.
         args, kwargs : any
             Other optional parameter of the function.
 
@@ -147,6 +148,9 @@ class CFunction(CCreator):
             Array with gradient output.
 
         """
+        if not x.is_vector_like:
+            raise ValueError("input of gradient must be a single point.")
+        self._check_ndim(x)
         out_grad = self._gradient(x, *args, **kwargs)
         if not isinstance(out_grad, CArray):
             raise TypeError("`_gradient` must return a CArray!")
@@ -241,14 +245,23 @@ class CFunction(CCreator):
         if x.issparse is True or x.is_vector_like is False:
             raise ValueError("x0 must be a dense flat array")
 
+        self._check_ndim(x)
+
         # double casting to always have a CArray
         xk_ndarray = CArray(x).ravel().tondarray()
 
         epsilon = epsilon.tondarray() if \
             isinstance(epsilon, CArray) else epsilon
 
+        # approx_fprime expects a scalar as output of fun
+        def fun_ndarray(xk, *f_args):
+            out_fun = self.fun_ndarray(xk, *f_args)
+            if isinstance(out_fun, CArray) and out_fun.size == 1:
+                return out_fun.item()  # return scalar
+            return out_fun  # already scalar
+
         return CArray(
-            sc_opt.approx_fprime(xk_ndarray, self.fun_ndarray, epsilon, *args))
+            sc_opt.approx_fprime(xk_ndarray, fun_ndarray, epsilon, *args))
 
     def check_grad(self, x, *args, **epsilon):
         """Check the correctness of a gradient function by comparing
@@ -302,6 +315,8 @@ class CFunction(CCreator):
         """
         if x.issparse is True or x.is_vector_like is False:
             raise ValueError("x0 must be a dense flat array")
+
+        self._check_ndim(x)
 
         # We now extract 'epsilon' if passed by the user
         if 'epsilon' in epsilon:

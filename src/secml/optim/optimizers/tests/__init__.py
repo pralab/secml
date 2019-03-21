@@ -1,1 +1,1 @@
-from c_optimizer_testcases import COptimizerTestCases
+from .c_optimizer_testcases import COptimizerTestCases
