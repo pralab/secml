@@ -7,6 +7,8 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
 """
+from six.moves import range
+
 from secml.optim.optimizers.descent_direction.explorer import \
     CExploreDescentDirection
 from secml.array import CArray
@@ -217,7 +219,7 @@ class CSolverDescDir(COptimizer):
         self.logger.debug('Point optim iter.: ' + str(0) +
                           ', f(x): ' + str(fx))
 
-        for i in xrange(1, self.max_iter):
+        for i in range(1, self.max_iter):
 
             # update point
             x, fx = self._xk(x, fx=fx)

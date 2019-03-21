@@ -8,6 +8,7 @@
 import warnings
 from abc import ABCMeta, abstractmethod
 import six
+from six.moves import range
 
 from secml.adv.attacks import CAttack
 from secml.optim.optimizers import COptimizer
@@ -268,7 +269,7 @@ class CAttackPoisoning(CAttack):
         yc = CArray(init_dataset.Y[idx]).deepcopy()  # true labels
 
         # randomly pick yc from a different class
-        for i in xrange(yc.size):
+        for i in range(yc.size):
             labels = CArray.randsample(init_dataset.num_classes, 2,
                                        random_state=self.random_seed)
             if yc[i] == labels[0]:
@@ -413,7 +414,7 @@ class CAttackPoisoning(CAttack):
                 self._xc[idx, :], self._yc[idx], clf, loss_grad, tr)
         else:
             # compute the gradient as a sum of the gradient for each class
-            for c in xrange(clf.n_classes):
+            for c in range(clf.n_classes):
                 loss_grad = self._attacker_loss.dloss(y_ts, score, c=c)
 
                 grad += self._gradient_fk_xc(self._xc[idx, :], self._yc[idx],
@@ -536,7 +537,7 @@ class CAttackPoisoning(CAttack):
                 "Iter on all the poisoning samples: {:}".format(k))
 
             xc_prv = xc.deepcopy()
-            for i in xrange(self._n_points):
+            for i in range(self._n_points):
                 # this is to optimize the last points first
                 # (and then re-optimize the first ones)
                 idx = self.n_points - i - 1
@@ -581,7 +582,7 @@ class CAttackPoisoning(CAttack):
         eta = self.eta
 
         # for each poisoning point
-        for p_idx in xrange(xc.shape[0]):
+        for p_idx in range(xc.shape[0]):
 
             c_xc = xc[p_idx, :]
 

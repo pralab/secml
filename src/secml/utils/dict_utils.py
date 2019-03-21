@@ -101,7 +101,7 @@ def invert_dict(d):
     """
     def tolist(x): return [x] if not isinstance(x, (list, tuple)) else list(x)
     new_d = {}
-    for k in d.iteritems():
+    for k in d.items():
         for v in tolist(k[1]):
             i = k[0]
             if v in new_d:

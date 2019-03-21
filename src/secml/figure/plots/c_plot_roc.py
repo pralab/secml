@@ -1,3 +1,5 @@
+from six.moves import range
+
 from secml.figure.plots import CPlot
 from secml.ml.peval.metrics import CRoc
 
@@ -418,7 +420,7 @@ class CPlotRoc(CPlot):
 
         plot_func = self.semilogx if logx is True else self.plot
 
-        for rep_i in xrange(roc.n_reps):
+        for rep_i in range(roc.n_reps):
 
             if roc.n_reps <= 1:  # For one rep ROC is stored as CArray
                 tpr = roc.tpr

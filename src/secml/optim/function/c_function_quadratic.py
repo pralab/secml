@@ -6,7 +6,7 @@
 .. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
 
 """
-from c_function import CFunction
+from secml.optim.function import CFunction
 from secml.array import CArray
 
 

@@ -1,10 +1,9 @@
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+from secml.array.tests import CArrayTestCases
 
 from secml.array import CArray
 
 
-class TestCArrayClassMethods(CArrayTestCases.TestCArray):
+class TestCArrayClassMethods(CArrayTestCases):
     """Unit test for CArray CLASSMETHODS methods."""
 
     def test_concatenate(self):
@@ -412,4 +411,4 @@ class TestCArrayClassMethods(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

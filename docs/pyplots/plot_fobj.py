@@ -5,7 +5,7 @@ from secml.figure import CFigure
 # we must define a function that take an array and return a value for every row
 def f(array):
     res = CArray.zeros(array.shape[0])
-    for r in xrange(array.shape[0]):
+    for r in range(array.shape[0]):
         x = array[r, 0]
         y = array[r, 1]
         res[r] = x + y

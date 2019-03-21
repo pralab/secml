@@ -1,6 +1,7 @@
 from secml.utils import CUnitTest
 from abc import ABCMeta, abstractmethod
 import six
+from six.moves import range
 
 from numpy import *
 import time
@@ -61,7 +62,7 @@ class CEvasionTestCases(object):
 
             # pick a malicious sample and init evasion
             malicious_idxs = self.dataset.Y.find(self.dataset.Y == 1)
-            target_idx = 1  # random.choice(xrange(0, len(malicious_idxs)))
+            target_idx = 1  # random.choice(range(0, len(malicious_idxs)))
 
             self.x0 = self.dataset.X[malicious_idxs[target_idx], :].ravel()
             self.y0 = +1
@@ -110,7 +111,7 @@ class CEvasionTestCases(object):
             if is_list(self.eta):
                 if len(self.eta) != self.n_features:
                     raise ValueError('len(eta) != n_features')
-                for i in xrange(len(self.eta)):
+                for i in range(len(self.eta)):
                     self.dataset.X[:, i] = (
                                                self.dataset.X[:, i] /
                                                float(self.eta[i])).round() * \

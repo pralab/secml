@@ -1,8 +1,7 @@
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+from secml.array.tests import CArrayTestCases
 
 
-class TestCArrayCopy(CArrayTestCases.TestCArray):
+class TestCArrayCopy(CArrayTestCases):
     """Unit test for CArray COPY methods."""
 
     def test_deepcopy(self):
@@ -29,4 +28,4 @@ class TestCArrayCopy(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

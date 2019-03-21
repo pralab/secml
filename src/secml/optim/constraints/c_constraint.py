@@ -8,6 +8,7 @@ Implements equality/inequality constraints in the canonic form
 """
 from abc import ABCMeta, abstractmethod
 import six
+from six.moves import range
 
 from secml.core import CCreator
 from secml.array import CArray
@@ -58,7 +59,7 @@ class CConstraint(CCreator):
         if len(X.shape) == 1:
             return self._is_active(X.ravel(), tol)
         is_active = CArray.ones(X.shape[0])
-        for i in xrange(0, X.shape[0]):
+        for i in range(0, X.shape[0]):
             is_active[i] = self._is_active(X[i, :].ravel(), tol)
 
         return is_active
@@ -89,7 +90,7 @@ class CConstraint(CCreator):
 
         # Multi-point case
         is_violated = CArray.ones(x.shape[0], dtype=bool)
-        for i in xrange(x.shape[0]):
+        for i in range(x.shape[0]):
             is_violated[i] = self._is_violated(x[i, :].ravel(), precision)
 
         return is_violated
@@ -130,7 +131,7 @@ class CConstraint(CCreator):
             Value of the constraint.
 
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def constraint(self, x):
         """Returns the value of the constraint for each sample in x.
@@ -155,7 +156,7 @@ class CConstraint(CCreator):
 
         # Multi-point case
         constr = CArray.ones(x.shape[0], dtype=float)
-        for i in xrange(x.shape[0]):
+        for i in range(x.shape[0]):
             constr[i] = self._constraint(x[i, :].ravel())
         return constr
 
@@ -177,7 +178,7 @@ class CConstraint(CCreator):
             return X.ravel()
 
         X = X.deepcopy()  # Return a new array
-        for i in xrange(X.shape[0]):
+        for i in range(X.shape[0]):
             x_i = X[i, :].ravel()
             if self.is_violated(x_i) is True:
                 self.logger.debug("Constraint violated, projecting...")
@@ -200,6 +201,6 @@ class CConstraint(CCreator):
             return X.ravel()
 
         X = X.deepcopy()  # We return a new object
-        for i in xrange(X.shape[0]):
+        for i in range(X.shape[0]):
             X[i, :] = self._gradient(X[i, :].ravel())
         return X

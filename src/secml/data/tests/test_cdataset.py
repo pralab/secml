@@ -8,10 +8,12 @@ This module tests the CDataset class.
 If you find any BUG, please notify authors first.
 
 """
-import unittest
+from secml.utils import CUnitTest
+
+from six.moves import zip
+
 from secml.array import CArray
 from secml.data import CDataset
-from secml.utils import CUnitTest
 
 
 class TestDataset(CUnitTest):
@@ -105,4 +107,4 @@ class TestDataset(CUnitTest):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    CUnitTest.main()

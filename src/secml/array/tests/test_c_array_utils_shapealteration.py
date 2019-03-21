@@ -1,12 +1,11 @@
-import numpy as np
+from secml.array.tests import CArrayTestCases
 
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+import numpy as np
 
 from secml.array import CArray
 
 
-class TestCArrayUtilsShapeAlteration(CArrayTestCases.TestCArray):
+class TestCArrayUtilsShapeAlteration(CArrayTestCases):
     """Unit test for CArray UTILS : SHAPE ALTERATION methods."""
 
     def test_transpose(self):
@@ -334,4 +333,4 @@ class TestCArrayUtilsShapeAlteration(CArrayTestCases.TestCArray):
     
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

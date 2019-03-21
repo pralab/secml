@@ -1,10 +1,9 @@
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+from secml.array.tests import CArrayTestCases
 
 from secml.array import CArray
 
 
-class TestCArrayUtilsSearch(CArrayTestCases.TestCArray):
+class TestCArrayUtilsSearch(CArrayTestCases):
     """Unit test for CArray UTILS - SEARCH methods."""
 
     def test_find(self):
@@ -101,4 +100,4 @@ class TestCArrayUtilsSearch(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

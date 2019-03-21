@@ -8,6 +8,8 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from six.moves import range
+
 from secml.adv.attacks import CAttack
 from secml.optim.optimizers import COptimizer
 from secml.array import CArray
@@ -319,7 +321,7 @@ class CAttackEvasion(CAttack):
                                 sparse=self.surrogate_data.issparse,
                                 dtype=self.surrogate_data.X.dtype)
         y0 = self._y0  # Backup last y0
-        for i in xrange(self.surrogate_data.num_classes):
+        for i in range(self.surrogate_data.num_classes):
             self._y0 = i
             self._xk[i, :] = self._get_point_with_min_f_obj(
                 y_pred, scores.deepcopy())
@@ -478,7 +480,7 @@ class CAttackEvasion(CAttack):
         # array in which the value of the optimization function are stored
         fs_opt = CArray.zeros(n_mod_samples, )
 
-        for i in xrange(n_mod_samples):
+        for i in range(n_mod_samples):
             k = idx[i].item()  # idx of sample that can be modified
 
             xi = x[k, :] if x_init is None else x_init[k, :]

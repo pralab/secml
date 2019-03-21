@@ -7,6 +7,7 @@
 """
 from abc import ABCMeta, abstractmethod
 import six
+from six.moves import range
 
 from secml.ml.classifiers import CClassifier
 from secml.array import CArray
@@ -46,7 +47,7 @@ class CClassifierMulticlass(CClassifier):
         # Calling superclass setter of verbose property
         CClassifier.verbose.fset(self, level)
         # Propagate verbosity level to trained classifiers
-        for i in xrange(self.num_classifiers):
+        for i in range(self.num_classifiers):
             self.binary_classifiers[i].verbose = level
 
     @property

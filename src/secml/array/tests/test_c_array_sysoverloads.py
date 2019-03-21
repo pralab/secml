@@ -1,18 +1,18 @@
 from __future__ import print_function
+
+from secml.array.tests import CArrayTestCases
+
 import numpy as np
 import scipy.sparse as scs
 import operator as op
 from itertools import product
-
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
 
 from secml.array import CArray
 from secml.array.c_dense import CDense
 from secml.array.c_sparse import CSparse
 
 
-class TestCArraySystemOverloads(CArrayTestCases.TestCArray):
+class TestCArraySystemOverloads(CArrayTestCases):
     """Unit test for CArray SYSTEM OVERLOADS methods."""
 
     def test_operators_array_vs_array(self):
@@ -583,4 +583,4 @@ class TestCArraySystemOverloads(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

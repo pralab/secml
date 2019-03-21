@@ -1,7 +1,7 @@
-import numpy as np
-
 from secml.utils import CUnitTest, fm
 from secml.array.c_dense import CDense
+
+import numpy as np
 
 
 class TestCDense(CUnitTest):

@@ -5,7 +5,9 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from c_function import CFunction
+from six.moves import range
+
+from secml.optim.function import CFunction
 from secml.array import CArray
 
 
@@ -62,7 +64,7 @@ class CFunctionRosenbrock(CFunction):
                 "Rosenbrock function available for at least 2 dimensions")
 
         f = 0  # Starting value
-        for n in xrange(x.shape[1] - 1):
+        for n in range(x.shape[1] - 1):
             f += 100 * (x[n+1].item() - x[n].item() ** 2) ** 2 + \
                  (x[n].item() - 1) ** 2
 

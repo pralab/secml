@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 import six
+from six.moves import range
 
 from secml.utils import CUnitTest
 
@@ -208,7 +209,7 @@ class CEvasionRejectTestCases(object):
             f_seq = CArray([])
 
             x = x0
-            for d_idx, d in enumerate(xrange(0, dmax + 1)):
+            for d_idx, d in enumerate(range(0, dmax + 1)):
 
                 self.logger.info("Evasion at dmax: " + str(d))
 
@@ -259,7 +260,7 @@ class CEvasionRejectTestCases(object):
 
             # plot distance constraint
             # for d_idx, d in enumerate([dmax]):
-            for d in xrange(1, dmax + 1):
+            for d in range(1, dmax + 1):
                 fig.sp.plot_fobj(func=self._rescaled_distance,
                                  multipoint=True,
                                  plot_background=False,
@@ -294,7 +295,7 @@ class CEvasionRejectTestCases(object):
                              final_facecolor='k', final_edgewidth=2)
 
             # plot distance constraint
-            for d in xrange(1, dmax + 1):
+            for d in range(1, dmax + 1):
                 fig.sp.plot_fobj(func=self._rescaled_distance,
                                  multipoint=True,
                                  plot_background=False,

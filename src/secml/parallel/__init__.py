@@ -1,1 +1,1 @@
-from parfor import parfor, parfor2
+from .parfor import parfor, parfor2

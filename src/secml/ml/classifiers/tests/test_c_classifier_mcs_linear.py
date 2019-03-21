@@ -1,4 +1,4 @@
-from c_classifier_testcases import CClassifierTestCases
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 from sklearn.svm import SVC
 from sklearn.ensemble import BaggingClassifier

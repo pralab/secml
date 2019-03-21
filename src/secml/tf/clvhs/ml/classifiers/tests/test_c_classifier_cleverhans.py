@@ -1,4 +1,5 @@
 import tensorflow as tf
+from six.moves import range
 
 from secml.utils import CUnitTest
 from secml.tf.clvhs.ml.classifiers import CClassifierCleverhans
@@ -81,7 +82,7 @@ class TestCClassifierCleverhans(CUnitTest):
 
         # compute the gradient matrix with the CClassifier
         gradients = CArray.zeros((self.tr.num_classes, self.tr.num_features))
-        for c in xrange(self.tr.num_classes):
+        for c in range(self.tr.num_classes):
             gradients[c, :] = self.clf.gradient_f_x(x, y=c)
         gradients = gradients.tondarray()
 
@@ -95,7 +96,7 @@ class TestCClassifierCleverhans(CUnitTest):
 
         clvh_gradients = CArray.zeros(
             (self.tr.num_classes, self.tr.num_features))
-        for c in xrange(self.tr.num_classes):
+        for c in range(self.tr.num_classes):
             # for each class compute the gradient (selecting the class using
             # a one-hot vector)
             grad_init = CArray.zeros(shape=(self.tr.num_classes,))

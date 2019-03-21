@@ -1,2 +1,1 @@
-from c_explore_descent_direction import CExploreDescentDirection
-
+from .c_explore_descent_direction import CExploreDescentDirection

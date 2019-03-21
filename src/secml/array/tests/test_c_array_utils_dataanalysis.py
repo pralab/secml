@@ -1,14 +1,13 @@
-import numpy as np
+from secml.array.tests import CArrayTestCases
 
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+import numpy as np
 
 from secml.array import CArray
 from secml.core.type_utils import is_scalar, is_int
 from secml.core.constants import nan, inf
 
 
-class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
+class TestCArrayUtilsDataAnalysis(CArrayTestCases):
     """Unit test for CArray UTILS - DATA ANALYSIS methods."""
 
     def test_get_nnz(self):
@@ -1297,4 +1296,4 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

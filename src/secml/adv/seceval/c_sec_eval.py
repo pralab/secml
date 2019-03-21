@@ -7,6 +7,7 @@
 
 """
 import time
+from six.moves import range
 
 from secml.core import CCreator
 from secml.array import CArray
@@ -158,9 +159,9 @@ class CSecEval(CCreator):
         scores = CArray.zeros(shape=(dataset.num_samples, dataset.num_classes))
 
         # create data structures to store attack output
-        self._sec_eval_data.scores = [CArray(scores).deepcopy() for i in xrange(
+        self._sec_eval_data.scores = [CArray(scores).deepcopy() for i in range(
             self._sec_eval_data.param_values.size)]
-        self._sec_eval_data.Y_pred = [CArray(Y_pred).deepcopy() for i in xrange(
+        self._sec_eval_data.Y_pred = [CArray(Y_pred).deepcopy() for i in range(
             self._sec_eval_data.param_values.size)]
 
         self._sec_eval_data.time = CArray.zeros(shape=(self._sec_eval_data.param_values.size,))

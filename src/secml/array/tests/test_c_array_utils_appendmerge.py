@@ -1,13 +1,12 @@
-import numpy as np
+from secml.array.tests import CArrayTestCases
 
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+import numpy as np
 
 from secml.array import CArray
 from secml.core.type_utils import is_scalar
 
 
-class TestCArrayUtilsAppendMerge(CArrayTestCases.TestCArray):
+class TestCArrayUtilsAppendMerge(CArrayTestCases):
     """Unit test for CArray UTILS - APPEND/MERGE methods."""
 
     def test_append(self):
@@ -194,4 +193,4 @@ class TestCArrayUtilsAppendMerge(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

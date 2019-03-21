@@ -8,6 +8,7 @@
 """
 from abc import ABCMeta, abstractmethod
 import six
+from six.moves import range
 
 from secml.core import CCreator
 from secml.core.type_utils import is_int
@@ -169,7 +170,7 @@ class CAttack(CCreator):
                 v[:] = True  # all classes can be manipulated
                 return v
 
-            for i in xrange(self.attack_classes.size):
+            for i in range(self.attack_classes.size):
                 v[y == self.attack_classes[i]] = True  # y can be manipulated
 
             return v

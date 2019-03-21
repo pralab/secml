@@ -1,10 +1,9 @@
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+from secml.array.tests import CArrayTestCases
 
 from secml.array import CArray
 
 
-class TestCArrayUtilsComparison(CArrayTestCases.TestCArray):
+class TestCArrayUtilsComparison(CArrayTestCases):
     """Unit test for CArray UTILS - COMPARISON methods."""
 
     def test_logical_and(self):
@@ -300,4 +299,4 @@ class TestCArrayUtilsComparison(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

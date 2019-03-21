@@ -1,5 +1,7 @@
-import unittest
+from six.moves import range
+
 from secml.utils import CUnitTest
+
 from secml.array import CArray
 from secml.figure import CFigure
 from secml.utils import fm
@@ -28,7 +30,7 @@ class TestCStep(CUnitTest):
         res_invsc = CArray.zeros(11)
         res_opt = CArray.zeros(11)
 
-        for i in xrange(0, 11):
+        for i in range(0, 11):
             res_const[i] = self.step_const.get_actual_step(i)
             res_exp[i] = self.step_exp.get_actual_step(i)
             res_invsc[i] = self.step_invsc.get_actual_step(i)
@@ -53,4 +55,4 @@ class TestCStep(CUnitTest):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    CUnitTest.main()

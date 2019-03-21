@@ -5,6 +5,8 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from six.moves import range
+
 from secml.array import CArray
 from secml.data.splitter import CDataSplitter
 
@@ -102,7 +104,7 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
         n_train_classes = int(dataset.num_classes / 2.0) \
             if self.n_train_classes is None else int(self.n_train_classes)
 
-        for fold in xrange(self.num_folds):
+        for fold in range(self.num_folds):
 
             if self.random_state is not None:
                 # Adding 1234 to specified random state to get different folds
@@ -155,7 +157,7 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
 
             # All other samples go to test
             test_samples_idx = CArray(
-                [idx for idx in xrange(dataset.num_samples)
+                [idx for idx in range(dataset.num_samples)
                  if idx not in train_samples_idx])
 
             self._tr_idx += [train_samples_idx]
