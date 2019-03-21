@@ -118,7 +118,7 @@ class CConstraintBox(CConstraint):
 
         m0 = abs(0 - self.center) - self.radius
         if x.nnz == 0:
-            return m0
+            return float(m0.max())
 
         # computes constraint values (l-inf dist. to center) for nonzero values
         z = abs(CArray(x.nnz_data).todense() - self.center) - self.radius

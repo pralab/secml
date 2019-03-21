@@ -2,7 +2,7 @@ from secml.utils import CUnitTest
 
 from secml.array import CArray
 from secml.optim.function import CFunction
-from secml.optim.constraints import CConstraintBox
+from secml.optim.constraints import CConstraint
 from secml.figure import CFigure
 import secml.utils.c_file_manager as fm
 
@@ -17,7 +17,7 @@ class COptimizerTestCases(CUnitTest):
         # Instancing the available functions to test optimizer
         self.test_funcs['3h-camel'] = {
             'fun': CFunction.create('3h-camel'),
-            'x0': CArray([2, 2]),
+            'x0': CArray([1, 1]),
             'grid_limits': [(-2, 2), (-2, 2)],
             'vmin': 0, 'vmax': 5
         }
@@ -29,7 +29,7 @@ class COptimizerTestCases(CUnitTest):
         }
         self.test_funcs['mc-cormick'] = {
             'fun': CFunction.create('mc-cormick'),
-            'x0': CArray([2, 0]),
+            'x0': CArray([0, 1]),
             'grid_limits': [(-2, 3), (-3, 1)],
             'vmin': -2, 'vmax': 2
         }
@@ -76,8 +76,9 @@ class COptimizerTestCases(CUnitTest):
             Dictionary of parameters for the minimize method.
 
         """
-        opt_params = {} if opt_params is None else opt_params
+
         minimize_params = {} if minimize_params is None else minimize_params
+        opt_params = {} if opt_params is None else opt_params
 
         fun_dict = self.test_funcs[fun_id]
 
@@ -91,17 +92,19 @@ class COptimizerTestCases(CUnitTest):
                 fun.__class__.__name__, opt.__class__.__name__))
 
         if fun.class_type == 'mc-cormick' and 'bounds' not in opt_params:
-            # set bounds
-            lb, ub = fun.bounds()
-            opt.bounds = CConstraintBox(lb, ub)
+            self.logger.info("Setting default bounds for mc-cormick function.")
+            # set default bounds
+            opt.bounds = CConstraint.create('box', *fun.bounds())
 
         min_x = opt.minimize(fun_dict['x0'], **minimize_params)
 
+        self.logger.info("x0: {:}".format(fun_dict['x0']))
         self.logger.info("Found minimum: {:}".format(min_x))
         self.logger.info("Fun value @ minimum: {:}".format(opt.f_opt))
 
         self._plot_optimization(opt, fun_dict['x0'], min_x,
                                 grid_limits=fun_dict['grid_limits'],
+                                method=minimize_params.get('method'),
                                 vmin=fun_dict['vmin'],
                                 vmax=fun_dict['vmax'])
 
@@ -111,7 +114,8 @@ class COptimizerTestCases(CUnitTest):
             min_x, fun.global_min_x(), decimal=4)
 
     def _plot_optimization(
-            self, solver, x_0, g_min, grid_limits, vmin=None, vmax=None):
+            self, solver, x_0, g_min, grid_limits,
+            method=None, vmin=None, vmax=None):
         """Plots the optimization problem.
 
         Parameters
@@ -156,8 +160,16 @@ class COptimizerTestCases(CUnitTest):
             fig.sp.plot_path(x_0.append(g_min, axis=0))
 
         fig.sp.title("{:}(fun={:}) - Glob Min @ {:}".format(
-            solver.class_type,  solver.f.class_type,
+            solver.class_type, solver.f.class_type,
             solver.f.global_min_x().tolist()))
-        fig.savefig(
-            fm.join(fm.abspath(__file__),
-                    solver.class_type + '_' + solver.f.class_type + '.pdf'))
+
+        if method is None:
+            filename = fm.join(
+                fm.abspath(__file__),
+                solver.class_type + '-' + solver.f.class_type)
+        else:
+            filename = fm.join(
+                fm.abspath(__file__),
+                solver.class_type + '-' + method + '-' + solver.f.class_type)
+
+        fig.savefig(filename + '.pdf')
