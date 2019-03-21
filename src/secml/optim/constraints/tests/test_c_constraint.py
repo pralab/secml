@@ -52,6 +52,15 @@ class CConstraintTestCases(object):
             p2_active = self._constr.is_active(self._p2_outside)
             p3_active = self._constr.is_active(self._p3_on)
 
+            self.logger.info("The value of the function `active` is {:} for "
+                             "a point inside the constraint".format(p1_active))
+            self.logger.info("The value of the function `active` is {:} for "
+                             "a point outside the constraint".format(
+                p2_active))
+            self.logger.info("The value of the function `active` is {:} for "
+                             "a point that lies on the constraint".format(
+                p3_active))
+
             self.assertLessEqual(p1_active, False, "The point lies "
                                                      "inside the constraint, therefore the value of the funciton is "
                                                      "active should be False")
