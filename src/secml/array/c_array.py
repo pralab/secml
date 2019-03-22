@@ -10,10 +10,10 @@ from six.moves import range
 import numpy as np
 import scipy.sparse as scs
 
-from .c_array_interface import _CArrayInterface
+from secml.array.c_array_interface import _CArrayInterface
 
-from .c_dense import CDense
-from .c_sparse import CSparse
+from secml.array.c_dense import CDense
+from secml.array.c_sparse import CSparse
 
 from secml.core.type_utils import \
     is_int, is_scalar, is_bool, is_ndarray, is_scsarray, to_builtin

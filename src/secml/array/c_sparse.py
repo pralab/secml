@@ -12,9 +12,9 @@ import scipy.sparse as scs
 from scipy.sparse.linalg import inv, norm
 import numpy as np
 
-from .c_array_interface import _CArrayInterface
+from secml.array.c_array_interface import _CArrayInterface
 
-from .c_dense import CDense
+from secml.array.c_dense import CDense
 
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_intlike, is_int, is_bool

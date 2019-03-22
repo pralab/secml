@@ -17,7 +17,7 @@ import scipy.sparse as scs
 
 from copy import deepcopy
 
-from .c_array_interface import _CArrayInterface
+from secml.array.c_array_interface import _CArrayInterface
 
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_int, is_bool
