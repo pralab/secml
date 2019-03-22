@@ -17,7 +17,7 @@ import scipy.sparse as scs
 
 from copy import deepcopy
 
-from .c_array_interface import _CArrayInterface
+from secml.array.c_array_interface import _CArrayInterface
 
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_int, is_bool
@@ -893,6 +893,8 @@ class CDense(_CArrayInterface):
 
         Data is stored preserving original data type.
 
+        The default encoding is `utf-8`.
+
         Parameters
         ----------
         datafile : str, file_handle
@@ -928,14 +930,16 @@ class CDense(_CArrayInterface):
                           "or delete the file.".format(datafile))
 
         try:
-            np.savetxt(
-                datafile, self.atleast_2d().tondarray(), delimiter=' ', fmt=fmt)
+            np.savetxt(datafile, self.atleast_2d().tondarray(),
+                       delimiter=' ', fmt=fmt, encoding='utf-8')
         except IOError as e:  # Prevent stopping after standard IOError
             print(e)
 
     @classmethod
     def load(cls, datafile, dtype=float, startrow=0, skipend=0, cols=None):
         """Load array data from plain text file.
+
+        The default encoding is `utf-8`.
 
         Parameters
         ----------
@@ -949,13 +953,13 @@ class CDense(_CArrayInterface):
             Array row to start loading from.
         skipend : int, optional
             Number of lines to skip from the end of the file when reading.
-        cols : {Cndarray, int, tuple, slice}, optional
+        cols : {CDense, int, tuple, slice}, optional
             Columns to load from target file.
 
         Returns
         -------
         loaded : CDense
-            Array resulting from loading, 2-dimensional.
+            Array resulting from loading, 2-Dimensional.
 
         """
         # Indexing for array columns to load (tuple)
@@ -967,7 +971,8 @@ class CDense(_CArrayInterface):
                                                    delimiter=' ',
                                                    skip_header=startrow,
                                                    skip_footer=skipend,
-                                                   usecols=cols)))
+                                                   usecols=cols,
+                                                   encoding='utf-8')))
         except IOError as e:  # Handling standard IOError
             raise IOError(e)
         except (IndexError, StopIteration):  # Something wrong with indexing
@@ -1512,7 +1517,7 @@ class CDense(_CArrayInterface):
         h = hashlib.new('sha1')
 
         # Hash by taking into account shape and data
-        h.update(str(x.shape))
+        h.update(bytes(x.shape))
         # The returned sha1 could be different for same data
         # but different memory order. Use C order to be consistent
         h.update(np.ascontiguousarray(x))

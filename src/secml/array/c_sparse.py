@@ -7,14 +7,17 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+import six
 from six.moves import range
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+
 import scipy.sparse as scs
 from scipy.sparse.linalg import inv, norm
 import numpy as np
 
-from .c_array_interface import _CArrayInterface
+from secml.array.c_array_interface import _CArrayInterface
 
-from .c_dense import CDense
+from secml.array.c_dense import CDense
 
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_intlike, is_int, is_bool
@@ -843,6 +846,8 @@ class CSparse(_CArrayInterface):
 
         Data is stored preserving original data type.
 
+        The default encoding is `utf-8`.
+
         Parameters
         ----------
         datafile : str, file_handle
@@ -882,15 +887,18 @@ class CSparse(_CArrayInterface):
 
         # Error handling is managed by CDense.save()
         # file will be closed exiting from context
-        with open(datafile, mode='w+') as fhandle:
+        with open(datafile, mode='w+', encoding='utf-8') as fhandle:
             data_cndarray.save(fhandle)
             indices_cndarray.save(fhandle)
             indptr_cndarray.save(fhandle)
-            fhandle.write(str(self.shape[0]) + " " + str(self.shape[1]))
+            fhandle.write(six.text_type(self.shape[0]) + " " +
+                          six.text_type(self.shape[1]))
 
     @classmethod
     def load(cls, datafile, dtype=float):
         """Load array data from plain text file.
+
+        The default encoding is `utf-8`.
 
         Parameters
         ----------
@@ -1716,7 +1724,7 @@ class CSparse(_CArrayInterface):
         h = hashlib.new('sha1')
 
         # Hash by taking into account shape and sparse matrix internals
-        h.update(str(x.shape))
+        h.update(bytes(x.shape))
         # The returned sha1 could be different for same data
         # but different memory order. Use C order to be consistent
         h.update(np.ascontiguousarray(x.indices))
