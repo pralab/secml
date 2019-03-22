@@ -1512,7 +1512,7 @@ class CDense(_CArrayInterface):
         h = hashlib.new('sha1')
 
         # Hash by taking into account shape and data
-        h.update(str(x.shape))
+        h.update(bytes(x.shape))
         # The returned sha1 could be different for same data
         # but different memory order. Use C order to be consistent
         h.update(np.ascontiguousarray(x))
