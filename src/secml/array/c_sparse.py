@@ -8,6 +8,7 @@
 
 """
 from six.moves import range
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 import scipy.sparse as scs
 from scipy.sparse.linalg import inv, norm
 import numpy as np
@@ -843,6 +844,8 @@ class CSparse(_CArrayInterface):
 
         Data is stored preserving original data type.
 
+        The default encoding is `utf-8`.
+
         Parameters
         ----------
         datafile : str, file_handle
@@ -882,7 +885,7 @@ class CSparse(_CArrayInterface):
 
         # Error handling is managed by CDense.save()
         # file will be closed exiting from context
-        with open(datafile, mode='w+') as fhandle:
+        with open(datafile, mode='w+', encoding='utf-8') as fhandle:
             data_cndarray.save(fhandle)
             indices_cndarray.save(fhandle)
             indptr_cndarray.save(fhandle)
@@ -891,6 +894,8 @@ class CSparse(_CArrayInterface):
     @classmethod
     def load(cls, datafile, dtype=float):
         """Load array data from plain text file.
+
+        The default encoding is `utf-8`.
 
         Parameters
         ----------

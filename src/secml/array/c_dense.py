@@ -893,6 +893,8 @@ class CDense(_CArrayInterface):
 
         Data is stored preserving original data type.
 
+        The default encoding is `utf-8`.
+
         Parameters
         ----------
         datafile : str, file_handle
@@ -928,14 +930,16 @@ class CDense(_CArrayInterface):
                           "or delete the file.".format(datafile))
 
         try:
-            np.savetxt(
-                datafile, self.atleast_2d().tondarray(), delimiter=' ', fmt=fmt)
+            np.savetxt(datafile, self.atleast_2d().tondarray(),
+                       delimiter=' ', fmt=fmt, encoding='utf-8')
         except IOError as e:  # Prevent stopping after standard IOError
             print(e)
 
     @classmethod
     def load(cls, datafile, dtype=float, startrow=0, skipend=0, cols=None):
         """Load array data from plain text file.
+
+        The default encoding is `utf-8`.
 
         Parameters
         ----------
@@ -967,7 +971,8 @@ class CDense(_CArrayInterface):
                                                    delimiter=' ',
                                                    skip_header=startrow,
                                                    skip_footer=skipend,
-                                                   usecols=cols)))
+                                                   usecols=cols,
+                                                   encoding='utf-8')))
         except IOError as e:  # Handling standard IOError
             raise IOError(e)
         except (IndexError, StopIteration):  # Something wrong with indexing
