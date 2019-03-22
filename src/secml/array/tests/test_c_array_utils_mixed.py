@@ -84,7 +84,7 @@ class TestCArrayUtilsMixed(CArrayTestCases):
 
             diag = array.diag(k=k)
             self.logger.info("({:})-th diagonal is: {:}".format(k, diag))
-            self.assertEquals(diag.ndim, 1)
+            self.assertEqual(1, diag.ndim)
             self.assertTrue(diag.isdense)
             self.assertTrue((diag == out).all())
 
@@ -123,8 +123,8 @@ class TestCArrayUtilsMixed(CArrayTestCases):
             diag = array.diag(k=k)
             self.logger.info(
                 "Array created using k={:} is:\n{:}".format(k, diag))
-            self.assertEquals(array.isdense, diag.isdense)
-            self.assertEquals(array.issparse, diag.issparse)
+            self.assertEqual(array.isdense, diag.isdense)
+            self.assertEqual(array.issparse, diag.issparse)
             self.assertTrue((diag == out).all())
 
         self.logger.info("Array is:\n{:}".format(self.row_flat_dense))

@@ -154,7 +154,7 @@ class Net(nn.Module):
 net = Net()
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print device
+print(device)
 # net = net.to(device)
 
 ########################################################################
