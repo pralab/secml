@@ -953,13 +953,13 @@ class CDense(_CArrayInterface):
             Array row to start loading from.
         skipend : int, optional
             Number of lines to skip from the end of the file when reading.
-        cols : {Cndarray, int, tuple, slice}, optional
+        cols : {CDense, int, tuple, slice}, optional
             Columns to load from target file.
 
         Returns
         -------
         loaded : CDense
-            Array resulting from loading, 2-dimensional.
+            Array resulting from loading, 2-Dimensional.
 
         """
         # Indexing for array columns to load (tuple)

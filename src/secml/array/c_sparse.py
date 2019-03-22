@@ -7,8 +7,10 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+import six
 from six.moves import range
 from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+
 import scipy.sparse as scs
 from scipy.sparse.linalg import inv, norm
 import numpy as np
@@ -889,7 +891,8 @@ class CSparse(_CArrayInterface):
             data_cndarray.save(fhandle)
             indices_cndarray.save(fhandle)
             indptr_cndarray.save(fhandle)
-            fhandle.write(str(self.shape[0]) + " " + str(self.shape[1]))
+            fhandle.write(six.text_type(self.shape[0]) + " " +
+                          six.text_type(self.shape[1]))
 
     @classmethod
     def load(cls, datafile, dtype=float):
