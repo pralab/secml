@@ -8,7 +8,7 @@
 
 """
 from __future__ import print_function
-from six.moves import range
+from six.moves import range, map
 import numpy as np
 import numpy.matlib
 from numpy.linalg import inv, pinv
@@ -76,7 +76,7 @@ class CDense(_CArrayInterface):
     @property
     def nnz_indices(self):
         """Return a list of list that contain index of non zero elements."""
-        return map(list, np.nonzero(self.atleast_2d().tondarray()))
+        return list(map(list, np.nonzero(self.atleast_2d().tondarray())))
 
     @property
     def nnz_data(self):
@@ -1244,7 +1244,7 @@ class CDense(_CArrayInterface):
         # size instead of shape as we just need one condition for each element
         if condition.size != self.size:
             raise ValueError("condition size must be {:}".format(self.size))
-        return map(list, np.nonzero(condition.atleast_2d().tondarray()))
+        return list(map(list, np.nonzero(condition.atleast_2d().tondarray())))
 
     def binary_search(self, value):
         """Returns the index of each input value inside the array.
@@ -1294,7 +1294,7 @@ class CDense(_CArrayInterface):
                 return pos
 
         # As bisect_left returns a single index, so we should ravel the array
-        out = map(lambda x: bs_single(self.ravel(), x), CDense(value))
+        out = list(map(lambda x: bs_single(self.ravel(), x), CDense(value)))
         return CDense(out) if len(out) > 1 else out[0]
 
     # ------------- #

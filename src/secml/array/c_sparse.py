@@ -8,7 +8,7 @@
 
 """
 import six
-from six.moves import range
+from six.moves import range, map
 from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 
 import scipy.sparse as scs
@@ -73,7 +73,7 @@ class CSparse(_CArrayInterface):
     @property
     def nnz_indices(self):
         """Return a list of list that contain index of non zero elements."""
-        return map(list, self.tocsr().nonzero())
+        return list(map(list, self.tocsr().nonzero()))
 
     @property
     def nnz_data(self):
@@ -1269,7 +1269,9 @@ class CSparse(_CArrayInterface):
         # size instead of shape as we just need one condition for each element
         if condition.size != self.size:
             raise ValueError("condition size must be {:}".format(self.size))
-        return map(list, scs.find(condition.tocsr()))[:2]
+        # scs.find returns row indices, column indices, and nonzero data
+        # we are interested only in row/column indices
+        return list(map(list, scs.find(condition.tocsr())))[:2]
 
     def binary_search(self, value):
         raise NotImplementedError(
