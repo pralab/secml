@@ -27,10 +27,10 @@ def git_version():
         env['LANG'] = 'C'
         env['LC_ALL'] = 'C'
         # Execute in the current dir
-        out = subprocess.Popen(cmd, cwd=here, env=env,
+        res = subprocess.Popen(cmd, cwd=here, env=env,
                                stdout=subprocess.PIPE,
                                stderr=open(os.devnull, 'w')).communicate()[0]
-        return out
+        return res
 
     try:
         out = _minimal_ext_cmd(['git', 'rev-parse', '--short', 'HEAD'])
@@ -101,7 +101,8 @@ def install_deps():
         https://github.com/pypa/pip/issues/3610#issuecomment-356687173
 
     """
-    default = io.open(os.path.join(here, 'requirements.txt'), 'r').readlines()
+    default = open(os.path.join(here, 'requirements.txt'),
+                   'r', encoding='ascii').readlines()
     new_pkgs = []
     links = []
     for resource in default:
