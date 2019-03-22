@@ -1,5 +1,5 @@
 import os
-import io
+from io import open  # TODO: REMOVE AFTER TRANSITIONING TO PYTHON 3
 import subprocess
 from pkg_resources import parse_version
 
@@ -14,15 +14,13 @@ _here = os.path.abspath(os.path.dirname(__file__))
 
 
 def _read(*path_parts):
-    # intentionally *not* adding an encoding option to open, See:
-    #   https://github.com/pypa/virtualenv/issues/201#issuecomment-3145690
-    with io.open(os.path.join(_here, *path_parts), 'r') as fp:
+    with open(os.path.join(_here, *path_parts), 'r', encoding='ascii') as fp:
         return fp.read().strip()
 
 
 def _write_rev(v, *path_parts):
     """Write revision id to file."""
-    a = open(os.path.join(_here, *path_parts), 'w')
+    a = open(os.path.join(_here, *path_parts), 'w', encoding='ascii')
     try:
         a.write(v)
     finally:

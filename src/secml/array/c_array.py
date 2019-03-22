@@ -10,10 +10,10 @@ from six.moves import range
 import numpy as np
 import scipy.sparse as scs
 
-from .c_array_interface import _CArrayInterface
+from secml.array.c_array_interface import _CArrayInterface
 
-from .c_dense import CDense
-from .c_sparse import CSparse
+from secml.array.c_dense import CDense
+from secml.array.c_sparse import CSparse
 
 from secml.core.type_utils import \
     is_int, is_scalar, is_bool, is_ndarray, is_scsarray, to_builtin
@@ -413,10 +413,7 @@ class CArray(_CArrayInterface):
         CArray([[1 2]
          [0 4]])
 
-        >>> array = CArray([[1,2],[0,4]],tosparse=True).tolist()
-        >>> array  # integers can be converted to long sometimes  # doctest: +SKIP
-        [[1L, 2L], [0L, 4L]]
-        >>> print(CArray(array,tosparse=True))  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray(array, tosparse=True))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	2
           (1, 1)	4)
@@ -1466,6 +1463,8 @@ class CArray(_CArrayInterface):
 
         Data is stored preserving original data type.
 
+        The default encoding is `utf-8`.
+
         Parameters
         ----------
         datafile : str, file_handle (dense only)
@@ -1481,11 +1480,11 @@ class CArray(_CArrayInterface):
 
         Notes
         -----
-            - Dense format, flat arrays are stored with shape N x 1.
-            - Sparse format, we only save non-zero data along with indices
-                necessary to reconstruct original 2-dimensional array.
-            - Dense format, shape of original array can be easly recognized
-                from target text file.
+        - Dense format, flat arrays are stored with shape N x 1.
+        - Sparse format, we only save non-zero data along with indices
+            necessary to reconstruct original 2-dimensional array.
+        - Dense format, shape of original array can be easily recognized
+            from target text file.
 
         """
         if self.issparse is True and not isinstance(datafile, str):
@@ -1499,6 +1498,8 @@ class CArray(_CArrayInterface):
     def load(cls, datafile, dtype=float, arrayformat='dense',
              startrow=0, skipend=0, cols=None):
         """Load array data from plain text file.
+
+        The default encoding is `utf-8`.
 
         Parameters
         ----------
