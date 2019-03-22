@@ -136,9 +136,9 @@ def is_slice(x):
     return isinstance(x, slice)
 
 
-def is_str(x):  # text unicode strings
-    # TODO: REMOVE text_type AFTER TRANSITIONING TO PY3
-    if isinstance(x, six.text_type):
+def is_str(x):  # text unicode strings (unicode AND bytes in Py2)
+    # TODO: REMOVE string_types AFTER TRANSITIONING TO PY3
+    if isinstance(x, six.string_types):
         return True
     elif isinstance(x, np.str_):
         return True
