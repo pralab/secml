@@ -6,6 +6,7 @@
 
 """
 import os
+import locale
 from six.moves.configparser import \
     SafeConfigParser, NoSectionError, NoOptionError
 
@@ -117,7 +118,7 @@ def _parse_env(name, default=None, dtype=None):
 
     # Parse var from env using the specified dtype
     if dtype is None or dtype == str:
-        return str(val)
+        return str(val).encode(locale.getpreferredencoding())
     if dtype == int or dtype == float or dtype == bool:
         return dtype(val)
     else:
