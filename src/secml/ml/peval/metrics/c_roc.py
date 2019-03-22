@@ -6,7 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from six.moves import range, zip
+from six.moves import range, zip, map
 
 from secml.array import CArray
 
@@ -246,7 +246,7 @@ class CRoc(CBaseRoc):
 
         """
         # This returns a list or a single arrays if one rep is available
-        fpr = map(list, zip(*self._data))[0]
+        fpr = list(map(list, zip(*self._data)))[0]
         return fpr[0] if len(fpr) == 1 else fpr
 
     @property
@@ -259,7 +259,7 @@ class CRoc(CBaseRoc):
 
         """
         # This returns a list or a single arrays if one rep is available
-        tpr = map(list, zip(*self._data))[1]
+        tpr = list(map(list, zip(*self._data)))[1]
         return tpr[0] if len(tpr) == 1 else tpr
 
     @property
@@ -273,7 +273,7 @@ class CRoc(CBaseRoc):
 
         """
         # This returns a list or a single arrays if one rep is available
-        th = map(list, zip(*self._data))[2]
+        th = list(map(list, zip(*self._data)))[2]
         return th[0] if len(th) == 1 else th
 
     @property
