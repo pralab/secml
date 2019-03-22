@@ -22,7 +22,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
 
                 if ax is None:
                     self.assertIsInstance(res, int)
-                    self.assertEquals(res, expected[ax_i])
+                    self.assertEqual(expected[ax_i], res)
                 else:
                     self.assertIsInstance(res, CArray)
                     self.assertEqual(1, res.ndim)

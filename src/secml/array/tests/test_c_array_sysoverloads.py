@@ -551,35 +551,35 @@ class TestCArraySystemOverloads(CArrayTestCases):
             res.append(elem)
             self.assertFalse(self.array_dense.ravel()[elem_id] != elem)
         # Check if all array elements have been returned
-        self.assertEquals(len(res), self.array_dense.size)
+        self.assertEqual(self.array_dense.size, len(res))
 
         res = []
         for elem_id, elem in enumerate(self.array_sparse):
             res.append(elem)
             self.assertFalse(self.array_sparse.ravel()[elem_id] != elem)
         # Check if all array elements have been returned
-        self.assertEquals(len(res), self.array_sparse.size)
+        self.assertEqual(self.array_sparse.size, len(res))
 
         res = []
         for elem_id, elem in enumerate(self.row_flat_dense):
             res.append(elem)
             self.assertFalse(self.row_flat_dense[elem_id] != elem)
         # Check if all array elements have been returned
-        self.assertEquals(len(res), self.row_flat_dense.size)
+        self.assertEqual(self.row_flat_dense.size, len(res))
 
         res = []
         for elem_id, elem in enumerate(self.row_dense):
             res.append(elem)
             self.assertFalse(self.row_dense[elem_id] != elem)
         # Check if all array elements have been returned
-        self.assertEquals(len(res), self.row_dense.size)
+        self.assertEqual(self.row_dense.size, len(res))
 
         res = []
         for elem_id, elem in enumerate(self.row_sparse):
             res.append(elem)
             self.assertFalse(self.row_sparse[elem_id] != elem)
         # Check if all array elements have been returned
-        self.assertEquals(len(res), self.row_sparse.size)
+        self.assertEqual(self.row_sparse.size, len(res))
 
 
 if __name__ == '__main__':

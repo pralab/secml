@@ -17,13 +17,13 @@ class TestCMetrics(CUnitTest):
         y_pred = CArray([0, 2, 1, 3])
 
         res = peval.performance_score(y_true=y_true, y_pred=y_pred)
-        self.assertEquals(res, 0.5)
+        self.assertEqual(0.5, res)
 
         y_true = CArray([0, 1, 0, 0])
         y_pred = CArray([0, 0, 0, 0])
 
         res = peval.performance_score(y_true=y_true, y_pred=y_pred)
-        self.assertEquals(res, 0.75)
+        self.assertEqual(0.75, res)
         self.assertTrue(is_float(res))
 
     def test_precision(self):
@@ -49,7 +49,7 @@ class TestCMetrics(CUnitTest):
 
         res = peval.performance_score(y_true=true, y_pred=pred)
         # tpr: 0.5, fnr: 0.5 -> 0.5 / (0.5 + 0.5) = 0.5
-        self.assertEquals(res, 0.5)
+        self.assertEqual(0.5, res)
         self.assertTrue(is_float(res))
 
     def test_f1(self):
@@ -75,7 +75,7 @@ class TestCMetrics(CUnitTest):
         pred = CArray([2.5, 0.0, 2, 8])
 
         res = peval.performance_score(y_true=true, score=pred)
-        self.assertEquals(res, 0.5)
+        self.assertEqual(0.5, res)
         self.assertTrue(is_float(res))
 
     def test_mse(self):
@@ -87,7 +87,7 @@ class TestCMetrics(CUnitTest):
         pred = CArray([2.5, 0.0, 2, 8])
 
         res = peval.performance_score(y_true=true, score=pred)
-        self.assertEquals(res, 0.375)
+        self.assertEqual(0.375, res)
         self.assertTrue(is_float(res))
 
     def test_tpratfpr(self):
@@ -99,7 +99,7 @@ class TestCMetrics(CUnitTest):
         pred = CArray([0.1, 0.4, 0.35, 0.8])
 
         res = peval.performance_score(y_true=true, score=pred)
-        self.assertEquals(res, 0.5)
+        self.assertEqual(0.5, res)
         self.assertTrue(is_float(res))
 
     def test_auc(self):
@@ -111,7 +111,7 @@ class TestCMetrics(CUnitTest):
         pred = CArray([0.1, 0.4, 0.35, 0.8])
 
         res = peval.performance_score(y_true=true, score=pred)
-        self.assertEquals(res, 0.75)
+        self.assertEqual(0.75, res)
         self.assertTrue(is_float(res))
 
         self.logger.info("Testing auc_wmw score...")
@@ -121,7 +121,7 @@ class TestCMetrics(CUnitTest):
         pred = CArray([0.1, 0.4, 0.35, 0.8])
 
         res = peval.performance_score(y_true=true, score=pred)
-        self.assertEquals(res, 0.75)
+        self.assertEqual(0.75, res)
         self.assertTrue(is_float(res))
 
         self.logger.info("Testing pauc score...")
@@ -131,7 +131,7 @@ class TestCMetrics(CUnitTest):
         pred = CArray([0.1, 0.4, 0.35, 0.8])
 
         res = peval.performance_score(y_true=true, score=pred)
-        self.assertEquals(res, 0.75)
+        self.assertEqual(0.75, res)
         self.assertTrue(is_float(res))
 
 

@@ -68,7 +68,7 @@ class TestCDataLoaderSvmLight(CUnitTest):
         self.assertTrue(new_dataset.idx_mapping.isdense)
 
         # non-zero elements should be unchanged
-        self.assertEquals(self.patterns.nnz, new_dataset.X.nnz)
+        self.assertEqual(self.patterns.nnz, new_dataset.X.nnz)
         new_nnz_data = new_dataset.X.nnz_data
         self.assertFalse((self.patterns.nnz_data != new_nnz_data.sort()).any())
 

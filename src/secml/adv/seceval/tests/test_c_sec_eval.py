@@ -6,7 +6,7 @@ Created on 08 mar 2016
 
 This module tests the CSecEval class, which performs an attacks on
 a dataset w.r.t increasing attack power
-TODO: Add assertEquals statements to check the correctness of the test
+TODO: Add assertEqual statements to check the correctness of the test
 
 """
 from abc import ABCMeta, abstractmethod
