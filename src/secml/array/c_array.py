@@ -413,10 +413,7 @@ class CArray(_CArrayInterface):
         CArray([[1 2]
          [0 4]])
 
-        >>> array = CArray([[1,2],[0,4]],tosparse=True).tolist()
-        >>> array  # integers can be converted to long sometimes  # doctest: +SKIP
-        [[1L, 2L], [0L, 4L]]
-        >>> print(CArray(array,tosparse=True))  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray(array, tosparse=True))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	2
           (1, 1)	4)
