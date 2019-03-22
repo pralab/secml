@@ -172,7 +172,7 @@ class CDataLoaderDrebin(CDataLoader):
         mal_fam_map = {'Benign': 0}
         with open(self.families_path, 'rb') as csvfile:
             mal_fam_reader = csv.reader(csvfile)
-            mal_fam_reader.next()  # Skipping the first header line
+            next(mal_fam_reader)  # Skipping the first header line
             for row in mal_fam_reader:
                 if row[1] not in mal_fam_map:
                     mal_fam_map[row[1]] = len(mal_fam_map)
