@@ -1,6 +1,8 @@
-from secml.figure.plots import CPlot
 import numpy as np
 import itertools
+from six.moves import range
+
+from secml.figure.plots import CPlot
 
 
 class CPlotConfMatr(CPlot):
@@ -22,15 +24,14 @@ class CPlotConfMatr(CPlot):
         self.ylabel("True label")
         self.xlabel("Predicted label")
 
-    #        self.tight_layout()
-
     def _apply_params(self):
         """Apply defined parameters to active subplot."""
         fig_legend = self.get_legend()
         if fig_legend is not None:
             fig_legend.set_visible(self.show_legend)
 
-    def plot_confusion_matrix(self, cnf_matrix, title=None, normalize=True, cmap='jet'):
+    def plot_confusion_matrix(
+            self, cnf_matrix, title=None, normalize=True, cmap='jet'):
         """
         This function prints and plots the confusion matrix.
         Normalization can be applied by setting `normalize=True`.
@@ -56,10 +57,12 @@ class CPlotConfMatr(CPlot):
 
         cnf_matrix = cnf_matrix.tondarray()
         if normalize:
-            cnf_matrix = cnf_matrix.astype('float') / cnf_matrix.sum(axis=1)[:, np.newaxis]
+            cnf_matrix = cnf_matrix.astype('float') / \
+                         cnf_matrix.sum(axis=1)[:, np.newaxis]
 
         thresh = cnf_matrix.max() / 2.
-        for i, j in itertools.product(range(cnf_matrix.shape[0]), range(cnf_matrix.shape[1])):
+        for i, j in itertools.product(range(cnf_matrix.shape[0]),
+                                      range(cnf_matrix.shape[1])):
             self.text(j, i, cnf_matrix[i, j].round(2),
                       horizontalalignment="center",
                       color="white" if cnf_matrix[i, j] > thresh else "black")

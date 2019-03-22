@@ -6,6 +6,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from six.moves import range
+
 from secml.ml.classifiers.loss import CLossClassification, CSoftmax
 from secml.array import CArray
 from secml import _NoValue
@@ -60,7 +62,7 @@ class CLossCrossEntropy(CLossClassification):
         p = CSoftmax().softmax(score)  # SoftMax function
 
         # find-like indexing (list of lists)
-        return -CArray(p[[range(score.shape[0]), y_true.tolist()]]).log()
+        return -CArray(p[[list(range(score.shape[0])), y_true.tolist()]]).log()
 
     def dloss(self, y_true, score, pos_label=None):
         """Computes gradient of the Cross Entropy loss w.r.t.the classifier
@@ -95,10 +97,10 @@ class CLossCrossEntropy(CLossClassification):
         grad = CSoftmax().softmax(score)
 
         # we subtract -1 only to the elements equal to y_true
-        grad[[range(score.shape[0]), y_true.tolist()]] -= 1.0
+        grad[[list(range(score.shape[0])), y_true.tolist()]] -= 1.0
 
         # find-like indexing (list of lists)
         a = y_true.tolist() if pos_label is None else [pos_label]
 
         # Return elements equal to y_true (if pos_label is None) or pos_label
-        return CArray(grad[[range(score.shape[0]), a]])
+        return CArray(grad[[list(range(score.shape[0])), a]])

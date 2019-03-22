@@ -1,6 +1,7 @@
 from secml.array.tests import CArrayTestCases
 
 import numpy as np
+from six.moves import range
 
 from secml.array import CArray
 from secml.core.type_utils import is_scalar, is_int
@@ -968,7 +969,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             min_res = min_res.ravel()
             # We create a find_2d-like mask to check result
             argmin_res = [
-                argmin_res.ravel().tolist(), range(array.shape[1])]
+                argmin_res.ravel().tolist(), list(range(array.shape[1]))]
             self.assertTrue((array[argmin_res] == min_res).all())
 
             self.logger.info("a: \n{:}".format(array))
@@ -980,7 +981,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             min_res = min_res.ravel()
             # We create a find_2d-like mask to check result
             argmin_res = [
-                range(array.shape[0]), argmin_res.ravel().tolist()]
+                list(range(array.shape[0])), argmin_res.ravel().tolist()]
             self.assertTrue((array[argmin_res] == min_res).all())
 
         _argmin(self.array_sparse)
@@ -1016,7 +1017,8 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             # One res for each column with keepdims
             max_res = max_res.ravel()
             # We create a find_2d-like mask to check result
-            argmax_res = [argmax_res.ravel().tolist(), range(array.shape[1])]
+            argmax_res = [
+                argmax_res.ravel().tolist(), list(range(array.shape[1]))]
             self.assertTrue((array[argmax_res] == max_res).all())
 
             self.logger.info("a: \n{:}".format(array))
@@ -1028,7 +1030,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             max_res = max_res.ravel()
             # We create a find_2d-like mask to check result
             argmax_res = [
-                range(array.shape[0]), argmax_res.ravel().tolist()]
+                list(range(array.shape[0])), argmax_res.ravel().tolist()]
             self.assertTrue((array[argmax_res] == max_res).all())
 
         _argmax(self.array_sparse)
@@ -1078,7 +1080,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                 # One res for each column with keepdims
                 min_res = min_res.ravel()
                 argmin_res = [
-                    argmin_res.ravel().tolist(), range(array.shape[1])]
+                    argmin_res.ravel().tolist(), list(range(array.shape[1]))]
                 # use numpy.testing to proper compare arrays with nans
                 self.assert_array_equal(array[argmin_res], min_res)
 
@@ -1096,7 +1098,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                 # One res for each row with keepdims
                 min_res = min_res.ravel()
                 argmin_res = [
-                    range(array.shape[0]), argmin_res.ravel().tolist()]
+                    list(range(array.shape[0])), argmin_res.ravel().tolist()]
                 # use numpy.testing to proper compare arrays with nans
                 self.assert_array_equal(array[argmin_res], min_res)
 
@@ -1144,7 +1146,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                 # One res for each column with keepdims
                 max_res = max_res.ravel()
                 argmax_res = [
-                    argmax_res.ravel().tolist(), range(array.shape[1])]
+                    argmax_res.ravel().tolist(), list(range(array.shape[1]))]
                 self.assert_array_equal(array[argmax_res], max_res)
 
             self.logger.info("a: \n{:}".format(array))
@@ -1161,7 +1163,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                 # One res for each row with keepdims
                 max_res = max_res.ravel()
                 argmax_res = [
-                    range(array.shape[0]), argmax_res.ravel().tolist()]
+                    list(range(array.shape[0])), argmax_res.ravel().tolist()]
                 self.assert_array_equal(array[argmax_res], max_res)
 
         _check_nanargmax(self.array_dense)
