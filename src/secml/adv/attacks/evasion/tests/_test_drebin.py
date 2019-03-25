@@ -31,7 +31,7 @@ if not fm.file_exist('ds.gz'):
     ts = ts[:, feats_idx]
     pickle_utils.save('ds.gz', (tr, ts))
 else:
-    tr, ts = pickle_utils.load('ds.gz')
+    tr, ts = pickle_utils.load('ds.gz', encoding='latin1')
 
 mal_idx = ts.Y.find(ts.Y == 1)[:3]
 adv_ds = ts[mal_idx, :]
@@ -44,7 +44,7 @@ if not fm.file_exist('clf.gz'):
     clf.fit(tr)
     pickle_utils.save('clf.gz', clf)
 else:
-    clf = pickle_utils.load('clf.gz')
+    clf = pickle_utils.load('clf.gz', encoding='latin1')
 
 solver_type = 'descent-direction'
 solver_params = {'eta': 1, 'eta_min': 1, 'eta_max': None, 'eps': 1e-4}
