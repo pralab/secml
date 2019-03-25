@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from __future__ import division
 from sklearn.model_selection import train_test_split
 
 from secml.core import CCreator
@@ -116,7 +117,7 @@ class CTrainTestSplit(CCreator):
             Flat arrays with the tr/ts indices.
 
         """
-        min_set_perc = 1.0 / dataset.num_samples
+        min_set_perc = 1 / dataset.num_samples
         if (is_float(self.train_size) and self.train_size < min_set_perc) or \
                 (is_int(self.train_size) and self.train_size < 1):
             raise ValueError(

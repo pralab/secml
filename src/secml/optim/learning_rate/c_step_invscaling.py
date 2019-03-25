@@ -1,4 +1,5 @@
 
+from __future__ import division
 from secml.optim.learning_rate import CStep
 
 
@@ -26,4 +27,4 @@ class CStepInvscaling(CStep):
         self.power_t = power_t
 
     def get_actual_step(self, iter):
-        return float(self.initial_step) / (iter + 1 ** self.power_t)
+        return self.initial_step / (iter + 1 ** self.power_t)

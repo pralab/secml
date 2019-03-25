@@ -73,4 +73,4 @@ class CMetricAUCWMW(CMetric):
                 elif score[i] == score[j]:
                     auc += 0.5
 
-        return auc / float(len(idxp) * len(idxn))
+        return auc / (len(idxp) * len(idxn))

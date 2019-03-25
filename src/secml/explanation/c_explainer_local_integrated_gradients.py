@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from __future__ import division
 from secml.explanation import CExplainer
 from secml.array import CArray
 from secml.core.type_utils import is_int
@@ -99,7 +100,7 @@ class CExplainerLocalIntegratedGradients(CExplainer):
             for i in range(len(ret)):
                 riemman_approx += self.clf.gradient_f_x(ret[i], y=c)
 
-            a = (x - reference) * (1.0 / m) * riemman_approx
+            a = (x - reference) * (1 / m) * riemman_approx
 
             self.logger.debug(
                 "Attributions for class {:}:\n{:}".format(c, a))
@@ -175,6 +176,6 @@ class CExplainerLocalIntegratedGradients(CExplainer):
         # Calculated stepwise difference from reference to the actual sample
         ret = []
         for s in range(1, m + 1):
-            ret.append(reference + (x - reference) * (s * 1.0 / m))
+            ret.append(reference + (x - reference) * (s * 1 / m))
 
         return ret

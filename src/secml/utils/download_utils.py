@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from __future__ import division
 import sys
 import requests
 import hashlib
@@ -68,7 +69,7 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
                 f.write(chunk)
                 # Report progress
                 dl += len(chunk)
-                done = int(float(50 * dl) / total_size)
+                done = int((50 * dl) / total_size)
                 if sys.stdout.isatty() is True:
                     # Provide real-time updates (if stdout is a tty)
                     sys.stdout.write("\r[{:}{:}] {:}/{:}".format(

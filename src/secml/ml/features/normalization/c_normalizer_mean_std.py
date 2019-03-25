@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from __future__ import division
 from six.moves import range
 
 from secml.array import CArray
@@ -187,7 +188,8 @@ class CNormalizerMeanSTD(CNormalizerLinear):
             mean_list = []
             for i in range(n_channels):
                 mean_list.append(
-                    CArray.ones(shape=(n_feats / n_channels, )) * self._mean[i])
+                    CArray.ones(
+                        shape=(int(n_feats / n_channels), )) * self._mean[i])
             self._x_mean = CArray.from_iterables(mean_list)
 
         # Setting the variance
@@ -205,7 +207,8 @@ class CNormalizerMeanSTD(CNormalizerLinear):
             std_list = []
             for i in range(n_channels):
                 std_list.append(
-                    CArray.ones(shape=(n_feats / n_channels, )) * self._std[i])
+                    CArray.ones(
+                        shape=(int(n_feats / n_channels), )) * self._std[i])
             self._x_std = CArray.from_iterables(std_list)
 
         # Updating linear normalizer parameters

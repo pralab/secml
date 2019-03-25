@@ -33,7 +33,10 @@ class TestCArraySystemOverloads(CArrayTestCases):
                  (self.array_dense, self.array_dense)]
         self._test_operator_cycle(operators, items, expected_result)
 
-        operators = [op.div, op.truediv, op.floordiv]
+        try:
+            operators = [op.div, op.truediv, op.floordiv]
+        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+            operators = [op.truediv, op.floordiv]
         expected_result = [CDense, CDense, CDense, CDense]
         items = [(self.array_sparse, self.array_sparse),
                  (self.array_sparse, self.array_dense),
@@ -160,7 +163,10 @@ class TestCArraySystemOverloads(CArrayTestCases):
         self._test_operator_cycle(operators, items, expected_result)
 
         # ARRAY / NONZERO SCALAR
-        operators = [op.div, op.truediv, op.floordiv]
+        try:
+            operators = [op.div, op.truediv, op.floordiv]
+        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+            operators = [op.truediv, op.floordiv]
         expected_result = [CDense] * 5 + [CSparse] * 5
         items = list(product([self.array_dense], test_scalars)) + \
             list(product([self.array_sparse], test_scalars))
@@ -168,14 +174,20 @@ class TestCArraySystemOverloads(CArrayTestCases):
 
         # NONZERO SCALAR / DENSE ARRAY
         # nonzero scalar / sparse array is not supported
-        operators = [op.div, op.truediv, op.floordiv]
+        try:
+            operators = [op.div, op.truediv, op.floordiv]
+        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+            operators = [op.truediv, op.floordiv]
         expected_result = [CDense] * 5
         items = list(product(test_scalars, [self.array_dense]))
         self._test_operator_cycle(operators, items, expected_result)
 
         # ZERO SCALAR / DENSE ARRAY
         # zero scalar / sparse array is not supported
-        operators = [op.div, op.truediv, op.floordiv]
+        try:
+            operators = [op.div, op.truediv, op.floordiv]
+        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+            operators = [op.truediv, op.floordiv]
         expected_result = [CDense] * 5
         items = list(product(test_z_scalars, [self.array_dense]))
         self._test_operator_cycle(operators, items, expected_result)
@@ -218,7 +230,10 @@ class TestCArraySystemOverloads(CArrayTestCases):
         # NONZERO SCALAR / SPARSE ARRAY NOT SUPPORTED
         items = list(product(test_scalars, [self.array_sparse])) + \
             list(product(test_z_scalars, [self.array_sparse]))
-        operators = [op.div, op.truediv, op.floordiv]
+        try:
+            operators = [op.div, op.truediv, op.floordiv]
+        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+            operators = [op.truediv, op.floordiv]
         self._test_operator_notimplemented(operators, items)
 
         # NONZERO SCALAR ** SPARSE ARRAY NOT SUPPORTED
@@ -239,8 +254,13 @@ class TestCArraySystemOverloads(CArrayTestCases):
         """Test for mathematical operators array vs unsupported types."""
 
         def test_unsupported(x):
-            for operator in [op.add, op.sub, op.mul,
-                             op.div, op.floordiv, op.pow]:
+            try:
+                operators = [op.add, op.sub, op.mul, op.truediv,
+                             op.div, op.floordiv, op.pow]
+            except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+                operators = [op.add, op.sub, op.mul,
+                             op.truediv, op.floordiv, op.pow]
+            for operator in operators:
                 with self.assertRaises(TypeError):
                     self.logger.info("Testing {:} dense vs '{:}'".format(
                         operator.__name__, type(x).__name__))
@@ -270,8 +290,13 @@ class TestCArraySystemOverloads(CArrayTestCases):
         """Test for mathematical operators unsupported types vs array."""
 
         def test_unsupported(x):
-            for operator in [op.add, op.sub, op.mul,
-                             op.div, op.floordiv, op.pow]:
+            try:
+                operators = [op.add, op.sub, op.mul, op.truediv,
+                             op.div, op.floordiv, op.pow]
+            except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+                operators = [op.add, op.sub, op.mul,
+                             op.truediv, op.floordiv, op.pow]
+            for operator in operators:
                 with self.assertRaises(TypeError):
                     self.logger.info("Testing {:} '{:}' vs dense".format(
                         operator.__name__, type(x).__name__))

@@ -191,8 +191,8 @@ class CBaseRoc(object):
         th = CArray(th[::-1])
 
         # Normalizing in 0-1
-        fpr = CArray(fp_list) / float(n.size) if n.size != 0 else CArray([0])
-        tpr = CArray(tp_list) / float(p.size) if p.size != 0 else CArray([0])
+        fpr = CArray(fp_list) / n.size if n.size != 0 else CArray([0])
+        tpr = CArray(tp_list) / p.size if p.size != 0 else CArray([0])
 
         # Ensure first and last points are (0,0) and (1,1) respectively
         self._fpr, self._tpr, self._th = refine_roc(fpr, tpr, th)

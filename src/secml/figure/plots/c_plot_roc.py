@@ -1,3 +1,4 @@
+from __future__ import division
 from six.moves import range
 
 from secml.figure.plots import CPlot
@@ -334,7 +335,7 @@ class CPlotRoc(CPlot):
         styles = ['go-', 'yp--', 'rs-.', 'bD--', 'c-.', 'm-', 'y-.']
 
         # If std should be plotted each run plots 2 curvers
-        n_lines = self.n_lines / 2 if plot_std is True else self.n_lines
+        n_lines = int(self.n_lines / 2) if plot_std is True else self.n_lines
         # Get indices of fpr @ xticks
         mkrs_idx = self._markers_idx(roc.mean_fpr * 100)
 

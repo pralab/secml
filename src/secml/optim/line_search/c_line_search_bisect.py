@@ -4,7 +4,7 @@
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 """
-
+from __future__ import division
 from secml.optim.line_search.c_line_search import CLineSearch
 from secml.array import CArray
 
@@ -58,8 +58,7 @@ class CLineSearchBisect(CLineSearch):
             self._eta_max = None
             return
         # set eta_max >= t*eta, t >= 1 (integer)
-        t = max(CArray(value / self.eta).round(), 1)
-        self._eta_max = self.eta * t
+        self._eta_max = self.eta * max(value / self.eta, 1)
 
     @property
     def eta_min(self):
@@ -229,12 +228,12 @@ class CLineSearchBisect(CLineSearch):
 
         if self.eta_max is None:
             eta_max = self._compute_eta_max(x, d, **kwargs)
-            idx_max = (eta_max / self.eta).ceil()
+            idx_max = (eta_max / self.eta).ceil().astype(int)
             idx_min = (idx_max / 2).astype(int)
             # this only searches within [eta, 2*eta]
             # the values fun_idx_min and fun_idx_max are already cached
         else:
-            idx_max = (self.eta_max / self.eta).ceil()
+            idx_max = (self.eta_max / self.eta).ceil().astype(int)
             idx_min = 0
             self._fun_idx_min = self._fx
             self._fun_idx_max = None  # this has not been cached

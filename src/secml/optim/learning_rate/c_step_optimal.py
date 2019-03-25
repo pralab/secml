@@ -1,4 +1,4 @@
-
+from __future__ import division
 from secml.optim.learning_rate import CStep
 
 
@@ -25,7 +25,4 @@ class CStepOptimal(CStep):
         self.alfa = alfa
 
     def get_actual_step(self, iter):
-        if iter is 0:
-            return 1
-        else:
-            return float(1) / (self.alfa * iter)
+        return 1 if iter is 0 else 1 / (self.alfa * iter)

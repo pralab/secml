@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from __future__ import division
 from six.moves import range
 import gzip
 import struct
@@ -131,7 +132,7 @@ class CDataLoaderMNIST(CDataLoader):
         # Number of samples per class
         num_samples_class = size
         if num_samples is not None:
-            num_samples_class = int(float(num_samples) / digits.size)
+            num_samples_class = int(num_samples / digits.size)
 
         # Counter of already taken sample for a class
         count_samples_class = {e: 0 for e in digits}

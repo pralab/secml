@@ -109,6 +109,9 @@ class CUnitTest(unittest.TestCase):
             dtype or string representing a typecode.
 
         """
+        if desired is float:
+            # To manage the built-in float as either np.float32 or np.float64
+            desired = np.floating
         if not np.issubdtype(actual, desired):
             raise AssertionError("{:} is not lower/equal to {:} in the type "
                                  "hierarchy.".format(actual, desired))
