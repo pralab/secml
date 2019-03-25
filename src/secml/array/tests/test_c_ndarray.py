@@ -2,6 +2,8 @@ from secml.utils import CUnitTest, fm
 from secml.array.c_dense import CDense
 
 import numpy as np
+from six.moves import range
+import warnings
 
 
 class TestCDense(CUnitTest):
@@ -40,12 +42,13 @@ class TestCDense(CUnitTest):
 
         with self.timer():
             b = CDense().load(
-                test_file, cols=slice(100, None, None), dtype=int).ravel()
+                test_file, cols=list(range(100, 1000)), dtype=int).ravel()
 
         self.assertFalse((a[0, 100] != b).any())
 
         with self.assertRaises(IndexError) as e:
-            CDense().load(test_file, startrow=10, cols=slice(100, None, None))
+            CDense().load(test_file, startrow=10)
+        self.logger.info("Expected error: {:}".format(e.exception))
 
         self.logger.info("UNITTEST - CDense - save/load row vector")
 
@@ -59,9 +62,13 @@ class TestCDense(CUnitTest):
 
         self.assertFalse((a[:, 100:] != b).any())
 
-        with self.assertRaises(IndexError) as e:
-            CDense().load(test_file, startrow=10, cols=CDense([3, 4]))
-        self.logger.info(e.exception)
+        # For some reasons np.genfromtxt does not close the file here
+        # Let's handle the resource warning abount unclosed file
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="unclosed file")
+            with self.assertRaises(IndexError) as e:
+                CDense().load(test_file, startrow=10)
+        self.logger.info("Expected error: {:}".format(e.exception))
 
         self.logger.info("UNITTEST - CDense - save/load negative vector")
 
