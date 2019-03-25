@@ -7,6 +7,7 @@
 
 """
 from scipy import optimize as sc_opt
+import six
 
 from secml.array import CArray
 from secml.optim.optimizers import COptimizer
@@ -166,7 +167,11 @@ class COptimizerScipy(COptimizer):
                 "Optimization has not exited successfully!\n")
 
         if self.verbose >= 1:
-            self.logger.info(sc_opt_out.message + "\n")
+            # Workaround for scipy message randomly being a str or bytes
+            if isinstance(sc_opt_out.message, six.string_types):
+                self.logger.info(sc_opt_out.message + "\n")
+            else:
+                self.logger.info(str(sc_opt_out.message, 'ascii') + "\n")
 
         self._f_seq = CArray(sc_opt_out.fun)  # only last iter available
 

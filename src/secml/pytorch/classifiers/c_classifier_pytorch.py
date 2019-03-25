@@ -531,8 +531,7 @@ class CClassifierPyTorch(CClassifier):
         if dataparallel is True:
             # Convert a DataParallel model state to a normal model state
             # Get the keys to alter the dict on-the-fly
-            keys = state_dict['state_dict'].keys()
-            for k in keys:
+            for k in list(state_dict['state_dict']):
                 name = k.replace('module.', '')  # remove module.
                 state_dict['state_dict'][name] = state_dict['state_dict'][k]
                 state_dict['state_dict'].pop(k)
