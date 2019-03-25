@@ -1,3 +1,4 @@
+from __future__ import division
 from six.moves import range
 
 from secml.utils import CUnitTest
@@ -143,7 +144,7 @@ class TestCExplainerLocalInfluence(CUnitTest):
 
         clf_copy.fit(new_dataset)
 
-        loss = (1.0 / self._ts.num_samples) * self.clf_gradients.L(
+        loss = (1 / self._ts.num_samples) * self.clf_gradients.L(
             self._ts.X, self._ts.Y, clf_copy, regularized=False).sum(axis=None)
 
         return loss

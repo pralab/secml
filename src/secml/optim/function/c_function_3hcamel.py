@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from __future__ import division
 from secml.optim.function import CFunction
 from secml.array import CArray
 
@@ -56,7 +57,7 @@ class CFunctionThreeHumpCamel(CFunction):
 
         # Split into 2 parts
         f1 = 2 * x[0].item() ** 2 - 1.05 * x[0].item() ** 4
-        f2 = float(x[0].item() ** 6) / 6 + \
+        f2 = x[0].item() ** 6 / 6 + \
              x[0].item() * x[1].item() + x[1].item() ** 2
 
         return f1 + f2

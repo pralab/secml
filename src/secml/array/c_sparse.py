@@ -7,6 +7,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from __future__ import division
 import six
 from six.moves import range, map
 from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
@@ -542,7 +543,7 @@ class CSparse(_CArrayInterface):
         raise NotImplementedError(
             "dividing a scalar by a sparse array is not supported")
 
-    def __div__(self, other):
+    def __div__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
         """Element-wise division.
 
         See .__truediv__() for more informations.
@@ -550,7 +551,7 @@ class CSparse(_CArrayInterface):
         """
         return self.__truediv__(other)
 
-    def __rdiv__(self, other):
+    def __rdiv__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
         """Element-wise (inverse) division.
 
         See .__rtruediv__() for more informations.
@@ -559,7 +560,7 @@ class CSparse(_CArrayInterface):
         return self.__rtruediv__(other)
 
     def __floordiv__(self, other):
-        """Element-wise floor division.
+        """Element-wise floor division (integral part of the quotient).
 
         Parameters
         ----------
@@ -1707,7 +1708,7 @@ class CSparse(_CArrayInterface):
         # n is array size for axis == None or
         # the number of rows/columns of specified axis
         n = self.size if axis is None else self.shape[axis]
-        variance = (1.0 / (float(n) - ddof)) * (centered_array ** 2)
+        variance = (1.0 / (n - ddof)) * (centered_array ** 2)
 
         return CDense(variance.sum(axis=axis, keepdims=keepdims).sqrt())
 

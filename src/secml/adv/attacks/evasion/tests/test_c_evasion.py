@@ -1,3 +1,5 @@
+from __future__ import division
+
 from secml.utils import CUnitTest
 from abc import ABCMeta, abstractmethod
 import six
@@ -113,13 +115,10 @@ class CEvasionTestCases(object):
                     raise ValueError('len(eta) != n_features')
                 for i in range(len(self.eta)):
                     self.dataset.X[:, i] = (
-                                               self.dataset.X[:, i] /
-                                               float(self.eta[i])).round() * \
-                                           self.eta[i]
+                        self.dataset.X[:, i] /
+                        self.eta[i]).round() * self.eta[i]
             else:  # eta is a single value
-                self.dataset.X = (
-                                     self.dataset.X / float(
-                                         self.eta)).round() * self.eta
+                self.dataset.X = (self.dataset.X / self.eta).round() * self.eta
 
         def test_evasion(self):
             self.x_evas = self._run_evasion(self.evasion)

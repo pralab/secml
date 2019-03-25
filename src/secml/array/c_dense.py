@@ -7,7 +7,7 @@
 .. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
 
 """
-from __future__ import print_function
+from __future__ import print_function, division
 from six.moves import range, map
 import numpy as np
 import numpy.matlib
@@ -593,7 +593,7 @@ class CDense(_CArrayInterface):
         else:
             return NotImplemented
 
-    def __div__(self, other):
+    def __div__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
         """Element-wise division.
 
         See .__truediv__() for more informations.
@@ -601,7 +601,7 @@ class CDense(_CArrayInterface):
         """
         return self.__truediv__(other)
 
-    def __rdiv__(self, other):
+    def __rdiv__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
         """Element-wise (inverse) division.
 
         See .__rtruediv__() for more informations.
@@ -650,11 +650,7 @@ class CDense(_CArrayInterface):
         """
         # Result of Numpy floor division is not reliable
         # (nan in place of inf, etc.)... Let's floor the truediv result
-        out_truediv = self.__rtruediv__(other)
-        if out_truediv is NotImplemented:
-            return NotImplemented
-        else:  # Return the integer part of the truediv result
-            return out_truediv.floor()
+        return self.__floordiv__(other)
 
     def __abs__(self):
         """Returns array elements without sign.
@@ -2055,7 +2051,7 @@ class CDense(_CArrayInterface):
         out = cls.zeros((n, len(arrays)), dtype=dtype)
 
         # Computing how many times first parameter list should be replicated
-        m = n / arrays[0].size
+        m = int(n / arrays[0].size)
 
         # Replicating first parameter values list
         out[:, 0] = arrays[0].repeat(m).transpose()

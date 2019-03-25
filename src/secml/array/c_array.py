@@ -953,7 +953,7 @@ class CArray(_CArrayInterface):
         else:
             return NotImplemented
 
-    def __div__(self, other):
+    def __div__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
         """Element-wise division. True division will be performed.
 
         See .__truediv__() for more informations.
@@ -961,7 +961,7 @@ class CArray(_CArrayInterface):
         """
         return self.__truediv__(other)
 
-    def __rdiv__(self, other):
+    def __rdiv__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
         """Element-wise (inverse) division. True division will be performed.
 
         See .__rtruediv__() for more informations.
@@ -981,7 +981,7 @@ class CArray(_CArrayInterface):
         Returns
         -------
         CArray
-            Array after true division.
+            Array after floor division (integral part of the quotient).
             If input is a scalar or a boolean, array format is preserved.
             If input is a CArray, format of output array depends on the
             format of current array:
@@ -1011,7 +1011,7 @@ class CArray(_CArrayInterface):
         Parameters
         ----------
         other : CArray or scalar or bool
-            Element to divide to current array.
+            Element to floor divide to current array.
             If a CArray, element-wise division will be performed.
             If scalar or boolean, the element will be divided
             to each array element.

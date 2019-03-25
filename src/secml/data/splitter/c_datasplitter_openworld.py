@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from __future__ import division
 from six.moves import range
 
 from secml.array import CArray
@@ -101,7 +102,7 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
 
         # If no custom number of training classes is selected,
         # use half of the classes
-        n_train_classes = int(dataset.num_classes / 2.0) \
+        n_train_classes = int(dataset.num_classes / 2) \
             if self.n_train_classes is None else int(self.n_train_classes)
 
         for fold in range(self.num_folds):

@@ -6,6 +6,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
 """
+from __future__ import division
 from six.moves import range
 
 from secml.array import CArray
