@@ -3,6 +3,7 @@ from secml.array.c_dense import CDense
 
 import numpy as np
 from six.moves import range
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 import warnings
 
 
@@ -75,7 +76,7 @@ class TestCDense(CUnitTest):
         a = -CDense().zeros(1000)
 
         a.save(test_file, overwrite=True)
-        with open(test_file, mode='a+') as fhandle:
+        with open(test_file, mode='at+') as fhandle:
             with self.timer():
                 a.save(fhandle, overwrite=True)
 

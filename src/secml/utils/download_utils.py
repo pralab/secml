@@ -9,6 +9,8 @@ from __future__ import division
 import sys
 import requests
 import hashlib
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+
 from secml.utils import fm
 
 
@@ -103,7 +105,7 @@ def md5(fname, blocksize=65536):
 
     """
     hash_md5 = hashlib.md5()
-    with open(fname, "rb") as f:
+    with open(fname, mode='rb') as f:
         for chunk in iter(lambda: f.read(blocksize), b""):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
