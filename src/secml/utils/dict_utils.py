@@ -7,11 +7,13 @@
 """
 from collections import MutableMapping
 
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+
 __all__ = ['load_dict', 'merge_dicts', 'invert_dict',
            'LastInDict', 'SubLevelsDict']
 
 
-def load_dict(file_path, values_dtype=str):
+def load_dict(file_path, values_dtype=str, encoding='ascii'):
     """Load dictionary from textfile.
 
     Each file's line should be <key: value>
@@ -22,6 +24,8 @@ def load_dict(file_path, values_dtype=str):
         Full path to the file to read.
     values_dtype : dtype
         Datatype of the values. Default str (string).
+    encoding : str, optional
+        Encoding to use for reading the file. Default 'ascii'.
 
     Returns
     -------
@@ -31,7 +35,7 @@ def load_dict(file_path, values_dtype=str):
 
     """
     new_dict = {}
-    with open(file_path) as df:
+    with open(file_path, mode='rt', encoding=encoding) as df:
         for key_line in df:
             # a line is 'key: value'
             key_line_splitted = key_line.split(':')
