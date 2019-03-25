@@ -8,6 +8,7 @@
 import tarfile
 from six.moves import cPickle
 from six.moves import range
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 from multiprocessing import Lock
 from abc import ABCMeta, abstractmethod, abstractproperty
 import six
@@ -139,9 +140,9 @@ class CDataLoaderCIFAR(CDataLoader):
             List of the files where the test set is stored.
         meta_file : str
             Name of the metafile containing the class names.
-        labels_key : str
+        labels_key : bytes
             Dictionary key where the labels are stored.
-        class_names_key : str
+        class_names_key : bytes
             Dictionary key where the class names are stored.
         val_size : int, optional
             Size of the validation set.
@@ -166,13 +167,15 @@ class CDataLoaderCIFAR(CDataLoader):
             data = None
             labels = None
             for batch in batches_list:
-                # TODO: add encoding when transitioning to python3
                 with open(batch, 'rb') as bf:
-                    mydict = cPickle.load(bf)
+                    try:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+                        mydict = cPickle.load(bf, encoding='bytes')
+                    except TypeError:
+                        mydict = cPickle.load(bf)
 
                 # The labels have different names in the two datasets
                 new_data = np.array(mydict[b'data'], dtype='uint8')
-                newlabels = np.array(mydict[bytes(labels_key)], dtype='int32')
+                newlabels = np.array(mydict[labels_key], dtype='int32')
                 if data is not None:
                     data = np.vstack([data, new_data])
                     labels = np.hstack([labels, newlabels])
@@ -223,7 +226,7 @@ class CDataLoaderCIFAR(CDataLoader):
         ----------
         meta_file : str
             Name of the metafile where the labels are stored.
-        class_names_key : str
+        class_names_key : bytes
             Dictionary key where the labels are stored.
 
         Returns
@@ -236,7 +239,10 @@ class CDataLoaderCIFAR(CDataLoader):
 
         # Load the class-names from the pickled file.
         with open(meta_file_url, 'rb') as mf:
-            raw = cPickle.load(mf)[bytes(class_names_key)]
+            try:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+                raw = cPickle.load(mf, encoding='bytes')[class_names_key]
+            except TypeError:
+                raw = cPickle.load(mf)[class_names_key]
 
         # Convert from binary strings.
         names = {i: x.decode('utf-8') for i, x in enumerate(raw)}
@@ -327,8 +333,8 @@ class CDataLoaderCIFAR10(CDataLoaderCIFAR):
         train_files = ['data_batch_' + str(i) for i in range(1, 6)]
         test_files = ['test_batch']
         meta_file = 'batches.meta'
-        labels_key = 'labels'
-        class_names_key = 'label_names'
+        labels_key = b'labels'
+        class_names_key = b'label_names'
 
         return self._load(train_files, test_files, meta_file,
                           labels_key, class_names_key, val_size)
@@ -398,8 +404,8 @@ class CDataLoaderCIFAR100(CDataLoaderCIFAR):
         train_files = ['train']
         test_files = ['test']
         meta_file = 'meta'
-        labels_key = 'fine_labels'
-        class_names_key = 'fine_label_names'
+        labels_key = b'fine_labels'
+        class_names_key = b'fine_label_names'
 
         return self._load(train_files, test_files, meta_file,
                           labels_key, class_names_key, val_size)

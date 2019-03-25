@@ -1,5 +1,7 @@
 from secml.ml.classifiers.tests import CClassifierTestCases
 
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+
 from secml.pytorch.classifiers import CClassifierPyTorch
 from secml.pytorch.models import mlp
 from secml.data.loader import CDLRandom
@@ -25,9 +27,9 @@ class TestCClassifierPyTorch(CClassifierTestCases):
 
         # Creating a textfile with model params
         mlp_params = {'input_dims': 20, 'output_dims': 10}
-        with open(dict_file, 'w') as df:
+        with open(dict_file, 'wt', encoding='ascii') as df:
             for p in mlp_params:
-                df.write('{:}: {:}\n'.format(p, mlp_params[p]))
+                df.write(u'{:}: {:}\n'.format(p, mlp_params[p]))
 
         clf = CClassifierPyTorch(model=mlp, model_params=dict_file)
 

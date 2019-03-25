@@ -8,6 +8,7 @@
 import tarfile
 from collections import OrderedDict
 from six.moves import zip
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 from multiprocessing import Lock
 import csv
 import numpy as np

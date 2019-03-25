@@ -888,7 +888,7 @@ class CSparse(_CArrayInterface):
 
         # Error handling is managed by CDense.save()
         # file will be closed exiting from context
-        with open(datafile, mode='w+', encoding='utf-8') as fhandle:
+        with open(datafile, mode='wt+', encoding='utf-8') as fhandle:
             data_cndarray.save(fhandle)
             indices_cndarray.save(fhandle)
             indptr_cndarray.save(fhandle)

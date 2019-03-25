@@ -138,7 +138,7 @@ class TestEvasionMNISTCleverhansAttack(CUnitTest):
             tr = loader.load('training', digits=digits)
             pickle_utils.save(tr_file, tr)
         else:
-            tr = pickle_utils.load(tr_file)
+            tr = pickle_utils.load(tr_file, encoding='latin1')
 
         ts_file = fm.join(
             fm.abspath(__file__), 'mnist_ts_{:}.gz'.format(digits_str))
@@ -147,7 +147,7 @@ class TestEvasionMNISTCleverhansAttack(CUnitTest):
             ts = loader.load('testing', digits=digits)
             pickle_utils.save(ts_file, ts)
         else:
-            ts = pickle_utils.load(ts_file)
+            ts = pickle_utils.load(ts_file, encoding='latin1')
 
         idx = CArray.arange(tr.num_samples)
         val_dts_idx = CArray.randsample(idx, 200, random_state=0)

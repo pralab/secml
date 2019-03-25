@@ -7,6 +7,7 @@
 """
 from __future__ import division
 from six.moves import range
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 import gzip
 import struct
 from array import array

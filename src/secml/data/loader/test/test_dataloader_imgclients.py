@@ -46,7 +46,8 @@ class TestCDataLoaderImgClients(CUnitTest):
             "Loaded {:} images of {:} features, {:} classes".format(
                 ds.num_samples, ds.num_features, ds.num_classes))
 
-        self.assertEqual('S', ds.X.dtype.char)
+        # TODO: USE 'U' AFTER TRANSITION TO PYTHON 3
+        self.assertIn(ds.X.dtype.char, ('S', 'U'))
 
         # Checking correct label-img association
         self.assertEqual(ds.Y[0].item(),

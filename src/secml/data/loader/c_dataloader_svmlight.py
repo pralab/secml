@@ -7,6 +7,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+
 from sklearn.datasets import load_svmlight_file, dump_svmlight_file
 from secml.data.loader import CDataLoader
 from secml.array import CArray
@@ -113,7 +115,7 @@ class CDataLoaderSvmLight(CDataLoader):
         infos = None  # Return None if load_infos is False
         if load_infos is True:
             infos = []
-            with open(file_path, 'r') as f:
+            with open(file_path, 'rt') as f:
                 for l_idx, l in enumerate(f):
                     i = l.split(' # ')
                     if len(i) > 2:  # Line should have only one split point
