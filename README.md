@@ -108,10 +108,12 @@ All the installation procedures via `pip` described above allow definition of th
 
 ### Available extra components
   - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
-    Will install the following libraries: `torch == 0.4.*`, `torchvision >= 0.1.8`
+    Will install the following libraries: `torch >= 0.4.*`, `torchvision >= 0.1.8`
   - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
     a Python library to benchmark machine learning systems' vulnerability to adversarial examples.
-    Will install the following libraries: `tensorflow >= 1.5.*, < 2`, `cleverhans`
+    Will install the following libraries: `tensorflow >= 1.13.*, < 2`, `cleverhans`
+  - `tf-gpu` : Shortcut for installing `TensorFlow` package with GPU support.
+    Will install: `tensorflow-gpu >= 1.13.*, < 2`
 
 ## Usage Guide
 
