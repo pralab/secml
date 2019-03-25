@@ -79,7 +79,7 @@ class CMetric(CCreator):
                     self.class_type, p))
 
         # Clean any other kwarg passed and not required by the metric
-        for p in kwargs.keys():
+        for p in list(kwargs):
             if p not in metric_params:
                 kwargs.pop(p)
 

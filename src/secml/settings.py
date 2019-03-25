@@ -6,7 +6,6 @@
 
 """
 import os
-import locale
 from six.moves.configparser import \
     SafeConfigParser, NoSectionError, NoOptionError
 

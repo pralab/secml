@@ -147,7 +147,7 @@ class CDataLoaderDrebin(CDataLoader):
         feat_family_idx = CArray.empty(feat_family.size, dtype=int)
         for f_idx, feat_fam in enumerate(feat_family):
             fam_inv = FEAT_FAMILY_MAPPING_INVERTED[feat_fam]
-            feat_family_idx[f_idx] = FEAT_FAMILY_MAPPING.keys().index(fam_inv)
+            feat_family_idx[f_idx] = list(FEAT_FAMILY_MAPPING).index(fam_inv)
 
         self.logger.info(
             "Loading feats mappings from {:}".format(self.feat_mapping_path))
