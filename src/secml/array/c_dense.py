@@ -911,12 +911,14 @@ class CDense(_CArrayInterface):
         """
         if not isinstance(self.dtype, np.dtype):
             fmt = '%s'
-        elif issubclass(self.dtype.type, str):
+        elif np.issubdtype(self.dtype, np.character):
             fmt = '%s'
-        elif issubclass(self.dtype.type, int):
+        elif np.issubdtype(self.dtype, np.integer):
             fmt = '%d'
-        else:  # Everything else will be stored as float
+        elif np.issubdtype(self.dtype, np.floating):
             fmt = '%f'
+        else:  # Everything else will be stored as standard str
+            fmt = '%s'
 
         # We now check if input file already exists
         import os
@@ -949,7 +951,7 @@ class CDense(_CArrayInterface):
             Array row to start loading from.
         skipend : int, optional
             Number of lines to skip from the end of the file when reading.
-        cols : {CDense, int, tuple, slice}, optional
+        cols : {CDense, int, tuple}, optional
             Columns to load from target file.
 
         Returns
@@ -968,6 +970,7 @@ class CDense(_CArrayInterface):
                                                    skip_header=startrow,
                                                    skip_footer=skipend,
                                                    usecols=cols,
+                                                   loose=False,
                                                    encoding='utf-8')))
         except IOError as e:  # Handling standard IOError
             raise IOError(e)

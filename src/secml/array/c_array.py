@@ -1515,7 +1515,7 @@ class CArray(_CArrayInterface):
             Array row to start loading from.
         skipend : int, optional, dense only
             Number of lines to skip from the end of the file when reading.
-        cols : {CArray, int, tuple, slice}, optional, dense only
+        cols : {CArray, int, tuple}, optional, dense only
             Columns to load from target file.
 
         Returns
