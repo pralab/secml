@@ -73,4 +73,9 @@ class CConstraintL2(CConstraint):
 
     def _gradient(self, x):
         """Returns the gradient of the constraint function at x."""
-        return (x - self._center).ravel() / (x - self._center).norm(order=2)
+        sub = x - self._center
+
+        if sub.norm(order=2) == 0:
+            return sub.ravel()
+        else:
+            return sub.ravel()/(sub).norm(order=2)
