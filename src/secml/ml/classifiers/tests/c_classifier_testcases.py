@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.data import CDataset
 from secml.ml.features import CPreProcess

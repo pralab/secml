@@ -1,5 +1,5 @@
 from __future__ import division
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.array import CArray
 from secml.ml.peval.metrics import CRoc

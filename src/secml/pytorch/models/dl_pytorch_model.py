@@ -103,7 +103,7 @@ def dl_pytorch_model(ds_id, model_id):
 
 
 # UNITTESTS
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 
 class CTestDLPytorchModel(CUnitTest):

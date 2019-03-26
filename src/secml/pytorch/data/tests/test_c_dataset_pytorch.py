@@ -1,6 +1,6 @@
 import torch
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.data.loader import CDLRandomToy
 from secml.pytorch.data import CDatasetPyTorch
 

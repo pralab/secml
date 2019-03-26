@@ -8,7 +8,7 @@ This module tests the CDataset class.
 If you find any BUG, please notify authors first.
 
 """
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from six.moves import zip
 

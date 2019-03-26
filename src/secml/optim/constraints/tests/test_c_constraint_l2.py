@@ -1,25 +1,43 @@
-from secml.utils import CUnitTest
-from secml.optim.constraints.tests.test_c_constraint import CConstraintTestCases
+"""
+Created on 27/apr/2015
 
-from secml.optim.constraints import CConstraintL2
+@author: davidemaiorca
+"""
+import unittest
+from secml.testing import CUnitTest
+
+from secml.data import CDataset
+from sklearn import datasets
+from secml.optim.constraints import CConstraint, CConstraintL2
 
 
-class TestConstraintL2(CConstraintTestCases.TestCConstraint):
-    """Test the L2 distance constraint."""
+class TestCConstraintBox(CUnitTest):
+    """Unit test for CKernelLinear."""
 
-    def _constr_creation(self):
-        center = 0
-        radius = 1
-        self._constr = CConstraintL2(center=center, radius=radius)
+    def setUp(self):
+        # TODO: create class in our lib to wrap artificial data generators
+        patterns, labels = datasets.make_classification(n_features=2,
+                                                        n_redundant=0,
+                                                        n_informative=1,
+                                                        n_clusters_per_class=1)
 
-    def _set_constr_name(self):
-        self._constr_name = 'L2'
+        self.dataset = CDataset(patterns, labels)
+        self.constraint = CConstraintL2()
+           
+    def test_instantiation(self):
+        """Test constraint instantiation."""
+        self.logger.info("Testing CConstraintBox instantiation method")
+        self.assertEqual(CConstraint.create('l2').__class__.__name__,
+                         self.constraint.__class__.__name__)
 
-    def _set_norm_order(self):
-        """
-        Set the distance on which the constrain is computed
-        """
-        self._norm_order = 2
+    def test_projection(self):
+        """Test projection onto feasible box."""
+        # FIXME: This test should also verify something...
+        self.logger.info("Testing projection on box")
+        self.logger.info(self.dataset.X[0, :])
+        self.logger.info(self.constraint.constraint(self.dataset.X))
+        self.logger.info(self.constraint.projection(self.dataset.X[0, :]))
+        self.logger.info(self.constraint.constraint(self.dataset.X[0, :]))
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    unittest.main()

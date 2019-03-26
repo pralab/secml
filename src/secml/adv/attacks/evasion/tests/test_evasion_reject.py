@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 import six
 from six.moves import range
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml import _NoValue
 from secml.adv.attacks.evasion import CAttackEvasion

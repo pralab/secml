@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from six.moves import range
 import sklearn.metrics as skm

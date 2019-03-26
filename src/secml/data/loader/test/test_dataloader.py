@@ -1,5 +1,5 @@
 import unittest
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.data.loader import CDataLoader
 

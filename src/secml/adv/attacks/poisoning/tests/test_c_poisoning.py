@@ -1,7 +1,7 @@
 from abc import ABCMeta
 import six
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.data.loader import CDLRandomBlobs
 from secml.data.splitter import CDataSplitterShuffle
 from secml.ml.features.normalization import CNormalizerMinMax

@@ -5,7 +5,7 @@ Class to test CFigure
 @author: Ambra Demontis
 
 """
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.array import CArray
 from secml.data import CDataset

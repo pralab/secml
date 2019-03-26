@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.ml.classifiers.loss import CLossCrossEntropy
 from secml.data.loader import CDLRandom

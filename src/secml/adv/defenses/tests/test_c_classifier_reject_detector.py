@@ -1,7 +1,7 @@
 import os
 from six.moves import range
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.ml.classifiers.reject.tests import CClassifierRejectTestCases
 
 from secml.adv.attacks import CAttackEvasion
