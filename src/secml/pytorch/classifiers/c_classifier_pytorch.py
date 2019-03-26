@@ -705,7 +705,7 @@ class CClassifierPyTorch(CClassifier):
             for batch_idx, (x, y) in enumerate(ds_loader):
 
                 if use_cuda is True:
-                    x, y = x.cuda(), y.cuda(async=True)
+                    x, y = x.cuda(), y.cuda()
                 x, y = Variable(x, requires_grad=True), Variable(y)
 
                 # As y have shape [N, 1, C], squeeze them
