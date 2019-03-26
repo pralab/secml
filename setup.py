@@ -12,6 +12,11 @@ def read(*path_parts):
         return fp.read().strip()
 
 
+def parse_readme(*path_parts):  # For README.md we accept utf-8 chars
+    with open(os.path.join(here, *path_parts), 'r', encoding='utf-8') as fp:
+        return fp.read().strip()
+
+
 # Return the git revision as a string
 # Thanks to Numpy GitHub: https://github.com/numpy/numpy
 def git_version():
@@ -117,7 +122,7 @@ def install_deps():
 
 REQ_PKGS, DEP_LINKS = install_deps()
 
-LONG_DESCRIPTION = read('README.md')
+LONG_DESCRIPTION = parse_readme('README.md')
 
 # List of classifiers: https://pypi.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = """\
@@ -128,6 +133,10 @@ License :: OSI Approved
 Programming Language :: Python
 Programming Language :: Python :: 2
 Programming Language :: Python :: 2.7
+Programming Language :: Python :: 3
+Programming Language :: Python :: 3.5
+Programming Language :: Python :: 3.6
+Programming Language :: Python :: 3.7
 Programming Language :: Python :: Implementation :: PyPy
 Topic :: Software Development
 Topic :: Scientific/Engineering

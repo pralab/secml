@@ -14,8 +14,8 @@ It comes with a set of powerful features:
 ### SecML is currently in development. If you encounter any bug, please report them using the GitLab issue tracker.
 
 [![Status DEV](https://img.shields.io/badge/status-dev-red.svg)]()
-[![Python 2.7](https://img.shields.io/badge/python-2.7-brightgreen.svg)]()
-[![Platform MacOS | Linux](https://img.shields.io/badge/platform-macos%20%7C%20linux-lightgrey.svg)]()
+[![Python 2.7 | 3.5 | 3.6 | 3.7](https://img.shields.io/badge/python-2.7%20%7C%203.5%20%7C%203.6%20%7C%203.7-brightgreen.svg)]()
+[![Platform Linux | MacOS ](https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey.svg)]()
 [![GNU GPLv3](https://img.shields.io/badge/license-GPL%20(%3E%3D%203)-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## Installation Guide
@@ -27,14 +27,15 @@ As generally recommended for any Python project, SecML should be installed
  procedure.
 
 ### Operating System requirements
-Depending on the Operating System (OS), few libraries must be installed before SecML
-and its dependencies. Most of them are provided by default on common distributions, but 
-we provide a list of required package for each OS for convenience:
+SecML can run under Python 2.7 and Python >= 3.5 with no configuration steps required, 
+as ll its dependencies are available as wheel packages for the main macOS and Linux 
+distributions.
+However, to support additional advanced features more packages can be necessary 
+depending on the Operating System used:
 - Linux (Ubuntu >= 16.04):
-   - `python-dev python-pip wget build-essential pkg-config gfortran libatlas-base-dev libffi-dev libssl-dev`
-   - For full `matplotlib` support: `python-tk libpng-dev libgif-dev libjpeg8-dev libtiff5-dev libpng12-dev libfreetype6-dev`
+   - `python-tk` (Python 2.7), `python3-tk` (Python >= 3.5). For running Matplotlib Tk-based backends;
+   - NVIDIA® CUDA® Toolkit for running `tf-gpu` [extra component](#extra-components). See https://www.tensorflow.org/install/gpu
 - MacOS: **TODO**
-- Windows: **TODO**
 
 ### Installation process
 
@@ -108,11 +109,11 @@ All the installation procedures via `pip` described above allow definition of th
 
 ### Available extra components
   - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
-    Will install the following libraries: `torch >= 0.4.*`, `torchvision >= 0.1.8`
+    Will install: `torch >= 0.4.*`, `torchvision >= 0.1.8`
   - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
-    a Python library to benchmark machine learning systems' vulnerability to adversarial examples.
-    Will install the following libraries: `tensorflow >= 1.13.*, < 2`, `cleverhans`
-  - `tf-gpu` : Shortcut for installing `TensorFlow` package with GPU support.
+    a Python library to benchmark machine learning systems' vulnerability to adversarial examples.  
+    Will install: `tensorflow >= 1.13.*, < 2`, `cleverhans`
+  - `tf-gpu` : Shortcut for installing `TensorFlow` package with GPU support.  
     Will install: `tensorflow-gpu >= 1.13.*, < 2`
 
 ## Usage Guide
