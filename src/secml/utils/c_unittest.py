@@ -12,6 +12,7 @@ import numpy as np
 import numpy.testing as npt
 
 from secml.utils import CLog
+from secml.settings import SECML_STORE_LOGS
 
 
 class CUnitTest(unittest.TestCase):
@@ -32,9 +33,12 @@ class CUnitTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        # TODO: MAKE FILE PATH/NAME DYNAMIC
-        cls._logger = CLog(logger_id='unittest', add_stream=True,
-                           file_handler='unittest.log')
+        # Unittests logs will be stored in a `unittests.log` file
+        # in the same directory of the calling unittest.
+        # Use `store_logs=True` in configuration file to activate this
+        cls._logger = CLog(
+            logger_id='unittest', add_stream=True,
+            file_handler='unittests.log' if SECML_STORE_LOGS is True else None)
         cls._logger.set_level('DEBUG')
 
     def timer(self):
