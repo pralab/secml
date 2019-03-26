@@ -161,7 +161,7 @@ class CConstraintTestCases(object):
             gradient = self._constr.gradient(p)
             num_gradient = CFunction(self._constr.constraint,
                                      self._constr.gradient).approx_fprime(
-                self._p1_inside, 1e-8)
+                p, 1e-8)
             error = (gradient - num_gradient).norm(order=2)
             self.logger.info("Compute the gradient for the point {:}".format(
                 str(p)))
