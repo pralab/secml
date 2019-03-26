@@ -1,5 +1,5 @@
 import unittest
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.figure.c_figure import CFigure
 from secml.data.selection import CPrototypesSelector

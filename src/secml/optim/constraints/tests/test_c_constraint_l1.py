@@ -6,7 +6,7 @@ Created on 27/apr/2015
 This module provides the test for the CConstraintL1
 """
 import unittest
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.array import CArray
 from secml.figure import CFigure

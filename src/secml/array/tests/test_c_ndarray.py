@@ -1,4 +1,5 @@
-from secml.utils import CUnitTest, fm
+from secml.testing import CUnitTest
+from secml.utils import fm
 from secml.array.c_dense import CDense
 
 import numpy as np

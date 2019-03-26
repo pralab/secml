@@ -1,7 +1,8 @@
 from __future__ import print_function
 import numpy as np
 
-from secml.utils import CUnitTest, fm
+from secml.testing import CUnitTest
+from secml.utils import fm
 from secml.array.c_dense import CDense
 from secml.array.c_sparse import CSparse
 

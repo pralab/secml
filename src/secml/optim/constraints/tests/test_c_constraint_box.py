@@ -7,7 +7,7 @@ This class implements tests for the CConstraintBox
 
 """
 import unittest
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.data import CDataset
 from secml.data.loader import CDataLoader

@@ -4,7 +4,7 @@ Created on 27/apr/2015
 @author: davidemaiorca
 """
 import unittest
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.data import CDataset
 from sklearn import datasets

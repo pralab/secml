@@ -4,7 +4,7 @@ from secml.data import CDataset
 from secml.array import CArray
 from secml.data.splitter import *
 from secml.data.loader import CDLRandom
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 
 class TestCDataSplitter(CUnitTest):

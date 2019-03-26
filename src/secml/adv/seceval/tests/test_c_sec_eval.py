@@ -12,7 +12,7 @@ TODO: Add assertEqual statements to check the correctness of the test
 from abc import ABCMeta, abstractmethod
 import six
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.adv.seceval import CSecEval
 from secml.data.loader import CDLRandomBlobs
 from secml.figure import CFigure

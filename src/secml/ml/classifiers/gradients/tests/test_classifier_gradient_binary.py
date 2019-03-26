@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.ml.classifiers.gradients.tests import \
     CClassifierGradientTestCases, binary_clf_creation

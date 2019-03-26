@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.ml.peval.metrics import CMetric
 from secml.array import CArray

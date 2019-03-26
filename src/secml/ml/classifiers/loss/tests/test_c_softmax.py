@@ -4,7 +4,7 @@ from secml.ml.classifiers import CClassifierSVM
 from secml.ml.classifiers.loss.c_softmax import CSoftmax
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.optim.function import CFunction
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 
 class TestCSoftmax(CUnitTest):

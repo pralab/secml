@@ -1,7 +1,7 @@
 from __future__ import division
 from six.moves import range
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.explanation import CExplainerLocalInfluence
 from secml.array import CArray

@@ -1,5 +1,4 @@
 from .c_log import CLog, CTimer
-from .c_unittest import CUnitTest
 from . import c_file_manager as fm
 # Utility collections
 from .mixed_utils import OrderedFlexibleClass

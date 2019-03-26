@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.pytorch.normalization import CNormalizerPyTorch
 from secml.pytorch.classifiers import CClassifierPyTorchMLP
