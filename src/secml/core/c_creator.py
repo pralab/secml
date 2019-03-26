@@ -9,6 +9,7 @@ from importlib import import_module
 from inspect import isclass, getmembers
 from functools import wraps
 
+from secml.settings import SECML_STORE_LOGS, SECML_LOGS_PATH
 from secml.core.attr_utils import is_public, extract_attr, \
     as_public, as_private, get_private
 from secml.core.type_utils import is_str
@@ -31,11 +32,13 @@ class CCreator(object):
         Can be None to explicitly NOT support `.create()` and `.load()`.
 
     """
-    __class_type = None  # This attribute must be re-defined to support `.create()`
-    __super__ = None  # Leaving this None will make `create` and `load` not supported
+    __class_type = None  # Must be re-defined to support `.create()`
+    __super__ = None  # Name of the superclass (if `.create()` or `.load()` should be available)
 
-    # TODO: MAKE FILE PATH/NAME DYNAMIC
-    _logger = CLog(add_stream=True, file_handler='logs.log')  # Ancestor logger, level 'WARNING' by default
+    # Ancestor logger, level 'WARNING' by default
+    _logger = CLog(
+        add_stream=True,
+        file_handler=SECML_LOGS_PATH if SECML_STORE_LOGS is True else None)
 
     @property
     def class_type(self):

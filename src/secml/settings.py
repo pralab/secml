@@ -13,7 +13,8 @@ from secml.utils import fm, CLog
 
 
 __all__ = ['SECML_HOME_DIR', 'SECML_CONFIG',
-           'SECML_EXP_DIR', 'SECML_DS_DIR']
+           'SECML_EXP_DIR', 'SECML_DS_DIR',
+           'SECML_STORE_LOGS', 'SECML_LOGS_DIR', 'SECML_LOGS_FILENAME']
 
 
 def parse_config(conf_files, section, parameter, default=None, dtype=None):
@@ -158,9 +159,9 @@ This is set by default to:
     * Windows -> ($HOME, $USERPROFILE, $HOMEPATH, $HOMEDRIVE)/secml-data'
 
 """
-SECML_HOME_DIR = _parse_env('SECML_HOME_DIR',
-                            default=os.path.join(os.path.expanduser('~'),
-                                                 'secml-data'))
+SECML_HOME_DIR = _parse_env(
+    'SECML_HOME_DIR',
+    default=os.path.join(os.path.expanduser('~'), 'secml-data'))
 if not fm.folder_exist(SECML_HOME_DIR):
     # Creating the home directory if not already available
     fm.make_folder(SECML_HOME_DIR)
@@ -230,7 +231,7 @@ SECML_CONFIG = _config_fpath()
 # [SECML] #
 # ------- #
 
-"""Main directory for storing datasets, subdirectory of SECML_HOME_DIR.
+"""Main directory for storing datasets.
 
 This is set by default to: 'SECML_HOME_DIR/datasets'
 
@@ -240,7 +241,7 @@ SECML_DS_DIR = _parse_env_config(
     dtype=str, default=os.path.join(SECML_HOME_DIR, 'datasets')
 )
 
-"""Main directory of experiments data, subdirectory of SECML_HOME_DIR.
+"""Main directory of experiments data.
 
 This is set by default to: 'SECML_HOME_DIR/experiments'
 
@@ -248,4 +249,30 @@ This is set by default to: 'SECML_HOME_DIR/experiments'
 SECML_EXP_DIR = _parse_env_config(
     'SECML_EXP_DIR', SECML_CONFIG, 'secml', 'exp_dir',
     dtype=str, default=os.path.join(SECML_HOME_DIR, 'experiments')
+)
+
+# ------------ #
+# [SECML:LOGS] #
+# ------------ #
+
+"""Whether to store logs to file. Default False."""
+SECML_STORE_LOGS = _parse_env_config(
+    'SECML_STORE_LOGS', SECML_CONFIG, 'secml:logs', 'store_logs',
+    dtype=bool, default=False
+)
+
+"""Directory where logs will be stores.
+
+This is set by default to: 'SECML_HOME_DIR/logs'
+
+"""
+SECML_LOGS_DIR = _parse_env_config(
+    'SECML_LOGS_DIR', SECML_CONFIG, 'secml:logs', 'logs_dir',
+    dtype=str, default=os.path.join(SECML_HOME_DIR, 'logs')
+)
+
+"""Name of the logs file on disk. Default: 'logs.log'."""
+SECML_LOGS_FILENAME = _parse_env_config(
+    'SECML_LOGS_FILENAME', SECML_CONFIG, 'secml:logs', 'logs_filename',
+    dtype=str, default='logs.log'
 )
