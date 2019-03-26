@@ -4,10 +4,8 @@ import subprocess
 from pkg_resources import parse_version
 
 from ._globals import _NoValue
-from .settings import SECML_CONFIG
 
-
-__all__ = ['_NoValue', 'SECML_CONFIG', '__version__']
+__all__ = ['_NoValue', '__version__']
 
 
 _here = os.path.abspath(os.path.dirname(__file__))
