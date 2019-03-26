@@ -7,7 +7,3 @@ Pillow
 requests
 # For python 2/3 compatibility
 six
-
-# Unittests requirements
-pytest >= 4.2
-pytest-cov >= 2.6.1
