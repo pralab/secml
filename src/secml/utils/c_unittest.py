@@ -78,7 +78,7 @@ class CUnitTest(unittest.TestCase):
     assert_array_max_ulp.__doc__ = npt.assert_array_max_ulp.__doc__
 
     # AssertionError if two objects are not equal up to desired tolerance
-    def assert_allclose(self, actual, desired, rtol=1e-7, atol=0,
+    def assert_allclose(self, actual, desired, rtol=1e-6, atol=0,
                         equal_nan=True, err_msg='', verbose=True):
         actual = actual.tondarray() if hasattr(actual, 'tondarray') else actual
         des = desired.tondarray() if hasattr(desired, 'tondarray') else desired
@@ -88,7 +88,7 @@ class CUnitTest(unittest.TestCase):
 
     # AssertionError if two items are not equal up to significant digits.
     def assert_approx_equal(
-            self, actual, desired, significant=7, err_msg='', verbose=True,):
+            self, actual, desired, significant=6, err_msg='', verbose=True,):
         actual = actual.tondarray() if hasattr(actual, 'tondarray') else actual
         des = desired.tondarray() if hasattr(desired, 'tondarray') else desired
         return npt.assert_approx_equal(
