@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from math import acos
 
 from numpy import *
 
@@ -174,17 +175,56 @@ class CConstraintTestCases(object):
             self.assertLess(error, 1e-3, "the gradient function of the "
                                          "constraint object does not work")
 
+        def _l1_subgradient_check(self):
+            """
+            Check if the subgradient is computed correctly (if it lies in
+            the cone made up by the subgradients).
+
+            Parameters
+            ----------
+            p the point on which the gradient is computed
+            """
+            center = CArray([0, 1])
+
+            p_min = CArray([1, 1])
+            p_max = CArray([-1, 1])
+
+            gradient = self._constr.gradient(center)
+
+            # normalize the points
+            norm_center = center / center.norm(2)
+            norm_p_min = p_min / p_min.norm(2)
+            norm_p_max = p_max / p_max.norm(2)
+            norm_gradient = gradient / gradient.norm(2)
+
+            angl1 = round(acos(norm_center.dot(norm_gradient)), 5)
+            angl2 = round(acos(norm_p_min.dot(norm_p_max)) / 2.0, 5)
+
+            self.logger.info("The computed subgradient for the point {:} is "
+                             "{:} which should stay in the cone between {:} "
+                             "and {:}".format(center, gradient, p_min, p_max))
+
+            self.logger.info("The angle between the computed gradient and "
+                             "the center of the cone is {:} whereas the "
+                             "half angle of the subgradient cone is {"
+                             ":}".format(angl1, angl2))
+
+            self.assertLessEqual(angl1, angl2,
+                                 "The computed gradient is not inside the cone of the subtradients")
+
         def test_gradient(self):
             """
             Test the gradient of the constraint function
             """
             # Compare the analytical grad with the numerical grad
 
-            if self._constr.class_type != 'L-inf':
+            if self._constr.class_type != 'box':
                 self._grad_comparation(self._p1_inside)
                 self._grad_comparation(self._p2_outside)
-            if self._constr.class_type != 'l1':
-                self._grad_comparation(self._p3_on)
+                if self._constr.class_type != 'l1':
+                    self._grad_comparation(self._p3_on)
+                else:
+                    self._l1_subgradient_check()
 
         def test_projection(self):
             """
