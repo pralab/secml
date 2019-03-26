@@ -20,7 +20,7 @@ class CConstraintTestCases(object):
         _fun_value_p_out_str = _fun_value_str + "for a point outside the " \
                                                 "constraint"
         _fun_value_p_on_str = _fun_value_str + "for a point on the " \
-                                                "constraint"
+                                               "constraint"
 
         @abstractmethod
         def _constr_creation(self):
@@ -62,10 +62,9 @@ class CConstraintTestCases(object):
             self.logger.info(self._fun_value_p_in_str.format(fun_name,
                                                              v_in))
             self.logger.info(self._fun_value_p_out_str.format(fun_name,
-                                                             v_out))
+                                                              v_out))
             self.logger.info(self._fun_value_p_on_str.format(fun_name,
                                                              v_on))
-
 
         def test_is_active(self):
             """
@@ -78,7 +77,8 @@ class CConstraintTestCases(object):
             p3_active = self._constr.is_active(self._p3_on)
 
             fun_name = '`is_active`'
-            self._print_funct_outputs(fun_name, p1_active, p2_active, p3_active)
+            self._print_funct_outputs(fun_name, p1_active, p2_active,
+                                      p3_active)
 
             self.assertLessEqual(p1_active, False, "The point lies "
                                                    "inside the constraint, therefore the value of the funciton `is_"
@@ -150,25 +150,40 @@ class CConstraintTestCases(object):
                                         "therefore the value of the constraint "
                                         "function should be equal to zero")
 
+        def _grad_comparation(self, p):
+            """
+            Compare the analytical with the numerical gradient.
+
+            Parameters
+            ----------
+            p the point on which the gradient is computed
+            """
+            gradient = self._constr.gradient(p)
+            num_gradient = CFunction(self._constr.constraint,
+                                     self._constr.gradient).approx_fprime(
+                self._p1_inside, 1e-8)
+            error = (gradient - num_gradient).norm(order=2)
+            self.logger.info("Compute the gradient for the point {:}".format(
+                str(p)))
+            self.logger.info("Analitic gradient {:}".format(str(gradient)))
+            self.logger.info(
+                "Numerical gradient {:}".format(str(num_gradient)))
+
+            self.logger.info(
+                "norm(grad - num_grad): %s", str(error))
+            self.assertLess(error, 1e-3, "the gradient function of the "
+                                         "constraint object does not work")
+
         def test_gradient(self):
             """
             Test the gradient of the constraint function
             """
             # Compare the analytical grad with the numerical grad
-            if self._constr_name != 'L-inf':
-                gradient = self._constr.gradient(self._p1_inside)
-                num_gradient = CFunction(self._constr.constraint,
-                                         self._constr.gradient).approx_fprime(
-                    self._p1_inside, 1e-8)
-                error = (gradient - num_gradient).norm(order=2)
-                self.logger.info("Analitic gradient {:}".format(str(gradient)))
-                self.logger.info(
-                    "Numerical gradient {:}".format(str(num_gradient)))
 
-                self.logger.info(
-                    "norm(grad - num_grad): %s", str(error))
-                self.assertLess(error, 1e-3, "the gradient function of the "
-                                             "constraint object does not work")
+            if self._constr_name != 'L-inf':
+                self._grad_comparation(self._p1_inside)
+                self._grad_comparation(self._p2_outside)
+                self._grad_comparation(self._p3_on)
 
         def test_projection(self):
             """
@@ -205,11 +220,10 @@ class CConstraintTestCases(object):
             self.assertLess(error, 1e-3, "the projection function is not "
                                          "working correclty")
 
-
             pout_proj = self._constr.projection(self._p2_outside)
             self.logger.info(
                 "projected point {:}".format(pout_proj))
-            center = CArray([0,0])
+            center = CArray([0, 0])
             proj_dist = (pout_proj - center).norm(order=self._norm_order)
             self.logger.info(
                 "The radius of the constraint is: %s",
@@ -218,12 +232,13 @@ class CConstraintTestCases(object):
                 "The distance of the projected point from the center is: %s",
                 str(proj_dist))
             self.assertAlmostEqual(
-                proj_dist, self._constr.radius,  msg="The distance of "
-                                                          "the "
-                                                   "projected "
-                                         "point is "
-                                "different from the "
-                "constraint radius", places=2)
+                proj_dist, self._constr.radius, msg="The distance of "
+                                                    "the "
+                                                    "projected "
+                                                    "point is "
+                                                    "different from the "
+                                                    "constraint radius",
+                places=2)
 
         def setUp(self):
             self._constr_creation()
