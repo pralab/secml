@@ -36,7 +36,7 @@ class CConstraintTestCases(object):
 
         def _create_test_points(self):
             # create a point that lies inside the constraint
-            self._p1_inside = CArray([0, 0])
+            self._p1_inside = CArray([0.1, 0.1])
             # create a point that lies outside the constraint
             self._p2_outside = CArray([2, 2])
             # create a point that lies on the constraint
