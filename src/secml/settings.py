@@ -6,15 +6,25 @@
 
 """
 import os
+import sys
+import shutil
 from six.moves.configparser import \
     SafeConfigParser, NoSectionError, NoOptionError
 
-from secml.utils import fm, CLog
+# Logger for this module only. Use `secml.utils.CLog` elsewhere
+import logging
+_logger = logging.getLogger(__name__)
+_logger.setLevel(logging.INFO)
+_logger_handle = logging.StreamHandler(sys.stdout)
+_logger_handle.setFormatter(logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+_logger.addHandler(_logger_handle)
 
 
 __all__ = ['SECML_HOME_DIR', 'SECML_CONFIG',
            'SECML_EXP_DIR', 'SECML_DS_DIR',
-           'SECML_STORE_LOGS', 'SECML_LOGS_DIR', 'SECML_LOGS_FILENAME']
+           'SECML_STORE_LOGS', 'SECML_LOGS_DIR',
+           'SECML_LOGS_FILENAME', 'SECML_LOGS_PATH']
 
 
 def parse_config(conf_files, section, parameter, default=None, dtype=None):
@@ -162,21 +172,20 @@ This is set by default to:
 SECML_HOME_DIR = _parse_env(
     'SECML_HOME_DIR',
     default=os.path.join(os.path.expanduser('~'), 'secml-data'))
-if not fm.folder_exist(SECML_HOME_DIR):
-    # Creating the home directory if not already available
-    fm.make_folder(SECML_HOME_DIR)
-    CLog(level='INFO', logger_id=__name__).info(
-        'New `SECML_HOME_DIR` created: {:}'.format(SECML_HOME_DIR))
+if not os.path.isdir(SECML_HOME_DIR):
+    os.makedirs(os.path.abspath(SECML_HOME_DIR))
+    _logger.info('New `SECML_HOME_DIR` created: {:}'.format(SECML_HOME_DIR))
 
 
 """Name of the configuration file (default `secml.conf`)."""
 SECML_CONFIG_FNAME = 'secml.conf'
-if not fm.file_exist(fm.join(SECML_HOME_DIR, SECML_CONFIG_FNAME)):
-    def_config = fm.normpath(fm.join(fm.abspath(__file__), SECML_CONFIG_FNAME))
-    home_config = fm.join(SECML_HOME_DIR, SECML_CONFIG_FNAME)
+if not os.path.isfile(os.path.join(SECML_HOME_DIR, SECML_CONFIG_FNAME)):
+    def_config = os.path.normpath(os.path.join(os.path.dirname(
+        os.path.abspath(__file__)), SECML_CONFIG_FNAME))
+    home_config = os.path.join(SECML_HOME_DIR, SECML_CONFIG_FNAME)
     # Copy the default config file to SECML_HOME_DIR if not already available
-    fm.copy_file(def_config, home_config)
-    CLog(level='INFO', logger_id=__name__).info(
+    shutil.copy(def_config, home_config)
+    _logger.info(
         'Default configuration file copied to: {:}'.format(home_config))
 
 
@@ -204,20 +213,21 @@ def _config_fpath():
 
     """
     def gen_candidates():
-        yield fm.join(os.getcwd(), SECML_CONFIG_FNAME)
+        yield os.path.join(os.getcwd(), SECML_CONFIG_FNAME)
         try:
             secml_config = os.environ['$SECML_CONFIG']
         except KeyError:
             pass
         else:
             yield secml_config
-            yield fm.join(secml_config, 'SECML_CONFIG_FNAME')
-        yield fm.join(SECML_HOME_DIR, SECML_CONFIG_FNAME)
-        yield fm.normpath(fm.join(fm.abspath(__file__), SECML_CONFIG_FNAME))
+            yield os.path.join(secml_config, 'SECML_CONFIG_FNAME')
+        yield os.path.join(SECML_HOME_DIR, SECML_CONFIG_FNAME)
+        yield os.path.normpath(os.path.join(os.path.dirname(
+            os.path.abspath(__file__)), SECML_CONFIG_FNAME))
 
     candidates = []
     for fname in gen_candidates():
-        if fm.file_exist(fname):
+        if os.path.isfile(fname):
             candidates.append(fname)
 
     return candidates
@@ -240,6 +250,9 @@ SECML_DS_DIR = _parse_env_config(
     'SECML_DS_DIR', SECML_CONFIG, 'secml', 'ds_dir',
     dtype=str, default=os.path.join(SECML_HOME_DIR, 'datasets')
 )
+if not os.path.isdir(SECML_DS_DIR):
+    os.makedirs(os.path.abspath(SECML_DS_DIR))
+    _logger.info('New `SECML_DS_DIR` created: {:}'.format(SECML_DS_DIR))
 
 """Main directory of experiments data.
 
@@ -250,6 +263,9 @@ SECML_EXP_DIR = _parse_env_config(
     'SECML_EXP_DIR', SECML_CONFIG, 'secml', 'exp_dir',
     dtype=str, default=os.path.join(SECML_HOME_DIR, 'experiments')
 )
+if not os.path.isdir(SECML_EXP_DIR):
+    os.makedirs(os.path.abspath(SECML_EXP_DIR))
+    _logger.info('New `SECML_EXP_DIR` created: {:}'.format(SECML_EXP_DIR))
 
 # ------------ #
 # [SECML:LOGS] #
@@ -270,9 +286,15 @@ SECML_LOGS_DIR = _parse_env_config(
     'SECML_LOGS_DIR', SECML_CONFIG, 'secml:logs', 'logs_dir',
     dtype=str, default=os.path.join(SECML_HOME_DIR, 'logs')
 )
+if not os.path.isdir(SECML_LOGS_DIR):
+    os.makedirs(os.path.abspath(SECML_LOGS_DIR))
+    _logger.info('New `SECML_LOGS_DIR` created: {:}'.format(SECML_LOGS_DIR))
 
 """Name of the logs file on disk. Default: 'logs.log'."""
 SECML_LOGS_FILENAME = _parse_env_config(
     'SECML_LOGS_FILENAME', SECML_CONFIG, 'secml:logs', 'logs_filename',
     dtype=str, default='logs.log'
 )
+
+# Full path to the logs file
+SECML_LOGS_PATH = os.path.join(SECML_LOGS_DIR, SECML_LOGS_FILENAME)
