@@ -80,13 +80,6 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
 
-    def _fun_args(self, x, *args):
-        return self.clf.decision_function(x, **args[0])
-
-    def _grad_args(self, x, *args):
-        """Wrapper needed as gradient_f_x have **kwargs"""
-        return self.clf.gradient_f_x(x, **args[0])
-
     def test_aspreprocess(self):
         """Test for normalizer used as preprocess."""
         from secml.ml.classifiers import CClassifierSVM
@@ -125,8 +118,8 @@ class TestCNormalizerPyTorch(CUnitTest):
             self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
 
             check_grad_val = CFunction(
-                self._fun_args, self._grad_args).check_grad(
-                x, ({'y': c}), epsilon=1e-1)
+                self.clf.decision_function, self.clf.gradient_f_x).check_grad(
+                    x, y=c, epsilon=1e-1)
             self.logger.info(
                 "norm(grad - num_grad): %s", str(check_grad_val))
             self.assertLess(check_grad_val, 1e-3)

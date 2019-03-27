@@ -66,21 +66,17 @@ class TestCSoftmax(CUnitTest):
             softmax = self.softmax.softmax(s).ravel()
             return softmax[y]
 
-        def _grad_wrapper(s, y):
-            return self.softmax.gradient(s, y)
-
         score = self.scores[0, :]
 
         for pos_label in (0, 1, 2):
             self.logger.info("POS_LABEL: {:}".format(pos_label))
 
             # real value of the gradient on x
-            grad = _grad_wrapper(score, pos_label)
+            grad = self.softmax.gradient(score, pos_label)
 
             self.logger.info("ANALITICAL GRAD: {:}".format(grad))
 
-            approx = CFunction(
-                _sigma_pos_label, _grad_wrapper).approx_fprime(
+            approx = CFunction(_sigma_pos_label).approx_fprime(
                 score, 1e-5, pos_label)
 
             self.logger.info("NUMERICAL GRADIENT: {:}".format(approx))

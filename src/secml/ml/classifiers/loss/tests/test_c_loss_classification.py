@@ -127,7 +127,7 @@ class TestCLossClassification(CUnitTest):
 
             check_grad_val = CFunction(
                 _loss_wrapper, _dloss_wrapper).check_grad(
-                score, loss_class, y_true)
+                score, 1e-8, loss=loss_class, true_labels=y_true)
             self.logger.info("Gradient difference between analytical svm "
                              "gradient and numerical gradient: %s",
                              str(check_grad_val))

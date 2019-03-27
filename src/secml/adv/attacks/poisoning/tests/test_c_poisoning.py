@@ -159,7 +159,8 @@ class CPoisoningTestCases(object):
             # Compare analytical gradient with its numerical approximation
             check_grad_val = CFunction(
                 self.poisoning._objective_function,
-                self.poisoning._objective_function_gradient).check_grad(xc)
+                self.poisoning._objective_function_gradient).check_grad(
+                    xc, epsilon=1e-8)
             self.logger.info("Gradient difference between analytical svm "
                              "gradient and numerical gradient: %s",
                              str(check_grad_val))
