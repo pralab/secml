@@ -1,12 +1,11 @@
 """
-C_constraint
-@author: Battista Biggio
-@author: Ambra Demontis
-@author: Paolo Russu
-This module contains the class for the L1 constraints
+.. module:: CConstraintL1
+   :synopsis: L1 Constraint
+
+.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-import numpy as np
 from secml.array import CArray
 from secml.optim.constraints import CConstraint
 
@@ -67,41 +66,32 @@ class CConstraintL1(CConstraint):
         """
         return float((x - self._center).norm(order=1) - self._radius)
 
-    # TODO: make tests
     def _gradient(self, x):
         return (x - self._center).ravel().sign()
 
     def _projection(self, x):
-        # TODO: Put mathematical expression here as comment
-        # TODO: remove ndarray-CArray conversions. Use only CArray
-        """ Compute the Euclidean projection on a L1-ball
+        """ Compute the Euclidean projection on a L1-ball.
+
         Solves the optimisation problem (using the algorithm from [1]):
             min_w 0.5 * || w - x ||_2^2 , s.t. || w ||_1 <= s
 
         Parameters
         ----------
-        x: (n,) numpy array,
-           n-dimensional vector to project
-
-        s: int, optional, default: 1,
-           radius of the L1-ball
+        x : CArray
+            1-Dimensional array.
 
         Returns
         -------
-        w: (n,) numpy array,
-           Euclidean projection of v on the L1-ball of radius s
+        w : CArray
+            Euclidean projection of v on the L1-ball of radius s.
 
         Notes
         -----
-        Solves the problem by a reduction to the positive simplex case
+        Solves the problem by a reduction to the positive simplex case.
 
-        See also
-        --------
-        euclidean_proj_simplex
         """
         s = float(self._radius)
         v = (x - self._center).ravel()
-        n = v.size
         # compute the vector of absolute values
         u = abs(v)
         # check if v is already a solution
@@ -117,7 +107,7 @@ class CConstraintL1(CConstraint):
         return w + self._center
 
     def _euclidean_proj_simplex(self, v, s=1):
-        """ Compute the Euclidean projection on a positive simplex
+        """Compute the Euclidean projection on a positive simplex.
 
         Solves the optimisation problem (using the algorithm from [1]):
 
@@ -126,16 +116,16 @@ class CConstraintL1(CConstraint):
 
         Parameters
         ----------
-        v: (n,) numpy array,
-           n-dimensional vector to project
+        v : CArray
+            1-Dimensional vector
 
-        s: int, optional, default: 1,
-           radius of the simplex
+        s : int, optional
+            Radius of the simplex. Default 1.
 
         Returns
         -------
-        w: (n,) numpy array,
-           Euclidean projection of v on the simplex
+        w : CArray
+           Euclidean projection of v on the simplex.
 
         Notes
         -----
@@ -152,9 +142,8 @@ class CConstraintL1(CConstraint):
             and Tushar Chandra.
             International Conference on Machine Learning (ICML 2008)
             http://www.cs.berkeley.edu/~jduchi/projects/DuchiSiShCh08.pdf
-        """
-        assert s > 0, "Radius s must be strictly positive (%d <= 0)" % s
 
+        """
         v = CArray(v).ravel()
         d = v.size
         # check if we are already on the simplex

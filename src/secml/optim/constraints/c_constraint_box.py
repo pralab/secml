@@ -1,14 +1,12 @@
-'''
-C_constraint
-@author: Battista Biggio
+"""
+.. module:: CConstraintBox
+   :synopsis: Box constraint.
 
-This module contains the class for the Box constraint
+.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
-'''
-
+"""
 from secml.optim.constraints import CConstraint
 from secml.array import CArray
-from secml.core.type_utils import is_scalar
 from secml.core.constants import inf
 
 

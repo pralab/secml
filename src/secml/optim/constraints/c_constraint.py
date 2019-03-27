@@ -1,7 +1,7 @@
 """
-This module implements the generic constraint class
-Implements equality/inequality constraints in the canonic form
-    c(x) <= 0
+.. module:: CConstraint
+   :synopsis: Interface for equality/inequality constraints
+                in the canonic form c(x) <= 0
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
@@ -18,23 +18,6 @@ from secml.array import CArray
 class CConstraint(CCreator):
     """Abstract class that defines basic methods for constraints."""
     __super__ = 'CConstraint'
-
-    # This is not abstract as some constraints may not be differentiable
-    def _gradient(self, x):
-        """Returns the gradient of c(x) at x
-            x: a single sample
-        """
-        raise NotImplementedError()
-
-    @abstractmethod
-    def _projection(self, x):
-        """Project x onto feasible domain / within the given constraint.
-            x: a single sample
-
-            No need to check whether constraint is violated.
-            It's already done by projection(x)
-        """
-        raise NotImplementedError()
 
     def _is_active(self, x, tol=1e-4):
         """
@@ -160,6 +143,16 @@ class CConstraint(CCreator):
             constr[i] = self._constraint(x[i, :].ravel())
         return constr
 
+    @abstractmethod
+    def _projection(self, x):
+        """Project x onto feasible domain / within the given constraint.
+            x: a single sample
+
+            No need to check whether constraint is violated.
+            It's already done by projection(x)
+        """
+        raise NotImplementedError
+
     def projection(self, X):
         """
         Works either on a matrix, each row representing a data sample,
@@ -189,6 +182,13 @@ class CConstraint(CCreator):
                     raise RuntimeError(
                         "Projected x is outside of feasible domain!")
         return X
+
+    # This is not abstract as some constraints may not be differentiable
+    def _gradient(self, x):
+        """Returns the gradient of c(x) at x
+            x: a single sample
+        """
+        raise NotImplementedError
 
     def gradient(self, X):
         """

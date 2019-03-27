@@ -1,9 +1,8 @@
 """
-C_constraint
-@author: Battista Biggio
-@author: Paolo Russu
+.. module:: CConstraintL2
+   :synopsis: L2 Constraint
 
-This module contains the class for the L2 constraint
+.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
 """
 from secml.optim.constraints import CConstraint
@@ -68,14 +67,14 @@ class CConstraintL2(CConstraint):
 
     def _projection(self, x):
         """Project x onto the feasible domain."""
-        return self._center + self._radius * (x - self._center) / \
-            (x - self._center).norm()
+        sub = self._radius * (x - self._center)
+        sub_l2 = (x - self._center).norm(order=2)
+        if sub_l2 != 0:  # Avoid division by 0
+            sub /= sub_l2
+        return self._center + sub
 
     def _gradient(self, x):
         """Returns the gradient of the constraint function at x."""
-        sub = x - self._center
-
-        if sub.norm(order=2) == 0:
-            return sub.ravel()
-        else:
-            return sub.ravel()/(sub).norm(order=2)
+        sub = (x - self._center).ravel()
+        # Avoid division by 0
+        return sub if sub.norm() == 0 else sub / sub.norm()

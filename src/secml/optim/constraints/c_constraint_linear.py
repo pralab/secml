@@ -1,6 +1,6 @@
 """
-.. module:: LinearConstraint
-   :synopsis: Class that defines a linear constraint.
+.. module:: CConstraintLinear
+   :synopsis: Linear constraint.
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -71,5 +71,4 @@ class CConstraintLinear(CConstraint):
 
     def _projection(self, x):
         """Project x onto the convex polytope Ax-b <= 0."""
-        # TODO: come si fa ? :)
         raise NotImplementedError()
