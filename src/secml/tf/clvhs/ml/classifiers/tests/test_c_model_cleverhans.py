@@ -1,7 +1,7 @@
 import tensorflow as tf
 from six.moves import range
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.tf.clvhs.ml.classifiers import CModelCleverhans
 from secml.array import CArray
 from secml.data.loader import CDLRandom

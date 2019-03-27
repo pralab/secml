@@ -1,6 +1,6 @@
 from six.moves import range
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.array import CArray
 from secml.figure import CFigure

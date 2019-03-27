@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.adv.attacks.evasion.tests import CEvasionTestCases
 
 from secml.ml.classifiers import CClassifierSVM

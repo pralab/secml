@@ -323,7 +323,7 @@ def extract_attr(obj, mode):
 
 
 import unittest
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 
 class TestAttributeUtilities(CUnitTest):

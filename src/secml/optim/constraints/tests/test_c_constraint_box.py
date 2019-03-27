@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.optim.constraints.tests.test_c_constraint import CConstraintTestCases
 
 from secml.optim.constraints import CConstraintBox

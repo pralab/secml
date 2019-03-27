@@ -111,7 +111,7 @@ def md5(fname, blocksize=65536):
     return hash_md5.hexdigest()
 
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 class CTestDLUtils(CUnitTest):
 
     def test_md5(self):

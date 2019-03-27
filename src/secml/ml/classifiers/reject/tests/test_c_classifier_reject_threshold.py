@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.ml.classifiers.reject.tests import CClassifierRejectTestCases
 
 from secml.data.loader import CDLRandomBlobs

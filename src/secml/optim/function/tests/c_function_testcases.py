@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.figure import CFigure
 from secml.core.type_utils import is_scalar

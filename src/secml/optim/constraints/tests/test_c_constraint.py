@@ -3,7 +3,7 @@ from math import acos
 
 from numpy import *
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.figure import CFigure
 from secml.array import CArray
 from secml.optim.function import CFunction

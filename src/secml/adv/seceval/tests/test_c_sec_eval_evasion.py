@@ -8,7 +8,7 @@ This module tests the CSecEval class, which performs an attacks on
 a dataset w.r.t increasing attack power
 TODO: Add assertEqual statements to check the correctness of the test
 """
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.adv.seceval.tests import CSecEvalTestCases
 
 from secml.adv.attacks.evasion import CAttackEvasion
