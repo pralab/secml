@@ -50,14 +50,8 @@ class TestCLossCrossEntropy(CUnitTest):
 
     def test_grad(self):
         """Compare analytical gradients with its numerical approximation."""
-
-        def _loss_wrapper(scores, loss, true_labels, pos_l=None):
-            # Keeping pos_l in the signature as approx_fprime will try
-            # to pass the same parameters as the dloss wrapper
+        def _loss_wrapper(scores, loss, true_labels):
             return loss.loss(true_labels, scores)
-
-        def _dloss_wrapper(scores, loss, true_labels, pos_l):
-            return loss.dloss(true_labels, scores, pos_label=pos_l)
 
         loss_class = CLossCrossEntropy()
 
@@ -70,13 +64,12 @@ class TestCLossCrossEntropy(CUnitTest):
             self.logger.info("POS_LABEL: {:}".format(pos_label))
 
             # real value of the gradient on x
-            grad = _dloss_wrapper(score, loss_class, y_true, pos_label)
+            grad = loss_class.dloss(y_true, score, pos_label)
 
             self.logger.info("GRAD: {:}".format(grad))
 
-            approx = CFunction(
-                _loss_wrapper, _dloss_wrapper).approx_fprime(
-                score, eps, loss_class, y_true, pos_label)
+            approx = CFunction(_loss_wrapper).approx_fprime(
+                score, eps, loss_class, y_true)
             self.logger.info("APPROX (FULL): {:}".format(approx))
 
             pos_label = pos_label if pos_label is not None else y_true.item()
