@@ -1,5 +1,5 @@
 from secml.utils import CUnitTest
-from test_c_constraint import CConstraintTestCases
+from secml.optim.constraints.tests.test_c_constraint import CConstraintTestCases
 
 from secml.optim.constraints import CConstraintL1
 

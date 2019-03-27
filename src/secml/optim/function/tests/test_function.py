@@ -30,7 +30,7 @@ class TestCFunction(CFunctionTestCases):
             self.logger.info(
                 "Testing grad approx of {:}".format(fun.__class__.__name__))
 
-            grad_err = fun.check_grad(x0)
+            grad_err = fun.check_grad(x0, epsilon=1e-8)
 
             self.logger.info(
                 "(Real grad - approx).norm(): {:}".format(grad_err))
@@ -56,10 +56,14 @@ class TestCFunction(CFunctionTestCases):
         return CArray([0])
 
     def _fun_args(self, x, *args):
-        return self._fun_kwargs(x, **args[0])
+        if len(args) != 1 or args[0] != 1:
+            raise ValueError("Wrong args received: {:}".format(args))
+        return 1
 
     def _dfun_args(self, x, *args):
-        return self._dfun_kwargs(x, **args[0])
+        if len(args) != 1 or args[0] != 1:
+            raise ValueError("Wrong args received: {:}".format(args))
+        return CArray([0])
 
     def test_approx_fprime_check_param_passage(self):
         """Test the functions COptimizer.approx_fprime() and .check_grad()
@@ -81,7 +85,7 @@ class TestCFunction(CFunctionTestCases):
         fun = CFunction(fun=self._fun_2_params, gradient=self._dfun_2_params)
         self.logger.info("Testing check_grad")
 
-        grad_err = fun.check_grad(x0, 1)
+        grad_err = fun.check_grad(x0, epsilon, 1)
         self.logger.info("Grad error: {:}".format(grad_err))
         self.assertEqual(0, grad_err)
 
@@ -91,21 +95,39 @@ class TestCFunction(CFunctionTestCases):
         self.logger.info("Grad error: {:}".format(grad_err))
         self.assertEqual(0, grad_err)
 
-        self.logger.info(
-            "Testing when the function and the gradient have **kwargs "
-            " as second parameter")
+        self.logger.info("Testing fun/grad accepting only *args")
 
         fun = CFunction(fun=self._fun_args, gradient=self._dfun_args)
 
         self.logger.info("Testing check_grad ")
 
-        grad_err = fun.check_grad(x0, {'y': 1})
+        grad_err = fun.check_grad(x0, epsilon, 1)
         self.logger.info("Grad error: {:}".format(grad_err))
         self.assertEqual(0, grad_err)
 
         self.logger.info("Testing approx_fprime ")
 
-        grad_err = fun.approx_fprime(x0, epsilon, ({'y': 1}))
+        grad_err = fun.approx_fprime(x0, epsilon, 1)
+        self.logger.info("Grad error: {:}".format(grad_err))
+        self.assertEqual(0, grad_err)
+
+        # TypeError expected as `_fun_args` does not accept kwargs
+        with self.assertRaises(TypeError):
+            fun.approx_fprime(x0, epsilon, y=1)
+
+        self.logger.info("Testing fun/grad accepting only **kwargs")
+
+        fun = CFunction(fun=self._fun_kwargs, gradient=self._dfun_kwargs)
+
+        self.logger.info("Testing check_grad ")
+
+        grad_err = fun.check_grad(x0, epsilon, y=1)
+        self.logger.info("Grad error: {:}".format(grad_err))
+        self.assertEqual(0, grad_err)
+
+        self.logger.info("Testing approx_fprime ")
+
+        grad_err = fun.approx_fprime(x0, epsilon, y=1)
         self.logger.info("Grad error: {:}".format(grad_err))
         self.assertEqual(0, grad_err)
 
