@@ -187,7 +187,7 @@ class CFunction(CCreator):
         """Evaluates if function value is close to `val` within tol."""
         return True if abs(float(self.fun(x)) - val) <= tol else False
 
-    def approx_fprime(self, x, epsilon, *args):
+    def approx_fprime(self, x, epsilon, *args, **kwargs):
         """Finite-difference approximation of the gradient of a scalar function.
 
         Wrapper for scipy function :func:`scipy.optimize.approx_fprime`.
@@ -202,7 +202,7 @@ class CFunction(CCreator):
             If a scalar, uses the same finite difference delta for all partial
             derivatives.
             If an array, should contain one value per element of `x`.
-        *args : args, optional
+        *args, **kwargs : args, kwargs, optional
             Any other arguments that are to be passed to `fun`.
 
         Returns
@@ -238,8 +238,8 @@ class CFunction(CCreator):
         ...     return c0 * x[0]**2 + c1*x[1]**2
 
         >>> c0, c1 = (1, 200)
-        >>> CFunction(func).approx_fprime(CArray.ones(2), [eps, (200 ** 0.5) * eps], c0, c1)
-        CArray(2,)(dense: [   2.        400.000042])
+        >>> CFunction(func).approx_fprime(CArray.ones(2), [eps, (200 ** 0.5) * eps], c0, c1=c1)
+        CArray(2,)(dense: [  2.       400.000042])
 
         """
         if x.issparse is True or x.is_vector_like is False:
@@ -254,16 +254,16 @@ class CFunction(CCreator):
             isinstance(epsilon, CArray) else epsilon
 
         # approx_fprime expects a scalar as output of fun
-        def fun_ndarray(xk, *f_args):
-            out_fun = self.fun_ndarray(xk, *f_args)
+        def fun_ndarray(xk, f_args, f_kwargs):
+            out_fun = self.fun_ndarray(xk, *f_args, **f_kwargs)
             if isinstance(out_fun, CArray) and out_fun.size == 1:
                 return out_fun.item()  # return scalar
             return out_fun  # already scalar
 
-        return CArray(
-            sc_opt.approx_fprime(xk_ndarray, fun_ndarray, epsilon, *args))
+        return CArray(sc_opt.approx_fprime(
+            xk_ndarray, fun_ndarray, epsilon, args, kwargs))
 
-    def check_grad(self, x, *args, **epsilon):
+    def check_grad(self, x, epsilon, *args, **kwargs):
         """Check the correctness of a gradient function by comparing
          it against a (forward) finite-difference approximation of
          the gradient.
@@ -274,11 +274,11 @@ class CFunction(CCreator):
             Flat dense pattern to check function gradient against
             forward difference approximation of function gradient.
         epsilon : scalar or CArray
-            Increment to `x` to use for determining the function gradient.
+            Increment of `x` to use for determining the function gradient.
             If a scalar, uses the same finite difference delta for all partial
-            derivatives.  If an array, should contain one value per element of
-            `x`.
-        *args : *args, optional
+            derivatives.
+            If an array, should contain one value per element of `x`.
+        *args, **kwargs : args, kwargs, optional
             Extra arguments passed to `fun` and `fprime`.
 
         Returns
@@ -309,8 +309,8 @@ class CFunction(CCreator):
         ...     return CArray([2 * x[0].item(), -1.5 * x[1].item()**2])
 
         >>> fun = CFunction(func, grad)
-        >>> fun.check_grad(CArray([1.5, -1.5]))
-        2.9802322387695312e-08
+        >>> fun.check_grad(CArray([1.5, -1.5]), epsilon=1e-8)
+        7.817837928307533e-08
 
         """
         if x.issparse is True or x.is_vector_like is False:
@@ -318,15 +318,9 @@ class CFunction(CCreator):
 
         self._check_ndim(x)
 
-        # We now extract 'epsilon' if passed by the user
-        if 'epsilon' in epsilon:
-            epsilon = epsilon.pop('epsilon', eps)
-        else:
-            epsilon = eps
-
         # real value of the gradient on x
-        grad = self.gradient(x, *args)
+        grad = self.gradient(x, *args, **kwargs)
         # value of the approximated gradient on x
-        approx = self.approx_fprime(x, epsilon, *args)
+        approx = self.approx_fprime(x, epsilon, *args, **kwargs)
 
         return (grad - approx).norm()

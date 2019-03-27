@@ -1,1 +1,1 @@
-from test_c_constraint import CConstraintTestCases
+from .test_c_constraint import CConstraintTestCases

@@ -51,7 +51,7 @@ class TestKernelGradient(CUnitTest):
 
             grad_error = CFunction(
                 kern_f_for_test, kern_grad_for_test).check_grad(
-                self.p2_dense, self.p1_dense, kernel)
+                self.p2_dense, 1e-8, self.p1_dense, kernel)
 
             self.logger.info("error committed into own grad calc is {:}"
                              "".format(grad_error))
