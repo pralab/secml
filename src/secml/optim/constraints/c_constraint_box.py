@@ -5,6 +5,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
 """
+import numpy as np
 from secml.optim.constraints import CConstraint
 from secml.array import CArray
 from secml.core.constants import inf
@@ -144,6 +145,11 @@ class CConstraintBox(CConstraint):
             Point after projection.
 
         """
+        # If bound is float, ensure x is float
+        if np.issubdtype(self.ub.dtype, np.floating) or \
+                np.issubdtype(self.ub.dtype, np.floating):
+            x = x.astype(float)
+
         if self.ub.size == 1:  # Same ub for all the features
             x[x >= self._ub] = self._ub
         else:
