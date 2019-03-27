@@ -1,77 +1,79 @@
-"""
-Created on 27/apr/2015
-This class implements tests for the CConstraintBox
+from secml.optim.constraints.tests import CConstraintTestCases
 
-@author: Davide Maiorca
-@author: Battista Biggio
-
-"""
-import unittest
-from secml.testing import CUnitTest
-
-from secml.data import CDataset
-from secml.data.loader import CDataLoader
-from secml.array import CArray
-from secml.optim.constraints import CConstraint
 from secml.optim.constraints import CConstraintBox
-from secml.figure import CFigure
-from secml.utils import fm
+from secml.array import CArray
 
 
-class TestCConstraintBox(CUnitTest):
-    """Unit test for CConstraintBox."""
+class TestConstraintBox(CConstraintTestCases):
+    """Unittest for CConstraintBox."""
 
     def setUp(self):
-        """Sets up the test."""
-        self.logger.info("Generating training set... ")
-        self.filename = 'test_c_constraint_box.pdf'
-        loader = CDataLoader.create('blobs')
-        self.dataset = loader.load()
-        self.lb = [-1, -0.5]
-        self.ub = [1, 2]
-        self.constraint = CConstraintBox(lb=self.lb, ub=self.ub)
 
-    def test_instantiation(self):
-        """Test constraint instantiation."""
-        self.logger.info("Testing CConstraintBox instantiation method")
-        self.assertEqual(
-            CConstraint.create('box', self.lb, self.ub).__class__.__name__,
-            self.constraint.__class__.__name__)
+        self.c = CConstraintBox(lb=CArray([0, -0.5]), ub=1.5)
+
+        # create a point that lies inside the constraint
+        self.p1_inside = CArray([1., 1.])
+        # create a point that lies outside the constraint
+        self.p2_outside = CArray([2., 2.])
+        # create a point that lies on the constraint
+        self.p3_on = CArray([0., 1.])
+
+    def test_is_active(self):
+        """Test for CConstraint.is_active()."""
+        self._test_is_active(
+            self.c, self.p1_inside, self.p2_outside, self.p3_on)
+
+        # Test for sparse arrays
+        self._test_is_active(
+            self.c, self.p1_inside.tosparse(),
+            self.p2_outside.tosparse(), self.p3_on.tosparse())
+
+    def test_is_violated(self):
+        """Test for CConstraint.is_violated()."""
+        self._test_is_violated(
+            self.c, self.p1_inside, self.p2_outside, self.p3_on)
+
+        # Test for sparse arrays
+        self._test_is_active(
+            self.c, self.p1_inside.tosparse(),
+            self.p2_outside.tosparse(), self.p3_on.tosparse())
+
+    def test_constraint(self):
+        """Test for CConstraint.constraint()."""
+        self._test_constraint(
+            self.c, self.p1_inside, self.p2_outside, self.p3_on)
+
+        # Test for sparse arrays
+        self._test_constraint(
+            self.c, self.p1_inside.tosparse(),
+            self.p2_outside.tosparse(), self.p3_on.tosparse())
 
     def test_projection(self):
-        """Test projection onto feasible box."""
-        self.logger.info("Testing projection on box")
-        x = CArray(self.lb) - 1.0
-        self.assertTrue(self.constraint.is_violated(x))
-        x1 = self.constraint.projection(x)
-        self.assertFalse(self.constraint.is_violated(x1))
+        """Test for CConstraint.projection()."""
+        self._test_projection(self.c, self.p1_inside, self.p2_outside,
+                              self.p3_on, CArray([1.5, 1.5]))
 
-    def test_sparse(self):
-        """Test using sparse arrays."""
-        x = CArray(self.lb) - 1.0
-        x = x.tosparse()
-        self.assertTrue(self.constraint.is_violated(x))
+        # Test for sparse arrays
+        self._test_projection(
+            self.c, self.p1_inside.tosparse(),
+            self.p2_outside.tosparse(), self.p3_on.tosparse(),
+            CArray([1.5, 1.5], tosparse=True))
 
-        # try when lb and ub are scalars, and x is all zeros.
-        box = CConstraintBox(lb=-1, ub=1)
-        x = CArray([0, 0])
-        x = x.tosparse()
-        self.assertFalse(box.is_violated(x))
+        # Check sparse arrays and scalar ub/lb
+        # (corner case of sparse arrays as we cannot sub/add scalara)
+        c = CConstraintBox(lb=0, ub=1.5)
+        self._test_projection(
+            c, CArray([1., 1., 0.], tosparse=True),
+            CArray([2., 2., 0.], tosparse=True),
+            CArray([0., 1., 0.]).tosparse(),
+            CArray([1.5, 1.5, 0], tosparse=True))
 
-    def test_box_plot(self):
-        grid_limits = [(-3, 3), (-3, 3)]
-        fig = CFigure(height=6, width=6)
-        fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(func=self.constraint.constraint,
-                         grid_limits=grid_limits)
-        fig.sp.plot_fobj(func=self.constraint.constraint,
-                         plot_background=False,
-                         n_grid_points=50,
-                         grid_limits=grid_limits,
-                         levels=[0])
-        fig.savefig(fm.join(fm.abspath(__file__), self.filename),
-                    file_format='pdf')
+    def test_plot(self):
+        """Visualize the constraint."""
+        # Plotting constraint and "critical" points
+        self._test_plot(
+            self.c, self.p1_inside, self.p2_outside, self.p3_on)
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CConstraintTestCases.main()

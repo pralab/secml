@@ -1,290 +1,253 @@
-from abc import ABCMeta, abstractmethod
-from math import acos
-
-from numpy import *
-
 from secml.testing import CUnitTest
+
 from secml.figure import CFigure
 from secml.array import CArray
 from secml.optim.function import CFunction
+from secml.utils import fm
 
 
-class CConstraintTestCases(object):
-    """Wrapper for TestCConstraint to make unittest.main() work correctly."""
+class CConstraintTestCases(CUnitTest):
+    """Unittests interface for CConstraint."""
 
-    class TestCConstraint(CUnitTest):
-        """Unit test for CConstraint."""
-        __metaclass__ = ABCMeta
+    def _test_is_active(self, c, p_in=None, p_out=None, p_on=None):
+        """Test for CConstraint.is_active().
 
-        _fun_value_str = "The value of the function {:} is {:} "
-        _fun_value_p_in_str = _fun_value_str + "for a point inside the constraint"
-        _fun_value_p_out_str = _fun_value_str + "for a point outside the " \
-                                                "constraint"
-        _fun_value_p_on_str = _fun_value_str + "for a point on the " \
-                                               "constraint"
+        Parameters
+        ----------
+        c : CConstraint
+        p_in, p_out, p_on : CArray, optional
+            3 points could be passes. One point inside the constraint,
+            one point outside and one point on the constraint.
 
-        @abstractmethod
-        def _constr_creation(self):
-            raise NotImplementedError
+        """
+        self.logger.info("Testing `.is_active` method for: {:}".format(c))
 
-        @abstractmethod
-        def _set_constr_name(self):
-            raise NotImplementedError
+        def check_active(cons, point, expect):
+            res = cons.is_active(point)
+            self.assertEqual(expect, res)
 
-        @abstractmethod
-        def _set_norm_order(self):
-            raise NotImplementedError
+        if p_in is None and p_out is None and p_on is None:
+            raise ValueError("pass at least one point")
 
-        def _create_test_points(self):
-            # create a point that lies inside the constraint
-            self._p1_inside = CArray([0.2, 0.15])
-            # create a point that lies outside the constraint
-            self._p2_outside = CArray([2, 2])
-            # create a point that lies on the constraint
-            self._p3_on = CArray([0, 1])
+        if p_in is not None:
+            # This point is INSIDE, constraint should NOT be active
+            check_active(c, p_in, False)
+            check_active(c, p_in.astype(int), False)
 
-        def test_plot_constraint_visualization(self):
-            grid_limits = [(-3, 3), (-3, 3)]
-            fig = CFigure(height=6, width=6)
-            fig.switch_sptype(sp_type='function')
-            fig.sp.plot_fobj(func=self._constr.constraint,
-                             grid_limits=grid_limits)
-            fig.sp.plot_fobj(func=self._constr.constraint,
-                             plot_background=False,
-                             n_grid_points=40,
-                             grid_limits=grid_limits,
-                             levels=[0])
+        if p_out is not None:
+            # This point is OUTSIDE, constraint should NOT be active
+            check_active(c, p_out, False)
+            check_active(c, p_out.astype(int), False)
 
-            file_name = "test_{:}_constraint.pdf".format(self._constr_name)
+        if p_on is not None:
+            # This point is ON, constraint SHOULD BE active
+            check_active(c, p_on, True)
+            check_active(c, p_on.astype(int), True)
 
-            fig.savefig(file_name)
+    def _test_is_violated(self, c, p_in=None, p_out=None, p_on=None):
+        """Test for CConstraint.is_violated().
 
-        def _print_funct_outputs(self, fun_name, v_in, v_out, v_on):
-            self.logger.info(self._fun_value_p_in_str.format(fun_name,
-                                                             v_in))
-            self.logger.info(self._fun_value_p_out_str.format(fun_name,
-                                                              v_out))
-            self.logger.info(self._fun_value_p_on_str.format(fun_name,
-                                                             v_on))
+        Parameters
+        ----------
+        c : CConstraint
+        p_in, p_out, p_on : CArray, optional
+            3 points are required. One point inside the constraint,
+            one point outside and one point on the constraint.
 
-        def test_is_active(self):
-            """
-            Check the `is_active` function of the constraint object.
-            (It should return True if the point lies on the
-            constraint and False otherwise).
-            """
-            p1_active = self._constr.is_active(self._p1_inside)
-            p2_active = self._constr.is_active(self._p2_outside)
-            p3_active = self._constr.is_active(self._p3_on)
+        """
+        self.logger.info("Testing `.is_violated` method for: {:}".format(c))
 
-            fun_name = '`is_active`'
-            self._print_funct_outputs(fun_name, p1_active, p2_active,
-                                      p3_active)
+        def check_violated(cons, point, expect):
+            res = cons.is_violated(point)
+            self.assertEqual(expect, res)
 
-            self.assertLessEqual(p1_active, False, "The point lies "
-                                                   "inside the constraint, therefore the value of the funciton `is_"
-                                                   "active` should be False")
-            self.assertLessEqual(p2_active, False, "The point lies "
-                                                   "inside the constraint, "
-                                                   "therefore the value of the funciton `is_"
-                                                   "active` should be False")
-            self.assertLessEqual(p3_active, True, "The point lies "
-                                                  "on the constraint, "
-                                                  "therefore the value of "
-                                                  "the funciton `is_"
-                                                  "active` should be "
-                                                  "True")
+        if p_in is None and p_out is None and p_on is None:
+            raise ValueError("pass at least one point")
 
-        def test_is_violated(self):
-            """
-            Check the `is_violated` function of the constraint object.
-            (It should return True if the point lies outside the
-            constraint and False otherwise).
-            """
-            p1_violated = self._constr.is_violated(self._p1_inside)
-            p2_violated = self._constr.is_violated(self._p2_outside)
-            p3_violated = self._constr.is_violated(self._p3_on)
+        if p_in is not None:
+            # This point is INSIDE, constraint should NOT be violated
+            check_violated(c, p_in, False)
+            check_violated(c, p_in.astype(int), False)
 
-            fun_name = '`is_violated`'
-            self._print_funct_outputs(fun_name, p1_violated, p2_violated,
-                                      p3_violated)
+        if p_on is not None:
+            # This point is ON, constraint NOT be violated
+            check_violated(c, p_on, False)
+            check_violated(c, p_on.astype(int), False)
 
-            self.assertLessEqual(p1_violated, False, "The point lies "
-                                                     "inside the constraint "
-                                                     "therefore the value of the function `is_"
-                                                     "violated` should be False")
-            self.assertLessEqual(p2_violated, True, "The point lies "
-                                                    "inside the constraint "
-                                                    "therefore the value of the function `is_"
-                                                    "violated` should be True")
-            self.assertLessEqual(p3_violated, False, "The point lies "
-                                                     "on the constraint "
-                                                     "therefore the value of the function `is_"
-                                                     "violated` should be "
-                                                     "False")
+        if p_out is not None:
+            # This point is OUTSIDE, constraint SHOULD BE violated
+            check_violated(c, p_out, True)
+            check_violated(c, p_out.astype(int), True)
 
-        def test_constraint(self):
-            """
-            Check the `constraint` function of the constraint object.
-            (It should return True a positive value if point lies outside the
-            constraint, zero if it is lies on the contraint and a negative
-            value otherwise).
-            """
-            p1_out = self._constr.constraint(self._p1_inside)
-            p2_out = self._constr.constraint(self._p2_outside)
-            p3_out = self._constr.constraint(self._p3_on)
+    def _test_constraint(self, c, p_in=None, p_out=None, p_on=None):
+        """Test for CConstraint.constraint().
 
-            fun_name = '`constraint`'
-            self._print_funct_outputs(fun_name, p1_out, p2_out,
-                                      p3_out)
+        Parameters
+        ----------
+        c : CConstraint
+        p_in, p_out, p_on : CArray, optional
+            3 points are required. One point inside the constraint,
+            one point outside and one point on the constraint.
 
-            self.assertLess(p1_out, 0, "The point lies "
-                                       "inside the constraint "
-                                       "therefore the value of the constraint "
-                                       "function should be negative")
-            self.assertGreater(p2_out, 0, "The point lies "
-                                          "outside the constraint "
-                                          "therefore the value of the constraint "
-                                          "function should be positive")
-            self.assertEqual(p3_out, 0, "The point lies "
-                                        "on the constraint "
-                                        "therefore the value of the constraint "
-                                        "function should be equal to zero")
+        """
+        self.logger.info("Testing `.constraint` method for: {:}".format(c))
 
-        def _grad_comparation(self, p):
-            """
-            Compare the analytical with the numerical gradient.
-
-            Parameters
-            ----------
-            p the point on which the gradient is computed
-            """
-            gradient = self._constr.gradient(p)
-            num_gradient = CFunction(self._constr.constraint,
-                                     self._constr.gradient).approx_fprime(
-                p, 1e-8)
-            error = (gradient - num_gradient).norm(order=2)
-            self.logger.info("Compute the gradient for the point {:}".format(
-                str(p)))
-            self.logger.info("Analitic gradient {:}".format(str(gradient)))
-            self.logger.info(
-                "Numerical gradient {:}".format(str(num_gradient)))
+        def check_constraint(cons, point, expect):
+            res = cons.constraint(point)
 
             self.logger.info(
-                "norm(grad - num_grad): %s", str(error))
-            self.assertLess(error, 1e-3, "the gradient function of the "
-                                         "constraint object does not work")
+                ".constraint({:}): {:}".format(point, res))
 
-        def _l1_subgradient_check(self):
-            """
-            Check if the subgradient is computed correctly (if it lies in
-            the cone made up by the subgradients).
+            self.assertIsInstance(res, float)
 
-            Parameters
-            ----------
-            p the point on which the gradient is computed
-            """
-            center = CArray([0, 1])
+            if expect == 'equal':
+                self.assertEqual(0, res)
+            elif expect == 'less':
+                self.assertLess(res, 0)
+            elif expect == 'greater':
+                self.assertGreater(res, 0)
+            else:
+                raise ValueError(
+                    "values {'equal', 'less', 'greater'} for `expect`")
 
-            p_min = CArray([1, 1])
-            p_max = CArray([-1, 1])
+        if p_in is None and p_out is None and p_on is None:
+            raise ValueError("pass at least one point")
 
-            gradient = self._constr.gradient(center)
+        if p_in is not None:
+            # This point is INSIDE, constraint should be LESS then 0
+            check_constraint(c, p_in, 'less')
+            check_constraint(c, p_in.astype(int), 'less')
 
-            # normalize the points
-            norm_center = center / center.norm(2)
-            norm_p_min = p_min / p_min.norm(2)
-            norm_p_max = p_max / p_max.norm(2)
-            norm_gradient = gradient / gradient.norm(2)
+        if p_out is not None:
+            # This point is OUTSIDE, constraint should be GREATER then 0
+            check_constraint(c, p_out, 'greater')
+            check_constraint(c, p_out.astype(int), 'greater')
 
-            angl1 = round(acos(norm_center.dot(norm_gradient)), 5)
-            angl2 = round(acos(norm_p_min.dot(norm_p_max)) / 2.0, 5)
+        if p_on is not None:
+            # This point is ON, constraint should be EQUAL to 0
+            check_constraint(c, p_on, 'equal')
+            check_constraint(c, p_on.astype(int), 'equal')
 
-            self.logger.info("The computed subgradient for the point {:} is "
-                             "{:} which should stay in the cone between {:} "
-                             "and {:}".format(center, gradient, p_min, p_max))
+    def _test_projection(self, c, p_in=None, p_out=None,
+                         p_on=None, p_out_expected=None):
+        """Test for CConstraint.projection().
 
-            self.logger.info("The angle between the computed gradient and "
-                             "the center of the cone is {:} whereas the "
-                             "half angle of the subgradient cone is {"
-                             ":}".format(angl1, angl2))
+        Parameters
+        ----------
+        c : CConstraint
+        p_in, p_out, p_on : CArray, optional
+            3 points are required. One point inside the constraint,
+            one point outside and one point on the constraint.
+        p_out_expected : CArray, optional
+            The expected value of .projection(p_out).
 
-            self.assertLessEqual(angl1, angl2,
-                                 "The computed gradient is not inside the cone of the subtradients")
+        """
+        self.logger.info("Testing `.projection` method for: {:}".format(c))
 
-        def test_gradient(self):
-            """
-            Test the gradient of the constraint function
-            """
-            # Compare the analytical grad with the numerical grad
+        def check_projection(cons, point, expected):
+            self.logger.info("Testing point: {:}".format(point))
 
-            if self._constr.class_type != 'box':
-                self._grad_comparation(self._p1_inside)
-                self._grad_comparation(self._p2_outside)
-                if self._constr.class_type != 'l1':
-                    self._grad_comparation(self._p3_on)
-                else:
-                    self._l1_subgradient_check()
+            x_proj = cons.projection(point)
 
-        def test_projection(self):
-            """
-            Test the `projection` function of the constraint object.
-            This function should project a point that lies outside the
-            constraint inside the constraint. It should return exactly
-            the same point if it does not violate the constraint.
-            """
-            pin_proj = self._constr.projection(self._p1_inside)
-            error = (pin_proj - self._p1_inside).norm(order=2)
+            self.logger.info("After projection: {:}".format(x_proj))
+            self.logger.info("Expected: {:}".format(expected))
+
+            self.assertIsInstance(x_proj, CArray)
+            self.assertEqual(x_proj.issparse, point.issparse)
+
+            # After projection, value should be 0 if point is OUTSIDE
+            if cons.is_violated(point) is True:
+                self.assertAlmostEqual(0, cons.constraint(x_proj))
+            else:  # Value should not change
+                self.assertEqual(cons.constraint(point),
+                                 cons.constraint(x_proj))
+
+            self.assert_array_almost_equal(x_proj, expected, decimal=4)
+
+        if p_in is None and p_out is None and p_on is None:
+            raise ValueError("pass at least one point")
+
+        if p_in is not None:
+            # This point is INSIDE, should not change
+            check_projection(c, p_in, p_in)
+            check_projection(c, p_in.astype(int), p_in)
+
+        if p_on is not None:
+            # This point is ON, should not change
+            check_projection(c, p_on, p_on)
+            check_projection(c, p_on.astype(int), p_on)
+
+        if p_out is not None:
+            # This point is OUTSIDE, should be projected
+            check_projection(c, p_out, p_out_expected)
+            check_projection(c, p_out.astype(int), p_out_expected)
+
+    def _test_plot(self, c, *points):
+        """Visualize the constraint.
+
+        Parameters
+        ----------
+        c : CConstraint
+        *points : CArray
+            A series of point to plot. Each point will be plotted before
+            and after cosntraint projection.
+
+        """
+        self.logger.info("Plotting constrain {:}".format(c.class_type))
+
+        grid_limits = [(-1, 2.5), (-1, 2.5)]
+
+        fig = CFigure(height=6, width=6)
+
+        fig.switch_sptype(sp_type='function')
+        fig.sp.plot_fobj(func=c.constraint,
+                         grid_limits=grid_limits,
+                         n_grid_points=40,
+                         levels=[0],
+                         levels_linewidth=1.5)
+
+        colors = ['g', 'r', 'c', 'm', 'y', 'k', 'w']
+        for p_i, p in enumerate(points):
             self.logger.info(
-                "norm(projected point inside the constraint -  "
-                "point inside the constraint): %s", str(error))
-            self.assertLess(error, 1e-3, "the projection function change a "
-                                         "point that is already inside the "
-                                         "constraint")
-
-            pon_proj = self._constr.projection(self._p3_on)
-            error = (pon_proj - self._p3_on).norm(order=2)
+                "Plotting point (color {:}): {:}".format(colors[p_i], p))
+            fig.sp.scatter(*p, c=colors[p_i], zorder=10)
+            p_proj = c.projection(p)
             self.logger.info(
-                "norm(projected point inside the constraint -  "
-                "point inside the constraint): %s", str(error))
-            self.assertLess(error, 1e-3, "the projection function change a "
-                                         "point that is on the "
-                                         "constraint")
+                "Plotting point (color {:}): {:}".format(colors[p_i], p_proj))
+            fig.sp.scatter(*p_proj, c=colors[p_i], zorder=10)
 
-            pout = CArray([0, 2])
-            real_proj_pout = CArray([0, 1])
-            pout_proj = self._constr.projection(pout)
+        filename = "test_constraint_{:}.pdf".format(c.class_type)
 
-            error = (real_proj_pout - pout_proj).norm(order=2)
-            self.logger.info(
-                "norm(real projected point - projected point): %s", str(error))
-            self.assertLess(error, 1e-3, "the projection function is not "
-                                         "working correclty")
+        fig.savefig(fm.join(fm.abspath(__file__), filename))
 
-            pout_proj = self._constr.projection(self._p2_outside)
-            self.logger.info(
-                "projected point {:}".format(pout_proj))
-            center = CArray([0, 0])
-            proj_dist = (pout_proj - center).norm(order=self._norm_order)
-            self.logger.info(
-                "The radius of the constraint is: %s",
-                str(self._constr.radius))
-            self.logger.info(
-                "The distance of the projected point from the center is: %s",
-                str(proj_dist))
-            self.assertAlmostEqual(
-                proj_dist, self._constr.radius, msg="The distance of "
-                                                    "the "
-                                                    "projected "
-                                                    "point is "
-                                                    "different from the "
-                                                    "constraint radius",
-                places=2)
+    def _test_gradient(self, c, p, th=1e-6):
+        """Compare the analytical with the numerical gradient.
 
-        def setUp(self):
-            self._constr_creation()
-            self._set_norm_order()
-            self._set_constr_name()
+        Parameters
+        ----------
+        c : CConstraint
+        p : CArray
+            The point on which the gradient is computed.
+        th : float
+            Tolerance for approximation check.
 
-            self._create_test_points()  # creates the point that we will use
-            # to test the constraint functionalities
+        """
+        self.logger.info("Testing `.gradient({:})` for {:}".format(p, c))
+        gradient = c.gradient(p)
+
+        self.assertTrue(gradient.is_vector_like)
+        self.assertEqual(p.size, gradient.size)
+
+        # Numerical gradient
+        num_gradient = CFunction(c.constraint).approx_fprime(p, 1e-8)
+
+        # Compute the norm of the difference
+        error = (gradient - num_gradient).norm()
+
+        self.logger.info("Analytic grad: {:}".format(gradient))
+        self.logger.info("Numeric grad: {:}".format(num_gradient))
+
+        self.logger.info("norm(grad - num_grad): {:}".format(error))
+        self.assertLess(error, th)
+
+        self.assertIsSubDtype(gradient.dtype, float)
