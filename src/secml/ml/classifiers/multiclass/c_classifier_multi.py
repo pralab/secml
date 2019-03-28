@@ -46,19 +46,14 @@ class CClassifierMulticlass(CClassifier):
         """Set verbosity level and propagate to trained classifiers."""
         # Calling superclass setter of verbose property
         CClassifier.verbose.fset(self, level)
-        # Propagate verbosity level to trained classifiers
+        # Propagate verbosity level to trained binary classifiers
         for i in range(self.num_classifiers):
-            self.binary_classifiers[i].verbose = level
+            self._binary_classifiers[i].verbose = level
 
     @property
     def classifier(self):
-        """Returns the binary classifier used."""
-        return self.binary_classifiers[0].__class__
-
-    @property
-    def binary_classifiers(self):
-        """Returns the list of binary classifiers"""
-        return self._binary_classifiers
+        """Returns the class of the binary classifier used."""
+        return self._binary_classifiers[0].__class__
 
     @property
     def num_classifiers(self):
@@ -67,7 +62,7 @@ class CClassifierMulticlass(CClassifier):
         Returns 1 until .fit(dataset) or .prepare(num_classes) is called.
 
         """
-        return len(self.binary_classifiers)
+        return len(self._binary_classifiers)
 
     def set(self, param_name, param_value, copy=False):
         """Set a parameter that has a specific name to a specific value.
@@ -107,7 +102,7 @@ class CClassifierMulticlass(CClassifier):
             return
 
         # SET PARAMETERS OF BINARY CLASSIFIERS
-        elif '.'.join(param_name) in self.binary_classifiers[0].get_params():
+        elif '.'.join(param_name) in self._binary_classifiers[0].get_params():
             # Tuples can be used to set a different value for each trained clf
             if isinstance(param_value, tuple):
                 # Check if enough binary classifiers are available
@@ -116,12 +111,12 @@ class CClassifierMulticlass(CClassifier):
                                      " Use .prepare(num_classes={0}) first"
                                      "".format(len(param_value)))
                 # Update parameter (different value) in each binary classifier
-                for clf_idx, clf in enumerate(self.binary_classifiers):
+                for clf_idx, clf in enumerate(self._binary_classifiers):
                     clf.set(
                         '.'.join(param_name), param_value[clf_idx], copy=copy)
             else:
                 # Update parameter (same value) in each binary classifier
-                for clf in self.binary_classifiers:
+                for clf in self._binary_classifiers:
                     clf.set('.'.join(param_name), param_value, copy=copy)
             return
 
@@ -131,10 +126,10 @@ class CClassifierMulticlass(CClassifier):
     def prepare(self, num_classes):
         """Creates num_classes copies of the binary classifier.
 
-        Creates enough deepcopies of the first binary classifier in
-        self.binary_classifiers until num_classes binary classifier
-        are instanced. If num_classes < self.num_classifiers, classifiers
-        in excess are deleted.
+        Creates enough deepcopies of the binary classifier until
+         `num_classes` binary classifiers are instanced.
+        If `num_classes < self.num_classifiers`,
+         classifiers in excess are deleted.
 
         Parameters
         ----------
@@ -301,15 +296,15 @@ class CClassifierMulticlass(CClassifier):
         return self._decision_function(x, y)
 
     def apply_method(self, method, *args, **kwargs):
-        """Apply input method to all trained classifers.
+        """Apply input method to all trained classifiers.
 
         Useful to perform a routine after training (e.g. reduction, optim)
 
-        `method` is an unbound method to apply, e.g. CCLassiferSVM.set
+        `method` is an unbound method to apply, e.g. CClassiferSVM.set
         Any other argument for `method` can be passed in.
 
         """
         # Applying method to all trained classifiers
-        for clf in self.binary_classifiers:
+        for clf in self._binary_classifiers:
             # Unbound method: First argument is the instance to apply method to
             method(clf, *args, **kwargs)

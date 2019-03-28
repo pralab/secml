@@ -66,8 +66,9 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
                 # Binarize dataset
                 test_binary_ds = estimator.binarize_dataset(
                     class_idx, test_dataset)
-                # Extract the target binary estimator
-                binary_clf = estimator.binary_classifiers[class_idx]
+                # Extract the target internal binary estimator.
+                # They are all trained on the same data (normalized if needed)
+                binary_clf = estimator._binary_classifiers[class_idx]
 
                 pred_label, pred_score = binary_clf.predict(
                     test_binary_ds.X, return_decision_function=True)
