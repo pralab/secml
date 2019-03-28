@@ -13,6 +13,14 @@ from secml.optim.constraints import CConstraint
 class CConstraintL1(CConstraint):
     """L1 Constraint.
 
+    Parameters
+    ----------
+    center : scalar or CArray, optional
+        Center of the constraint. Use an array to specify a different
+        value for each dimension. Default 0.
+    radius : scalar, optional
+        The semidiagonal of the constraint. Default 1.
+
     Attributes
     ----------
     class_type : 'l1'
@@ -29,23 +37,23 @@ class CConstraintL1(CConstraint):
 
     @property
     def center(self):
-        """Returns constraint L1 center."""
+        """Center of the constraint."""
         return self._center
 
     @center.setter
     def center(self, value):
-        """Sets constraint L1 center."""
+        """Center of the constraint."""
         self._center = CArray(value)
 
     @property
     def radius(self):
-        """Returns the semidiagonal of the constraint."""
+        """Semidiagonal of the constraint."""
         return self._radius
 
     @radius.setter
     def radius(self, value):
-        """Sets the semidiagonal of the constraint."""
-        self._radius = value
+        """Semidiagonal of the constraint."""
+        self._radius = float(value)
 
     def _constraint(self, x):
         """Returns the value of the constraint for the sample x.
@@ -56,7 +64,7 @@ class CConstraintL1(CConstraint):
         Parameters
         ----------
         x : CArray
-            Flat 1-D array with the sample.
+            Input array.
 
         Returns
         -------
@@ -64,13 +72,10 @@ class CConstraintL1(CConstraint):
             Value of the constraint.
 
         """
-        return float((x - self._center).norm(order=1) - self._radius)
-
-    def _gradient(self, x):
-        return (x - self._center).ravel().sign()
+        return float((x - self.center).norm(order=1) - self.radius)
 
     def _projection(self, x):
-        """ Compute the Euclidean projection on a L1-ball.
+        """Project x onto feasible domain / within the given constraint.
 
         Solves the optimisation problem (using the algorithm from [1]):
             min_w 0.5 * || w - x ||_2^2 , s.t. || w ||_1 <= s
@@ -78,20 +83,20 @@ class CConstraintL1(CConstraint):
         Parameters
         ----------
         x : CArray
-            1-Dimensional array.
+            Input sample.
 
         Returns
         -------
-        w : CArray
-            Euclidean projection of v on the L1-ball of radius s.
+        CArray
+            Projected x onto feasible domain if constraint is violated.
 
         Notes
         -----
         Solves the problem by a reduction to the positive simplex case.
 
         """
-        s = float(self._radius)
-        v = (x - self._center).ravel()
+        s = float(self.radius)
+        v = (x - self.center).ravel()
         # compute the vector of absolute values
         u = abs(v)
         # check if v is already a solution
@@ -173,10 +178,26 @@ class CConstraintL1(CConstraint):
         # compute the projection by thresholding v using theta
         w = v
         if w.issparse:
-            p = CArray(w.nnz_data).todense()
+            p = CArray(w.nnz_data)
             p -= theta
             w[w.nnz_indices] = p
         else:
             w -= theta
         w[w < 0] = 0
         return w
+
+    def _gradient(self, x):
+        """Returns the gradient of c(x) in x.
+
+        Parameters
+        ----------
+        x : CArray
+            Input sample.
+
+        Returns
+        -------
+        CArray
+            The gradient of the constraint computed on x.
+
+        """
+        return (x - self.center).sign().ravel()

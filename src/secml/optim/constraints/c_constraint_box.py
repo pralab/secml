@@ -27,44 +27,53 @@ class CConstraintBox(CConstraint):
 
     @property
     def lb(self):
-        """Returns lower bound."""
+        """Lower bound."""
         return self._lb
 
     @lb.setter
     def lb(self, value):
+        """Lower bound."""
         value = -inf if value is None else value
         self._lb = CArray(value).ravel()
 
     @property
     def ub(self):
-        """Returns upper bound."""
+        """Upper bound."""
         return self._ub
 
     @ub.setter
     def ub(self, value):
-        """Sets upper bound."""
+        """Upper bound."""
         value = inf if value is None else value
         self._ub = CArray(value).ravel()
 
     @property
     def center(self):
+        """Center of the constraint."""
         return CArray(0.5 * (self.ub + self.lb)).ravel()
 
     @property
     def radius(self):
+        """Radius of the constraint."""
         return CArray(0.5 * (self.ub - self.lb)).ravel()
 
     def set_center_radius(self, c, r):
-        """This function enables setting a box constraint in terms of
-        its center and radius. c and r can be either scalars or CArray."""
+        """Set constraint bounds in terms of center and radius.
+
+        This method will transform the input center/radius as follows:
+          lb = center - radius
+          ub = center + radius
+
+        Parameters
+        ----------
+        c : scalar
+            Constraint center.
+        r : scalar
+            Constraint radius.
+
+        """
         self.lb = c - r
         self.ub = c + r
-
-    def set_lb_ub(self, lb, ub):
-        """This function enables setting a box constraint in terms of
-        lb and ub. lb and ub can be either scalars or CArray."""
-        self.lb = lb
-        self.ub = ub
 
     def _constraint(self, x):
         """Returns the value of the constraint for the sample x.
@@ -75,7 +84,7 @@ class CConstraintBox(CConstraint):
         Parameters
         ----------
         x : CArray
-            Flat 1-D array with the sample.
+            Input array.
 
         Returns
         -------
@@ -83,8 +92,7 @@ class CConstraintBox(CConstraint):
             Value of the constraint.
 
         """
-        # if x is sparse, and center and radius are not (sparse) vectors,
-        # call sparse implementation
+        # if x is sparse, and center and radius are not (sparse) vectors
         if x.issparse and self.center.size != x.size and \
                 self.radius.size != x.size:
             return self._constraint_sparse(x)
@@ -93,10 +101,7 @@ class CConstraintBox(CConstraint):
         return float(z.max())
 
     def _constraint_sparse(self, x):
-        """Returns the value of the constraint for the sparse sample x.
-
-        The constraint value y is given by:
-         y = max(abs(x - center) - radius)
+        """Returns the value of the constraint for the sample x.
 
         This implementation for sparse arrays only allows a scalar value
          for center and radius.
@@ -104,7 +109,7 @@ class CConstraintBox(CConstraint):
         Parameters
         ----------
         x : CArray
-            Flat 1-D array with the sample.
+            Input array.
 
         Returns
         -------
@@ -115,9 +120,9 @@ class CConstraintBox(CConstraint):
         if self.center.size > 1 and self.radius.size > 1:
             raise ValueError("Box center and radius are not scalar values.")
 
-        m0 = abs(0 - self.center) - self.radius
+        m0 = (abs(0 - self.center) - self.radius).max()
         if x.nnz == 0:
-            return float(m0.max())
+            return float(m0)
 
         # computes constraint values (l-inf dist. to center) for nonzero values
         z = abs(CArray(x.nnz_data).todense() - self.center) - self.radius
@@ -132,17 +137,17 @@ class CConstraintBox(CConstraint):
         return float(max(m, m0))
 
     def _projection(self, x):
-        """Project x onto the feasible domain (box).
+        """Project x onto feasible domain / within the given constraint.
 
         Parameters
         ----------
         x : CArray
-            Point to be projected.
+            Input sample.
 
         Returns
         -------
         CArray
-            Point after projection.
+            Projected x onto feasible domain if constraint is violated.
 
         """
         # If bound is float, ensure x is float

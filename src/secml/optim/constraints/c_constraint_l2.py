@@ -6,10 +6,19 @@
 
 """
 from secml.optim.constraints import CConstraint
+from secml.array import CArray
 
 
 class CConstraintL2(CConstraint):
     """L2 Constraint.
+
+    Parameters
+    ----------
+    center : scalar or CArray, optional
+        Center of the constraint. Use an array to specify a different
+        value for each dimension. Default 0.
+    radius : scalar, optional
+        The semidiagonal of the constraint. Default 1.
 
     Attributes
     ----------
@@ -20,30 +29,28 @@ class CConstraintL2(CConstraint):
 
     def __init__(self, center=0, radius=1):
         # Setting the value of the center (array or scalar)
-        self._center = None
         self.center = center
         # Setting the radius of the L2 ball (fixed)
-        self._radius = None
         self.radius = radius
 
     @property
     def center(self):
-        """Returns constraint L2 center."""
+        """Center of the constraint."""
         return self._center
 
     @center.setter
     def center(self, value):
-        """Sets constraint L2 center."""
-        self._center = value
+        """Center of the constraint."""
+        self._center = CArray(value)
 
     @property
     def radius(self):
-        """Returns constraint L2 radius."""
+        """Radius of the constraint."""
         return self._radius
 
     @radius.setter
     def radius(self, value):
-        """Sets constraint L2 radius."""
+        """Radius of the constraint."""
         self._radius = float(value)
 
     def _constraint(self, x):
@@ -55,7 +62,7 @@ class CConstraintL2(CConstraint):
         Parameters
         ----------
         x : CArray
-            Flat 1-D array with the sample.
+            Input sample.
 
         Returns
         -------
@@ -63,18 +70,42 @@ class CConstraintL2(CConstraint):
             Value of the constraint.
 
         """
-        return float((x - self._center).norm(order=2) - self._radius)
+        return float((x - self.center).norm(order=2) - self.radius)
 
     def _projection(self, x):
-        """Project x onto the feasible domain."""
-        sub = self._radius * (x - self._center)
-        sub_l2 = (x - self._center).norm(order=2)
+        """Project x onto feasible domain / within the given constraint.
+
+        Parameters
+        ----------
+        x : CArray
+            Input sample.
+
+        Returns
+        -------
+        CArray
+            Projected x onto feasible domain if constraint is violated.
+
+        """
+        sub = self._radius * (x - self.center)
+        sub_l2 = (x - self.center).norm(order=2)
         if sub_l2 != 0:  # Avoid division by 0
             sub /= sub_l2
         return self._center + sub
 
     def _gradient(self, x):
-        """Returns the gradient of the constraint function at x."""
-        sub = (x - self._center).ravel()
+        """Returns the gradient of c(x) in x.
+
+        Parameters
+        ----------
+        x : CArray
+            Input sample.
+
+        Returns
+        -------
+        CArray
+            The gradient of the constraint computed on x.
+
+        """
+        sub = (x - self.center).ravel()
         # Avoid division by 0
         return sub if sub.norm() == 0 else sub / sub.norm()
