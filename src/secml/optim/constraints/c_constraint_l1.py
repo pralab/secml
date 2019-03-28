@@ -102,14 +102,16 @@ class CConstraintL1(CConstraint):
         # check if v is already a solution
         if u.sum() <= s:
             # l1-norm is <= s
-            return v + self._center
+            out = v + self._center
+            return out.tosparse() if x.issparse else out
 
         # v is not already a solution: optimum lies on the boundary (norm == s)
         # project *u* on the simplex
         w = self._euclidean_proj_simplex(u, s=s)
         # compute the solution to the original problem on v
         w *= v.sign()
-        return w + self._center
+        out = w + self._center
+        return out.tosparse() if x.issparse else out
 
     def _euclidean_proj_simplex(self, v, s=1):
         """Compute the Euclidean projection on a positive simplex.

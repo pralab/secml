@@ -90,7 +90,8 @@ class CConstraintL2(CConstraint):
         sub_l2 = (x - self.center).norm(order=2)
         if sub_l2 != 0:  # Avoid division by 0
             sub /= sub_l2
-        return self._center + sub
+        out = self._center + sub
+        return out.tosparse() if x.issparse else out
 
     def _gradient(self, x):
         """Returns the gradient of c(x) in x.
