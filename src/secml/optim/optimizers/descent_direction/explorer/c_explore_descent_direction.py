@@ -171,8 +171,8 @@ class CExploreDescentDirection(CCreator):
         if modified according to the given descent direction,
         would violate the box constraint.
         """
-        if self._descent_direction is None:
-            return
+        if self.bounds is None:  # FIXME: PRETTY BAD FOR SPARSE, SEE BELOW
+            return CArray.ones(shape=x.shape, dtype=bool)
 
         # feature manipulations that violate box
         x_lb = (self._descent_direction > 0).logical_and(

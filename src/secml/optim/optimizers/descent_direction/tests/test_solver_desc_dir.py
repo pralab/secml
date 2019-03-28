@@ -19,8 +19,7 @@ class TestOptimizerDescDir(COptimizerTestCases):
     # FIXME: DOES NOT REACH THE GLOBAL MIN (PARAMS PROBLEM?)
     # def test_minimize_beale(self):
     #     """Test for COptimizer.minimize() method on beale fun."""
-    #     opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12,
-    #                   'bounds': CConstraintBox()}  # FIXME: FIX #372 AND REMOVE BOUNDS
+    #     opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12}
     #
     #     self._test_minimize(
     #         CSolverDescDir, 'beale', opt_params=opt_params)
@@ -28,8 +27,7 @@ class TestOptimizerDescDir(COptimizerTestCases):
     # FIXME: DOES NOT REACH THE GLOBAL MIN (PARAMS PROBLEM?)
     # def test_minimize_mc_cormick(self):
     #     """Test for COptimizer.minimize() method on mc-cormick fun."""
-    #     opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12,
-    #                   'bounds': CConstraintBox()}  # FIXME: FIX #372 AND REMOVE BOUNDS
+    #     opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12}
     #
     #     self._test_minimize(
     #         CSolverDescDir, 'mc-cormick', opt_params=opt_params)
@@ -37,8 +35,7 @@ class TestOptimizerDescDir(COptimizerTestCases):
     # FIXME: DOES NOT REACH THE GLOBAL MIN (PARAMS PROBLEM?)
     # def test_minimize_rosenbrock(self):
     #     """Test for COptimizer.minimize() method on rosenbrock fun."""
-    #     opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12,
-    #                   'bounds': CConstraintBox()}  # FIXME: FIX #372 AND REMOVE BOUNDS
+    #     opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12}
     #
     #     self._test_minimize(
     #         CSolverDescDir, 'rosenbrock', opt_params=opt_params)
@@ -46,12 +43,19 @@ class TestOptimizerDescDir(COptimizerTestCases):
     # TODO: IMPROVE THIS TEST (DATA IS NOT SPARSE)
     def test_minimize_discrete(self):
         """Test for COptimizer.minimize() method in discrete space."""
+        opt_params = {'eta': 1, 'eta_min': 1, 'eps': 1,
+                      'discrete': True}
 
+        self._test_minimize(CSolverDescDir, 'quadratic',
+                            opt_params=opt_params, label='discrete')
+
+        # Testing bounds
         opt_params = {'eta': 1, 'eta_min': 1, 'eps': 1,
                       'discrete': True,
                       'bounds': CConstraintBox(lb=-2, ub=3)}
 
-        self._test_minimize(CSolverDescDir, 'quadratic', opt_params=opt_params)
+        self._test_minimize(CSolverDescDir, 'quadratic',
+                            opt_params=opt_params, label='discrete-bounded')
 
 
 if __name__ == '__main__':
