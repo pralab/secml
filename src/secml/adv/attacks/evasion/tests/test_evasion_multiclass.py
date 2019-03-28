@@ -270,7 +270,7 @@ class TestEvasionMulticlass(CUnitTest):
             c = self.normalizer.revert(c)
             x = self.normalizer.revert(x)
         constr = CConstraintL2(center=c, radius=r)
-        return constr.constraint(x)
+        return x.apply_along_axis(constr.constraint, axis=1)
 
     def _get_style(self):
         """

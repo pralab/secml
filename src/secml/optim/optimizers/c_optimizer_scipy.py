@@ -179,16 +179,16 @@ class COptimizerScipy(COptimizer):
 
         self._f_seq = CArray(sc_opt_out.fun)  # only last iter available
 
-        x_opt = CArray(sc_opt_out.x)
+        self._x_opt = CArray(sc_opt_out.x)
 
         # check if point is valid
         # i.e., if the selected solver does not ignore the constraints
-        if self.constr is not None and self.constr.is_violated(x_opt):
+        if self.constr is not None and self.constr.is_violated(self.x_opt):
             self.logger.warning("Constraints are not satisfied. "
                                 "The scipy solver may be ignoring them.\n")
 
-        if self.bounds is not None and self.bounds.is_violated(x_opt):
+        if self.bounds is not None and self.bounds.is_violated(self.x_opt):
             self.logger.warning("Bounds are not satisfied. "
                                 "The scipy solver may be ignoring them.\n")
 
-        return x_opt
+        return self.x_opt

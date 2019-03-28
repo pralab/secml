@@ -105,22 +105,11 @@ class CAttack(CCreator):
         # ... and corresponding values of the objective function
         self._f_seq = None
 
-        # number of function and gradient evaluations
-        self._f_eval = 0
-        self._grad_eval = 0
-
-        # clear solver
-        if self._solver is not None:
-            self._solver.clear()
-
     def __is_clear(self):
         """Returns True if object is clear."""
         if self._x_opt is not None or self._f_opt is not None:
             return False
         if self._x_seq is not None or self._f_seq is not None:
-            return False
-
-        if self._solver is not None and not self._solver.is_clear():
             return False
 
         if self._f_eval + self._grad_eval != 0:
@@ -236,11 +225,11 @@ class CAttack(CCreator):
 
     @property
     def f_eval(self):
-        return self._f_eval
+        return self._solver.f_eval
 
     @property
     def grad_eval(self):
-        return self._grad_eval
+        return self._solver.grad_eval
 
     ###########################################################################
     #                           READ-WRITE ATTRIBUTES
@@ -442,9 +431,6 @@ class CAttack(CCreator):
         """
         Retrieve solution from solver and set internal class parameters.
         """
-        self._f_eval += self._solver.f_eval
-        self._grad_eval += self._solver.grad_eval
-
         # retrieve sequence of evasion points, and final point
         self._x_seq = self._solver.x_seq
         self._x_opt = self._solver.x_opt
