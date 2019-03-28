@@ -59,8 +59,8 @@ class COptimizerTestCases(CUnitTest):
 
         return discr_fun
 
-    def _test_minimize(
-            self, opt_class, fun_id, opt_params=None, minimize_params=None):
+    def _test_minimize(self, opt_class, fun_id,
+                       opt_params=None, minimize_params=None, label=None):
         """Test for COptimizer.minimize() method.
 
         Parameters
@@ -74,9 +74,10 @@ class COptimizerTestCases(CUnitTest):
             Dictionary of parameters for the optimizer.
         minimize_params : dict or None, optional
             Dictionary of parameters for the minimize method.
+        label : str or None, optional
+            Label to identify the test.
 
         """
-
         minimize_params = {} if minimize_params is None else minimize_params
         opt_params = {} if opt_params is None else opt_params
 
@@ -106,7 +107,8 @@ class COptimizerTestCases(CUnitTest):
                                 grid_limits=fun_dict['grid_limits'],
                                 method=minimize_params.get('method'),
                                 vmin=fun_dict['vmin'],
-                                vmax=fun_dict['vmax'])
+                                vmax=fun_dict['vmax'],
+                                label=label)
 
         # Round results for easier asserts
         self.assertAlmostEqual(opt.f_opt, fun.global_min(), places=4)
@@ -115,7 +117,7 @@ class COptimizerTestCases(CUnitTest):
 
     def _plot_optimization(
             self, solver, x_0, g_min, grid_limits,
-            method=None, vmin=None, vmax=None):
+            method=None, vmin=None, vmax=None, label=None):
         """Plots the optimization problem.
 
         Parameters
@@ -127,6 +129,7 @@ class COptimizerTestCases(CUnitTest):
             Final point (after optimization).
         grid_limits : list of tuple
         vmin, vmax : int or None, optional
+        label : str or None, optional
 
         """
         fig = CFigure(markersize=12)
@@ -171,5 +174,7 @@ class COptimizerTestCases(CUnitTest):
             filename = fm.join(
                 fm.abspath(__file__),
                 solver.class_type + '-' + method + '-' + solver.f.class_type)
+
+        filename += '-' + label if label is not None else ''
 
         fig.savefig(filename + '.pdf')
