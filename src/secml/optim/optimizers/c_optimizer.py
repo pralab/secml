@@ -60,10 +60,6 @@ class COptimizer(CCreator):
     ##########################################
     def __clear(self):
         """Reset the object."""
-        if self._f is not None:
-            self._f.clear()
-        if self._fun is not None:
-            self._fun.clear()
         if self.constr is not None:
             self.constr.clear()
         if self.bounds is not None:
@@ -78,10 +74,6 @@ class COptimizer(CCreator):
 
     def __is_clear(self):
         """Returns True if object is clear."""
-        if self._f is not None and not self._f.is_clear():
-            return False
-        if self._fun is not None and not self._fun.is_clear():
-            return False
         if self.constr is not None and not self.constr.is_clear():
             return False
         if self.bounds is not None and not self.bounds.is_clear():

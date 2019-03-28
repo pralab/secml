@@ -130,6 +130,10 @@ class COptimizerScipy(COptimizer):
         if x_init.issparse is True or x_init.is_vector_like is False:
             raise ValueError("x0 must be a dense flat array")
 
+        # reset fun and grad eval counts for both fun and f (by default fun==f)
+        self._f.reset_eval()
+        self._fun.reset_eval()
+
         # select method
         method = kwargs['method'] if 'method' in kwargs else None
         if method is None:

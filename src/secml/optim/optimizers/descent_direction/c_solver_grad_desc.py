@@ -128,8 +128,9 @@ class CSolverGradDesc(COptimizer):
             Array containing values of x during optimization.
 
         """
-
-        self._fun.clear()  # reset fun and grad evaluation counts
+        # reset fun and grad eval counts for both fun and f (by default fun==f)
+        self._f.reset_eval()
+        self._fun.reset_eval()
 
         x = x_init.deepcopy()
 
