@@ -4,8 +4,8 @@ from secml.optim.optimizers import COptimizerGradBLS
 from secml.optim.constraints import CConstraintBox
 
 
-class TestOptimizerDescDir(COptimizerTestCases):
-    """Unittests for COptimizerDescDir."""
+class TestCOptimizerGradBLS(COptimizerTestCases):
+    """Unittests for COptimizerGradBLS."""
 
     def test_minimize_3h_camel(self):
         """Test for COptimizer.minimize() method on 3h-camel fun."""
