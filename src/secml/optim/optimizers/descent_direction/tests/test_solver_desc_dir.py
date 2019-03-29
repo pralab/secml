@@ -14,29 +14,26 @@ class TestOptimizerDescDir(COptimizerTestCases):
         self._test_minimize(
             CSolverDescDir, '3h-camel', opt_params=opt_params)
 
-    # FIXME: DOES NOT REACH THE GLOBAL MIN (PARAMS PROBLEM?)
-    # def test_minimize_beale(self):
-    #     """Test for COptimizer.minimize() method on beale fun."""
-    #     opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12}
-    #
-    #     self._test_minimize(
-    #         CSolverDescDir, 'beale', opt_params=opt_params)
+    def test_minimize_beale(self):
+        """Test for COptimizer.minimize() method on beale fun."""
+        opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12}
 
-    # FIXME: DOES NOT REACH THE GLOBAL MIN (PARAMS PROBLEM?)
-    # def test_minimize_mc_cormick(self):
-    #     """Test for COptimizer.minimize() method on mc-cormick fun."""
-    #     opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12}
-    #
-    #     self._test_minimize(
-    #         CSolverDescDir, 'mc-cormick', opt_params=opt_params)
+        self._test_minimize(
+            CSolverDescDir, 'beale', opt_params=opt_params)
 
-    # FIXME: DOES NOT REACH THE GLOBAL MIN (PARAMS PROBLEM?)
-    # def test_minimize_rosenbrock(self):
-    #     """Test for COptimizer.minimize() method on rosenbrock fun."""
-    #     opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12}
-    #
-    #     self._test_minimize(
-    #         CSolverDescDir, 'rosenbrock', opt_params=opt_params)
+    def test_minimize_mc_cormick(self):
+        """Test for COptimizer.minimize() method on mc-cormick fun."""
+        opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12}
+
+        self._test_minimize(
+            CSolverDescDir, 'mc-cormick', opt_params=opt_params)
+
+    def test_minimize_rosenbrock(self):
+        """Test for COptimizer.minimize() method on rosenbrock fun."""
+        opt_params = {'eta': 1e-6, 'eta_min': 1e-6, 'eps': 1e-12}
+
+        self._test_minimize(
+            CSolverDescDir, 'rosenbrock', opt_params=opt_params)
 
     # TODO: IMPROVE THIS TEST (DATA IS NOT SPARSE)
     def test_minimize_discrete(self):
