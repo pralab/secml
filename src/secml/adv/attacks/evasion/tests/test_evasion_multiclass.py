@@ -88,7 +88,7 @@ class TestEvasionMulticlass(CUnitTest):
 
         dmax = 4
 
-        self.solver_type = 'descent-direction'
+        self.solver_type = 'gradient-bls'
         self.solver_params = {'eta': 1e-1, 'eta_min': 0.1}
 
         eva = CAttackEvasion(classifier=self.multiclass,

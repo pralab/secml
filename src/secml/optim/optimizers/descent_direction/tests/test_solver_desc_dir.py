@@ -1,6 +1,6 @@
 from secml.optim.optimizers.tests import COptimizerTestCases
 
-from secml.optim.optimizers import CSolverDescDir
+from secml.optim.optimizers import COptimizerGradBLS
 from secml.optim.constraints import CConstraintBox
 
 
@@ -12,7 +12,7 @@ class TestOptimizerDescDir(COptimizerTestCases):
         opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12}
 
         self._test_minimize(
-            CSolverDescDir, '3h-camel', opt_params=opt_params)
+            COptimizerGradBLS, '3h-camel', opt_params=opt_params)
 
     # FIXME: DOES NOT REACH THE GLOBAL MIN (PARAMS PROBLEM?)
     # def test_minimize_beale(self):
@@ -20,7 +20,7 @@ class TestOptimizerDescDir(COptimizerTestCases):
     #     opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12}
     #
     #     self._test_minimize(
-    #         CSolverDescDir, 'beale', opt_params=opt_params)
+    #         COptimizerGradBLS, 'beale', opt_params=opt_params)
 
     # FIXME: DOES NOT REACH THE GLOBAL MIN (PARAMS PROBLEM?)
     # def test_minimize_mc_cormick(self):
@@ -28,7 +28,7 @@ class TestOptimizerDescDir(COptimizerTestCases):
     #     opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12}
     #
     #     self._test_minimize(
-    #         CSolverDescDir, 'mc-cormick', opt_params=opt_params)
+    #         COptimizerGradBLS, 'mc-cormick', opt_params=opt_params)
 
     # FIXME: DOES NOT REACH THE GLOBAL MIN (PARAMS PROBLEM?)
     # def test_minimize_rosenbrock(self):
@@ -36,7 +36,7 @@ class TestOptimizerDescDir(COptimizerTestCases):
     #     opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12}
     #
     #     self._test_minimize(
-    #         CSolverDescDir, 'rosenbrock', opt_params=opt_params)
+    #         COptimizerGradBLS, 'rosenbrock', opt_params=opt_params)
 
     # TODO: IMPROVE THIS TEST (DATA IS NOT SPARSE)
     def test_minimize_discrete(self):
@@ -44,7 +44,7 @@ class TestOptimizerDescDir(COptimizerTestCases):
         opt_params = {'eta': 1, 'eta_min': 1, 'eps': 1,
                       'discrete': True}
 
-        self._test_minimize(CSolverDescDir, 'quadratic',
+        self._test_minimize(COptimizerGradBLS, 'quadratic',
                             opt_params=opt_params, label='discrete')
 
         # Testing bounds
@@ -52,7 +52,7 @@ class TestOptimizerDescDir(COptimizerTestCases):
                       'discrete': True,
                       'bounds': CConstraintBox(lb=-2, ub=3)}
 
-        self._test_minimize(CSolverDescDir, 'quadratic',
+        self._test_minimize(COptimizerGradBLS, 'quadratic',
                             opt_params=opt_params, label='discrete-bounded')
 
 

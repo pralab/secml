@@ -1,6 +1,6 @@
 """
-.. module:: CSolverGradDesc
-   :synopsis: This class optimize with the standard gradient descent approach
+.. module:: COptimizerGrad
+   :synopsis: This class optimize with the standard gradient approach
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
@@ -12,7 +12,7 @@ from secml.array import CArray
 from secml.optim.optimizers import COptimizer
 
 
-class CSolverGradDesc(COptimizer):
+class COptimizerGrad(COptimizer):
     """Solves the following problem:
 
         min  f(x)
@@ -27,10 +27,10 @@ class CSolverGradDesc(COptimizer):
 
     Attributes
     ----------
-    class_type : 'gradient-descent'
+    class_type : 'gradient'
 
     """
-    __class_type = 'gradient-descent'
+    __class_type = 'gradient'
 
     def __init__(self, fun,
                  constr=None,

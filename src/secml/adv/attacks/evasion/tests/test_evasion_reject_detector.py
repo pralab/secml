@@ -40,7 +40,7 @@ class TestEvasionRejectDetector(CEvasionRejectTestCases.TestCEvasionReject):
         self.dmax_lst = [0.1, 0.2]
         self.discrete = False
         self.type_dist = 'l2'
-        self.solver_type = 'gradient-descent'
+        self.solver_type = 'gradient'
         self.solver_params = {'eta': 0.1}
 
     def _generate_advx(self):

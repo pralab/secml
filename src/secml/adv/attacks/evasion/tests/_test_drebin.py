@@ -46,7 +46,7 @@ if not fm.file_exist('clf.gz'):
 else:
     clf = pickle_utils.load('clf.gz', encoding='latin1')
 
-solver_type = 'descent-direction'
+solver_type = 'gradient-bls'
 solver_params = {'eta': 1, 'eta_min': 1, 'eta_max': None, 'eps': 1e-4}
 lb = 'x0'  # None
 ub = 1     # None

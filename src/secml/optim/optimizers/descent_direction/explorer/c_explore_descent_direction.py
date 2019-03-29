@@ -12,7 +12,7 @@ from secml.optim.line_search import CLineSearch
 from secml.array import CArray
 
 
-class CExploreDescentDirection(CCreator):
+class _CExploreDescentDirection(CCreator):
     """
 
     Attributes
