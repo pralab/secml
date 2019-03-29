@@ -9,6 +9,7 @@
 
 """
 from six.moves import range
+import numpy as np
 
 # Used only by this class, will be removed in the future
 from .explorer import _CExploreDescentDirection
@@ -313,7 +314,13 @@ class COptimizerGradBLS(COptimizer):
 
             # update point
             x, fx = self._xk(x, fx=fx)
-            # print "x: ", x
+
+            if np.issubdtype(x.dtype, np.floating):
+                # The current point is float,
+                # so we need to update the type of x_sex
+                self._x_seq = self._x_seq.astype(float)
+
+            # Update history
             self._x_seq[i, :] = x
             self._f_seq[i] = fx
             self._x_opt = x
