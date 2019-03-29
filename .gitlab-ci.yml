@@ -13,6 +13,32 @@ stages:
   - deploy
   - triage
 
+
+package:
+  stage: package
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/python2-setuptools:latest
+  before_script:
+    - echo $CI_PROJECT_DIR
+  script:
+    - python setup.py sdist --formats=zip
+  only:
+    changes:
+      - src/secml/**/*
+      - .gitlab-ci.yml
+      - CHANGELOG.md
+      - MANIFEST.in
+      - README.md
+      - requirements.txt
+      - setup.py
+      - tox.ini
+  except:
+    - schedules
+  artifacts:
+    name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
+    paths:
+      - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
+
+
 .test-cache-py2: &test-cache-py2
   cache:
     key: "test-cache-py2"
@@ -57,63 +83,39 @@ stages:
   except:
     - schedules
 
-test:py2-min:
+test:py2:min:
   extends: .test
   image: python:2
   script: tox -e py2-min
   <<: *test-cache-py2
 
-test:py35-latest:
+test:py35:latest:
   extends: .test
   image: python:3.5
   script: tox -e py35
   <<: *test-cache-py35
 
-test:py35-min:
+test:py35:min:
   extends: .test
   image: python:3.5
   script: tox -e py35-min
   <<: *test-cache-py35
 
-test:py36-min:
+test:py36:min:
   extends: .test
   image: python:3.6
   script: tox -e py36-min
   <<: *test-cache-py36
 
-test:py37-min:
+test:py37:min:
   extends: .test
   image: python:3.7
   script: tox -e py37-min
   <<: *test-cache-py37
 
-package:
-  stage: package
-  image: ${CI_REGISTRY}/pralab/docker-helper-images/python2-setuptools:latest
-  before_script:
-    - echo $CI_PROJECT_DIR
-  script:
-    - python setup.py sdist --formats=zip
-  only:
-    changes:
-      - src/secml/**/*
-      - .gitlab-ci.yml
-      - CHANGELOG.md
-      - MANIFEST.in
-      - README.md
-      - requirements.txt
-      - setup.py
-      - tox.ini
-  except:
-    - schedules
-  artifacts:
-    name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
-    paths:
-      - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
 
 .test:install:
   stage: test
-  image: python:2
   before_script:
     - echo $CI_PROJECT_DIR
     - python -V
@@ -137,7 +139,6 @@ package:
       - tox.ini
   except:
     - schedules
-  <<: *test-cache-py2
 
 #test:install:pypi:
 #  extends: .test:install
@@ -152,22 +153,48 @@ package:
 #    - python -c "import secml"
 #    - python -c "import secml.pytorch"
 
-test:install:zip:
+test:install:py2:zip:
   extends: .test:install
+  image: python:2
   script:
     - pip install ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
+  <<: *test-cache-py2
 
-test:install:unzip:
+test:install:py35:zip:
   extends: .test:install
+  image: python:3.5
+  script:
+    - pip install ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
+  <<: *test-cache-py35
+
+test:install:py36:zip:
+  extends: .test:install
+  image: python:3.6
+  script:
+    - pip install ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
+  <<: *test-cache-py36
+
+test:install:py37:zip:
+  extends: .test:install
+  image: python:3.7
+  script:
+    - pip install ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
+  <<: *test-cache-py37
+
+test:install:py35:unzip:
+  extends: .test:install
+  image: python:3.5
   script:
     - apt-get install -yq unzip > /dev/null
     - cd ${CI_PROJECT_DIR}/dist
     - unzip ${CI_PROJECT_NAME}-*.zip
     - cd $(find -maxdepth 1 -type d -iname ${CI_PROJECT_NAME}-\*)
     - pip install .
+  <<: *test-cache-py35
 
-test:install:unzip-extras:
+test:install:py35:unzip-extras:
   extends: .test:install
+  image: python:3.5
   script:
     - apt-get install -yq unzip > /dev/null
     - cd ${CI_PROJECT_DIR}/dist
@@ -178,6 +205,8 @@ test:install:unzip-extras:
     - python -c "import secml"
     - python -c "import secml.pytorch"
     - python -c "import secml.tf.clvhs"
+  <<: *test-cache-py35
+
 
 release:
   stage: release
@@ -193,27 +222,13 @@ release:
   only:
     - tags
 
-#install:repo:
-#  extends: .install
-#  script:
-#    - apt-get install -yq git > /dev/null
-#    - pip install git+${CI_REPOSITORY_URL}@${CI_COMMIT_REF_NAME}#egg=secml
-
-#install:repo-extras:
-#  extends: .install
-#  script:
-#    - apt-get install -yq git > /dev/null
-#    - pip install git+${CI_REPOSITORY_URL}@${CI_COMMIT_REF_NAME}#egg=secml[pytorch]
-#  after_script:
-#    - python -c "import secml"
-#    - python -c "import secml.pytorch"
 
 #deploy:
-#  image: ubuntu:xenial
 #  stage: deploy
 #  when:manual
 #  script:
 #    - echo "DEPLOY"
+
 
 .triage:
   image: ruby:2.4
