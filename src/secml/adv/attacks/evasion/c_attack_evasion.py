@@ -8,18 +8,38 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from six.moves import range
+
 from secml.adv.attacks import CAttack
-from secml.adv.attacks.evasion.solvers import CSolver
+from secml.optim.optimizers import COptimizer
 from secml.array import CArray
 from secml.data import CDataset
 from secml.core.constants import nan
-from secml.optimization.function import CFunction
-from secml.optimization.constraints import CConstraint
+from secml.optim.function import CFunction
+from secml.optim.constraints import CConstraint
 from secml.ml.classifiers.reject import CClassifierReject
 
 
 class CAttackEvasion(CAttack):
     """Class that implements evasion attacks.
+
+    It requires classifier, surrogate_classifier, and surrogate_data.
+    Note that surrogate_classifier is assumed to be trained (before
+    passing it to this class) on surrogate_data.
+
+    TODO: complete list of parameters
+    Parameters
+    ----------
+    discrete: True/False (default: false).
+              If True, input space is considered discrete (integer-valued),
+              otherwise continuous.
+    attack_classes : 'all' or CArray, optional
+        List of classes that can be manipulated by the attacker or
+         'all' (default) if all classes can be manipulated.
+    y_target : int or None, optional
+            If None an indiscriminate attack will be performed, else a
+            targeted attack to have the samples misclassified as
+            belonging to the y_target class.
 
     Attributes
     ----------
@@ -40,29 +60,8 @@ class CAttackEvasion(CAttack):
                  attack_classes='all',
                  solver_type=None,
                  solver_params=None):
-        """
-        Initialization method.
 
-        It requires classifier, surrogate_classifier, and surrogate_data.
-        Note that surrogate_classifier is assumed to be trained (before
-        passing it to this class) on surrogate_data.
-
-        TODO: complete list of parameters
-
-        Parameters
-        ----------
-        discrete: True/False (default: false).
-                  If True, input space is considered discrete (integer-valued),
-                  otherwise continuous.
-        attack_classes : 'all' or CArray, optional
-            List of classes that can be manipulated by the attacker or
-             'all' (default) if all classes can be manipulated.
-        y_target : int or None, optional
-                If None an indiscriminate attack will be performed, else a
-                targeted attack to have the samples misclassified as
-                belonging to the y_target class.
-
-        """
+        # INTERNALS
         self._x0 = None
         self._y0 = None
 
@@ -84,20 +83,11 @@ class CAttackEvasion(CAttack):
                          solver_type=solver_type,
                          solver_params=solver_params)
 
-    def __clear(self):
-        """Reset the object."""
-        self._x0 = None
-        self._y0 = None
-        self._xk = None
+    ###########################################################################
+    #                           READ-WRITE ATTRIBUTES
+    ###########################################################################
 
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        if self._x0 is not None or self._y0 is not None:
-            return False
-        if self._xk is not None:
-            return False
-        return True
-
+    # OVERRIDE y_target to reset the alternative init point xk
     @property
     def y_target(self):
         return self._y_target
@@ -105,7 +95,6 @@ class CAttackEvasion(CAttack):
     @y_target.setter
     def y_target(self, value):
         self._y_target = value
-        # If y_target changes, we need to reset the alternative init point
         self._xk = None
 
     ###########################################################################
@@ -251,7 +240,7 @@ class CAttackEvasion(CAttack):
 
         solver_type = self._solver_type
         if solver_type is None:
-            solver_type = 'descent-direction'
+            solver_type = 'gradient-bls'
 
         constr = CConstraint.create(self._distance)
         constr.center = self._x0
@@ -263,7 +252,7 @@ class CAttackEvasion(CAttack):
 
         bounds = CConstraint.create('box', lb=lb, ub=ub)
 
-        self._solver = CSolver.create(
+        self._solver = COptimizer.create(
             solver_type,
             fun=fun, constr=constr,
             bounds=bounds,
@@ -319,7 +308,7 @@ class CAttackEvasion(CAttack):
                                 sparse=self.surrogate_data.issparse,
                                 dtype=self.surrogate_data.X.dtype)
         y0 = self._y0  # Backup last y0
-        for i in xrange(self.surrogate_data.num_classes):
+        for i in range(self.surrogate_data.num_classes):
             self._y0 = i
             self._xk[i, :] = self._get_point_with_min_f_obj(
                 y_pred, scores.deepcopy())
@@ -365,9 +354,6 @@ class CAttackEvasion(CAttack):
          the objective function and sequence of attack points (if enabled).
 
         """
-        self._f_eval = 0
-        self._grad_eval = 0
-
         # x0 must 2-D, y0 scalar if a CArray of size 1
         x0 = x0.atleast_2d()
         y0 = y0.item() if isinstance(y0, CArray) else y0
@@ -464,7 +450,7 @@ class CAttackEvasion(CAttack):
         # only consider samples that can be manipulated
         v = self.is_attack_class(y)
         idx = CArray(v.find(v)).ravel()
-        # print v, idx
+        # print(v, idx)
 
         # number of modifiable samples
         n_mod_samples = idx.size
@@ -478,7 +464,7 @@ class CAttackEvasion(CAttack):
         # array in which the value of the optimization function are stored
         fs_opt = CArray.zeros(n_mod_samples, )
 
-        for i in xrange(n_mod_samples):
+        for i in range(n_mod_samples):
             k = idx[i].item()  # idx of sample that can be modified
 
             xi = x[k, :] if x_init is None else x_init[k, :]
@@ -486,8 +472,8 @@ class CAttackEvasion(CAttack):
 
             self.logger.info(
                 "Point: {:}/{:}, dmax:{:}, f(x):{:}, eval:{:}/{:}".format(
-                    k, x.shape[0], self._dmax, f_opt, self._f_eval,
-                    self._grad_eval))
+                    k, x.shape[0], self._dmax, f_opt,
+                    self.f_eval, self.grad_eval))
             adv_ds.X[k, :] = x_opt
             fs_opt[i] = f_opt
 

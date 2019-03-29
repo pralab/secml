@@ -7,24 +7,24 @@
 """
 import warnings
 from abc import ABCMeta, abstractmethod
+import six
+from six.moves import range
 
 from secml.adv.attacks import CAttack
-from secml.adv.attacks.evasion.solvers import CSolver
+from secml.optim.optimizers import COptimizer
 from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.classifiers.loss import CLoss
 from secml.ml.peval.metrics import CMetric
-from secml.optimization.constraints import CConstraint
-from secml.optimization.function import CFunction
+from secml.optim.constraints import CConstraint
+from secml.optim.function import CFunction
 
 
+@six.add_metaclass(ABCMeta)
 class CAttackPoisoning(CAttack):
-    """Class providing a common interface to CSolver classes."""
-    __metaclass__ = ABCMeta
+    """Class for implementing poisoning attacks."""
     __super__ = 'CAttackPoisoning'
 
-    # fixme: use always the softmax loss as attacker loss
-    # FIXME: FOLLOW THE THE CATTACK SIGNATURE OR CHANGE IT (LSP ANYONE?)
     def __init__(self, classifier,
                  training_data,
                  surrogate_classifier,
@@ -85,6 +85,7 @@ class CAttackPoisoning(CAttack):
                 "Poisoning in discrete space is not implemented yet!")
 
         # fixme: use the cross-entropy for all the classifier poisoning
+        # fixme: Bat - WHY!? I don't think we should use a single loss
         if classifier.class_type == 'svm':
             loss_name = 'hinge'
         elif classifier.class_type == 'logistic':
@@ -105,22 +106,19 @@ class CAttackPoisoning(CAttack):
         self._xc = None  # set of poisoning points along with their labels yc
         self._yc = None
         self._idx = None  # index of the current point to be optimized
-        self._ts = None  # this is for validation set
-        self._n_points = None
         self._training_data = None  # training set used to learn classifier
+        self._n_points = None  # FIXME: WHY THIS HAS A SETTER IF NOT AN INIT PARAM?
 
-        # call setters
-        self.ts = ts
+        # READ/WRITE
+        self.ts = ts  # this is for validation set
         self.training_data = training_data
         self.random_seed = random_seed
+
         self.init_type = init_type
 
         # fixme: change this (we needs eta to compute the perturbation if the
         #  attack is performed in a discrete space )
         self.eta = solver_params['eta']
-
-        # fixme: forced
-        self.verbose = 2
 
         # this is used to speed up some poisoning algorithms by re-using
         # the solution obtained at a previous step of the optimization
@@ -146,16 +144,6 @@ class CAttackPoisoning(CAttack):
         self._ts = value
 
     @property
-    def random_seed(self):
-        """Returns the attacker's validation data"""
-        return self._random_seed
-
-    @random_seed.setter
-    def random_seed(self, value):
-        """Sets the attacker's validation data"""
-        self._random_seed = value
-
-    @property
     def training_data(self):
         """Returns the training set used to learn the targeted classifier"""
         return self._training_data
@@ -167,6 +155,16 @@ class CAttackPoisoning(CAttack):
         if not isinstance(value, CDataset):
             raise TypeError('training_data should be a CDataset!')
         self._training_data = value
+
+    @property
+    def random_seed(self):
+        """Returns the attacker's validation data"""
+        return self._random_seed
+
+    @random_seed.setter
+    def random_seed(self, value):
+        """Sets the attacker's validation data"""
+        self._random_seed = value
 
     @property
     def n_points(self):
@@ -184,12 +182,6 @@ class CAttackPoisoning(CAttack):
     ###########################################################################
     #                              PRIVATE METHODS
     ###########################################################################
-
-    def __clear(self):
-        self._xc = None
-        self._yc = None
-        self._idx = None
-        self._ts = None
 
     def _constraint_cretion(self):
 
@@ -217,16 +209,16 @@ class CAttackPoisoning(CAttack):
 
         solver_type = self._solver_type
         if solver_type is None:
-            solver_type = 'gradient-descent'
+            solver_type = 'gradient'
 
-        self._solver = CSolver.create(
+        self._solver = COptimizer.create(
             solver_type,
             fun=fun, constr=constr,
             bounds=bounds,
             discrete=self._discrete,
             **self.solver_params)
 
-        self._solver.verbose = 0  # 1
+        self._solver.verbose = 0
         self._warm_start = None
 
     def _rnd_init_poisoning_points(
@@ -268,7 +260,7 @@ class CAttackPoisoning(CAttack):
         yc = CArray(init_dataset.Y[idx]).deepcopy()  # true labels
 
         # randomly pick yc from a different class
-        for i in xrange(yc.size):
+        for i in range(yc.size):
             labels = CArray.randsample(init_dataset.num_classes, 2,
                                        random_state=self.random_seed)
             if yc[i] == labels[0]:
@@ -315,7 +307,6 @@ class CAttackPoisoning(CAttack):
             # hash is stored only if update_poisoned_clf() is called w/out pars
             self._xc_hash = xc_hash if xc_hash_is_valid else None
             self._poisoned_clf = clf.deepcopy()
-            self._poisoned_clf.clear()
 
             # we assume that normalizer is not changing w.r.t xc!
             # so we avoid re-training the normalizer on dataset including xc
@@ -414,7 +405,7 @@ class CAttackPoisoning(CAttack):
                 self._xc[idx, :], self._yc[idx], clf, loss_grad, tr)
         else:
             # compute the gradient as a sum of the gradient for each class
-            for c in xrange(clf.n_classes):
+            for c in range(clf.n_classes):
                 loss_grad = self._attacker_loss.dloss(y_ts, score, c=c)
 
                 grad += self._gradient_fk_xc(self._xc[idx, :], self._yc[idx],
@@ -454,9 +445,6 @@ class CAttackPoisoning(CAttack):
         :param idx: index of point in xc to be manipulated to poison clf
         :return:
         """
-        self._f_eval = 0
-        self._grad_eval = 0
-
         xc = CArray(xc.deepcopy()).atleast_2d()
 
         self._yc = yc
@@ -537,14 +525,14 @@ class CAttackPoisoning(CAttack):
                 "Iter on all the poisoning samples: {:}".format(k))
 
             xc_prv = xc.deepcopy()
-            for i in xrange(self._n_points):
+            for i in range(self._n_points):
                 # this is to optimize the last points first
                 # (and then re-optimize the first ones)
                 idx = self.n_points - i - 1
                 xc[idx, :] = self._run(xc, yc, idx=idx)
                 # optimizing poisoning point 0
                 self.logger.info(
-                    "poisoning point {:} optimization fopt: {:}".format(
+                    "poisoning point {:} optim fopt: {:}".format(
                         i, self._f_opt))
 
                 y_pred, scores = self._poisoned_clf.predict(
@@ -574,15 +562,13 @@ class CAttackPoisoning(CAttack):
 
         return y_pred, scores, CDataset(xc, yc), self._f_opt
 
-    ###################################
-
     def add_discrete_perturbation(self, xc):
 
         # FIXME: ETA WAS A SOLVER PARAM BUT NOW IS A C_ATTACK_POISONING PARAM
         eta = self.eta
 
         # for each poisoning point
-        for p_idx in xrange(xc.shape[0]):
+        for p_idx in range(xc.shape[0]):
 
             c_xc = xc[p_idx, :]
 

@@ -1,9 +1,8 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.data import CDataset
 from secml.ml.features import CPreProcess
-from secml.optimization import COptimizer
-from secml.optimization.function import CFunction
+from secml.optim.function import CFunction
 from secml.core.constants import eps
 
 
@@ -28,15 +27,6 @@ class CClassifierTestCases(CUnitTest):
             Any extra parameter for the gradient function.
 
         """
-        def _fun_args(sample, classifier, *f_args):
-            return classifier.decision_function(sample, **f_args[0])
-
-        def _grad_args(sample, classifier, *f_args):
-            """
-            Wrapper needed as gradient_f_x have **kwargs
-            """
-            return classifier.gradient_f_x(sample, **f_args[0])
-
         if 'y' in grad_kwargs:
             raise ValueError("`y` cannot be passed to this unittest.")
 
@@ -56,9 +46,8 @@ class CClassifierTestCases(CUnitTest):
             self.assertEqual(x.size, gradient.size)
 
             # Numerical gradient
-            num_gradient = COptimizer(
-                CFunction(_fun_args, _grad_args)).approx_fprime(
-                x, epsilon, clf, grad_kwargs)
+            num_gradient = CFunction(
+                clf.decision_function).approx_fprime(x, epsilon, y=c)
 
             # Compute the norm of the difference
             error = (gradient - num_gradient).norm()
@@ -66,7 +55,8 @@ class CClassifierTestCases(CUnitTest):
             self.logger.info(
                 "Analytic grad wrt. class {:}:\n{:}".format(c, gradient))
             self.logger.info(
-                "Numeric gradient wrt. class {:}:\n{:}".format(c, num_gradient))
+                "Numeric gradient wrt. class {:}:\n{:}".format(
+                    c, num_gradient))
 
             self.logger.info("norm(grad - num_grad): {:}".format(error))
             self.assertLess(error, th)

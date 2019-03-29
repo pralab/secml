@@ -5,6 +5,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from six.moves import range
+
 from secml.array import CArray
 from secml.data.splitter import CDataSplitter
 
@@ -36,11 +38,11 @@ class CDataSplitterLabelKFold(CDataSplitter):
     >>> from secml.data.splitter import CDataSplitterLabelKFold
     >>> ds = CDataset([[1,2],[3,4],[5,6],[7,8]], [1,0,1,2])
     >>> kfold = CDataSplitterLabelKFold(num_folds=3).compute_indices(ds)
-    >>> print kfold.num_folds
+    >>> print(kfold.num_folds)
     3
-    >>> print kfold.tr_idx
+    >>> print(kfold.tr_idx)
     [CArray(2,)(dense: [1 3]), CArray(3,)(dense: [0 1 2]), CArray(3,)(dense: [0 2 3])]
-    >>> print kfold.ts_idx
+    >>> print(kfold.ts_idx)
     [CArray(2,)(dense: [0 2]), CArray(1,)(dense: [3]), CArray(1,)(dense: [1])]
 
     """
@@ -60,12 +62,13 @@ class CDataSplitterLabelKFold(CDataSplitter):
 
         Returns
         -------
-        splitter : CDataSplitterLabelKFold
+        CDataSplitter
             Instance of the dataset splitter with tr/ts indices.
 
         """
         # Resetting indices
-        self.clear()
+        self._tr_idx = []
+        self._ts_idx = []
 
         unique_labels, labels = dataset.Y.unique(return_inverse=True)
         n_labels = unique_labels.size
@@ -97,7 +100,7 @@ class CDataSplitterLabelKFold(CDataSplitter):
 
         fold_labels = label_to_fold[labels]
 
-        for fold_idx in xrange(self.num_folds):
+        for fold_idx in range(self.num_folds):
             test_indices = fold_labels.find(fold_labels == fold_idx)
             train_indices = fold_labels.find(fold_labels != fold_idx)
             self._ts_idx.append(CArray(test_indices))

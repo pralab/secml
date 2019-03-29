@@ -7,6 +7,8 @@
 .. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
 
 """
+from __future__ import print_function, division
+from six.moves import range, map
 import numpy as np
 import numpy.matlib
 from numpy.linalg import inv, pinv
@@ -15,7 +17,8 @@ import scipy.sparse as scs
 
 from copy import deepcopy
 
-from c_array_interface import _CArrayInterface
+from secml.array.c_array_interface import _CArrayInterface
+
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_int, is_bool
 from secml.core.constants import inf
@@ -73,7 +76,7 @@ class CDense(_CArrayInterface):
     @property
     def nnz_indices(self):
         """Return a list of list that contain index of non zero elements."""
-        return map(list, np.nonzero(self.atleast_2d().tondarray()))
+        return list(map(list, np.nonzero(self.atleast_2d().tondarray())))
 
     @property
     def nnz_data(self):
@@ -590,7 +593,7 @@ class CDense(_CArrayInterface):
         else:
             return NotImplemented
 
-    def __div__(self, other):
+    def __div__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
         """Element-wise division.
 
         See .__truediv__() for more informations.
@@ -598,7 +601,7 @@ class CDense(_CArrayInterface):
         """
         return self.__truediv__(other)
 
-    def __rdiv__(self, other):
+    def __rdiv__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
         """Element-wise (inverse) division.
 
         See .__rtruediv__() for more informations.
@@ -647,11 +650,7 @@ class CDense(_CArrayInterface):
         """
         # Result of Numpy floor division is not reliable
         # (nan in place of inf, etc.)... Let's floor the truediv result
-        out_truediv = self.__rtruediv__(other)
-        if out_truediv is NotImplemented:
-            return NotImplemented
-        else:  # Return the integer part of the truediv result
-            return out_truediv.floor()
+        return self.__floordiv__(other)
 
     def __abs__(self):
         """Returns array elements without sign.
@@ -860,8 +859,8 @@ class CDense(_CArrayInterface):
         # But as .ravel() can return a copy, we prefer this
         n_rows = 1 if self.ndim == 1 else self.shape[0]
         n_columns = self.size if self.ndim == 1 else self.shape[1]
-        for row_id in xrange(n_rows):
-            for column_id in xrange(n_columns):
+        for row_id in range(n_rows):
+            for column_id in range(n_columns):
                 yield self[row_id, column_id]
 
     def __str__(self):
@@ -890,6 +889,8 @@ class CDense(_CArrayInterface):
 
         Data is stored preserving original data type.
 
+        The default encoding is `utf-8`.
+
         Parameters
         ----------
         datafile : str, file_handle
@@ -910,12 +911,14 @@ class CDense(_CArrayInterface):
         """
         if not isinstance(self.dtype, np.dtype):
             fmt = '%s'
-        elif issubclass(self.dtype.type, str):
+        elif np.issubdtype(self.dtype, np.character):
             fmt = '%s'
-        elif issubclass(self.dtype.type, int):
+        elif np.issubdtype(self.dtype, np.integer):
             fmt = '%d'
-        else:  # Everything else will be stored as float
+        elif np.issubdtype(self.dtype, np.floating):
             fmt = '%f'
+        else:  # Everything else will be stored as standard str
+            fmt = '%s'
 
         # We now check if input file already exists
         import os
@@ -925,14 +928,16 @@ class CDense(_CArrayInterface):
                           "or delete the file.".format(datafile))
 
         try:
-            np.savetxt(
-                datafile, self.atleast_2d().tondarray(), delimiter=' ', fmt=fmt)
+            np.savetxt(datafile, self.atleast_2d().tondarray(),
+                       delimiter=' ', fmt=fmt, encoding='utf-8')
         except IOError as e:  # Prevent stopping after standard IOError
-            print e
+            print(e)
 
     @classmethod
     def load(cls, datafile, dtype=float, startrow=0, skipend=0, cols=None):
         """Load array data from plain text file.
+
+        The default encoding is `utf-8`.
 
         Parameters
         ----------
@@ -946,13 +951,13 @@ class CDense(_CArrayInterface):
             Array row to start loading from.
         skipend : int, optional
             Number of lines to skip from the end of the file when reading.
-        cols : {Cndarray, int, tuple, slice}, optional
+        cols : {CDense, int, tuple}, optional
             Columns to load from target file.
 
         Returns
         -------
         loaded : CDense
-            Array resulting from loading, 2-dimensional.
+            Array resulting from loading, 2-Dimensional.
 
         """
         # Indexing for array columns to load (tuple)
@@ -964,7 +969,9 @@ class CDense(_CArrayInterface):
                                                    delimiter=' ',
                                                    skip_header=startrow,
                                                    skip_footer=skipend,
-                                                   usecols=cols)))
+                                                   usecols=cols,
+                                                   loose=False,
+                                                   encoding='utf-8')))
         except IOError as e:  # Handling standard IOError
             raise IOError(e)
         except (IndexError, StopIteration):  # Something wrong with indexing
@@ -1236,7 +1243,7 @@ class CDense(_CArrayInterface):
         # size instead of shape as we just need one condition for each element
         if condition.size != self.size:
             raise ValueError("condition size must be {:}".format(self.size))
-        return map(list, np.nonzero(condition.atleast_2d().tondarray()))
+        return list(map(list, np.nonzero(condition.atleast_2d().tondarray())))
 
     def binary_search(self, value):
         """Returns the index of each input value inside the array.
@@ -1262,13 +1269,13 @@ class CDense(_CArrayInterface):
         --------
         >>> from secml.array.c_dense import CDense
 
-        >>> print CDense([[0,0.1],[0.4,1.0]]).binary_search(0.3)
+        >>> print(CDense([[0,0.1],[0.4,1.0]]).binary_search(0.3))
         2
 
-        >>> print CDense([1,2,3,4]).binary_search(10)
+        >>> print(CDense([1,2,3,4]).binary_search(10))
         3
 
-        >>> print CDense([1,2,3,4]).binary_search(CDense([-10,1,2.2,10]))
+        >>> print(CDense([1,2,3,4]).binary_search(CDense([-10,1,2.2,10])))
         [0 0 1 3]
 
         """
@@ -1286,7 +1293,7 @@ class CDense(_CArrayInterface):
                 return pos
 
         # As bisect_left returns a single index, so we should ravel the array
-        out = map(lambda x: bs_single(self.ravel(), x), CDense(value))
+        out = list(map(lambda x: bs_single(self.ravel(), x), CDense(value)))
         return CDense(out) if len(out) > 1 else out[0]
 
     # ------------- #
@@ -1321,8 +1328,14 @@ class CDense(_CArrayInterface):
             self.tondarray(), return_index, return_inverse, return_counts)
         if not any([return_index, return_inverse, return_counts]):
             return self.__class__(out)
-        else:
-            return tuple([self.__class__(elem) for elem in out])
+        else:  # unique returned multiple elements
+            out_list = []
+            # All elements must have int dtype apart from the first one
+            for elem_i, elem in enumerate(out):
+                elem = self.__class__(elem)
+                elem = elem.astype(int) if elem_i > 0 else elem
+                out_list.append(elem)
+            return tuple(out_list)
 
     def bincount(self):
         """Count the number of occurrences of each non-negative int."""
@@ -1503,7 +1516,7 @@ class CDense(_CArrayInterface):
         h = hashlib.new('sha1')
 
         # Hash by taking into account shape and data
-        h.update(str(x.shape))
+        h.update(bytes(x.shape))
         # The returned sha1 could be different for same data
         # but different memory order. Use C order to be consistent
         h.update(np.ascontiguousarray(x))
@@ -1720,16 +1733,16 @@ class CDense(_CArrayInterface):
         --------
         >>> from secml.array.c_dense import CDense
         >>> array = CDense.empty(2)
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         [  6.94292784e-310   6.94292784e-310]
-        >>> print array.shape
+        >>> print(array.shape)
         (2,)
 
         >>> array = CDense.empty((2, 1), dtype=int)
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         [[              0]
          [140526427175696]]
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 1)
 
         """
@@ -1753,16 +1766,16 @@ class CDense(_CArrayInterface):
         --------
         >>> from secml.array.c_dense import CDense
         >>> array = CDense.zeros(2)
-        >>> print array
+        >>> print(array)
         [ 0.  0.]
-        >>> print array.shape
+        >>> print(array.shape)
         (2,)
 
         >>> array = CDense.zeros((2, 1), dtype=int)
-        >>> print array
+        >>> print(array)
         [[0]
          [0]]
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 1)
 
         """
@@ -1786,16 +1799,16 @@ class CDense(_CArrayInterface):
         --------
         >>> from secml.array.c_dense import CDense
         >>> array = CDense.ones(2)
-        >>> print array
+        >>> print(array)
         [ 1.  1.]
-        >>> print array.shape
+        >>> print(array.shape)
         (2,)
 
         >>> array = CDense.ones((2, 1), dtype=int)
-        >>> print array
+        >>> print(array)
         [[1]
          [1]]
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 1)
 
         """
@@ -1822,17 +1835,17 @@ class CDense(_CArrayInterface):
         --------
         >>> from secml.array.c_dense import CDense
         >>> array = CDense.eye(2)
-        >>> print array
+        >>> print(array)
         [[ 1.  0.]
          [ 0.  1.]]
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 2)
 
         >>> array = CDense.eye(2, k=1, dtype=int)
-        >>> print array
+        >>> print(array)
         [[0 1]
          [0 0]]
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 2)
 
         """
@@ -2041,7 +2054,7 @@ class CDense(_CArrayInterface):
         out = cls.zeros((n, len(arrays)), dtype=dtype)
 
         # Computing how many times first parameter list should be replicated
-        m = n / arrays[0].size
+        m = int(n / arrays[0].size)
 
         # Replicating first parameter values list
         out[:, 0] = arrays[0].repeat(m).transpose()
@@ -2049,7 +2062,7 @@ class CDense(_CArrayInterface):
         if len(arrays) > 1:  # More than 1 list to combine, recursion!
             # Rebuild the list of lists and call recursively
             out[0:m, 1:] = cls.comblist([x.tolist() for x in arrays[1:]])
-            for j in xrange(1, arrays[0].size):
+            for j in range(1, arrays[0].size):
                 out[j * m:(j + 1) * m, 1:] = out[0:m, 1:]
 
         return out

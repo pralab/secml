@@ -1,5 +1,7 @@
-import unittest
-from secml.utils import CUnitTest
+from six.moves import range
+
+from secml.testing import CUnitTest
+
 from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM
@@ -57,7 +59,7 @@ class TestCRoc(CUnitTest):
         fig = CFigure(linewidth=2)
         fig.sp.errorbar(
             self.roc.mean_fpr, self.roc.mean_tpr, yerr=mean_std)
-        for rep in xrange(self.roc.n_reps):
+        for rep in range(self.roc.n_reps):
             fig.sp.semilogx(self.roc.fpr[rep], self.roc.tpr[rep])
         fig.sp.semilogx(mean_fp, mean_tp)
         fig.sp.grid()
@@ -65,4 +67,4 @@ class TestCRoc(CUnitTest):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

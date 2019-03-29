@@ -1,4 +1,6 @@
-from secml.utils import CUnitTest
+from six.moves import range
+
+from secml.testing import CUnitTest
 
 from secml.data import CDataset
 from secml.data.loader import CDataLoaderSvmLight
@@ -21,7 +23,7 @@ class TestCDataLoaderSvmLight(CUnitTest):
         """
         col_num = array.shape[1]
         non_zero_col = CArray([], dtype=int)
-        for c in xrange(col_num):
+        for c in range(col_num):
             col = array[:, c]
             if col.any() == True:
                 non_zero_col = non_zero_col.append(c)
@@ -66,7 +68,7 @@ class TestCDataLoaderSvmLight(CUnitTest):
         self.assertTrue(new_dataset.idx_mapping.isdense)
 
         # non-zero elements should be unchanged
-        self.assertEquals(self.patterns.nnz, new_dataset.X.nnz)
+        self.assertEqual(self.patterns.nnz, new_dataset.X.nnz)
         new_nnz_data = new_dataset.X.nnz_data
         self.assertFalse((self.patterns.nnz_data != new_nnz_data.sort()).any())
 

@@ -1,9 +1,8 @@
-from secml.utils import CUnitTest
-from test_c_evasion import CEvasionTestCases
+from secml.testing import CUnitTest
+from secml.adv.attacks.evasion.tests import CEvasionTestCases
 
 from secml.ml.classifiers import CClassifierSVM
 from secml.ml.features.normalization import CNormalizerMinMax
-from secml.utils import fm
 
 
 class TestEvasionNonLinearL1(CEvasionTestCases.TestCEvasion):
@@ -42,7 +41,7 @@ class TestEvasionNonLinearL1(CEvasionTestCases.TestCEvasion):
         self.ub = +1.0
 
         self.grid_limits = [(-1.5, 1.5), (-1.5, 1.5)]
-        self.name_file = fm.join(fm.abspath(__file__), 'L1_nonlinear.pdf')
+        self.filename = 'test_c_evasion_nonlinear_L1.pdf'
 
 
 if __name__ == '__main__':

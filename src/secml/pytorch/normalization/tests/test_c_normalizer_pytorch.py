@@ -1,22 +1,20 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.pytorch.normalization import CNormalizerPyTorch
 from secml.pytorch.classifiers import CClassifierPyTorchMLP
 from secml.data.loader import CDLRandom
-from secml.optimization import COptimizer
-from secml.optimization.function import CFunction
+from secml.optim.function import CFunction
 
 
 class TestCNormalizerPyTorch(CUnitTest):
 
     def setUp(self):
-
         self.ds = CDLRandom(n_samples=100, n_classes=3,
                             n_features=20, n_informative=15,
                             random_state=0).load()
 
         self.net = CClassifierPyTorchMLP(
-            input_dims=20, hidden_dims=(40, ), output_dims=3,
+            input_dims=20, hidden_dims=(40,), output_dims=3,
             weight_decay=0, epochs=10, learning_rate=1e-1,
             momentum=0, random_state=0)
         self.net.fit(self.ds)
@@ -82,20 +80,13 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
 
-    def _fun_args(self, x, *args):
-        return self.clf.decision_function(x, **args[0])
-
-    def _grad_args(self, x, *args):
-        """Wrapper needed as gradient_f_x have **kwargs"""
-        return self.clf.gradient_f_x(x, **args[0])
-
     def test_aspreprocess(self):
         """Test for normalizer used as preprocess."""
         from secml.ml.classifiers import CClassifierSVM
         from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 
         self.net = CClassifierPyTorchMLP(
-            input_dims=20, hidden_dims=(40, ), output_dims=3,
+            input_dims=20, hidden_dims=(40,), output_dims=3,
             weight_decay=0, epochs=10, learning_rate=1e-1,
             momentum=0, random_state=0, preprocess='min-max')
         self.net.fit(self.ds)
@@ -120,16 +111,15 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.logger.info("Testing last layer gradient")
 
         for c in self.ds.classes:
-
             self.logger.info("Gradient w.r.t. class {:}".format(c))
 
             grad = self.clf.gradient_f_x(x, y=c)
 
             self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
 
-            check_grad_val = COptimizer(
-                CFunction(self._fun_args, self._grad_args)).check_grad(
-                    x, ({'y': c}), epsilon=1e-1)
+            check_grad_val = CFunction(
+                self.clf.decision_function, self.clf.gradient_f_x).check_grad(
+                    x, y=c, epsilon=1e-1)
             self.logger.info(
                 "norm(grad - num_grad): %s", str(check_grad_val))
             self.assertLess(check_grad_val, 1e-3)

@@ -11,6 +11,7 @@ from sklearn import ensemble
 
 from secml.array import CArray
 from secml.ml.classifiers import CClassifier
+from secml.utils.mixed_utils import check_is_fitted
 
 
 class CClassifierRandomForest(CClassifier):
@@ -44,15 +45,7 @@ class CClassifierRandomForest(CClassifier):
         self.min_samples_split = min_samples_split
         self.random_state = random_state
 
-        self._rf = None
-
-    def __clear(self):
-        """Reset the object."""
-        self._rf = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return self._rf is None
+        self._rf = None  # sklearn random forest classifier
 
     @property
     def n_estimators(self):
@@ -73,6 +66,18 @@ class CClassifierRandomForest(CClassifier):
     def min_samples_split(self, value):
         """Sets classifier min_samples_split."""
         self._min_samples_split = value
+
+    def _check_is_fitted(self):
+        """Check if the classifier is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier is not fitted.
+
+        """
+        check_is_fitted(self, '_rf')
+        super(CClassifierRandomForest, self)._check_is_fitted()
 
     def _fit(self, dataset):
         """Trains the Random Forest classifier."""

@@ -6,6 +6,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from six.moves import range, zip, map
+
 from secml.array import CArray
 
 
@@ -176,7 +178,7 @@ class CBaseRoc(object):
         # Counting the fpr and the tpr
         fp_list = []
         tp_list = []
-        for i in xrange(th.size):
+        for i in range(th.size):
             fp_i = (n >= th[i]).sum() if n.size != 0 else 0
             tp_i = (p >= th[i]).sum() if p.size != 0 else 0
             fp_list.append(fp_i)
@@ -189,8 +191,8 @@ class CBaseRoc(object):
         th = CArray(th[::-1])
 
         # Normalizing in 0-1
-        fpr = CArray(fp_list) / float(n.size) if n.size != 0 else CArray([0])
-        tpr = CArray(tp_list) / float(p.size) if p.size != 0 else CArray([0])
+        fpr = CArray(fp_list) / n.size if n.size != 0 else CArray([0])
+        tpr = CArray(tp_list) / p.size if p.size != 0 else CArray([0])
 
         # Ensure first and last points are (0,0) and (1,1) respectively
         self._fpr, self._tpr, self._th = refine_roc(fpr, tpr, th)
@@ -244,7 +246,7 @@ class CRoc(CBaseRoc):
 
         """
         # This returns a list or a single arrays if one rep is available
-        fpr = map(list, zip(*self._data))[0]
+        fpr = list(map(list, zip(*self._data)))[0]
         return fpr[0] if len(fpr) == 1 else fpr
 
     @property
@@ -257,7 +259,7 @@ class CRoc(CBaseRoc):
 
         """
         # This returns a list or a single arrays if one rep is available
-        tpr = map(list, zip(*self._data))[1]
+        tpr = list(map(list, zip(*self._data)))[1]
         return tpr[0] if len(tpr) == 1 else tpr
 
     @property
@@ -271,7 +273,7 @@ class CRoc(CBaseRoc):
 
         """
         # This returns a list or a single arrays if one rep is available
-        th = map(list, zip(*self._data))[2]
+        th = list(map(list, zip(*self._data)))[2]
         return th[0] if len(th) == 1 else th
 
     @property
@@ -384,7 +386,7 @@ class CRoc(CBaseRoc):
         self._std_dev_tpr = None
 
         if n_ytrue == 1:  # Use the same true labels vs all scores
-            for score_idx in xrange(n_score):
+            for score_idx in range(n_score):
                 rep = CBaseRoc().compute(y_true_list[0],
                                          score_list[score_idx],
                                          positive_label)
@@ -392,7 +394,7 @@ class CRoc(CBaseRoc):
                 self._data.append(rep)
 
         else:  # Use each true labels vs corresponding scores
-            for score_idx in xrange(n_score):
+            for score_idx in range(n_score):
                 rep = CBaseRoc().compute(y_true_list[score_idx],
                                          score_list[score_idx],
                                          positive_label)

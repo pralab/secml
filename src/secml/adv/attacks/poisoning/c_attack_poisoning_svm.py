@@ -75,9 +75,6 @@ class CAttackPoisoningSVM(CAttackPoisoning):
     #                           PRIVATE METHODS
     ###########################################################################
 
-    def __clear(self):
-        pass
-
     def _init_solver(self):
         """Overrides _init_solver to additionally reset the SV indices."""
         super(CAttackPoisoningSVM, self)._init_solver()

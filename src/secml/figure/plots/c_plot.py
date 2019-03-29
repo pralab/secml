@@ -1709,9 +1709,11 @@ class CPlot(CCreator):
             kwargs['fontsize'] = self._params['font.size']
         return self._sp.set_title(text, *args, **kwargs)
 
-    def plot_path(self, path, path_style='-', path_color='k', straight=False,
-                  start_style='h', start_facecolor='r', start_edgewidth=1,
-                  final_style='*', final_facecolor='g', final_edgewidth=1):
+    def plot_path(self, path, path_style='-', path_width=1.5, path_color='k',
+                  straight=False, start_style='h', start_facecolor='r',
+                  start_edgecolor='k', start_edgewidth=1,
+                  final_style='*', final_facecolor='g',
+                  final_edgecolor='k', final_edgewidth=1):
         """Plot a path traversed by a point.
 
         By default, path is drawn in solid black, start point
@@ -1724,6 +1726,8 @@ class CPlot(CCreator):
             Every row contain one point coordinate.
         path_style : str
             Style for the path line. Default solid (-).
+        path_width : int
+            Width of path line. Default 1.5.
         path_color : str
             Color for the path line. Default black (k).
         straight : bool, default False
@@ -1732,12 +1736,16 @@ class CPlot(CCreator):
             Style for the start point. Default an hexagon (h).
         start_facecolor : str
             Color for the start point. Default red (r).
+        start_edgecolor : str
+            Color for the edge of the start point marker. Default black (k).
         start_edgewidth : scalar
             Width of the edge for the start point. Default 1.
         final_style : str
             Style for the end point. Default a star (*).
         final_facecolor : str
             Color for the end point. Default red (g).
+        final_edgecolor : str
+            Color for the edge of the final point marker. Default black (k).
         final_edgewidth : scalar
             Width of the edge for the end point. Default 1.
 
@@ -1754,15 +1762,19 @@ class CPlot(CCreator):
         # Plotting full path, then the start and the end points
         if straight is False:
             self.plot(path_2d[:, 0], path_2d[:, 1],
-                      linestyle=path_style, color=path_color)
+                      linestyle=path_style,
+                      color=path_color,
+                      linewidth=path_width)
         else:
             self.plot(path_2d[[0, -1], 0], path_2d[[0, -1], 1],
                       linestyle=path_style, color=path_color)
         self.plot(path_2d[0, 0], path_2d[0, 1], marker=start_style,
                   markerfacecolor=start_facecolor,
+                  markeredgecolor=start_edgecolor,
                   markeredgewidth=start_edgewidth)
         self.plot(path_2d[-1, 0], path_2d[-1, 1], marker=final_style,
                   markerfacecolor=final_facecolor,
+                  markeredgecolor=final_edgecolor,
                   markeredgewidth=final_edgewidth)
 
     def imshow(self, img, *args, **kwargs):

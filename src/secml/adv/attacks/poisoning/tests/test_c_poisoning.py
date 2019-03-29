@@ -1,6 +1,7 @@
 from abc import ABCMeta
+import six
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.data.loader import CDLRandomBlobs
 from secml.data.splitter import CDataSplitterShuffle
 from secml.ml.features.normalization import CNormalizerMinMax
@@ -11,15 +12,15 @@ from secml.data import CDataset
 from secml.ml.classifiers import CClassifierSVM, CClassifierRidge
 from secml.ml.classifiers import CClassifierLogistic
 from secml.ml.peval.metrics import CMetric
-from secml.optimization import COptimizer
-from secml.optimization.constraints import CConstraintBox
-from secml.optimization.function import CFunction
+from secml.optim.constraints import CConstraintBox
+from secml.optim.function import CFunction
 
 
 class CPoisoningTestCases(object):
+
+    @six.add_metaclass(ABCMeta)
     class TestCPoisoning(CUnitTest):
         """Unit test for CAttackPoisoning."""
-        __metaclass__ = ABCMeta
 
         def _dataset_creation(self):
             self.n_features = 2  # Number of dataset features
@@ -104,10 +105,10 @@ class CPoisoningTestCases(object):
 
         def _pois_obj_creation(self):
 
-            # self.solver_type = 'gradient-descent'
+            # self.solver_type = 'gradient'
             # self.solver_params = {'eta': 0.05, 'eps': 1e-9}
 
-            self.solver_type = 'descent-direction'
+            self.solver_type = 'gradient-bls'
             self.solver_params = {'eta': 0.05, 'eta_min': 0.1, 'eps': 1e-9}
 
             self._poisoning_params = {
@@ -156,10 +157,10 @@ class CPoisoningTestCases(object):
 
         def grad_check(self, xc):
             # Compare analytical gradient with its numerical approximation
-            check_grad_val = COptimizer(
-                CFunction(self.poisoning._objective_function,
-                          self.poisoning._objective_function_gradient)
-            ).check_grad(xc)
+            check_grad_val = CFunction(
+                self.poisoning._objective_function,
+                self.poisoning._objective_function_gradient).check_grad(
+                    xc, epsilon=1e-8)
             self.logger.info("Gradient difference between analytical svm "
                              "gradient and numerical gradient: %s",
                              str(check_grad_val))
@@ -191,7 +192,6 @@ class CPoisoningTestCases(object):
             tr = self.tr.append(CDataset(xc, self.yc))
 
             pois_clf = self.classifier.deepcopy()
-            pois_clf.clear()
 
             pois_clf.fit(tr)
             y_pred, scores = pois_clf.predict(self.ts.X,
@@ -306,7 +306,7 @@ class CPoisoningTestCases(object):
                                          return_decision_function=True)
             acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
             self.logger.info("Error on testing data: " + str(1 - acc))
-            self.assertGreater(acc, 0.70, "The trained classifier have an "
-                                         "accuracy that is too low to evaluate "
-                                         "if the poisoning against this "
-                                         "calssifier works")
+            self.assertGreater(
+                acc, 0.70, "The trained classifier have an accuracy that "
+                           "is too low to evaluate if the poisoning against "
+                           "this classifier works")

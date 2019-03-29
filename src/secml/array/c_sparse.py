@@ -7,12 +7,19 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from __future__ import division
+import six
+from six.moves import range, map
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+
 import scipy.sparse as scs
 from scipy.sparse.linalg import inv, norm
 import numpy as np
 
-from c_array_interface import _CArrayInterface
-from c_dense import CDense
+from secml.array.c_array_interface import _CArrayInterface
+
+from secml.array.c_dense import CDense
+
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_intlike, is_int, is_bool
 from secml.core.constants import inf
@@ -67,7 +74,7 @@ class CSparse(_CArrayInterface):
     @property
     def nnz_indices(self):
         """Return a list of list that contain index of non zero elements."""
-        return map(list, self.tocsr().nonzero())
+        return list(map(list, self.tocsr().nonzero()))
 
     @property
     def nnz_data(self):
@@ -380,20 +387,26 @@ class CSparse(_CArrayInterface):
 
         """
         if is_scalar(other) or is_bool(other):
-            raise NotImplementedError("adding a nonzero scalar "
-                                      "to a sparse array is not supported")
+            if other == 0:
+                return self.deepcopy()
+            raise NotImplementedError(
+                "adding a nonzero scalar or a boolean True to a "
+                "sparse array is not supported. Convert to dense if needed.")
         elif isinstance(other, CSparse):  # Sparse + Sparse = Sparse
             return self.__class__(self._data.__add__(other.tocsr()))
-        elif isinstance(other, CDense) \
-                and other.size > 1:  # Sparse + Dense = Dense
-            return CDense(self._data.__add__(other.tondarray()))
+        elif isinstance(other, CDense):  # Sparse + Dense = Dense
+            if other.size == 1:  # scalar-like
+                raise NotImplementedError(
+                    "adding an array of size one to a sparse array "
+                    "is not supported. Convert to dense if needed.")
+            else:  # direct operation or broadcast
+                return CDense(self._data.__add__(other.tondarray()))
         else:
             return NotImplemented
 
     def __radd__(self, other):
         """Element-wise (inverse) addition."""
-        raise NotImplementedError(
-            "adding a nonzero scalar to a sparse array is not supported")
+        return self.__add__(other)
 
     def __sub__(self, other):
         """Element-wise subtraction.
@@ -411,20 +424,33 @@ class CSparse(_CArrayInterface):
 
         """
         if is_scalar(other) or is_bool(other):
-            raise NotImplementedError("subtracting a nonzero scalar "
-                                      "to a sparse array is not supported")
+            if other == 0:
+                return self.deepcopy()
+            raise NotImplementedError(
+                "subtracting a nonzero scalar or a boolean True from a "
+                "sparse array is not supported. Convert to dense if needed.")
         elif isinstance(other, CSparse):  # Sparse - Sparse = Sparse
             return self.__class__(self._data.__sub__(other.tocsr()))
-        elif isinstance(other, CDense) \
-                and other.size > 1:  # Sparse + Dense = Dense
-            return CDense(self._data.__sub__(other.tondarray()))
+        elif isinstance(other, CDense):  # Sparse - Dense = Dense
+            if other.size == 1:  # scalar-like
+                raise NotImplementedError(
+                    "subtracting an array of size one from a sparse array "
+                    "is not supported. Convert to dense if needed.")
+            else:  # direct operation or broadcast
+                return CDense(self._data.__sub__(other.tondarray()))
         else:
             return NotImplemented
 
     def __rsub__(self, other):
         """Element-wise (inverse) subtraction."""
-        raise NotImplementedError(
-            "subtracting a nonzero scalar to a sparse array is not supported")
+        if is_scalar(other) or is_bool(other):
+            if other == 0:
+                return -self.deepcopy()
+            raise NotImplementedError(
+                "subtracting a sparse array from a nonzero scalar or from "
+                "a boolean True is not supported. Convert to dense if needed.")
+        else:
+            return NotImplemented
 
     def __mul__(self, other):
         """Element-wise product.
@@ -517,7 +543,7 @@ class CSparse(_CArrayInterface):
         raise NotImplementedError(
             "dividing a scalar by a sparse array is not supported")
 
-    def __div__(self, other):
+    def __div__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
         """Element-wise division.
 
         See .__truediv__() for more informations.
@@ -525,7 +551,7 @@ class CSparse(_CArrayInterface):
         """
         return self.__truediv__(other)
 
-    def __rdiv__(self, other):
+    def __rdiv__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
         """Element-wise (inverse) division.
 
         See .__rtruediv__() for more informations.
@@ -534,7 +560,7 @@ class CSparse(_CArrayInterface):
         return self.__rtruediv__(other)
 
     def __floordiv__(self, other):
-        """Element-wise floor division.
+        """Element-wise floor division (integral part of the quotient).
 
         Parameters
         ----------
@@ -598,6 +624,10 @@ class CSparse(_CArrayInterface):
 
         """
         if is_scalar(power) or is_bool(power):
+            if power == 0:
+                raise NotImplementedError(
+                    "using zero or a boolean False as power is not supported "
+                    "for sparse arrays. Convert to dense if needed.")
             return self.__class__((pow(self._data.data, power),
                                    self._data.indices, self._data.indptr),
                                   shape=self.shape)
@@ -779,8 +809,8 @@ class CSparse(_CArrayInterface):
 
     def __iter__(self):
         """Yields array elements in raster-scan order."""
-        for row_id in xrange(self.shape[0]):
-            for column_id in xrange(self.shape[1]):
+        for row_id in range(self.shape[0]):
+            for column_id in range(self.shape[1]):
                 yield self[row_id, column_id]
 
     def __str__(self):
@@ -816,6 +846,8 @@ class CSparse(_CArrayInterface):
         """Save array data into plain text file.
 
         Data is stored preserving original data type.
+
+        The default encoding is `utf-8`.
 
         Parameters
         ----------
@@ -856,15 +888,18 @@ class CSparse(_CArrayInterface):
 
         # Error handling is managed by CDense.save()
         # file will be closed exiting from context
-        with open(datafile, mode='w+') as fhandle:
+        with open(datafile, mode='wt+', encoding='utf-8') as fhandle:
             data_cndarray.save(fhandle)
             indices_cndarray.save(fhandle)
             indptr_cndarray.save(fhandle)
-            fhandle.write(str(self.shape[0]) + " " + str(self.shape[1]))
+            fhandle.write(six.text_type(self.shape[0]) + " " +
+                          six.text_type(self.shape[1]))
 
     @classmethod
     def load(cls, datafile, dtype=float):
         """Load array data from plain text file.
+
+        The default encoding is `utf-8`.
 
         Parameters
         ----------
@@ -987,12 +1022,12 @@ class CSparse(_CArrayInterface):
         tosort = self if inplace is True else self.deepcopy()
 
         if axis == 1 or axis == -1:
-            for i in xrange(tosort.shape[0]):
+            for i in range(tosort.shape[0]):
                 row = tosort[i, :].todense()
                 row.sort(axis=1, inplace=True)
                 tosort[i, :] = row
         elif axis == 0:
-            for i in xrange(tosort.shape[1]):
+            for i in range(tosort.shape[1]):
                 column = tosort[:, i].todense()
                 column.sort(axis=0, inplace=True)
                 tosort[:, i] = column
@@ -1028,7 +1063,7 @@ class CSparse(_CArrayInterface):
         index_matrix = CDense().zeros(array.shape, dtype=int)
 
         axis_element = None
-        for i in xrange(axis_elem_num):
+        for i in range(axis_elem_num):
 
             if axis == 1 or axis == -1 or axis is None:
                 axis_element = array[i, :]  # order for row
@@ -1075,8 +1110,8 @@ class CSparse(_CArrayInterface):
         n: the number of times that we want repeat a alog axis 1 (orizontal)
         """
         self_csr = self.tocsr()
-        rows = [self_csr for _ in xrange(n)]
-        blocks = [rows for _ in xrange(m)]
+        rows = [self_csr for _ in range(n)]
+        blocks = [rows for _ in range(m)]
         if len(blocks) == 0:  # To manage the m = 0 case
             blocks = [[]]
         return self.__class__(scs.bmat(blocks, format='csr', dtype=self.dtype))
@@ -1235,7 +1270,9 @@ class CSparse(_CArrayInterface):
         # size instead of shape as we just need one condition for each element
         if condition.size != self.size:
             raise ValueError("condition size must be {:}".format(self.size))
-        return map(list, scs.find(condition.tocsr()))[:2]
+        # scs.find returns row indices, column indices, and nonzero data
+        # we are interested only in row/column indices
+        return list(map(list, scs.find(condition.tocsr())))[:2]
 
     def binary_search(self, value):
         raise NotImplementedError(
@@ -1300,7 +1337,7 @@ class CSparse(_CArrayInterface):
             # Let's get the index of the first zero...
             unique_index = CDense(dtype=int)
             if n_zeros > 0:  # ... if any!
-                for i in xrange(flat_a.size):
+                for i in range(flat_a.size):
                     # If a element is missing for indices[1]
                     # (nz column indices), means there is a zero there!
                     if i + 1 > len(flat_a.nnz_indices[1]) or \
@@ -1310,7 +1347,7 @@ class CSparse(_CArrayInterface):
 
             # Let's get the indices of the nz elements (columns indices)
             unique_index = unique_index.append(
-                CDense(flat_a.nnz_indices[1])[CDense(out[1])])
+                CDense(flat_a.nnz_indices[1], dtype=int)[CDense(out[1])])
             # Add result to the list of returned items
             outputs.append(unique_index)
 
@@ -1327,7 +1364,7 @@ class CSparse(_CArrayInterface):
 
             # size of the out tuple depends on the number of extra params
             unique_counts = CDense(
-                counts_zeros + out[min(3, num_params)].tolist())
+                counts_zeros + out[min(3, num_params)].tolist(), dtype=int)
             # Add result to the list of returned items
             outputs.append(unique_counts)
 
@@ -1509,7 +1546,7 @@ class CSparse(_CArrayInterface):
 
         index_matrix = CDense.zeros(axis_elem_num, dtype=array.dtype)
 
-        for i in xrange(axis_elem_num):
+        for i in range(axis_elem_num):
 
             # search maximum between non zero element for current row/column
             i_indices = this_indices.find(this_indices == i)[1]
@@ -1601,7 +1638,7 @@ class CSparse(_CArrayInterface):
 
         index_matrix = CDense.zeros(axis_elem_num, dtype=array.dtype)
 
-        for i in xrange(axis_elem_num):
+        for i in range(axis_elem_num):
 
             # search minimum between non zero element for current row/column
             i_indices = this_indices.find(this_indices == i)[1]
@@ -1671,7 +1708,7 @@ class CSparse(_CArrayInterface):
         # n is array size for axis == None or
         # the number of rows/columns of specified axis
         n = self.size if axis is None else self.shape[axis]
-        variance = (1.0 / (float(n) - ddof)) * (centered_array ** 2)
+        variance = (1.0 / (n - ddof)) * (centered_array ** 2)
 
         return CDense(variance.sum(axis=axis, keepdims=keepdims).sqrt())
 
@@ -1690,7 +1727,7 @@ class CSparse(_CArrayInterface):
         h = hashlib.new('sha1')
 
         # Hash by taking into account shape and sparse matrix internals
-        h.update(str(x.shape))
+        h.update(bytes(x.shape))
         # The returned sha1 could be different for same data
         # but different memory order. Use C order to be consistent
         h.update(np.ascontiguousarray(x.indices))
@@ -1827,16 +1864,16 @@ class CSparse(_CArrayInterface):
         --------
         >>> from secml.array.c_sparse import CSparse
         >>> array = CSparse.eye(2)
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         (0, 0)	1.0
         (1, 1)	1.0
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 2)
 
         >>> array = CSparse.eye(2, k=1, dtype=int)
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         (0, 1)	1
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 2)
 
         """
@@ -1862,6 +1899,11 @@ class CSparse(_CArrayInterface):
     @classmethod
     def randuniform(cls, low=0.0, high=1.0, shape=None, random_state=None):
         """Return random samples from low (inclusive) to high (exclusive)."""
+        raise NotImplementedError
+
+    @classmethod
+    def randint(cls, low, high=None, shape=None, random_state=None):
+        """Return random integers from low (inclusive) to high (exclusive)."""
         raise NotImplementedError
 
     @classmethod

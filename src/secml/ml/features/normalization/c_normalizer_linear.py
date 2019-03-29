@@ -6,8 +6,10 @@
 
 """
 from abc import abstractproperty
+
 from secml.array import CArray
 from secml.ml.features.normalization import CNormalizer
+from secml.utils.mixed_utils import check_is_fitted
 
 
 # TODO: ADD SPARSE ARRAYS SUPPORT
@@ -53,6 +55,17 @@ class CNormalizerLinear(CNormalizer):
         # b must be a CArray
         raise NotImplementedError("Linear normalizer should define the bias.")
 
+    def _check_is_fitted(self):
+        """Check if the preprocessor is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the preprocessor is not fitted.
+
+        """
+        check_is_fitted(self, ['w', 'b'])
+
     def _transform(self, x):
         """Linearly scales features.
 
@@ -93,17 +106,11 @@ class CNormalizerLinear(CNormalizer):
             raise ValueError("array to revert must have {:} "
                              "features (columns).".format(self.w.size))
 
-        v = (x - self.b) / self.w
+        v = (x - self.b).atleast_2d()
 
-        # set nan/inf to zero
-        zeros_feats = self.w.find(self.w == 0)
-        if len(zeros_feats) > 0:
-            if v.ndim == 1:
-                v[zeros_feats] = 0
-            else:
-                v[:, zeros_feats] = 0
+        v[:, self.w != 0] /= self.w[self.w != 0]  # avoids division by zero
 
-        return v
+        return v.ravel() if x.ndim <= 1 else v
 
     def _gradient(self, x, w=None):
         """Returns the gradient wrt data.

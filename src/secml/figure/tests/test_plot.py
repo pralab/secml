@@ -1,5 +1,5 @@
 import unittest
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.figure import CFigure
 from secml.array.c_array import CArray
 from secml.core import constants

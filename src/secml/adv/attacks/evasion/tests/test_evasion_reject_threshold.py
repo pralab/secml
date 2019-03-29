@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.adv.attacks.evasion.tests.test_evasion_reject import \
     CEvasionRejectTestCases
 

@@ -1,3 +1,5 @@
+from six.moves import range
+
 from secml.ml.classifiers.tests import CClassifierTestCases
 
 from sklearn.multiclass import OneVsRestClassifier
@@ -54,7 +56,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
                                               C=1, kernel=CKernelRBF())
         # Test set before training
         multiclass.set_params({'C': 100, 'kernel.gamma': 20})
-        for clf in multiclass.binary_classifiers:
+        for clf in multiclass._binary_classifiers:
             self.assertEqual(clf.C, 100.0)
             self.assertEqual(clf.kernel.gamma, 20.0)
 
@@ -71,25 +73,25 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         # Fit multiclass classifier than test set after training
         multiclass.fit(self.dataset)
 
-        for clf_idx, clf in enumerate(multiclass.binary_classifiers):
+        for clf_idx, clf in enumerate(multiclass._binary_classifiers):
             self.assertEqual(clf.C, different_c[clf_idx])
             self.assertEqual(clf.kernel.gamma, different_gamma[clf_idx])
 
         # Test set after training
         multiclass.set_params({'C': 30, 'kernel.gamma': 200})
-        for clf in multiclass.binary_classifiers:
+        for clf in multiclass._binary_classifiers:
             self.assertEqual(clf.C, 30.0)
             self.assertEqual(clf.kernel.gamma, 200.0)
 
-        for clf in multiclass.binary_classifiers:
+        for clf in multiclass._binary_classifiers:
             self.assertEqual(clf.C, 30.0)
             self.assertEqual(clf.kernel.gamma, 200.0)
 
         # Setting parameter in single trained_classifiers
-        multiclass.binary_classifiers[0].kernel.gamma = 300
-        for i in xrange(1, multiclass.num_classifiers):
+        multiclass._binary_classifiers[0].kernel.gamma = 300
+        for i in range(1, multiclass.num_classifiers):
             self.assertNotEqual(
-                multiclass.binary_classifiers[i].kernel.gamma, 300.0)
+                multiclass._binary_classifiers[i].kernel.gamma, 300.0)
 
         # Setting different parameter in single trained_classifiers
         different_c = (100, 200, 300)
@@ -100,7 +102,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
 
         multiclass.prepare(num_classes=3)
         multiclass.set('C', different_c)
-        for clf_idx, clf in enumerate(multiclass.binary_classifiers):
+        for clf_idx, clf in enumerate(multiclass._binary_classifiers):
             self.assertEqual(clf.C, different_c[clf_idx])
 
     def test_apply_method(self):
@@ -111,8 +113,8 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         multiclass.apply_method(CClassifierSVM.set, param_name='C',
                                 param_value=150)
 
-        for i in xrange(multiclass.num_classifiers):
-            self.assertEqual(multiclass.binary_classifiers[i].C, 150)
+        for i in range(multiclass.num_classifiers):
+            self.assertEqual(multiclass._binary_classifiers[i].C, 150)
 
     def test_normalization(self):
         """Test data normalization inside CClassifierMulticlassOVA."""
@@ -175,7 +177,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         for c_idx, c in enumerate(ds.classes):
             # Plot boundary and predicted label for each OVA classifier
 
-            plot_hyperplane(fig, multiclass.binary_classifiers[c_idx],
+            plot_hyperplane(fig, multiclass._binary_classifiers[c_idx],
                             x_bounds[0], x_bounds[1], styles[c_idx],
                             'Boundary\nfor class {:}'.format(c))
 
@@ -362,9 +364,9 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         self._test_gradient_numerical(multiclass, pattern)
 
         # Check if we can return the i_th classifier
-        for i in xrange(multiclass.num_classifiers):
+        for i in range(multiclass.num_classifiers):
 
-            ova_grad = multiclass.binary_classifiers[i].gradient_f_x(pattern)
+            ova_grad = multiclass._binary_classifiers[i].gradient_f_x(pattern)
 
             gradient = multiclass.gradient_f_x(pattern, y=i)
             self.logger.info(

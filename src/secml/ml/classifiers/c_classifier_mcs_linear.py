@@ -6,6 +6,9 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
 """
+from __future__ import division
+from six.moves import range
+
 from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.classifiers import CClassifierLinear
@@ -59,13 +62,6 @@ class CClassifierMCSLinear(CClassifierLinear):
         self.max_samples = max_samples
         self.max_features = max_features
         self.random_state = random_state
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        # CClassifierLinear attributes
-        if self._w is not None or self._b is not None:
-            return False
-        return True
     
     @property
     def classifier(self):
@@ -132,7 +128,7 @@ class CClassifierMCSLinear(CClassifierLinear):
         self._w = CArray.zeros(dataset.num_features)
         self._b = CArray(0.0)
         
-        for i in xrange(self.n_classifiers):
+        for i in range(self.n_classifiers):
 
             # generate random indices for features and samples
             idx_samples = CArray.randsample(dataset.num_samples, num_samples,

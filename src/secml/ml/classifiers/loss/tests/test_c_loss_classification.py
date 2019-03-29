@@ -1,12 +1,11 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.ml.classifiers.loss import *
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM
 from secml.array import CArray
 from secml.figure import CFigure
-from secml.optimization import COptimizer
-from secml.optimization.function import CFunction
+from secml.optim.function import CFunction
 
 
 class TestCLossClassification(CUnitTest):
@@ -126,10 +125,9 @@ class TestCLossClassification(CUnitTest):
             y_true = CArray.randint(0, 2, n_elemes).todense()
             score = CArray.randn((n_elemes,))
 
-            check_grad_val = COptimizer(
-                CFunction(_loss_wrapper,
-                          _dloss_wrapper)
-            ).check_grad(score, loss_class, y_true)
+            check_grad_val = CFunction(
+                _loss_wrapper, _dloss_wrapper).check_grad(
+                score, 1e-8, loss=loss_class, true_labels=y_true)
             self.logger.info("Gradient difference between analytical svm "
                              "gradient and numerical gradient: %s",
                              str(check_grad_val))

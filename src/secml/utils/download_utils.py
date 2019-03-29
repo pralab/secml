@@ -5,9 +5,12 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from __future__ import division
 import sys
 import requests
 import hashlib
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+
 from secml.utils import fm
 
 
@@ -68,7 +71,7 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
                 f.write(chunk)
                 # Report progress
                 dl += len(chunk)
-                done = int(float(50 * dl) / total_size)
+                done = int((50 * dl) / total_size)
                 if sys.stdout.isatty() is True:
                     # Provide real-time updates (if stdout is a tty)
                     sys.stdout.write("\r[{:}{:}] {:}/{:}".format(
@@ -102,13 +105,13 @@ def md5(fname, blocksize=65536):
 
     """
     hash_md5 = hashlib.md5()
-    with open(fname, "rb") as f:
+    with open(fname, mode='rb') as f:
         for chunk in iter(lambda: f.read(blocksize), b""):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 class CTestDLUtils(CUnitTest):
 
     def test_md5(self):

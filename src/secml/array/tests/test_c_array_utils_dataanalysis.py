@@ -1,14 +1,14 @@
-import numpy as np
+from secml.array.tests import CArrayTestCases
 
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+import numpy as np
+from six.moves import range
 
 from secml.array import CArray
 from secml.core.type_utils import is_scalar, is_int
 from secml.core.constants import nan, inf
 
 
-class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
+class TestCArrayUtilsDataAnalysis(CArrayTestCases):
     """Unit test for CArray UTILS - DATA ANALYSIS methods."""
 
     def test_get_nnz(self):
@@ -23,7 +23,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
 
                 if ax is None:
                     self.assertIsInstance(res, int)
-                    self.assertEquals(res, expected[ax_i])
+                    self.assertEqual(expected[ax_i], res)
                 else:
                     self.assertIsInstance(res, CArray)
                     self.assertEqual(1, res.ndim)
@@ -94,10 +94,13 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
             self.assertTrue(unique_ok)
 
             # unique_indices construct unique array from original FLAT one
+            self.assertEqual(array_unique.size, u_indices.size)
+            self.assertEqual(u_indices.dtype, int)
             self.assertFalse(
                 (array.ravel()[u_indices] != array_unique).any())
 
             self.assertEqual(array_unique.size, u_counts.size)
+            self.assertEqual(u_counts.dtype, int)
             for e_idx, e in enumerate(array_unique):
                 self.assertEqual(u_counts[e_idx], sum(array == e))
 
@@ -966,7 +969,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
             min_res = min_res.ravel()
             # We create a find_2d-like mask to check result
             argmin_res = [
-                argmin_res.ravel().tolist(), range(array.shape[1])]
+                argmin_res.ravel().tolist(), list(range(array.shape[1]))]
             self.assertTrue((array[argmin_res] == min_res).all())
 
             self.logger.info("a: \n{:}".format(array))
@@ -978,7 +981,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
             min_res = min_res.ravel()
             # We create a find_2d-like mask to check result
             argmin_res = [
-                range(array.shape[0]), argmin_res.ravel().tolist()]
+                list(range(array.shape[0])), argmin_res.ravel().tolist()]
             self.assertTrue((array[argmin_res] == min_res).all())
 
         _argmin(self.array_sparse)
@@ -1014,7 +1017,8 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
             # One res for each column with keepdims
             max_res = max_res.ravel()
             # We create a find_2d-like mask to check result
-            argmax_res = [argmax_res.ravel().tolist(), range(array.shape[1])]
+            argmax_res = [
+                argmax_res.ravel().tolist(), list(range(array.shape[1]))]
             self.assertTrue((array[argmax_res] == max_res).all())
 
             self.logger.info("a: \n{:}".format(array))
@@ -1026,7 +1030,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
             max_res = max_res.ravel()
             # We create a find_2d-like mask to check result
             argmax_res = [
-                range(array.shape[0]), argmax_res.ravel().tolist()]
+                list(range(array.shape[0])), argmax_res.ravel().tolist()]
             self.assertTrue((array[argmax_res] == max_res).all())
 
         _argmax(self.array_sparse)
@@ -1076,7 +1080,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                 # One res for each column with keepdims
                 min_res = min_res.ravel()
                 argmin_res = [
-                    argmin_res.ravel().tolist(), range(array.shape[1])]
+                    argmin_res.ravel().tolist(), list(range(array.shape[1]))]
                 # use numpy.testing to proper compare arrays with nans
                 self.assert_array_equal(array[argmin_res], min_res)
 
@@ -1094,7 +1098,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                 # One res for each row with keepdims
                 min_res = min_res.ravel()
                 argmin_res = [
-                    range(array.shape[0]), argmin_res.ravel().tolist()]
+                    list(range(array.shape[0])), argmin_res.ravel().tolist()]
                 # use numpy.testing to proper compare arrays with nans
                 self.assert_array_equal(array[argmin_res], min_res)
 
@@ -1142,7 +1146,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                 # One res for each column with keepdims
                 max_res = max_res.ravel()
                 argmax_res = [
-                    argmax_res.ravel().tolist(), range(array.shape[1])]
+                    argmax_res.ravel().tolist(), list(range(array.shape[1]))]
                 self.assert_array_equal(array[argmax_res], max_res)
 
             self.logger.info("a: \n{:}".format(array))
@@ -1159,7 +1163,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
                 # One res for each row with keepdims
                 max_res = max_res.ravel()
                 argmax_res = [
-                    range(array.shape[0]), argmax_res.ravel().tolist()]
+                    list(range(array.shape[0])), argmax_res.ravel().tolist()]
                 self.assert_array_equal(array[argmax_res], max_res)
 
         _check_nanargmax(self.array_dense)
@@ -1294,4 +1298,4 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

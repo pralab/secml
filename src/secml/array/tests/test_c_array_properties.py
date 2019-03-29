@@ -1,33 +1,28 @@
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+from secml.array.tests import CArrayTestCases
 
 from secml.array import CArray
 
 
-class TestCArrayProperties(CArrayTestCases.TestCArray):
+class TestCArrayProperties(CArrayTestCases):
     """Unit test for CArray PROPERTIES."""
 
     def test_non_zero_indices(self):
         """Property test non_zero_indices."""
         self.logger.info("Testing non_zero_indices property")
 
+        # FIXME: UPDATE UNITTESTS
         def non_zero_indices(self, structure_name, matrix, row_vector,
                              column_vector):
             self.logger.info("nnz_indices: matrix \n" + str(matrix))
             self.logger.info(
                 "Non zero index are: \n" + str(matrix.nnz_indices))
-            self.assertEquals(
-                matrix.nnz_indices == [[0, 0, 1, 1, 2, 2], [0, 3, 0, 1, 0, 1]],
-                True, "nnz_indices returned the wrong indices indices")
+            self.assertEqual(
+                matrix.nnz_indices, [[0, 0, 1, 1, 2, 2], [0, 3, 0, 1, 0, 1]])
 
-            self.assertEquals(isinstance(matrix.nnz_indices, list), True,
-                              "nnz_indices not returned a list")
-            self.assertEquals(len(matrix.nnz_indices), 2,
-                              "nnz_indices not returned a list of 2 element")
-            self.assertEquals(
-                all(isinstance(elem, list) for elem in matrix.nnz_indices),
-                True,
-                "nnz_indices not returned a list of 2 lists")
+            self.assertIsInstance(matrix.nnz_indices, list)
+            self.assertEqual(2, len(matrix.nnz_indices))
+            self.assertTrue(
+                all(isinstance(elem, list) for elem in matrix.nnz_indices))
 
         non_zero_indices(self, "sparse", self.array_sparse, self.row_sparse,
                          self.column_sparse)
@@ -43,7 +38,7 @@ class TestCArrayProperties(CArrayTestCases.TestCArray):
             res = array.nnz
             self.logger.info("nnz: {:}".format(res))
             self.assertIsInstance(res, int)
-            self.assertEquals(res, array.nnz_data.size)
+            self.assertEqual(array.nnz_data.size, res)
 
         check_nnz(self.array_sparse)
         check_nnz(self.row_sparse)
@@ -75,4 +70,4 @@ class TestCArrayProperties(CArrayTestCases.TestCArray):
     
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

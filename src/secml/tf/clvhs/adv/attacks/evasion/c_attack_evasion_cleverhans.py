@@ -1,6 +1,6 @@
 """
 .. module:: CAttackEvasionCleverhans
-    :synopsis: Performs one of the CleverHans Evasion attacks
+    :synopsis: Performs one of the Cleverhans Evasion attacks
                 against a classifier.
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
@@ -13,12 +13,11 @@ from cleverhans.attacks import \
     ProjectedGradientDescent, SaliencyMapMethod, MomentumIterativeMethod, \
     MadryEtAl, BasicIterativeMethod, DeepFool
 
-from secml.tf.clvhs.ml.classifiers import CClassifierCleverhans
+from secml.tf.clvhs.ml.classifiers import CModelCleverhans
 from secml.adv.attacks import CAttack
 from secml.adv.attacks.evasion import CAttackEvasion
 from secml.array import CArray
 from secml.core.constants import nan
-
 
 SUPPORTED_ATTACKS = [
     FastGradientMethod, CarliniWagnerL2, ElasticNetMethod, SPSA, LBFGS,
@@ -27,8 +26,9 @@ SUPPORTED_ATTACKS = [
 ]
 
 
-class CAttackEvasionCleverHans(CAttackEvasion):
-    """This class is a wrapper of the attacks implemented in the CleverHans library.
+class CAttackEvasionCleverhans(CAttackEvasion):
+    """This class is a wrapper of the attacks implemented in the Cleverhans
+    library.
     
     Credits: https://github.com/tensorflow/cleverhans.
 
@@ -64,9 +64,6 @@ class CAttackEvasionCleverHans(CAttackEvasion):
                  n_feats, n_classes, surrogate_data=None, y_target=None,
                  clvh_attack_class=CarliniWagnerL2, **kwargs):
 
-        self._x0 = None
-        self._y0 = None
-
         self._tfsess = tf.Session()
 
         # store the cleverhans attack parameters
@@ -76,24 +73,41 @@ class CAttackEvasionCleverHans(CAttackEvasion):
         if clvh_attack_class not in SUPPORTED_ATTACKS:
             raise ValueError("This cleverhans attack is not supported yet!")
 
-        self._clvrh_clvh_attack_class = clvh_attack_class
+        self._clvrh_attack_class = clvh_attack_class
 
         # store the number of features
         self._n_feats = n_feats
         # store the number of dataset classes
         self._n_classes = n_classes
 
+        self._clvrh_clf = None
+
         CAttackEvasion.__init__(self, classifier=classifier,
                                 surrogate_classifier=surrogate_classifier,
                                 surrogate_data=surrogate_data,
                                 y_target=y_target)
 
-    def __clear(self):
-        self._x0 = None
-        self._y0 = None
+    ###########################################################################
+    #                           READ-ONLY ATTRIBUTES
+    ###########################################################################
 
-        self._tfsess.close()
-        self._tfsess = tf.Session()
+    @property
+    def f_eval(self):
+        if self._clvrh_clf:
+            return self._clvrh_clf.f_eval
+        else:
+            return 0
+
+    @property
+    def grad_eval(self):
+        if self._clvrh_clf:
+            return self._clvrh_clf.grad_eval
+        else:
+            return 0
+
+    ###########################################################################
+    #                              PRIVATE METHODS
+    ###########################################################################
 
     def _set_solver_classifier(self):
         """This function set the surrogate classifier,
@@ -108,16 +122,15 @@ class CAttackEvasionCleverHans(CAttackEvasion):
         CAttack._set_solver_classifier(self)
 
         # create the cleverhans attack object
-
         self._tfsess.close()
         self._tfsess = tf.Session()
 
         # wrap the surrogate classifier into a cleverhans classifier
-        self._clvrh_clf = CClassifierCleverhans(
+        self._clvrh_clf = CModelCleverhans(
             self._surrogate_classifier, out_dims=self._n_classes)
 
         # create an istance of the chosen cleverhans attack
-        clvrh_attack = self._clvrh_clvh_attack_class(
+        clvrh_attack = self._clvrh_attack_class(
             self._clvrh_clf, sess=self._tfsess)
 
         # create the placeholder to feed into the attack the initial evasion
@@ -166,9 +179,6 @@ class CAttackEvasionCleverHans(CAttackEvasion):
          the objective function and sequence of attack points (if enabled).
 
         """
-        self._f_eval = 0
-        self._grad_eval = 0
-
         # if data can not be modified by the attacker, exit
         if not self.is_attack_class(y0):
             self._x_seq = x_init

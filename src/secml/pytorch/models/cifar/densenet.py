@@ -1,3 +1,5 @@
+from __future__ import division
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -81,7 +83,8 @@ class DenseNet(nn.Module):
         super(DenseNet, self).__init__()
 
         assert (depth - 4) % 3 == 0, 'depth should be 3n+4'
-        n = (depth - 4) / 3 if block == BasicBlock else (depth - 4) // 6
+        n = int((depth - 4) / 3) if \
+            block == BasicBlock else int((depth - 4) // 6)
 
         self.growthRate = growthRate
         self.dropRate = dropRate

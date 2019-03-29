@@ -1,4 +1,7 @@
-from secml.utils import CUnitTest
+from __future__ import division
+from six.moves import range
+
+from secml.testing import CUnitTest
 
 from secml.explanation import CExplainerLocalInfluence
 from secml.array import CArray
@@ -141,7 +144,7 @@ class TestCExplainerLocalInfluence(CUnitTest):
 
         clf_copy.fit(new_dataset)
 
-        loss = (1.0 / self._ts.num_samples) * self.clf_gradients.L(
+        loss = (1 / self._ts.num_samples) * self.clf_gradients.L(
             self._ts.X, self._ts.Y, clf_copy, regularized=False).sum(axis=None)
 
         return loss
@@ -191,7 +194,7 @@ class TestCExplainerLocalInfluence(CUnitTest):
         avg_infl_idx = average_influence.argsort()
 
         n_check = 2
-        for i in xrange(1, n_check + 1):
+        for i in range(1, n_check + 1):
             not_infl_idx = avg_infl_idx[i - 1].item()
             infl_idx = avg_infl_idx[-i].item()
             self._check_prototype_pair(infl_idx, not_infl_idx)

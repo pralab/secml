@@ -5,12 +5,14 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
+import six
 import inspect
 
 from secml.core import CCreator
 
 
+@six.add_metaclass(ABCMeta)
 class CMetric(CCreator):
     """Performance evaluation metrics.
 
@@ -33,15 +35,14 @@ class CMetric(CCreator):
     >>> from secml.array import CArray
 
     >>> peval = CMetric.create('accuracy')
-    >>> print peval.performance_score(y_true=CArray([0, 1, 2, 3]), y_pred=CArray([0, 1, 1, 3]))
+    >>> print(peval.performance_score(y_true=CArray([0, 1, 2, 3]), y_pred=CArray([0, 1, 1, 3])))
     0.75
 
     >>> peval = CMetric.create('tpr-at-fpr', fpr=0.1)
-    >>> print peval.performance_score(y_true=CArray([0, 1, 0, 0]), score=CArray([1, 1, 0, 0]))
+    >>> print(peval.performance_score(y_true=CArray([0, 1, 0, 0]), score=CArray([1, 1, 0, 0])))
     0.3
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CMetric'
 
     best_value = None
@@ -64,9 +65,14 @@ class CMetric(CCreator):
         kwargs.update(y_true=y_true, y_pred=y_pred, score=score)
 
         # Getting specifications of _performance_score method of the metric
-        metric_argspec = inspect.getargspec(self._performance_score)
-        metric_params = metric_argspec[0][1:]  # Excluding `self`
-        metric_defaults = metric_argspec[3]
+        # TODO: REPLACE WITH inspect.signature
+        try:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+            getargspec = inspect.getfullargspec
+        except AttributeError:
+            getargspec = inspect.getargspec
+        metric_argspec = getargspec(self._performance_score)
+        metric_params = metric_argspec.args[1:]  # Excluding `self`
+        metric_defaults = metric_argspec.defaults
 
         # Check if all required parameters have been passed
         # Do not raise error if a defaulted parameter is not passed
@@ -78,7 +84,7 @@ class CMetric(CCreator):
                     self.class_type, p))
 
         # Clean any other kwarg passed and not required by the metric
-        for p in kwargs.keys():
+        for p in list(kwargs):
             if p not in metric_params:
                 kwargs.pop(p)
 

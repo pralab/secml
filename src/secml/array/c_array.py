@@ -6,12 +6,15 @@
 
 """
 from copy import deepcopy
+from six.moves import range
 import numpy as np
 import scipy.sparse as scs
 
-from c_array_interface import _CArrayInterface
-from c_dense import CDense
-from c_sparse import CSparse
+from secml.array.c_array_interface import _CArrayInterface
+
+from secml.array.c_dense import CDense
+from secml.array.c_sparse import CSparse
+
 from secml.core.type_utils import \
     is_int, is_scalar, is_bool, is_ndarray, is_scsarray, to_builtin
 
@@ -94,22 +97,22 @@ class CArray(_CArrayInterface):
     --------
     >>> from secml.array import CArray
 
-    >>> print CArray([[1, 2], [3, 4]])
+    >>> print(CArray([[1, 2], [3, 4]]))
     CArray([[1 2]
      [3 4]])
 
-    >>> print CArray(True)
+    >>> print(CArray(True))
     CArray([ True])
 
-    >>> print CArray([1,0,3,4], tosparse=True)  # doctest: +NORMALIZE_WHITESPACE
+    >>> print(CArray([1,0,3,4], tosparse=True))  # doctest: +NORMALIZE_WHITESPACE
     CArray(  (0, 0)	1
       (0, 2)    3
       (0, 3)    4)
 
-    >>> print CArray([1,2,3], dtype=float, shape=(3,1))  # Custom dtype and shape
-    CArray([[ 1.]
-     [ 2.]
-     [ 3.]])
+    >>> print(CArray([1,2,3], dtype=float, shape=(3,1)))  # Custom dtype and shape
+    CArray([[1.]
+     [2.]
+     [3.]])
 
     """
     __slots__ = '_data'  # CArray has only one slot for the buffer
@@ -180,7 +183,7 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([1,0,3,0], tosparse=True).nnz
+        >>> print(CArray([1,0,3,0], tosparse=True).nnz)
         2
 
         """
@@ -206,7 +209,7 @@ class CArray(_CArrayInterface):
         >>> nzz_indices = array.nnz_indices
         >>> nzz_indices
         [[0, 0], [0, 2]]
-        >>> print array[nzz_indices]  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(array[nzz_indices])  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	3)
 
@@ -214,7 +217,7 @@ class CArray(_CArrayInterface):
         >>> nzz_indices = array.nnz_indices
         >>> nzz_indices
         [[0, 0], [0, 2]]
-        >>> print array[nzz_indices]
+        >>> print(array[nzz_indices])
         CArray([1 3])
 
         """
@@ -234,9 +237,8 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> array = CArray([1,0,3,0], tosparse=True)
-        >>> print array.nnz_data  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	1
-          (0, 1)	3)
+        >>> print(array.nnz_data)
+        CArray([1 3])
 
         """
         return self.__class__(self._data.nnz_data).ravel()
@@ -371,7 +373,7 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> array = CArray([[1,2],[0,4]], tosparse=True).tocsr()
-        >>> print array  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
           (0, 0)	1
           (0, 1)	2
           (1, 1)	4
@@ -379,7 +381,7 @@ class CArray(_CArrayInterface):
         <class 'scipy.sparse.csr.csr_matrix'>
 
         >>> array = CArray([1,2,3]).tocsr()
-        >>> print array  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
           (0, 0)	1
           (0, 1)	2
           (0, 2)	3
@@ -407,14 +409,11 @@ class CArray(_CArrayInterface):
         >>> array = CArray([[1,2],[0,4]]).tolist()
         >>> array
         [[1, 2], [0, 4]]
-        >>> print CArray(array)
+        >>> print(CArray(array))
         CArray([[1 2]
          [0 4]])
 
-        >>> array = CArray([[1,2],[0,4]],tosparse=True).tolist()
-        >>> array  # integers can be converted to long sometimes  # doctest: +SKIP
-        [[1L, 2L], [0L, 4L]]
-        >>> print CArray(array,tosparse=True)  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray(array, tosparse=True))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	2
           (1, 1)	4)
@@ -449,11 +448,11 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[2, 0], [3, 4]], tosparse=True).todense(dtype=float)
-        CArray([[ 2.  0.]
-         [ 3.  4.]])
+        >>> print(CArray([[2, 0], [3, 4]], tosparse=True).todense(dtype=float))
+        CArray([[2. 0.]
+         [3. 4.]])
 
-        >>> print CArray([[2, 0], [3, 4]], tosparse=True).todense(shape=(4,))
+        >>> print(CArray([[2, 0], [3, 4]], tosparse=True).todense(shape=(4,)))
         CArray([2 0 3 4])
 
         """
@@ -494,12 +493,12 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[2, 0], [3, 4]]).tosparse(dtype=float)  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([[2, 0], [3, 4]]).tosparse(dtype=float))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	2.0
           (1, 0)	3.0
           (1, 1)	4.0)
 
-        >>> print CArray([[2, 0], [3, 4]]).tosparse(shape=(1, 4))  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([[2, 0], [3, 4]]).tosparse(shape=(1, 4)))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	2
           (0, 2)	3
           (0, 3)	4)
@@ -595,21 +594,21 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([1]).item()
+        >>> print(CArray([1]).item())
         1
 
-        >>> print CArray([[1.]]).item()
+        >>> print(CArray([[1.]]).item())
         1.0
 
-        >>> print CArray([1], tosparse=True).item()
+        >>> print(CArray([1], tosparse=True).item())
         1
 
-        >>> print CArray([1,2,3]).item()
+        >>> print(CArray([1,2,3]).item())
         Traceback (most recent call last):
             ...
         ValueError: cannot use .item(). Array has size 3
 
-        >>> print CArray([]).item()
+        >>> print(CArray([]).item())
         Traceback (most recent call last):
             ...
         ValueError: cannot use .item(). Array has size 0
@@ -682,13 +681,13 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1,2]]).has_compatible_shape(CArray([[1],[2]]))
+        >>> print(CArray([[1,2]]).has_compatible_shape(CArray([[1],[2]])))
         False
 
-        >>> print CArray([1,2]).has_compatible_shape(CArray([1,2,3]))
+        >>> print(CArray([1,2]).has_compatible_shape(CArray([1,2,3])))
         False
 
-        >>> print CArray([[1,2]], tosparse=True).has_compatible_shape(CArray([1,2]))
+        >>> print(CArray([[1,2]], tosparse=True).has_compatible_shape(CArray([1,2])))
         True
 
         """
@@ -954,7 +953,7 @@ class CArray(_CArrayInterface):
         else:
             return NotImplemented
 
-    def __div__(self, other):
+    def __div__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
         """Element-wise division. True division will be performed.
 
         See .__truediv__() for more informations.
@@ -962,7 +961,7 @@ class CArray(_CArrayInterface):
         """
         return self.__truediv__(other)
 
-    def __rdiv__(self, other):
+    def __rdiv__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
         """Element-wise (inverse) division. True division will be performed.
 
         See .__rtruediv__() for more informations.
@@ -982,7 +981,7 @@ class CArray(_CArrayInterface):
         Returns
         -------
         CArray
-            Array after true division.
+            Array after floor division (integral part of the quotient).
             If input is a scalar or a boolean, array format is preserved.
             If input is a CArray, format of output array depends on the
             format of current array:
@@ -1012,7 +1011,7 @@ class CArray(_CArrayInterface):
         Parameters
         ----------
         other : CArray or scalar or bool
-            Element to divide to current array.
+            Element to floor divide to current array.
             If a CArray, element-wise division will be performed.
             If scalar or boolean, the element will be divided
             to each array element.
@@ -1337,7 +1336,7 @@ class CArray(_CArrayInterface):
 
         >>> array = CArray([[1, 2], [3, 4]])
         >>> for elem in array:
-        ...     print elem
+        ...     print(elem)
         1
         2
         3
@@ -1345,7 +1344,7 @@ class CArray(_CArrayInterface):
 
         >>> array = CArray([1, 2, 3, 4])
         >>> for elem in array:
-        ...     print elem
+        ...     print(elem)
         1
         2
         3
@@ -1356,8 +1355,8 @@ class CArray(_CArrayInterface):
         # But as .ravel() can return a copy, we prefer this
         n_rows = 1 if self.is_vector_like else self.shape[0]
         n_columns = self.size if self.is_vector_like else self.shape[1]
-        for row_id in xrange(n_rows):
-            for column_id in xrange(n_columns):
+        for row_id in range(n_rows):
+            for column_id in range(n_columns):
                 yield self[row_id, column_id].item()
 
     def __str__(self):
@@ -1367,14 +1366,14 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([1])
+        >>> print(CArray([1]))
         CArray([1])
-        >>> print CArray([1,2])
+        >>> print(CArray([1,2]))
         CArray([1 2])
-        >>> print CArray([[1,2],[3,4]])
+        >>> print(CArray([[1,2],[3,4]]))
         CArray([[1 2]
          [3 4]])
-        >>> print CArray([[1,2],[3,4]], tosparse=True)  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([[1,2],[3,4]], tosparse=True))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	2
           (1, 0)	3
@@ -1464,6 +1463,8 @@ class CArray(_CArrayInterface):
 
         Data is stored preserving original data type.
 
+        The default encoding is `utf-8`.
+
         Parameters
         ----------
         datafile : str, file_handle (dense only)
@@ -1479,11 +1480,11 @@ class CArray(_CArrayInterface):
 
         Notes
         -----
-            - Dense format, flat arrays are stored with shape N x 1.
-            - Sparse format, we only save non-zero data along with indices
-                necessary to reconstruct original 2-dimensional array.
-            - Dense format, shape of original array can be easly recognized
-                from target text file.
+        - Dense format, flat arrays are stored with shape N x 1.
+        - Sparse format, we only save non-zero data along with indices
+            necessary to reconstruct original 2-dimensional array.
+        - Dense format, shape of original array can be easily recognized
+            from target text file.
 
         """
         if self.issparse is True and not isinstance(datafile, str):
@@ -1497,6 +1498,8 @@ class CArray(_CArrayInterface):
     def load(cls, datafile, dtype=float, arrayformat='dense',
              startrow=0, skipend=0, cols=None):
         """Load array data from plain text file.
+
+        The default encoding is `utf-8`.
 
         Parameters
         ----------
@@ -1512,7 +1515,7 @@ class CArray(_CArrayInterface):
             Array row to start loading from.
         skipend : int, optional, dense only
             Number of lines to skip from the end of the file when reading.
-        cols : {CArray, int, tuple, slice}, optional, dense only
+        cols : {CArray, int, tuple}, optional, dense only
             Columns to load from target file.
 
         Returns
@@ -1554,12 +1557,12 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([1, 2, 3]).transpose()
+        >>> print(CArray([1, 2, 3]).transpose())
         CArray([[1]
          [2]
          [3]])
 
-        >>> print CArray([[1], [2], [3]]).transpose()
+        >>> print(CArray([[1], [2], [3]]).transpose())
         CArray([[1 2 3]])
 
         """
@@ -1586,10 +1589,10 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1,2],[3,4]]).ravel()
+        >>> print(CArray([[1,2],[3,4]]).ravel())
         CArray([1 2 3 4])
 
-        >>> print CArray([[1],[2],[3]], tosparse=True).ravel()  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([[1],[2],[3]], tosparse=True).ravel())  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	2
           (0, 2)	3)
@@ -1614,10 +1617,10 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1,2],[3,4]]).flatten()
+        >>> print(CArray([[1,2],[3,4]]).flatten())
         CArray([1 2 3 4])
 
-        >>> print CArray([[1],[2],[3]], tosparse=True).flatten()  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([[1],[2],[3]], tosparse=True).flatten())  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	2
           (0, 2)	3)
@@ -1645,7 +1648,7 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([1,2,3]).atleast_2d()
+        >>> print(CArray([1,2,3]).atleast_2d())
         CArray([[1 2 3]])
 
         """
@@ -1673,12 +1676,12 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([1,2,3]).reshape((3,1))
+        >>> print(CArray([1,2,3]).reshape((3,1)))
         CArray([[1]
          [2]
          [3]])
 
-        >>> print CArray([[1],[2],[3]], tosparse=True).reshape(3)  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([[1],[2],[3]], tosparse=True).reshape(3))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	2
           (0, 2)	3)
@@ -1716,36 +1719,36 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([1,2,3]).resize((3,3))
+        >>> print(CArray([1,2,3]).resize((3,3)))
         CArray([[1 2 3]
          [0 0 0]
          [0 0 0]])
 
-        >>> print CArray([1,2,3]).resize((3,1))
+        >>> print(CArray([1,2,3]).resize((3,1)))
         CArray([[1]
          [2]
          [3]])
 
-        >>> print CArray([1,2,3]).resize((1,3))
+        >>> print(CArray([1,2,3]).resize((1,3)))
         CArray([[1 2 3]])
 
-        >>> print CArray([[1,2,3]]).resize((5, ))
+        >>> print(CArray([[1,2,3]]).resize((5, )))
         CArray([1 2 3 0 0])
 
         >>> from secml.core.constants import inf
-        >>> print CArray([[1,2,3]]).resize((5, ), constant=inf)  # doctest: +SKIP
+        >>> print(CArray([[1,2,3]]).resize((5, ), constant=inf))  # doctest: +SKIP
         CArray([                   1                    2                    3
          -9223372036854775808 -9223372036854775808])
 
-        >>> print CArray([[0, 1],[2, 3]]).resize(3)
+        >>> print(CArray([[0, 1],[2, 3]]).resize(3))
         CArray([0 1 2])
 
-        >>> print CArray([[0, 1],[2, 3]]).resize((3, 3))
+        >>> print(CArray([[0, 1],[2, 3]]).resize((3, 3)))
         CArray([[0 1 2]
          [3 0 0]
          [0 0 0]])
 
-        >>> print CArray([[0, 1, 2],[3, 4, 5]]).resize((2, 2))
+        >>> print(CArray([[0, 1, 2],[3, 4, 5]]).resize((2, 2)))
         CArray([[0 1]
          [2 3]])
 
@@ -1773,10 +1776,10 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([1, 2, 3]).astype(float)
-        CArray([ 1.  2.  3.])
+        >>> print(CArray([1, 2, 3]).astype(float))
+        CArray([1. 2. 3.])
 
-        >>> print CArray([1.1, 2.1, 3.1], tosparse=True).astype(int)  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([1.1, 2.1, 3.1], tosparse=True).astype(int))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	2
           (0, 2)	3)
@@ -1808,9 +1811,9 @@ class CArray(_CArrayInterface):
 
         >>> array = CArray([-1,0,1,nan,inf,-inf])
         >>> array.nan_to_num()
-        >>> print array
-        CArray([ -1.000000e+000   0.000000e+000   1.000000e+000   0.000000e+000
-           1.797693e+308  -1.797693e+308])
+        >>> print(array)
+        CArray([-1.000000e+000  0.000000e+000  1.000000e+000  0.000000e+000  1.797693e+308
+         -1.797693e+308])
 
         >>> # Restoring default print precision
         >>> np.set_printoptions(precision=8)
@@ -1861,17 +1864,17 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([1.28,5.62]).round()
-        CArray([ 1.  6.])
+        >>> print(CArray([1.28,5.62]).round())
+        CArray([1. 6.])
 
-        >>> print CArray([1.28,5.62],tosparse=True).round(decimals=1)  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([1.28,5.62],tosparse=True).round(decimals=1))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1.3
           (0, 1)	5.6)
 
-        >>> print CArray([.5, 1.5, 2.5, 3.5, 4.5]).round() # rounds to nearest even value
-        CArray([ 0.  2.  2.  4.  4.])
+        >>> print(CArray([.5, 1.5, 2.5, 3.5, 4.5]).round()) # rounds to nearest even value
+        CArray([0. 2. 2. 4. 4.])
 
-        >>> print CArray([1,5,6,11]).round(decimals=-1)
+        >>> print(CArray([1,5,6,11]).round(decimals=-1))
         CArray([ 0  0 10 10])
 
         """
@@ -1897,11 +1900,11 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([-1.7, -1.5, -0.2, 0.2, 1.5, 1.7, 2.0]).ceil()
+        >>> print(CArray([-1.7, -1.5, -0.2, 0.2, 1.5, 1.7, 2.0]).ceil())
         CArray([-1. -1. -0.  1.  2.  2.  2.])
 
         >>> # Array with dtype == int is upcasted to float before ceiling
-        >>> print CArray([[-2, -1], [1, 1]], tosparse=True).ceil()  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([[-2, -1], [1, 1]], tosparse=True).ceil())  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	-2.0
           (0, 1)	-1.0
           (1, 0)	1.0
@@ -1935,11 +1938,11 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([-1.7, -1.5, -0.2, 0.2, 1.5, 1.7, 2.0]).floor()
+        >>> print(CArray([-1.7, -1.5, -0.2, 0.2, 1.5, 1.7, 2.0]).floor())
         CArray([-2. -2. -1.  0.  1.  1.  2.])
 
         >>> # Array with dtype == int is upcasted to float before flooring
-        >>> print CArray([[-2, -1], [1, 1]], tosparse=True).floor()  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([[-2, -1], [1, 1]], tosparse=True).floor())  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	-2.0
           (0, 1)	-1.0
           (1, 0)	1.0
@@ -1974,16 +1977,16 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1,2],[3,4]]).clip(2, 4)
+        >>> print(CArray([[1,2],[3,4]]).clip(2, 4))
         CArray([[2 2]
          [3 4]])
 
         >>> from secml.core.constants import inf
 
         >>> # inf is a float, array will be casted accordingly
-        >>> print CArray([[1,2],[3,4]]).clip(-inf, 2)
-        CArray([[ 1.  2.]
-         [ 2.  2.]])
+        >>> print(CArray([[1,2],[3,4]]).clip(-inf, 2))
+        CArray([[1. 2.]
+         [2. 2.]])
 
         """
         if c_min > c_max:
@@ -2027,23 +2030,23 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> array = CArray([5,-1,0,-3])
-        >>> print array.sort()
+        >>> print(array.sort())
         CArray([-3 -1  0  5])
 
         >>> array = CArray([5,-1,0,-3])
-        >>> print array.sort(axis=0)
+        >>> print(array.sort(axis=0))
         CArray([ 5 -1  0 -3])
 
         >>> array = CArray([5,-1,0,-3])
-        >>> print array.sort(axis=1)
+        >>> print(array.sort(axis=1))
         CArray([-3 -1  0  5])
 
         >>> array = CArray([5,-1,0,-3])
         >>> out = array.sort(inplace=True)
-        >>> print out
+        >>> print(out)
         CArray([-3 -1  0  5])
         >>> array[0] = 100
-        >>> print out
+        >>> print(out)
         CArray([100  -1   0   5])
 
         """
@@ -2083,14 +2086,14 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([0,-3,5]).argsort()
+        >>> print(CArray([0,-3,5]).argsort())
         CArray([1 0 2])
 
-        >>> print CArray([[0,-3],[5,1]]).argsort(axis=1)  # Sorting of each row
+        >>> print(CArray([[0,-3],[5,1]]).argsort(axis=1))  # Sorting of each row
         CArray([[1 0]
          [1 0]])
 
-        >>> print CArray([[0,-3],[5,1]]).argsort(axis=None)  # Sorting the flattened array
+        >>> print(CArray([[0,-3],[5,1]]).argsort(axis=None))  # Sorting the flattened array
         CArray([1 0 3 2])
 
         """
@@ -2108,12 +2111,12 @@ class CArray(_CArrayInterface):
 
         >>> array = CArray([2,3,0,1])
         >>> array.shuffle()
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         CArray([0 2 1 3])  # random result
 
         >>> array = CArray([[2,3],[0,1]])
         >>> array.shuffle()
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         CArray([[0 1]
          [2 3]])
 
@@ -2154,22 +2157,22 @@ class CArray(_CArrayInterface):
         >>> def return_sum(x):
         ...     return x.sum()
 
-        >>> print a.apply_along_axis(return_sum, axis=0)  # Column-wise
-        CArray([ 111.  222.])
+        >>> print(a.apply_along_axis(return_sum, axis=0))  # Column-wise
+        CArray([111. 222.])
 
-        >>> print a.apply_along_axis(return_sum, axis=1)  # Row-wise
-        CArray([   3.   30.  300.])
+        >>> print(a.apply_along_axis(return_sum, axis=1))  # Row-wise
+        CArray([  3.  30. 300.])
 
         """
         data_2d = self.atleast_2d()
         # Preallocate output array
         if axis == 0:
             out = CArray.zeros(self.shape[1])
-            for i in xrange(self.shape[1]):
+            for i in range(self.shape[1]):
                 out[i] = func(data_2d[:, i], *args, **kwargs)
         elif axis == 1:
             out = CArray.zeros(self.shape[0])
-            for i in xrange(self.shape[0]):
+            for i in range(self.shape[0]):
                 out[i] = func(data_2d[i, :], *args, **kwargs)
         else:
             raise ValueError("`apply_along_axis` currently available "
@@ -2212,17 +2215,17 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1,2],[3,4]]).append([[11],[22]])
+        >>> print(CArray([[1,2],[3,4]]).append([[11],[22]]))
         CArray([ 1  2  3  4 11 22])
-        >>> print CArray([[1,2],[3,4]]).append([[11,22]], axis=0)
+        >>> print(CArray([[1,2],[3,4]]).append([[11,22]], axis=0))
         CArray([[ 1  2]
          [ 3  4]
          [11 22]])
 
-        >>> print CArray([[1,2],[3,4]]).append(CArray([[11],[22]], tosparse=True))
+        >>> print(CArray([[1,2],[3,4]]).append(CArray([[11],[22]], tosparse=True)))
         CArray([ 1  2  3  4 11 22])
         >>> array = CArray([[1,2],[3,4]], tosparse=True).append([[11],[22]])
-        >>> print array  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	2
           (0, 2)	3
@@ -2230,13 +2233,13 @@ class CArray(_CArrayInterface):
           (0, 4)	11
           (0, 5)	22)
 
-        >>> print CArray([1,2]).append([11,22])
+        >>> print(CArray([1,2]).append([11,22]))
         CArray([ 1  2 11 22])
 
-        >>> print CArray([1,2]).append([11,22], axis=0)
+        >>> print(CArray([1,2]).append([11,22], axis=0))
         CArray([[ 1  2]
          [11 22]])
-        >>> print CArray([1,2]).append([11,22], axis=1)
+        >>> print(CArray([1,2]).append([11,22], axis=1))
         CArray([ 1  2 11 22])
 
         """
@@ -2265,7 +2268,7 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1,2]],tosparse=True).repmat(2,2)  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([[1,2]],tosparse=True).repmat(2,2))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	2
           (0, 2)	1
@@ -2275,12 +2278,12 @@ class CArray(_CArrayInterface):
           (1, 2)	1
           (1, 3)	2)
 
-        >>> print CArray([1,2]).repmat(2,2)
+        >>> print(CArray([1,2]).repmat(2,2))
         CArray([[1 2 1 2]
          [1 2 1 2]])
-        >>> print CArray([1,2]).repmat(1,2)
+        >>> print(CArray([1,2]).repmat(1,2))
         CArray([[1 2 1 2]])
-        >>> print CArray([1,2]).repmat(2,1)
+        >>> print(CArray([1,2]).repmat(2,1))
         CArray([[1 2]
          [1 2]])
 
@@ -2315,19 +2318,19 @@ class CArray(_CArrayInterface):
 
         >>> x = CArray([[1,2],[3,4]])
 
-        >>> print x.repeat(2)
+        >>> print(x.repeat(2))
         CArray([1 1 2 2 3 3 4 4])
 
-        >>> print x.repeat(2, axis=1)  # Repeat the columns on the right
+        >>> print(x.repeat(2, axis=1))  # Repeat the columns on the right
         CArray([[1 1 2 2]
          [3 3 4 4]])
-        >>> print x.repeat(2, axis=0)  # Repeat the rows on the right
+        >>> print(x.repeat(2, axis=0))  # Repeat the rows on the right
         CArray([[1 2]
          [1 2]
          [3 4]
          [3 4]])
 
-        >>> print x.repeat([1, 2], axis=0)
+        >>> print(x.repeat([1, 2], axis=0))
         CArray([[1 2]
          [3 4]
          [3 4]])
@@ -2338,9 +2341,9 @@ class CArray(_CArrayInterface):
         ValueError: operands could not be broadcast together with shape (4,) (2,)
 
         >>> x = CArray([1,2,3])
-        >>> print x.repeat(2, axis=0)  # Repeat the (only) row on the right
+        >>> print(x.repeat(2, axis=0))  # Repeat the (only) row on the right
         CArray([1 1 2 2 3 3])
-        >>> print x.repeat(2, axis=1)  # No columns to repeat
+        >>> print(x.repeat(2, axis=1))  # No columns to repeat
         Traceback (most recent call last):
           ...
         AxisError: axis 1 is out of bounds for array of dimension 1
@@ -2378,15 +2381,15 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[-1,0],[2,0]]).logical_and(CArray([[2,-1],[2,-1]]))
+        >>> print(CArray([[-1,0],[2,0]]).logical_and(CArray([[2,-1],[2,-1]])))
         CArray([[ True False]
          [ True False]])
 
-        >>> print CArray([-1]).logical_and(CArray([2]))
+        >>> print(CArray([-1]).logical_and(CArray([2])))
         CArray([ True])
 
         >>> array = CArray([1,0,2,-1])
-        >>> print (array > 0).logical_and(array < 2)
+        >>> print((array > 0).logical_and(array < 2))
         CArray([ True False False False])
 
         """
@@ -2419,15 +2422,15 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[-1,0],[2,0]]).logical_or(CArray([[2,0],[2,-1]]))
+        >>> print(CArray([[-1,0],[2,0]]).logical_or(CArray([[2,0],[2,-1]])))
         CArray([[ True False]
          [ True  True]])
 
-        >>> print CArray([True]).logical_or(CArray([False]))
+        >>> print(CArray([True]).logical_or(CArray([False])))
         CArray([ True])
 
         >>> array = CArray([1,0,2,-1])
-        >>> print (array > 0).logical_or(array < 2)
+        >>> print((array > 0).logical_or(array < 2))
         CArray([ True  True  True  True])
 
         """
@@ -2455,15 +2458,15 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[-1,0],[2,0]]).logical_not()
+        >>> print(CArray([[-1,0],[2,0]]).logical_not())
         CArray([[False  True]
          [False  True]])
 
-        >>> print CArray([True]).logical_not()
+        >>> print(CArray([True]).logical_not())
         CArray([False])
 
         >>> array = CArray([1,0,2,-1])
-        >>> print (array > 0).logical_not()
+        >>> print((array > 0).logical_not())
         CArray([False  True False  True])
 
         """
@@ -2497,15 +2500,15 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[-1,0],[2,0]]).maximum(CArray([[2,-1],[2,-1]]))
+        >>> print(CArray([[-1,0],[2,0]]).maximum(CArray([[2,-1],[2,-1]])))
         CArray([[2 0]
          [2 0]])
 
-        >>> print CArray([[-1,0],[2,0]], tosparse=True).maximum(CArray([[2,-1],[2,-1]]))  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([[-1,0],[2,0]], tosparse=True).maximum(CArray([[2,-1],[2,-1]])))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	2
           (1, 0)	2)
 
-        >>> print CArray([-1]).maximum(CArray([2]))
+        >>> print(CArray([-1]).maximum(CArray([2])))
         CArray([2])
 
         """
@@ -2550,17 +2553,17 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[-1,0],[2,0]]).minimum(CArray([[2,-1],[2,-1]]))
+        >>> print(CArray([[-1,0],[2,0]]).minimum(CArray([[2,-1],[2,-1]])))
         CArray([[-1 -1]
          [ 2 -1]])
 
-        >>> print CArray([[-1,0],[2,0]], tosparse=True).minimum(CArray([[2,-1],[2,-1]]))  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([[-1,0],[2,0]], tosparse=True).minimum(CArray([[2,-1],[2,-1]])))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	-1
           (0, 1)	-1
           (1, 0)	2
           (1, 1)	-1)
 
-        >>> print CArray([-1]).minimum(CArray([2]))
+        >>> print(CArray([-1]).minimum(CArray([2])))
         CArray([-1])
 
         """
@@ -2605,23 +2608,23 @@ class CArray(_CArrayInterface):
 
         >>> array = CArray([1,0,-6,2,0])
         >>> array_find = array.find(array > 0)
-        >>> print array_find
+        >>> print(array_find)
         [0, 3]
-        >>> print array[array_find]
+        >>> print(array[array_find])
         CArray([1 2])
 
         >>> array = CArray([[1,0,-6,2,0]])
         >>> array_find = array.find(array == 0)
-        >>> print array_find
+        >>> print(array_find)
         [1, 4]
-        >>> print array[array_find].shape
+        >>> print(array[array_find].shape)
         (1, 2)
 
         >>> array = CArray([[1,0,-6,2,0]], tosparse=True)
         >>> array_find = array.find(array == 0)
-        >>> print array_find
+        >>> print(array_find)
         [1, 4]
-        >>> print array[array_find].shape
+        >>> print(array[array_find].shape)
         (1, 2)
 
         """
@@ -2657,23 +2660,23 @@ class CArray(_CArrayInterface):
 
         >>> array = CArray([[1,0],[-6,3],[2,7]])
         >>> array_find = array.find_2d(array > 0)
-        >>> print array_find
+        >>> print(array_find)
         [[0, 1, 2, 2], [0, 1, 0, 1]]
-        >>> print array[array_find]
+        >>> print(array[array_find])
         CArray([1 3 2 7])
 
         >>> array = CArray([[1,0],[-6,0],[2,0]], tosparse=True)
         >>> array_find = array.find_2d(array == 0)
-        >>> print array_find
+        >>> print(array_find)
         [[0, 1, 2], [1, 1, 1]]
-        >>> print array[array_find].shape
+        >>> print(array[array_find].shape)
         (1, 3)
 
         >>> array = CArray([1,0,2])
         >>> array_find = array.find_2d(array > 0)
-        >>> print array_find
+        >>> print(array_find)
         [[0, 0], [0, 2]]
-        >>> print array[array_find]
+        >>> print(array[array_find])
         CArray([1 2])
 
         """
@@ -2705,13 +2708,13 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[0,0.1],[0.4,1.0]]).binary_search(0.3)
+        >>> print(CArray([[0,0.1],[0.4,1.0]]).binary_search(0.3))
         2
 
-        >>> print CArray([1,2,3,4]).binary_search(10)
+        >>> print(CArray([1,2,3,4]).binary_search(10))
         3
 
-        >>> print CArray([1,2,3,4]).binary_search(CArray([-10,1,2.2,10]))
+        >>> print(CArray([1,2,3,4]).binary_search(CArray([-10,1,2.2,10])))
         CArray([0 0 1 3])
 
         """
@@ -2744,11 +2747,11 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> a = CArray([[1,2],[0,5],[0,0],[2,0]])
-        >>> print a.get_nnz()  # Total number of non-zero elements
+        >>> print(a.get_nnz())  # Total number of non-zero elements
         4
-        >>> print a.get_nnz(axis=0)  # Number of non-zero elements for each column
+        >>> print(a.get_nnz(axis=0))  # Number of non-zero elements for each column
         CArray([2 2])
-        >>> print a.get_nnz(axis=1)  # Number of non-zero elements for each row
+        >>> print(a.get_nnz(axis=1))  # Number of non-zero elements for each row
         CArray([2 1 0 1])
 
         """
@@ -2793,20 +2796,22 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1,0,2],[2,0,3]]).unique()
+        >>> print(CArray([[1,0,2],[2,0,3]]).unique())
         CArray([0 1 2 3])
 
-        >>> print CArray([1,2,2,3,3], tosparse=True).unique()
+        >>> print(CArray([1,2,2,3,3], tosparse=True).unique())
         CArray([1 2 3])
 
         >>> u, u_idx, u_inv = CArray([[2,2,3,3]]).unique(return_index=True, return_inverse=True)
-        >>> print u, u_idx  # unique and unique_indices
-        CArray([2 3]) CArray([0 2])
-        >>> print u[u_inv]  # original (flattened) array reconstructed from unique_inverse
+        >>> print(u)  # unique
+        CArray([2 3])
+        >>> print(u_idx)  # unique_indices
+        CArray([0 2])
+        >>> print(u[u_inv])  # original (flattened) array reconstructed from unique_inverse
         CArray([2 2 3 3])
 
         >>> u, u_counts = CArray([[2,2,2,3,3]]).unique(return_counts=True)
-        >>> print u_counts  # The number of times each unique item appears
+        >>> print(u_counts)  # The number of times each unique item appears
         CArray([3 2])
 
         """
@@ -2833,7 +2838,7 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> a = CArray([1, 2, 3, 1, 6], tosparse=True)
-        >>> print a.bincount()
+        >>> print(a.bincount())
         CArray([0 2 1 1 0 0 1])
 
         """
@@ -2884,22 +2889,22 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
         >>> from secml.core.constants import inf
 
-        >>> print round(CArray([1,2,3]).norm(), 5)
+        >>> print(round(CArray([1,2,3]).norm(), 5))
         3.74166
-        >>> print round(CArray([[1,2,3]]).norm(2), 5)
+        >>> print(round(CArray([[1,2,3]]).norm(2), 5))
         3.74166
 
-        >>> print CArray([1,2,3]).norm(1)
+        >>> print(CArray([1,2,3]).norm(1))
         6.0
-        >>> print CArray([1,2,3]).tosparse().norm(1)
+        >>> print(CArray([1,2,3]).tosparse().norm(1))
         6.0
 
-        >>> print CArray([1,2,3]).norm(inf)
+        >>> print(CArray([1,2,3]).norm(inf))
         3.0
-        >>> print CArray([1,2,3]).norm(-inf)
+        >>> print(CArray([1,2,3]).norm(-inf))
         1.0
 
-        >>> print CArray([[1,2],[2,4]]).norm()
+        >>> print(CArray([[1,2],[2,4]]).norm())
         Traceback (most recent call last):
             ...
         ValueError: Array has shape (2, 2). Call .norm_2d() to compute matricial norm or vector norm along axis.
@@ -2968,37 +2973,37 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
         >>> from secml.core.constants import inf
 
-        >>> print round(CArray([1,2,3]).norm_2d(), 5)
+        >>> print(round(CArray([1,2,3]).norm_2d(), 5))
         3.74166
 
-        >>> print CArray([1,2,3]).norm_2d(1)  # max(sum(abs(x), axis=0))
+        >>> print(CArray([1,2,3]).norm_2d(1))  # max(sum(abs(x), axis=0))
         3.0
-        >>> print CArray([[1,2,3]]).norm_2d(1)
+        >>> print(CArray([[1,2,3]]).norm_2d(1))
         3.0
 
-        >>> print CArray([1,2,3]).norm_2d(inf)  # max(sum(abs(x), axis=1))
+        >>> print(CArray([1,2,3]).norm_2d(inf))  # max(sum(abs(x), axis=1))
         6.0
-        >>> print CArray([1,2,3]).norm_2d(-inf)  # min(sum(abs(x), axis=1))
+        >>> print(CArray([1,2,3]).norm_2d(-inf))  # min(sum(abs(x), axis=1))
         6.0
 
-        >>> print CArray([[1,2],[2,4]], tosparse=True).norm_2d()
+        >>> print(CArray([[1,2],[2,4]], tosparse=True).norm_2d())
         5.0
 
-        >>> print CArray([[1,2],[2,4]]).norm_2d(axis=0).round(5)
-        CArray([[ 2.23607  4.47214]])
-        >>> print CArray([[1,2],[2,4]]).norm_2d(axis=1).round(5)
-        CArray([[ 2.23607]
-         [ 4.47214]])
+        >>> print(CArray([[1,2],[2,4]]).norm_2d(axis=0).round(5))
+        CArray([[2.23607 4.47214]])
+        >>> print(CArray([[1,2],[2,4]]).norm_2d(axis=1).round(5))
+        CArray([[2.23607]
+         [4.47214]])
 
-        >>> print CArray([1,2,3]).norm_2d(2, axis=0)
-        CArray([[ 1.  2.  3.]])
-        >>> print CArray([1,2,3]).norm_2d(2, axis=1).round(5)
-        CArray([[ 3.74166]])
+        >>> print(CArray([1,2,3]).norm_2d(2, axis=0))
+        CArray([[1. 2. 3.]])
+        >>> print(CArray([1,2,3]).norm_2d(2, axis=1).round(5))
+        CArray([[3.74166]])
 
-        >>> print CArray([1,0,3], tosparse=True).norm_2d(axis=0)  # Norm is dense
-        CArray([[ 1.  0.  3.]])
-        >>> print CArray([1,0,3], tosparse=True).norm_2d(axis=1).round(5)
-        CArray([[ 3.16228]])
+        >>> print(CArray([1,0,3], tosparse=True).norm_2d(axis=0))  # Norm is dense
+        CArray([[1. 0. 3.]])
+        >>> print(CArray([1,0,3], tosparse=True).norm_2d(axis=1).round(5))
+        CArray([[3.16228]])
 
         """
         if axis is None and order in (2, -2):
@@ -3045,16 +3050,16 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([-3,0,2]).sum()
+        >>> print(CArray([-3,0,2]).sum())
         -1
 
-        >>> print CArray([[-3,0],[1,2]], tosparse=True).sum(axis=1)
+        >>> print(CArray([[-3,0],[1,2]], tosparse=True).sum(axis=1))
         CArray([[-3]
          [ 3]])
 
-        >>> print CArray([-3,0,1,2]).sum(axis=0)
+        >>> print(CArray([-3,0,1,2]).sum(axis=0))
         CArray([-3  0  1  2])
-        >>> print CArray([-3,0,1,2]).sum(axis=1)
+        >>> print(CArray([-3,0,1,2]).sum(axis=1))
         CArray([0])
 
         """
@@ -3093,18 +3098,18 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([-3,0,2]).cumsum()
+        >>> print(CArray([-3,0,2]).cumsum())
         CArray([-3 -3 -1])
 
-        >>> print CArray([-3,0,1,2]).cumsum(axis=0)
+        >>> print(CArray([-3,0,1,2]).cumsum(axis=0))
         CArray([-3  0  1  2])
-        >>> print CArray([-3,0,1,2]).cumsum(axis=1)
+        >>> print(CArray([-3,0,1,2]).cumsum(axis=1))
         CArray([-3 -3 -2  0])
 
-        >>> print CArray([[-3,0],[1,2]]).cumsum(dtype=float)
+        >>> print(CArray([[-3,0],[1,2]]).cumsum(dtype=float))
         CArray([-3. -3. -2.  0.])
 
-        >>> print CArray([[-3,0],[1,2]]).cumsum(axis=1)
+        >>> print(CArray([[-3,0],[1,2]]).cumsum(axis=1))
         CArray([[-3 -3]
          [ 1  3]])
 
@@ -3147,25 +3152,25 @@ class CArray(_CArrayInterface):
         Arithmetic is modular when using integer types, and no error is
         raised on overflow. That means that, on a 32-bit platform:
 
-        >>> print CArray([536870910, 536870910, 536870910, 536870910]).prod()  # random result  # doctest: +SKIP
+        >>> print(CArray([536870910, 536870910, 536870910, 536870910]).prod())  # random result  # doctest: +SKIP
         16
 
         Examples
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1,2],[3,4]]).prod()
+        >>> print(CArray([[1,2],[3,4]]).prod())
         24
 
-        >>> print CArray([[1,2],[3,4]], tosparse=True).prod(axis=1)  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([[1,2],[3,4]], tosparse=True).prod(axis=1))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	2
           (1, 0)	12)
-        >>> print CArray([[1,2],[3,4]]).prod(axis=0, dtype=float)
-        CArray([[ 3.  8.]])
+        >>> print(CArray([[1,2],[3,4]]).prod(axis=0, dtype=float))
+        CArray([[3. 8.]])
 
-        >>> print CArray([1,2,3]).prod(axis=0)
+        >>> print(CArray([1,2,3]).prod(axis=0))
         CArray([1 2 3])
-        >>> print CArray([1,2,3]).prod(axis=1)
+        >>> print(CArray([1,2,3]).prod(axis=1))
         CArray([6])
 
         """
@@ -3213,19 +3218,19 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[True,False],[True,True]], tosparse=True).all()
+        >>> print(CArray([[True,False],[True,True]], tosparse=True).all())
         False
 
-        >>> print CArray([[True,False],[True,True]]).all(axis=0)
+        >>> print(CArray([[True,False],[True,True]]).all(axis=0))
         CArray([[ True False]])
 
-        >>> print CArray([-1,0,2,0]).all(axis=0)
+        >>> print(CArray([-1,0,2,0]).all(axis=0))
         CArray([ True False  True False])
-        >>> print CArray([-1,0,2,0]).all(axis=1)
+        >>> print(CArray([-1,0,2,0]).all(axis=1))
         CArray([False])
 
         >>> from secml.core.constants import nan, inf
-        >>> print CArray([nan, inf, -inf]).all()
+        >>> print(CArray([nan, inf, -inf]).all())
         True
 
         """
@@ -3273,19 +3278,19 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[True,False],[True,True]], tosparse=True).any()
+        >>> print(CArray([[True,False],[True,True]], tosparse=True).any())
         True
 
-        >>> print CArray([[True,False],[True,False]]).any(axis=0)
+        >>> print(CArray([[True,False],[True,False]]).any(axis=0))
         CArray([[ True False]])
 
-        >>> print CArray([-1,0,2,0]).any(axis=0)
+        >>> print(CArray([-1,0,2,0]).any(axis=0))
         CArray([ True False  True False])
-        >>> print CArray([-1,0,2,0]).any(axis=1)
+        >>> print(CArray([-1,0,2,0]).any(axis=1))
         CArray([ True])
 
         >>> from secml.core.constants import nan, inf
-        >>> print CArray([nan, inf, -inf]).any()
+        >>> print(CArray([nan, inf, -inf]).any())
         True
 
         """
@@ -3328,22 +3333,22 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[-1,0],[2,0]], tosparse=True).max()
+        >>> print(CArray([[-1,0],[2,0]], tosparse=True).max())
         2
 
-        >>> print CArray([[-1,0],[2,0]]).max(axis=0)
+        >>> print(CArray([[-1,0],[2,0]]).max(axis=0))
         CArray([[2 0]])
-        >>> print CArray([[-1,0],[2,0]]).max(axis=1)
+        >>> print(CArray([[-1,0],[2,0]]).max(axis=1))
         CArray([[0]
          [2]])
 
-        >>> print CArray([-1,0,2,0]).max(axis=0)
+        >>> print(CArray([-1,0,2,0]).max(axis=0))
         CArray([-1  0  2  0])
-        >>> print CArray([-1,0,2,0]).max(axis=1)
+        >>> print(CArray([-1,0,2,0]).max(axis=1))
         CArray([2])
 
         >>> from secml.core.constants import nan
-        >>> print CArray([5,nan]).max()
+        >>> print(CArray([5,nan]).max())
         nan
 
         """
@@ -3385,22 +3390,22 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[-1,0],[2,0]], tosparse=True).min()
+        >>> print(CArray([[-1,0],[2,0]], tosparse=True).min())
         -1
 
-        >>> print CArray([[-2,0],[-1,0]]).min(axis=0)
+        >>> print(CArray([[-2,0],[-1,0]]).min(axis=0))
         CArray([[-2  0]])
-        >>> print CArray([[-2,0],[-1,0]]).min(axis=1)
+        >>> print(CArray([[-2,0],[-1,0]]).min(axis=1))
         CArray([[-2]
          [-1]])
 
-        >>> print CArray([-1,0,2,0]).min(axis=0)
+        >>> print(CArray([-1,0,2,0]).min(axis=0))
         CArray([-1  0  2  0])
-        >>> print CArray([-1,0,2,0]).min(axis=1)
+        >>> print(CArray([-1,0,2,0]).min(axis=1))
         CArray([-1])
 
         >>> from secml.core.constants import nan
-        >>> print CArray([5,nan]).min()
+        >>> print(CArray([5,nan]).min())
         nan
 
         """
@@ -3436,19 +3441,19 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([-1, 0, 3]).argmax()
+        >>> print(CArray([-1, 0, 3]).argmax())
         2
 
-        >>> print CArray([[-1, 0],[4, 3]]).argmax(axis=0)  # We return the index of maximum for each column
+        >>> print(CArray([[-1, 0],[4, 3]]).argmax(axis=0))  # We return the index of maximum for each column
         CArray([[1 1]])
 
-        >>> print CArray([[-1, 0],[4, 3]]).argmax(axis=1)  # We return the index of maximum for each row
+        >>> print(CArray([[-1, 0],[4, 3]]).argmax(axis=1))  # We return the index of maximum for each row
         CArray([[1]
          [0]])
 
-        >>> print CArray([-3,0,1,2]).argmax(axis=0)
+        >>> print(CArray([-3,0,1,2]).argmax(axis=0))
         CArray([0 0 0 0])
-        >>> print CArray([-3,0,1,2]).argmax(axis=1)
+        >>> print(CArray([-3,0,1,2]).argmax(axis=1))
         CArray([3])
 
         """
@@ -3484,19 +3489,19 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([-1, 0, 3]).argmin()
+        >>> print(CArray([-1, 0, 3]).argmin())
         0
 
-        >>> print CArray([[-1, 0],[4, 3]]).argmin(axis=0)  # We return the index of minimum for each column
+        >>> print(CArray([[-1, 0],[4, 3]]).argmin(axis=0))  # We return the index of minimum for each column
         CArray([[0 0]])
 
-        >>> print CArray([[-1, 0],[4, 3]]).argmin(axis=1)  # We return the index of maximum for each row
+        >>> print(CArray([[-1, 0],[4, 3]]).argmin(axis=1))  # We return the index of maximum for each row
         CArray([[0]
          [1]])
 
-        >>> print CArray([-3,0,1,2]).argmin(axis=0)
+        >>> print(CArray([-3,0,1,2]).argmin(axis=0))
         CArray([0 0 0 0])
-        >>> print CArray([-3,0,1,2]).argmin(axis=1)
+        >>> print(CArray([-3,0,1,2]).argmin(axis=1))
         CArray([0])
 
         """
@@ -3537,18 +3542,18 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> from secml.core.constants import nan
-        >>> print CArray([5, nan]).max()
+        >>> print(CArray([5, nan]).max())
         nan
 
-        >>> print CArray([5, nan]).nanmax()
+        >>> print(CArray([5, nan]).nanmax())
         5.0
 
-        >>> print CArray([[-1, nan], [nan, 0]]).nanmax()
+        >>> print(CArray([[-1, nan], [nan, 0]]).nanmax())
         0.0
 
-        >>> print CArray([[-1, nan], [nan, 0]]).nanmax(axis=0)
+        >>> print(CArray([[-1, nan], [nan, 0]]).nanmax(axis=0))
         CArray([[-1.  0.]])
-        >>> print CArray([[-1, nan], [nan, 0]]).nanmax(axis=1)
+        >>> print(CArray([[-1, nan], [nan, 0]]).nanmax(axis=1))
         CArray([[-1.]
          [ 0.]])
 
@@ -3590,18 +3595,18 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> from secml.core.constants import nan
-        >>> print CArray([5, nan]).min()
+        >>> print(CArray([5, nan]).min())
         nan
 
-        >>> print CArray([5, nan]).nanmin()
+        >>> print(CArray([5, nan]).nanmin())
         5.0
 
-        >>> print CArray([[-1, nan], [nan, 0]]).nanmin()
+        >>> print(CArray([[-1, nan], [nan, 0]]).nanmin())
         -1.0
 
-        >>> print CArray([[-1, nan], [nan, 0]]).nanmin(axis=0)
+        >>> print(CArray([[-1, nan], [nan, 0]]).nanmin(axis=0))
         CArray([[-1.  0.]])
-        >>> print CArray([[-1, nan], [nan, 0]]).nanmin(axis=1)
+        >>> print(CArray([[-1, nan], [nan, 0]]).nanmin(axis=1))
         CArray([[-1.]
          [ 0.]])
 
@@ -3645,18 +3650,18 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> from secml.core.constants import nan
-        >>> print CArray([5, nan]).argmax()
+        >>> print(CArray([5, nan]).argmax())
         1
 
-        >>> print CArray([5, nan]).nanargmax()
+        >>> print(CArray([5, nan]).nanargmax())
         0
 
-        >>> print CArray([[-1, nan], [nan, 0]]).nanargmax()
+        >>> print(CArray([[-1, nan], [nan, 0]]).nanargmax())
         3
 
-        >>> print CArray([[-1, nan], [nan, 0]]).nanargmax(axis=0)
+        >>> print(CArray([[-1, nan], [nan, 0]]).nanargmax(axis=0))
         CArray([[0 1]])
-        >>> print CArray([[-1, nan], [nan, 0]]).nanargmax(axis=1)
+        >>> print(CArray([[-1, nan], [nan, 0]]).nanargmax(axis=1))
         CArray([[0]
          [1]])
 
@@ -3698,18 +3703,18 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> from secml.core.constants import nan
-        >>> print CArray([5, nan]).argmin()
+        >>> print(CArray([5, nan]).argmin())
         1
 
-        >>> print CArray([5, nan]).nanargmin()
+        >>> print(CArray([5, nan]).nanargmin())
         0
 
-        >>> print CArray([[-1, nan], [nan, 0]]).nanargmin()
+        >>> print(CArray([[-1, nan], [nan, 0]]).nanargmin())
         0
 
-        >>> print CArray([[-1, nan], [nan, 0]]).nanargmin(axis=0)
+        >>> print(CArray([[-1, nan], [nan, 0]]).nanargmin(axis=0))
         CArray([[0 1]])
-        >>> print CArray([[-1, nan], [nan, 0]]).nanargmin(axis=1)
+        >>> print(CArray([[-1, nan], [nan, 0]]).nanargmin(axis=1))
         CArray([[0]
          [1]])
 
@@ -3767,16 +3772,16 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1,4],[4,3]], tosparse=True).mean()
+        >>> print(CArray([[1,4],[4,3]], tosparse=True).mean())
         3.0
 
-        >>> print CArray([[1,4],[4,3]], tosparse=True).mean(axis=0)  # doctest: +NORMALIZE_WHITESPACE
-        CArray([[ 2.5  3.5]])
+        >>> print(CArray([[1,4],[4,3]], tosparse=True).mean(axis=0))  # doctest: +NORMALIZE_WHITESPACE
+        CArray([[2.5 3.5]])
 
-        >>> print CArray([1,4,4,3]).mean(axis=0)
-        CArray([ 1.  4.  4.  3.])
-        >>> print CArray([1,4,4,3]).mean(axis=1)
-        CArray([ 3.])
+        >>> print(CArray([1,4,4,3]).mean(axis=0))
+        CArray([1. 4. 4. 3.])
+        >>> print(CArray([1,4,4,3]).mean(axis=1))
+        CArray([3.])
 
         """
         out = self._data.mean(axis=axis, dtype=None, keepdims=keepdims)
@@ -3822,19 +3827,19 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1,4],[4,3]]).median()
+        >>> print(CArray([[1,4],[4,3]]).median())
         3.5
 
-        >>> print CArray([[1,4],[4,3]]).median(axis=0)
-        CArray([[ 2.5  3.5]])
+        >>> print(CArray([[1,4],[4,3]]).median(axis=0))
+        CArray([[2.5 3.5]])
 
-        >>> print CArray([1,4,3]).median()  # array size is odd
+        >>> print(CArray([1,4,3]).median())  # array size is odd
         3.0
 
-        >>> print CArray([1,4,4,3]).median(axis=0)
-        CArray([ 1.  4.  4.  3.])
-        >>> print CArray([1,4,4,3]).median(axis=1)
-        CArray([ 3.5])
+        >>> print(CArray([1,4,4,3]).median(axis=0))
+        CArray([1. 4. 4. 3.])
+        >>> print(CArray([1,4,4,3]).median(axis=1))
+        CArray([3.5])
 
         """
         out = self._data.median(axis=axis, keepdims=keepdims)
@@ -3901,19 +3906,19 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print round(CArray([[1,4],[4,3]],tosparse=True).std(), 2)
+        >>> print(round(CArray([[1,4],[4,3]],tosparse=True).std(), 2))
         1.22
 
-        >>> print CArray([[1,4],[4,3]],tosparse=True).std(axis=0)
-        CArray([[ 1.5  0.5]])
+        >>> print(CArray([[1,4],[4,3]],tosparse=True).std(axis=0))
+        CArray([[1.5 0.5]])
 
-        >>> print CArray([[1,4],[4,3]]).std(axis=0, ddof=1).round(2)
-        CArray([[ 2.12  0.71]])
+        >>> print(CArray([[1,4],[4,3]]).std(axis=0, ddof=1).round(2))
+        CArray([[2.12 0.71]])
 
-        >>> print CArray([1,4,4,3]).std(axis=0)
-        CArray([ 0.  0.  0.  0.])
-        >>> print CArray([1,4,4,3]).std(axis=1).round(2)
-        CArray([ 1.22])
+        >>> print(CArray([1,4,4,3]).std(axis=0))
+        CArray([0. 0. 0. 0.])
+        >>> print(CArray([1,4,4,3]).std(axis=1).round(2))
+        CArray([1.22])
 
         """
         out = self._data.std(axis=axis, ddof=ddof, keepdims=keepdims)
@@ -3934,8 +3939,8 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([0,1,3]).sha1()
-        e2c9088d290d4817e38dc7adfef9c984fbab1a6a
+        >>> print(CArray([0,1,3]).sha1())
+        58e199b94a1dfbc5da9def27110d2a4ae28b4123
 
         """
         return self._data.sha1()
@@ -3969,20 +3974,20 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray(2).sqrt()
-        CArray([ 1.414214])
+        >>> print(CArray(2).sqrt())
+        CArray([1.414214])
 
-        >>> print CArray([2,3,4]).sqrt()
-        CArray([ 1.414214  1.732051  2.      ])
+        >>> print(CArray([2,3,4]).sqrt())
+        CArray([1.414214 1.732051 2.      ])
 
-        >>> print CArray([[2,3],[4,5]],tosparse=True).sqrt()  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	1.41421356237
-          (0, 1)	1.73205080757
+        >>> print(CArray([[2,3],[4,5]],tosparse=True).sqrt().round(4))  # doctest: +NORMALIZE_WHITESPACE
+        CArray(  (0, 0)	1.4142
+          (0, 1)	1.7321
           (1, 0)	2.0
-          (1, 1)	2.2360679775)
+          (1, 1)	2.2361)
 
-        >>> print CArray([-3, 0]).sqrt()
-        CArray([ nan   0.])
+        >>> print(CArray([-3, 0]).sqrt())
+        CArray([nan  0.])
 
         """
         return self.__class__(self._data.sqrt())
@@ -4020,10 +4025,10 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
         >>> from secml.core.constants import pi
 
-        >>> print (CArray([0,90,180,270,360,-90,-180,-270])*pi/180).sin().round()
+        >>> print((CArray([0,90,180,270,360,-90,-180,-270])*pi/180).sin().round())
         CArray([ 0.  1.  0. -1. -0. -1. -0.  1.])
 
-        >>> print (CArray([[45,135],[225,315]])*pi/180).sin()
+        >>> print((CArray([[45,135],[225,315]])*pi/180).sin())
         CArray([[ 0.707107  0.707107]
          [-0.707107 -0.707107]])
 
@@ -4048,10 +4053,10 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
         >>> from secml.core.constants import pi
 
-        >>> print (CArray([0,90,180,270,360,-90,-180,-270])*pi/180).cos().round()
+        >>> print((CArray([0,90,180,270,360,-90,-180,-270])*pi/180).cos().round())
         CArray([ 1.  0. -1. -0.  1.  0. -1. -0.])
 
-        >>> print (CArray([[45,135],[225,315]])*pi/180).cos()
+        >>> print((CArray([[45,135],[225,315]])*pi/180).cos())
         CArray([[ 0.707107 -0.707107]
          [-0.707107  0.707107]])
 
@@ -4085,8 +4090,8 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([0,1,3]).exp()
-        CArray([  1.         2.718282  20.085537])
+        >>> print(CArray([0,1,3]).exp())
+        CArray([ 1.        2.718282 20.085537])
 
         """
         return self.__class__(self._data.exp())
@@ -4126,8 +4131,8 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([0,1,3]).log()
-        CArray([     -inf  0.        1.098612])
+        >>> print(CArray([0,1,3]).log())
+        CArray([    -inf 0.       1.098612])
 
         """
         return self.__class__(self._data.log())
@@ -4167,8 +4172,8 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([0,1,3]).log10()
-        CArray([     -inf  0.        0.477121])
+        >>> print(CArray([0,1,3]).log10())
+        CArray([    -inf 0.       0.477121])
 
         """
         return self.__class__(self._data.log10())
@@ -4197,15 +4202,15 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([1,2,3]).pow(2)
+        >>> print(CArray([1,2,3]).pow(2))
         CArray([1 4 9])
 
-        >>> print CArray([1,2,3]).pow(CArray([2,0,3]))
+        >>> print(CArray([1,2,3]).pow(CArray([2,0,3])))
         CArray([ 1  1 27])
 
-        >>> print CArray([1,0,3], tosparse=True).pow(0)  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([1,0,3], tosparse=True).pow(2))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
-          (0, 2)	1)
+          (0, 2)	9)
 
         """
         return self.__pow__(exp)
@@ -4242,11 +4247,11 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([1,2,3]).normpdf()
-        CArray([ 0.241971  0.053991  0.004432])
+        >>> print(CArray([1,2,3]).normpdf())
+        CArray([0.241971 0.053991 0.004432])
 
-        >>> print CArray([1,2,3]).normpdf(2,0.5)
-        CArray([ 0.107982  0.797885  0.107982])
+        >>> print(CArray([1,2,3]).normpdf(2,0.5))
+        CArray([0.107982 0.797885 0.107982])
 
         """
         return self.__class__(self._data.normpdf(float(mu), float(sigma)))
@@ -4269,10 +4274,10 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[-2,0,2]]).sign()
+        >>> print(CArray([[-2,0,2]]).sign())
         CArray([[-1  0  1]])
 
-        >>> print CArray([-2,0,2], tosparse=True).sign()  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([-2,0,2], tosparse=True).sign())  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	-1
           (0, 2)	1)
 
@@ -4304,14 +4309,14 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1, 2, 3], [10, 20, 30]]).diag(k=1)
+        >>> print(CArray([[1, 2, 3], [10, 20, 30]]).diag(k=1))
         CArray([ 2 30])
 
-        >>> print CArray([[2, 1]], tosparse=True).diag()  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([[2, 1]], tosparse=True).diag())  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	2
           (1, 1)	1)
 
-        >>> print CArray([1, 2, 3]).diag(k=1)
+        >>> print(CArray([1, 2, 3]).diag(k=1))
         CArray([[0 1 0 0]
          [0 0 2 0]
          [0 0 0 3]
@@ -4351,26 +4356,26 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray([[1,1],[2,2]]).dot(CArray([[1,1],[0,0]], tosparse=True))
+        >>> print(CArray([[1,1],[2,2]]).dot(CArray([[1,1],[0,0]], tosparse=True)))
         CArray([[1 1]
          [2 2]])
 
-        >>> print CArray([10,20]).dot(CArray([[1],[0]], tosparse=True))
+        >>> print(CArray([10,20]).dot(CArray([[1],[0]], tosparse=True)))
         10
 
         # OUTER PRODUCT
-        >>> print CArray([[10],[20]]).dot(CArray([1,0], tosparse=True))
+        >>> print(CArray([[10],[20]]).dot(CArray([1,0], tosparse=True)))
         CArray([[10  0]
          [20  0]])
 
         # INNER PRODUCT BETWEEN VECTORS
-        >>> print CArray([10,20]).dot(CArray([1,0]))
+        >>> print(CArray([10,20]).dot(CArray([1,0])))
         10
 
         # Inner product between vector-like arrays is a matrix multiplication
-        >>> print CArray([10,20]).dot(CArray([1,0], tosparse=True).T)
+        >>> print(CArray([10,20]).dot(CArray([1,0], tosparse=True).T))
         10
-        >>> print CArray([10,20], tosparse=True).dot(CArray([1,0]).T)
+        >>> print(CArray([10,20], tosparse=True).dot(CArray([1,0]).T))
         10
 
         """
@@ -4470,7 +4475,7 @@ class CArray(_CArrayInterface):
         >>> (array_inv.dot(array).round() == CArray.eye(2)).all()
         True
 
-        >>> print CArray([[1., 2.], [3., 4.]], tosparse=True).inv()  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray([[1., 2.], [3., 4.]], tosparse=True).inv().round(1))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	-2.0
           (0, 1)	1.0
           (1, 0)	1.5
@@ -4580,13 +4585,13 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> array = CArray.empty(3)
-        >>> print array  # doctest: +SKIP
+        >>> print(array  # doctest: +SKIP
         CArray([  0.00000000e+000   4.94944794e+173   6.93660640e-310])  # random
 
         >>> array = CArray.empty((2,1), dtype=int, sparse=True)
-        >>> print array
+        >>> print(array)
         CArray()
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 1)
 
         """
@@ -4624,13 +4629,13 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray.zeros(2)
-        CArray([ 0.  0.])
+        >>> print(CArray.zeros(2))
+        CArray([0. 0.])
 
         >>> array = CArray.zeros((2,1), dtype=int, sparse=True)
-        >>> print array  # sparse arrays with only zeros appear empty...
+        >>> print(array)  # sparse arrays with only zeros appear empty...
         CArray()
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 1)
 
         """
@@ -4672,10 +4677,10 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray.ones(2)
-        CArray([ 1.  1.])
+        >>> print(CArray.ones(2))
+        CArray([1. 1.])
 
-        >>> print CArray.ones((2,1), dtype=int, sparse=True)  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(CArray.ones((2,1), dtype=int, sparse=True))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (1, 0)	1)
 
@@ -4715,16 +4720,16 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
         >>> array = CArray.eye(2)
-        >>> print array
-        CArray([[ 1.  0.]
-         [ 0.  1.]])
+        >>> print(array)
+        CArray([[1. 0.]
+         [0. 1.]])
 
         >>> array = CArray.eye(2, 3, k=1, dtype=int, sparse=True)
-        >>> print array  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 1)	1
           (1, 2)	1)
 
-        >>> print array.shape
+        >>> print(array.shape)
         (2, 3)
 
         """
@@ -4768,16 +4773,16 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> array_dense = CArray.randn(shape=2)
-        >>> print array_dense  # doctest: +SKIP
+        >>> print(array_dense)  # doctest: +SKIP
         CArray([-0.170139  0.445385])
 
         >>> array_dense = CArray.rand(shape=(2, 3))
-        >>> print array_dense  # doctest: +SKIP
+        >>> print(array_dense)  # doctest: +SKIP
         [[ 0.68588225  0.88371576  0.3958642 ]
          [ 0.58243871  0.05104796  0.77719998]]
 
         >>> array_sparse = CArray.rand((2, 3), sparse=True, density=0.45)
-        >>> print array_sparse  # doctest: +SKIP
+        >>> print(array_sparse)  # doctest: +SKIP
         CArray(  (0, 0)	0.209653887609
           (1, 1)	0.521906773406)
 
@@ -4821,11 +4826,11 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> array_dense = CArray.randn(shape=2)
-        >>> print array_dense  # doctest: +SKIP
+        >>> print(array_dense)  # doctest: +SKIP
         CArray([-0.739091  1.201532])
 
         >>> array_dense = CArray.randn(shape=(2, 3))
-        >>> print array_dense  # doctest: +SKIP
+        >>> print(array_dense)  # doctest: +SKIP
         CArray([[ 0.2848132  -0.02965108  1.41184901]
          [-1.3842878   0.2673215   0.18978747]])
 
@@ -4880,14 +4885,14 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray.randuniform(high=5.0, shape=5)  # doctest: +SKIP
+        >>> print(CArray.randuniform(high=5.0, shape=5))  # doctest: +SKIP
         CArray([ 4.36769   0.139844  3.711734  4.924484  3.737672])
 
-        >>> print CArray.randuniform(shape=(2, 5))  # doctest: +SKIP
+        >>> print(CArray.randuniform(shape=(2, 5)))  # doctest: +SKIP
         CArray([[ 0.158324  0.485235  0.723386  0.072326  0.344732]
          [ 0.761642  0.844458  0.501523  0.171417  0.002068]])
 
-        >>> print CArray.randuniform(CArray([-1, -2, 3]), 5, (2, 3))  # doctest: +SKIP
+        >>> print(CArray.randuniform(CArray([-1, -2, 3]), 5, (2, 3)))  # doctest: +SKIP
         CArray([[ -0.584032  1.433291  3.671319]
          [ 3.566163 -1.139602  4.268376]])
 
@@ -4949,15 +4954,15 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> array = CArray.randint(5, shape=10)
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         CArray([1 0 0 2 2 0 2 4 3 4])
 
         >>> array = CArray.randint(0, 5, 10)
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         CArray([0 2 2 0 3 1 4 2 4 1])
 
         >>> array = CArray.randint(0, 5, (2, 2))
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         CArray([[3 2]
          [0 2]])
 
@@ -5003,12 +5008,12 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> array = CArray.randsample(10, shape=(2, 3))
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         CArray([[2 9 4]
          [8 6 5]])
 
         >>> array = CArray.randsample(CArray([1,5,6,7,3]), shape=4)
-        >>> print array  # doctest: +SKIP
+        >>> print(array)  # doctest: +SKIP
         CArray([3 7 5 6])
 
         >>> CArray.randsample(3, 4)
@@ -5071,12 +5076,12 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> array = CArray.linspace(3.0, 4, num=5)
-        >>> print array
-        CArray([ 3.    3.25  3.5   3.75  4.  ])
+        >>> print(array)
+        CArray([3.   3.25 3.5  3.75 4.  ])
 
         >>> array = CArray.linspace(3, 4., num=5, endpoint=False)
-        >>> print array
-        CArray([ 3.   3.2  3.4  3.6  3.8])
+        >>> print(array)
+        CArray([3.  3.2 3.4 3.6 3.8])
 
         """
         return cls(CDense.linspace(
@@ -5135,20 +5140,20 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray.arange(4)
+        >>> print(CArray.arange(4))
         CArray([0 1 2 3])
 
-        >>> print CArray.arange(4.0)
-        CArray([ 0.  1.  2.  3.])
+        >>> print(CArray.arange(4.0))
+        CArray([0. 1. 2. 3.])
 
-        >>> print CArray.arange(4.0, dtype=int)
+        >>> print(CArray.arange(4.0, dtype=int))
         CArray([0 1 2 3])
 
-        >>> print CArray.arange(0, 4)
+        >>> print(CArray.arange(0, 4))
         CArray([0 1 2 3])
 
-        >>> print CArray.arange(0, 4, 0.8)
-        CArray([ 0.   0.8  1.6  2.4  3.2])
+        >>> print(CArray.arange(0, 4, 0.8))
+        CArray([0.  0.8 1.6 2.4 3.2])
 
         """
         return cls(CDense.arange(
@@ -5190,19 +5195,19 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray.concatenate([[1,2],[3,4]], [[11],[22]])
+        >>> print(CArray.concatenate([[1,2],[3,4]], [[11],[22]]))
         CArray([[ 1  2 11]
          [ 3  4 22]])
-        >>> print CArray.concatenate([[1,2],[3,4]], [[11,22]], axis=0)
+        >>> print(CArray.concatenate([[1,2],[3,4]], [[11,22]], axis=0))
         CArray([[ 1  2]
          [ 3  4]
          [11 22]])
 
-        >>> print CArray.concatenate([[1,2],[3,4]], CArray([[11],[22]], tosparse=True))
+        >>> print(CArray.concatenate([[1,2],[3,4]], CArray([[11],[22]], tosparse=True)))
         CArray([[ 1  2 11]
          [ 3  4 22]])
         >>> array = CArray.concatenate(CArray([[1,2],[3,4]], tosparse=True), [[11],[22]])
-        >>> print array  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	2
           (0, 2)	11
@@ -5210,13 +5215,13 @@ class CArray(_CArrayInterface):
           (1, 1)	4
           (1, 2)	22)
 
-        >>> print CArray.concatenate([1,2], [11,22])
+        >>> print(CArray.concatenate([1,2], [11,22]))
         CArray([ 1  2 11 22])
 
-        >>> print CArray.concatenate([1,2], [11,22], axis=0)
+        >>> print(CArray.concatenate([1,2], [11,22], axis=0))
         CArray([[ 1  2]
          [11 22]])
-        >>> print CArray.concatenate([1,2], [11,22], axis=1)
+        >>> print(CArray.concatenate([1,2], [11,22], axis=1))
         CArray([ 1  2 11 22])
 
         """
@@ -5247,21 +5252,21 @@ class CArray(_CArrayInterface):
     
         Examples
         --------
-        >>> print CArray.comblist([[1, 2, 3], [4, 5], [6, 7]])
-        CArray([[ 1.  4.  6.]
-         [ 1.  4.  7.]
-         [ 1.  5.  6.]
-         [ 1.  5.  7.]
-         [ 2.  4.  6.]
-         [ 2.  4.  7.]
-         [ 2.  5.  6.]
-         [ 2.  5.  7.]
-         [ 3.  4.  6.]
-         [ 3.  4.  7.]
-         [ 3.  5.  6.]
-         [ 3.  5.  7.]])
+        >>> print(CArray.comblist([[1, 2, 3], [4, 5], [6, 7]]))
+        CArray([[1. 4. 6.]
+         [1. 4. 7.]
+         [1. 5. 6.]
+         [1. 5. 7.]
+         [2. 4. 6.]
+         [2. 4. 7.]
+         [2. 5. 6.]
+         [2. 5. 7.]
+         [3. 4. 6.]
+         [3. 4. 7.]
+         [3. 5. 6.]
+         [3. 5. 7.]])
 
-        >>> print CArray.comblist([[1, 2], [3]], dtype=int)
+        >>> print(CArray.comblist([[1, 2], [3]], dtype=int))
         CArray([[1 3]
          [2 3]])
 
@@ -5302,21 +5307,21 @@ class CArray(_CArrayInterface):
         >>> x = CArray([1,3,5])
         >>> y = CArray([2,4,6])
         >>> xv, yv = CArray.meshgrid((x, y))
-        >>> print xv
+        >>> print(xv)
         CArray([[1 3 5]
          [1 3 5]
          [1 3 5]])
-        >>> print yv
+        >>> print(yv)
         CArray([[2 2 2]
          [4 4 4]
          [6 6 6]])
         
         >>> xv, yv = CArray.meshgrid((x, y), indexing='ij')
-        >>> print xv
+        >>> print(xv)
         CArray([[1 1 1]
          [3 3 3]
          [5 5 5]])
-        >>> print yv
+        >>> print(yv)
         CArray([[2 4 6]
          [2 4 6]
          [2 4 6]])
@@ -5346,10 +5351,10 @@ class CArray(_CArrayInterface):
         --------
         >>> from secml.array import CArray
 
-        >>> print CArray.from_iterables([[1, 2], (3, 4), CArray([5, 6])])
+        >>> print(CArray.from_iterables([[1, 2], (3, 4), CArray([5, 6])]))
         CArray([1 2 3 4 5 6])
 
-        >>> print CArray.from_iterables([CArray([1, 2]), CArray([[3, 4], [5, 6]])])
+        >>> print(CArray.from_iterables([CArray([1, 2]), CArray([[3, 4], [5, 6]])]))
         CArray([1 2 3 4 5 6])
 
         """

@@ -7,14 +7,15 @@
 
 """
 from abc import ABCMeta, abstractmethod, abstractproperty
+import six
 
 from secml.core import CCreator
 from secml.array import CArray
 
 
+@six.add_metaclass(ABCMeta)
 class CLoss(CCreator):
     """Interface for loss functions."""
-    __metaclass__ = ABCMeta
     __super__ = 'CLoss'
 
     @abstractproperty

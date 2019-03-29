@@ -6,11 +6,14 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
+import six
+from six.moves import range
 
 from secml.core import CCreator
 
 
+@six.add_metaclass(ABCMeta)
 class CDataSplitter(CCreator):
     """Abstract class that defines basic methods for dataset splitting.
 
@@ -25,7 +28,6 @@ class CDataSplitter(CCreator):
         If None, is the RandomState instance used by np.random.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CDataSplitter'
 
     def __init__(self, num_folds=3, random_state=None):
@@ -36,18 +38,19 @@ class CDataSplitter(CCreator):
         self._tr_idx = []  # Training set indices for each fold
         self._ts_idx = []  # Test set indices for each fold
 
-    def __clear(self):
-        """Reset the object."""
-        self._tr_idx = []
-        self._ts_idx = []
+    @property
+    def tr_idx(self):
+        """List of training idx obtained with the split of the data."""
+        return self._tr_idx
 
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return len(self._tr_idx) + len(self._ts_idx) == 0
+    @property
+    def ts_idx(self):
+        """List of test idx obtained with the split of the data."""
+        return self._ts_idx
 
     def __iter__(self):
         """Return a train/test indices pair for each fold."""
-        for f in xrange(self.num_folds):
+        for f in range(self.num_folds):
             yield self._tr_idx[f], self._ts_idx[f]
 
     @abstractmethod
@@ -58,6 +61,11 @@ class CDataSplitter(CCreator):
         ----------
         dataset : CDataset
             Dataset to split.
+
+        Returns
+        -------
+        CDataSplitter
+            Instance of the dataset splitter with tr/ts indices.
 
         """
         raise NotImplementedError("Each data splitting algorithm must define "
@@ -86,13 +94,3 @@ class CDataSplitter(CCreator):
             ds_list.append((dataset[tr_idx, :], dataset[ts_idx, :]))
 
         return ds_list
-
-    @property
-    def tr_idx(self):
-        """List of training idx obtained with the split of the data."""
-        return self._tr_idx
-
-    @property
-    def ts_idx(self):
-        """List of test idx obtained with the split of the data."""
-        return self._ts_idx

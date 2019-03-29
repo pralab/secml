@@ -6,14 +6,15 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
+import six
 
 from secml.core import CCreator
 
 
+@six.add_metaclass(ABCMeta)
 class CRegularizer(CCreator):
     """Abstract class that defines basic methods for regularizer functions."""
-    __metaclass__ = ABCMeta
     __super__ = 'CRegularizer'
 
     @abstractmethod

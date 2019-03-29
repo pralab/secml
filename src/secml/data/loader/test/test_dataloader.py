@@ -1,5 +1,5 @@
 import unittest
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.data.loader import CDataLoader
 
@@ -27,12 +27,13 @@ class TestCDataLoader(CUnitTest):
         for samples, features in shapes:
             dataset = CDataLoader.create(
                 'binary', n_samples=samples, n_features=features).load()
-            self.assertEquals(
-                dataset.X.shape, (samples, features), "Wrong default shape for binary dataset")
-            self.assertEquals(
-                dataset.X[dataset.X > 1].shape[0], 0, "Data is not binary!")
-            self.assertEquals(
-                dataset.X[dataset.X < 0].shape[0], 0, "Data is not binary!")
+            self.assertEqual((samples, features), dataset.X.shape,
+                             "Wrong default shape for binary dataset")
+            self.assertEqual(
+                0, dataset.X[dataset.X > 1].shape[0], "Data is not binary!")
+            self.assertEqual(
+                0, dataset.X[dataset.X < 0].shape[0], "Data is not binary!")
+
 
 if __name__ == '__main__':
     unittest.main()

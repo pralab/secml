@@ -68,12 +68,13 @@ class CDataSplitterStratifiedKFold(CDataSplitter):
 
         Returns
         -------
-        splitter : CDataSplitterStratifiedKFold
+        CDataSplitter
             Instance of the dataset splitter with tr/ts indices.
 
         """
         # Resetting indices
-        self.clear()
+        self._tr_idx = []
+        self._ts_idx = []
 
         sk_splitter = StratifiedKFold(n_splits=self.num_folds,
                                       shuffle=True,

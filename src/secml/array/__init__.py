@@ -1,1 +1,1 @@
-from c_array import CArray
+from .c_array import CArray

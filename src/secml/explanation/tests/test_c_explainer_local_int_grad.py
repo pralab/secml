@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.explanation import CExplainerLocalIntegratedGradients
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA

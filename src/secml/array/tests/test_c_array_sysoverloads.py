@@ -1,16 +1,18 @@
+from __future__ import print_function
+
+from secml.array.tests import CArrayTestCases
+
 import numpy as np
 import scipy.sparse as scs
 import operator as op
-
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+from itertools import product
 
 from secml.array import CArray
 from secml.array.c_dense import CDense
 from secml.array.c_sparse import CSparse
 
 
-class TestCArraySystemOverloads(CArrayTestCases.TestCArray):
+class TestCArraySystemOverloads(CArrayTestCases):
     """Unit test for CArray SYSTEM OVERLOADS methods."""
 
     def test_operators_array_vs_array(self):
@@ -21,7 +23,7 @@ class TestCArraySystemOverloads(CArrayTestCases.TestCArray):
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
                  (self.array_dense, self.array_dense)]
-        self._test_cycle(operators, items, expected_result)
+        self._test_operator_cycle(operators, items, expected_result)
 
         operators = [op.mul]
         expected_result = [CSparse, CSparse, CDense, CDense]
@@ -29,21 +31,24 @@ class TestCArraySystemOverloads(CArrayTestCases.TestCArray):
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
                  (self.array_dense, self.array_dense)]
-        self._test_cycle(operators, items, expected_result)
+        self._test_operator_cycle(operators, items, expected_result)
 
-        operators = [op.div, op.floordiv]
+        try:
+            operators = [op.div, op.truediv, op.floordiv]
+        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+            operators = [op.truediv, op.floordiv]
         expected_result = [CDense, CDense, CDense, CDense]
         items = [(self.array_sparse, self.array_sparse),
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
                  (self.array_dense, self.array_dense)]
-        self._test_cycle(operators, items, expected_result)
+        self._test_operator_cycle(operators, items, expected_result)
 
         operators = [op.pow, CArray.pow]
         expected_result = [CDense, CDense]
         items = [(self.array_dense, self.array_sparse),
                  (self.array_dense, self.array_dense)]
-        self._test_cycle(operators, items, expected_result)
+        self._test_operator_cycle(operators, items, expected_result)
 
         # Sparse array ** array is not supported
         with self.assertRaises(TypeError):
@@ -90,114 +95,172 @@ class TestCArraySystemOverloads(CArrayTestCases.TestCArray):
     def test_operators_array_vs_scalar(self):
         """Test for mathematical operators array vs scalar."""
 
-        # ARRAY +,* SCALAR, SCALAR +,* ARRAY
+        test_scalars = [
+            2, np.ravel(2)[0], 2.0, np.ravel(2.0)[0], np.float32(2.0)]
+        test_z_scalars = [
+            0, np.ravel(0)[0], 0.0, np.ravel(0.0)[0], np.float32(0.0)]
+
+        # DENSE ARRAY + NONZERO SCALAR, NONZERO SCALAR + DENSE ARRAY
+        # sparse array + nonzero scalar is not supported (and viceversa)
         operators = [op.add, op.mul]
-        expected_result = [CDense, CDense,
-                           CDense, CDense,
-                           CDense, CDense,
-                           CDense, CDense]
-        items = [(self.array_dense, 2), (2, self.array_dense),
-                 (self.array_dense, np.ravel(2)[0]),
-                 (np.ravel(2)[0], self.array_dense),
-                 (self.array_dense, np.ravel(2.0)[0]),
-                 (np.ravel(2.0)[0], self.array_dense),
-                 (self.array_dense, np.float32(2.0)),
-                 (np.float32(2.0), self.array_dense)]
-        self._test_cycle(operators, items, expected_result)
+        expected_result = [CDense] * 10
+        items = list(product([self.array_dense], test_scalars)) + \
+            list(product(test_scalars, [self.array_dense]))
+        self._test_operator_cycle(operators, items, expected_result)
 
-        # ARRAY * SCALAR, SCALAR * ARRAY
+        # ARRAY + ZERO SCALAR, ZERO SCALAR + ARRAY
+        operators = [op.add, op.mul]
+        expected_result = [CDense] * 10 + [CSparse] * 10
+        items = list(product([self.array_dense], test_z_scalars)) + \
+            list(product(test_z_scalars, [self.array_dense])) + \
+            list(product([self.array_sparse], test_z_scalars)) + \
+            list(product(test_z_scalars, [self.array_sparse]))
+        self._test_operator_cycle(operators, items, expected_result)
+
+        # DENSE ARRAY - NONZERO SCALAR
+        # sparse array - nonzero scalar is not supported (and viceversa)
+        operators = [op.sub]
+        expected_result = [CDense] * 5
+        items = list(product([self.array_dense], test_scalars))
+        self._test_operator_cycle(operators, items, expected_result)
+
+        # NONZERO SCALAR - DENSE ARRAY
+        operators = [op.sub]
+        expected_result = [CDense] * 5
+        items = list(product(test_scalars, [self.array_dense]))
+        self._test_operator_cycle(operators, items, expected_result)
+
+        # ARRAY - ZERO SCALAR
+        operators = [op.sub]
+        expected_result = [CDense] * 5 + [CSparse] * 5
+        items = list(product([self.array_dense], test_z_scalars)) + \
+            list(product([self.array_sparse], test_z_scalars))
+        self._test_operator_cycle(operators, items, expected_result)
+
+        # ZERO SCALAR - ARRAY
+        operators = [op.sub]
+        expected_result = [CDense] * 5 + [CSparse] * 5
+        items = list(product(test_z_scalars, [self.array_dense])) + \
+            list(product(test_z_scalars, [self.array_sparse]))
+        self._test_operator_cycle(operators, items, expected_result)
+
+        # ARRAY * NONZERO SCALAR, NONZERO SCALAR * ARRAY
         operators = [op.mul]
-        expected_result = [CSparse, CSparse,
-                           CSparse, CSparse,
-                           CSparse, CSparse,
-                           CSparse, CSparse]
-        items = [(self.array_sparse, 2),
-                 (2, self.array_sparse),
-                 (self.array_sparse, np.ravel(2)[0]),
-                 (np.ravel(2)[0], self.array_sparse),
-                 (self.array_sparse, np.ravel(2.0)[0]),
-                 (np.ravel(2.0)[0], self.array_sparse),
-                 (self.array_sparse, np.float32(2.0)),
-                 (np.float32(2.0), self.array_sparse)]
-        self._test_cycle(operators, items, expected_result)
+        expected_result = [CDense] * 10 + [CSparse] * 10
+        items = list(product([self.array_dense], test_scalars)) + \
+            list(product(test_scalars, [self.array_dense])) + \
+            list(product([self.array_sparse], test_scalars)) + \
+            list(product(test_scalars, [self.array_sparse]))
+        self._test_operator_cycle(operators, items, expected_result)
 
-        # ARRAY / SCALAR
-        operators = [op.div, op.floordiv]
-        expected_result = [CSparse, CSparse, CSparse, CSparse]
-        items = [(self.array_sparse, 2),
-                 (self.array_sparse, np.ravel(2)[0]),
-                 (self.array_sparse, np.ravel(2.0)[0]),
-                 (self.array_sparse, np.float32(2))]
-        self._test_cycle(operators, items, expected_result)
+        # ARRAY * ZERO SCALAR, ZERO SCALAR * ARRAY
+        operators = [op.mul]
+        expected_result = [CDense] * 10 + [CSparse] * 10
+        items = list(product([self.array_dense], test_z_scalars)) + \
+            list(product(test_z_scalars, [self.array_dense])) + \
+            list(product([self.array_sparse], test_z_scalars)) + \
+            list(product(test_z_scalars, [self.array_sparse]))
+        self._test_operator_cycle(operators, items, expected_result)
 
-        # ARRAY -,/ SCALAR
-        operators = [op.sub, op.div, op.floordiv]
-        expected_result = [CDense, CDense, CDense, CDense]
-        items = [(self.array_dense, 2),
-                 (self.array_dense, np.ravel(2)[0]),
-                 (self.array_dense, np.ravel(2.0)[0]),
-                 (self.array_dense, np.float32(2))]
-        self._test_cycle(operators, items, expected_result)
+        # ARRAY / NONZERO SCALAR
+        try:
+            operators = [op.div, op.truediv, op.floordiv]
+        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+            operators = [op.truediv, op.floordiv]
+        expected_result = [CDense] * 5 + [CSparse] * 5
+        items = list(product([self.array_dense], test_scalars)) + \
+            list(product([self.array_sparse], test_scalars))
+        self._test_operator_cycle(operators, items, expected_result)
 
-        # SCALAR -,/ ARRAY
-        operators = [op.sub, op.div, op.floordiv]
-        expected_result = [CDense, CDense, CDense, CDense]
-        items = [(2, self.array_dense),
-                 (np.ravel(2)[0], self.array_dense),
-                 (np.ravel(2.0)[0], self.array_dense),
-                 (np.float32(2), self.array_dense)]
-        self._test_cycle(operators, items, expected_result)
+        # NONZERO SCALAR / DENSE ARRAY
+        # nonzero scalar / sparse array is not supported
+        try:
+            operators = [op.div, op.truediv, op.floordiv]
+        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+            operators = [op.truediv, op.floordiv]
+        expected_result = [CDense] * 5
+        items = list(product(test_scalars, [self.array_dense]))
+        self._test_operator_cycle(operators, items, expected_result)
 
-        # ARRAY ** SCALAR
+        # ZERO SCALAR / DENSE ARRAY
+        # zero scalar / sparse array is not supported
+        try:
+            operators = [op.div, op.truediv, op.floordiv]
+        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+            operators = [op.truediv, op.floordiv]
+        expected_result = [CDense] * 5
+        items = list(product(test_z_scalars, [self.array_dense]))
+        self._test_operator_cycle(operators, items, expected_result)
+
+        # ARRAY ** NONZERO SCALAR
         operators = [op.pow, CArray.pow]
-        expected_result = [CSparse, CDense,
-                           CSparse, CDense,
-                           CSparse, CDense,
-                           CSparse, CDense]
-        items = [(self.array_sparse, 2), (self.array_dense, 2),
-                 (self.array_sparse, np.ravel(2)[0]),
-                 (self.array_dense, np.ravel(2)[0]),
-                 (self.array_sparse, np.ravel(2.0)[0]),
-                 (self.array_dense, np.ravel(2.0)[0]),
-                 (self.array_sparse, np.float32(2)),
-                 (self.array_dense, np.float32(2))]
-        self._test_cycle(operators, items, expected_result)
+        expected_result = [CDense] * 5 + [CSparse] * 5
+        items = list(product([self.array_dense], test_scalars)) + \
+            list(product([self.array_sparse], test_scalars))
+        self._test_operator_cycle(operators, items, expected_result)
 
-        # SCALAR ** ARRAY
+        # NONZERO SCALAR ** DENSE ARRAY
+        # nonzero scalar ** sparse array is not supported
         operators = [op.pow]
-        expected_result = [CDense, CDense, CDense, CDense]
-        items = [(2, self.array_dense),
-                 (np.ravel(2)[0], self.array_dense),
-                 (np.ravel(2.0)[0], self.array_dense),
-                 (np.float32(2), self.array_dense)]
-        self._test_cycle(operators, items, expected_result)
+        expected_result = [CDense] * 5
+        items = list(product(test_scalars, [self.array_dense]))
+        self._test_operator_cycle(operators, items, expected_result)
 
-        # SCALAR / SPARSE ARRAY NOT SUPPORTED
-        with self.assertRaises(NotImplementedError):
-            2 / self.array_sparse
-        with self.assertRaises(NotImplementedError):
-            np.ravel(2)[0] / self.array_sparse
-        with self.assertRaises(NotImplementedError):
-            np.ravel(2.0)[0] / self.array_sparse
-        with self.assertRaises(NotImplementedError):
-            np.float32(2) / self.array_sparse
+        # DENSE ARRAY ** ZERO SCALAR
+        # sparse array ** zero scalar is not supported
+        operators = [op.pow, CArray.pow]
+        expected_result = [CDense] * 5
+        items = list(product([self.array_dense], test_z_scalars))
+        self._test_operator_cycle(operators, items, expected_result)
 
-        # SCALAR ** SPARSE ARRAY NOT SUPPORTED
-        with self.assertRaises(NotImplementedError):
-            2 ** self.array_sparse
-        with self.assertRaises(NotImplementedError):
-            np.ravel(2)[0] ** self.array_sparse
-        with self.assertRaises(NotImplementedError):
-            np.ravel(2.0)[0] ** self.array_sparse
-        with self.assertRaises(NotImplementedError):
-            np.float32(2) ** self.array_sparse
+        # ZERO SCALAR ** DENSE ARRAY
+        # zero scalar ** sparse array is not supported
+        operators = [op.pow]
+        expected_result = [CDense] * 5
+        items = list(product(test_z_scalars, [self.array_dense]))
+        self._test_operator_cycle(operators, items, expected_result)
+
+        # NONZERO SCALAR +,- SPARSE ARRAY NOT SUPPORTED (AND VICEVERSA)
+        items = list(product([self.array_sparse], test_scalars)) + \
+            list(product(test_scalars, [self.array_sparse]))
+        operators = [op.add, op.sub]
+        self._test_operator_notimplemented(operators, items)
+
+        # ZERO SCALAR / SPARSE ARRAY NOT SUPPORTED
+        # NONZERO SCALAR / SPARSE ARRAY NOT SUPPORTED
+        items = list(product(test_scalars, [self.array_sparse])) + \
+            list(product(test_z_scalars, [self.array_sparse]))
+        try:
+            operators = [op.div, op.truediv, op.floordiv]
+        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+            operators = [op.truediv, op.floordiv]
+        self._test_operator_notimplemented(operators, items)
+
+        # NONZERO SCALAR ** SPARSE ARRAY NOT SUPPORTED
+        # ZERO SCALAR ** SPARSE ARRAY NOT SUPPORTED
+        items = list(product(test_scalars, [self.array_sparse])) + \
+            list(product(test_z_scalars, [self.array_sparse]))
+        operators = [op.pow]
+        self._test_operator_notimplemented(operators, items)
+
+        # SPARSE ARRAY ** ZERO SCALAR NOT SUPPORTED
+        items = list(product([self.array_sparse], test_z_scalars))
+        operators = [op.pow]
+        self._test_operator_notimplemented(operators, items)
+
+        # TODO: ARRAY / ZERO SCALAR TEST (SEE #353)
 
     def test_operators_array_vs_unsupported(self):
         """Test for mathematical operators array vs unsupported types."""
 
         def test_unsupported(x):
-            for operator in [op.add, op.sub, op.mul,
-                             op.div, op.floordiv, op.pow]:
+            try:
+                operators = [op.add, op.sub, op.mul, op.truediv,
+                             op.div, op.floordiv, op.pow]
+            except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+                operators = [op.add, op.sub, op.mul,
+                             op.truediv, op.floordiv, op.pow]
+            for operator in operators:
                 with self.assertRaises(TypeError):
                     self.logger.info("Testing {:} dense vs '{:}'".format(
                         operator.__name__, type(x).__name__))
@@ -227,8 +290,13 @@ class TestCArraySystemOverloads(CArrayTestCases.TestCArray):
         """Test for mathematical operators unsupported types vs array."""
 
         def test_unsupported(x):
-            for operator in [op.add, op.sub, op.mul,
-                             op.div, op.floordiv, op.pow]:
+            try:
+                operators = [op.add, op.sub, op.mul, op.truediv,
+                             op.div, op.floordiv, op.pow]
+            except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+                operators = [op.add, op.sub, op.mul,
+                             op.truediv, op.floordiv, op.pow]
+            for operator in operators:
                 with self.assertRaises(TypeError):
                     self.logger.info("Testing {:} '{:}' vs dense".format(
                         operator.__name__, type(x).__name__))
@@ -265,7 +333,7 @@ class TestCArraySystemOverloads(CArrayTestCases.TestCArray):
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
                  (self.array_dense, self.array_dense)]
-        self._test_cycle(operators, items, expected_result)
+        self._test_operator_cycle(operators, items, expected_result)
 
     def test_comparison_array_vs_scalar(self):
         """Test for comparison operators array vs scalar."""
@@ -275,7 +343,7 @@ class TestCArraySystemOverloads(CArrayTestCases.TestCArray):
                  (self.array_dense, 2),
                  (self.array_sparse, np.ravel(2)[0]),
                  (self.array_dense, np.ravel(2)[0])]
-        self._test_cycle(operators, items, expected_result)
+        self._test_operator_cycle(operators, items, expected_result)
 
     def test_comparison_array_vs_unsupported(self):
         """Test for comparison operators array vs unsupported types."""
@@ -483,13 +551,13 @@ class TestCArraySystemOverloads(CArrayTestCases.TestCArray):
         self.logger.info("D logical_and C -> " + str(d.logical_and(c)))
 
         with self.assertRaises(ValueError):
-            print d and c
+            print(d and c)
         with self.assertRaises(ValueError):
-            print c and d
+            print(c and d)
         with self.assertRaises(ValueError):
-            print d or c
+            print(d or c)
         with self.assertRaises(ValueError):
-            print c or d
+            print(c or d)
 
         a = CArray(True)
         b = CArray(False)
@@ -508,36 +576,36 @@ class TestCArraySystemOverloads(CArrayTestCases.TestCArray):
             res.append(elem)
             self.assertFalse(self.array_dense.ravel()[elem_id] != elem)
         # Check if all array elements have been returned
-        self.assertEquals(len(res), self.array_dense.size)
+        self.assertEqual(self.array_dense.size, len(res))
 
         res = []
         for elem_id, elem in enumerate(self.array_sparse):
             res.append(elem)
             self.assertFalse(self.array_sparse.ravel()[elem_id] != elem)
         # Check if all array elements have been returned
-        self.assertEquals(len(res), self.array_sparse.size)
+        self.assertEqual(self.array_sparse.size, len(res))
 
         res = []
         for elem_id, elem in enumerate(self.row_flat_dense):
             res.append(elem)
             self.assertFalse(self.row_flat_dense[elem_id] != elem)
         # Check if all array elements have been returned
-        self.assertEquals(len(res), self.row_flat_dense.size)
+        self.assertEqual(self.row_flat_dense.size, len(res))
 
         res = []
         for elem_id, elem in enumerate(self.row_dense):
             res.append(elem)
             self.assertFalse(self.row_dense[elem_id] != elem)
         # Check if all array elements have been returned
-        self.assertEquals(len(res), self.row_dense.size)
+        self.assertEqual(self.row_dense.size, len(res))
 
         res = []
         for elem_id, elem in enumerate(self.row_sparse):
             res.append(elem)
             self.assertFalse(self.row_sparse[elem_id] != elem)
         # Check if all array elements have been returned
-        self.assertEquals(len(res), self.row_sparse.size)
+        self.assertEqual(self.row_sparse.size, len(res))
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

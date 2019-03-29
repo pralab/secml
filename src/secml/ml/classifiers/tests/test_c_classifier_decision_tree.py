@@ -27,21 +27,21 @@ class TestCClassifierDecisionTree(CClassifierTestCases):
         self.logger.info(
             "Probability of affinity to each class: {:}".format(result))
         self.logger.info("Class of affinity: {:}".format(y))
-        self.assertEquals(y, self.dataset.Y[0], "Wrong classification")
+        self.assertEqual(self.dataset.Y[0], y, "Wrong classification")
 
         y, result = self.dec_tree.predict(
             self.dataset.X[50, :], return_decision_function=True)
         self.logger.info(
             "Probability of affinity to each class: {:}".format(result))
         self.logger.info("Class of affinity: {:}".format(y))
-        self.assertEquals(y, self.dataset.Y[50], "Wrong classification")
+        self.assertEqual(self.dataset.Y[50], y, "Wrong classification")
 
         y, result = self.dec_tree.predict(
             self.dataset.X[120, :], return_decision_function=True)
         self.logger.info(
             "Probability of affinity to each class: {:}".format(result))
         self.logger.info("Class of affinity: {:}".format(y))
-        self.assertEquals(y, self.dataset.Y[120], "Wrong classification")
+        self.assertEqual(self.dataset.Y[120], y, "Wrong classification")
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""

@@ -6,6 +6,7 @@
 .. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
 
 """
+from __future__ import print_function
 import logging
 import time
 import sys
@@ -318,7 +319,7 @@ class CLog(object):
         >>> log.set_level(10)
         >>> @log.timed()
         ... def abc():
-        ...     print "Hello world!"
+        ...     print("Hello world!")
 
         >>> abc()  # doctest: +ELLIPSIS
         2... - root - DEBUG - Entering timed block `abc`...
@@ -398,7 +399,7 @@ class CTimer(object):
         if self.logger is not None:
             self.logger.debug(self.msg)
         else:
-            print self.msg
+            print(self.msg)
         # This allow using of 'as' statement (e.g.: with self.timer() as t)
         return self
 
@@ -442,7 +443,7 @@ class CTimer(object):
 
         >>> @CTimer.timed()
         ... def abc():
-        ...     print "Hello world!"
+        ...     print("Hello world!")
 
         >>> abc()  # doctest: +ELLIPSIS
         Entering timed block `abc`...

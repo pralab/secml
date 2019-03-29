@@ -9,9 +9,11 @@ from importlib import import_module
 from inspect import isclass, getmembers
 from functools import wraps
 
+from secml.settings import SECML_STORE_LOGS, SECML_LOGS_PATH
 from secml.core.attr_utils import is_public, extract_attr, \
     as_public, as_private, get_private
 from secml.core.type_utils import is_str
+from secml.core.decorators import deprecated
 import secml.utils.pickle_utils as pck
 from secml.utils.list_utils import find_duplicates
 from secml.utils import CLog, SubLevelsDict
@@ -30,11 +32,13 @@ class CCreator(object):
         Can be None to explicitly NOT support `.create()` and `.load()`.
 
     """
-    __class_type = None  # This attribute must be re-defined to support `.create()`
-    __super__ = None  # Leaving this None will make `create` and `load` not supported
+    __class_type = None  # Must be re-defined to support `.create()`
+    __super__ = None  # Name of the superclass (if `.create()` or `.load()` should be available)
 
-    # TODO: MAKE FILE PATH/NAME DYNAMIC
-    _logger = CLog(add_stream=True, file_handler='logs.log')  # Ancestor logger, level 'WARNING' by default
+    # Ancestor logger, level 'WARNING' by default
+    _logger = CLog(
+        add_stream=True,
+        file_handler=SECML_LOGS_PATH if SECML_STORE_LOGS is True else None)
 
     @property
     def class_type(self):
@@ -262,46 +266,6 @@ class CCreator(object):
 
         raise NameError("no class of type `{:}` found within the package "
                         "of class '{:}'".format(class_type, cls.__module__))
-
-    def clear(self):
-        """Resets internal attributes of all the hierarchy.
-
-        Notes
-        -----
-        To properly support the clear framework, define a `__clear` method
-        that executes the desired operations.
-
-        """
-        if self.is_clear() is True:  # If instance is clear, no need to clear
-            return
-        # __mro__ returns the class hierarchy (reverse order)
-        for base in self.__class__.__mro__:
-            # `__clear` is called only if defined
-            if hasattr(base, as_private(base, 'clear')):
-                getattr(self, as_private(base, 'clear'))()
-
-    def is_clear(self):
-        """Returns True if object is clear.
-
-        This function returns True if the internal attributes of
-        the instance are cleared, namely, if the instance has
-        not performed any operation after init.
-
-        Notes
-        -----
-        To properly support the clear framework, define a `__is_clear` method
-        that executes the desired operations.
-
-        """
-        # __mro__ returns the class hierarchy (reverse order)
-        for base in self.__class__.__mro__:
-            try:
-                if get_private(base, 'is_clear')(self) is False:
-                    return False
-            except AttributeError:
-                # `__is_clear` is not defined
-                pass
-        return True
 
     def get_params(self):
         """Returns the dictionary of class parameters.

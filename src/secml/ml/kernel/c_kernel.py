@@ -6,12 +6,15 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
+import six
+from six.moves import range
 
 from secml.core import CCreator
 from secml.array import CArray
 
 
+@six.add_metaclass(ABCMeta)
 class CKernel(CCreator):
     """Abstract class that defines basic methods for kernels.
 
@@ -28,7 +31,6 @@ class CKernel(CCreator):
     cache_size : int, size of the cache used for kernel computation. Default 100.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CKernel'
 
     cache_size = 100
@@ -91,21 +93,21 @@ class CKernel(CCreator):
 
         >>> array1 = CArray([[15,25],[45,55]])
         >>> array2 = CArray([[10,20],[40,50]])
-        >>> print CKernelRBF().k(array1, array2)
+        >>> print(CKernelRBF().k(array1, array2))
         CArray([[  1.92874985e-22   0.00000000e+00]
          [  0.00000000e+00   1.92874985e-22]])
 
-        >>> print CKernelRBF().k(array1)
+        >>> print(CKernelRBF().k(array1))
         CArray([[ 1.  0.]
          [ 0.  1.]])
 
         >>> vector = CArray([15,25])
-        >>> print CKernelRBF().k(vector, array1)
+        >>> print(CKernelRBF().k(vector, array1))
         CArray([[ 1.  0.]])
-        >>> print CKernelRBF().k(array1, vector)
+        >>> print(CKernelRBF().k(array1, vector))
         CArray([[ 1.]
          [ 0.]])
-        >>> print CKernelRBF().k(vector, vector)
+        >>> print(CKernelRBF().k(vector, vector))
         1.0
 
         """
@@ -119,8 +121,8 @@ class CKernel(CCreator):
         kernel = CArray.empty(
             shape=(x_carray_2d.shape[0], y_carray_2d.shape[0]))
 
-        # cache_size is the xrange step
-        for patterns_done in xrange(0, x_carray_2d.shape[0], self.cache_size):
+        # cache_size is the range step
+        for patterns_done in range(0, x_carray_2d.shape[0], self.cache_size):
 
             # This avoids indexing errors during computation of the last fold
             nxt_pattern_idx = min(
@@ -199,11 +201,11 @@ class CKernel(CCreator):
 
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])
-        >>> print CKernelRBF(gamma=1e-4).gradient(array, vector)
+        >>> print(CKernelRBF(gamma=1e-4).gradient(array, vector))
         CArray([[ 0.00245619  0.00377875]
          [ 0.00556703  0.00647329]])
 
-        >>> print CKernelRBF().gradient(vector, vector)
+        >>> print(CKernelRBF().gradient(vector, vector))
         CArray([ 0.  0.])
 
         """
@@ -218,7 +220,7 @@ class CKernel(CCreator):
         # Instancing an empty array to avoid return errors
         grad = CArray([], tosparse=x_carray.issparse)
         # Kernel gradient can be dense or sparse depending on `x_carray`
-        for i in xrange(x_carray.shape[0]):
+        for i in range(x_carray.shape[0]):
             grad_i = self._gradient(x_carray[i, :], v_carray)
             grad = grad_i if i == 0 else grad.append(grad_i, axis=0)
 

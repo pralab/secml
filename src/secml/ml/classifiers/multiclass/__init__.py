@@ -1,2 +1,2 @@
-from c_classifier_multi import CClassifierMulticlass
-from c_classifier_multi_ova import CClassifierMulticlassOVA
+from .c_classifier_multi import CClassifierMulticlass
+from .c_classifier_multi_ova import CClassifierMulticlassOVA

@@ -1,1 +1,1 @@
-from c_metric_pytorch_accuracy import CMetricPyTorchAccuracy
+from .c_metric_pytorch_accuracy import CMetricPyTorchAccuracy

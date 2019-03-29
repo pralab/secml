@@ -1,7 +1,8 @@
 from secml.ml.classifiers.tests import CClassifierTestCases
 
+from six.moves import range
 import numpy as np
-import pylab as pl
+import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
 from secml.ml.classifiers import CClassifierKNN
@@ -55,12 +56,12 @@ class TestCClassifierKNN(CClassifierTestCases):
         cmap_bold = ListedColormap(['#FF0000', '#00FF00', '#0000FF'])
         # cs = pl.contourf(xx, yy, Z_tree.data, 50)
         # cs = pl.contour(cs, levels=[0],colors = 'k', hold='on')
-        pl.pcolormesh(xx, yy, Z_tree.get_data(), cmap=cmap_light)
+        plt.pcolormesh(xx, yy, Z_tree.get_data(), cmap=cmap_light)
 
-        pl.scatter(self.dataset.X.get_data()[:, 0].ravel(),
-                   self.dataset.X.get_data()[:, 1].ravel(),
-                   c=self.dataset.Y.get_data(), marker='o', cmap=cmap_bold)
-        pl.show()
+        plt.scatter(self.dataset.X.get_data()[:, 0].ravel(),
+                    self.dataset.X.get_data()[:, 1].ravel(),
+                    c=self.dataset.Y.get_data(), marker='o', cmap=cmap_bold)
+        plt.show()
 
     def test_classification(self):
         self.logger.info("Check the classification method... ")
@@ -98,7 +99,7 @@ class TestCClassifierKNN(CClassifierTestCases):
         with self.timer():
             dist, index_n, corresp = self.knn.kneighbors(
                 array_samples, num_samp)
-        for i in xrange(10):
+        for i in range(10):
             self.logger.info("Sample to evaluate: {:}".format(single_sample))
             self.logger.info("Closest: {:}, index {:}, distance {:}"
                              "".format(corresp[i, :], index_n[i], dist[i, :]))

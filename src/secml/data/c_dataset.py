@@ -6,6 +6,8 @@
 .. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
 
 """
+from six.moves import range
+
 from secml.array import CArray
 from secml.core.attr_utils import extract_attr
 
@@ -39,26 +41,26 @@ class CDataset(object):
         >>> from secml.data import CDataset
 
         >>> ds = CDataset([[1,2],[3,4],[5,6]],[1,0,1])
-        >>> print ds.X
+        >>> print(ds.X)
         CArray([[1 2]
          [3 4]
          [5 6]])
-        >>> print ds.Y
+        >>> print(ds.Y)
         CArray([1 0 1])
 
         >>> ds = CDataset([1,2,3],1)  # Patterns will be converted to 2-Dims
-        >>> print ds.X
+        >>> print(ds.X)
         CArray([[1 2 3]])
-        >>> print ds.Y
+        >>> print(ds.Y)
         CArray([1])
 
         >>> from secml.array import CArray
         >>> ds = CDataset(CArray([[1,0],[0,4],[1,0]],tosparse=True), CArray([1,0,1], tosparse=True))
-        >>> print ds.X  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(ds.X)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (1, 1)	4
           (2, 0)	1)
-        >>> print ds.Y
+        >>> print(ds.Y)
         CArray([1 0 1])
 
         # The number of labels must be equal to the number of samples
@@ -68,9 +70,9 @@ class CDataset(object):
         ValueError: number of labels (1) must be equal to the number of samples (2).
 
         >>> ds = CDataset([1,2,3],1, id='mydataset', age=34)  # 2 custom attributes
-        >>> print ds.id
+        >>> print(ds.id)
         mydataset
-        >>> print ds.age
+        >>> print(ds.age)
         34
 
         """
@@ -254,25 +256,25 @@ class CDataset(object):
 
         >>> ds = CDataset([[1,2],[3,4],[5,6]],[1,0,1])
         >>> ds_new = ds.append(CDataset([[10,20],[30,40],[50,60]],[1,0,1]))
-        >>> print ds_new.X
+        >>> print(ds_new.X)
         CArray([[ 1  2]
          [ 3  4]
          [ 5  6]
          [10 20]
          [30 40]
          [50 60]])
-        >>> print ds_new.Y
+        >>> print(ds_new.Y)
         CArray([1 0 1 1 0 1])
 
         >>> ds_new = ds.append(CDataset([[10,20],[30,40],[50,60]],[1,0,1]).tosparse())
-        >>> print ds_new.X
+        >>> print(ds_new.X)
         CArray([[ 1  2]
          [ 3  4]
          [ 5  6]
          [10 20]
          [30 40]
          [50 60]])
-        >>> print ds_new.Y
+        >>> print(ds_new.Y)
         CArray([1 0 1 1 0 1])
 
         """
@@ -291,18 +293,18 @@ class CDataset(object):
         >>> ds_copy = ds.deepcopy()
         >>> ds_copy[0, :] = CDataset([[10,20]], 0)
 
-        >>> print ds.X
+        >>> print(ds.X)
         CArray([[1 2]
          [3 4]
          [5 6]])
-        >>> print ds.Y
+        >>> print(ds.Y)
         CArray([1 0 1])
 
-        >>> print ds_copy.X
+        >>> print(ds_copy.X)
         CArray([[10 20]
          [ 3  4]
          [ 5  6]])
-        >>> print ds_copy.Y
+        >>> print(ds_copy.Y)
         CArray([0 0 1])
 
         """
@@ -322,14 +324,14 @@ class CDataset(object):
         >>> from secml.data import CDataset
 
         >>> ds = CDataset([[1,2],[3,4],[5,6]],[1,0,1]).tosparse()
-        >>> print ds.X  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(ds.X)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1
           (0, 1)	2
           (1, 0)	3
           (1, 1)	4
           (2, 0)	5
           (2, 1)	6)
-        >>> print ds.Y
+        >>> print(ds.Y)
         CArray([1 0 1])
 
         """
@@ -349,7 +351,7 @@ class CDataset(object):
         >>> from secml.data import CDataset
 
         >>> ds = CDataset(CArray([[1,2],[3,4],[5,6]], tosparse=True),[1,0,1]).todense()
-        >>> print ds.X
+        >>> print(ds.X)
         CArray([[1 2]
          [3 4]
          [5 6]])
@@ -378,11 +380,11 @@ class CDataset(object):
         Examples
         --------
         >>> ds = CDataset([[11,22],[33,44],[55,66],[77,88]], [1,0,2,1])
-        >>> print ds.get_labels_asbinary(2)
+        >>> print(ds.get_labels_asbinary(2))
         CArray([0 0 1 0])
-        >>> print ds.get_labels_asbinary(1)
+        >>> print(ds.get_labels_asbinary(1))
         CArray([1 0 0 1])
-        >>> print ds.get_labels_asbinary()
+        >>> print(ds.get_labels_asbinary())
         CArray([[0 1 0]
          [1 0 0]
          [0 0 1]
@@ -396,7 +398,7 @@ class CDataset(object):
             new_labels = CArray.zeros((self.num_samples, self.num_classes),
                                       dtype=self.Y.dtype)
             # We use list of list indexing (find-like)
-            new_labels[[list(xrange(self.num_samples)),
+            new_labels[[list(range(self.num_samples)),
                         CArray(self.Y).tolist()]] = 1
             return new_labels
 
@@ -427,7 +429,7 @@ class CDataset(object):
         x_min = self.X.min(axis=0) - offset
         x_max = self.X.max(axis=0) + offset
         boundary = []
-        for f_idx in xrange(self.num_features):
+        for f_idx in range(self.num_features):
             boundary.append((x_min[0, f_idx].item(), x_max[0, f_idx].item()))
         return boundary
 

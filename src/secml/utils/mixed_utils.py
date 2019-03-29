@@ -6,7 +6,7 @@
 
 """
 
-__all__ = ['AverageMeter', 'OrderedFlexibleClass']
+__all__ = ['AverageMeter', 'OrderedFlexibleClass', 'check_is_fitted']
 
 
 class AverageMeter(object):
@@ -71,11 +71,11 @@ class OrderedFlexibleClass(object):
     >>> from secml.utils import OrderedFlexibleClass
 
     >>> c = OrderedFlexibleClass(('attr1', None), ('attr2', 5))
-    >>> print tuple(attr for attr in c)
+    >>> print(tuple(attr for attr in c))
     (None, 5)
 
     >>> c.attr3 = 123
-    >>> print tuple(attr for attr in c)
+    >>> print(tuple(attr for attr in c))
     (None, 5, 123)
 
     """
@@ -108,3 +108,53 @@ class OrderedFlexibleClass(object):
         """Returns class attributes following a fixed order."""
         for e in self._params:
             yield self.__dict__[e]
+
+
+def check_is_fitted(obj, attributes, msg=None, check_all=True):
+    """Check if the input object is trained (fitted).
+
+    Checks if the input object is fitted by verifying if all or any of the
+    input attributes are not None.
+
+    Parameters
+    ----------
+    obj : object
+        Instance of the class to check. Must implement `.fit()` method.
+    attributes : str or list of str
+        Attribute or list of attributes to check.
+        Es.: `['classes', 'n_features', ...], 'classes'`
+    msg : str or None, optional
+        If None, the default error message is,
+          "this `{name}` is not trained. Call `.fit()` first.".
+        For custom messages if '{name}' is present in the message string,
+        it is substituted by the class name of the checked object.
+    check_all : bool, optional
+        Specify whether to check (True) if all of the given attributes
+        are not None or (False) just any of them. Default True.
+
+    Raises
+    ------
+    NotFittedError
+        If `check_all` is True and any of the attributes is None;
+        if `check_all` is False and all of attributes are None.
+
+    """
+    from secml.core.type_utils import is_list, is_str
+    from secml.core.exceptions import NotFittedError
+
+    if msg is None:
+        msg = "this `{name}` is not trained. Call `.fit()` first."
+
+    if not hasattr(obj, 'fit'):
+        raise TypeError("`{:}` does not implement `.fit()`.".format(obj))
+
+    if is_str(attributes):
+        attributes = [attributes]
+    elif not is_list(attributes):
+        raise TypeError(
+            "the attribute(s) to check must be a string or a list of strings")
+
+    condition = any if check_all is True else all
+
+    if condition([getattr(obj, attr) is None for attr in attributes]):
+        raise NotFittedError(msg.format(name=obj.__class__.__name__))

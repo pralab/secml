@@ -7,14 +7,18 @@
 
 """
 from abc import ABCMeta, abstractmethod
+import six
+from six.moves import range
 
 from secml.core import CCreator
 from secml.core.type_utils import is_int
+from secml.core.exceptions import NotFittedError
 from secml.array import CArray
 from secml.ml.classifiers import CClassifier
 from secml.data import CDataset
 
 
+@six.add_metaclass(ABCMeta)
 class CAttack(CCreator):
     """Interface class for evasion and poisoning attacks.
 
@@ -36,7 +40,6 @@ class CAttack(CCreator):
          'all' (default) if all classes can be manipulated.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CAttack'
 
     def __init__(self, classifier,
@@ -52,23 +55,34 @@ class CAttack(CCreator):
                  solver_type=None,
                  solver_params=None):
 
-        # set true/targeted classifier (and ndim)
-        self.classifier = classifier
-
-        # classes that can be manipulated by the attacker
-        self._attack_classes = None
-
-        # call setters
-        self.attack_classes = attack_classes
-
+        # INTERNAL
         # init attributes to None (re-defined through setters below)
         self._solver = None
-
         # surrogate differentiable model used to optimize the attacks
         self._solver_clf = None
 
+        # READ ONLY ATTRIBUTES
+
+        # the attack point obtained after manipulation
+        self._x_opt = None
+        # value of objective function at x_opt
+        self._f_opt = None
+        # sequence of modifications to the attack point
+        self._x_seq = None
+        # ... and corresponding values of the objective function
+        self._f_seq = None
         # TODO: FULLY SUPPORT SPARSE DATA
         self._issparse = False  # We work with dense data by default
+
+        # set true/targeted classifier (and ndim)
+        if not isinstance(classifier, CClassifier):
+            raise ValueError("Classifier is not a CClassifier!")
+        self._classifier = classifier
+
+        # READ/WRITE
+
+        # classes that can be manipulated by the attacker
+        self.attack_classes = attack_classes
 
         # now we populate solver parameters (via dedicated setters)
         self.dmax = dmax
@@ -86,44 +100,95 @@ class CAttack(CCreator):
         # Surrogate data. Required in case of a nonlinear surrogate classifier
         self.surrogate_data = surrogate_data
 
-        CAttack.__clear(self)
+    ###########################################################################
+    #                           READ-ONLY ATTRIBUTES
+    ###########################################################################
 
-    def __clear(self):
-        """Reset the object."""
-        # the attack point obtained after manipulation
-        self._x_opt = None
+    @property
+    def classifier(self):
+        """Returns classifier"""
+        return self._classifier
 
-        # value of objective function at x_opt
-        self._f_opt = None
+    @property
+    def n_dim(self):  # dimensionality of x0
+        if self._solver_clf is None:
+            raise ValueError('Classifier is not set.')
+        return self._solver_clf.n_features
 
-        # sequence of modifications to the attack point
-        self._x_seq = None
+    @property
+    def issparse(self):
+        return self._issparse
 
-        # ... and corresponding values of the objective function
-        self._f_seq = None
+    @property
+    def x_opt(self):
+        return self._x_opt
 
-        # number of function and gradient evaluations
-        self._f_eval = 0
-        self._grad_eval = 0
+    @property
+    def f_opt(self):
+        return self._f_opt
 
-        # clear solver
-        if self._solver is not None:
-            self._solver.clear()
+    @property
+    def f_seq(self):
+        return self._f_seq
 
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        if self._x_opt is not None or self._f_opt is not None:
-            return False
-        if self._x_seq is not None or self._f_seq is not None:
-            return False
+    @property
+    def x_seq(self):
+        return self._x_seq
 
-        if self._solver is not None and not self._solver.is_clear():
-            return False
+    @property
+    def f_eval(self):
+        return self._solver.f_eval
 
-        if self._f_eval + self._grad_eval != 0:
-            return False
+    @property
+    def grad_eval(self):
+        return self._solver.grad_eval
 
-        return True
+    ###########################################################################
+    #                           READ-WRITE ATTRIBUTES
+    ###########################################################################
+
+    # TODO: REMOVE SETTERS FOR surrogate_classifier and surrogate_data as
+    #  they are required init attributes (resetting them must require reinit)
+
+    @property
+    def surrogate_classifier(self):
+        """Returns surrogate classifier"""
+        return self._surrogate_classifier
+
+    @surrogate_classifier.setter
+    def surrogate_classifier(self, clf):
+        """Sets surrogate classifier"""
+        if not isinstance(clf, CClassifier):
+            raise ValueError("Surrogate classifier is not a CClassifier!")
+
+        # TODO: WE DO NOT CURRENTLY HAVE A RELIABLE WAY TO CHECK IF THE
+        #  CLASSIFIER IS DIFFERENTIABLE. `_run` WILL CRASH ANYWAY LATER
+        #  IF `_gradient_f` IS NOT DEFINED
+
+        # TODO: MAYBE WE CAN REMOVE THIS? AN ERROR WILL BE RAISED LATER ANYWAY
+        if not clf.is_fitted():
+            raise NotFittedError(
+                "the surrogate classifier must be already trained")
+
+        self._surrogate_classifier = clf
+
+        # set classifier inside solver (and re-init solver)
+        self._set_solver_classifier()
+
+    @property
+    def surrogate_data(self):
+        """Returns surrogate data"""
+        return self._surrogate_data
+
+    @surrogate_data.setter
+    def surrogate_data(self, value):
+        """Sets surrogate data."""
+        if not isinstance(value, CDataset):
+            raise ValueError("Surrogate data is not a CDataset!")
+        self._surrogate_data = value
+
+        # Surrogate data changed, reset predictions of solver classifier
+        self._clear_solver_surrogate_predictions()
 
     @property
     def attack_classes(self):
@@ -167,134 +232,13 @@ class CAttack(CCreator):
                 v[:] = True  # all classes can be manipulated
                 return v
 
-            for i in xrange(self.attack_classes.size):
+            for i in range(self.attack_classes.size):
                 v[y == self.attack_classes[i]] = True  # y can be manipulated
 
             return v
 
         else:
             raise TypeError("y can be an integer or a CArray")
-
-    ###########################################################################
-    #                         ABSTRACT PUBLIC METHODS
-    ###########################################################################
-
-    @abstractmethod
-    def run(self, x, y, ds_init=None):
-        """
-        Perform attack for the i-th param name attack power
-        :param x:
-        :param y:
-        :param ds_init:
-        :return:
-        """
-        raise ValueError("Not implemented!")
-
-    @abstractmethod
-    def _run(self, x, y, ds_init=None):
-        """
-        Move one single point for improve attacker objective function score
-        :param x:
-        :param y:
-        :param ds_init:
-        :return:
-        """
-        raise ValueError("Not implemented!")
-
-    ###########################################################################
-    #                           READ-ONLY ATTRIBUTES
-    ###########################################################################
-
-    @property
-    def n_dim(self):  # dimensionality of x0
-        if self._solver_clf is None:
-            raise ValueError('Classifier is not set.')
-        return self._solver_clf.n_features
-
-    @property
-    def issparse(self):
-        return self._issparse
-
-    @property
-    def x_opt(self):
-        return self._x_opt
-
-    @property
-    def f_opt(self):
-        return self._f_opt
-
-    @property
-    def f_seq(self):
-        return self._f_seq
-
-    @property
-    def x_seq(self):
-        return self._x_seq
-
-    @property
-    def f_eval(self):
-        return self._f_eval
-
-    @property
-    def grad_eval(self):
-        return self._grad_eval
-
-    ###########################################################################
-    #                           READ-WRITE ATTRIBUTES
-    ###########################################################################
-    @property
-    def classifier(self):
-        """Returns classifier"""
-        return self._classifier
-
-    @classifier.setter
-    def classifier(self, value):
-        """Sets classifier"""
-        if not isinstance(value, CClassifier):
-            raise ValueError("Classifier is not a CClassifier!")
-        self._classifier = value
-
-    @property
-    def surrogate_classifier(self):
-        """Returns surrogate classifier"""
-        return self._surrogate_classifier
-
-    @surrogate_classifier.setter
-    def surrogate_classifier(self, clf):
-        """Sets surrogate classifier"""
-        if not isinstance(clf, CClassifier):
-            raise ValueError("Surrogate classifier is not a CClassifier!")
-
-        # TODO: WE DO NOT CURRENTLY HAVE A RELIABLE WAY TO CHECK IF THE
-        #  CLASSIFIER IS DIFFERENTIABLE. `_run` WILL CRASH ANYWAY LATER
-        #  IF `_gradient_f` IS NOT DEFINED
-
-        if clf.is_clear():
-            raise RuntimeError("surrogate classifier must be already trained")
-
-        self._surrogate_classifier = clf
-
-        # set classifier inside solver (and re-init solver)
-        self._set_solver_classifier()
-
-    @property
-    def surrogate_data(self):
-        """Returns surrogate data"""
-        return self._surrogate_data
-
-    @surrogate_data.setter
-    def surrogate_data(self, value):
-        """Sets surrogate data."""
-        if not isinstance(value, CDataset):
-            raise ValueError("Surrogate data is not a CDataset!")
-        self._surrogate_data = value
-
-        # Surrogate data changed, reset predictions of solver classifier
-        self._clear_solver_surrogate_predictions()
-
-    ###########################################################################
-    #            READ-WRITE ATTRIBUTES (from/to solver instance)
-    ###########################################################################
 
     @property
     def dmax(self):
@@ -383,8 +327,30 @@ class CAttack(CCreator):
         self._solver_params = {} if value is None else dict(value)
 
     ###########################################################################
-    #                              PRIVATE METHODS
+    #                              METHODS
     ###########################################################################
+
+    @abstractmethod
+    def run(self, x, y, ds_init=None):
+        """
+        Perform attack for the i-th param name attack power
+        :param x:
+        :param y:
+        :param ds_init:
+        :return:
+        """
+        raise ValueError("Not implemented!")
+
+    @abstractmethod
+    def _run(self, x, y, ds_init=None):
+        """
+        Move one single point for improve attacker objective function score
+        :param x:
+        :param y:
+        :param ds_init:
+        :return:
+        """
+        raise ValueError("Not implemented!")
 
     @abstractmethod
     def _objective_function(self, x):
@@ -437,9 +403,6 @@ class CAttack(CCreator):
         """
         Retrieve solution from solver and set internal class parameters.
         """
-        self._f_eval += self._solver.f_eval
-        self._grad_eval += self._solver.grad_eval
-
         # retrieve sequence of evasion points, and final point
         self._x_seq = self._solver.x_seq
         self._x_opt = self._solver.x_opt

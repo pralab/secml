@@ -184,3 +184,4 @@ pip-selfcheck.json
 # Things specific to this project #
 ###################################
 src/secml/VERSION_REV
+*.pdf

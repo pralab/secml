@@ -32,11 +32,11 @@ class CKernelEuclidean(CKernel):
     >>> from secml.array import CArray
     >>> from secml.ml.kernel.c_kernel_euclidean import CKernelEuclidean
 
-    >>> print CKernelEuclidean().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
+    >>> print(CKernelEuclidean().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
     CArray([[ 20.124612  47.801674]
      [ 17.464249  45.      ]])
 
-    >>> print CKernelEuclidean().k(CArray([[1,2],[3,4]]))
+    >>> print(CKernelEuclidean().k(CArray([[1,2],[3,4]])))
     CArray([[ 0.        2.828427]
      [ 2.828427  0.      ]])
 
@@ -109,15 +109,15 @@ class CKernelEuclidean(CKernel):
 
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])
-        >>> print CKernelEuclidean().gradient(array, vector)
+        >>> print(CKernelEuclidean().gradient(array, vector))
         CArray([[-0.544988 -0.838444]
          [-0.652039 -0.758185]])
 
-        >>> print CKernelEuclidean().gradient(array, vector, squared=True)
+        >>> print(CKernelEuclidean().gradient(array, vector, squared=True))
         CArray([[ -26  -40]
          [ -86 -100]])
 
-        >>> print CKernelEuclidean().gradient(vector, vector)
+        >>> print(CKernelEuclidean().gradient(vector, vector))
         CArray([ 0.  0.])
 
         """

@@ -1,13 +1,10 @@
-import numpy as np
-
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+from secml.array.tests import CArrayTestCases
 
 from secml.array import CArray
 from secml.core.constants import nan, inf
 
 
-class TestCArrayUtilsMathElementWise(CArrayTestCases.TestCArray):
+class TestCArrayUtilsMathElementWise(CArrayTestCases):
     """Unit test for CArray UTILS - MATH ELEMENT-WISE methods."""
 
     def test_sqrt(self):
@@ -207,4 +204,4 @@ class TestCArrayUtilsMathElementWise(CArrayTestCases.TestCArray):
     
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

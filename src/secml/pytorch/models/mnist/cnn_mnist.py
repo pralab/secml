@@ -142,6 +142,6 @@ def uniform_scaling_(tensor, factor=1.0):
         shape = tensor.shape
         input_size = 1.0
         for dim in shape[:-1]:
-            input_size *= float(dim)
+            input_size *= dim
         max_val = math.sqrt(3 / input_size) * factor
         return torch.FloatTensor(shape).uniform_(-max_val, max_val)

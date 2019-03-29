@@ -1,15 +1,13 @@
-import numpy as np
+from secml.array.tests import CArrayTestCases
 
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+import numpy as np
+import copy
 
 from secml.array import CArray
 from secml.core.constants import inf
 
-import copy 
 
-
-class TestCArrayUtilsDataAlteration(CArrayTestCases.TestCArray):
+class TestCArrayUtilsDataAlteration(CArrayTestCases):
     """Unit test for CArray UTILS - DATA ALTERATION methods."""
 
     def test_round(self):
@@ -115,8 +113,8 @@ class TestCArrayUtilsDataAlteration(CArrayTestCases.TestCArray):
                 self.logger.info("Array sorted along axis {:}:"
                                  "\n{:}".format(axis, array_sorted))
 
-                self.assertEquals(array_sorted.issparse, array_issparse)
-                self.assertEquals(array_sorted.isdense, array_isdense)
+                self.assertEqual(array_issparse, array_sorted.issparse)
+                self.assertEqual(array_isdense, array_sorted.isdense)
 
                 self.assertFalse((sorted_expected != array_sorted).any())
 
@@ -268,9 +266,9 @@ class TestCArrayUtilsDataAlteration(CArrayTestCases.TestCArray):
             array.shuffle()
             self.logger.info("Array shuffled:\n{:}".format(array))
 
-            self.assertEquals(array.shape, array_shape)
-            self.assertEquals(array.issparse, array_issparse)
-            self.assertEquals(array.isdense, array_isdense)
+            self.assertEqual(array_shape, array.shape)
+            self.assertEqual(array_issparse, array.issparse)
+            self.assertEqual(array_isdense, array.isdense)
 
             array_list = array.tolist()
             array_copy_list = array_copy.tolist()
@@ -305,4 +303,4 @@ class TestCArrayUtilsDataAlteration(CArrayTestCases.TestCArray):
     
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

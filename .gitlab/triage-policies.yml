@@ -54,3 +54,19 @@ resource_rules:
           remove_labels:
             - priority-medium
             - priority-high
+      - name: RemovePriorityAfterMerging
+        conditions:
+          date:
+            attribute: updated_at
+            condition: older_than
+            interval_type: days
+            interval: 1
+          state: merged
+          labels:
+            - priority-{medium, high}
+        limits:
+          oldest: 50
+        actions:
+          remove_labels:
+            - priority-medium
+            - priority-high

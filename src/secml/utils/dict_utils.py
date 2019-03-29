@@ -7,11 +7,13 @@
 """
 from collections import MutableMapping
 
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+
 __all__ = ['load_dict', 'merge_dicts', 'invert_dict',
            'LastInDict', 'SubLevelsDict']
 
 
-def load_dict(file_path, values_dtype=str):
+def load_dict(file_path, values_dtype=str, encoding='ascii'):
     """Load dictionary from textfile.
 
     Each file's line should be <key: value>
@@ -22,6 +24,8 @@ def load_dict(file_path, values_dtype=str):
         Full path to the file to read.
     values_dtype : dtype
         Datatype of the values. Default str (string).
+    encoding : str, optional
+        Encoding to use for reading the file. Default 'ascii'.
 
     Returns
     -------
@@ -31,7 +35,7 @@ def load_dict(file_path, values_dtype=str):
 
     """
     new_dict = {}
-    with open(file_path) as df:
+    with open(file_path, mode='rt', encoding=encoding) as df:
         for key_line in df:
             # a line is 'key: value'
             key_line_splitted = key_line.split(':')
@@ -91,17 +95,17 @@ def invert_dict(d):
     >>> from secml.utils.dict_utils import invert_dict
 
     >>> a = {'k1': 2, 'k2': 2, 'k3': 1}
-    >>> print invert_dict(a)
+    >>> print(invert_dict(a))
     {1: 'k3', 2: ['k1', 'k2']}
 
     >>> a = {'k1': 2, 'k2': [2,3,1], 'k3': 1}
-    >>> print invert_dict(a)
+    >>> print(invert_dict(a))
     {1: ['k2', 'k3'], 2: ['k1', 'k2'], 3: 'k2'}
 
     """
     def tolist(x): return [x] if not isinstance(x, (list, tuple)) else list(x)
     new_d = {}
-    for k in d.iteritems():
+    for k in d.items():
         for v in tolist(k[1]):
             i = k[0]
             if v in new_d:
@@ -188,13 +192,13 @@ class SubLevelsDict(MutableMapping):
 
     >>> li = SubLevelsDict({'attr1': Foo()})
 
-    >>> print type(li['attr1'])
+    >>> print(type(li['attr1']))
     <class 'dict_utils.Foo'>
-    >>> print li['attr1.attr2']
+    >>> print(li['attr1.attr2'])
     5
 
     >>> li['attr1.attr2'] = 10  # Subattributes can be set in the same way
-    >>> print li['attr1.attr2']
+    >>> print(li['attr1.attr2'])
     10
 
     """

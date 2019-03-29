@@ -1,8 +1,7 @@
+from secml.array.tests import CArrayTestCases
+
 import numpy as np
 import scipy.sparse as scs
-
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
 
 from secml.array import CArray
 from secml.array.c_dense import CDense
@@ -11,7 +10,7 @@ from secml.core.type_utils import \
     is_scalar, is_bool, is_list, is_list_of_lists
 
 
-class TestCArrayInit(CArrayTestCases.TestCArray):
+class TestCArrayInit(CArrayTestCases):
     """Unit test for CArray INIT."""
 
     def test_init(self):
@@ -131,4 +130,4 @@ class TestCArrayInit(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()
