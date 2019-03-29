@@ -50,11 +50,25 @@ class CConstraintBox(CConstraint):
     @property
     def center(self):
         """Center of the constraint."""
+        # FIXME: WORKAROUND FOR RUNTIMEWARNING inf + inf
+        if any(np.isinf(self.ub.tondarray())) or \
+                any(np.isinf(self.lb.tondarray())):
+            if self.ub.size > self.lb.size:
+                return CArray.empty(shape=self.ub.shape) * np.nan
+            else:
+                return CArray.empty(shape=self.lb.shape) * np.nan
         return CArray(0.5 * (self.ub + self.lb)).ravel()
 
     @property
     def radius(self):
         """Radius of the constraint."""
+        # FIXME: WORKAROUND FOR RUNTIMEWARNING inf + inf
+        if any(np.isinf(self.ub.tondarray())) or \
+                any(np.isinf(self.lb.tondarray())):
+            if self.ub.size > self.lb.size:
+                return CArray.empty(shape=self.ub.shape) * np.nan
+            else:
+                return CArray.empty(shape=self.lb.shape) * np.nan
         return CArray(0.5 * (self.ub - self.lb)).ravel()
 
     def set_center_radius(self, c, r):
@@ -97,8 +111,14 @@ class CConstraintBox(CConstraint):
                 self.radius.size != x.size:
             return self._constraint_sparse(x)
 
-        z = abs(x - self.center) - self.radius
-        return float(z.max())
+        c = self.center
+        r = self.radius
+
+        # FIXME: WORKAROUND FOR RUNTIMEWARNING x - nan
+        if any(np.isnan(c.tondarray())) or any(np.isnan(r.tondarray())):
+            return np.nan
+
+        return float((abs(x - c) - r).max())
 
     def _constraint_sparse(self, x):
         """Returns the value of the constraint for the sample x.
