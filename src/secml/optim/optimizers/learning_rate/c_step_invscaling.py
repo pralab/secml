@@ -1,6 +1,6 @@
 
 from __future__ import division
-from secml.optim.learning_rate import CStep
+from secml.optim.optimizers.learning_rate import CStep
 
 
 class CStepInvscaling(CStep):

@@ -6,7 +6,7 @@ from secml.array import CArray
 from secml.figure import CFigure
 from secml.utils import fm
 
-from secml.optim.learning_rate import CStepConstant, CStepExponential, \
+from secml.optim.optimizers.learning_rate import CStepConstant, CStepExponential, \
     CStepInvscaling, CStepOptimal
 
 

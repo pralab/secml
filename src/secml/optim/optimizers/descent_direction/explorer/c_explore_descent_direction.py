@@ -8,7 +8,7 @@
 
 """
 from secml.core import CCreator
-from secml.optim.line_search import CLineSearch
+from secml.optim.optimizers.line_search import CLineSearch
 from secml.array import CArray
 
 
