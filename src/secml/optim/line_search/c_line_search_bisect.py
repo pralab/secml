@@ -3,9 +3,10 @@
    :synopsis: Binary line search
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+
 """
 from __future__ import division
-from secml.optim.line_search.c_line_search import CLineSearch
+from secml.optim.line_search import CLineSearch
 from secml.array import CArray
 
 
@@ -71,6 +72,7 @@ class CLineSearchBisect(CLineSearch):
         Parameters
         ----------
         value: CArray or None
+
         """
         if value is None:
             self._eta_min = None
@@ -121,9 +123,10 @@ class CLineSearchBisect(CLineSearch):
             self.logger.debug("x1 and x2 are not feasible. Returning x.")
             return x, f0
 
-        # uses cached values (if available) to save computations
-        f1 = self._fun_idx_min if self._fun_idx_min is not None else \
-            self.fun.fun(x1, **kwargs)
+        # FIXME: THIS fun_idx_max thing is not working
+        # f1 = self._fun_idx_min if self._fun_idx_min is not None else \
+        #     self.fun.fun(x1, **kwargs)
+        f1 = self.fun.fun(x1, **kwargs)
 
         if not self._is_feasible(x2):
             if f1 < f0:
@@ -136,9 +139,10 @@ class CLineSearchBisect(CLineSearch):
                               ", f(x1): " + str(f1))
             return x, f0
 
-        # uses cached values (if available) to save computations
-        f2 = self._fun_idx_max if self._fun_idx_max is not None else \
-            self.fun.fun(x2, **kwargs)
+        # FIXME: THIS fun_idx_max thing is not working
+        # f2 = self._fun_idx_max if self._fun_idx_max is not None else \
+        #     self.fun.fun(x2, **kwargs)
+        f2 = self.fun.fun(x2, **kwargs)
 
         if not self._is_feasible(x1):
             if f2 < f0:
@@ -148,11 +152,11 @@ class CLineSearchBisect(CLineSearch):
             return x, f0
 
         # else return best point among x1, x2 and x
-        if f2 <= f0 and f2 < f1:
+        if f2 <= f0 and f2 <= f1:
             self.logger.debug("Returning x2.")
             return x2, f2
 
-        if f1 <= f0 and f1 < f2:
+        if f1 <= f0 and f1 <= f2:
             self.logger.debug("Returning x1.")
             return x1, f1
 
