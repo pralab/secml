@@ -454,9 +454,6 @@ class CAttackPoisoning(CAttack):
         :param idx: index of point in xc to be manipulated to poison clf
         :return:
         """
-        self._f_eval = 0
-        self._grad_eval = 0
-
         xc = CArray(xc.deepcopy()).atleast_2d()
 
         self._yc = yc

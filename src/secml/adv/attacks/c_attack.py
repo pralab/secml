@@ -112,9 +112,6 @@ class CAttack(CCreator):
         if self._x_seq is not None or self._f_seq is not None:
             return False
 
-        if self._f_eval + self._grad_eval != 0:
-            return False
-
         return True
 
     @property

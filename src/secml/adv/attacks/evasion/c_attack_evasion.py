@@ -367,9 +367,6 @@ class CAttackEvasion(CAttack):
          the objective function and sequence of attack points (if enabled).
 
         """
-        self._f_eval = 0
-        self._grad_eval = 0
-
         # x0 must 2-D, y0 scalar if a CArray of size 1
         x0 = x0.atleast_2d()
         y0 = y0.item() if isinstance(y0, CArray) else y0
@@ -488,8 +485,8 @@ class CAttackEvasion(CAttack):
 
             self.logger.info(
                 "Point: {:}/{:}, dmax:{:}, f(x):{:}, eval:{:}/{:}".format(
-                    k, x.shape[0], self._dmax, f_opt, self._f_eval,
-                    self._grad_eval))
+                    k, x.shape[0], self._dmax, f_opt,
+                    self.f_eval, self.grad_eval))
             adv_ds.X[k, :] = x_opt
             fs_opt[i] = f_opt
 
