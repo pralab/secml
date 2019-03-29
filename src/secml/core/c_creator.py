@@ -267,48 +267,6 @@ class CCreator(object):
         raise NameError("no class of type `{:}` found within the package "
                         "of class '{:}'".format(class_type, cls.__module__))
 
-    @deprecated("will be removed no later than in v0.6-dev")
-    def clear(self):
-        """Resets internal attributes of all the hierarchy.
-
-        Notes
-        -----
-        To properly support the clear framework, define a `__clear` method
-        that executes the desired operations.
-
-        """
-        if self.is_clear() is True:  # If instance is clear, no need to clear
-            return
-        # __mro__ returns the class hierarchy (reverse order)
-        for base in self.__class__.__mro__:
-            # `__clear` is called only if defined
-            if hasattr(base, as_private(base, 'clear')):
-                getattr(self, as_private(base, 'clear'))()
-
-    @deprecated("will be removed no later than in v0.6-dev")
-    def is_clear(self):
-        """Returns True if object is clear.
-
-        This function returns True if the internal attributes of
-        the instance are cleared, namely, if the instance has
-        not performed any operation after init.
-
-        Notes
-        -----
-        To properly support the clear framework, define a `__is_clear` method
-        that executes the desired operations.
-
-        """
-        # __mro__ returns the class hierarchy (reverse order)
-        for base in self.__class__.__mro__:
-            try:
-                if get_private(base, 'is_clear')(self) is False:
-                    return False
-            except AttributeError:
-                # `__is_clear` is not defined
-                pass
-        return True
-
     def get_params(self):
         """Returns the dictionary of class parameters.
 
