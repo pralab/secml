@@ -1,5 +1,5 @@
 
-from secml.optim.learning_rate import CStep
+from secml.optim.optimizers.learning_rate import CStep
 
 
 class CStepExponential(CStep):

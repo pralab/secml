@@ -94,10 +94,10 @@ class CEvasionRejectTestCases(object):
 
             dmax = 5
 
-            # self.solver_type = 'descent-direction'
+            # self.solver_type = 'gradient-bls'
             # self.solver_params = {'eta': 1e-1, 'eta_min': 0.1}
 
-            self.solver_type = 'gradient-descent'
+            self.solver_type = 'gradient'
             self.solver_params = {'eta': 0.5, 'max_iter': 3}
 
             eva = CAttackEvasion(classifier=self.multiclass,

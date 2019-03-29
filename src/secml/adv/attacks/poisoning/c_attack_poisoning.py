@@ -209,7 +209,7 @@ class CAttackPoisoning(CAttack):
 
         solver_type = self._solver_type
         if solver_type is None:
-            solver_type = 'gradient-descent'
+            solver_type = 'gradient'
 
         self._solver = COptimizer.create(
             solver_type,

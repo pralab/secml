@@ -240,7 +240,7 @@ class CAttackEvasion(CAttack):
 
         solver_type = self._solver_type
         if solver_type is None:
-            solver_type = 'descent-direction'
+            solver_type = 'gradient-bls'
 
         constr = CConstraint.create(self._distance)
         constr.center = self._x0

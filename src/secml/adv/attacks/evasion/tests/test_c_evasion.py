@@ -71,8 +71,8 @@ class CEvasionTestCases(object):
 
             self.logger.info("Malicious sample: " + str(self.x0))
 
-            self.solver_type = 'descent-direction'
-            # self.solver_type = 'gradient-descent'
+            self.solver_type = 'gradient-bls'
+            # self.solver_type = 'gradient'
 
             self.solver_params = {
                 "eta": self.eta,

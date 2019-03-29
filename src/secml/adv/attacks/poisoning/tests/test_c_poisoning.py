@@ -105,10 +105,10 @@ class CPoisoningTestCases(object):
 
         def _pois_obj_creation(self):
 
-            # self.solver_type = 'gradient-descent'
+            # self.solver_type = 'gradient'
             # self.solver_params = {'eta': 0.05, 'eps': 1e-9}
 
-            self.solver_type = 'descent-direction'
+            self.solver_type = 'gradient-bls'
             self.solver_params = {'eta': 0.05, 'eta_min': 0.1, 'eps': 1e-9}
 
             self._poisoning_params = {

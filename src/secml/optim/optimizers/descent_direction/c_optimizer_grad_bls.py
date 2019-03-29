@@ -1,8 +1,9 @@
 """
-.. module:: CSolverDescentDirection
-   :synopsis: This class explores a descent direction. Differently from
-   standard line searches, it explores a subset of n_dimensions at a time.
-   In this sense, it is an extension of the classical line-search approach.
+.. module:: COptimizerGradBLS
+   :synopsis: This class explores a descent direction using Bisect Line Search.
+   Differently from standard line searches, it explores a subset of
+   n_dimensions at a time. In this sense, it is an extension of the
+   classical line-search approach.
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
@@ -10,14 +11,15 @@
 from six.moves import range
 import numpy as np
 
-from secml.optim.optimizers.descent_direction.explorer import \
-    CExploreDescentDirection
+# Used only by this class, will be removed in the future
+from .explorer import _CExploreDescentDirection
+
 from secml.array import CArray
 from secml.optim.optimizers import COptimizer
 
 
-class CSolverDescDir(COptimizer):
-    """This is an abstract class for optimizing:
+class COptimizerGradBLS(COptimizer):
+    """Solves the following problem:
 
         min  f(x)
         s.t. d(x,x0) <= dmax
@@ -35,10 +37,10 @@ class CSolverDescDir(COptimizer):
 
     Attributes
     ----------
-    class_type : 'descent-direction'
+    class_type : 'gradient-bls'
 
     """
-    __class_type = 'descent-direction'
+    __class_type = 'gradient-bls'
 
     def __init__(self, fun,
                  constr=None, bounds=None,
@@ -134,7 +136,7 @@ class CSolverDescDir(COptimizer):
                 'This constraint is not supported by \
                      the current solver.')
 
-        self._explorer = CExploreDescentDirection(
+        self._explorer = _CExploreDescentDirection(
             fun=self._fun,
             constr=self._constr,
             bounds=self._bounds,

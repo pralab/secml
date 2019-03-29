@@ -8,7 +8,7 @@
 from __future__ import division
 import numpy as np
 
-from secml.optim.line_search import CLineSearch
+from secml.optim.optimizers.line_search import CLineSearch
 from secml.array import CArray
 
 

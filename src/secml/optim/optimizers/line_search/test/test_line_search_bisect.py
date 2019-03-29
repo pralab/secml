@@ -3,7 +3,7 @@ from secml.testing import CUnitTest
 from secml.optim.function import CFunction
 from secml.array import CArray
 from secml.figure import CFigure
-from secml.optim.line_search import CLineSearchBisect
+from secml.optim.optimizers.line_search import CLineSearchBisect
 from secml.utils import fm
 
 
