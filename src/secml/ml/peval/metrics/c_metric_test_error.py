@@ -31,7 +31,7 @@ class CMetricTestError(CMetric):
     >>> from secml.array import CArray
 
     >>> peval = CMetricTestError()
-    >>> print peval.performance_score(CArray([0, 1, 2, 3]), CArray([0, 1, 1, 3]))
+    >>> print(peval.performance_score(CArray([0, 1, 2, 3]), CArray([0, 1, 1, 3])))
     0.25
 
     """

@@ -49,12 +49,12 @@ class CNormalizerUnitNorm(CNormalizer):
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
     >>> dense_normalized = CNormalizerUnitNorm().fit_transform(array)
-    >>> print dense_normalized
+    >>> print(dense_normalized)
     CArray([[ 0.408248 -0.408248  0.816497]
      [ 1.        0.        0.      ]
      [ 0.        0.707107 -0.707107]])
 
-    >>> print CNormalizerUnitNorm(order=1).fit_transform(array)
+    >>> print(CNormalizerUnitNorm(order=1).fit_transform(array))
     CArray([[ 0.25 -0.25  0.5 ]
      [ 1.    0.    0.  ]
      [ 0.    0.5  -0.5 ]])
@@ -72,14 +72,6 @@ class CNormalizerUnitNorm(CNormalizer):
 
         super(CNormalizerUnitNorm, self).__init__(preprocess=preprocess)
 
-    def __clear(self):
-        """Reset the object."""
-        self._norm = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return self.norm is None
-
     @property
     def order(self):
         """Returns the order of the norm used for patterns normalization."""
@@ -89,6 +81,17 @@ class CNormalizerUnitNorm(CNormalizer):
     def norm(self):
         """Returns the norm of each training array's patterns."""
         return self._norm
+
+    def _check_is_fitted(self):
+        """Check if the preprocessor is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the preprocessor is not fitted.
+
+        """
+        pass  # This preprocessor does not require training
 
     def _fit(self, x, y=None):
         """Fit the normalizer.
@@ -114,14 +117,6 @@ class CNormalizerUnitNorm(CNormalizer):
         """
         return self
 
-    # FIXME: remove this method after removing clear DEPRECATED framework
-    def transform(self, x):
-
-        # Transform data using inner preprocess, if defined
-        x = self._preprocess_data(x)
-
-        return self._transform(x)
-
     def _transform(self, x):
         """Transform array patterns to have unit norm.
 
@@ -143,14 +138,14 @@ class CNormalizerUnitNorm(CNormalizer):
 
         >>> normalizer = CNormalizerUnitNorm().fit(array)
         >>> array_normalized = normalizer.transform(array)
-        >>> print array_normalized  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(array_normalized)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	0.408248290464
           (0, 1)	-0.408248290464
           (0, 2)	0.816496580928
           (1, 0)	1.0
           (2, 1)	0.707106781187
           (2, 2)	-0.707106781187)
-        >>> print array_normalized.todense().norm_2d(order=normalizer.order, axis=1)
+        >>> print(array_normalized.todense().norm_2d(order=normalizer.order, axis=1))
         CArray([[ 1.]
          [ 1.]
          [ 1.]])
@@ -171,10 +166,7 @@ class CNormalizerUnitNorm(CNormalizer):
             for e_idx, e in enumerate(scale):
                 x[e_idx, :] /= e
         else:
-            # Normalizing array and removing any 'nan'
             x /= scale  # This creates a copy
-
-        x.nan_to_num()  # Avoid storing nans/inf
 
         return x
 
@@ -209,7 +201,7 @@ class CNormalizerUnitNorm(CNormalizer):
 
         >>> normalizer = CNormalizerUnitNorm().fit(array)
         >>> array_normalized = normalizer.transform(array)
-        >>> print normalizer.revert(array_normalized)  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(normalizer.revert(array_normalized))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1.0
           (0, 1)	-1.0
           (0, 2)	2.0
@@ -220,9 +212,9 @@ class CNormalizerUnitNorm(CNormalizer):
         """
         x = x.atleast_2d()
 
-        # Training first!
-        if self.norm is None:
-            raise ValueError("fit the normalizer first.")
+        if self.norm is None:  # special case of "check_is_fitted"
+            raise ValueError(
+                "call `.transform` at least one time before using `.revert`.")
 
         if x.shape[0] != self.norm.size:
             raise ValueError("array to revert must have {:} patterns (rows)."

@@ -1,28 +1,39 @@
 import os
-import io
+from io import open  # TODO: REMOVE AFTER TRANSITIONING TO PYTHON 3
+import sys
 import subprocess
 from pkg_resources import parse_version
 
 from ._globals import _NoValue
-from .settings import SECML_CONFIG
 
+# Logger for this module only. Use `secml.utils.CLog` elsewhere
+import logging
+_logger = logging.getLogger(__name__)
+_logger.setLevel(logging.INFO)
+_logger_handle = logging.StreamHandler(sys.stdout)
+_logger_handle.setFormatter(logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+_logger.addHandler(_logger_handle)
 
-__all__ = ['_NoValue', 'SECML_CONFIG', '__version__']
-
+__all__ = ['_NoValue', '__version__']
 
 _here = os.path.abspath(os.path.dirname(__file__))
 
 
+if sys.version_info < (3, 0):
+    _logger.warn("DEPRECATION: Python 2.7 is deprecated, please use "
+                 "Python >= 3.5. Support for Python 2.7 will be dropped "
+                 "in a future release without advanced notice.")
+
+
 def _read(*path_parts):
-    # intentionally *not* adding an encoding option to open, See:
-    #   https://github.com/pypa/virtualenv/issues/201#issuecomment-3145690
-    with io.open(os.path.join(_here, *path_parts), 'r') as fp:
+    with open(os.path.join(_here, *path_parts), 'r', encoding='ascii') as fp:
         return fp.read().strip()
 
 
 def _write_rev(v, *path_parts):
     """Write revision id to file."""
-    a = open(os.path.join(_here, *path_parts), 'w')
+    a = open(os.path.join(_here, *path_parts), 'w', encoding='ascii')
     try:
         a.write(v)
     finally:

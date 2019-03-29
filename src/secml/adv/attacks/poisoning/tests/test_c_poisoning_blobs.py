@@ -1,5 +1,5 @@
-from secml.utils import CUnitTest
-from test_c_poisoning import CPoisoningTestCases
+from secml.testing import CUnitTest
+from secml.adv.attacks.poisoning.tests import CPoisoningTestCases
 
 from secml.figure import CFigure
 

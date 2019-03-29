@@ -1,4 +1,5 @@
-from c_classifier_pytorch import CClassifierPyTorch
-from c_classifier_pytorch_mlp import CClassifierPyTorchMLP
-from c_classifier_pytorch_densenet_cifar import CClassifierPyTorchDenseNetCifar
-from c_classifier_pytorch_cnn_mnist import CClassifierPyTorchCNNMNIST
+from .c_classifier_pytorch import CClassifierPyTorch
+from .c_classifier_pytorch_mlp import CClassifierPyTorchMLP
+from .c_classifier_pytorch_densenet_cifar import \
+    CClassifierPyTorchDenseNetCifar
+from .c_classifier_pytorch_cnn_mnist import CClassifierPyTorchCNNMNIST

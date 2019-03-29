@@ -7,6 +7,7 @@
 
 """
 from copy import deepcopy
+from six.moves import range
 
 import torch
 from torch.utils.data import DataLoader
@@ -20,6 +21,7 @@ from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.loss import CSoftmax
 from secml.utils import load_dict, fm
 from secml.utils.mixed_utils import AverageMeter
+from secml.core.exceptions import NotFittedError
 
 from secml.pytorch.settings import SECML_PYTORCH_USE_CUDA
 from secml.pytorch.data import CDatasetPyTorch
@@ -30,14 +32,20 @@ from secml.pytorch.utils.optim_utils import add_weight_decay
 use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
 
 
-# FIXME: inner preprocess not manage yet for training phase
 class CClassifierPyTorch(CClassifier):
     """PyTorch Neural Network classifier.
 
     Parameters
     ----------
-    model
+    model : torch.nn.Module or callable
         PyTorch Neural Network model or function which returns a model.
+    pretrained : bool, optional
+        If True, `model` is supposed to be (or return) an already
+        trained network. Otherwise, the state of the model should be
+        loaded using `.load_state()` or the network should be trained
+        by calling `.fit()`.
+        This keyword will be passed to the models that support it
+        (like models from `torchvision.models`).
     learning_rate : float, optional
         Learning rate. Default 1e-2.
     momentum : float, optional
@@ -73,7 +81,6 @@ class CClassifierPyTorch(CClassifier):
     input_shape : tuple, optional
         Shape of the input expected by the first layer of the network.
         If None, samples will not be reshaped before passing them to the net.
-        If not set, `load_state` will not be available.
     softmax_outputs : bool, optional
         If True, apply softmax function to the outputs. Default False.
     random_state : int or None, optional
@@ -87,15 +94,17 @@ class CClassifierPyTorch(CClassifier):
     """
     __super__ = 'CClassifierPyTorch'
 
-    def __init__(self, model, learning_rate=1e-2, momentum=0.9,
-                 weight_decay=1e-4, loss='cross-entropy', epochs=100,
-                 gamma=0.1, lr_schedule=(50, 75), batch_size=1,
-                 regularize_bias=True, train_transform=None, preprocess=None,
+    def __init__(self, model, pretrained=False,
+                 learning_rate=1e-2, momentum=0.9, weight_decay=1e-4,
+                 loss='cross-entropy', epochs=100, gamma=0.1,
+                 lr_schedule=(50, 75), batch_size=1, regularize_bias=True,
+                 train_transform=None, preprocess=None,
                  input_shape=None, softmax_outputs=False,
                  random_state=None, **model_params):
 
         # Model and params
         self._model_base = model
+        self._trained = pretrained
 
         # If a string was passed as `model_params` try to load params from file
         if 'model_params' in model_params:
@@ -334,17 +343,27 @@ class CClassifierPyTorch(CClassifier):
         new_obj.init_optimizer()
         new_obj.load_state(state_dict)
 
-        # Restoring original CClassifier parameters
-        # that may had been updated by `load_state`
-        # Ugly, but required for managing the train/pretrain cases
-        new_obj._classes = self.classes
-        new_obj._n_features = self.n_features
-
         # Decrementing the start_epoch counter as the temporary
         # save/load of the state has incremented it
         new_obj._start_epoch -= 1
 
         return new_obj
+
+    def _check_is_fitted(self):
+        """Check if the classifier is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier is not fitted.
+
+        """
+        # In this classifier we use `_trained` for the fitting check
+        # This is set during init or by .load_state (which is called by .fit)
+        if self._trained is False:
+            raise NotFittedError(
+                "this `{name}` is not trained. Call `.fit()` first."
+                "".format(name=self.__class__.__name__))
 
     def init_model(self):
         """Initialize the PyTorch Neural Network model."""
@@ -356,7 +375,11 @@ class CClassifierPyTorch(CClassifier):
                 torch.backends.cudnn.deterministic = True
 
         # Call the specific model initialization method passing params
-        self._model = self._model_base(**self._model_params)
+        try:  # pretrained is a special keyword used by `torchvision.models`
+            self._model = self._model_base(
+                pretrained=self._trained, **self._model_params)
+        except TypeError:  # pretrained probably not supported
+            self._model = self._model_base(**self._model_params)
 
         # Make sure that model is a proper PyTorch module
         if not isinstance(self._model, torch.nn.Module):
@@ -508,27 +531,16 @@ class CClassifierPyTorch(CClassifier):
         if dataparallel is True:
             # Convert a DataParallel model state to a normal model state
             # Get the keys to alter the dict on-the-fly
-            keys = state_dict['state_dict'].keys()
-            for k in keys:
+            for k in list(state_dict['state_dict']):
                 name = k.replace('module.', '')  # remove module.
                 state_dict['state_dict'][name] = state_dict['state_dict'][k]
                 state_dict['state_dict'].pop(k)
         self._model.load_state_dict(state_dict['state_dict'])
 
-        # If input_shape is not set, try to load from state_dict
-        if self.input_shape is None:
-            self.input_shape = state_dict.get('input_shape', None)
-        # Now input_shape should be not None, otherwise raise error
-        if self.input_shape is None:
-            raise RuntimeError("`input_shape` is not known. Cannot load state")
+        self._trained = True  # Model is "pretrained" after loading state_dict
 
-        # Restoring CClassifier params
-        self._n_features = sum(self.input_shape)
-        # For _classes we input a fake sample to the model and check output
-        x = torch.rand(2, *self.input_shape).type(torch.FloatTensor)
-        if use_cuda is True:
-            x = x.cuda()
-        self._classes = CArray.arange(self._model(x).shape[-1])
+        # Try to load from state_dict
+        self.input_shape = state_dict.get('input_shape', self.input_shape)
 
     def state_dict(self):
         """Return a dictionary with PyTorch objects state.
@@ -592,8 +604,6 @@ class CClassifierPyTorch(CClassifier):
                 "training set should be provided as a CDataset object.")
 
         if warm_start is False:
-            # Resetting the classifier
-            self.clear()
             # Storing dataset classes
             self._classes = dataset.classes
             self._n_features = dataset.num_features
@@ -678,7 +688,7 @@ class CClassifierPyTorch(CClassifier):
         best_epoch = self.start_epoch
         best_state_dict = deepcopy(self.state_dict())
 
-        for self._start_epoch in xrange(self.start_epoch, self.epochs):
+        for self._start_epoch in range(self.start_epoch, self.epochs):
 
             scheduler.step()  # Adjust the learning rate
             losses = AverageMeter()  # Logger of the loss value
@@ -695,7 +705,7 @@ class CClassifierPyTorch(CClassifier):
             for batch_idx, (x, y) in enumerate(ds_loader):
 
                 if use_cuda is True:
-                    x, y = x.cuda(), y.cuda(async=True)
+                    x, y = x.cuda(), y.cuda()
                 x, y = Variable(x, requires_grad=True), Variable(y)
 
                 # As y have shape [N, 1, C], squeeze them
@@ -781,6 +791,8 @@ class CClassifierPyTorch(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
+        self._check_is_fitted()
+
         x = x.atleast_2d()  # Ensuring input is 2-D
 
         # Transform data if a preprocess is defined
@@ -809,9 +821,6 @@ class CClassifierPyTorch(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
-        if self.is_clear():
-            raise ValueError("make sure the classifier is trained first.")
-
         x = x.atleast_2d()  # Ensuring input is 2-D
 
         x_loader = self._get_test_input_loader(x, n_jobs=n_jobs)
@@ -881,8 +890,7 @@ class CClassifierPyTorch(CClassifier):
             Will be returned only if `return_decision_function` is True.
 
         """
-        if self.is_clear():
-            raise ValueError("make sure the classifier is trained first.")
+        self._check_is_fitted()
 
         x_carray = CArray(x).atleast_2d()
 
@@ -1074,7 +1082,7 @@ class CClassifierPyTorch(CClassifier):
                 # HAS ANY SPECIAL OPERATION INSIDE (LIKE DENSENET)
             # Manual iterate the network and stop at desired layer
             # Use _model to iterate over first level modules only
-            for m_k, m in self._model._modules.iteritems():
+            for m_k, m in self._model._modules.items():
                 s = m(s)  # Forward input trough module
                 if m_k == layer:
                     # We found the desired layer
@@ -1103,6 +1111,8 @@ class CClassifierPyTorch(CClassifier):
             Output of the desired layer.
 
         """
+        self._check_is_fitted()
+
         x = CArray(x).atleast_2d()
         # Transform data if a preprocess is defined
         x = self._preprocess_data(x)

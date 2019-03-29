@@ -11,6 +11,7 @@ from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.array import CArray
 from secml.data import CDataset
 from secml import _NoValue
+from secml.utils.mixed_utils import check_is_fitted
 
 
 class CClassifierLinear(CClassifier):
@@ -40,13 +41,6 @@ class CClassifierLinear(CClassifier):
         # Calling init of CClassifier
         CClassifier.__init__(self, preprocess=preprocess)
 
-    def __clear(self):
-        """Reset the object."""
-        self._w = None
-        self._b = None
-
-    # SPECIAL CASE: DELEGATE IS_CLEAR CHECK TO SUBCLASSES
-
     @property
     def w(self):
         """Vector with each feature's weight (dense or sparse)."""
@@ -63,6 +57,19 @@ class CClassifierLinear(CClassifier):
                 self.preprocess is not None and self.preprocess.is_linear():
             return True
         return False
+
+    def _check_is_fitted(self):
+        """Check if the classifier is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier is not fitted.
+
+        """
+        # Do not check `b` as some classifiers do not set it
+        check_is_fitted(self, 'w')
+        super(CClassifierLinear, self)._check_is_fitted()
 
     def fit(self, dataset, n_jobs=1):
         """Trains the linear classifier.
@@ -115,8 +122,6 @@ class CClassifierLinear(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
-        if self.is_clear():
-            raise ValueError("make sure the classifier is trained first.")
         if y != 1:
             raise ValueError(
                 "decision function is always computed wrt positive class.")
@@ -150,8 +155,7 @@ class CClassifierLinear(CClassifier):
             Dense flat array of shape (n_patterns,).
 
         """
-        if self.is_clear():
-            raise ValueError("make sure the classifier is trained first.")
+        self._check_is_fitted()
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 

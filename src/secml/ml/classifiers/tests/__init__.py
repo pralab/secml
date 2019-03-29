@@ -1,1 +1,1 @@
-from c_classifier_testcases import CClassifierTestCases
+from .c_classifier_testcases import CClassifierTestCases

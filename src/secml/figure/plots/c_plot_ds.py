@@ -1,3 +1,5 @@
+from six.moves import range
+
 from secml.figure.plots import CPlot
 from secml.core.type_utils import is_list
 from matplotlib import cm
@@ -77,7 +79,7 @@ class CPlotDataset(CPlot):
                 colors = ['b', 'r']
             else:  # Next returns an ndarray classes.size X 4 (RGB + Alpha)
                 colors = cm.ScalarMappable(
-                    cmap='jet').to_rgba(xrange(classes.size))
+                    cmap='jet').to_rgba(range(classes.size))
         else:
             if len(colors) != classes.size:
                 raise ValueError(

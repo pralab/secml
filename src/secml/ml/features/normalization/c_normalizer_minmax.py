@@ -61,12 +61,12 @@ class CNormalizerMinMax(CNormalizerLinear):
     >>> from secml.ml.features.normalization import CNormalizerMinMax
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-    >>> print CNormalizerMinMax().fit_transform(array)
+    >>> print(CNormalizerMinMax().fit_transform(array))
     CArray([[ 0.5       0.        1.      ]
      [ 1.        0.5       0.333333]
      [ 0.        1.        0.      ]])
 
-    >>> print CNormalizerMinMax(feature_range=(-1,1)).fit_transform(array)
+    >>> print(CNormalizerMinMax(feature_range=(-1,1)).fit_transform(array))
     CArray([[ 0.       -1.        1.      ]
      [ 1.        0.       -0.333333]
      [-1.        1.       -1.      ]])
@@ -92,20 +92,6 @@ class CNormalizerMinMax(CNormalizerLinear):
         self._q = None
 
         super(CNormalizerMinMax, self).__init__(preprocess=preprocess)
-
-    def __clear(self):
-        """Reset the object."""
-        self._data_min = None
-        self._data_max = None
-        # Properties of the linear normalizer
-        # we split them to easily manage feature_range
-        self._m = None
-        self._q = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return self.min is None and self.max is None and \
-            self._m is None and self._q is None
 
     @property
     def w(self):
@@ -196,9 +182,9 @@ class CNormalizerMinMax(CNormalizerLinear):
         >>> normalizer = CNormalizerMinMax().fit(array)
         >>> normalizer.feature_range
         (0.0, 1.0)
-        >>> print normalizer.min
+        >>> print(normalizer.min)
         CArray([ 0. -1. -1.])
-        >>> print normalizer.max
+        >>> print(normalizer.max)
         CArray([ 2.  1.  2.])
 
         """
@@ -218,95 +204,3 @@ class CNormalizerMinMax(CNormalizerLinear):
         # z = n * y + v  ->  Y = n * m * x + (n * q + v)
 
         return self
-
-    def _transform(self, x):
-        """Scales array features according to feature_range.
-
-        Parameters
-        ----------
-        x : CArray
-            Array to be scaled. Must have the same number of features
-            (i.e. the number of columns) of training array. If this is
-            not the training array, resulting features can be outside
-            feature_range interval.
-
-        Returns
-        -------
-        CArray
-            Array with features scaled according to feature_range and
-            training data. Shape of returned array is the same of the
-            original array.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-        >>> from secml.ml.features.normalization import CNormalizerMinMax
-        >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
-
-        >>> normalizer = CNormalizerMinMax().fit(array)
-        >>> print normalizer.transform(array)
-        CArray([[ 0.5       0.        1.      ]
-         [ 1.        0.5       0.333333]
-         [ 0.        1.        0.      ]])
-
-        >>> print normalizer.transform(CArray([-1,5,1]))
-        CArray([-0.5       3.        0.666667])
-        >>> normalizer.transform(CArray([-1,5,1]).T)  # We trained on 3 features
-        Traceback (most recent call last):
-            ...
-        ValueError: array to normalize must have 3 features (columns).
-
-        """
-        data_scaled = super(CNormalizerMinMax, self)._transform(x)
-
-        # replacing any nan
-        data_scaled.nan_to_num()
-
-        return data_scaled
-
-    def _gradient(self, x, w=None):
-        """Returns the gradient wrt data.
-
-        Gradient of the min-max scaler wrt each row `i` in data is given by:
-        .. math::
-
-           \frac{d}{dX_i} = \frac{feat_range[1] - feat_range[0]}{max - min}
-
-        Parameters
-        ----------
-        x : CArray
-            Data array, 2-Dimensional or ravel.
-        w : CArray or None, optional
-            If CArray, will be left-multiplied to the gradient
-            of the preprocessor.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of min-max normalizer wrt input data.
-            Array of shape (x.shape[1], x.shape[1]) if `w` is None,
-            otherwise an array of shape (w.shape[0], x.shape[1]).
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-        >>> from secml.ml.features.normalization import CNormalizerMinMax
-        >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
-
-        >>> normalizer = CNormalizerMinMax().fit(array)
-        >>> print normalizer.gradient(array)
-        CArray([[ 0.5       0.        0.      ]
-         [ 0.        0.5       0.      ]
-         [ 0.        0.        0.333333]])
-
-        """
-        data_gradient = super(CNormalizerMinMax, self)._gradient(x, w=w)
-
-        # Replacing any inf with proper values
-        data_gradient[data_gradient == -inf] = self.feature_range[0]
-        data_gradient[data_gradient == inf] = self.feature_range[1]
-        # replacing any nan
-        data_gradient.nan_to_num()
-
-        return data_gradient
-

@@ -1,13 +1,12 @@
-import numpy as np
+from secml.array.tests import CArrayTestCases
 
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+import numpy as np
 
 from secml.array import CArray
 from secml.core.type_utils import is_scalar
 
 
-class TestCArrayUtilsAppendMerge(CArrayTestCases.TestCArray):
+class TestCArrayUtilsAppendMerge(CArrayTestCases):
     """Unit test for CArray UTILS - APPEND/MERGE methods."""
 
     def test_append(self):
@@ -24,9 +23,9 @@ class TestCArrayUtilsAppendMerge(CArrayTestCases.TestCArray):
             self.logger.info("a1.append(a2): {:}".format(append_res))
             # If axis is None, result should be ravelled...
             if array1.isdense:
-                self.assertEquals(append_res.ndim, 1)
+                self.assertEqual(1, append_res.ndim)
             else:  # ... but if array is sparse let's check for shape[0]
-                self.assertEquals(append_res.shape[0], 1)
+                self.assertEqual(1, append_res.shape[0])
             self.assertTrue((append_res[:array1.size] == array1.ravel()).all())
             self.assertTrue((append_res[array1.size:] == array2.ravel()).all())
 
@@ -38,17 +37,17 @@ class TestCArrayUtilsAppendMerge(CArrayTestCases.TestCArray):
             # check append on axis 0 (vertical)
             append_res = array1.append(array2, axis=0)
             self.logger.info("a1.append(a2, axis=0): {:}".format(append_res))
-            self.assertEquals(append_res.shape[1], array1_shape1)
-            self.assertEquals(
-                append_res.shape[0], array1_shape0 + array2_shape0)
+            self.assertEqual(array1_shape1, append_res.shape[1])
+            self.assertEqual(
+                array1_shape0 + array2_shape0, append_res.shape[0])
             self.assertTrue((append_res[array1_shape0:, :] == array2).all())
 
             # check append on axis 1 (horizontal)
             append_res = array1.append(array2, axis=1)
             self.logger.info("a1.append(a2, axis=1): {:}".format(append_res))
-            self.assertEquals(
-                append_res.shape[1], array1_shape1 + array2_shape1)
-            self.assertEquals(append_res.shape[0], array1_shape0)
+            self.assertEqual(
+                array1_shape1 + array2_shape1, append_res.shape[1])
+            self.assertEqual(array1_shape0, append_res.shape[0])
             self.assertTrue((append_res[:, array1_shape1:] == array2).all())
 
         _append_allaxis(self.array_dense, self.array_dense)
@@ -194,4 +193,4 @@ class TestCArrayUtilsAppendMerge(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

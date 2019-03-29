@@ -1,8 +1,7 @@
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+from secml.array.tests import CArrayTestCases
 
 
-class TestCArrayCopy(CArrayTestCases.TestCArray):
+class TestCArrayCopy(CArrayTestCases):
     """Unit test for CArray COPY methods."""
 
     def test_deepcopy(self):
@@ -17,8 +16,8 @@ class TestCArrayCopy(CArrayTestCases.TestCArray):
             self.logger.info("Array deepcopied:\n{:}".format(
                 array_deepcopy.todense()))
 
-            self.assertEquals(array.issparse, array_deepcopy.issparse)
-            self.assertEquals(array.isdense, array_deepcopy.isdense)
+            self.assertEqual(array.issparse, array_deepcopy.issparse)
+            self.assertEqual(array.isdense, array_deepcopy.isdense)
 
             # copy method must return a copy of data
             array_deepcopy[:, :] = 9
@@ -29,4 +28,4 @@ class TestCArrayCopy(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

@@ -1,4 +1,4 @@
-from c_classifier_testcases import CClassifierTestCases
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml.array import CArray
 from secml.ml.classifiers import CClassifierRidge, CClassifierSVM

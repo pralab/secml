@@ -61,7 +61,7 @@ class TestCClassifierPyTorchDenseNetCifar(CClassifierTestCases):
 
     def test_classify_cifar10(self):
         """Test predict of the CIFAR10 dataset."""
-        state = dl_pytorch_model('densenet-bc-L100-K12')
+        state = dl_pytorch_model('cifar10', 'densenet-bc-L100-K12')
         self.clf.load_state(state, dataparallel=True)
 
         labels, scores = self.clf.predict(
@@ -93,7 +93,7 @@ class TestCClassifierPyTorchDenseNetCifar(CClassifierTestCases):
 
     def test_gradient(self):
         """Test gradient of the CIFAR10 dataset."""
-        state = dl_pytorch_model('densenet-bc-L100-K12')
+        state = dl_pytorch_model('cifar10', 'densenet-bc-L100-K12')
         self.clf.load_state(state, dataparallel=True)
         
         grad = self.clf.gradient_f_x(self.ts.X[100, :], y=3)
@@ -125,7 +125,7 @@ class TestCClassifierPyTorchDenseNetCifar(CClassifierTestCases):
             self.assertEqual(int, l.dtype)
             self.assertEqual(float, s.dtype)
             
-        state = dl_pytorch_model('densenet-bc-L100-K12')
+        state = dl_pytorch_model('cifar10', 'densenet-bc-L100-K12')
         self.clf.load_state(state, dataparallel=True)
         
         x = x_norm = self.ts.X[:5, :]
@@ -181,7 +181,7 @@ class TestCClassifierPyTorchDenseNetCifar(CClassifierTestCases):
         labels, scores = self.clf.predict(x, return_decision_function=True)
         self.logger.info(
             "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
-        _check_classify_scores(labels, scores, 5, self.clf.n_classes)
+        _check_classify_scores(labels, scores, 5, self.ts.num_classes)
 
         # Comparing output of decision_function and predict
 
@@ -234,7 +234,7 @@ class TestCClassifierPyTorchDenseNetCifar(CClassifierTestCases):
         labels, scores = self.clf.predict(p, return_decision_function=True)
         self.logger.info(
             "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
-        _check_classify_scores(labels, scores, 1, self.clf.n_classes)
+        _check_classify_scores(labels, scores, 1, self.ts.num_classes)
 
         # Comparing output of decision_function and predict
 
@@ -271,7 +271,7 @@ class TestCClassifierPyTorchDenseNetCifar(CClassifierTestCases):
 
         self.logger.info("Testing after loading state")
 
-        state = dl_pytorch_model('densenet-bc-L100-K12')
+        state = dl_pytorch_model('cifar10', 'densenet-bc-L100-K12')
         self.clf.load_state(state, dataparallel=True)
 
         self.assertEqual(1, w.ndim)

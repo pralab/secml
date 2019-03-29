@@ -1,5 +1,9 @@
-from secml.utils import CUnitTest
+from __future__ import division
+
+from secml.testing import CUnitTest
 from abc import ABCMeta, abstractmethod
+import six
+from six.moves import range
 
 from numpy import *
 import time
@@ -8,18 +12,19 @@ from secml.core.type_utils import is_list
 from secml.array import CArray
 from secml.data.loader import CDLRandomBlobs
 from secml.figure import CFigure
+from secml.utils import fm
 
 from secml.adv.attacks.evasion import CAttackEvasion
-from secml.optimization.constraints import \
+from secml.optim.constraints import \
     CConstraintBox, CConstraintL1, CConstraintL2
 
 
 class CEvasionTestCases(object):
     """Wrapper for TestCEvasion to make unittest.main() work correctly."""
 
+    @six.add_metaclass(ABCMeta)
     class TestCEvasion(CUnitTest):
         """Unit test for CEvasion."""
-        __metaclass__ = ABCMeta
 
         @abstractmethod
         def param_setter(self):
@@ -59,15 +64,15 @@ class CEvasionTestCases(object):
 
             # pick a malicious sample and init evasion
             malicious_idxs = self.dataset.Y.find(self.dataset.Y == 1)
-            target_idx = 1  # random.choice(xrange(0, len(malicious_idxs)))
+            target_idx = 1  # random.choice(range(0, len(malicious_idxs)))
 
             self.x0 = self.dataset.X[malicious_idxs[target_idx], :].ravel()
             self.y0 = +1
 
             self.logger.info("Malicious sample: " + str(self.x0))
 
-            self.solver_type = 'descent-direction'
-            # self.solver_type = 'gradient-descent'
+            self.solver_type = 'gradient-bls'
+            # self.solver_type = 'gradient'
 
             self.solver_params = {
                 "eta": self.eta,
@@ -79,7 +84,7 @@ class CEvasionTestCases(object):
                 self.logger.info("Converting data to sparse...")
                 self.dataset = self.dataset.tosparse()
 
-            if self.surrogate_classifier.is_clear():
+            if not self.surrogate_classifier.is_fitted():
                 self.surrogate_classifier.fit(self.dataset)
 
             params = {
@@ -108,15 +113,12 @@ class CEvasionTestCases(object):
             if is_list(self.eta):
                 if len(self.eta) != self.n_features:
                     raise ValueError('len(eta) != n_features')
-                for i in xrange(len(self.eta)):
+                for i in range(len(self.eta)):
                     self.dataset.X[:, i] = (
-                                               self.dataset.X[:, i] /
-                                               float(self.eta[i])).round() * \
-                                           self.eta[i]
+                        self.dataset.X[:, i] /
+                        self.eta[i]).round() * self.eta[i]
             else:  # eta is a single value
-                self.dataset.X = (
-                                     self.dataset.X / float(
-                                         self.eta)).round() * self.eta
+                self.dataset.X = (self.dataset.X / self.eta).round() * self.eta
 
         def test_evasion(self):
             self.x_evas = self._run_evasion(self.evasion)
@@ -164,8 +166,8 @@ class CEvasionTestCases(object):
             fig.subplot(n_rows=1, n_cols=1, grid_slot=1)
             self._plot_clf(self.evasion, fig, self.x_evas)
             # self._plot_clf_grad(fig)
-            fig.savefig(self.name_file, file_format='pdf')
-            fig.show()
+            fig.savefig(fm.join(fm.abspath(__file__), self.filename), 
+                        file_format='pdf')
 
         def _distance(self, x):
             """Rescale distance for plot"""

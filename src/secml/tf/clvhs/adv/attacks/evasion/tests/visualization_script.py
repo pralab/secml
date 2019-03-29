@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from secml.array import CArray
 from secml.figure import CFigure
 from secml.utils import fm
@@ -20,11 +22,11 @@ def _show_adv(x0, y0, xopt, y_pred):
     added_noise = abs(xopt - x0)  # absolute value of noise image
 
     if distance == 'l1':
-        print "Norm of input perturbation (l1): ", \
-            added_noise.ravel().norm(ord=1)
+        print("Norm of input perturbation (l1): ",
+              added_noise.ravel().norm(ord=1))
     else:
-        print "Norm of input perturbation (l2): ", \
-            added_noise.ravel().norm()
+        print("Norm of input perturbation (l2): ",
+              added_noise.ravel().norm())
 
     fig = CFigure(height=5.0, width=15.0)
     fig.subplot(1, 3, 1)

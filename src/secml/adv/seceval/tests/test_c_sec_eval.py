@@ -6,12 +6,13 @@ Created on 08 mar 2016
 
 This module tests the CSecEval class, which performs an attacks on
 a dataset w.r.t increasing attack power
-TODO: Add assertEquals statements to check the correctness of the test
+TODO: Add assertEqual statements to check the correctness of the test
 
 """
 from abc import ABCMeta, abstractmethod
+import six
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.adv.seceval import CSecEval
 from secml.data.loader import CDLRandomBlobs
 from secml.figure import CFigure
@@ -24,11 +25,11 @@ class CSecEvalTestCases(object):
     Wrapper for TestCSecEval to make unittest.main() work correctly
     """
 
+    @six.add_metaclass(ABCMeta)
     class TestCSecEval(CUnitTest):
         """
         SecEval unittest
         """
-        __metaclass__ = ABCMeta
 
         @abstractmethod
         def attack_params_setter(self):

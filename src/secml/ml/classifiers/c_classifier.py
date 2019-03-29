@@ -7,12 +7,16 @@
 
 """
 from abc import ABCMeta, abstractmethod
+import six
+from six.moves import range
 
 from secml.core import CCreator
 from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.features import CPreProcess
 from secml.parallel import parfor2
+from secml.utils.mixed_utils import check_is_fitted
+from secml.core.exceptions import NotFittedError
 
 
 def _classify_one(tr_class_idx, clf, test_x, verbose):
@@ -38,6 +42,7 @@ def _classify_one(tr_class_idx, clf, test_x, verbose):
     return clf.decision_function(test_x, y=tr_class_idx)
 
 
+@six.add_metaclass(ABCMeta)
 class CClassifier(CCreator):
     """Abstract class that defines basic methods for Classifiers.
 
@@ -56,7 +61,6 @@ class CClassifier(CCreator):
         desired preprocessor. If None, input data is used as is.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CClassifier'
 
     def __init__(self, preprocess=None):
@@ -67,23 +71,6 @@ class CClassifier(CCreator):
         # Data preprocess
         self.preprocess = preprocess if preprocess is None \
             else CPreProcess.create(preprocess)
-
-    def __clear(self):
-        """Reset the object."""
-        self._classes = None
-        self._n_features = None
-        if self.preprocess is not None:
-            self.preprocess.clear()
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        if self._classes is not None:
-            return False
-        if self._n_features is not None:
-            return False
-        if self.preprocess is not None and not self.preprocess.is_clear():
-            return False
-        return True
 
     @property
     def classes(self):
@@ -103,6 +90,33 @@ class CClassifier(CCreator):
     def is_linear(self):
         """Return true for linear classifiers, false otherwise"""
         return False
+
+    def is_fitted(self):
+        """Return True if the classifier is trained (fitted).
+
+        Returns
+        -------
+        bool
+            True or False depending on the result of the
+            call to `check_is_fitted`.
+
+        """
+        try:
+            self._check_is_fitted()
+        except NotFittedError:
+            return False
+        return True
+
+    def _check_is_fitted(self):
+        """Check if the classifier is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier is not fitted.
+
+        """
+        check_is_fitted(self, ['classes', 'n_features'])
 
     def _preprocess_data(self, x):
         """Apply the preprocess to input, if defined.
@@ -168,9 +182,6 @@ class CClassifier(CCreator):
         if not isinstance(dataset, CDataset):
             raise TypeError(
                 "training set should be provided as a CDataset object.")
-
-        # Resetting the classifier
-        self.clear()
 
         # Storing dataset classes
         self._classes = dataset.classes
@@ -245,8 +256,7 @@ class CClassifier(CCreator):
          for all patterns at once to improve performance.
 
         """
-        if self.is_clear():
-            raise ValueError("make sure the classifier is trained first.")
+        self._check_is_fitted()
 
         x = x.atleast_2d()  # Ensuring input is 2-D
 
@@ -254,7 +264,7 @@ class CClassifier(CCreator):
         x = self._preprocess_data(x)
 
         score = CArray.ones(shape=x.shape[0])
-        for i in xrange(x.shape[0]):
+        for i in range(x.shape[0]):
             score[i] = self._decision_function(x[i, :], y)
 
         return score
@@ -308,7 +318,7 @@ class CClassifier(CCreator):
                       n_jobs, self, x, self.verbose)
 
         # Build results array by extracting the scores for each training class
-        for i in xrange(self.n_classes):
+        for i in range(self.n_classes):
             scores[:, i] = CArray(res[i]).T
 
         # The classification label is the label of the class
@@ -370,9 +380,6 @@ class CClassifier(CCreator):
         best_params = perf_eval.evaluate_params(
             self, dataset, parameters, pick=pick, n_jobs=n_jobs)[0]
 
-        # Clear estimator as parameters are going to change
-        self.clear()
-
         # Set the best parameters in classifier
         self.set_params(best_params)
 
@@ -398,6 +405,8 @@ class CClassifier(CCreator):
             Gradient of the classifier's output wrt input. Vector-like array.
 
         """
+        self._check_is_fitted()
+
         x_in = x  # Original data
 
         # If preprocess is defined, transform data before computing the grad

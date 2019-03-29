@@ -1,4 +1,4 @@
-from c_attack import CAttack
+from .c_attack import CAttack
 
-# Evasion
-from evasion import CAttackEvasion
+from .evasion import *
+from .poisoning import *

@@ -1,4 +1,4 @@
-from c_classifier_testcases import CClassifierTestCases
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 from sklearn.svm import SVC
 from sklearn.ensemble import BaggingClassifier
@@ -32,7 +32,7 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
             self.logger.info("Trained MCS.")
 
         with self.timer():
-            self.sklearn_bagging = BaggingClassifier(SVC(),
+            self.sklearn_bagging = BaggingClassifier(SVC(kernel='linear'),
                                                      n_estimators=10,
                                                      max_samples=0.5,
                                                      max_features=0.5,

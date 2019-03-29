@@ -1,3 +1,5 @@
+from six.moves import range
+
 from secml.figure.plots import CPlot
 from secml.array import CArray
 from secml.core.constants import inf
@@ -81,9 +83,10 @@ class CPlotFunction(CPlot):
     def plot_fobj(self, func, multipoint=False,
                   plot_background=True, plot_levels=True,
                   levels=None, levels_color='k', levels_style=None,
-                  n_colors=50, cmap='jet', alpha=1.0, alpha_levels=1.0,
-                  vmin=None, vmax=None, colorbar=True, n_grid_points=30,
-                  grid_limits=None,  func_args=(), **func_kwargs):
+                  levels_linewidth=1.0, n_colors=50, cmap='jet',
+                  alpha=1.0, alpha_levels=1.0, vmin=None, vmax=None,
+                  colorbar=True, n_grid_points=30,
+                  grid_limits=None, func_args=(), **func_kwargs):
         """Plot a function (used for decision functions or boundaries).
 
         Parameters
@@ -114,6 +117,8 @@ class CPlotFunction(CPlot):
             specifying a set of levels_style to be used. If this iterable
             is shorter than the number of contour levels it will be
             repeated as necessary.
+        levels_linewidth : float or list of floats
+            The line width of the contour lines. Default 1.0.
         n_colors : int
             Number of color levels of background plot. Default 50.
         cmap : str
@@ -183,7 +188,7 @@ class CPlotFunction(CPlot):
             self.contour(
                 pad_xgrid, pad_ygrid, grid_points_val_reshaped,
                 levels=levels, colors=levels_color, linestyles=levels_style,
-                alpha=alpha_levels)
+                linewidths=levels_linewidth, alpha=alpha_levels)
 
         # Customizing figure
         self._apply_params()
@@ -225,7 +230,7 @@ class CPlotFunction(CPlot):
         n_vals = pad_grid_point_features.shape[0]
         grad_point_values = CArray.zeros((n_vals, 2))
         # compute gradient on each grid point
-        for p_idx in xrange(n_vals):
+        for p_idx in range(n_vals):
             grad_point_values[p_idx, :] = gradf(
                 pad_grid_point_features[p_idx, :].ravel(),
                 *func_args, **func_kwargs)

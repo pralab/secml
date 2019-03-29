@@ -1,5 +1,6 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
+from six.moves import range
 import sklearn.metrics as skm
 import numpy as np
 
@@ -97,12 +98,12 @@ class TestCPerfEvaluator(CUnitTest):
         parameters_combination = [
             [1, 1], [1, 50], [10, 1], [10, 50], [100, 1], [100, 50]]
         par_comb_score = CArray.zeros(len(parameters_combination))
-        for comb in xrange(len(parameters_combination)):
+        for comb in range(len(parameters_combination)):
 
             this_fold_score = []
             num_xval_fold = len(xval_splitter.tr_idx)
 
-            for f in xrange(num_xval_fold):
+            for f in range(num_xval_fold):
 
                 self.svm.set("C", parameters_combination[comb][0])
                 self.svm.kernel.gamma = parameters_combination[comb][1]
@@ -183,6 +184,30 @@ class TestCPerfEvaluator(CUnitTest):
             perf_eval.evaluate_params(
                 self.svm, self.training_dataset, xval_parameters, pick='last')
 
+    def _run_multiclass(self, tr, multiclass, xval_params, expected_best):
+
+        xval_splitter = CDataSplitter.create(
+            'kfold', num_folds=3, random_state=50000)
+
+        # Set the best parameters inside the classifier
+        best_params = multiclass.estimate_parameters(
+            tr, xval_params, xval_splitter, 'accuracy', n_jobs=1)
+
+        self.logger.info(
+            "Multiclass SVM has now the following parameters: {:}".format(
+                multiclass.get_params()))
+
+        for clf_idx, clf in enumerate(multiclass._binary_classifiers):
+            self.assertEqual(clf.C, expected_best['C'])
+            self.assertEqual(clf.kernel.gamma, expected_best['kernel.gamma'])
+
+        # Final test: fit using best parameters
+        multiclass.fit(tr)
+
+        for clf in multiclass._binary_classifiers:
+            for param in best_params:
+                self.assertEqual(clf.get_params()[param], best_params[param])
+
     def test_params_multiclass(self):
         """Parameter estimation for multiclass classifiers."""
         # Create dummy dataset (we want a test different from train)
@@ -196,28 +221,22 @@ class TestCPerfEvaluator(CUnitTest):
 
         xval_parameters = {'C': [1, 10, 100], 'kernel.gamma': [0.1, 1]}
 
-        # DO XVAL FOR CHOOSE BEST PARAMETERS
-        xval_splitter = CDataSplitter.create(
-            'kfold', num_folds=3, random_state=50000)
+        expected = {'C': 10.0, 'kernel.gamma': 0.1}
 
-        # Set the best parameters inside the classifier
-        best_params = multiclass.estimate_parameters(
-            tr, xval_parameters, xval_splitter, 'accuracy', n_jobs=1)
+        self._run_multiclass(tr, multiclass, xval_parameters, expected)
 
-        self.logger.info(
-            "Multiclass SVM has now the following parameters: {:}".format(
-                multiclass.get_params()))
+        self.logger.info("Testing with preprocessor")
 
-        for clf_idx, clf in enumerate(multiclass.binary_classifiers):
-            self.assertEqual(clf.C, 10.0)
-            self.assertEqual(clf.kernel.gamma, 0.1)
+        kernel = CKernel.create('rbf')
+        multiclass = CClassifierMulticlassOVA(
+            CClassifierSVM, C=1, kernel=kernel, preprocess='min-max')
+        multiclass.verbose = 1
 
-        # Final test: fit using best parameters
-        multiclass.fit(tr)
+        xval_parameters = {'C': [1, 10, 100], 'kernel.gamma': [0.1, 1]}
 
-        for clf in multiclass.binary_classifiers:
-            for param in best_params:
-                self.assertEqual(clf.get_params()[param], best_params[param])
+        expected = {'C': 10.0, 'kernel.gamma': 0.1}
+
+        self._run_multiclass(tr, multiclass, xval_parameters, expected)
 
 
 if __name__ == '__main__':

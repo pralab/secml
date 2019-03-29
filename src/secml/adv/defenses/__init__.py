@@ -1,1 +1,1 @@
-from c_classifier_reject_detector import CClassifierRejectDetector
+from .c_classifier_reject_detector import CClassifierRejectDetector

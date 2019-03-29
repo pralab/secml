@@ -1,5 +1,5 @@
-import unittest
-from secml.utils import CUnitTest
+from __future__ import division
+from secml.testing import CUnitTest
 
 from secml.array import CArray
 from secml.ml.peval.metrics import CRoc
@@ -202,4 +202,4 @@ class TestCRoc(CUnitTest):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

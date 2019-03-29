@@ -1,3 +1,6 @@
+from __future__ import division
+from six.moves import range
+
 from secml.figure.plots import CPlot
 from secml.ml.peval.metrics import CRoc
 
@@ -332,7 +335,7 @@ class CPlotRoc(CPlot):
         styles = ['go-', 'yp--', 'rs-.', 'bD--', 'c-.', 'm-', 'y-.']
 
         # If std should be plotted each run plots 2 curvers
-        n_lines = self.n_lines / 2 if plot_std is True else self.n_lines
+        n_lines = int(self.n_lines / 2) if plot_std is True else self.n_lines
         # Get indices of fpr @ xticks
         mkrs_idx = self._markers_idx(roc.mean_fpr * 100)
 
@@ -418,7 +421,7 @@ class CPlotRoc(CPlot):
 
         plot_func = self.semilogx if logx is True else self.plot
 
-        for rep_i in xrange(roc.n_reps):
+        for rep_i in range(roc.n_reps):
 
             if roc.n_reps <= 1:  # For one rep ROC is stored as CArray
                 tpr = roc.tpr

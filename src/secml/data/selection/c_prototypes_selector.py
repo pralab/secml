@@ -5,11 +5,13 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
+import six
 
 from secml.core import CCreator
 
 
+@six.add_metaclass(ABCMeta)
 class CPrototypesSelector(CCreator):
     """Selection of Prototypes.
 
@@ -35,7 +37,6 @@ class CPrototypesSelector(CCreator):
     Springer Berlin Heidelberg, 2006. 287-296.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CPrototypesSelector'
 
     def __init__(self):

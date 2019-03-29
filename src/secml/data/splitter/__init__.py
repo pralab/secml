@@ -1,9 +1,9 @@
-from c_datasplitter import CDataSplitter
-from c_datasplitter_kfold import CDataSplitterKFold
-from c_datasplitter_stratkfold import CDataSplitterStratifiedKFold
-from c_datasplitter_shuffle import CDataSplitterShuffle
-from c_datasplitter_openworld import CDataSplitterOpenWorldKFold
-from c_datasplitter_labelkfold import CDataSplitterLabelKFold
+from .c_datasplitter import CDataSplitter
+from .c_datasplitter_kfold import CDataSplitterKFold
+from .c_datasplitter_stratkfold import CDataSplitterStratifiedKFold
+from .c_datasplitter_shuffle import CDataSplitterShuffle
+from .c_datasplitter_openworld import CDataSplitterOpenWorldKFold
+from .c_datasplitter_labelkfold import CDataSplitterLabelKFold
 
 # Other splitting functions
-from c_train_test_split import CTrainTestSplit
+from .c_train_test_split import CTrainTestSplit

@@ -48,10 +48,10 @@ def convert_binary_labels(labels):
     >>> from secml.ml.classifiers.clf_utils import convert_binary_labels
     >>> from secml.array import CArray
 
-    >>> print convert_binary_labels(2)
+    >>> print(convert_binary_labels(2))
     -1
 
-    >>> print convert_binary_labels(CArray([0,1,1,1,0,0]))
+    >>> print(convert_binary_labels(CArray([0,1,1,1,0,0])))
     CArray([-1  1  1  1 -1 -1])
 
     """

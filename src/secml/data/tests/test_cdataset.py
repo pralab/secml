@@ -8,10 +8,12 @@ This module tests the CDataset class.
 If you find any BUG, please notify authors first.
 
 """
-import unittest
+from secml.testing import CUnitTest
+
+from six.moves import zip
+
 from secml.array import CArray
 from secml.data import CDataset
-from secml.utils import CUnitTest
 
 
 class TestDataset(CUnitTest):
@@ -31,9 +33,12 @@ class TestDataset(CUnitTest):
         self.logger.info("Number of patterns: \n" + str(self.dataset.num_samples))
         self.logger.info("Number of features: \n" + str(self.dataset.num_features))
         self.logger.info("Testing dataset properties...")
-        self.assertEquals(self.dataset.num_classes, 2, "Wrong number of classes!")
-        self.assertEquals(self.dataset.num_samples, 3, "Wrong number of patterns!")
-        self.assertEquals(self.dataset.num_features, 3, "Wrong number of features!")
+        self.assertEqual(
+            2, self.dataset.num_classes, "Wrong number of classes!")
+        self.assertEqual(
+            3, self.dataset.num_samples, "Wrong number of patterns!")
+        self.assertEqual(
+            3, self.dataset.num_features, "Wrong number of features!")
 
     def test_getters_and_setters(self):
         """Test for getters and setters of the class."""
@@ -75,15 +80,20 @@ class TestDataset(CUnitTest):
         self.logger.info("Testing pattern extraction...")
         patterns = self.dataset.X[0:2, :]
         target = CArray([[1, 2, 3], [4, 5, 6]])
-        self.logger.info("Extracting patterns: \n" + str(patterns) + "\n" + "Targets: \n" + str(target))
+        self.logger.info("Extracting patterns:\n{:}".format(patterns))
+        self.logger.info("Targets:\n{:}".format(target))
         self.logger.info("Testing row extraction...")
-        self.assertEquals((patterns == target).all(), True, "Wrong subset extraction")
+        self.assert_array_equal(patterns, target)
 
     def test_subset(self):
         """Tests for subset method."""
         self.logger.info("Testing subsets...")
-        subset_lists = [([0, 1], [0, 1]), ([0, 2], slice(0, 3)), (slice(0, 3), [0, 2])]
-        x_targets = [CArray([[1, 2], [4, 5]]), CArray([[1, 2, 3], [7, 8, 9]]), CArray([[1, 3], [4, 6], [7, 9]])]
+        subset_lists = [([0, 1], [0, 1]),
+                        ([0, 2], slice(0, 3)),
+                        (slice(0, 3), [0, 2])]
+        x_targets = [CArray([[1, 2], [4, 5]]),
+                     CArray([[1, 2, 3], [7, 8, 9]]),
+                     CArray([[1, 3], [4, 6], [7, 9]])]
         y_targets = [CArray([1, 2]), CArray([1, 2]), CArray([1, 2, 2])]
         for row_cols, Xtarget, Ytarget in zip(subset_lists, x_targets, y_targets):
             rows = row_cols[0]
@@ -91,9 +101,10 @@ class TestDataset(CUnitTest):
             subset = self.dataset[rows, cols]
             self.logger.info(
                 "Testing Subset extraction with rows indices: " + str(rows) +
-                " and columns indices: " + str(cols) + " \n" + str(subset.X) + " \n" + str(subset.Y))
-            self.assertEquals((subset.X == Xtarget).all(), True, "Wrong subset extraction")
-            self.assertEquals((subset.Y == Ytarget).all(), True, "Wrong subset extraction")
+                " and columns indices: " + str(cols) + " \n" + str(subset.X) +
+                " \n" + str(subset.Y))
+            self.assert_array_equal(subset.X, Xtarget)
+            self.assert_array_equal(subset.Y, Ytarget)
 
     def test_custom_attr(self):
         """Testing for custom attributes."""
@@ -105,4 +116,4 @@ class TestDataset(CUnitTest):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    CUnitTest.main()

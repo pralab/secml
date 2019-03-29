@@ -5,7 +5,9 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from c_prototypes_selector import CPrototypesSelector
+from six.moves import range
+
+from secml.data.selection import CPrototypesSelector
 from secml.array import CArray
 from secml.ml.kernel import CKernelEuclidean
 
@@ -52,8 +54,8 @@ class CPSSpanning(CPrototypesSelector):
         # List of selected prototypes (indices)
         # First sample is the median
         sel_idx = [k_euclidean.sum(axis=0, keepdims=False).argmin()]
-        set_indices = list(xrange(dataset.num_samples))
-        for i in xrange(1, n_prototypes):
+        set_indices = list(range(dataset.num_samples))
+        for i in range(1, n_prototypes):
             set_indices = [e for e in set_indices if e not in sel_idx]
             p = k_euclidean[set_indices, sel_idx]
             # Compute the farthest prototype

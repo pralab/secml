@@ -7,7 +7,8 @@
 """
 import tarfile
 from collections import OrderedDict
-from itertools import izip
+from six.moves import zip
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 from multiprocessing import Lock
 import csv
 import numpy as np
@@ -147,7 +148,7 @@ class CDataLoaderDrebin(CDataLoader):
         feat_family_idx = CArray.empty(feat_family.size, dtype=int)
         for f_idx, feat_fam in enumerate(feat_family):
             fam_inv = FEAT_FAMILY_MAPPING_INVERTED[feat_fam]
-            feat_family_idx[f_idx] = FEAT_FAMILY_MAPPING.keys().index(fam_inv)
+            feat_family_idx[f_idx] = list(FEAT_FAMILY_MAPPING).index(fam_inv)
 
         self.logger.info(
             "Loading feats mappings from {:}".format(self.feat_mapping_path))
@@ -160,7 +161,7 @@ class CDataLoaderDrebin(CDataLoader):
         # and the corresponding description as value
         feat_desc_idx = CArray(feat_mapping[:, 0].astype(int))
         feat_desc_str = CArray(feat_mapping[:, 1])
-        feat_desc = {k: v for k, v in izip(feat_desc_idx, feat_desc_str)}
+        feat_desc = {k: v for k, v in zip(feat_desc_idx, feat_desc_str)}
 
         self.logger.info(
             "Loading malware families from {:}".format(self.families_path))
@@ -172,7 +173,7 @@ class CDataLoaderDrebin(CDataLoader):
         mal_fam_map = {'Benign': 0}
         with open(self.families_path, 'rb') as csvfile:
             mal_fam_reader = csv.reader(csvfile)
-            mal_fam_reader.next()  # Skipping the first header line
+            next(mal_fam_reader)  # Skipping the first header line
             for row in mal_fam_reader:
                 if row[1] not in mal_fam_map:
                     mal_fam_map[row[1]] = len(mal_fam_map)

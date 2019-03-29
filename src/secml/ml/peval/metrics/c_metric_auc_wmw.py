@@ -30,7 +30,7 @@ class CMetricAUCWMW(CMetric):
     >>> from secml.array import CArray
 
     >>> peval = CMetricAUCWMW()
-    >>> print peval.performance_score(CArray([0, 1, 0, 0]), score=CArray([0, 0, 0, 0]))
+    >>> print(peval.performance_score(CArray([0, 1, 0, 0]), score=CArray([0, 0, 0, 0])))
     0.5
 
     """
@@ -73,4 +73,4 @@ class CMetricAUCWMW(CMetric):
                 elif score[i] == score[j]:
                     auc += 0.5
 
-        return auc / float(len(idxp) * len(idxn))
+        return auc / (len(idxp) * len(idxn))

@@ -1,6 +1,8 @@
 from abc import ABCMeta, abstractmethod
+import six
+from six.moves import range
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml import _NoValue
 from secml.adv.attacks.evasion import CAttackEvasion
@@ -8,16 +10,16 @@ from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.figure import CFigure
 from secml.ml.features.normalization import CNormalizerMinMax
-from secml.optimization.constraints import CConstraintL2
+from secml.optim.constraints import CConstraintL2
 from secml.utils import fm
 
 
 class CEvasionRejectTestCases(object):
     """Wrapper for TestCEvasion to make unittest.main() work correctly."""
 
+    @six.add_metaclass(ABCMeta)
     class TestCEvasionReject(CUnitTest):
         """Unit test for CEvasion."""
-        __metaclass__ = ABCMeta
 
         @abstractmethod
         def _classifier_creation(self):
@@ -92,10 +94,10 @@ class CEvasionRejectTestCases(object):
 
             dmax = 5
 
-            # self.solver_type = 'descent-direction'
+            # self.solver_type = 'gradient-bls'
             # self.solver_params = {'eta': 1e-1, 'eta_min': 0.1}
 
-            self.solver_type = 'gradient-descent'
+            self.solver_type = 'gradient'
             self.solver_params = {'eta': 0.5, 'max_iter': 3}
 
             eva = CAttackEvasion(classifier=self.multiclass,
@@ -207,7 +209,7 @@ class CEvasionRejectTestCases(object):
             f_seq = CArray([])
 
             x = x0
-            for d_idx, d in enumerate(xrange(0, dmax + 1)):
+            for d_idx, d in enumerate(range(0, dmax + 1)):
 
                 self.logger.info("Evasion at dmax: " + str(d))
 
@@ -258,7 +260,7 @@ class CEvasionRejectTestCases(object):
 
             # plot distance constraint
             # for d_idx, d in enumerate([dmax]):
-            for d in xrange(1, dmax + 1):
+            for d in range(1, dmax + 1):
                 fig.sp.plot_fobj(func=self._rescaled_distance,
                                  multipoint=True,
                                  plot_background=False,
@@ -293,7 +295,7 @@ class CEvasionRejectTestCases(object):
                              final_facecolor='k', final_edgewidth=2)
 
             # plot distance constraint
-            for d in xrange(1, dmax + 1):
+            for d in range(1, dmax + 1):
                 fig.sp.plot_fobj(func=self._rescaled_distance,
                                  multipoint=True,
                                  plot_background=False,

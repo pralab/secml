@@ -8,6 +8,7 @@
 """
 from secml.array import CArray
 from secml.ml.features.reduction import CReducer
+from secml.utils.mixed_utils import check_is_fitted
 
 __all__ = ['CPCA']
 
@@ -113,6 +114,17 @@ class CPCA(CReducer):
 
         """
         return self._explained_variance_ratio
+
+    def _check_is_fitted(self):
+        """Check if the preprocessor is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the preprocessor is not fitted.
+
+        """
+        check_is_fitted(self, ['components', 'mean'])
 
     def _fit(self, x, y=None):
         """Fit the PCA using input data.
@@ -244,9 +256,6 @@ class CPCA(CReducer):
         ValueError: array to transform must have 3 features (columns).
 
         """
-        if self._mean is None:
-            raise ValueError("fit PCA first.")
-
         data_carray = CArray(x).todense().atleast_2d()
         if data_carray.shape[1] != self.mean.size:
             raise ValueError("array to transform must have {:} "
@@ -282,9 +291,6 @@ class CPCA(CReducer):
          [-0.  1. -9.]])
 
         """
-        if self._mean is None:
-            raise ValueError("fit PCA first.")
-
         data_carray = CArray(x).atleast_2d()
         if data_carray.shape[1] != self.n_components:
             raise ValueError("array to revert must have {:} "

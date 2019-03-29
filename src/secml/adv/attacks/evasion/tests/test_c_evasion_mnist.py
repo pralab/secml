@@ -1,16 +1,18 @@
-from secml.ml.classifiers import CClassifierSVM
-from secml.ml.kernel import CKernel
-from secml.adv.attacks.evasion import CAttackEvasion
-from secml.core import CCreator
-from secml.data.loader import CDataLoaderMNIST
-from secml.array import CArray
-from secml.figure import CFigure
-from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
+from secml.testing import CUnitTest
 
 from numpy import random
 
+from secml.adv.attacks.evasion import CAttackEvasion
+from secml.ml.classifiers import CClassifierSVM
+from secml.ml.kernel import CKernel
+from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
+from secml.data.loader import CDataLoaderMNIST
+from secml.array import CArray
+from secml.figure import CFigure
+from secml.utils import fm
 
-class TestEvasionMNIST(CCreator):
+
+class TestEvasionMNIST(CUnitTest):
     """Evasion on MNIST datset."""
 
     def _param_setter(self):
@@ -36,23 +38,19 @@ class TestEvasionMNIST(CCreator):
         self.lb = 0.0
         self.ub = 1.0
 
-        self.name_file = 'MNIST_evasion.pdf'
+        self.filename = 'test_c_evasion_mnist.pdf'
 
-    def __init__(self):
+    def setUp(self):
 
         self.seed = None
 
         if self.seed is None:
             self.seed = random.randint(999999999)
 
-        print "seed: ", str(self.seed)
-
         self._param_setter()
         self._dataset_creation()
-        print "training classifier ..."
         self.classifier.fit(self._tr)
-        print "training classifier ... Done."
-        self._chose_x0()
+        self._choose_x0()
 
         # adversarial example creation
         self._evasion_obj = CAttackEvasion(
@@ -65,7 +63,7 @@ class TestEvasionMNIST(CCreator):
             ub=self.ub,
             dmax=self.dmax,
             y_target=self.y_target,
-            solver_type='descent-direction',
+            solver_type='gradient-bls',
             solver_params={'eta': self.eta,
                            'eta_min': self.eta_min,
                            'eta_max': self.eta_max,
@@ -74,18 +72,21 @@ class TestEvasionMNIST(CCreator):
         self._evasion_obj.verbose = 2
 
     def _dataset_creation(self):
+
         loader = CDataLoaderMNIST()
 
-        self._digits = CArray.arange(10).tolist()
-        self._tr = loader.load('training', digits=self._digits)
+        n_tr = 500
+        n_val = 100
+        n_ts = 100
 
-        print "classes: ", self._tr.classes
+        self._digits = [4, 9]
 
-        self._ts = loader.load('testing', digits=self._digits)
+        self._tr = loader.load(
+            'training', digits=self._digits, num_samples=n_tr+n_val)
+        self._ts = loader.load(
+            'testing', digits=self._digits, num_samples=n_ts)
 
-        # get dataset img dimension
-        # TODO: these should not be included in CDataset!
-        # they're lost after conversion tosparse
+        # these properties are going to be moved in data loader/header
         self.img_w = self._tr.img_w
         self.img_h = self._tr.img_h
 
@@ -104,42 +105,36 @@ class TestEvasionMNIST(CCreator):
             self._ts.X += self.lb
 
         idx = CArray.arange(0, self._tr.num_samples)
-        val_dts_idx = CArray.randsample(idx, 1000, random_state=self.seed)
+        val_dts_idx = CArray.randsample(idx, n_val, random_state=self.seed)
         self._val_dts = self._tr[val_dts_idx, :]
 
-        tr_dts_idx = CArray.randsample(idx, 5000, random_state=self.seed)
+        tr_dts_idx = CArray.randsample(idx, n_tr, random_state=self.seed)
         self._tr = self._tr[tr_dts_idx, :]
 
         idx = CArray.arange(0, self._ts.num_samples)
-        ts_dts_idx = CArray.randsample(idx, 100, random_state=self.seed)
+        ts_dts_idx = CArray.randsample(idx, n_ts, random_state=self.seed)
         self._ts = self._ts[ts_dts_idx, :]
 
-    def _chose_x0(self):
-        """
-        Find a sample of that belong to the required class
-        :return:
-        """
+    def _choose_x0(self):
+        """Find a sample of that belong to the required class."""
         adv_img_idx = \
             CArray(self._ts.Y.find(self._ts.Y == self.x0_img_class))[0]
 
-        print "adv img idx ", adv_img_idx
         self._x0 = self._ts.X[adv_img_idx, :]
         self._y0 = self._ts.Y[adv_img_idx]
 
     def _show_adv(self, x0, y0, xopt, y_pred):
-        """
-        Show the original and the modified sample
-        :param x0: original image
-        :param xopt: modified sample
+        """Show the original and the modified sample.
+
+        Parameters
+        ----------
+        x0
+            Original image.
+        xopt
+            Modified sample.
+
         """
         added_noise = abs(xopt - x0)  # absolute value of noise image
-
-        if self.distance == 'l1':
-            print "Norm of input perturbation (l1): ", \
-                added_noise.ravel().norm(order=1)
-        else:
-            print "Norm of input perturbation (l2): ", \
-                added_noise.ravel().norm()
 
         fig = CFigure(height=5.0, width=15.0)
         fig.subplot(1, 3, 1)
@@ -151,14 +146,13 @@ class TestEvasionMNIST(CCreator):
         fig.subplot(1, 3, 3)
         fig.sp.title(self._digits[y_pred.item()])
         fig.sp.imshow(xopt.reshape((self.img_h, self.img_w)), cmap='gray')
-        fig.savefig(self.name_file, file_format='pdf')
-        fig.show()
+        fig.savefig(
+            fm.join(fm.abspath(__file__), self.filename), file_format='pdf')
 
-    def run(self):
-        print "Run..."
+    def test_evasion(self):
         y_pred, scores, p_opt = self._evasion_obj.run(self._x0, self._y0)[:3]
         self._show_adv(self._x0, self._y0, p_opt.X, y_pred[0])
 
 
 if __name__ == '__main__':
-    TestEvasionMNIST().run()
+    CUnitTest.main()

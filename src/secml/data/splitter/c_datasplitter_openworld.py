@@ -5,6 +5,9 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from __future__ import division
+from six.moves import range
+
 from secml.array import CArray
 from secml.data.splitter import CDataSplitter
 
@@ -52,11 +55,11 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
     ...     num_folds=3, n_train_samples=2, random_state=0).compute_indices(ds)
     >>> kfold.num_folds
     3
-    >>> print kfold.tr_idx
+    >>> print(kfold.tr_idx)
     [CArray(2,)(dense: [2 5]), CArray(2,)(dense: [1 4]), CArray(2,)(dense: [0 2])]
-    >>> print kfold.ts_idx
+    >>> print(kfold.ts_idx)
     [CArray(6,)(dense: [0 1 3 4 6 7]), CArray(6,)(dense: [0 2 3 5 6 7]), CArray(6,)(dense: [1 3 4 5 6 7])]
-    >>> print kfold.tr_classes  # Class 2 is skipped as there are not enough samples (at least 3)
+    >>> print(kfold.tr_classes)  # Class 2 is skipped as there are not enough samples (at least 3)
     [CArray(1,)(dense: [1]), CArray(1,)(dense: [0]), CArray(1,)(dense: [1])]
 
     """
@@ -73,14 +76,6 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
 
         self._tr_classes = []
 
-    def __clear(self):
-        """Reset the object."""
-        self._tr_classes = []
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return len(self._tr_classes) == 0
-
     @property
     def tr_classes(self):
         """List of training classes obtained with the split of the data."""
@@ -96,19 +91,21 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
 
         Returns
         -------
-        splitter : CDataSplitterOpenWorldKFold
+        CDataSplitter
             Instance of the dataset splitter with tr/ts indices.
 
         """
         # Resetting indices
-        self.clear()
+        self._tr_idx = []
+        self._ts_idx = []
+        self._tr_classes = []
 
         # If no custom number of training classes is selected,
         # use half of the classes
-        n_train_classes = int(dataset.num_classes / 2.0) \
+        n_train_classes = int(dataset.num_classes / 2) \
             if self.n_train_classes is None else int(self.n_train_classes)
 
-        for fold in xrange(self.num_folds):
+        for fold in range(self.num_folds):
 
             if self.random_state is not None:
                 # Adding 1234 to specified random state to get different folds
@@ -161,7 +158,7 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
 
             # All other samples go to test
             test_samples_idx = CArray(
-                [idx for idx in xrange(dataset.num_samples)
+                [idx for idx in range(dataset.num_samples)
                  if idx not in train_samples_idx])
 
             self._tr_idx += [train_samples_idx]

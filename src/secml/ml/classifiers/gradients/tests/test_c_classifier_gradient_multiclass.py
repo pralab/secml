@@ -1,8 +1,8 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.data.loader import CDLRandom
-from secml.ml.classifiers.gradients.tests import multiclass_clf_creation
-from test_c_classifier_gradient import CClassifierGradientTestCases
+from secml.ml.classifiers.gradients.tests import \
+    CClassifierGradientTestCases, multiclass_clf_creation
 
 
 class TestCClassifierGradientMulticlass(

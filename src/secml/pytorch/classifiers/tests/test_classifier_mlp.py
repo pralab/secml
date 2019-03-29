@@ -27,7 +27,7 @@ class TestCClassifierPyTorchMLP(CClassifierTestCases):
 
             nn = CClassifierPyTorchMLP(in_dims, h_dims, out_dims)
 
-            layers = nn._model._modules.items()
+            layers = list(nn._model._modules.items())
 
             # Expected number of layers: 4 if hl=1, 6 if hl=2, 8 if hl=3, etc.
             self.assertEqual(2 * (len(h_dims) - 1) + 3, len(layers))
@@ -302,7 +302,7 @@ class TestCClassifierPyTorchMLP(CClassifierTestCases):
         self.assertEqual(self.clf.n_features, clf2.n_features)
 
         self.assertEqual(3, clf2.classes.size)
-        self.assertEqual(21, clf2.n_features)
+        self.assertEqual(20, clf2.n_features)
 
         self.assertEqual(self.clf.start_epoch, clf2.start_epoch)
 

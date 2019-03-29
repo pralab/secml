@@ -7,15 +7,16 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
+import six
 
 from secml.array import CArray
 from secml.core import CCreator
 
 
+@six.add_metaclass(ABCMeta)
 class CDataLoader(CCreator):
     """Interface for Dataset loaders."""
-    __metaclass__ = ABCMeta
     __super__ = 'CDataLoader'
 
     @abstractmethod
@@ -25,7 +26,9 @@ class CDataLoader(CCreator):
         This method should return a `.CDataset` object.
 
         """
-        raise NotImplementedError("Please implement a `load` method for class {:}".format(self.__class__.__name__))
+        raise NotImplementedError(
+            "Please implement a `load` method for class {:}"
+            "".format(self.__class__.__name__))
 
     # TODO: GENERALIZE THIS FUNCTION AND PUT IT INTO CARRAY
     @staticmethod
@@ -52,10 +55,10 @@ class CDataLoader(CCreator):
         >>> from secml.data.loader import CDataLoader
         >>> patterns = CArray([[1,0,2], [4,0,5]])
         >>> patterns, mapping = CDataLoader._remove_all_zero_features(patterns)
-        >>> print patterns
+        >>> print(patterns)
         CArray([[1 2]
          [4 5]])
-        >>> print mapping
+        >>> print(mapping)
         CArray([0 2])
 
         """
@@ -66,7 +69,8 @@ class CDataLoader(CCreator):
         nnz_elem_idx = patterns.nnz_indices
         idx_feat_presents = CArray(nnz_elem_idx[1]).unique()
 
-        # return dataset without features that are all zero and non zero old idx
-        return patterns[:, idx_feat_presents], all_orig_feat_idx[idx_feat_presents]
+        # return ds without features that are all zero and non zero old idx
+        return patterns[:, idx_feat_presents], \
+            all_orig_feat_idx[idx_feat_presents]
 
 

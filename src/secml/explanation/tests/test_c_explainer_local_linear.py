@@ -1,4 +1,4 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 
 from secml.explanation import CExplainerLocalLinear
 from secml.ml.classifiers import CClassifierSVM

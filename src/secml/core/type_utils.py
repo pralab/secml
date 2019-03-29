@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+import six
 import numpy as np
 from scipy.sparse import issparse
 
@@ -19,9 +20,10 @@ def is_bool(x):
 
 
 def is_int(x):
-    if isinstance(x, int) and not isinstance(x, bool):  # bool subclass of int
+    # TODO: REMOVE integer_types AFTER TRANSITIONING TO PY3
+    if isinstance(x, six.integer_types) and not isinstance(x, bool):  # bool is a subclass of int
         return True
-    elif isinstance(x, (long, np.integer)):
+    elif isinstance(x, np.integer):
         return True
     return False
 
@@ -33,14 +35,14 @@ def is_intlike(x):
     --------
     >>> from secml.core.type_utils import is_intlike
 
-    >>> print is_intlike(0)  # Standard int
+    >>> print(is_intlike(0))  # Standard int
     True
-    >>> print is_intlike(0.1)  # Standard float
+    >>> print(is_intlike(0.1))  # Standard float
     False
 
-    >>> print is_intlike(np.array([0]))  # ndarray with one int
+    >>> print(is_intlike(np.array([0])))  # ndarray with one int
     True
-    >>> print is_intlike(np.array([0.1]))  # ndarray with one float
+    >>> print(is_intlike(np.array([0.1])))  # ndarray with one float
     False
 
     """
@@ -65,14 +67,14 @@ def is_floatlike(x):
     --------
     >>> from secml.core.type_utils import is_floatlike
 
-    >>> print is_floatlike(0.1)  # Standard float
+    >>> print(is_floatlike(0.1))  # Standard float
     True
-    >>> print is_floatlike(0)  # Standard int
+    >>> print(is_floatlike(0))  # Standard int
     False
 
-    >>> print is_floatlike(np.array([0.1]))  # ndarray with one float
+    >>> print(is_floatlike(np.array([0.1])))  # ndarray with one float
     True
-    >>> print is_floatlike(np.array([0]))  # ndarray with one int
+    >>> print(is_floatlike(np.array([0])))  # ndarray with one int
     False
 
     """
@@ -86,12 +88,12 @@ def is_floatlike(x):
 
 
 def is_scalar(x):
-    """Return True if input is integer or float."""
+    """True if input is integer or float."""
     return is_int(x) or is_float(x)
 
 
 def is_scalarlike(x):
-    """Return True if input is scalar (int or float) or list/array of 1 real."""
+    """True if input is scalar (int or float) or list/array of 1 real."""
     return is_intlike(x) or is_floatlike(x)
 
 
@@ -134,9 +136,13 @@ def is_slice(x):
     return isinstance(x, slice)
 
 
-def is_str(x):
-    # FIXME: CHANGE THIS FOR PYTHON 3 (STR ARE UNICODE)
-    return isinstance(x, (str, np.str_, unicode))
+def is_str(x):  # text unicode strings (unicode AND bytes in Py2)
+    # TODO: REMOVE string_types AFTER TRANSITIONING TO PY3
+    if isinstance(x, six.string_types):
+        return True
+    elif isinstance(x, np.str_):
+        return True
+    return False
 
 
 def is_tuple(x):
@@ -156,7 +162,7 @@ def to_builtin(x):
 
     Works with the following types:
      - bool, np.bool_ -> bool
-     - int, long, np.integer -> int
+     - int, np.integer -> int
      - float, np.floating -> float
      - str, np.str_ -> str
 
@@ -165,7 +171,7 @@ def to_builtin(x):
         # Covers bool, np.bool_
         return bool(x)
     elif is_int(x):
-        # Covers int, long, np.integer
+        # Covers int, np.integer
         return int(x)
     elif is_float(x):
         # Covers float, np.floating

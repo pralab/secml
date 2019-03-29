@@ -5,7 +5,9 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from c_prototypes_selector import CPrototypesSelector
+from six.moves import range
+
+from secml.data.selection import CPrototypesSelector
 from secml.array import CArray
 from secml.ml.kernel import CKernelEuclidean
 
@@ -53,7 +55,7 @@ class CPSKMedians(CPrototypesSelector):
         k_euclidean = CKernelEuclidean().k(dataset.X)
         # List of selected prototypes (indices)
         sel_idx = []
-        for i in xrange(n_prototypes):
+        for i in range(n_prototypes):
             # Find the samples associated with each cluster
             cluster_indices = km_labels.find(km_labels == i)
             if len(cluster_indices) == 0:  # No sample in the cluster?!

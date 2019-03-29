@@ -39,8 +39,8 @@ def _fit_one_ova(
     # Binarizing dataset
     train_ds = multi_ova.binarize_dataset(tr_class_idx, dataset)
 
-    # Extracting one-vs-all classifier
-    classifier_instance = multi_ova.binary_classifiers[tr_class_idx]
+    # Extracting the internal one-vs-all classifier
+    classifier_instance = multi_ova._binary_classifiers[tr_class_idx]
     # Setting verbosity level
     classifier_instance.verbose = multi_ova.verbose
     # Training one-vs-all classifier
@@ -143,7 +143,7 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
             "Getting decision function against class: {:}".format(y))
         # Getting predicted scores for classifier associated with y
         # The decision function is always computed wrt positive class (1)
-        return self.binary_classifiers[y].decision_function(x, y=1)
+        return self._binary_classifiers[y].decision_function(x, y=1)
 
     def _gradient_f(self, x, y):
         """Computes the gradient of the classifier's decision function
@@ -167,4 +167,4 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
 
         """
         self._check_clf_index(y)  # Check the binary classifier input index
-        return self.binary_classifiers[y].gradient_f_x(x, y=1).ravel()
+        return self._binary_classifiers[y].gradient_f_x(x, y=1).ravel()

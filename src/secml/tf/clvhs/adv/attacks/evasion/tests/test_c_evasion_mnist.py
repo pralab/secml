@@ -1,4 +1,6 @@
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
+
+from six.moves import range
 
 from cleverhans.attacks import FastGradientMethod, CarliniWagnerL2, \
     ElasticNetMethod, SPSA, LBFGS, \
@@ -6,7 +8,7 @@ from cleverhans.attacks import FastGradientMethod, CarliniWagnerL2, \
     MomentumIterativeMethod, MadryEtAl, BasicIterativeMethod, DeepFool
 
 from secml.tf.clvhs.adv.attacks.evasion import \
-    CAttackEvasionCleverHans
+    CAttackEvasionCleverhans
 from secml.array import CArray
 from secml.data.loader import CDataLoaderMNIST
 from secml.figure import CFigure
@@ -136,7 +138,7 @@ class TestEvasionMNISTCleverhansAttack(CUnitTest):
             tr = loader.load('training', digits=digits)
             pickle_utils.save(tr_file, tr)
         else:
-            tr = pickle_utils.load(tr_file)
+            tr = pickle_utils.load(tr_file, encoding='latin1')
 
         ts_file = fm.join(
             fm.abspath(__file__), 'mnist_ts_{:}.gz'.format(digits_str))
@@ -145,7 +147,7 @@ class TestEvasionMNISTCleverhansAttack(CUnitTest):
             ts = loader.load('testing', digits=digits)
             pickle_utils.save(ts_file, ts)
         else:
-            ts = pickle_utils.load(ts_file)
+            ts = pickle_utils.load(ts_file, encoding='latin1')
 
         idx = CArray.arange(tr.num_samples)
         val_dts_idx = CArray.randsample(idx, 200, random_state=0)
@@ -244,7 +246,7 @@ class TestEvasionMNISTCleverhansAttack(CUnitTest):
             labels
 
         """
-        for atk_idx in xrange(len(self.clvh_attacks)):
+        for atk_idx in range(len(self.clvh_attacks)):
 
             attack_idx = self.clvh_attacks[atk_idx]['class'].__name__
 
@@ -252,7 +254,7 @@ class TestEvasionMNISTCleverhansAttack(CUnitTest):
 
                 self.logger.info("Run the {:} attack ".format(attack_idx))
 
-                self._evasion_obj = CAttackEvasionCleverHans(
+                self._evasion_obj = CAttackEvasionCleverhans(
                     classifier=self.classifier,
                     surrogate_classifier=self.classifier,
                     n_feats=self.tr.num_features,
@@ -268,6 +270,11 @@ class TestEvasionMNISTCleverhansAttack(CUnitTest):
                 y_pred, scores, adv_ds = self._evasion_obj.run(
                     self._x0, self._y0)[:3]
                 adv_x = adv_ds.X
+
+                self.logger.info("num grad eval {:}".format(
+                self._evasion_obj.grad_eval))
+                self.logger.info("num f eval {:}".format(
+                self._evasion_obj.f_eval))
 
                 if self.save_info_for_plot:
                     info_dir = fm.join(fm.abspath(__file__), 'attacks_data')

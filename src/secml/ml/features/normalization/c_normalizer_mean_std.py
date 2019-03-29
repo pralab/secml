@@ -5,6 +5,9 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from __future__ import division
+from six.moves import range
+
 from secml.array import CArray
 from secml.core.type_utils import is_scalar
 from secml.ml.features.normalization import CNormalizerLinear
@@ -89,19 +92,6 @@ class CNormalizerMeanSTD(CNormalizerLinear):
 
         super(CNormalizerMeanSTD, self).__init__(preprocess=preprocess)
 
-    def __clear(self):
-        """Reset the object."""
-        self._x_mean = None
-        self._x_std = None
-        # Properties of the linear normalizer
-        self._w = None
-        self._b = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return self.mean is None and self.std is None and \
-            self._w is None and self._b is None
-
     @property
     def w(self):
         """Returns the slope of the linear normalizer."""
@@ -159,28 +149,28 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]],tosparse=True)
 
         >>> normalizer = CNormalizerMeanSTD(0.5, 0.2).fit(array)
-        >>> print normalizer.mean
+        >>> print(normalizer.mean)
         CArray([ 0.5  0.5  0.5])
-        >>> print normalizer.std
+        >>> print(normalizer.std)
         CArray([ 0.2  0.2  0.2])
 
-        >>> print normalizer.transform(array)
+        >>> print(normalizer.transform(array))
         CArray([[ 2.5 -7.5  7.5]
          [ 7.5 -2.5 -2.5]
          [-2.5  2.5 -7.5]])
 
         >>> normalizer = CNormalizerMeanSTD((0.5, 0.5, 0.2), (0.2, 0.1, 0.1)).fit(array)
 
-        >>> print normalizer.transform(array)
+        >>> print(normalizer.transform(array))
         CArray([[  2.5 -15.   18. ]
          [  7.5  -5.   -2. ]
          [ -2.5   5.  -12. ]])
 
         >>> out = CNormalizerMeanSTD().fit_transform(array)
         >>> # Expected zero mean and unit variance
-        >>> print out.mean(axis=0, keepdims=False)
+        >>> print(out.mean(axis=0, keepdims=False))
         CArray([ 0.  0.  0.])
-        >>> print out.std(axis=0, keepdims=False)
+        >>> print(out.std(axis=0, keepdims=False))
         CArray([ 1.  1.  1.])
 
         """
@@ -196,9 +186,10 @@ class CNormalizerMeanSTD(CNormalizerLinear):
                 raise ValueError("input number of features must be "
                                  "divisible by {:}".format(n_channels))
             mean_list = []
-            for i in xrange(n_channels):
+            for i in range(n_channels):
                 mean_list.append(
-                    CArray.ones(shape=(n_feats / n_channels, )) * self._mean[i])
+                    CArray.ones(
+                        shape=(int(n_feats / n_channels), )) * self._mean[i])
             self._x_mean = CArray.from_iterables(mean_list)
 
         # Setting the variance
@@ -214,9 +205,10 @@ class CNormalizerMeanSTD(CNormalizerLinear):
                 raise ValueError("input number of features must be "
                                  "divisible by {:}".format(n_channels))
             std_list = []
-            for i in xrange(n_channels):
+            for i in range(n_channels):
                 std_list.append(
-                    CArray.ones(shape=(n_feats / n_channels, )) * self._std[i])
+                    CArray.ones(
+                        shape=(int(n_feats / n_channels), )) * self._std[i])
             self._x_std = CArray.from_iterables(std_list)
 
         # Updating linear normalizer parameters

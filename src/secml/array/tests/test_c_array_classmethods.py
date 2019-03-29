@@ -1,10 +1,9 @@
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+from secml.array.tests import CArrayTestCases
 
 from secml.array import CArray
 
 
-class TestCArrayClassMethods(CArrayTestCases.TestCArray):
+class TestCArrayClassMethods(CArrayTestCases):
     """Unit test for CArray CLASSMETHODS methods."""
 
     def test_concatenate(self):
@@ -21,9 +20,9 @@ class TestCArrayClassMethods(CArrayTestCases.TestCArray):
             self.logger.info("concat(a1, a2): {:}".format(concat_res))
             # If axis is None, result should be ravelled...
             if array1.isdense:
-                self.assertEquals(concat_res.ndim, 1)
+                self.assertEqual(1, concat_res.ndim)
             else:  # ... but if array is sparse let's check for shape[0]
-                self.assertEquals(concat_res.shape[0], 1)
+                self.assertEqual(1, concat_res.shape[0])
             self.assertTrue((concat_res[:array1.size] == array1.ravel()).all())
             self.assertTrue((concat_res[array1.size:] == array2.ravel()).all())
 
@@ -35,18 +34,18 @@ class TestCArrayClassMethods(CArrayTestCases.TestCArray):
             # check append on axis 0 (vertical)
             concat_res = CArray.concatenate(array1, array2, axis=0)
             self.logger.info("concat(a1, a2, axis=0): {:}".format(concat_res))
-            self.assertEquals(concat_res.shape[1], array1_shape1)
-            self.assertEquals(
-                concat_res.shape[0], array1_shape0 + array2_shape0)
+            self.assertEqual(array1_shape1, concat_res.shape[1])
+            self.assertEqual(
+                array1_shape0 + array2_shape0, concat_res.shape[0])
             self.assertTrue((concat_res[:array1_shape0, :] == array1).all())
             self.assertTrue((concat_res[array1_shape0:, :] == array2).all())
 
             # check append on axis 1 (horizontal)
             concat_res = CArray.concatenate(array1, array2, axis=1)
             self.logger.info("concat(a1, a2, axis=1): {:}".format(concat_res))
-            self.assertEquals(
-                concat_res.shape[1], array1_shape1 + array2_shape1)
-            self.assertEquals(concat_res.shape[0], array1_shape0)
+            self.assertEqual(
+                array1_shape1 + array2_shape1, concat_res.shape[1])
+            self.assertEqual(array1_shape0, concat_res.shape[0])
             self.assertTrue((concat_res[:, :array1_shape1] == array1).all())
             self.assertTrue((concat_res[:, array1_shape1:] == array2).all())
 
@@ -412,4 +411,4 @@ class TestCArrayClassMethods(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

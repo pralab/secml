@@ -5,6 +5,9 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
+from __future__ import division
+from six.moves import range
+from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 import gzip
 import struct
 from array import array
@@ -72,7 +75,7 @@ class CDataLoaderMNIST(CDataLoader):
                     md5(self.test_labels_path) != TEST_LABELS_MD5:
                 self._get_data(TEST_LABELS_URL, MNIST_PATH, self.test_labels_path)
 
-    def load(self, ds, digits=(xrange(0, 10)), num_samples=None):
+    def load(self, ds, digits=(range(0, 10)), num_samples=None):
         """Load all images of specified format inside given path.
 
         Adapted from: http://cvxopt.org/_downloads/mnist.py
@@ -130,21 +133,21 @@ class CDataLoaderMNIST(CDataLoader):
         # Number of samples per class
         num_samples_class = size
         if num_samples is not None:
-            num_samples_class = int(float(num_samples) / digits.size)
+            num_samples_class = int(num_samples / digits.size)
 
         # Counter of already taken sample for a class
         count_samples_class = {e: 0 for e in digits}
 
         # Extract the indices of samples to load
         ind = []
-        for k in xrange(size):
+        for k in range(size):
             if lbl[k] in digits and \
                     count_samples_class[lbl[k]] < num_samples_class:
                 ind += [k]
                 count_samples_class[lbl[k]] += 1
 
         # Number of loaded samples
-        num_loaded = sum(count_samples_class.viewvalues())
+        num_loaded = sum(count_samples_class.values())
 
         # Check if dataset has enough samples
         if num_samples is not None and num_loaded < num_samples:

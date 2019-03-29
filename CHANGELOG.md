@@ -1,3 +1,101 @@
+## v0.5-dev (29/03/2019)
+- #198 `secml` now support Python >= 3.5. DEPRECATION: support for Python 2.7 will be dropped in a future release without advance notice.
+- #347 The `clear` framework (`CCreator.clear()` and `.is_clear()` methods) is now removed. Alternative methods have been added to different classes, if necessary, to replace its functionality.
+- #4 Updated and completed the PyTorch models zoo. We provide multiple widely-used pre-trained models for 'cifar10', 'cifar100' and 'imagenet' datasets. For a complete list of the available models see `secml.pytorch.models.PYTORCH_MODELS`.
+- #70 Complete revision of `optimization` package, which is now called `optim`. All solvers are now subclasses of `COptimizer`, which now provides all the methods previously implemented as part of `CSolver`, including constraints, bounds and `.maximize()` method. The following solvers are available: `COptimizerScipy`, `COptimizerGrad` and `COptimizerGradBLS`. See documentation for more informations.
+
+### Requirements (3 changes)
+- #394 Raise minimum required version of `tensorflow` to `1.13.*` for compatibility with Python 3.7.
+- #198 Raised minimum requirements in order to properly support Python 3.7 (coming soon): `numpy >= 1.15.*, scipy >= 1.2.*, scikit-learn >= 0.20.*, torch>=0.4.1`.
+- #198 Temporarily added `six` as a required dependency as we use it for Python 2/3 compatibility. Will be removed in future versions.
+
+### Python 3 support (23 changes)
+- #398 Added parameter `encoding` (default 'ascii') to `dict_utils.load_dict`.
+- #398 Updated `pickle_utils.load` to allow loading files pickled using Python 2 by adding parameter `encoding` (default 'bytes').
+- #398 Fixed `CDataLoaderCIFAR` to allow loading the dataset under Python 3.
+- #398 Multiple updates for Python 3 compatibility when opening external files.
+- #393 Revised use of division (`/`) and floor division (`//`) operators to be compatible with Python 3.
+- #395 Fixed call to deprecated `inspect.getargspec()` function.
+- #392 Fixed calls to `dict.items()`, `dict.keys()` and `dict.items()` returning a view instead of a list in Python 3.
+- #386 Fixed concatenation of strings and bytes in COptimizerScipy.
+- #391 Revised any call to `range` to be compatible with Python 3.
+- #388 Fixed use of `map` built-in function to be compatible with Python 3.
+- #389 Fixed use of deprecated `.next()` method of iterators (Python 3 compatibility).
+- #386 `core.type_utils` now uses type checks for `int` and `str` compatible with Python 3.
+- #386 `VERSION` and `VERSION_REV` files are now stored using `ascii` encoding.
+- #386 Use `ascii` to decode `requirements.txt` file.
+- #386 Fixed `hashlib.sha1.update()` receiving standard strings as input in Python 3.
+- #386 `CArray` is now stored and loaded from text files using `utf-8` encoding by default.
+- #381 Updated all imports to be compatible with Python 3.
+- #383 Update use of `zip` and `itertools.izip` function to be compatible with Python 3.
+- #384 Removed any use of the deprecated methods of `dict` `.iterkeys(), .iteritems(), .itervalues(), .viewkeys(), .viewitems() .viewvalues()` (Python 3 compatibility).
+- #382 Using `0o` as the prefix for octal literals (Python 3 compatibility).
+- #379 Use `six.add_metaclass(...)` to replace `__metaclass__` deprecated in Python 3.
+- #374 `print` is now only used as a function for Python 3 compatibility.
+- #198 Updated setup to allow installation under Python 3.5+.
+
+### Added (8 changes)
+- #409 Added new method `CFunction.reset_eval()` which can be used to reset the function and gradient of function evaluations counters.
+- #289 Added new configuration options to control logging functionality: `SECML_STORE_LOGS`, `SECML_LOGS_DIR`, `SECML_LOGS_FILENAME`, `SECML_LOGS_PATH`. By default, logs are now stored in the `SECML_HOME_DIR/logs` folder only if `SECML_STORE_LOGS` is active (default False). See docs for more information.
+- #345 Added new extra `tf-gpu` to setup which allows installation of `tensorflow-gpu`.
+- #360 Added `CFunctionMcCormick.bounds()` which returns the expected input domain of the function.
+- #357 Added custom exception `NotFittedError` which will be raised if an object is used before training (before calling `.fit()`).
+- #357 Added new utility function `util.mixed_utils.check_if_fitted` that checks if the input object is trained, by raising `NotFittedError` if not.
+- #357 Added the new method `CClassifier.is_fitted()` that can be used to check if a classifier is trained.
+- #347 Added a new `deprecated` decorator. Can be imported from the new `core.decorators` module.
+
+### Improved (12 changes)
+- #88 Output of `CConstraintL1` and `CConstraintL2` `.projection()` method is now correctly a sparse array if input is sparse.
+- #247 Added ability to pass optional keyword arguments to `CFunction.approx_fprime` and `.check_grad`. This allows better control of parameters and the use of those method with function only accepting keyword arguments (and not also standard optional arguments).
+- #293 Improved error messages of configuration files parser.
+- #99 Bounds of `COptimizerScipy` are now passed to the `scipy.optimize` solvers if defined.
+- #385 `CFunction` can now work with callables (functions) accepting matrices (arrays of multiple points).
+- #369 Output of `COptimizerScipy` can now be controlled via the `.verbose` parameter.
+- #368 Added new parameter `levels_linewidth` to `CPlot.plot_fobj` which controls the line width of the contour lines.
+- #368 Added new parameters to `CPlot.plot_path`: `path_width`, to control the width of path line; `start_edgecolor` and `final_edgecolor` to control the color of the edge of the start and final point marker, respectively.
+- #99 Added support for bounds (`CContraintBox`) in `CSolverScipy`.
+- #362 Added a new stop condition to `COptimizerGrad` that checks if the function value has not changed between two subsequent iterations.
+- #4 Added a new input parameter `ds_id` to `pytorch.models.dl_pytorch_model()` to download a specific model trained on different datasets.
+- #357 Added new init parameter `pretrained` and corresponding internal attribute `_trained` to `CClassifierPyTorch`. This should be set to `True` if the input model is (or return) a pretrained PyTorch model.
+
+### Changed (14 changes)
+- #20 Removed `armijo-goldstein` criteria to stop search in `CLineSearchBisect`. Replaced with a simpler tolerance check.
+- #351 Using zero or a boolean False as a power in case of sparse arrays is no more permitted. The array should be explicitly converted to dense if needed.
+- #252 Moved `CUnitTest` to new package `secml.testing`. This can be used to create additional unittests for the library. `pytest` must be installed to use this package.
+- #252 Requirements for unittesting (`pytest` and `pytest-cov` are no more installed by default as are not necessary for running the library. If needed for developing reasons, can be installed using the new extra component `unittests`.
+- #377 `CClassifierCleverhans` is now `CModelCleverhans`.
+- #360 Package `optimization` is now named `optim`.
+- #360 `CSolver` is now `COptimizer`. As a result, all solvers are now subclasses of `COptimizer`. `COptimizer` now provides all the methods previosuly implemented as part of `CSolver`, including constraints, bounds and `.maximize()` method.
+- #405 `CSolverGradDesc` is now `COptimizerGrad` as it implements a Gradient (descent/ascent) optimization method. `CSolverDescDir` is now `COptimizerGradBLS` as it implements the Gradient (descent/ascent) method with Bisect Line Search.
+- #405 `optim.line_search` and `optim.learning_rate` packages are now moved inside `optim.optimizers` package.
+- #358 Moved solvers from `adv.attacks.evasion.solvers` to the new package `optimization.optimizers`.
+- #360 Created new solver type `COptimizerScipy` which wraps `scipy.optimize.minimize`.
+- #360 Removed `.minimize()` from `COptimizer`. This is now part of `COptimizerScipy`.
+- #360 Moved `COptimizer.check_grad()` and `COptimizer.approx_fprime()` to `CFunction`.
+- #357 `CClassifierPyTorch.load_state()` will now avoid to estimate and set the parameters `classes` and `n_features` as we do not have reliable knowledge of those informations (the training dataset is unknown).
+
+### Fixed (11 changes)
+- #363 Fixed `CAttackEvasion` crashing when input data is sparse.
+- #20 Fixed a bug in `CLineSearchBisect` where the optimization points were incorrectly casted to `int` even if the `eta` step is `float`.
+- #397 Fixed `CDense.save` storing arrays of dtype `int` as `float`. An error will now be raised if the loaded file contains values that cannot be casted using the desired dtype.
+- #344 Fixed output of `CArray.unique()` having `float` or `bool` dtype instead of `int` dtype in some occasions.
+- #372 Fixed a bug in `CExploreDescentDirection` which lead to a crash if no bounds constraint is defined.
+- #404 Fixed a bug in `CConstraintBox` which caused the constraint to not be applied correctly on arrays of `int` dtype.
+- #401 Fixed a bug in `CConstraintL2` which caused `.gradient()` and `.projection()` methods to return an array of `nan` values if the norm of input is zero.
+- #349 Fixed inability to add/subtract a zero scalar or a boolean `False` from a sparse `CArray`.
+- #378 Fixed a crash of `CConstraintBox` when input data is a sparse array with no zero elements.
+- #402 Removed use of deprecated and not correctly used `async` parameter while calling `.cuda()` in `.CClassifierPyTorch`.
+- #400 Fixed setup not installing "post" versions of PyTorch when available.
+
+### Removed (6 change)
+- #396 Removed ability to pass a `slice` to parameter `usecols` of `CArray.load()`.
+- #93 Removed support for multipoint input in `CConstraint` and subclasses. Use `CArray.apply_along_axis` if needed.
+- #48 Removed attribute `CClassifierMulticlass.binary_classifiers`. The binary classifiers trained by the multiclass estimators are only intended to be used internally.
+- #289 Removed ability to import configuration file `SECML_CONF` from main module `secml`. Use `secml.settings.SECML_CONF` instead.
+- #326 Removed redundant calls to `.nan_to_num()` from `CNormalizer` and subclasses.
+- #357 Removed `RuntimeError` raised by `CClassifierPyTorch.load_state()` if `input_shape` is `None`. If `input_shape` is unknown or `None`, input will not be reshaped before passing it to the network.
+
+
 ## v0.4-dev (08/03/2019)
 - #329 The project is now officially called `SecML`.
 - #210 Added new package `tf.clvhs` which provides a wrapper for [CleverHans](https://github.com/tensorflow/cleverhans).

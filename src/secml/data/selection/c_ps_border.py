@@ -5,7 +5,9 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from c_prototypes_selector import CPrototypesSelector
+from six.moves import range
+
+from secml.data.selection import CPrototypesSelector
 from secml.array import CArray
 from secml.ml.kernel import CKernelEuclidean
 
@@ -49,8 +51,8 @@ class CPSBorder(CPrototypesSelector):
         k_euclidean = CKernelEuclidean().k(dataset.X)
         # List of selected prototypes (indices)
         sel_idx = []
-        set_indices = list(xrange(dataset.num_samples))
-        for i in xrange(n_prototypes):
+        set_indices = list(range(dataset.num_samples))
+        for i in range(n_prototypes):
             set_indices = [e for e in set_indices if e not in sel_idx]
             p = k_euclidean[set_indices, set_indices]
             # Compute the marginal prototype

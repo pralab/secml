@@ -6,7 +6,9 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
+import six
+from six.moves import range
 from collections import OrderedDict
 from copy import deepcopy
 
@@ -62,6 +64,7 @@ def _evaluate_one(
     return eval_score
 
 
+@six.add_metaclass(ABCMeta)
 class CPerfEvaluator(CCreator):
     """Evaluate the best parameters for input estimator.
 
@@ -73,7 +76,6 @@ class CPerfEvaluator(CCreator):
         Name of the metric that we want maximize / minimize.
 
     """
-    __metaclass__ = ABCMeta
     __super__ = 'CPerfEvaluator'
 
     def __init__(self, splitter, metric):
@@ -130,7 +132,7 @@ class CPerfEvaluator(CCreator):
                 raise TypeError("values for parameter `{:}` must be "
                                 "specified as a list.".format(param_name))
             # Add an index for each parameter's value
-            params_idx.append(xrange(len(parameters[param_name])))
+            params_idx.append(list(range(len(parameters[param_name]))))
 
         # this is a matrix of indices.... e.g. [[1,1] [1,2], ..]
         # each row corresponds to the indices of parameters to be set
@@ -150,8 +152,7 @@ class CPerfEvaluator(CCreator):
         self.logger.info("Best params: {:} - Value: {:}".format(
             best_params_dict, best_value))
 
-        # Clear estimator and restore original parameters
-        estimator.clear()
+        # Restore original parameters of classifier
         for param in original_estimator.__dict__:
             estimator.__dict__[param] = original_estimator.__dict__[param]
 

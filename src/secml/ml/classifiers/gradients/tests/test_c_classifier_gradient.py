@@ -1,18 +1,18 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
+import six
 
-from secml.utils import CUnitTest
+from secml.testing import CUnitTest
 from secml.array import CArray
-from secml.optimization import COptimizer
-from secml.optimization.function import CFunction
+from secml.optim.function import CFunction
 from secml.ml.classifiers.gradients.tests.utils import CClassifierGradientTest
 
 
 class CClassifierGradientTestCases(object):
     """Wrapper for TestCClassifierGradient to make unittest.main() work correctly."""
 
+    @six.add_metaclass(ABCMeta)
     class TestCClassifierGradient(CUnitTest):
         """Unit test for the classifier gradients."""
-        __metaclass__ = ABCMeta
 
         @abstractmethod
         def _dataset_creation(self):
@@ -28,7 +28,7 @@ class CClassifierGradientTestCases(object):
 
         def setUp(self):
 
-            self.seed = 2 # 0
+            self.seed = 2  # 0
 
             self._dataset_creation()
             self._set_tested_classes()
@@ -60,11 +60,9 @@ class CClassifierGradientTestCases(object):
 
                 # Compare the analytical grad with the numerical grad
                 gradient = clf.gradient_f_x(pattern, y=c)
-                num_gradient = COptimizer(
-                    CFunction(self._fun_f_args,
-                              self._grad_f_x_args)).approx_fprime(pattern,
-                                                                  1e-8,
-                                                                  ({'y': c}))
+                num_gradient = CFunction(
+                    self.clf.decision_function).approx_fprime(
+                        pattern, epsilon=1e-8, y=c)
                 error = (gradient - num_gradient).norm(order=1)
                 self.logger.info("Analitic gradient w.r.t. class %s: %s",
                                  str(c), str(gradient))
@@ -129,14 +127,6 @@ class CClassifierGradientTestCases(object):
 
             return self.clf_gradients.L(**new_args[0])
 
-        def _grad_L_params_args(self, params, *args):
-            """
-            Wrapper needed as the gradient function have **kwargs
-            """
-            new_args = self._change_clf_params_in_args(self, args, params)
-
-            return self.clf_gradients.L_d_params( **new_args[0]).ravel()
-
         def _clf_gradient_L_params_check(self, clf, clf_idx):
 
             if not hasattr(clf, 'gradients'):
@@ -147,7 +137,7 @@ class CClassifierGradientTestCases(object):
 
             self.clf = clf
             self.clf_gradients = CClassifierGradientTest.create(
-                clf.class_type,clf.gradients)
+                clf.class_type, clf.gradients)
             params = self.clf_gradients.params(clf)
 
             smpls_idx = CArray.arange(self.dataset.num_samples)
@@ -158,10 +148,8 @@ class CClassifierGradientTestCases(object):
 
             # Compare the analytical grad with the numerical grad
             gradient = clf.gradients.L_d_params(clf, x, y).ravel()
-            num_gradient = COptimizer(
-                CFunction(self._fun_L_args,
-                          self._grad_L_params_args)).approx_fprime(
-                params, 1e-8, ({'x':x,'y': y, 'clf': clf}))
+            num_gradient = CFunction(self._fun_L_args).approx_fprime(
+                params, 1e-8, ({'x': x, 'y': y, 'clf': clf}))
             error = (gradient - num_gradient).norm(order=1)
 
             self.logger.info("Analitic gradient %s", str(gradient))

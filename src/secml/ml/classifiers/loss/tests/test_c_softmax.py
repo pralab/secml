@@ -3,9 +3,8 @@ from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM
 from secml.ml.classifiers.loss.c_softmax import CSoftmax
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
-from secml.optimization import COptimizer
-from secml.optimization.function import CFunction
-from secml.utils import CUnitTest
+from secml.optim.function import CFunction
+from secml.testing import CUnitTest
 
 
 class TestCSoftmax(CUnitTest):
@@ -67,23 +66,18 @@ class TestCSoftmax(CUnitTest):
             softmax = self.softmax.softmax(s).ravel()
             return softmax[y]
 
-        def _grad_wrapper(s, y):
-            return self.softmax.gradient(s, y)
-
         score = self.scores[0, :]
 
         for pos_label in (0, 1, 2):
             self.logger.info("POS_LABEL: {:}".format(pos_label))
 
             # real value of the gradient on x
-            grad = _grad_wrapper(score, pos_label)
+            grad = self.softmax.gradient(score, pos_label)
 
             self.logger.info("ANALITICAL GRAD: {:}".format(grad))
 
-            approx = COptimizer(
-                CFunction(_sigma_pos_label,
-                          _grad_wrapper)
-            ).approx_fprime(score, 1e-5, pos_label)
+            approx = CFunction(_sigma_pos_label).approx_fprime(
+                score, 1e-5, pos_label)
 
             self.logger.info("NUMERICAL GRADIENT: {:}".format(approx))
 

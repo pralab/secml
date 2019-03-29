@@ -14,6 +14,7 @@ from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.array import CArray
 from secml.ml.kernel import CKernel
 from secml.ml.classifiers.gradients import CClassifierGradientRidge
+from secml.utils.mixed_utils import check_is_fitted
 
 
 class CClassifierRidge(CClassifierLinear):
@@ -55,21 +56,6 @@ class CClassifierRidge(CClassifierLinear):
 
         self._gradients = CClassifierGradientRidge()
 
-    def __clear(self):
-        """Reset the object."""
-        self._tr = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        if self._tr is not None:
-            return False
-
-        # CClassifierLinear attributes
-        if self._w is not None or self._b is not None:
-            return False
-
-        return True
-
     def is_linear(self):
         """Return True if the classifier is linear."""
         if super(CClassifierRidge, self).is_linear() and self.is_kernel_linear():
@@ -81,6 +67,19 @@ class CClassifierRidge(CClassifierLinear):
         if self.kernel is None or self.kernel.class_type == 'linear':
             return True
         return False
+
+    def _check_is_fitted(self):
+        """Check if the classifier is trained (fitted).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier is not fitted.
+
+        """
+        if self._kernel is not None:
+            check_is_fitted(self, '_tr')
+        super(CClassifierRidge, self)._check_is_fitted()
 
     @property
     def gradients(self):
@@ -153,8 +152,7 @@ class CClassifierRidge(CClassifierLinear):
                                 solver='auto')
 
         # Storing training dataset (only if required by kernel)
-        if self._kernel is not None:
-            self._tr = dataset.X
+        self._tr = dataset.X if self._kernel is not None else None
 
         # Storing the training matrix for kernel mapping
         if self.is_kernel_linear():

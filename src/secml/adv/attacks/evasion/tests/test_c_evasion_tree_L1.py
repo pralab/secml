@@ -1,8 +1,7 @@
-from secml.utils import CUnitTest
-from test_c_evasion import CEvasionTestCases
+from secml.testing import CUnitTest
+from secml.adv.attacks.evasion.tests import CEvasionTestCases
 
 from secml.ml.classifiers import CClassifierDecisionTree, CClassifierSVM
-from secml.utils import fm
 
 
 class TestEvasionTreeL1(CEvasionTestCases.TestCEvasion):
@@ -34,8 +33,7 @@ class TestEvasionTreeL1(CEvasionTestCases.TestCEvasion):
         self.ub = +1.5
 
         self.grid_limits = [(-2, 2), (-2, 2)]
-        self.name_file = fm.join(fm.abspath(__file__), 'L1_tree.pdf')
-
+        self.filename = 'test_c_evasion_tree_L1.pdf'
 
 if __name__ == '__main__':
     CUnitTest.main()

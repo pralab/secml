@@ -1,12 +1,11 @@
-from secml.utils import CUnitTest
-from c_array_testcases import CArrayTestCases
+from secml.array.tests import CArrayTestCases
 
 from secml.array import CArray
 from secml.array.c_dense import CDense
 from secml.array.c_sparse import CSparse
 
 
-class TestCArrayUtilsMixed(CArrayTestCases.TestCArray):
+class TestCArrayUtilsMixed(CArrayTestCases):
     """Unit test for CArray UTILS - MIXED methods."""
 
     def test_sign(self):
@@ -85,7 +84,7 @@ class TestCArrayUtilsMixed(CArrayTestCases.TestCArray):
 
             diag = array.diag(k=k)
             self.logger.info("({:})-th diagonal is: {:}".format(k, diag))
-            self.assertEquals(diag.ndim, 1)
+            self.assertEqual(1, diag.ndim)
             self.assertTrue(diag.isdense)
             self.assertTrue((diag == out).all())
 
@@ -99,7 +98,7 @@ class TestCArrayUtilsMixed(CArrayTestCases.TestCArray):
 
         with self.assertRaises(ValueError):
             # k is higher/lower than array shape
-            print self.array_dense.diag(k=4)
+            self.array_dense.diag(k=4)
         with self.assertRaises(ValueError):
             # k is higher/lower than array shape
             self.array_dense.diag(k=-3)
@@ -112,7 +111,7 @@ class TestCArrayUtilsMixed(CArrayTestCases.TestCArray):
 
         with self.assertRaises(ValueError):
             # k is higher/lower than array shape
-            print self.array_sparse.diag(k=4)
+            self.array_sparse.diag(k=4)
         with self.assertRaises(ValueError):
             # k is higher/lower than array shape
             self.array_sparse.diag(k=-3)
@@ -124,8 +123,8 @@ class TestCArrayUtilsMixed(CArrayTestCases.TestCArray):
             diag = array.diag(k=k)
             self.logger.info(
                 "Array created using k={:} is:\n{:}".format(k, diag))
-            self.assertEquals(array.isdense, diag.isdense)
-            self.assertEquals(array.issparse, diag.issparse)
+            self.assertEqual(array.isdense, diag.isdense)
+            self.assertEqual(array.issparse, diag.issparse)
             self.assertTrue((diag == out).all())
 
         self.logger.info("Array is:\n{:}".format(self.row_flat_dense))
@@ -226,4 +225,4 @@ class TestCArrayUtilsMixed(CArrayTestCases.TestCArray):
 
 
 if __name__ == '__main__':
-    CUnitTest.main()
+    CArrayTestCases.main()

@@ -25,11 +25,11 @@ class CKernelHamming(CKernel):
     >>> from secml.array import CArray
     >>> from secml.ml.kernel.c_kernel_hamming import CKernelHamming
 
-    >>> print CKernelHamming().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]]))
+    >>> print(CKernelHamming().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
     CArray([[ 1.  1.]
      [ 1.  1.]])
 
-    >>> print CKernelHamming().k(CArray([[1,2],[3,4]]))
+    >>> print(CKernelHamming().k(CArray([[1,2],[3,4]])))
     CArray([[ 0.  1.]
      [ 1.  0.]])
 

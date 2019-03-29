@@ -1,16 +1,19 @@
 from setuptools import setup, find_packages
 from pkg_resources import parse_version
 import os
-import io
+from io import open  # TODO: REMOVE AFTER TRANSITIONING TO PYTHON 3
 import subprocess
 
 here = os.path.abspath(os.path.dirname(__file__))
 
 
 def read(*path_parts):
-    # intentionally *not* adding an encoding option to open, See:
-    #   https://github.com/pypa/virtualenv/issues/201#issuecomment-3145690
-    with io.open(os.path.join(here, *path_parts), 'r') as fp:
+    with open(os.path.join(here, *path_parts), 'r', encoding='ascii') as fp:
+        return fp.read().strip()
+
+
+def parse_readme(*path_parts):  # For README.md we accept utf-8 chars
+    with open(os.path.join(here, *path_parts), 'r', encoding='utf-8') as fp:
         return fp.read().strip()
 
 
@@ -29,10 +32,10 @@ def git_version():
         env['LANG'] = 'C'
         env['LC_ALL'] = 'C'
         # Execute in the current dir
-        out = subprocess.Popen(cmd, cwd=here, env=env,
+        res = subprocess.Popen(cmd, cwd=here, env=env,
                                stdout=subprocess.PIPE,
                                stderr=open(os.devnull, 'w')).communicate()[0]
-        return out
+        return res
 
     try:
         out = _minimal_ext_cmd(['git', 'rev-parse', '--short', 'HEAD'])
@@ -103,7 +106,8 @@ def install_deps():
         https://github.com/pypa/pip/issues/3610#issuecomment-356687173
 
     """
-    default = io.open(os.path.join(here, 'requirements.txt'), 'r').readlines()
+    default = open(os.path.join(here, 'requirements.txt'),
+                   'r', encoding='ascii').readlines()
     new_pkgs = []
     links = []
     for resource in default:
@@ -118,7 +122,7 @@ def install_deps():
 
 REQ_PKGS, DEP_LINKS = install_deps()
 
-LONG_DESCRIPTION = read('README.md')
+LONG_DESCRIPTION = parse_readme('README.md')
 
 # List of classifiers: https://pypi.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = """\
@@ -129,6 +133,10 @@ License :: OSI Approved
 Programming Language :: Python
 Programming Language :: Python :: 2
 Programming Language :: Python :: 2.7
+Programming Language :: Python :: 3
+Programming Language :: Python :: 3.5
+Programming Language :: Python :: 3.6
+Programming Language :: Python :: 3.7
 Programming Language :: Python :: Implementation :: PyPy
 Topic :: Software Development
 Topic :: Scientific/Engineering
@@ -138,7 +146,7 @@ Operating System :: MacOS
 """
 
 setup(
-    name='SecML',
+    name='secml',
     version=find_version("src", "secml", "VERSION"),
     description='A library for Secure Machine Learning',
     long_description=LONG_DESCRIPTION,
@@ -154,11 +162,13 @@ setup(
                                            "tests.*", "tests"]),
     package_dir={'': 'src'},
     include_package_data=True,
-    python_requires='==2.7.*',
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
     install_requires=REQ_PKGS,
     extras_require={
         'pytorch': ["torch>=0.4.*", "torchvision>=0.1.8"],
-        'cleverhans': ["tensorflow>=1.5.*,<2", "cleverhans"]
+        'cleverhans': ["tensorflow>=1.13.*,<2", "cleverhans"],
+        'tf-gpu': ["tensorflow-gpu>=1.13.*,<2"],
+        'unittests': ['pytest>=4.2', 'pytest-cov>=2.6.1']
     },
     zip_safe=False
 )

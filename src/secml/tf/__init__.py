@@ -2,7 +2,7 @@ try:
     import tensorflow
 except ImportError:
     try:  # Skip unittests if tensorflow is not available
-        from secml.utils import CUnitTest
+        from secml.testing import CUnitTest
         CUnitTest.importskip("tensorflow")
     except ImportError:  # CUnitTest not available
         pass

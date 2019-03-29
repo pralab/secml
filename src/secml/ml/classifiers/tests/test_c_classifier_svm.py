@@ -1,5 +1,6 @@
-from c_classifier_testcases import CClassifierTestCases
+from secml.ml.classifiers.tests import CClassifierTestCases
 
+from six.moves import range
 import numpy as np
 from sklearn.svm import SVC
 import sklearn.metrics as skm
@@ -51,14 +52,14 @@ class TestCClassifierSVM(CClassifierTestCases):
 
     def test_linear_svm(self):
         """Performs tests on linear SVM."""
-        self.logger.info("Testing SVM linear variants (kernel and linear model)")
+        self.logger.info("Testing SVM linear variants (kernel and not)")
 
         # Instancing a linear SVM and an SVM with linear kernel
         linear_svm = CClassifierSVM(kernel=None)
         kernel_linear_svm = self.svms[0]
 
         self.logger.info("SVM kernel: {:}".format(linear_svm.kernel))
-        self.assertEquals(linear_svm.kernel.class_type, 'linear')
+        self.assertEqual('linear', linear_svm.kernel.class_type)
 
         self.logger.info("Training both classifiers on dense data")
         linear_svm.fit(self.dataset)
@@ -248,23 +249,23 @@ class TestCClassifierSVM(CClassifierTestCases):
         self.logger.info("Instancing a linear SVM")
         svm = CClassifierSVM(kernel=None)
 
-        self.assertEquals(svm.store_dual_vars, None)
+        self.assertIsNone(svm.store_dual_vars)
         svm.fit(self.dataset)
-        self.assertEquals(svm.sv, None)
+        self.assertIsNone(svm.sv)
 
         self.logger.info("Changing store_dual_vars to True")
         svm.store_dual_vars = True
 
-        self.assertEquals(svm.store_dual_vars, True)
+        self.assertTrue(svm.store_dual_vars)
         svm.fit(self.dataset)
-        self.assertNotEquals(svm.sv, None)
+        self.assertIsNotNone(svm.sv)
 
         self.logger.info("Changing store_dual_vars to False")
         svm.store_dual_vars = False
 
-        self.assertEquals(svm.store_dual_vars, False)
+        self.assertFalse(svm.store_dual_vars)
         svm.fit(self.dataset)
-        self.assertEquals(svm.sv, None)
+        self.assertIsNone(svm.sv)
 
         self.logger.info("Changing kernel to nonlinear when "
                          "store_dual_vars is False should raise ValueError")
@@ -274,16 +275,16 @@ class TestCClassifierSVM(CClassifierTestCases):
         self.logger.info("Instancing a nonlinear SVM")
         svm = CClassifierSVM(kernel='rbf')
 
-        self.assertEquals(svm.store_dual_vars, None)
+        self.assertIsNone(svm.store_dual_vars)
         svm.fit(self.dataset)
-        self.assertNotEquals(svm.sv, None)
+        self.assertIsNotNone(svm.sv)
 
         self.logger.info("Changing store_dual_vars to True")
         svm.store_dual_vars = True
 
-        self.assertEquals(svm.store_dual_vars, True)
+        self.assertTrue(svm.store_dual_vars)
         svm.fit(self.dataset)
-        self.assertNotEquals(svm.sv, None)
+        self.assertIsNotNone(svm.sv)
 
         self.logger.info(
             "Changing store_dual_vars to False should raise ValueError")
@@ -432,7 +433,7 @@ class TestCClassifierSVM(CClassifierTestCases):
 
             svm.fit(self.dataset)
 
-            for i in random.sample(xrange(self.dataset.num_samples), 10):
+            for i in random.sample(range(self.dataset.num_samples), 10):
                 # Randomly extract a pattern to test
                 pattern = self.dataset.X[i, :]
                 self.logger.info("P {:}: {:}".format(i, pattern))

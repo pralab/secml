@@ -33,17 +33,22 @@ def file_exist(file_path):
     return True if os.path.isfile(file_path) else False
 
 
-def make_folder_incwd(folder_name, mode=0777):
+def make_folder_incwd(folder_name, mode=0o777):
     """Create a directory named folder_name inside current working directory (cwd).
-
-    The default mode is 0777 (octal). On some systems, mode is
-    ignored. Where it is used, the current umask value is first
-    masked out. If the directory already exists, OSError is raised.
 
     Parameters
     ----------
     folder_name : str
         Desired name for the new folder.
+    mode : oct, optional
+        Octal literal representing the numeric mode to use.
+        On some systems, mode is ignored. Where it is used,
+        the current umask value is first masked out.
+        If bits other than the last 9 (i.e. the last 3 digits
+        of the octal representation of the mode) are set,
+        their meaning is platform-dependent. On some platforms,
+        they are ignored and you should call chmod() explicitly
+        to set them. Default `0o777`.
 
     See Also
     --------
@@ -53,20 +58,25 @@ def make_folder_incwd(folder_name, mode=0777):
     return make_folder(os.path.join(os.path.dirname(os.getcwd()), folder_name), mode=mode)
 
 
-def make_folder(folder_path, mode=0777):
+def make_folder(folder_path, mode=0o777):
     """Create a directory inside folder_path with numeric mode 'mode'.
 
     All intermediate-level directories needed to contain
     the leaf directory will be recursively made.
 
-    The default mode is 0777 (octal). On some systems, mode is
-    ignored. Where it is used, the current umask value is first
-    masked out. If the directory already exists, OSError is raised.
-
     Parameters
     ----------
     folder_path : str
         Desired path for the new folder.
+    mode : oct, optional
+        Octal literal representing the numeric mode to use.
+        On some systems, mode is ignored. Where it is used,
+        the current umask value is first masked out.
+        If bits other than the last 9 (i.e. the last 3 digits
+        of the octal representation of the mode) are set,
+        their meaning is platform-dependent. On some platforms,
+        they are ignored and you should call chmod() explicitly
+        to set them. Default `0o777`.
 
     See Also
     --------
@@ -307,7 +317,7 @@ def split(path):
     >>> path = fm.join('dir1','dir2','dir3')
     >>> path
     'dir1/dir2/dir3'
-    >>> print fm.split(path)
+    >>> print(fm.split(path))
     ('dir1/dir2', 'dir3')
 
     """
@@ -336,13 +346,13 @@ def splitext(path):
     >>> path = fm.join('dir1','file.gz')
     >>> path
     'dir1/file.gz'
-    >>> print fm.splitext(path)
+    >>> print(fm.splitext(path))
     ('dir1/file', '.gz')
 
     >>> path = fm.join('dir1','file.tar.gz')
     >>> path
     'dir1/file.tar.gz'
-    >>> print fm.splitext(path)  # Only the first (real) extension is returned
+    >>> print(fm.splitext(path))  # Only the first (real) extension is returned
     ('dir1/file.tar', '.gz')
 
     """
