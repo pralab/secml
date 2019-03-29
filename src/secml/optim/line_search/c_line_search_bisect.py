@@ -6,6 +6,8 @@
 
 """
 from __future__ import division
+import numpy as np
+
 from secml.optim.line_search import CLineSearch
 from secml.array import CArray
 
@@ -111,10 +113,17 @@ class CLineSearchBisect(CLineSearch):
         In practice, if f(x + eta*d) increases on d, we return x.
 
         """
-        x1 = x if idx_min == 0 else CArray(x + d * self.eta * idx_min,
-                                           dtype=x.dtype, tosparse=x.issparse)
-        x2 = x if idx_max == 0 else CArray(x + d * self.eta * idx_max,
-                                           dtype=x.dtype, tosparse=x.issparse)
+        # dtype of x1 and x2 depends on x and eta (the grid discretization)
+        if np.issubdtype(x.dtype, np.floating):
+            # if x is float res dtype should be float
+            dtype = x.dtype
+        else:  # x is int, so the res dtype depends on the grid discretization
+            dtype = self.eta.dtype
+
+        x1 = CArray(x + d * self.eta * idx_min,
+                    dtype=dtype, tosparse=x.issparse)
+        x2 = CArray(x + d * self.eta * idx_max,
+                    dtype=dtype, tosparse=x.issparse)
 
         f0 = self._fx
 
@@ -123,10 +132,9 @@ class CLineSearchBisect(CLineSearch):
             self.logger.debug("x1 and x2 are not feasible. Returning x.")
             return x, f0
 
-        # FIXME: THIS fun_idx_max thing is not working
-        # f1 = self._fun_idx_min if self._fun_idx_min is not None else \
-        #     self.fun.fun(x1, **kwargs)
-        f1 = self.fun.fun(x1, **kwargs)
+        # uses cached values (if available) to save computations
+        f1 = self._fun_idx_min if self._fun_idx_min is not None else \
+            self.fun.fun(x1, **kwargs)
 
         if not self._is_feasible(x2):
             if f1 < f0:
@@ -139,10 +147,9 @@ class CLineSearchBisect(CLineSearch):
                               ", f(x1): " + str(f1))
             return x, f0
 
-        # FIXME: THIS fun_idx_max thing is not working
-        # f2 = self._fun_idx_max if self._fun_idx_max is not None else \
-        #     self.fun.fun(x2, **kwargs)
-        f2 = self.fun.fun(x2, **kwargs)
+        # uses cached values (if available) to save computations
+        f2 = self._fun_idx_max if self._fun_idx_max is not None else \
+            self.fun.fun(x2, **kwargs)
 
         if not self._is_feasible(x1):
             if f2 < f0:
@@ -152,11 +159,11 @@ class CLineSearchBisect(CLineSearch):
             return x, f0
 
         # else return best point among x1, x2 and x
-        if f2 <= f0 and f2 <= f1:
+        if f2 <= f0 and f2 < f1:
             self.logger.debug("Returning x2.")
             return x2, f2
 
-        if f1 <= f0 and f1 <= f2:
+        if f1 <= f0 and f1 < f2:
             self.logger.debug("Returning x1.")
             return x1, f1
 
@@ -216,6 +223,8 @@ class CLineSearchBisect(CLineSearch):
         -------
         x' : CArray
             Point x'=x+eta*d that approximately solves min f(x+eta*d).
+        fx': int or float or None, optional
+            The value f(x').
 
         """
         d = CArray(d, tosparse=d.issparse).ravel()
@@ -230,6 +239,7 @@ class CLineSearchBisect(CLineSearch):
         self._fun_idx_min = None
         self._fun_idx_max = None
 
+        # exponential search
         if self.eta_max is None:
             eta_max = self._compute_eta_max(x, d, **kwargs)
             idx_max = (eta_max / self.eta).ceil().astype(int)
@@ -271,7 +281,6 @@ class CLineSearchBisect(CLineSearch):
             z = self._update_z(x, self.eta, d * idx)
 
             self.logger.debug(
-                "eta: " + str(self.eta * d * idx) +
                 ", z: " + str(z[z != 0]) +
                 ", f(z): " + str(self._fz))
 
