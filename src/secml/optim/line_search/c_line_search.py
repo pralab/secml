@@ -5,8 +5,8 @@ from secml.array import CArray
 
 
 class CLineSearch(CCreator):
-    """
-    Abstract class that implements line-search optimization algorithms.
+    """Abstract class that implements line-search optimization algorithms.
+
     Line-search algorithms optimize the objective function along a given
     direction in the feasible domain, potentially subject to constraints.
     The search is normally stopped when the objective improves at a satisfying

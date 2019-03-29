@@ -7,14 +7,12 @@ from secml.optim.constraints import CConstraintBox
 class TestOptimizerDescDir(COptimizerTestCases):
     """Unittests for COptimizerDescDir."""
 
-    # FIXME: STILL BUGGED. SEE #20
-    # def test_minimize_3h_camel(self):
-    #     """Test for COptimizer.minimize() method on 3h-camel fun."""
-    #     opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12,
-    #                   'bounds': CConstraintBox()}  # FIXME: FIX #372 AND REMOVE BOUNDS
-    #
-    #     self._test_minimize(
-    #         CSolverDescDir, '3h-camel', opt_params=opt_params)
+    def test_minimize_3h_camel(self):
+        """Test for COptimizer.minimize() method on 3h-camel fun."""
+        opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12}
+
+        self._test_minimize(
+            CSolverDescDir, '3h-camel', opt_params=opt_params)
 
     # FIXME: DOES NOT REACH THE GLOBAL MIN (PARAMS PROBLEM?)
     # def test_minimize_beale(self):
