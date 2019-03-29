@@ -64,9 +64,6 @@ class CAttackEvasionCleverhans(CAttackEvasion):
                  n_feats, n_classes, surrogate_data=None, y_target=None,
                  clvh_attack_class=CarliniWagnerL2, **kwargs):
 
-        self._x0 = None
-        self._y0 = None
-
         self._tfsess = tf.Session()
 
         # store the cleverhans attack parameters
@@ -90,6 +87,10 @@ class CAttackEvasionCleverhans(CAttackEvasion):
                                 surrogate_data=surrogate_data,
                                 y_target=y_target)
 
+    ###########################################################################
+    #                           READ-ONLY ATTRIBUTES
+    ###########################################################################
+
     @property
     def f_eval(self):
         if self._clvrh_clf:
@@ -104,12 +105,9 @@ class CAttackEvasionCleverhans(CAttackEvasion):
         else:
             return 0
 
-    def __clear(self):
-        self._x0 = None
-        self._y0 = None
-
-        self._tfsess.close()
-        self._tfsess = tf.Session()
+    ###########################################################################
+    #                              PRIVATE METHODS
+    ###########################################################################
 
     def _set_solver_classifier(self):
         """This function set the surrogate classifier,
@@ -124,7 +122,6 @@ class CAttackEvasionCleverhans(CAttackEvasion):
         CAttack._set_solver_classifier(self)
 
         # create the cleverhans attack object
-
         self._tfsess.close()
         self._tfsess = tf.Session()
 

@@ -13,7 +13,7 @@ from secml.optim.optimizers import COptimizer
 
 
 class CSolverGradDesc(COptimizer):
-    """This is an abstract class for optimizing:
+    """Solves the following problem:
 
         min  f(x)
         s.t. d(x,x0) <= dmax
@@ -48,17 +48,13 @@ class CSolverGradDesc(COptimizer):
             raise NotImplementedError(
                 'Descent in discrete space not implemented!')
 
-        self._eta = None  # gradient step size
-        self._eps = None  # tolerance value for stop criterion
-        self._max_iter = None  # maximum number of iterations
-
-        # invoke setters
-        self.eta = eta
-        self.max_iter = max_iter
-        self.eps = eps
+        # Read/write attributes
+        self.eta = eta  # gradient step size
+        self.max_iter = max_iter  # maximum number of iterations
+        self.eps = eps  # tolerance value for stop criterion
 
     ###########################################################################
-    #                              SETTER-GETTER
+    #                        READ/WRITE ATTRIBUTES
     ###########################################################################
 
     @property
@@ -91,21 +87,9 @@ class CSolverGradDesc(COptimizer):
         """Set tolerance value for stop criterion"""
         self._eps = float(value)
 
-    ###########################################################################
-    #                           READ-WRITE ATTRIBUTES
-    ###########################################################################
-
-    # none (by now)
-
-    ###########################################################################
-    #                             PRIVATE METHODS
-    ###########################################################################
-
-    # none (by now)
-
-    ###########################################################################
-    #                             PUBLIC METHODS
-    ###########################################################################
+    #############################################
+    #                  METHODS
+    #############################################
 
     def minimize(self, x_init):
         """
@@ -128,8 +112,9 @@ class CSolverGradDesc(COptimizer):
             Array containing values of x during optimization.
 
         """
-
-        self._fun.clear()  # reset fun and grad evaluation counts
+        # reset fun and grad eval counts for both fun and f (by default fun==f)
+        self._f.reset_eval()
+        self._fun.reset_eval()
 
         x = x_init.deepcopy()
 
@@ -180,12 +165,9 @@ class CSolverGradDesc(COptimizer):
             if self.bounds is not None and self.bounds.is_violated(x):
                 x = self.bounds.projection(x)
 
-            # update fun/grad evaluations
-            self._f_eval = self._fun.n_fun_eval
-            self._grad_eval = self._fun.n_grad_eval
-
         # self.logger.warning('Maximum iterations reached. Exiting.')
         self._x_seq = self.x_seq[:self._max_iter - 1, :]
         self._f_seq = self.f_seq[:self._max_iter - 1]
         self._x_opt = self._x_seq[-1, :]
+
         return self._x_opt

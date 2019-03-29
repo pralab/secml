@@ -106,22 +106,19 @@ class CAttackPoisoning(CAttack):
         self._xc = None  # set of poisoning points along with their labels yc
         self._yc = None
         self._idx = None  # index of the current point to be optimized
-        self._ts = None  # this is for validation set
-        self._n_points = None
         self._training_data = None  # training set used to learn classifier
+        self._n_points = None  # FIXME: WHY THIS HAS A SETTER IF NOT AN INIT PARAM?
 
-        # call setters
-        self.ts = ts
+        # READ/WRITE
+        self.ts = ts  # this is for validation set
         self.training_data = training_data
         self.random_seed = random_seed
+
         self.init_type = init_type
 
         # fixme: change this (we needs eta to compute the perturbation if the
         #  attack is performed in a discrete space )
         self.eta = solver_params['eta']
-
-        # fixme: forced
-        self.verbose = 2
 
         # this is used to speed up some poisoning algorithms by re-using
         # the solution obtained at a previous step of the optimization
@@ -147,16 +144,6 @@ class CAttackPoisoning(CAttack):
         self._ts = value
 
     @property
-    def random_seed(self):
-        """Returns the attacker's validation data"""
-        return self._random_seed
-
-    @random_seed.setter
-    def random_seed(self, value):
-        """Sets the attacker's validation data"""
-        self._random_seed = value
-
-    @property
     def training_data(self):
         """Returns the training set used to learn the targeted classifier"""
         return self._training_data
@@ -168,6 +155,16 @@ class CAttackPoisoning(CAttack):
         if not isinstance(value, CDataset):
             raise TypeError('training_data should be a CDataset!')
         self._training_data = value
+
+    @property
+    def random_seed(self):
+        """Returns the attacker's validation data"""
+        return self._random_seed
+
+    @random_seed.setter
+    def random_seed(self, value):
+        """Sets the attacker's validation data"""
+        self._random_seed = value
 
     @property
     def n_points(self):
@@ -185,12 +182,6 @@ class CAttackPoisoning(CAttack):
     ###########################################################################
     #                              PRIVATE METHODS
     ###########################################################################
-
-    def __clear(self):
-        self._xc = None
-        self._yc = None
-        self._idx = None
-        self._ts = None
 
     def _constraint_cretion(self):
 
@@ -227,7 +218,7 @@ class CAttackPoisoning(CAttack):
             discrete=self._discrete,
             **self.solver_params)
 
-        self._solver.verbose = 0  # 1
+        self._solver.verbose = 0
         self._warm_start = None
 
     def _rnd_init_poisoning_points(
@@ -454,9 +445,6 @@ class CAttackPoisoning(CAttack):
         :param idx: index of point in xc to be manipulated to poison clf
         :return:
         """
-        self._f_eval = 0
-        self._grad_eval = 0
-
         xc = CArray(xc.deepcopy()).atleast_2d()
 
         self._yc = yc
@@ -573,8 +561,6 @@ class CAttackPoisoning(CAttack):
             "Original classifier accuracy on test data {:}".format(acc))
 
         return y_pred, scores, CDataset(xc, yc), self._f_opt
-
-    ###################################
 
     def add_discrete_perturbation(self, xc):
 

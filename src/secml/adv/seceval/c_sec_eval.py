@@ -149,8 +149,6 @@ class CSecEval(CCreator):
             Each array row contain the times of the attack for one samples.
             Each row element represent a different attack power
         """
-        self.clear()
-
         # store true labels within class
         self._sec_eval_data.Y = CArray(dataset.Y).deepcopy()
 

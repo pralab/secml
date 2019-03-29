@@ -40,25 +40,6 @@ class CSecEvalData(CCreator):
         self._Y_target = None
         self._fobj = None
 
-    def __clear(self):
-        """Reset the object."""
-        self._scores = None
-        self._Y_pred = None
-        self._adv_ds = None
-        self._time = None
-        self._Y = None
-        self._fobj = None
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        if self._scores is not None or self._Y_pred is not None:
-            return False
-        if self._adv_ds is not None or self._time is not None:
-            return False
-        if self._Y is not None or self._fobj is not None:
-            return False
-        return True
-
     ###########################################################################
     #                           READ-WRITE ATTRIBUTES
     ###########################################################################

@@ -130,6 +130,10 @@ class COptimizerScipy(COptimizer):
         if x_init.issparse is True or x_init.is_vector_like is False:
             raise ValueError("x0 must be a dense flat array")
 
+        # reset fun and grad eval counts for both fun and f (by default fun==f)
+        self._f.reset_eval()
+        self._fun.reset_eval()
+
         # select method
         method = kwargs['method'] if 'method' in kwargs else None
         if method is None:
@@ -175,16 +179,16 @@ class COptimizerScipy(COptimizer):
 
         self._f_seq = CArray(sc_opt_out.fun)  # only last iter available
 
-        x_opt = CArray(sc_opt_out.x)
+        self._x_opt = CArray(sc_opt_out.x)
 
         # check if point is valid
         # i.e., if the selected solver does not ignore the constraints
-        if self.constr is not None and self.constr.is_violated(x_opt):
+        if self.constr is not None and self.constr.is_violated(self.x_opt):
             self.logger.warning("Constraints are not satisfied. "
                                 "The scipy solver may be ignoring them.\n")
 
-        if self.bounds is not None and self.bounds.is_violated(x_opt):
+        if self.bounds is not None and self.bounds.is_violated(self.x_opt):
             self.logger.warning("Bounds are not satisfied. "
                                 "The scipy solver may be ignoring them.\n")
 
-        return x_opt
+        return self.x_opt

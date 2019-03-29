@@ -52,31 +52,43 @@ class CSolverDescDir(COptimizer):
                             constr=constr, bounds=bounds,
                             discrete=discrete)
 
-        # internals
-        self._max_iter = None
-        self._eps = None
-        # calling setters
-        self.max_iter = max_iter
-        self.eps = eps
-
-        # params for explorer
+        # Read/write attributes
         self.eta = eta
         self.eta_min = eta_min
         self.eta_max = eta_max
+        self.max_iter = max_iter
+        self.eps = eps
 
+        # Internal attributes
         self._explorer = None
-
-    def __clear(self):
-        """Reset the object."""
-        self._explorer.clear()
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return self._explorer.is_clear()
 
     ###########################################################################
     #                           READ-WRITE ATTRIBUTES
     ###########################################################################
+
+    @property
+    def eta(self):
+        return self._eta
+
+    @eta.setter
+    def eta(self, value):
+        self._eta = value
+
+    @property
+    def eta_min(self):
+        return self._eta_min
+
+    @eta_min.setter
+    def eta_min(self, value):
+        self._eta_min = value
+
+    @property
+    def eta_max(self):
+        return self._eta_max
+
+    @eta_max.setter
+    def eta_max(self, value):
+        self._eta_max = value
 
     @property
     def max_iter(self):
@@ -98,9 +110,9 @@ class CSolverDescDir(COptimizer):
         """Set tolerance value for stop criterion"""
         self._eps = float(value)
 
-    ###########################################################################
-    #                             PRIVATE METHODS
-    ###########################################################################
+    ##########################################
+    #                METHODS
+    ##########################################
 
     def _initialize_explorer(self, line_search, eta, eta_min,
                              eta_max, discrete):
@@ -133,128 +145,6 @@ class CSolverDescDir(COptimizer):
         # TODO: fix this (decide whether propagate verbosity level or not)
         self._explorer.verbose = 0  # self.verbose
         self._explorer._line_search.verbose = 0  # self.verbose
-
-    ###########################################################################
-    #                             PUBLIC METHODS
-    ###########################################################################
-
-    def minimize(self, x):
-        """
-        Interface to minimizers implementing
-            min fun(x)
-            s.t. constraint
-
-        Parameters
-        ----------
-        x : CArray
-            The initial input point.
-
-        Returns
-        -------
-        f_seq : CArray
-            Array containing values of f during optimization.
-        x_seq : CArray
-            Array containing values of x during optimization.
-
-        """
-        self._fun.clear()  # reset fun and grad evaluation counts
-
-        # initialize explorer
-        self._initialize_explorer(line_search='bisect',
-                                  eta=self.eta,
-                                  eta_min=self.eta_min,
-                                  eta_max=self.eta_max,
-                                  discrete=self.discrete)
-
-        # constr.radius = 0, exit
-        if self.constr is not None and self.constr.radius == 0:
-            # classify x0 and return
-            x0 = self.constr.center
-            self._x_seq = CArray.zeros(
-                (1, x0.size), sparse=x0.issparse, dtype=x0.dtype)
-            self._f_seq = CArray.zeros(1)
-            self._x_seq[0, :] = x0
-            self._f_seq[0] = self._fun.fun(x0)
-            self._x_opt = x0
-            self._grad_eval = self._fun.n_grad_eval
-            self._f_eval = self._fun.n_fun_eval
-            return
-
-        # eval fun at x
-        fx = self._fun.fun(x)
-
-        # TODO: fix this part / separa per BOX e CONSTR!
-        # line search in feature space towards the benign data.
-        # if x is outside of the feasible domain, we run a line search to
-        # identify the closest point to x in feasible domain (starting from x0)
-        if self.bounds is not None and self.bounds.is_violated(x):
-            x = self.bounds.projection(x)
-
-        if self.constr is not None and self.constr.is_violated(x):
-            d = x - self._constr.center  # direction in feature space
-            if self.discrete:
-                d = d.sign()
-            self._explorer.eta_max = 2.0 * self.constr.constraint(x)
-            x, fx = self._explorer._line_search.line_search(
-                self._constr.center, d)
-            self._explorer.eta_max = self.eta_max
-
-        if (self.bounds is not None and self.bounds.is_violated(x)) or \
-                (self.constr is not None and self.constr.is_violated(x)):
-            raise ValueError("x " + str(x) + " is outside of feasible domain.")
-
-        self._x_seq = CArray.zeros(
-            (self.max_iter, x.size), sparse=x.issparse, dtype=x.dtype)
-        self._f_seq = CArray.zeros(self.max_iter)
-
-        # The first point is obviously the starting point,
-        # and the constraint is not violated (false...)
-        self._x_seq[0, :] = x
-        self._f_seq[0] = fx
-
-        # debugging information
-        # self.logger.debug('Iter.: ' + str(0) + ', x: ' + str(x) +
-        #                   ', f(x): ' + str(fx))
-
-        self.logger.debug('Point optim iter.: ' + str(0) +
-                          ', f(x): ' + str(fx))
-
-        for i in range(1, self.max_iter):
-
-            # update point
-            x, fx = self._xk(x, fx=fx)
-            # print "x: ", x
-            self._x_seq[i, :] = x
-            self._f_seq[i] = fx
-            self._x_opt = x
-
-            self.logger.debug('Iter.: ' + str(i) +
-                              ', f(x): ' + str(fx) +
-                              ', norm(gr(x)): ' +
-                              str(self._explorer._descent_direction.norm()))
-
-            # Update gradient and fun evaluation
-            self._grad_eval = self._fun.n_grad_eval
-            self._f_eval = self._fun.n_fun_eval
-
-            diff = abs(self.f_seq[i].item() - self.f_seq[i - 1].item())
-
-            self.logger.debug('delta_f: {:}'.format(diff))
-
-            if diff < self.eps:
-                self.logger.debug("Flat region, exiting... {:}  {:}".format(
-                    self._f_seq[i].item(),
-                    self._f_seq[i - 1].item()))
-                self._x_seq = self.x_seq[:i + 1, :]
-                self._f_seq = self.f_seq[:i + 1]
-                return x
-
-        self.logger.warning('Maximum iterations reached. Exiting.')
-        return x
-
-    ###########################################################################
-    #                       PRIVATE / INTERNAL METHODS
-    ###########################################################################
 
     def _xk(self, x, fx):
         """Returns a new point after gradient descent."""
@@ -335,3 +225,114 @@ class CSolverDescDir(COptimizer):
 
         z, fz = self._explorer._line_search.line_search(x, d, fx=fx)
         return z, fz
+
+    def minimize(self, x):
+        """
+        Interface to minimizers implementing
+            min fun(x)
+            s.t. constraint
+
+        Parameters
+        ----------
+        x : CArray
+            The initial input point.
+
+        Returns
+        -------
+        f_seq : CArray
+            Array containing values of f during optimization.
+        x_seq : CArray
+            Array containing values of x during optimization.
+
+        """
+        # reset fun and grad eval counts for both fun and f (by default fun==f)
+        self._f.reset_eval()
+        self._fun.reset_eval()
+
+        # initialize explorer
+        self._initialize_explorer(line_search='bisect',
+                                  eta=self.eta,
+                                  eta_min=self.eta_min,
+                                  eta_max=self.eta_max,
+                                  discrete=self.discrete)
+
+        # constr.radius = 0, exit
+        if self.constr is not None and self.constr.radius == 0:
+            # classify x0 and return
+            x0 = self.constr.center
+            self._x_seq = CArray.zeros(
+                (1, x0.size), sparse=x0.issparse, dtype=x0.dtype)
+            self._f_seq = CArray.zeros(1)
+            self._x_seq[0, :] = x0
+            self._f_seq[0] = self._fun.fun(x0)
+            self._x_opt = x0
+            return
+
+        # eval fun at x
+        fx = self._fun.fun(x)
+
+        # TODO: fix this part / separa per BOX e CONSTR!
+        # line search in feature space towards the benign data.
+        # if x is outside of the feasible domain, we run a line search to
+        # identify the closest point to x in feasible domain (starting from x0)
+        if self.bounds is not None and self.bounds.is_violated(x):
+            x = self.bounds.projection(x)
+
+        if self.constr is not None and self.constr.is_violated(x):
+            d = x - self._constr.center  # direction in feature space
+            if self.discrete:
+                d = d.sign()
+            self._explorer.eta_max = 2.0 * self.constr.constraint(x)
+            x, fx = self._explorer._line_search.line_search(
+                self._constr.center, d)
+            self._explorer.eta_max = self.eta_max
+
+        if (self.bounds is not None and self.bounds.is_violated(x)) or \
+                (self.constr is not None and self.constr.is_violated(x)):
+            raise ValueError("x " + str(x) + " is outside of feasible domain.")
+
+        self._x_seq = CArray.zeros(
+            (self.max_iter, x.size), sparse=x.issparse, dtype=x.dtype)
+        self._f_seq = CArray.zeros(self.max_iter)
+
+        # The first point is obviously the starting point,
+        # and the constraint is not violated (false...)
+        self._x_seq[0, :] = x
+        self._f_seq[0] = fx
+
+        # debugging information
+        # self.logger.debug('Iter.: ' + str(0) + ', x: ' + str(x) +
+        #                   ', f(x): ' + str(fx))
+
+        self.logger.debug('Point optim iter.: ' + str(0) +
+                          ', f(x): ' + str(fx))
+
+        for i in range(1, self.max_iter):
+
+            # update point
+            x, fx = self._xk(x, fx=fx)
+            # print "x: ", x
+            self._x_seq[i, :] = x
+            self._f_seq[i] = fx
+            self._x_opt = x
+
+            self.logger.debug('Iter.: ' + str(i) +
+                              ', f(x): ' + str(fx) +
+                              ', norm(gr(x)): ' +
+                              str(self._explorer._descent_direction.norm()))
+
+            diff = abs(self.f_seq[i].item() - self.f_seq[i - 1].item())
+
+            self.logger.debug('delta_f: {:}'.format(diff))
+
+            if diff < self.eps:
+                self.logger.debug("Flat region, exiting... {:}  {:}".format(
+                    self._f_seq[i].item(),
+                    self._f_seq[i - 1].item()))
+                self._x_seq = self.x_seq[:i + 1, :]
+                self._f_seq = self.f_seq[:i + 1]
+                return x
+
+        self.logger.warning('Maximum iterations reached. Exiting.')
+
+        return x

@@ -26,8 +26,33 @@ class CExploreDescentDirection(CCreator):
                  n_dimensions=0, line_search='bisect',
                  eta=1e-3, eta_min=None, eta_max=None, max_iter=50):
 
-        """Constructor for the class."""
+        # Read only attributes
         self._n_dimensions = n_dimensions
+        self._explored = False
+
+        # INTERNALS
+
+        self._n_feat = None  # number of features
+        self._ff_n_feat = None
+
+        # descent direction (passed from outside)
+        self._descent_direction = None
+
+        # Indices of features that would sort the gradient
+        # in descending order of their absolute value
+        # (otherwise, for random direction, randomly set to +1 or -1)
+        self._idx_top_feat = None
+        self._ff_idx_top_feat = None
+
+        # This index vector indexes _idx_top_feat,
+        # starting from 0 to n_neighbors-1.
+        # Features which do not generate useful candidates
+        # (e.g., constraint violations) are substituted with
+        # next candidate features, until all features are explored
+        self._idx_current = None
+
+        # index of next candidate feature
+        self._idx_next = None
 
         self._line_search = CLineSearch.create(
             line_search,
@@ -42,70 +67,15 @@ class CExploreDescentDirection(CCreator):
         # TODO fix verbose - this is hardcoded
         self._line_search.verbose = 2
 
-        CExploreDescentDirection.__clear(self)
-
-    def __clear(self):
-        """Reset the object."""
-        # descent direction (passed from outside)
-        self._descent_direction = None
-
-        # this is useful to check if exploration is finished
-        self._explored = False
-
-        # Indices of features that would sort the gradient
-        # in descending order of their absolute value
-        # (otherwise, for random direction, randomly set to +1 or -1)
-        self._idx_top_feat = None
-
-        # This index vector indexes _idx_top_feat,
-        # starting from 0 to n_neighbors-1.
-        # Features which do not generate useful candidates
-        # (e.g., constraint violations) are substitued with
-        # next candidate features, until all features are explored
-        self._idx_current = None
-
-        # index of next candidate feature
-        self._idx_next = None
-
-        # number of features
-        self._n_feat = None
-
-        # clear line search
-        self._line_search.clear()
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        if self._descent_direction is not None:
-            return False
-        if self._explored is True:
-            return False
-        if self._idx_top_feat is not None or self._idx_current is not None:
-            return False
-        if self._idx_next is not None or self._n_feat is not None:
-            return False
-        if self._line_search.is_clear() is False:
-            return False
-        return True
-
     @property
     def n_dimensions(self):
         return self._n_dimensions
 
-    @n_dimensions.setter
-    def n_dimensions(self, val):
-        self._n_dimensions = int(val)
-
     @property
-    def eta(self):
-        return self._line_search.eta
-
-    @property
-    def eta_max(self):
-        return self._line_search.eta_max
-
-    @eta_max.setter
-    def eta_max(self, value):
-        self._line_search.eta_max = value
+    def explored(self):
+        """Returns True if the exploration of the feature (dimension)
+        subsets is terminated."""
+        return self._explored
 
     @property
     def fun(self):
@@ -119,15 +89,34 @@ class CExploreDescentDirection(CCreator):
     def bounds(self):
         return self._line_search.bounds
 
-    def finished_exploration(self):
-        """
-        This function returns True
-        if the exploration of the feature
-        (dimension) subsets is terminated.
-        """
-        if self._explored is True:
-            return True
-        return False
+    @property
+    def eta(self):
+        return self._line_search.eta
+
+    @eta.setter
+    def eta(self, value):
+        self._line_search.eta = value
+
+    @property
+    def eta_min(self):
+        return self._line_search.eta_min
+
+    @eta_min.setter
+    def eta_min(self, value):
+        self._line_search.eta_min = value
+
+    @property
+    def eta_max(self):
+        return self._line_search.eta_max
+
+    @eta_max.setter
+    def eta_max(self, value):
+        self._line_search.eta_max = value
+
+    def reset_exploration(self):
+        self._explored = False
+        self._idx_next = self._n_dimensions
+        self._idx_current = CArray.arange(0, self._idx_next, 1)
 
     def set_descent_direction(self, x):
         """
@@ -236,15 +225,6 @@ class CExploreDescentDirection(CCreator):
                                 dtype=d.dtype).ravel()
         return d / d_norm
 
-    # questa e' la reset di update_current_subset
-    # agganciare a warm_start...
-    def reset_exploration(self):
-        self._explored = False
-        self._idx_next = self._n_dimensions
-        self._idx_current = CArray.arange(0, self._idx_next, 1)
-        self._line_search.clear()
-        return
-
     def _update_current_subset(self):
         """
         Updates the current set of features to be explored.
@@ -279,7 +259,7 @@ class CExploreDescentDirection(CCreator):
         x = x.ravel()
         score = fx
 
-        while not self.finished_exploration() and self._ff_n_feat > 0:
+        while not self.explored and self._ff_n_feat > 0:
 
             # descent direction (exploring n features at a time)
             d = self._current_descent_direction()

@@ -53,17 +53,9 @@ class CFunction(CCreator):
         # sets expected number of dimensions of input `x`
         self._n_dim = n_dim
 
+        # Counters for fun/grad evaluations
         self._n_fun_eval = 0
         self._n_grad_eval = 0
-
-    def __clear(self):
-        """Reset the object."""
-        self._n_fun_eval = 0
-        self._n_grad_eval = 0
-
-    def __is_clear(self):
-        """Returns True if object is clear."""
-        return self._n_fun_eval + self._n_grad_eval == 0
 
     @property
     def n_fun_eval(self):
@@ -74,6 +66,11 @@ class CFunction(CCreator):
     def n_grad_eval(self):
         """Returns the number of gradient evaluations."""
         return self._n_grad_eval
+
+    def reset_eval(self):
+        """Reset the count of function and gradient of function evaluations."""
+        self._n_fun_eval = 0
+        self._n_grad_eval = 0
 
     @property
     def n_dim(self):
