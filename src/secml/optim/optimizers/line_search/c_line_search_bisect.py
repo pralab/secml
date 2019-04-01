@@ -1,6 +1,6 @@
 """
 .. module:: CLineSearchBisect
-   :synopsis: Binary line search
+   :synopsis: Binary line search.
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 
@@ -13,7 +13,7 @@ from secml.array import CArray
 
 
 class CLineSearchBisect(CLineSearch):
-    """Implements binary line search.
+    """Binary line search.
 
     Attributes
     ----------
