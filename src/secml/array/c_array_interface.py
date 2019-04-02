@@ -545,6 +545,26 @@ class _CArrayInterface(object):
         """Calculate the sha1 hexadecimal hash of array."""
         raise NotImplementedError
 
+    @abstractmethod
+    def is_inf(self):
+        """Test element-wise for positive or negative infinity."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def is_posinf(self):
+        """Test element-wise for positive infinity."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def is_neginf(self):
+        """Test element-wise for negative infinity."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def is_nan(self):
+        """Test element-wise for Not a Number (NaN)."""
+        raise NotImplementedError
+
     # ----------------- #
     # MATH ELEMENT-WISE #
     # ----------------- #

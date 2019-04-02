@@ -3945,6 +3945,90 @@ class CArray(_CArrayInterface):
         """
         return self._data.sha1()
 
+    def is_inf(self):
+        """Test element-wise for positive or negative infinity.
+
+        Returns
+        -------
+        CArray
+            Array of the same shape as x, with True where x == +/-inf,
+            otherwise False.
+
+        Examples
+        --------
+        >>> from secml.core.constants import inf, nan
+        >>> from secml.array import CArray
+
+        >>> a = CArray([1, inf, -inf, nan, 4.5])
+        >>> print(a.is_inf())
+        CArray([False  True  True False False])
+
+        """
+        return self.__class__(self._data.is_inf())
+
+    def is_posinf(self):
+        """Test element-wise for positive infinity.
+
+        Returns
+        -------
+        CArray
+            Array of the same shape as x, with True where x == +inf,
+            otherwise False.
+
+        Examples
+        --------
+        >>> from secml.core.constants import inf, nan
+        >>> from secml.array import CArray
+
+        >>> a = CArray([1, inf, -inf, nan, 4.5])
+        >>> print(a.is_posinf())
+        CArray([False  True False False False])
+
+        """
+        return self.__class__(self._data.is_posinf())
+
+    def is_neginf(self):
+        """Test element-wise for negative infinity.
+
+        Returns
+        -------
+        CArray
+            Array of the same shape as x, with True where x == -inf,
+            otherwise False.
+
+        Examples
+        --------
+        >>> from secml.core.constants import inf, nan
+        >>> from secml.array import CArray
+
+        >>> a = CArray([1, inf, -inf, nan, 4.5])
+        >>> print(a.is_neginf())
+        CArray([False False  True False False])
+
+        """
+        return self.__class__(self._data.is_neginf())
+
+    def is_nan(self):
+        """Test element-wise for Not a Number (NaN).
+
+        Returns
+        -------
+        CArray
+            Array of the same shape as x, with True where x == nan,
+            otherwise False.
+
+        Examples
+        --------
+        >>> from secml.core.constants import inf, nan
+        >>> from secml.array import CArray
+
+        >>> a = CArray([1, inf, -inf, nan, 4.5])
+        >>> print(a.is_nan())
+        CArray([False False False  True False])
+
+        """
+        return self.__class__(self._data.is_nan())
+
     # ----------------- #
     # MATH ELEMENT-WISE #
     # ----------------- #

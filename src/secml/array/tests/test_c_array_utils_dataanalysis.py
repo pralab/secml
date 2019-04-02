@@ -4,7 +4,7 @@ import numpy as np
 from six.moves import range
 
 from secml.array import CArray
-from secml.core.type_utils import is_scalar, is_int
+from secml.core.type_utils import is_scalar, is_int, is_list_of_lists
 from secml.core.constants import nan, inf
 
 
@@ -1295,6 +1295,75 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         import itertools
         for a, b in itertools.combinations(sha1_list, 2):
             self.assertNotEqual(a, b)
+
+    def test_is_inf_nan(self):
+        """Test for CArray .is_inf, .is_posinf, .is_neginf, .is_nan methods."""
+
+        def _check_is_inf_nan(fun, val, array, pos=None):
+
+            if pos is not None:
+                array = array.astype(float)  # To correctly assign inf/nan
+                array[pos] = val
+
+            self.logger.info("Array:\n{:}".format(array))
+
+            res = fun(array)
+            self.logger.info("array.{:}():\n{:}".format(fun.__name__, res))
+
+            self.assertIsInstance(res, CArray)
+            self.assertIsSubDtype(res.dtype, bool)
+            self.assertEqual(array.issparse, res.issparse)
+            self.assertEqual(array.shape, res.shape)
+
+            if pos is not None:
+                self.assertTrue(all(res[pos]))
+                self.assertEqual(
+                    len(pos[0]) if is_list_of_lists(pos) else len(pos), res.nnz)
+
+        for test_fun, sub_val in (
+                (CArray.is_inf, inf), (CArray.is_inf, -inf),
+                (CArray.is_posinf, inf), (CArray.is_neginf, -inf),
+                (CArray.is_nan, nan)):
+
+            self.logger.info(
+                "Test for CArray.{:}() method.".format(test_fun.__name__))
+
+            _check_is_inf_nan(
+                test_fun, sub_val, self.array_sparse, [[0, 1], [1, 2]]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.array_dense, [[0, 1], [1, 2]]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.array_dense_bool, [[0, 1], [1, 2]]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.array_sparse_bool, [[0, 1], [1, 2]]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.row_flat_dense, [1, 2]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.row_dense, [1, 2]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.row_sparse, [1, 2]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.column_dense, [[1, 2], [0, 0]]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.column_sparse, [[1, 2], [0, 0]]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.single_flat_dense, [0]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.single_dense, [0]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.single_sparse, [0]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.single_bool_flat_dense, [0]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.single_bool_dense, [0]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.single_bool_sparse, [0]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.empty_flat_dense),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.empty_dense),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.empty_sparse)
 
 
 if __name__ == '__main__':
