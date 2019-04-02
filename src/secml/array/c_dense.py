@@ -1523,6 +1523,22 @@ class CDense(_CArrayInterface):
 
         return h.hexdigest()
 
+    def is_inf(self):
+        """Test element-wise for positive or negative infinity."""
+        return self.__class__(np.isinf(self.tondarray()))
+
+    def is_posinf(self):
+        """Test element-wise for positive infinity."""
+        return self.__class__(np.isposinf(self.tondarray()))
+
+    def is_neginf(self):
+        """Test element-wise for negative infinity."""
+        return self.__class__(np.isneginf(self.tondarray()))
+
+    def is_nan(self):
+        """Test element-wise for Not a Number (NaN)."""
+        return self.__class__(np.isnan(self.tondarray()))
+
     # ----------------- #
     # MATH ELEMENT-WISE #
     # ----------------- #

@@ -25,6 +25,42 @@ from secml.core.type_utils import is_ndarray, is_list_of_lists, \
 from secml.core.constants import inf
 
 
+def _expand_nnz_bool(array, nnz_val):
+    """Convert a bool condition evaluated on `array.nnz_val` to full array shape.
+
+    Parameters
+    ----------
+    array : CSparse
+        Reference sparse array.
+    nnz_val : CDense
+        Dense array of bool, with True/False values of the desired
+        function evaluated on `nnz_data`
+
+    Returns
+    -------
+    CSparse
+        Convert the input dense array of bool evaluated on `nnz_data` to
+        a sparse array of bool, with True/False in the positions
+        corresponding to the `nnz_data`.
+
+    """
+    out = CSparse.empty(shape=array.shape, dtype=bool)
+
+    if array.size == 0:  # Empty array, return empty
+        return out
+
+    if len(nnz_val.shape) != 2:  # nnz_val must be (1, N)
+        raise RuntimeError("unexpected shape {:}".format(nnz_val.shape))
+
+    # Get the indices of array where the True values are
+    nnz_val_true_idx = nnz_val.find(nnz_val)[1]
+    true_idx = [[e[i] for i in nnz_val_true_idx] for e in array.nnz_indices]
+
+    out[true_idx] = True
+
+    return out
+
+
 class CSparse(_CArrayInterface):
     """Sparse array. Encapsulation for scipy.sparse.csr_matrix."""
     __slots__ = '_data'  # CSparse has only one slot for the scs.csr_matrix
@@ -1735,6 +1771,26 @@ class CSparse(_CArrayInterface):
         h.update(np.ascontiguousarray(x.data))
 
         return h.hexdigest()
+
+    def is_inf(self):
+        """Test element-wise for positive or negative infinity."""
+        # Get the indices of array where inf values are
+        return _expand_nnz_bool(self, self.nnz_data.is_inf())
+
+    def is_posinf(self):
+        """Test element-wise for positive infinity."""
+        # Get the indices of array where +inf values are
+        return _expand_nnz_bool(self, self.nnz_data.is_posinf())
+
+    def is_neginf(self):
+        """Test element-wise for negative infinity."""
+        # Get the indices of array where -inf values are
+        return _expand_nnz_bool(self, self.nnz_data.is_neginf())
+
+    def is_nan(self):
+        """Test element-wise for Not a Number (NaN)."""
+        # Get the indices of array where nan values are
+        return _expand_nnz_bool(self, self.nnz_data.is_nan())
 
     # ----------------- #
     # MATH ELEMENT-WISE #
