@@ -10,7 +10,8 @@ import numpy as np
 from scipy.sparse import issparse
 
 __all__ = ['is_bool', 'is_int', 'is_intlike', 'is_float', 'is_floatlike',
-           'is_scalar', 'is_scalarlike', 'is_list', 'is_list_of_lists',
+           'is_scalar', 'is_scalarlike', 'is_inf', 'is_posinf', 'is_neginf',
+           'is_nan', 'is_list', 'is_list_of_lists',
            'is_ndarray', 'is_scsarray', 'is_slice', 'is_str', 'is_tuple',
            'is_set', 'is_dict', 'to_builtin']
 
@@ -95,6 +96,140 @@ def is_scalar(x):
 def is_scalarlike(x):
     """True if input is scalar (int or float) or list/array of 1 real."""
     return is_intlike(x) or is_floatlike(x)
+
+
+def is_inf(x):
+    """True if input is a positive/negative infinity.
+
+    Parameters
+    ----------
+    x : scalar
+
+    Examples
+    --------
+    >>> from secml.core.type_utils import is_inf
+    >>> from secml.core.constants import inf, nan
+
+    >>> print(is_inf(inf))
+    True
+    >>> print(is_inf(-inf))
+    True
+
+    >>> print(is_inf(nan))
+    False
+
+    >>> print(is_inf(0.1))
+    False
+
+    >>> from secml.array import CArray
+    >>> print(is_inf(CArray([inf])))  # Use `CArray.is_inf()` instead
+    Traceback (most recent call last):
+        ...
+    TypeError: input must be a scalar.
+
+    """
+    if not is_scalar(x):
+        raise TypeError("input must be a scalar.")
+    return np.isinf(x)
+
+
+def is_posinf(x):
+    """True if input is a positive infinity.
+
+    Parameters
+    ----------
+    x : scalar
+
+    Examples
+    --------
+    >>> from secml.core.type_utils import is_posinf
+    >>> from secml.core.constants import inf, nan
+
+    >>> print(is_posinf(inf))
+    True
+
+    >>> print(is_posinf(-inf))
+    False
+
+    >>> from secml.array import CArray
+    >>> print(is_posinf(CArray([inf])))  # Use `CArray.is_posinf()` instead
+    Traceback (most recent call last):
+        ...
+    TypeError: input must be a scalar.
+
+    """
+    if not is_scalar(x):
+        raise TypeError("input must be a scalar.")
+    return np.isposinf(x)
+
+
+def is_neginf(x):
+    """True if input is a negative infinity.
+
+    Parameters
+    ----------
+    x : scalar
+
+    Examples
+    --------
+    >>> from secml.core.type_utils import is_neginf
+    >>> from secml.core.constants import inf, nan
+
+    >>> print(is_neginf(-inf))
+    True
+
+    >>> print(is_neginf(inf))
+    False
+
+    >>> from secml.array import CArray
+    >>> print(is_neginf(CArray([-inf])))  # Use `CArray.is_neginf()` instead
+    Traceback (most recent call last):
+        ...
+    TypeError: input must be a scalar.
+
+    """
+    if not is_scalar(x):
+        raise TypeError("input must be a scalar.")
+    return np.isneginf(x)
+
+
+def is_nan(x):
+    """True if input is Not a Number (NaN).
+
+    Parameters
+    ----------
+    x : scalar
+
+    Notes
+    -----
+    NumPy uses the IEEE Standard for Binary Floating-Point for
+    Arithmetic (IEEE 754). This means that Not a Number is not
+    equivalent to infinity.
+
+    Examples
+    --------
+    >>> from secml.core.type_utils import is_nan
+    >>> from secml.core.constants import inf, nan
+
+    >>> print(is_nan(nan))
+    True
+
+    >>> print(is_nan(inf))
+    False
+
+    >>> print(is_nan(0.1))
+    False
+
+    >>> from secml.array import CArray
+    >>> print(is_neginf(CArray([nan])))  # Use `CArray.is_nan()` instead
+    Traceback (most recent call last):
+        ...
+    TypeError: input must be a scalar.
+
+    """
+    if not is_scalar(x):
+        raise TypeError("input must be a scalar.")
+    return np.isnan(x)
 
 
 def is_list(x):
