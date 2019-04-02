@@ -164,11 +164,13 @@ class _CExploreDescentDirection(CCreator):
             return CArray.ones(shape=x.shape, dtype=bool)
 
         # feature manipulations that violate box
+        # FIXME: the following condition is error-prone.
+        #  Use (ad wrap in CArray) np.isclose with atol=1e-6, rtol=0
         x_lb = (self._descent_direction > 0).logical_and(
-            x.round(6) == self.bounds.lb.round(6)).astype(int)
+            x.round(6) == CArray(self.bounds.lb).round(6)).astype(int)
 
         x_ub = (self._descent_direction < 0).logical_and(
-            x.round(6) == self.bounds.ub.round(6)).astype(int)
+            x.round(6) == CArray(self.bounds.ub).round(6)).astype(int)
 
         # feature manipulations that do not violate box
         # TODO: think of more efficient implementation for sparse data (if any)

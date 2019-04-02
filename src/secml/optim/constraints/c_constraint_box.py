@@ -3,6 +3,7 @@
    :synopsis: Box constraint.
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
 import numpy as np
@@ -14,6 +15,14 @@ from secml.core.constants import inf
 class CConstraintBox(CConstraint):
     """Class that defines a box constraint.
 
+    Parameters
+    ----------
+    lb, ub : scalar or CArray or None, optional
+        Bounds of the constraints.
+        If scalar, the same bound will be applied to all features.
+        If CArray, should contain a bound for each feature.
+        If None, a +/- inf ub/lb bound will be used for all features.
+
     Attributes
     ----------
     class_type : 'box'
@@ -22,53 +31,73 @@ class CConstraintBox(CConstraint):
     __class_type = 'box'
 
     def __init__(self, lb=None, ub=None):
-        self.lb = lb
-        self.ub = ub
+
+        # Lower bound
+        lb = -inf if lb is None else lb
+        self._lb = lb.ravel() if isinstance(lb, CArray) else lb
+        # Upper bound
+        ub = inf if ub is None else ub
+        self._ub = ub.ravel() if isinstance(ub, CArray) else ub
+
+        self._validate_bounds()  # Check if bounds have been correctly defined
 
     @property
     def lb(self):
         """Lower bound."""
         return self._lb
 
-    @lb.setter
-    def lb(self, value):
-        """Lower bound."""
-        value = -inf if value is None else value
-        self._lb = CArray(value).ravel()
-
     @property
     def ub(self):
         """Upper bound."""
         return self._ub
 
-    @ub.setter
-    def ub(self, value):
-        """Upper bound."""
-        value = inf if value is None else value
-        self._ub = CArray(value).ravel()
+    def _validate_bounds(self):
+        """Check that bounds are valid.
+
+        Must:
+         - be lb <= ub
+         - have same size if both CArray.
+
+        """
+        lb_array = CArray(self.lb)
+        ub_array = CArray(self.ub)
+
+        if isinstance(self.lb, CArray) and isinstance(self.ub, CArray):
+            if lb_array.size != ub_array.size:
+                raise ValueError("`ub` and `lb` must have the same size if "
+                                 "both `CArray`. Currently {:} and {:}"
+                                 "".format(ub_array.size, lb_array.size))
+
+        if (lb_array > ub_array).any():
+            raise ValueError("`lb` must be lower or equal than `ub`")
+
+    def _check_inf(self):
+        """Return True if any of the bounds are or contain inf.
+
+        Returns
+        -------
+        bool
+
+        """
+        # Convert both bounds to CArray for simplicity
+        if CArray(self.ub).is_inf().any() or CArray(self.lb).is_inf().any():
+            return True
+        return False
 
     @property
     def center(self):
         """Center of the constraint."""
-        # FIXME: WORKAROUND FOR RUNTIMEWARNING inf + inf
-        if any(np.isinf(self.ub.tondarray())) or \
-                any(np.isinf(self.lb.tondarray())):
-            if self.ub.size > self.lb.size:
-                return CArray.empty(shape=self.ub.shape) * np.nan
-            else:
-                return CArray.empty(shape=self.lb.shape) * np.nan
+        if self._check_inf() is True:
+            raise ValueError("cannot compute `center` as at least one value "
+                             "in the bounds is +/- `inf`")
         return CArray(0.5 * (self.ub + self.lb)).ravel()
 
     @property
     def radius(self):
         """Radius of the constraint."""
-        # FIXME: WORKAROUND FOR RUNTIMEWARNING inf + inf
-        if any(np.isinf(self.ub.tondarray())) or \
-                any(np.isinf(self.lb.tondarray())):
-            if self.ub.size > self.lb.size:
-                return CArray.empty(shape=self.ub.shape) * np.nan
-            else:
-                return CArray.empty(shape=self.lb.shape) * np.nan
+        if self._check_inf() is True:
+            raise ValueError("cannot compute `radius` as at least one value "
+                             "in the bounds is +/- `inf`")
         return CArray(0.5 * (self.ub - self.lb)).ravel()
 
     def set_center_radius(self, c, r):
@@ -86,8 +115,60 @@ class CConstraintBox(CConstraint):
             Constraint radius.
 
         """
-        self.lb = c - r
-        self.ub = c + r
+        self._lb = c - r
+        self._ub = c + r
+
+        self._validate_bounds()  # Check if bounds have been correctly defined
+
+    def is_active(self, x, tol=1e-4):
+        """Returns True if constraint is active.
+
+        A constraint is active if c(x) = 0.
+
+        By default we assume constraints of the form c(x) <= 0.
+
+        Parameters
+        ----------
+        x : CArray
+            Input sample.
+        tol : float, optional
+            Tolerance to use for comparing c(x) against 0. Default 1e-4.
+
+        Returns
+        -------
+        bool
+            True if constraint is active, False otherwise.
+
+        """
+        # If at least one value in the bounds is +/- inf,
+        # the constraint is never active
+        if self._check_inf() is True:
+            return False
+
+        return super(CConstraintBox, self).is_active(x, tol=tol)
+
+    def is_violated(self, x, precision=4):
+        """Returns the violated status of the constraint for the sample x.
+
+        We assume the constraint violated if c(x) <= 0.
+
+        Parameters
+        ----------
+        x : CArray
+            Input sample.
+        precision : int, optional
+            Number of digits to check. Default 4.
+
+        Returns
+        -------
+        bool
+            True if constraint is violated, False otherwise.
+
+        """
+        if not x.is_vector_like:
+            raise ValueError("only a vector-like array is accepted")
+        x_prec = x.round(precision)  # Only consider the desired decimals
+        return (x_prec < self.lb).logical_or(x_prec > self.ub).any()
 
     def _constraint(self, x):
         """Returns the value of the constraint for the sample x.
@@ -111,14 +192,7 @@ class CConstraintBox(CConstraint):
                 self.radius.size != x.size:
             return self._constraint_sparse(x)
 
-        c = self.center
-        r = self.radius
-
-        # FIXME: WORKAROUND FOR RUNTIMEWARNING x - nan
-        if any(np.isnan(c.tondarray())) or any(np.isnan(r.tondarray())):
-            return np.nan
-
-        return float((abs(x - c) - r).max())
+        return float((abs(x - self.center) - self.radius).max())
 
     def _constraint_sparse(self, x):
         """Returns the value of the constraint for the sample x.
@@ -171,18 +245,18 @@ class CConstraintBox(CConstraint):
 
         """
         # If bound is float, ensure x is float
-        if np.issubdtype(self.ub.dtype, np.floating) or \
-                np.issubdtype(self.ub.dtype, np.floating):
+        if np.issubdtype(CArray(self.ub).dtype, np.floating) or \
+                np.issubdtype(CArray(self.ub).dtype, np.floating):
             x = x.astype(float)
 
-        if self.ub.size == 1:  # Same ub for all the features
-            x[x >= self._ub] = self._ub
-        else:
-            x[x >= self._ub] = self._ub[x >= self._ub]
+        if isinstance(self.ub, CArray):
+            x[x > self.ub] = self.ub[x > self.ub]
+        else:  # Same ub for all the features
+            x[x > self.ub] = self.ub
 
-        if self.lb.size == 1:  # Same lb for all the features
-            x[x <= self._lb] = self._lb
-        else:
-            x[x <= self._lb] = self._lb[x <= self._lb]
+        if isinstance(self.lb, CArray):
+            x[x < self.lb] = self.lb[x < self.lb]
+        else:  # Same lb for all the features
+            x[x < self.lb] = self.lb
 
         return x

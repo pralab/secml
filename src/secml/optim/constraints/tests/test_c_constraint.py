@@ -23,6 +23,7 @@ class CConstraintTestCases(CUnitTest):
         self.logger.info("Testing `.is_active` method for: {:}".format(c))
 
         def check_active(cons, point, expect):
+            self.logger.info("Testing point: {:}".format(point))
             res = cons.is_active(point)
             self.assertEqual(expect, res)
 
@@ -58,6 +59,7 @@ class CConstraintTestCases(CUnitTest):
         self.logger.info("Testing `.is_violated` method for: {:}".format(c))
 
         def check_violated(cons, point, expect):
+            self.logger.info("Testing point: {:}".format(point))
             res = cons.is_violated(point)
             self.assertEqual(expect, res)
 
@@ -155,12 +157,8 @@ class CConstraintTestCases(CUnitTest):
             self.assertIsInstance(x_proj, CArray)
             self.assertEqual(x_proj.issparse, point.issparse)
 
-            # After projection, value should be 0 if point is OUTSIDE
-            if cons.is_violated(point) is True:
-                self.assertAlmostEqual(0, cons.constraint(x_proj))
-            else:  # Value should not change
-                self.assertEqual(cons.constraint(point),
-                                 cons.constraint(x_proj))
+            # After projection, constraint should not be violated
+            self.assertFalse(cons.is_violated(x_proj))
 
             self.assert_array_almost_equal(x_proj, expected, decimal=4)
 

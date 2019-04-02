@@ -37,13 +37,13 @@ class COptimizerScipy(COptimizer):
         if self.bounds is None:
             return None
 
-        # vector-like bounds
-        lb = self.bounds.lb.tondarray()
-        ub = self.bounds.ub.tondarray()
+        # Scalar or CArray
+        lb = self.bounds.lb
+        ub = self.bounds.ub
 
-        # scalar bounds (have to be scalars)
-        lb = lb if lb.size > 1 else float(lb)
-        ub = ub if ub.size > 1 else float(ub)
+        # If bounds are vectors, transform to ndarray
+        lb = lb.tondarray() if isinstance(lb, CArray) else lb
+        ub = ub.tondarray() if isinstance(ub, CArray) else ub
 
         # return scipy bounds
         return sc_opt.Bounds(lb, ub)
