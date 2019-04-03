@@ -37,6 +37,7 @@ package:
     name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
     paths:
       - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
+    expire_in: 1 week
 
 
 .test-cache-py2: &test-cache-py2
@@ -218,7 +219,11 @@ release:
   script:
     - DIST_ZIP=$(find $CI_PROJECT_DIR/dist -iname \*.zip -exec basename {} \;)
     - echo $DIST_ZIP
-    - 'curl -s --request POST --header "PRIVATE-TOKEN: $PRAGIT_BOT_TOKEN" --data name="$DIST_ZIP" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_ZIP?job=package" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
+    - 'curl -s --request POST --header "PRIVATE-TOKEN: $PRAGIT_BOT_TOKEN" --data name="$DIST_ZIP" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_ZIP?job=release" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
+  artifacts:  # Keep the distribution package (default expire 0)
+    name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
+    paths:
+      - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
   only:
     - tags
 
