@@ -12,8 +12,8 @@ from scipy.sparse import issparse
 __all__ = ['is_bool', 'is_int', 'is_intlike', 'is_float', 'is_floatlike',
            'is_scalar', 'is_scalarlike', 'is_inf', 'is_posinf', 'is_neginf',
            'is_nan', 'is_list', 'is_list_of_lists',
-           'is_ndarray', 'is_scsarray', 'is_slice', 'is_str', 'is_tuple',
-           'is_set', 'is_dict', 'to_builtin']
+           'is_ndarray', 'is_scsarray', 'is_slice', 'is_str', 'is_bytes',
+           'is_tuple', 'is_set', 'is_dict', 'to_builtin']
 
 
 def is_bool(x):
@@ -280,6 +280,12 @@ def is_str(x):  # text unicode strings (unicode AND bytes in Py2)
     return False
 
 
+def is_bytes(x):  # byte strings
+    if isinstance(x, (bytes, np.bytes_)):
+        return True
+    return False
+
+
 def is_tuple(x):
     return isinstance(x, tuple)
 
@@ -300,6 +306,7 @@ def to_builtin(x):
      - int, np.integer -> int
      - float, np.floating -> float
      - str, np.str_, np.unicode_ -> str
+     - bytes, np.bytes_ -> bytes
 
     """
     if is_bool(x):
@@ -314,5 +321,8 @@ def to_builtin(x):
     elif is_str(x):
         # Covers str, np.str_, np.unicode_
         return str(x)
+    elif is_bytes(x):
+        # Covers bytes, np.bytes_
+        return bytes(x)
     else:
         raise TypeError("objects of type {:} not supported.".format(type(x)))
