@@ -222,7 +222,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         gt += v
 
         # propagating gradient back to input space
-        return gt if clf.preprocess is None else \
-            gt.dot(clf.preprocess.gradient(xc0)).ravel()
-        # fixme: change when the preprocessor gradient will take again a
-        #  w parameter
+        if clf.preprocess is not None:
+            return clf.preprocess.gradient(xc0, w=gt)
+
+        return gt
