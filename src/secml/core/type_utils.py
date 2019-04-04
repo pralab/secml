@@ -275,7 +275,7 @@ def is_str(x):  # text unicode strings (unicode AND bytes in Py2)
     # TODO: REMOVE string_types AFTER TRANSITIONING TO PY3
     if isinstance(x, six.string_types):
         return True
-    elif isinstance(x, np.str_):
+    elif isinstance(x, (np.str_, np.unicode_)):
         return True
     return False
 
@@ -299,7 +299,7 @@ def to_builtin(x):
      - bool, np.bool_ -> bool
      - int, np.integer -> int
      - float, np.floating -> float
-     - str, np.str_ -> str
+     - str, np.str_, np.unicode_ -> str
 
     """
     if is_bool(x):
@@ -312,7 +312,7 @@ def to_builtin(x):
         # Covers float, np.floating
         return float(x)
     elif is_str(x):
-        # Covers str, np.str_
+        # Covers str, np.str_, np.unicode_
         return str(x)
     else:
         raise TypeError("objects of type {:} not supported.".format(type(x)))
