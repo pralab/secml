@@ -15,10 +15,12 @@ from secml.utils import fm, pickle_utils
 #  SHOULD BE REMOVED FROM MAIN BRANCH
 
 
-if not fm.file_exist('ds.gz'):
+if False or not fm.file_exist('ds.gz'):
     print("Creating the dataset")
 
-    ds = CDataLoaderDrebin().load()
+    dl = CDataLoaderDrebin()
+    dl.verbose = 1
+    ds = dl.load(feats_info=False)
 
     tr = ds[:30000, :]
     ts = ds[30000:, :]
@@ -36,7 +38,7 @@ else:
 mal_idx = ts.Y.find(ts.Y == 1)[:3]
 adv_ds = ts[mal_idx, :]
 
-if not fm.file_exist('clf.gz'):
+if False or not fm.file_exist('clf.gz'):
     print("Training the classifier")
 
     clf = CClassifierSVM()
