@@ -138,13 +138,14 @@ class CDataLoaderDrebin(CDataLoader):
             "Loading feats freqs from {:}".format(self.feat_freqs_path))
 
         feat_freqs = np.genfromtxt(
-            self.feat_freqs_path, delimiter=',', dtype="|S500", autostrip=True)
+            self.feat_freqs_path, delimiter=',', dtype="|S500",
+            autostrip=True, loose=False)
         # Original index of each feature
         original_idx = CArray(feat_freqs[:, 1].astype(int))
 
         # Let's assign to each feature the index of the corresponding family
         # relative to the FEAT_FAMILY_MAPPING ordered dict
-        feat_family = CArray(feat_freqs[:, 2])
+        feat_family = CArray(feat_freqs[:, 2]).astype(str)
         feat_family_idx = CArray.empty(feat_family.size, dtype=int)
         for f_idx, feat_fam in enumerate(feat_family):
             fam_inv = FEAT_FAMILY_MAPPING_INVERTED[feat_fam]
@@ -155,12 +156,12 @@ class CDataLoaderDrebin(CDataLoader):
 
         feat_mapping = np.genfromtxt(
             self.feat_mapping_path, delimiter=',', dtype="|S500",
-            autostrip=True, skip_header=1)
+            autostrip=True, skip_header=1, loose=False)
 
         # Now create a dictionary with features ORIGINAL index as key
         # and the corresponding description as value
         feat_desc_idx = CArray(feat_mapping[:, 0].astype(int))
-        feat_desc_str = CArray(feat_mapping[:, 1])
+        feat_desc_str = CArray(feat_mapping[:, 1]).astype(str)
         feat_desc = {k: v for k, v in zip(feat_desc_idx, feat_desc_str)}
 
         self.logger.info(
@@ -171,7 +172,7 @@ class CDataLoaderDrebin(CDataLoader):
         # a dict with the family ID for each malware (hash)
         mal_fam = dict()
         mal_fam_map = {'Benign': 0}
-        with open(self.families_path, 'rb') as csvfile:
+        with open(self.families_path, 'r') as csvfile:
             mal_fam_reader = csv.reader(csvfile)
             next(mal_fam_reader)  # Skipping the first header line
             for row in mal_fam_reader:
