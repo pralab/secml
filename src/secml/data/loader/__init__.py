@@ -7,3 +7,4 @@ from .c_dataloader_mnist import CDataLoaderMNIST
 from .c_dataloader_lfw import CDataLoaderLFW
 from .c_dataloader_cifar import CDataLoaderCIFAR10, CDataLoaderCIFAR100
 from .c_dataloader_drebin import CDataLoaderDrebin
+from .c_dataloader_icubworld import CDataLoaderICubWorld28
