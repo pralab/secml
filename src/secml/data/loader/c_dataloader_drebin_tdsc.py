@@ -1,6 +1,6 @@
 """
-.. module:: DataLoaderDrebin
-   :synopsis: Loader the Drebin Android applications dataset
+.. module:: DataLoaderDrebinTDSC
+   :synopsis: Loader the Drebin Android applications dataset (TDSC version)
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
@@ -22,22 +22,10 @@ from secml.utils.dict_utils import invert_dict
 from secml import settings
 
 DREBIN_URL = 'https://nue.diee.unica.it/public.php/webdav'
-DREBIN_USER = 'e5a854edbdda1739f1f2bfbc31085e2b'
-DREBIN_MD5 = 'ab73d749f2a8f51b30601ca7ed7c321b'
+DREBIN_USER = 'f0e4dc007baf02d54a306b0b73f2b53f'
+DREBIN_MD5 = '4c24ef53b837d1b54d4d304616313438'
 
 DREBIN_PATH = fm.join(settings.SECML_DS_DIR, 'drebin')
-
-OBFUSCATION_MAPPING = {
-    'ORIGINAL': 'ORIGINAL',
-    'CLASS_ENCRYPTION': 'CLASS ENCRYPTION',
-    'STRING_ENCRYPTION': 'STRING ENCRYPTION',
-    'REFLECTION': 'REFLECTION',
-    'TRIVIAL': 'TRIVIAL',
-    'TRIVIAL_STRING_ENCRYPTION': 'TRIVIAL STRING E',
-    'TRIVIAL_STRING_ENCRYPTION_REFLECTION': 'TRIVIAL STRING E + R',
-    'TRIVIAL_STRING_ENCRYPTION_REFLECTION_CLASS_ENCRYPTION':
-        'TRIVIAL STRING E + R + CLASS E'
-}
 
 FEAT_FAMILY_MAPPING = OrderedDict([
     ("Hardware components", ["features"]),
@@ -58,10 +46,11 @@ MANIFEST_FAMILIES = ["Hardware components", "Requested permissions",
                      "App components", "Filtered Intents"]
 
 
-class CDataLoaderDrebin(CDataLoader):
-    """Loads the Drebin Android applications dataset.
+class CDataLoaderDrebinTDSC(CDataLoader):
+    """Loads the Drebin Android applications dataset (TDSC version).
 
-    Available at: https://www.sec.cs.tu-bs.de/~danarp/drebin/download.html
+    Full version available at:
+        https://www.sec.cs.tu-bs.de/~danarp/drebin/download.html
 
     Attributes
     ----------
@@ -76,7 +65,6 @@ class CDataLoaderDrebin(CDataLoader):
     FEAT_FAMILY_MAPPING_INVERTED = FEAT_FAMILY_MAPPING_INVERTED
     DEXCODE_FAMILIES = DEXCODE_FAMILIES
     MANIFEST_FAMILIES = MANIFEST_FAMILIES
-    OBFUSCATION_MAPPING = OBFUSCATION_MAPPING
 
     def __init__(self):
 
@@ -86,7 +74,7 @@ class CDataLoaderDrebin(CDataLoader):
         self.feat_mapping_path = fm.join(DREBIN_PATH, 'feature_mapping.txt')
         self.families_path = fm.join(DREBIN_PATH, 'sha256_family.csv')
 
-        with CDataLoaderDrebin.__lock:
+        with CDataLoaderDrebinTDSC.__lock:
             # Download (if needed) data and extract it
             if not fm.file_exist(self.data_path):
                 self._get_data(DREBIN_URL, DREBIN_PATH)
@@ -103,7 +91,7 @@ class CDataLoaderDrebin(CDataLoader):
         (only if `feats_info` is True)
          - 'original_idx': original index of each feature
          - 'feat_family_idx': for each feature, the index of the family
-                relative to the CDataLoaderDrebin.FEAT_FAMILY_MAPPING
+                relative to the CDataLoaderDrebinTDSC.FEAT_FAMILY_MAPPING
          - 'feat_desc': dict with the description of each original feature
          - 'app_family_map': dict with the id of each app family (0 is Benign,
                 others are malware)
