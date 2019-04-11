@@ -4,7 +4,7 @@ from secml.adv.attacks import CAttackEvasion
 from secml.adv.seceval import CSecEval
 
 from secml.array import CArray
-from secml.data.loader import CDataLoaderDrebin
+from secml.data.loader import CDataLoaderDrebinTDSC
 from secml.ml.features.selection import CFeatSel
 from secml.ml.classifiers import CClassifierSVM
 from secml.utils import fm, pickle_utils
@@ -18,7 +18,7 @@ from secml.utils import fm, pickle_utils
 if False or not fm.file_exist('ds.gz'):
     print("Creating the dataset")
 
-    dl = CDataLoaderDrebin()
+    dl = CDataLoaderDrebinTDSC()
     dl.verbose = 1
     ds = dl.load(feats_info=False)
 
