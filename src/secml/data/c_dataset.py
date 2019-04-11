@@ -1,91 +1,91 @@
 """
-.. module:: Dataset
+.. module:: CDataset
    :synopsis: A dataset with an array of patterns and corresponding labels
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
 
 """
 from six.moves import range
 
-from secml.array import CArray
+from secml.core import CCreator
 from secml.core.attr_utils import extract_attr
+from secml.array import CArray
+from secml.utils import SubLevelsDict
 
 
-class CDataset(object):
+class CDataset(CCreator):
     """Creates a new dataset.
 
-        A dataset consists in a 2-Dimensional patterns array,
-        dense or sparse format, with one pattern for each row
-        and a flat dense array with each pattern's label.
+    A dataset consists in a 2-Dimensional patterns array,
+    dense or sparse format, with one pattern for each row
+    and a flat dense array with each pattern's label.
 
-        Parameters
-        ----------
-        x : array_like or CArray
-            Dataset patterns, one for each row.
-            Array is converted to 2-Dimensions before storing.
-        y : array_like or CArray
-            Dataset labels. Array is converted to dense format
-            and flattened before storing.
-        kwargs : any, optional
-            Any other attribute of the dataset.
+    Parameters
+    ----------
+    x : array_like or CArray
+        Dataset patterns, one for each row.
+        Array is converted to 2-Dimensions before storing.
+    y : array_like or CArray
+        Dataset labels. Array is converted to dense format
+        and flattened before storing.
+    kwargs : any, optional
+        Any other attribute of the dataset.
 
-        Returns
-        -------
-        out_ds : CDataset
-            Dataset consisting in a 2-Dimensional patterns array and
-            a dense flat vector of corresponding labels (if provided).
+    Examples
+    --------
+    >>> from secml.data import CDataset
 
-        Examples
-        --------
-        >>> from secml.data import CDataset
+    >>> ds = CDataset([[1,2],[3,4],[5,6]],[1,0,1])
+    >>> print(ds.X)
+    CArray([[1 2]
+     [3 4]
+     [5 6]])
+    >>> print(ds.Y)
+    CArray([1 0 1])
 
-        >>> ds = CDataset([[1,2],[3,4],[5,6]],[1,0,1])
-        >>> print(ds.X)
-        CArray([[1 2]
-         [3 4]
-         [5 6]])
-        >>> print(ds.Y)
-        CArray([1 0 1])
+    >>> ds = CDataset([1,2,3],1)  # Patterns will be converted to 2-Dims
+    >>> print(ds.X)
+    CArray([[1 2 3]])
+    >>> print(ds.Y)
+    CArray([1])
 
-        >>> ds = CDataset([1,2,3],1)  # Patterns will be converted to 2-Dims
-        >>> print(ds.X)
-        CArray([[1 2 3]])
-        >>> print(ds.Y)
-        CArray([1])
+    >>> from secml.array import CArray
+    >>> ds = CDataset(CArray([[1,0],[0,4],[1,0]],tosparse=True), CArray([1,0,1],tosparse=True))
+    >>> print(ds.X)  # doctest: +NORMALIZE_WHITESPACE
+    CArray(  (0, 0)	1
+      (1, 1)	4
+      (2, 0)	1)
+    >>> print(ds.Y)
+    CArray([1 0 1])
 
-        >>> from secml.array import CArray
-        >>> ds = CDataset(CArray([[1,0],[0,4],[1,0]],tosparse=True), CArray([1,0,1], tosparse=True))
-        >>> print(ds.X)  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	1
-          (1, 1)	4
-          (2, 0)	1)
-        >>> print(ds.Y)
-        CArray([1 0 1])
+    # The number of labels must be equal to the number of samples
+    >>> ds = CDataset([[1,2],[3,4]],1)
+    Traceback (most recent call last):
+     ...
+    ValueError: number of labels (1) must be equal to the number of samples (2).
 
-        # The number of labels must be equal to the number of samples
-        >>> ds = CDataset([[1,2],[3,4]],1)
-        Traceback (most recent call last):
-         ...
-        ValueError: number of labels (1) must be equal to the number of samples (2).
+    >>> ds = CDataset([1,2,3],1, id='mydataset', age=34)  # 2 custom attributes
+    >>> print(ds.id)
+    mydataset
+    >>> print(ds.age)
+    34
 
-        >>> ds = CDataset([1,2,3],1, id='mydataset', age=34)  # 2 custom attributes
-        >>> print(ds.id)
-        mydataset
-        >>> print(ds.age)
-        34
-
-        """
+    """
+    __super__ = 'CDataset'
+    __class_type = 'standard'
 
     def __init__(self, x, y, **kwargs):
-        # Default placeholders
+
+        # Default placeholders (keep to make _check_samples_labels work)
         self._X = None
         self._Y = None
+
         # Patterns are forced to be 2-D (one row for each pattern)
         self.X = x
         # Labels are 1-D (one label for each sample)
         # This will also check patterns/labels size consistency
         self.Y = y
+
         # Setting any other dataset attribute
         for key in kwargs:
             setattr(self, key, kwargs[key])
@@ -168,8 +168,6 @@ class CDataset(object):
             and flattened before storing.
 
         """
-        # This double casting is to prevent storing a single scalar,
-        # should have minimal effect on performance
         y = CArray(value).todense().ravel()
         if self._X is not None:  # Checking number of samples/labels equality
             self._check_samples_labels(y=y)
@@ -198,7 +196,8 @@ class CDataset(object):
     def get_params(self):
         """Returns dataset's custom attributes dictionary."""
         # We extract the PUBLIC (pub) attributes from the class dictionary
-        return dict((k, getattr(self, k)) for k in extract_attr(self, 'pub'))
+        return SubLevelsDict(
+            (k, getattr(self, k)) for k in extract_attr(self, 'pub'))
 
     # TODO: ADD DOCSTRING, EXAMPLES
     def __getitem__(self, idx):
@@ -232,11 +231,11 @@ class CDataset(object):
             axis (axis=0) so the number of features must be
             equal to dataset.num_features. If current dataset
             format is sparse, dense dataset to append will
-            be converted to sparse and viceversa.
+            be converted to sparse and vice-versa.
 
         Returns
         -------
-        out_append : CDataset
+        CDataset
             A new Dataset resulting of appending new data to
             existing data. Format of resulting dataset is equal
             to current dataset format.
@@ -282,40 +281,12 @@ class CDataset(object):
         new_labels = self.Y.append(dataset.Y)
         return self.__class__(self.X.append(dataset.X, axis=0), new_labels)
 
-    def deepcopy(self):
-        """Create a deepcopy of the current dataset.
-
-        Examples
-        --------
-        >>> from secml.data import CDataset
-
-        >>> ds = CDataset([[1,2],[3,4],[5,6]],[1,0,1])
-        >>> ds_copy = ds.deepcopy()
-        >>> ds_copy[0, :] = CDataset([[10,20]], 0)
-
-        >>> print(ds.X)
-        CArray([[1 2]
-         [3 4]
-         [5 6]])
-        >>> print(ds.Y)
-        CArray([1 0 1])
-
-        >>> print(ds_copy.X)
-        CArray([[10 20]
-         [ 3  4]
-         [ 5  6]])
-        >>> print(ds_copy.Y)
-        CArray([0 0 1])
-
-        """
-        return CDataset(self.X.deepcopy(), self.Y.deepcopy())
-
     def tosparse(self):
         """Convert dataset's patterns to sparse format.
 
         Returns
         -------
-        out_sparse : CDataset
+        CDataset
             A new CDataset with same patterns converted
             to sparse format. Copy is avoided if possible.
 
@@ -342,7 +313,7 @@ class CDataset(object):
 
         Returns
         -------
-        out_dense : CDataset
+        CDataset
             A new CDataset with same patterns converted
             to dense format. Copy is avoided if possible.
 
@@ -412,7 +383,7 @@ class CDataset(object):
 
         Returns
         -------
-        boundary : List of tuple
+        boundary : list of tuple
             Every tuple contain min and max feature value plus an
             offset for corresponding coordinate.
 
