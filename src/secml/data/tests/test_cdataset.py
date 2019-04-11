@@ -114,6 +114,24 @@ class TestDataset(CUnitTest):
         self.assertEqual(ds_params['age'], 34)
         self.assertEqual(ds_params['color'], 'green')
 
+    def test_copy(self):
+        """Test for .deepcopy() method."""
+        # add a custom parameter to test its copy too
+        self.dataset.a = CArray([1, 2, 3])
+
+        ds_copy = self.dataset.deepcopy()
+        ds_copy.X[0, :] = 100
+        ds_copy.Y[0] = 100
+        ds_copy.a[0] = 100
+
+        self.assert_array_equal(self.dataset.X[0, :], CArray([[1, 2, 3]]))
+        self.assert_array_equal(self.dataset.Y[0], CArray([1]))
+        self.assert_array_equal(self.dataset.a[0], CArray([1]))
+
+        self.assert_array_equal(ds_copy.X[0, :], CArray([[100, 100, 100]]))
+        self.assert_array_equal(ds_copy.Y[0], CArray([100]))
+        self.assert_array_equal(ds_copy.a[0], CArray([100]))
+
 
 if __name__ == "__main__":
     CUnitTest.main()

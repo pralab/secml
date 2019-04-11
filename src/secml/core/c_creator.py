@@ -11,9 +11,8 @@ from functools import wraps
 
 from secml.settings import SECML_STORE_LOGS, SECML_LOGS_PATH
 from secml.core.attr_utils import is_public, extract_attr, \
-    as_public, as_private, get_private
+    as_public, get_private
 from secml.core.type_utils import is_str
-from secml.core.decorators import deprecated
 import secml.utils.pickle_utils as pck
 from secml.utils.list_utils import find_duplicates
 from secml.utils import CLog, SubLevelsDict
