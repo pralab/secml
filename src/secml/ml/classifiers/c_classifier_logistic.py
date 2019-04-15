@@ -63,23 +63,6 @@ class CClassifierLogistic(CClassifierLinear):
     def random_seed(self, value):
         self._random_seed = value
 
-    def _clf_init(self):
-        self._sklearn_clf = LogisticRegression(
-            penalty='l2',
-            dual=False,
-            tol=0.0001,
-            C=self._C,
-            fit_intercept=True,
-            intercept_scaling=1.0,
-            class_weight=None,
-            solver='liblinear',
-            random_state=self._random_seed,
-            max_iter=self._max_iter,
-            multi_class='ovr',
-            verbose=0,
-            warm_start=False,
-        )
-
     @property
     def C(self):
         """Penalty parameter C of the error term."""
@@ -113,29 +96,22 @@ class CClassifierLogistic(CClassifierLinear):
     def b(self, value):
         self._b = value
 
-    def _train_params_init(self, ds):
-        """
-        This function fix the training parameters initialization.
-        :return:
-        """
-        # Trick due to de fact that sklearn does not give to you the
-        # opportunity to fix the initial random weights.
-        # (random state is used only for the training sample shuffling)
-        self._sklearn_clf.max_iter = 1
-        self._sklearn_clf.fit(ds.X.tondarray(), ds.Y.tondarray())
-        self._sklearn_clf.max_iter = self._max_iter
-        self._sklearn_clf.warm_start = True
-        self._init_w = self._init_w
-        self._init_b = self._init_b
-
-    def _generate_random_params_init(self, ds):
-        """
-        This function fix the training parameters initialization.
-        :return:
-        """
-        self._init_w = CArray.rand(shape=(ds.num_features,),
-                                   random_state=self._random_seed)
-        self._init_b = CArray.rand(shape=(1,), random_state=self._random_seed)
+    def _init_clf(self):
+        self._sklearn_clf = LogisticRegression(
+            penalty='l2',
+            dual=False,
+            tol=0.0001,
+            C=self._C,
+            fit_intercept=True,
+            intercept_scaling=1.0,
+            class_weight=None,
+            solver='liblinear',
+            random_state=self._random_seed,
+            max_iter=self._max_iter,
+            multi_class='ovr',
+            verbose=0,
+            warm_start=False,
+        )
 
     def _fit(self, ds):
         """
@@ -147,14 +123,7 @@ class CClassifierLogistic(CClassifierLinear):
         :param ds:
         :return:
         """
-        self._clf_init()
-
-        if self.random_seed:
-            # if random seed is not None, during the first training the initial
-            # random weights are saved and reused
-            if self._init_w is None:
-                self._generate_random_params_init(ds)
-            self._train_params_init(ds)
+        self._init_clf()
 
         self._sklearn_clf.fit(ds.X.tondarray(), ds.Y.tondarray())
 
