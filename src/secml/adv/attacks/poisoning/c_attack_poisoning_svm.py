@@ -183,7 +183,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
             self.logger.debug("Warning: xs is empty "
                               "(all points are error vectors).")
             return gt if svm.preprocess is None else \
-                gt.dot(svm.preprocess.gradient(xc0)).ravel()
+                svm.preprocess.gradient(xc0, w=gt)
 
         s = xs.shape[0]
 
