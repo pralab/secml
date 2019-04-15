@@ -8,8 +8,10 @@
 from secml import _NoValue
 from secml.core.type_utils import is_str
 
-__all__ = ['as_public', 'as_private', 'has_private', 'get_private',
+__all__ = ['as_public', 'as_protected',
+           'as_private', 'has_private', 'get_private',
            'has_property', 'get_property', 'has_getter', 'has_setter',
+           'add_readonly', 'add_readwrite',
            'is_public', 'is_protected', 'is_readonly', 'is_readwrite',
            'is_readable', 'is_writable', 'extract_attr']
 
@@ -17,7 +19,8 @@ __all__ = ['as_public', 'as_private', 'has_private', 'get_private',
 def _check_is_attr_name(attr):
     """Raise TypeError if input is not an attribute name (string)."""
     if not is_str(attr):
-        raise TypeError("attribute must be passed as a string.")
+        raise TypeError("attribute must be passed as a string, "
+                        "not {:}.".format(type(attr)))
 
 
 def as_public(attr):
@@ -38,6 +41,29 @@ def as_public(attr):
     _check_is_attr_name(attr)
     import re
     return re.sub('^_rw_|^_r_|^_', '', attr)
+
+
+def as_protected(attr):
+    """Return the protected name associated with a public attribute.
+
+    Examples
+    --------
+    >>> from secml.core.attr_utils import as_protected
+
+    >>> as_protected('attr1')
+    '_attr1'
+    >>> as_protected('__attr1')
+    '_attr1'
+    >>> as_protected('_attr1')  # Protected attributes are returned as is
+    '_attr1'
+
+    """
+    _check_is_attr_name(attr)
+    if not attr.startswith('_'):  # Public attribute
+        return '_' + attr
+    if attr.startswith('__'):  # Private attribute
+        return attr[1:]  # Remove the first underscore
+    return attr  # Already a protected attribute
 
 
 def as_private(obj_class, attr):
@@ -156,6 +182,57 @@ def has_setter(obj, attr):
     _check_is_attr_name(attr)
     return True if has_property(obj, attr) and \
                    get_property(obj, attr).fset is not None else False
+
+
+def add_readonly(obj, attr, val=None):
+    """Add a READ ONLY attribute to object.
+
+    A read only attribute is defined as a protected attribute plus
+    a getter associated with it.
+
+    Parameters
+    ----------
+    obj : object
+        Any class instance.
+    attr : str
+        Name of the attribute to set.
+    val : any, optional
+        Value to assign to the attribute. If not given, None is used.
+
+    """
+    setattr(obj, as_protected(attr), val)
+
+    def fget(get_obj):
+        return getattr(get_obj, as_protected(attr))
+
+    setattr(obj.__class__, attr, property(fget))
+
+
+def add_readwrite(obj, attr, val=None):
+    """Add a READ/WRITE attribute to object.
+
+    A read/write attribute is defined as a protected attribute plus
+    a getter AND a setter associated with it.
+
+    Parameters
+    ----------
+    obj : object
+        Any class instance.
+    attr : str
+        Name of the attribute to set.
+    val : any, optional
+        Value to assign to the attribute. If not given, None is used.
+
+    """
+    setattr(obj, as_protected(attr), val)
+
+    def fget(get_obj):
+        return getattr(get_obj, as_protected(attr))
+
+    def fset(set_obj, set_val):
+        return setattr(set_obj, as_protected(attr), set_val)
+
+    setattr(obj.__class__, attr, property(fget, fset))
 
 
 def is_public(obj, attr):
