@@ -8,7 +8,7 @@
 from secml import _NoValue
 from secml.core.type_utils import is_str
 
-__all__ = ['as_public', 'as_protected',
+__all__ = ['as_public', 'as_protected', 'has_protected',
            'as_private', 'has_private', 'get_private',
            'has_property', 'get_property', 'has_getter', 'has_setter',
            'add_readonly', 'add_readwrite',
