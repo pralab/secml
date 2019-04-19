@@ -6,6 +6,7 @@
 
 """
 from __future__ import division
+
 import numpy as np
 
 from secml.optim.optimizers.line_search import CLineSearch
@@ -125,6 +126,15 @@ class CLineSearchBisect(CLineSearch):
         x2 = CArray(x + d * self.eta * idx_max,
                     dtype=dtype, tosparse=x.issparse)
 
+        self.logger.info("Select best point between: " +
+                         str(x + self.eta * d * idx_min) + ", " +
+                         str(x + self.eta * d * idx_max) + ", " +
+                         str(x))
+        self.logger.debug("f[a], f[b]: [" +
+                          str(self._fun_idx_min) + "," +
+                          str(self._fun_idx_max) + "]")
+        self.logger.debug("f[x] " + str(self._fx))
+
         f0 = self._fx
 
         if not self._is_feasible(x1) and \
@@ -159,6 +169,8 @@ class CLineSearchBisect(CLineSearch):
             return x, f0
 
         # else return best point among x1, x2 and x
+        self.logger.debug("f0: {:}, f1: {:}, f2: {:}".format(f0, f1, f2))
+
         if f2 <= f0 and f2 < f1:
             self.logger.debug("Returning x2.")
             return x2, f2
@@ -168,6 +180,7 @@ class CLineSearchBisect(CLineSearch):
             return x1, f1
 
         self.logger.debug("Returning x.")
+        self.logger.debug("f0: {:}".format(f0))
         return x, f0
 
     def _is_decreasing(self, x, d, **kwargs):
@@ -232,8 +245,14 @@ class CLineSearchBisect(CLineSearch):
         self._n_iter = 0
 
         # func eval
+        self.logger.debug("received fx: {:}".format(fx))
+
         self._fx = self.fun.fun(x) if fx is None else fx
         self._fz = self._fx
+
+        self.logger.info(
+            "line search: " + str(x[x != 0]) +
+            ", f(x): " + str(self._fx))
 
         # reset cached values
         self._fun_idx_min = None
@@ -241,20 +260,22 @@ class CLineSearchBisect(CLineSearch):
 
         # exponential search
         if self.eta_max is None:
+            self.logger.debug("Exponential search ")
             eta_max = self._compute_eta_max(x, d, **kwargs)
             idx_max = (eta_max / self.eta).ceil().astype(int)
             idx_min = (idx_max / 2).astype(int)
             # this only searches within [eta, 2*eta]
             # the values fun_idx_min and fun_idx_max are already cached
         else:
+            self.logger.debug("Binary search ")
             idx_max = (self.eta_max / self.eta).ceil().astype(int)
             idx_min = 0
             self._fun_idx_min = self._fx
             self._fun_idx_max = None  # this has not been cached
 
-        self.logger.debug("Running binary line search in: [" +
-                          str(x + self.eta * d * idx_min) + "," +
-                          str(x + self.eta * d * idx_max) + "]")
+        self.logger.info("Running binary line search in: [" +
+                         str(x + self.eta * d * idx_min) + "," +
+                         str(x + self.eta * d * idx_max) + "]")
         self.logger.debug("f[a], f[b]: [" +
                           str(self._fun_idx_min) + "," +
                           str(self._fun_idx_max) + "]")
@@ -264,11 +285,13 @@ class CLineSearchBisect(CLineSearch):
             if idx_min == 0:
                 if (idx_max <= 1).any():
                     # local minimum found
+                    self.logger.debug("local minimum found")
                     return self._select_best_point(
                         x, d, idx_min, idx_max, **kwargs)
             else:
                 if (idx_max - idx_min <= 1).any():
                     # local minimum found
+                    self.logger.debug("local minimum found")
                     return self._select_best_point(
                         x, d, idx_min, idx_max, **kwargs)
 
@@ -314,8 +337,15 @@ class CLineSearchBisect(CLineSearch):
         # this helps getting closer to the violated constraint
         t = CArray(eta / self.eta).round()
 
+        self.logger.debug(
+            "[_compute_eta_max] eta: " + str(eta) + ", x: " +
+            str(x[x != 0]) + ", f(x): " + str(self._fx))
         # update z and fz
         z = self._update_z(x, eta, d)
+
+        self.logger.debug(
+            "[_compute_eta_max] eta max, eta: " + str(eta) + ", z: " +
+            str(z[z != 0]) + ", f(z): " + str(self._fz))
 
         # divide eta by 2 if x+eta*d goes out of bounds or fz decreases
         # update (if required) z and fz
@@ -341,8 +371,9 @@ class CLineSearchBisect(CLineSearch):
             # cache f_max
             self._fun_idx_max = self._fz
 
-            self.logger.debug("eta: " + str(eta) + ", z: " +
-                              str(z[z != 0]) + ", f(z): " + str(self._fz))
+            self.logger.debug(
+                "[_compute_eta_max] eta: " + str(eta) + ", z: " +
+                str(z[z != 0]) + ", f(z): " + str(self._fz))
 
             self._n_iter += 1
 
