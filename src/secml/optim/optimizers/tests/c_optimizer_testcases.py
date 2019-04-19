@@ -25,7 +25,7 @@ class COptimizerTestCases(CUnitTest):
             'fun': CFunction.create('beale'),
             'x0': CArray([0, 0]),
             'grid_limits': [(-1, 4.5), (-1, 1.5)],
-            'vmin': 0, 'vmax': 5
+            'vmin': 0, 'vmax': 1
         }
         self.test_funcs['mc-cormick'] = {
             'fun': CFunction.create('mc-cormick'),
@@ -39,28 +39,81 @@ class COptimizerTestCases(CUnitTest):
             'grid_limits': [(-1.1, 1.1), (-1.1, 1.1)],
             'vmin': 0, 'vmax': 10
         }
-        quad = self._create_quadratic_fun()
-        self.test_funcs['quadratic'] = {
+        quad = self._quadratic_fun(2)
+        self.test_funcs['quad-2'] = {
             'fun': quad,
-            'x0': CArray([4., -4.]),
+            'x0': CArray([4, -4]),
             'grid_limits': [(-5, 5), (-5, 5)],
             'vmin': None, 'vmax': None
         }
+        n = 100
+        quad = self._quadratic_fun(n)
+        self.test_funcs['quad-100-sparse'] = {
+            'fun': quad,
+            'x0': CArray.zeros((n,), dtype=int).tosparse(dtype=int),
+        }
+        n = 2
+        exp_sum = self._create_exp_sum(d=n)
+        self.test_funcs['exp-sum-2'] = {
+            'fun': exp_sum,
+            'x0': CArray.ones((n,)) * 2,
+            'vmin': -10, 'vmax': 5,
+            'grid_limits': [(-1, 1), (-1, 1)]
+        }
+        n = 100
+        # x0 is a sparse CArray and the solution is a zero vector
+        exp_sum = self._create_exp_sum(d=n)
+        self.test_funcs['exp-sum-100-int'] = {
+            'fun': exp_sum,
+            'x0': CArray.ones((n,), dtype=int) * 2
+        }
+        n = 100
+        exp_sum = self._create_exp_sum(d=n)
+        self.test_funcs['exp-sum-100-int-sparse'] = {
+            'fun': exp_sum,
+            'x0': CArray.ones((n,), dtype=int).tosparse(dtype=int) * 2
+        }
 
-    def _create_quadratic_fun(self):
-        """Creates a quadratic function."""
-        A = CArray.eye(2, 2)
-        b = CArray.zeros((2, 1))
-        c = 0
+    def _quadratic_fun(self, d):
+        """Creates a quadratic function in d dimensions."""
 
-        discr_fun = CFunction.create('quadratic', A, b, c)
-        discr_fun.global_min = lambda: 0.
-        discr_fun.global_min_x = lambda: CArray([0, 0])
+        def _quadratic_fun_min(A, b):
+            from scipy import linalg
+            min_x_scipy = linalg.solve(
+                (2*A).tondarray(), -b.tondarray(), sym_pos=True)
+            return CArray(min_x_scipy).ravel()
+
+        A = CArray.eye(d, d)
+        b = CArray.ones((d, 1)) * 2
+
+        discr_fun = CFunction.create('quadratic', A, b, c=0)
+
+        min_x = _quadratic_fun_min(A, b)
+        min_val = discr_fun.fun(min_x)
+
+        discr_fun.global_min = lambda: min_val
+        discr_fun.global_min_x = lambda: min_x
 
         return discr_fun
 
+    def _create_exp_sum(self, d):
+        """Creates an exponential sum function in d dimensions."""
+
+        def _exp_sum_fun(x):
+            return (x ** 4).sum() + x.sum() ** 2
+
+        def _exp_sum_grad(x):
+            return (4 * x ** 3) + 2 * x
+
+        int_fun = CFunction(fun=_exp_sum_fun, gradient=_exp_sum_grad)
+        int_fun.global_min = lambda: 0.
+        int_fun.global_min_x = lambda: CArray.zeros(d, )
+
+        return int_fun
+
     def _test_minimize(self, opt_class, fun_id,
-                       opt_params=None, minimize_params=None, label=None):
+                       opt_params=None, minimize_params=None,
+                       label=None, out_int=False):
         """Test for COptimizer.minimize() method.
 
         Parameters
@@ -76,6 +129,8 @@ class COptimizerTestCases(CUnitTest):
             Dictionary of parameters for the minimize method.
         label : str or None, optional
             Label to identify the test.
+        out_int : bool, optional
+            If True, output solution should have int dtype. Default False.
 
         """
         minimize_params = {} if minimize_params is None else minimize_params
@@ -103,17 +158,24 @@ class COptimizerTestCases(CUnitTest):
         self.logger.info("Found minimum: {:}".format(min_x))
         self.logger.info("Fun value @ minimum: {:}".format(opt.f_opt))
 
-        self._plot_optimization(opt, fun_dict['x0'], min_x,
-                                grid_limits=fun_dict['grid_limits'],
-                                method=minimize_params.get('method'),
-                                vmin=fun_dict['vmin'],
-                                vmax=fun_dict['vmax'],
-                                label=label)
+        if fun.global_min_x().size == 2:
+            self._plot_optimization(opt, fun_dict['x0'], min_x,
+                                    grid_limits=fun_dict['grid_limits'],
+                                    method=minimize_params.get('method'),
+                                    vmin=fun_dict['vmin'],
+                                    vmax=fun_dict['vmax'],
+                                    label=label)
 
         # Round results for easier asserts
         self.assertAlmostEqual(opt.f_opt, fun.global_min(), places=4)
         self.assert_array_almost_equal(
-            min_x, fun.global_min_x(), decimal=4)
+            min_x.todense().ravel(), fun.global_min_x(), decimal=4)
+
+        # Check if the type of the solution is correct
+        self.assertEqual(fun_dict['x0'].issparse, min_x.issparse)
+
+        # Check if solution has expected int dtype or not
+        self.assertIsSubDtype(min_x.dtype, int if out_int is True else float)
 
     def _plot_optimization(
             self, solver, x_0, g_min, grid_limits,
@@ -164,7 +226,7 @@ class COptimizerTestCases(CUnitTest):
 
         fig.sp.title("{:}(fun={:}) - Glob Min @ {:}".format(
             solver.class_type, solver.f.class_type,
-            solver.f.global_min_x().tolist()))
+            solver.f.global_min_x().round(2).tolist()))
 
         if method is None:
             filename = fm.join(

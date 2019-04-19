@@ -24,10 +24,12 @@ class _CExploreDescentDirection(CCreator):
 
     def __init__(self, fun, constr=None, bounds=None,
                  n_dimensions=0, line_search='bisect',
-                 eta=1e-3, eta_min=None, eta_max=None, max_iter=50):
+                 eta=1e-3, eta_min=None, eta_max=None,
+                 max_iter=50, discrete=False):
 
         # Read only attributes
         self._n_dimensions = n_dimensions
+        self._discrete = discrete
         self._explored = False
 
         # INTERNALS
@@ -70,6 +72,10 @@ class _CExploreDescentDirection(CCreator):
     @property
     def n_dimensions(self):
         return self._n_dimensions
+
+    @property
+    def discrete(self):
+        return self._discrete
 
     @property
     def explored(self):
@@ -225,16 +231,20 @@ class _CExploreDescentDirection(CCreator):
             return CArray.zeros(shape=(1, self._n_feat),
                                 sparse=d.issparse,
                                 dtype=d.dtype).ravel()
-        return d / d_norm
+
+        # For discrete optimization, descend direction is the sign
+        return d.sign() if self.discrete else d / d_norm
 
     def _update_current_subset(self):
-        """
-        Updates the current set of features to be explored.
-        For instance, if n = 5, our algorithm starts exploring
-        features 0, 1, 2, 3, 4 (indexing the most relevant features
-        from the current descent direction).
-        This function will update this set to
-        features 5, 6, 7, 8 after optimization of the former ones.
+        """Updates the current set of features to be explored.
+
+        For instance, given x_size = 9, if n = 5, our algorithm
+        starts exploring features 0, 1, 2, 3, 4 (indexing the most
+        relevant features from the current descent direction).
+
+        This function will update the set to be:
+        0, 1, 2, 3, 4, 5, 6, 7, 8
+
         This happens until the objective is minimized,
         and until all features have been explored.
 

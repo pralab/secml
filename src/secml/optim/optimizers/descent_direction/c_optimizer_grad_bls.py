@@ -117,24 +117,29 @@ class COptimizerGradBLS(COptimizer):
     #                METHODS
     ##########################################
 
-    def _initialize_explorer(self, line_search, eta, eta_min,
-                             eta_max, discrete):
-        """
-        Initializes explorer. This is done to avoid code
-        repetitions with the inherited classes.
-        """
+    def _initialize_explorer(
+            self, line_search, eta, eta_min, eta_max, discrete):
+        """Initialize explorer."""
 
-        if discrete or \
-                (self.constr is not None and self._constr.class_type == 'l1'):
+        if discrete is True:
+            if self.constr is not None and self.constr.class_type == 'l2':
+                # TODO: CHECK SUPPORT OF DISCRETE + L2
+                raise NotImplementedError(
+                    "L2 constraint is not supported for discrete optimization")
+            # Discrete optimization but no l2 constraint (not supported)
             n_dimensions = 1
-        elif self.constr is None:  # discrete is False, and no constraint
+        elif self.constr is not None and self.constr.class_type == 'l1':
+            # Continue optimization and l1 constraint
+            n_dimensions = 1
+        elif self.constr is not None and self.constr.class_type == 'l2':
+            # Continue optimization and l2 constraint
             n_dimensions = 0
-        elif self._constr.class_type == 'l2':  # discrete is False, l2 constr
+        elif self.constr is None:
+            # Continue optimization and no constraint
             n_dimensions = 0
         else:
             raise NotImplementedError(
-                'This constraint is not supported by \
-                     the current solver.')
+                "the chosen combination of solver parameters is not supported")
 
         self._explorer = _CExploreDescentDirection(
             fun=self._fun,
@@ -142,8 +147,8 @@ class COptimizerGradBLS(COptimizer):
             bounds=self._bounds,
             n_dimensions=n_dimensions,
             line_search=line_search,
-            eta=eta, eta_min=eta_min,
-            eta_max=eta_max)
+            eta=eta, eta_min=eta_min, eta_max=eta_max,
+            discrete=discrete)
 
         # TODO: fix this (decide whether propagate verbosity level or not)
         self._explorer.verbose = 0  # self.verbose
