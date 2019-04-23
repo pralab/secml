@@ -20,7 +20,6 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
                             label='discrete')
 
     def test_minimize_beale(self):
-
         # Test discrete optimization with float eta
         opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12,
                       'discrete': True,
@@ -57,7 +56,6 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
             out_int=True)
 
     def test_minimize_quad100d_sparse(self):
-
         # Testing bounded optimization
         opt_params = {'eta': 1, 'eta_min': 1, 'eps': 1e-12,
                       'discrete': True,
@@ -70,7 +68,6 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
             out_int=True)
 
     def test_minimize_expsum2d_bounded(self):
-
         # Testing bounded optimization
         opt_params = {'eta': 1, 'eta_min': 1, 'eps': 1e-12,
                       'discrete': True,
@@ -83,7 +80,6 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
         )
 
     def test_minimize_expsum100d_bounded(self):
-
         opt_params = {'eta': 1, 'eta_min': 1, 'eps': 1e-12,
                       'discrete': True,
                       'bounds': CConstraintBox(lb=-1, ub=1)}
@@ -106,7 +102,6 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
             out_int=True)
 
     def test_minimize_expsum100d_lc_constr(self):
-
         # Discrete optimization + L2 constraint is not supported
         with self.assertRaises(NotImplementedError):
             opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12,
