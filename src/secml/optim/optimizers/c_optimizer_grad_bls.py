@@ -12,7 +12,7 @@ from six.moves import range
 import numpy as np
 
 # Used only by this class, will be removed in the future
-from .explorer import _CExploreDescentDirection
+from secml.optim.optimizers.explorer import _CExploreDescentDirection
 
 from secml.array import CArray
 from secml.optim.optimizers import COptimizer
