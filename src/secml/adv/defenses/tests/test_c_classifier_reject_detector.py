@@ -4,7 +4,7 @@ from six.moves import range
 from secml.testing import CUnitTest
 from secml.ml.classifiers.reject.tests import CClassifierRejectTestCases
 
-from secml.adv.attacks import CAttackEvasion
+from secml.adv.attacks import CAttackEvasionBLS
 from secml.adv.defenses import CClassifierRejectDetector
 from secml.adv.seceval import CSecEval
 from secml.array import CArray
@@ -78,7 +78,7 @@ class TestCClassifierRejectDetector(
                 "solver_params": self.solver_params
             }
 
-            self.evasion = CAttackEvasion(**params)
+            self.evasion = CAttackEvasionBLS(**params)
             self.evasion.verbose = 1
             self.sec_eval = CSecEval(attack=self.evasion, param_name='dmax',
                                      param_values=self.dmax_lst,

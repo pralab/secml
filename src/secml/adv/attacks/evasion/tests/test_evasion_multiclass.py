@@ -14,7 +14,7 @@ from secml.figure import CFigure
 from secml.optim.constraints import CConstraintL2
 from secml.ml.features.normalization import CNormalizerMinMax
 
-from secml.adv.attacks.evasion import CAttackEvasion
+from secml.adv.attacks.evasion import CAttackEvasionBLS
 
 
 class TestEvasionMulticlass(CUnitTest):
@@ -91,7 +91,7 @@ class TestEvasionMulticlass(CUnitTest):
         self.solver_type = 'gradient-bls'
         self.solver_params = {'eta': 1e-1, 'eta_min': 0.1}
 
-        eva = CAttackEvasion(classifier=self.multiclass,
+        eva = CAttackEvasionBLS(classifier=self.multiclass,
                              surrogate_classifier=self.multiclass,
                              surrogate_data=self.ds,
                              distance='l2', dmax=dmax, lb=lb, ub=ub,
