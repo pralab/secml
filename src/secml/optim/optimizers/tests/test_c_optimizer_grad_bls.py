@@ -1,7 +1,6 @@
 from secml.optim.optimizers.tests import COptimizerTestCases
 
 from secml.optim.optimizers import COptimizerGradBLS
-from secml.optim.constraints import CConstraintBox, CConstraintL2
 
 
 class TestCOptimizerGradBLS(COptimizerTestCases):
