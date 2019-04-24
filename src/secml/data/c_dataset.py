@@ -8,9 +8,8 @@
 from six.moves import range
 
 from secml.core import CCreator
-from secml.core.attr_utils import extract_attr
 from secml.array import CArray
-from secml.utils import SubLevelsDict
+from secml.data import CDatasetHeader
 
 
 class CDataset(CCreator):
@@ -28,8 +27,8 @@ class CDataset(CCreator):
     y : array_like or CArray
         Dataset labels. Array is converted to dense format
         and flattened before storing.
-    kwargs : any, optional
-        Any other attribute of the dataset.
+    header : CDatasetHeader or None, optional
+        The header for the dataset. Will define any extra parameter.
 
     Examples
     --------
@@ -64,17 +63,18 @@ class CDataset(CCreator):
      ...
     ValueError: number of labels (1) must be equal to the number of samples (2).
 
-    >>> ds = CDataset([1,2,3],1, id='mydataset', age=34)  # 2 custom attributes
-    >>> print(ds.id)
+    >>> from secml.data import CDatasetHeader
+    >>> ds = CDataset([1,2,3], 1, CDatasetHeader(id='mydataset', age=34))  # 2 extra attributes
+    >>> print(ds.header.id)
     mydataset
-    >>> print(ds.age)
+    >>> print(ds.header.age)
     34
 
     """
     __super__ = 'CDataset'
     __class_type = 'standard'
 
-    def __init__(self, x, y, **kwargs):
+    def __init__(self, x, y, header=None):
 
         # Default placeholders (keep to make _check_samples_labels work)
         self._X = None
@@ -86,50 +86,8 @@ class CDataset(CCreator):
         # This will also check patterns/labels size consistency
         self.Y = y
 
-        # Setting any other dataset attribute
-        for key in kwargs:
-            setattr(self, key, kwargs[key])
-
-    @property
-    def num_samples(self):
-        """Returns dataset's number of patterns."""
-        return self.X.shape[0]
-
-    @property
-    def num_features(self):
-        """Returns dataset's patterns number of features.
-
-        Number of features should be equal for each pattern.
-
-        """
-        return self.X.shape[1]
-
-    @property
-    def num_labels(self):
-        """Returns dataset's number of labels.
-
-        This can be actually different from dataset.num_patterns.
-
-        """
-        return self.Y.size
-
-    @property
-    def classes(self):
-        """Returns dataset's classes (unique).
-
-        Each different labels vector element defines a class.
-
-        """
-        return self.Y.unique()
-
-    @property
-    def num_classes(self):
-        """Returns dataset's number of classes.
-
-        Each different labels vector element defines a class.
-
-        """
-        return self.classes.size
+        # Header that will store extra attributes of dataset
+        self.header = header
 
     @property
     def X(self):
@@ -174,6 +132,58 @@ class CDataset(CCreator):
         self._Y = y
 
     @property
+    def header(self):
+        return self._header
+
+    @header.setter
+    def header(self, value):
+        if value is not None and not isinstance(value, CDatasetHeader):
+            raise TypeError("'header' must be an instance of 'CDatasetHeader'")
+        # TODO: CHECK NUMBER OF SAMPLES FOR EACH HEADER'S CARRAY
+        self._header = value
+
+    @property
+    def num_samples(self):
+        """Returns dataset's number of patterns."""
+        return self.X.shape[0]
+
+    @property
+    def num_features(self):
+        """Returns dataset's patterns number of features.
+
+        Number of features should be equal for each pattern.
+
+        """
+        return self.X.shape[1]
+
+    @property
+    def num_labels(self):
+        """Returns dataset's number of labels.
+
+        This can be actually different from dataset.num_patterns.
+
+        """
+        return self.Y.size
+
+    @property
+    def classes(self):
+        """Returns dataset's classes (unique).
+
+        Each different labels vector element defines a class.
+
+        """
+        return self.Y.unique()
+
+    @property
+    def num_classes(self):
+        """Returns dataset's number of classes.
+
+        Each different labels vector element defines a class.
+
+        """
+        return self.classes.size
+
+    @property
     def issparse(self):
         """Return True if patterns are stored in sparse format, else False."""
         return self.X.issparse
@@ -193,21 +203,21 @@ class CDataset(CCreator):
                 "number of labels ({:}) must be equal to the number "
                 "of samples ({:}).".format(y.size, x.shape[0]))
 
-    def get_params(self):
-        """Returns dataset's custom attributes dictionary."""
-        # We extract the PUBLIC (pub) attributes from the class dictionary
-        return SubLevelsDict(
-            (k, getattr(self, k)) for k in extract_attr(self, 'pub'))
-
     # TODO: ADD DOCSTRING, EXAMPLES
     def __getitem__(self, idx):
         """Given an index, get the corresponding X and Y elements."""
         if not isinstance(idx, tuple) or len(idx) != self.X.ndim:
             raise IndexError(
                 "{:} sequences are required for indexing.".format(self.X.ndim))
+
         y = self.Y.__getitem__([idx[0] if isinstance(idx, tuple) else idx][0])
-        ds = self.__class__(self.X.__getitem__(idx), y, **self.get_params())
-        return ds
+
+        header = None
+        if self.header is not None:
+            header = self.header.__getitem__(
+                [idx[0] if isinstance(idx, tuple) else idx][0])
+
+        return self.__class__(self.X.__getitem__(idx), y, header=header)
 
     # TODO: ADD DOCSTRING, EXAMPLES
     def __setitem__(self, idx, data):
@@ -279,7 +289,15 @@ class CDataset(CCreator):
         """
         # Format conversion and error checking is managed by CArray.append()
         new_labels = self.Y.append(dataset.Y)
-        return self.__class__(self.X.append(dataset.X, axis=0), new_labels)
+
+        # As the input dataset (or self) could have no header, check it
+        if dataset.header is None or self.header is None:
+            new_header = self.header or dataset.header
+        else:  # Both input ds and self have header, merge them
+            new_header = self.header.append(dataset.header)
+
+        return self.__class__(
+            self.X.append(dataset.X, axis=0), new_labels, header=new_header)
 
     def tosparse(self):
         """Convert dataset's patterns to sparse format.
@@ -306,7 +324,7 @@ class CDataset(CCreator):
         CArray([1 0 1])
 
         """
-        return self.__class__(self.X.tosparse(), self.Y)
+        return self.__class__(self.X.tosparse(), self.Y, header=self.header)
 
     def todense(self):
         """Convert dataset's patterns to dense format.
@@ -328,7 +346,7 @@ class CDataset(CCreator):
          [5 6]])
 
         """
-        return self.__class__(self.X.todense(), self.Y)
+        return self.__class__(self.X.todense(), self.Y, header=self.header)
 
     def get_labels_asbinary(self, pos_class=None):
         """Return binarized dataset labels.

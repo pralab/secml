@@ -12,7 +12,7 @@ from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 from sklearn.datasets import load_svmlight_file, dump_svmlight_file
 from secml.data.loader import CDataLoader
 from secml.array import CArray
-from secml.data import CDataset
+from secml.data import CDataset, CDatasetHeader
 
 
 class CDataLoaderSvmLight(CDataLoader):
@@ -30,17 +30,16 @@ class CDataLoaderSvmLight(CDataLoader):
         pass
     
     def load(self, file_path, dtype_samples=float, dtype_labels=float,
-             n_features=None, zero_based=True,
-             remove_all_zero=False, multilabel=False,
-             load_infos=False):
+             n_features=None, zero_based=True, remove_all_zero=False,
+             multilabel=False, load_infos=False):
         """Loads a dataset from the svmlight / libsvm format and
         returns a sparse dataset.
 
         Datasets must have only numerical feature indices and
         for every pattern indices must be ordered.
 
-        'infos' (CArray with inline comments for each file) will be added
-        as custom CDataset attributes.
+        Extra dataset attributes:
+         - 'infos', CArray with inline comment for each sample.
 
         Parameters
         ----------
@@ -86,16 +85,16 @@ class CDataLoaderSvmLight(CDataLoader):
         >>> from secml.array import CArray
         >>> patterns = CArray ([[1,0,2], [4,0,5]])
         >>> labels = CArray ([0, 1])
-        >>> CDataLoaderSvmLight.dump(CDataset(patterns,labels), "myfile.libsvm")
-        >>> new_dataset = CDataLoaderSvmLight.load("myfile.libsvm", remove_all_zero=True)
+        >>> CDataLoaderSvmLight().dump(CDataset(patterns,labels), "myfile.libsvm")
+        >>> new_dataset = CDataLoaderSvmLight().load("myfile.libsvm", remove_all_zero=True)
         >>> print(new_dataset.X)  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 1)	2.0
           (0, 0)	1.0
           (1, 1)	5.0
           (1, 0)	4.0)
         >>> print(new_dataset.Y)
-        CArray([ 0.  1.])
-        >>> print(new_dataset.idx_mapping)
+        CArray([0. 1.])
+        >>> print(new_dataset.header.idx_mapping)
         CArray([0 2])
 
         """
@@ -106,13 +105,18 @@ class CDataLoaderSvmLight(CDataLoader):
                                               dtype=float,
                                               multilabel=multilabel,
                                               zero_based=zero_based)
+
         patterns = CArray(patterns, tosparse=True, dtype=dtype_samples)
         labels = CArray(labels, dtype=dtype_labels)
-        if remove_all_zero is True:
-            patterns, idx_mapping = CDataLoaderSvmLight._remove_all_zero_features(patterns)
-            return CDataset(patterns, labels, idx_mapping=idx_mapping)
 
-        infos = None  # Return None if load_infos is False
+        header = CDatasetHeader()  # Will be populated with extra attributes
+
+        if remove_all_zero is True:
+            patterns, idx_mapping = \
+                CDataLoaderSvmLight._remove_all_zero_features(patterns)
+            # Store reverse mapping as extra ds attribute
+            header.add_attr('idx_mapping', idx_mapping)
+
         if load_infos is True:
             infos = []
             with open(file_path, 'rt') as f:
@@ -123,9 +127,12 @@ class CDataLoaderSvmLight(CDataLoader):
                                          "extracting infos for line {:}"
                                          "".format(l_idx))
                     infos.append(i[1].rstrip() if len(i) == 2 else '')
-            infos = CArray(infos)
+            header.add_attr('infos', CArray(infos))
 
-        return CDataset(patterns, labels, infos=infos)
+        if len(header.get_params()) == 0:
+            header = None  # Header is empty, store None in ds
+
+        return CDataset(patterns, labels, header=header)
 
     @staticmethod
     def dump(d, f, zero_based=True, comment=None):

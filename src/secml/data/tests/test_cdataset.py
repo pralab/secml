@@ -1,19 +1,9 @@
-"""
-Created on 27/apr/2015
-
-This module tests the CDataset class.
-
-@author: Davide Maiorca
-
-If you find any BUG, please notify authors first.
-
-"""
 from secml.testing import CUnitTest
 
 from six.moves import zip
 
 from secml.array import CArray
-from secml.data import CDataset
+from secml.data import CDataset, CDatasetHeader
 
 
 class TestDataset(CUnitTest):
@@ -108,8 +98,10 @@ class TestDataset(CUnitTest):
 
     def test_custom_attr(self):
         """Testing for custom attributes."""
-        ds = CDataset(self.X, self.Y, id='mydataset', age=34, color='green')
-        ds_params = ds.get_params()
+        header = CDatasetHeader(id='mydataset', age=34, color='green')
+        ds = CDataset(self.X, self.Y, header=header)
+
+        ds_params = ds.header.get_params()
         self.assertEqual(ds_params['id'], 'mydataset')
         self.assertEqual(ds_params['age'], 34)
         self.assertEqual(ds_params['color'], 'green')

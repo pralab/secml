@@ -163,7 +163,7 @@ class TestEvasionMNISTCleverhansAttack(CUnitTest):
         tr.X /= 255.0
         ts.X /= 255.0
 
-        return tr, val_dts, ts, digits, tr.img_w, tr.img_h
+        return tr, val_dts, ts, digits, tr.header.img_w, tr.header.img_h
 
     def _chose_x0(self):
         """Find a sample of that belong to the required class."""

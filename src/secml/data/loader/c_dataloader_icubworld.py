@@ -17,7 +17,7 @@ from PIL import Image
 
 from secml import settings
 from secml.array import CArray
-from secml.data import CDataset
+from secml.data import CDataset, CDatasetHeader
 from secml.data.loader import CDataLoader
 from secml.data.loader.loader_utils import resize_img, crop_img
 from secml.utils import fm
@@ -94,7 +94,8 @@ class CDataLoaderICubWorld28(CDataLoaderICubWorld):
         The pre-cropped version of the images is loaded, with size 128 x 128.
         An additional resize/crop shape could be passed as input if needed.
 
-        Custom CDataset attributes:
+        Extra dataset attributes:
+          - 'img_w', 'img_h': size of the images in pixels.
           - 'y_orig': CArray with the original labels of the objects.
 
         Parameters
@@ -176,7 +177,12 @@ class CDataLoaderICubWorld28(CDataLoaderICubWorld):
         if normalize is True:
             x /= 255.0
 
-        return CDataset(x, y, y_orig=y_orig)
+        # Size of images is the crop shape (if any) otherwise, the resize shape
+        img_h, img_w = crop_shape if crop_shape is not None else resize_shape
+
+        header = CDatasetHeader(img_w=img_w, img_h=img_h, y_orig=y_orig)
+
+        return CDataset(x, y, header=header)
 
     def _get_data(self, file_url, dl_folder):
         """Download input datafile, unzip and store in output_path.

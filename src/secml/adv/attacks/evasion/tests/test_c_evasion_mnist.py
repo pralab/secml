@@ -86,10 +86,6 @@ class TestEvasionMNIST(CUnitTest):
         self._ts = loader.load(
             'testing', digits=self._digits, num_samples=n_ts)
 
-        # these properties are going to be moved in data loader/header
-        self.img_w = self._tr.img_w
-        self.img_h = self._tr.img_h
-
         if self.sparse is True:
             self._tr = self._tr.tosparse()
             self._ts = self._ts.tosparse()
@@ -139,13 +135,16 @@ class TestEvasionMNIST(CUnitTest):
         fig = CFigure(height=5.0, width=15.0)
         fig.subplot(1, 3, 1)
         fig.sp.title(self._digits[y0.item()])
-        fig.sp.imshow(x0.reshape((self.img_h, self.img_w)), cmap='gray')
+        fig.sp.imshow(x0.reshape((self._tr.header.img_h,
+                                  self._tr.header.img_w)), cmap='gray')
         fig.subplot(1, 3, 2)
         fig.sp.imshow(
-            added_noise.reshape((self.img_h, self.img_w)), cmap='gray')
+            added_noise.reshape((self._tr.header.img_h,
+                                 self._tr.header.img_w)), cmap='gray')
         fig.subplot(1, 3, 3)
         fig.sp.title(self._digits[y_pred.item()])
-        fig.sp.imshow(xopt.reshape((self.img_h, self.img_w)), cmap='gray')
+        fig.sp.imshow(xopt.reshape((self._tr.header.img_h,
+                                    self._tr.header.img_w)), cmap='gray')
         fig.savefig(
             fm.join(fm.abspath(__file__), self.filename), file_format='pdf')
 

@@ -61,11 +61,11 @@ class TestCDataLoaderSvmLight(CUnitTest):
         self.logger.info("Patterns loaded:\n{:}".format(new_dataset.X))
         self.logger.info("Labels loaded:\n{:}".format(new_dataset.Y))
         self.logger.info(
-            "Mapping back:\n{:}".format(new_dataset.idx_mapping))
+            "Mapping back:\n{:}".format(new_dataset.header.idx_mapping))
 
         self.assertTrue(new_dataset.X.issparse)
         self.assertTrue(new_dataset.Y.isdense)
-        self.assertTrue(new_dataset.idx_mapping.isdense)
+        self.assertTrue(new_dataset.header.idx_mapping.isdense)
 
         # non-zero elements should be unchanged
         self.assertEqual(self.patterns.nnz, new_dataset.X.nnz)
@@ -74,7 +74,7 @@ class TestCDataLoaderSvmLight(CUnitTest):
 
         # With idx_mapping we should be able to reconstruct original data
         original = CArray.zeros(self.patterns.shape, sparse=True)
-        original[:, new_dataset.idx_mapping] = new_dataset.X
+        original[:, new_dataset.header.idx_mapping] = new_dataset.X
         self.assertFalse((self.patterns != original).any())
 
         # Cleaning test file
