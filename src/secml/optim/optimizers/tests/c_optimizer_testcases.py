@@ -229,17 +229,16 @@ class COptimizerTestCases(CUnitTest):
             solver.f.global_min_x().round(2).tolist()))
 
         test_img_fold_name = 'test_images'
-        if not fm.folder_exist(test_img_fold_name):
-            fm.make_folder(test_img_fold_name)
-
-        path = fm.join(fm.abspath(__file__), test_img_fold_name)
+        test_img_fold_path = fm.join(fm.abspath(__file__), test_img_fold_name)
+        if not fm.folder_exist(test_img_fold_path):
+            fm.make_folder(test_img_fold_path)
 
         if method is None:
-            filename = fm.join(path,
+            filename = fm.join(test_img_fold_path,
                 solver.class_type + '-' + solver.f.class_type)
         else:
             filename = fm.join(
-                path,
+                test_img_fold_path,
                 solver.class_type + '-' + method + '-' + solver.f.class_type)
 
         filename += '-' + label if label is not None else ''
