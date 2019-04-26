@@ -98,31 +98,91 @@ class TestDataset(CUnitTest):
 
     def test_custom_attr(self):
         """Testing for custom attributes."""
-        header = CDatasetHeader(id='mydataset', age=34, color='green')
+        header = CDatasetHeader(
+            id='mydataset', age=34, colors=CArray([1, 2, 3]))
         ds = CDataset(self.X, self.Y, header=header)
 
         ds_params = ds.header.get_params()
         self.assertEqual(ds_params['id'], 'mydataset')
         self.assertEqual(ds_params['age'], 34)
-        self.assertEqual(ds_params['color'], 'green')
+        self.assert_array_equal(ds_params['colors'], CArray([1, 2, 3]))
+
+        # Testing getitem. Immutable objects should be copied as they are.
+        # Arrays should be indexed.
+        ds_get = ds[[0, 2], :]
+        ds_params = ds_get.header.get_params()
+        self.assert_array_equal(ds_get.X, CArray([[1, 2, 3], [7, 8, 9]]))
+        self.assert_array_equal(ds_get.Y, CArray([1, 2]))
+        self.assertEqual(ds_params['id'], 'mydataset')
+        self.assertEqual(ds_params['age'], 34)
+        self.assert_array_equal(ds_params['colors'], CArray([1, 3]))
+
+    def test_append(self):
+        """Test for .append() method."""
+        ds_append = self.dataset.append(self.dataset)
+
+        self.assertEqual(self.dataset.num_samples * 2, ds_append.num_samples)
+
+        self.assert_array_equal(
+            ds_append.X, CArray([[1, 2, 3], [4, 5, 6], [7, 8, 9],
+                                 [1, 2, 3], [4, 5, 6], [7, 8, 9]]))
+        self.assert_array_equal(ds_append.Y, CArray([1, 2, 2, 1, 2, 2]))
+
+        header = CDatasetHeader(
+            id='mydataset', age=34, colors=CArray([1, 2, 3]))
+
+        # Test append with header in both ds
+        ds1 = self.dataset.deepcopy()
+        ds2 = self.dataset.deepcopy()
+        ds1.header = header
+        ds2.header = header
+
+        # Test append with header in first ds
+        ds_append = ds1.append(self.dataset)
+        ds_params = ds_append.header.get_params()
+        self.assertEqual(ds_params['id'], 'mydataset')
+        self.assertEqual(ds_params['age'], 34)
+        self.assert_array_equal(
+            ds_params['colors'], CArray([1, 2, 3]))
+
+        # Test append with header in second ds
+        ds_append = self.dataset.append(ds2)
+        ds_params = ds_append.header.get_params()
+        self.assertEqual(ds_params['id'], 'mydataset')
+        self.assertEqual(ds_params['age'], 34)
+        self.assert_array_equal(
+            ds_params['colors'], CArray([1, 2, 3]))
 
     def test_copy(self):
         """Test for .deepcopy() method."""
-        # add a custom parameter to test its copy too
-        self.dataset.a = CArray([1, 2, 3])
-
         ds_copy = self.dataset.deepcopy()
         ds_copy.X[0, :] = 100
         ds_copy.Y[0] = 100
-        ds_copy.a[0] = 100
 
         self.assert_array_equal(self.dataset.X[0, :], CArray([[1, 2, 3]]))
         self.assert_array_equal(self.dataset.Y[0], CArray([1]))
-        self.assert_array_equal(self.dataset.a[0], CArray([1]))
 
         self.assert_array_equal(ds_copy.X[0, :], CArray([[100, 100, 100]]))
         self.assert_array_equal(ds_copy.Y[0], CArray([100]))
-        self.assert_array_equal(ds_copy.a[0], CArray([100]))
+
+        # Test deepcopy with header
+        header = CDatasetHeader(
+            id='mydataset', age=34, colors=CArray([1, 2, 3]))
+        self.dataset.header = header
+
+        ds_copy = self.dataset.deepcopy()
+
+        # Now change header of original dataset
+        self.dataset.header.colors[0] = 100
+        ds_params = self.dataset.header.get_params()
+        self.assertEqual(ds_params['id'], 'mydataset')
+        self.assertEqual(ds_params['age'], 34)
+        self.assert_array_equal(ds_params['colors'], CArray([100, 2, 3]))
+
+        ds_params = ds_copy.header.get_params()
+        self.assertEqual(ds_params['id'], 'mydataset')
+        self.assertEqual(ds_params['age'], 34)
+        self.assert_array_equal(ds_params['colors'], CArray([1, 2, 3]))
 
 
 if __name__ == "__main__":
