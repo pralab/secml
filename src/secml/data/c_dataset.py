@@ -149,38 +149,22 @@ class CDataset(CCreator):
 
     @property
     def num_features(self):
-        """Returns dataset's patterns number of features.
-
-        Number of features should be equal for each pattern.
-
-        """
+        """Returns dataset's patterns number of features."""
         return self.X.shape[1]
 
     @property
     def num_labels(self):
-        """Returns dataset's number of labels.
-
-        This can be actually different from dataset.num_patterns.
-
-        """
+        """Returns dataset's number of labels."""
         return self.Y.size
 
     @property
     def classes(self):
-        """Returns dataset's classes (unique).
-
-        Each different labels vector element defines a class.
-
-        """
+        """Returns dataset's classes (unique)."""
         return self.Y.unique()
 
     @property
     def num_classes(self):
-        """Returns dataset's number of classes.
-
-        Each different labels vector element defines a class.
-
-        """
+        """Returns dataset's number of classes."""
         return self.classes.size
 
     @property
@@ -203,7 +187,6 @@ class CDataset(CCreator):
                 "number of labels ({:}) must be equal to the number "
                 "of samples ({:}).".format(y.size, x.shape[0]))
 
-    # TODO: ADD DOCSTRING, EXAMPLES
     def __getitem__(self, idx):
         """Given an index, get the corresponding X and Y elements."""
         if not isinstance(idx, tuple) or len(idx) != self.X.ndim:
@@ -219,7 +202,6 @@ class CDataset(CCreator):
 
         return self.__class__(self.X.__getitem__(idx), y, header=header)
 
-    # TODO: ADD DOCSTRING, EXAMPLES
     def __setitem__(self, idx, data):
         """Given an index, set the corresponding X and Y elements."""
         if not isinstance(data, self.__class__):
