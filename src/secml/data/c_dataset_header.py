@@ -41,9 +41,37 @@ class CDatasetHeader(CCreator):
 
     def __init__(self, **kwargs):
 
+        self._num_samples = None  # Will be populated by `._validate_params()`
+        # Do not create a property for this as will be included in get_params()
+
         # Set each optional arg as a protected attr and create getter
         for key in kwargs:
             self.add_attr(key, kwargs[key])
+
+    def _validate_params(self):
+        """Validate input attributes.
+
+        The following checks will be performed:
+         - no attribute should be a list (should be stored as CArray)
+         - all CArray must be vector-like and have the same size
+
+        """
+        for attr_k, attr_v in self.get_params().items():
+            if is_list(attr_v):
+                raise TypeError("`list `should be used as a header parameter. "
+                                "Use `CArray` instead.")
+            if isinstance(attr_v, CArray):
+                if not attr_v.is_vector_like:
+                    raise ValueError(
+                        "`CArray`s should be passed as vector-like.")
+                if self._num_samples is not None:
+                    if attr_v.size != self._num_samples:
+                        raise ValueError(
+                            "`{:}` is an array of size {:}. "
+                            "{:} expected.".format(attr_k, attr_v.size,
+                                                   self._num_samples))
+                # Populate the protected _num_samples attribute
+                self._num_samples = attr_v.size
 
     def get_params(self):
         """Returns dataset's custom attributes dictionary."""
@@ -70,7 +98,13 @@ class CDatasetHeader(CCreator):
         # We store lists as CArrays to facilitate indexing
         value = CArray(value) if is_list(value) else value
 
+        # Make sure we store arrays as vector-like
+        value = value.ravel() if isinstance(value, CArray) else value
+
         add_readonly(self, key, value)
+
+        # Make sure that input attributes are consistent
+        self._validate_params()
 
     def __getitem__(self, idx):
         """Given an index, extract the header subset.
