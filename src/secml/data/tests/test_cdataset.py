@@ -128,12 +128,30 @@ class TestDataset(CUnitTest):
                                  [1, 2, 3], [4, 5, 6], [7, 8, 9]]))
         self.assert_array_equal(ds_append.Y, CArray([1, 2, 2, 1, 2, 2]))
 
+        # Test append with header
+        ds = self.dataset.deepcopy()
+
+        # Test append with header in both ds
         header = CDatasetHeader(
             id='mydataset', age=34, colors=CArray([1, 2, 3]))
 
+        ds.header = header
+
         # Test append with header in both ds
+        ds_append = ds.append(ds)
+        ds_params = ds_append.header.get_params()
+        self.assertEqual(ds_params['id'], 'mydataset')
+        self.assertEqual(ds_params['age'], 34)
+        self.assert_array_equal(
+            ds_params['colors'], CArray([1, 2, 3, 1, 2, 3]))
+
+        # Create two copies now for later tests
         ds1 = self.dataset.deepcopy()
         ds2 = self.dataset.deepcopy()
+
+        # For the following tests we cannot use CArrays as params. Use tuple
+        header = CDatasetHeader(
+            id='mydataset', age=34, colors=(1, 2, 3))
         ds1.header = header
         ds2.header = header
 
@@ -142,16 +160,14 @@ class TestDataset(CUnitTest):
         ds_params = ds_append.header.get_params()
         self.assertEqual(ds_params['id'], 'mydataset')
         self.assertEqual(ds_params['age'], 34)
-        self.assert_array_equal(
-            ds_params['colors'], CArray([1, 2, 3]))
+        self.assertEqual(ds_params['colors'], (1, 2, 3))
 
         # Test append with header in second ds
         ds_append = self.dataset.append(ds2)
         ds_params = ds_append.header.get_params()
         self.assertEqual(ds_params['id'], 'mydataset')
         self.assertEqual(ds_params['age'], 34)
-        self.assert_array_equal(
-            ds_params['colors'], CArray([1, 2, 3]))
+        self.assert_array_equal(ds_params['colors'], (1, 2, 3))
 
     def test_copy(self):
         """Test for .deepcopy() method."""
