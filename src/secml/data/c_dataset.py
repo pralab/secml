@@ -89,6 +89,14 @@ class CDataset(CCreator):
         # Header that will store extra attributes of dataset
         self.header = header
 
+    def __setstate__(self, state):
+        """Reset CDataset instance after unpickling."""
+        self.__dict__.update(state)
+        # Initialize header placeholder if not available
+        # Necessary to unpickle old dataset (stored with secml < v0.6)
+        if not hasattr(self, '_header'):
+            self._header = None
+
     @property
     def X(self):
         """Dataset Patterns."""
