@@ -15,7 +15,13 @@ from secml.utils import SubLevelsDict
 class CDatasetHeader(CCreator):
     """Creates a new dataset header.
 
-    Each extra keyword argument will be set as a read only attribute.
+    Parameters to be included into the header could be defined as keyword
+    init arguments or by using `.add_attr()` method.
+
+    Immutable objects (scalar, string, tuple, dictionary) will be passed
+    as they are while indexing the header. Arrays will be indexed and the
+    result of indexing will be returned.
+
     To extract a dictionary with the entire set of attributes,
      use `.get_params()`.
 
@@ -23,6 +29,9 @@ class CDatasetHeader(CCreator):
     ----------
     kwargs : any, optional
         Any extra attribute of the dataset.
+        Could be an immutable object (scalar, tuple, dict, str),
+        or a vector-like CArray. Lists are automatically converted
+        to vector-like CArrays.
 
     Examples
     --------
@@ -47,6 +56,13 @@ class CDatasetHeader(CCreator):
         # Set each optional arg as a protected attr and create getter
         for key in kwargs:
             self.add_attr(key, kwargs[key])
+
+    def __setstate__(self, state):
+        """Reset CDatasetHeader instance after unpickling."""
+        self.__dict__.update(state)
+        # We now need to reinitialize getters
+        for key in state:
+            add_readonly(self, as_public(key))
 
     def _validate_params(self):
         """Validate input attributes.
@@ -79,17 +95,18 @@ class CDatasetHeader(CCreator):
         return SubLevelsDict((as_public(k), getattr(self, as_public(k)))
                              for k in sorted(extract_attr(self, 'pub+rw+r')))
 
-    def add_attr(self, key, value=None):
+    def add_attr(self, key, value):
         """Add a new attribute to the header.
-
-        Each input attribute will be set as read only (getter only).
 
         Parameters
         ----------
         key : str
             Attribute to set.
-        value : any, optional
-            Value to assign to the attribute. If not given, None is used.
+        value : any
+            Value to assign to the attribute.
+            Could be an immutable object (scalar, tuple, dict, str),
+            or a vector-like CArray. Lists are automatically converted
+            to vector-like CArrays.
 
         """
         if hasattr(self, key):
@@ -109,8 +126,9 @@ class CDatasetHeader(CCreator):
     def __getitem__(self, idx):
         """Given an index, extract the header subset.
 
-        The resulting header will have arrays indexed using input `idx`,
-        while other types (dict, scalar, str, etc.) will be passed as is.
+        Immutable objects (scalar, string, tuple, dictionary) will be passed
+        as they are while indexing the header. Arrays will be indexed and the
+        result of indexing will be returned.
 
         Examples
         --------
@@ -134,13 +152,6 @@ class CDatasetHeader(CCreator):
                 subset[attr] = getattr(self, attr)
 
         return self.__class__(**subset)
-
-    def __setstate__(self, state):
-        """Reset CDatasetHeader instance after unpickling."""
-        self.__dict__.update(state)
-        # We now need to reinitialize getters
-        for key in state:
-            add_readonly(self, as_public(key))
 
     def __str__(self):
         if len(self.get_params()) == 0:
