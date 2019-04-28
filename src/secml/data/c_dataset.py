@@ -151,15 +151,11 @@ class CDataset(CCreator):
                     "'header' must be an instance of 'CDatasetHeader'")
 
             # Check if header is compatible (same num_samples)
-            # Special case we access protected attr
-            # (as it cannot have e public property)
-            header_n_samples = value._num_samples
-
-            if header_n_samples is not None and \
-                    self.num_samples != header_n_samples:
+            if value.num_samples is not None and \
+                    self.num_samples != value.num_samples:
                 raise ValueError(
                     "incompatible header size {:}. {:} expected.".format(
-                        self.num_samples, header_n_samples))
+                        self.num_samples, value.num_samples))
 
         self._header = value
 
@@ -297,15 +293,12 @@ class CDataset(CCreator):
         if dataset.header is None or self.header is None:
             new_header = self.header or dataset.header
             if new_header is not None:
-                # Special case we access protected attr
-                # (as it cannot have e public property)
-                h_num_samples = new_header._num_samples
-                if h_num_samples is not None:
+                if new_header.num_samples is not None:
                     raise ValueError(
                         "cannot append a dataset with header and "
                         "{:} samples as the other has no header. "
                         "Define a consistent header for both dataset "
-                        "and try again.".format(h_num_samples))
+                        "and try again.".format(new_header.num_samples))
         else:  # Both input ds and self have header, merge them
             new_header = self.header.append(dataset.header)
 
