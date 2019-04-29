@@ -29,6 +29,7 @@ class CDataset(CCreator):
         and flattened before storing.
     header : CDatasetHeader or None, optional
         The header for the dataset. Will define any extra parameter.
+        See `CDatasetHeader` docs for more informations.
 
     Examples
     --------
@@ -141,10 +142,12 @@ class CDataset(CCreator):
 
     @property
     def header(self):
+        """Dataset header."""
         return self._header
 
     @header.setter
     def header(self, value):
+        """Dataset header."""
         if value is not None:
             if not isinstance(value, CDatasetHeader):
                 raise TypeError(
@@ -161,12 +164,12 @@ class CDataset(CCreator):
 
     @property
     def num_samples(self):
-        """Returns dataset's number of patterns."""
+        """Number of patterns."""
         return self.X.shape[0]
 
     @property
     def num_features(self):
-        """Returns dataset's patterns number of features."""
+        """Number of features."""
         return self.X.shape[1]
 
     @property
@@ -176,22 +179,22 @@ class CDataset(CCreator):
 
     @property
     def classes(self):
-        """Returns dataset's classes (unique)."""
+        """Classes (unique)."""
         return self.Y.unique()
 
     @property
     def num_classes(self):
-        """Returns dataset's number of classes."""
+        """Number of classes."""
         return self.classes.size
 
     @property
     def issparse(self):
-        """Return True if patterns are stored in sparse format, else False."""
+        """True if patterns are stored in sparse format, else False."""
         return self.X.issparse
 
     @property
     def isdense(self):
-        """Return True if patterns are stored in dense format, else False."""
+        """True if patterns are stored in dense format, else False."""
         return self.X.isdense
 
     def _check_samples_labels(self, x=None, y=None):

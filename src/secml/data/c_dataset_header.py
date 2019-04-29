@@ -153,9 +153,9 @@ class CDatasetHeader(CCreator):
         ----------
         header : CDatasetHeader
             Header to append. Only attributes which are arrays are merged.
-            Other attributes are set if not already defined in
-            the current header. Otherwise, the value of the attributes in the
-            input header should be equal to the value of the same attribute
+            Other attributes are set if not already defined in the current
+            header. Otherwise, the value of the attributes in the input
+            header should be equal to the value of the same attribute
             in the current header.
 
         Returns
@@ -164,8 +164,7 @@ class CDatasetHeader(CCreator):
 
         Notes
         -----
-        Append does not occur in-place: a new header is allocated
-        and filled.
+        Append does not occur in-place: a new header is allocated and filled.
 
         See Also
         --------
