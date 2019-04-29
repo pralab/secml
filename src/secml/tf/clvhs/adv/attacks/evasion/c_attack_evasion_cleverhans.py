@@ -109,6 +109,24 @@ class CAttackEvasionCleverhans(CAttackEvasion):
     #                              PRIVATE METHODS
     ###########################################################################
 
+    def _objective_function(self, x):
+        """Objective function.
+
+        Parameters
+        ----------
+        x : CArray or CDataset
+
+        Returns
+        -------
+        f_obj : float or CArray of floats
+
+        """
+        raise NotImplementedError
+
+    def _objective_function_gradient(self, x):
+        """Gradient of the objective function."""
+        raise NotImplementedError
+
     def _set_solver_classifier(self):
         """This function set the surrogate classifier,
         if differentiable; otherwise, it learns a smooth approximation for
@@ -195,7 +213,6 @@ class CAttackEvasionCleverhans(CAttackEvasion):
 
         self._x0 = x0
         self._y0 = y0
-        self._init_solver()
 
         x = self._x0.atleast_2d().tondarray().astype(np.float32)
 

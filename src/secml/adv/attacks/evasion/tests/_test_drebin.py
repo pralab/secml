@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from secml.adv.attacks import CAttackEvasion
+from secml.adv.attacks import CAttackEvasionBLS
 from secml.adv.seceval import CSecEval
 
 from secml.array import CArray
@@ -74,7 +74,7 @@ params = {
     "solver_params": solver_params
 }
 
-evasion = CAttackEvasion(**params)
+evasion = CAttackEvasionBLS(**params)
 evasion.verbose = 1
 
 param_name = 'dmax'

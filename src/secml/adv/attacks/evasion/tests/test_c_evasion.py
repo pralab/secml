@@ -14,7 +14,7 @@ from secml.data.loader import CDLRandomBlobs
 from secml.figure import CFigure
 from secml.utils import fm
 
-from secml.adv.attacks.evasion import CAttackEvasion
+from secml.adv.attacks.evasion import CAttackEvasionBLS
 from secml.optim.constraints import \
     CConstraintBox, CConstraintL1, CConstraintL2
 
@@ -102,7 +102,7 @@ class CEvasionTestCases(object):
                 "solver_params": self.solver_params
             }
 
-            self.evasion = CAttackEvasion(**params)
+            self.evasion = CAttackEvasionBLS(**params)
             self.evasion.verbose = 2
 
         # ####################################################################

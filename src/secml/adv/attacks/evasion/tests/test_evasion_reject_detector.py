@@ -11,7 +11,7 @@ from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.array import CArray
 from secml.utils import fm
 from secml.adv.seceval import CSecEval
-from secml.adv.attacks.evasion import CAttackEvasion
+from secml.adv.attacks.evasion import CAttackEvasionBLS
 from secml.ml.kernel import CKernelRBF
 
 
@@ -67,7 +67,7 @@ class TestEvasionRejectDetector(CEvasionRejectTestCases.TestCEvasionReject):
                 "solver_params": self.solver_params
             }
 
-            self.evasion = CAttackEvasion(**params)
+            self.evasion = CAttackEvasionBLS(**params)
             self.sec_eval = CSecEval(attack=self.evasion, param_name='dmax',
                                      param_values=self.dmax_lst,
                                      save_adv_ds=True)
