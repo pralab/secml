@@ -1,7 +1,7 @@
 """
-.. module:: CAttackEvasion
+.. module:: CAttackEvasionBLS
    :synopsis: Class performs evasion attacks against a classifier,
-                under different constraints.
+                under different constraints, using Bisect Line Search.
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
@@ -21,25 +21,25 @@ from secml.ml.classifiers.reject import CClassifierReject
 
 
 class CAttackEvasionBLS(CAttackEvasion):
-    """Class that implements evasion attacks.
+    """Class that implements evasion attacks using Bisect Line Search.
 
     It requires classifier, surrogate_classifier, and surrogate_data.
     Note that surrogate_classifier is assumed to be trained (before
     passing it to this class) on surrogate_data.
-
-    TODO: complete list of parameters
     Parameters
     ----------
     discrete: True/False (default: false).
-              If True, input space is considered discrete (integer-valued),
-              otherwise continuous.
+        If True, input space is considered discrete (integer-valued),
+        otherwise continuous.
     attack_classes : 'all' or CArray, optional
         List of classes that can be manipulated by the attacker or
          'all' (default) if all classes can be manipulated.
     y_target : int or None, optional
-            If None an indiscriminate attack will be performed, else a
-            targeted attack to have the samples misclassified as
-            belonging to the y_target class.
+        If None an indiscriminate attack will be performed, else a
+        targeted attack to have the samples misclassified as
+        belonging to the y_target class.
+
+    TODO: complete list of parameters
 
     Attributes
     ----------
