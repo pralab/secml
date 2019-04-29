@@ -15,7 +15,7 @@ class CDatasetHeader(CCreator):
     """Creates a new dataset header.
 
     Parameters to be included into the header could be defined as keyword
-    init arguments or by using `.add_attr()` method.
+    init arguments or by setting them as new public header attributes.
 
     Immutable objects (scalar, string, tuple, dictionary) will be passed
     as they are while indexing the header. Arrays will be indexed and the
@@ -37,11 +37,16 @@ class CDatasetHeader(CCreator):
     >>> from secml.data import CDatasetHeader
     >>> from secml.array import CArray
 
-    >>> ds_header = CDatasetHeader(id='mydataset', age=CArray([1,2,3]))
+    >>> ds_header = CDatasetHeader(id='mydataset', colors=CArray([1,2,3]))
+
     >>> print(ds_header.id)
     mydataset
-    >>> print(ds_header.age)
+    >>> print(ds_header.colors)
     CArray([1 2 3])
+
+    >>> ds_header.age = 32
+    >>> print(ds_header.age)
+    32
 
     """
     __super__ = 'CDatasetHeader'
