@@ -115,7 +115,7 @@ class CDataLoaderSvmLight(CDataLoader):
             patterns, idx_mapping = \
                 CDataLoaderSvmLight._remove_all_zero_features(patterns)
             # Store reverse mapping as extra ds attribute
-            header.add_attr('idx_mapping', idx_mapping)
+            header.idx_mapping = idx_mapping
 
         if load_infos is True:
             infos = []
@@ -127,7 +127,7 @@ class CDataLoaderSvmLight(CDataLoader):
                                          "extracting infos for line {:}"
                                          "".format(l_idx))
                     infos.append(i[1].rstrip() if len(i) == 2 else '')
-            header.add_attr('infos', CArray(infos))
+            header.infos = CArray(infos)
 
         if len(header.get_params()) == 0:
             header = None  # Header is empty, store None in ds
