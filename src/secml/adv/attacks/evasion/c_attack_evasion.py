@@ -40,7 +40,7 @@ class CAttackEvasion(CAttack):
     def __init__(self, classifier,
                  surrogate_classifier,
                  surrogate_data=None,
-                 y_target=None, **kwargs):
+                 y_target=None):
 
         super(CAttackEvasion, self).__init__(
             classifier=classifier,
