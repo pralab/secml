@@ -42,27 +42,11 @@ class CAttackEvasion(CAttack):
                  surrogate_data=None,
                  y_target=None, **kwargs):
 
-        super(CAttackEvasion, self).__init__(classifier=classifier,
-                                             surrogate_classifier=surrogate_classifier,
-                                             surrogate_data=surrogate_data,
-                                             y_target=y_target)
-
-    ###########################################################################
-    #                           READ-WRITE ATTRIBUTES
-    ###########################################################################
-
-    @property
-    def y_target(self):
-        return self._y_target
-
-    @y_target.setter
-    def y_target(self, value):
-        self._y_target = value
-        self._xk = None
-
-    ###########################################################################
-    #                              PRIVATE METHODS
-    ###########################################################################
+        super(CAttackEvasion, self).__init__(
+            classifier=classifier,
+            surrogate_classifier=surrogate_classifier,
+            surrogate_data=surrogate_data,
+            y_target=y_target)
 
     ###########################################################################
     #                              PUBLIC METHODS

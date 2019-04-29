@@ -87,6 +87,16 @@ class CAttackEvasionBLS(CAttackEvasion):
     #                           READ-WRITE ATTRIBUTES
     ###########################################################################
 
+    # OVERRIDE y_target to reset the alternative init point xk
+    @property
+    def y_target(self):
+        return self._y_target
+
+    @y_target.setter
+    def y_target(self, value):
+        self._y_target = value
+        self._xk = None
+
     ###########################################################################
     #                              PRIVATE METHODS
     ###########################################################################
