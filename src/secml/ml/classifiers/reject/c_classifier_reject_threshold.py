@@ -106,7 +106,6 @@ class CClassifierRejectThreshold(CClassifierReject):
         self._n_features = dataset.num_features
 
         data_x = dataset.X
-
         # Transform data if a preprocess is defined
         if self.preprocess is not None:
             data_x = self.preprocess.fit_transform(dataset.X)

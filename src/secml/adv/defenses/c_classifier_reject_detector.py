@@ -90,7 +90,7 @@ class CClassifierRejectDetector(CClassifierReject):
 
     @property
     def n_features(self):
-        """Number of features"""
+        """Number of features (before preprocessing)."""
         return self._clf.n_features
 
     def _normalize_scores(self, orig_score):
