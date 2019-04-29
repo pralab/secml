@@ -84,11 +84,11 @@ class CClassifier(CCreator):
 
     @property
     def n_features(self):
-        """Number of features"""
+        """Number of features (before preprocessing)."""
         return self._n_features
 
     def is_linear(self):
-        """Return true for linear classifiers, false otherwise"""
+        """True for linear classifiers, False otherwise."""
         return False
 
     def is_fitted(self):

@@ -82,11 +82,6 @@ class CClassifierRejectThreshold(CClassifierReject):
         """Number of classes of training dataset."""
         return self._clf.n_classes
 
-    @property
-    def n_features(self):
-        """Number of features"""
-        return self._clf.n_features
-
     def fit(self, dataset, n_jobs=1):
         """Trains the classifier.
 
@@ -108,6 +103,8 @@ class CClassifierRejectThreshold(CClassifierReject):
             Instance of the classifier trained using input dataset.
 
         """
+        self._n_features = dataset.num_features
+
         data_x = dataset.X
         # Transform data if a preprocess is defined
         if self.preprocess is not None:
