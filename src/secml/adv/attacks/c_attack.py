@@ -339,7 +339,7 @@ class CAttack(CCreator):
         :param ds_init:
         :return:
         """
-        raise ValueError("Not implemented!")
+        raise NotImplementedError
 
     @abstractmethod
     def _run(self, x, y, ds_init=None):
@@ -350,7 +350,7 @@ class CAttack(CCreator):
         :param ds_init:
         :return:
         """
-        raise ValueError("Not implemented!")
+        raise NotImplementedError
 
     @abstractmethod
     def _objective_function(self, x):
