@@ -342,12 +342,11 @@ class CAttack(CCreator):
         raise NotImplementedError
 
     @abstractmethod
-    def _run(self, x, y, ds_init=None):
+    def _run(self, x, y):
         """
         Move one single point for improve attacker objective function score
         :param x:
         :param y:
-        :param ds_init:
         :return:
         """
         raise NotImplementedError

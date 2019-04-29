@@ -8,7 +8,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 import six
 from six.moves import range
 
@@ -120,3 +120,14 @@ class CAttackEvasion(CAttack):
         f_obj = fs_opt.mean()
 
         return y_pred, scores, adv_ds, f_obj
+
+    @abstractmethod
+    def _run(self, x0, y0, x_init=None):
+        """
+        Move one single point for improve attacker objective function score
+        :param x:
+        :param y:
+        :param x_init:
+        :return:
+        """
+        raise NotImplementedError
