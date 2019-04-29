@@ -145,6 +145,10 @@ class CClassifierTestCases(CUnitTest):
         self.assert_array_equal(y1, y2)
         self.assert_array_almost_equal(score1, score2)
 
+        # The number of features of the clf with preprocess inside should be
+        # equal to the number of dataset features (so before preprocessing)
+        self.assertEqual(ds.num_features, clf_pre.n_features)
+
     def _test_preprocess_grad(self, ds, clf, pre_id_list, kwargs_list,
                               extra_classes=None, check_numerical=True,
                               th=1e-3, epsilon=eps, **grad_kwargs):
