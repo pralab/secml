@@ -24,16 +24,18 @@ class CAttackEvasion(CAttack):
     It requires classifier, surrogate_classifier, and surrogate_data.
     Note that surrogate_classifier is assumed to be trained (before
     passing it to this class) on surrogate_data.
-
-    TODO: complete list of parameters
+    
     Parameters
     ----------
     y_target : int or None, optional
             If None an indiscriminate attack will be performed, else a
             targeted attack to have the samples misclassified as
             belonging to the y_target class.
+
+    TODO: complete list of parameters
+            
     """
-    __super__ = 'evasion'
+    __super__ = 'CAttackEvasion'
 
     def __init__(self, classifier,
                  surrogate_classifier,
