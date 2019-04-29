@@ -14,7 +14,7 @@ import csv
 import numpy as np
 
 from secml.data.loader import CDataLoader, CDataLoaderSvmLight
-from secml.data import CDataset
+from secml.data import CDataset, CDatasetHeader
 from secml.array import CArray
 from secml.utils import fm
 from secml.utils.download_utils import dl_file
@@ -86,15 +86,15 @@ class CDataLoaderDrebinTDSC(CDataLoader):
         and 5615 malware applications. Each sample is in sparse format,
         consisting of 1227080 binary (0-1) features each.
 
-        Custom CDataset attributes:
+        Extra dataset attributes:
          - 'infos': CArray with the 'hash.label' string for each point
-        (only if `feats_info` is True)
-         - 'original_idx': original index of each feature
-         - 'feat_family_idx': for each feature, the index of the family
-                relative to the CDataLoaderDrebinTDSC.FEAT_FAMILY_MAPPING
-         - 'feat_desc': dict with the description of each original feature
-         - 'app_family_map': dict with the id of each app family (0 is Benign,
-                others are malware)
+        (only if `feats_info` is True).
+         - 'original_idx': tuple with original index of each feature.
+         - 'feat_family_idx': tuple with, for each feature, the index of the
+             family relative to the CDataLoaderDrebinTDSC.FEAT_FAMILY_MAPPING.
+         - 'feat_desc': dict with the description of each original feature.
+         - 'app_family_map': dict with the id of each app family
+             (0 is Benign, others are malware).
          - 'mal_family': dict with the app family id for
                 each malware (hash). The hash can be retrieved from 'infos'.
 
@@ -170,12 +170,17 @@ class CDataLoaderDrebinTDSC(CDataLoader):
         # The next is the inverted dict with app family number as key
         mal_fam_map_inverted = {k[1]: k[0] for k in mal_fam_map.items()}
 
-        # Adding the extra parameters to the dataset object
-        ds.original_idx = original_idx
-        ds.feat_family_idx = feat_family_idx
-        ds.feat_desc = feat_desc
-        ds.app_family_map = mal_fam_map_inverted
-        ds.mal_family = mal_fam
+        # Create a new header with additional params
+        header = CDatasetHeader(
+            original_idx=tuple(original_idx.tolist()),
+            feat_family_idx=tuple(feat_family_idx.tolist()),
+            feat_desc=feat_desc,
+            app_family_map=mal_fam_map_inverted,
+            mal_family=mal_fam
+        )
+
+        # Append new header to existing header (as load_infos above is True)
+        ds.header = ds.header.append(header)
 
         return ds
 

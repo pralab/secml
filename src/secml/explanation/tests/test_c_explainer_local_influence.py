@@ -74,12 +74,11 @@ class TestCExplainerLocalInfluence(CUnitTest):
         splitter.compute_indices(tr)
 
         val_dts_idx = CArray.randsample(CArray.arange(0, tr.num_samples),
-                                        n_val,
-                                        random_state=seed)
+                                        n_val, random_state=seed)
         val = tr[val_dts_idx, :]
 
-        tr_dts_idx = CArray.randsample(CArray.arange(0, tr.num_samples), n_tr,
-                                       random_state=seed)
+        tr_dts_idx = CArray.randsample(CArray.arange(0, tr.num_samples),
+                                       n_tr, random_state=seed)
         tr = tr[tr_dts_idx, :]
 
         tr.X /= 255.0

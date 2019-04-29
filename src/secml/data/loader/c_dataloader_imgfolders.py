@@ -6,7 +6,7 @@
 
 """
 from secml.data.loader import CDataLoader
-from secml.data import CDataset
+from secml.data import CDataset, CDatasetHeader
 from secml.array import CArray
 from secml.utils import fm
 from secml.utils.dict_utils import load_dict
@@ -34,10 +34,11 @@ class CDataLoaderImgFolders(CDataLoader):
         """Load all images of specified format inside given path.
 
         The following custom CDataset attributes are available:
-        - 'id' (last `ds_path` folder)
-        - 'img_w' (image width)
-        - 'img_h' (image height)
-        - 'img_c' (image number of channels)
+        - 'id': last `ds_path` folder.
+        - 'img_w', 'img_h': size of the images in pixels.
+        - 'img_c': images number of channels.
+        - Any other custom attribute is retrieved from 'attributes.txt' file.
+          Only attributes of `str` type are currently supported.
 
         Any other custom attribute is retrieved from 'attributes.txt' file.
 
@@ -87,8 +88,11 @@ class CDataLoaderImgFolders(CDataLoader):
         self.logger.info("Loaded {:} images from {:}...".format(
             patterns.shape[0], ds_path))
 
-        return CDataset(patterns, labels, id=fm.split(ds_path)[1],
-                        img_w=img_w, img_h=img_h, img_c=img_c, **attributes)
+        header = CDatasetHeader(id=fm.split(ds_path)[1],
+                                img_w=img_w, img_h=img_h, img_c=img_c,
+                                **attributes)
+
+        return CDataset(patterns, labels, header=header)
 
     def _explore_dir(self, dir_path, img_w, img_h, img_c, img_ext,
                      label_re=None, load_data=True):

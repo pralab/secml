@@ -15,7 +15,7 @@ import six
 import numpy as np
 
 from secml.data.loader import CDataLoader
-from secml.data import CDataset
+from secml.data import CDataset, CDatasetHeader
 from secml.utils import fm
 from secml.utils.download_utils import dl_file, md5
 from secml.settings import SECML_DS_DIR
@@ -103,10 +103,9 @@ class CDataLoaderCIFAR(CDataLoader):
         of the array are the red channel values of the first row of the image.
         Dtype of images is `uint8`. Dtype of labels is `int32`.
 
-        Custom CDataset attributes:
-         - 'img_w': height of the images
-         - 'img_h': height of the images
-         - 'class_names': dictionary with the name of each class
+        Extra dataset attributes:
+         - 'img_w', 'img_h': size of the images in pixels.
+         - 'class_names': dictionary with the original name of each class.
 
         Parameters
         ----------
@@ -203,17 +202,16 @@ class CDataLoaderCIFAR(CDataLoader):
         # Load the class names from the meta file
         class_names = self._load_class_names(meta_file, class_names_key)
 
-        tr = CDataset(train_data, train_labels,
-                      img_w=32, img_h=32, class_names=class_names)
-        ts = CDataset(test_data, test_labels,
-                      img_w=32, img_h=32, class_names=class_names)
+        header = CDatasetHeader(img_w=32, img_h=32, class_names=class_names)
+
+        tr = CDataset(train_data, train_labels, header=header)
+        ts = CDataset(test_data, test_labels, header=header)
 
         # Return training set and test set for sure
         out_datasets = (tr, ts)
 
         if val_size > 0:
-            val = CDataset(val_data, val_labels,
-                           img_w=32, img_h=32, class_names=class_names)
+            val = CDataset(val_data, val_labels, header=header)
             # Also return the validation dataset
             out_datasets += (val, )
 

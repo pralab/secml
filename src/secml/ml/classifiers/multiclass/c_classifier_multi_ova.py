@@ -116,7 +116,8 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
 
         """
         return CDataset(
-            dataset.X, dataset.get_labels_asbinary(dataset.classes[class_idx]))
+            dataset.X, dataset.get_labels_asbinary(dataset.classes[class_idx]),
+            header=dataset.header)
 
     def _decision_function(self, x, y):
         """Computes the decision function for each pattern in x.

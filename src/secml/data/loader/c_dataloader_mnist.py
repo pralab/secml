@@ -15,7 +15,7 @@ from multiprocessing import Lock
 import numpy as np
 
 from secml.data.loader import CDataLoader
-from secml.data import CDataset
+from secml.data import CDataset, CDatasetHeader
 from secml.array import CArray
 from secml.utils import fm
 from secml.utils.download_utils import dl_file, md5
@@ -75,13 +75,14 @@ class CDataLoaderMNIST(CDataLoader):
                     md5(self.test_labels_path) != TEST_LABELS_MD5:
                 self._get_data(TEST_LABELS_URL, MNIST_PATH, self.test_labels_path)
 
-    def load(self, ds, digits=(range(0, 10)), num_samples=None):
+    def load(self, ds, digits=tuple(range(0, 10)), num_samples=None):
         """Load all images of specified format inside given path.
 
         Adapted from: http://cvxopt.org/_downloads/mnist.py
 
-        'img_w', 'img_h', 'y_original', will be added as
-        custom CDataset attributes.
+        Extra dataset attributes:
+         - 'img_w', 'img_h': size of the images in pixels.
+         - 'y_original': array with the original labels (before renumbering)
 
         Parameters
         ----------
@@ -92,8 +93,8 @@ class CDataLoaderMNIST(CDataLoader):
             Tuple with the digits to load. By default all digits are loaded.
         num_samples : int or None, optional
             Number of expected samples in resulting ds.
-            If integer, an equal number of samples will be taken
-            from each class until num_samples have been loaded.
+            If int, an equal number of samples will be taken
+             from each class until num_samples have been loaded.
             If None, all samples will be loaded.
 
         """
@@ -127,13 +128,13 @@ class CDataLoaderMNIST(CDataLoader):
         img = array("B", fimg.read())
         fimg.close()
 
-        # Convert digits list to array
-        digits = CArray(digits)
+        # Convert digits to tuple in case was passed as array/list
+        digits = tuple(digits)
 
         # Number of samples per class
         num_samples_class = size
         if num_samples is not None:
-            num_samples_class = int(num_samples / digits.size)
+            num_samples_class = int(num_samples / len(digits))
 
         # Counter of already taken sample for a class
         count_samples_class = {e: 0 for e in digits}
@@ -156,12 +157,15 @@ class CDataLoaderMNIST(CDataLoader):
 
         images = CArray.zeros((len(ind), rows * cols), dtype=np.uint8)
         labels = CArray.zeros(len(ind), dtype=int)
+        digs_array = CArray(digits)  # To use find method
         for i in range(len(ind)):
             images[i, :] = CArray(img[
                 ind[i] * rows * cols: (ind[i] + 1) * rows * cols])
-            labels[i] = CArray(digits.find(digits == lbl[ind[i]]))
+            labels[i] = CArray(digs_array.find(digs_array == lbl[ind[i]]))
 
-        return CDataset(images, labels, img_w=28, img_h=28, y_original=digits)
+        header = CDatasetHeader(img_w=28, img_h=28, y_original=digits)
+
+        return CDataset(images, labels, header=header)
 
     def _get_data(self, file_url, dl_folder, output_path):
         """Download input datafile, unzip and store in output_path.
