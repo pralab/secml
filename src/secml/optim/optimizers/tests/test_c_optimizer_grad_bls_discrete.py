@@ -10,7 +10,8 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
     def test_minimize_3h_camel(self):
         """Test for COptimizer.minimize() method on 3h-camel fun. This
         function tests the optimization in discrete space, with a floating
-        eta"""
+        eta and an integer starting point. The solution expected by this
+        test is a float vector."""
 
         opt_params = {'eta': 0.5, 'eta_min': 0.5, 'eps': 1e-12,
                       'discrete': True,
@@ -23,7 +24,8 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
     def test_minimize_beale(self):
         """Test for COptimizer.minimize() method on 3h-camel fun. This
         function tests the optimization in discrete space, with a floating
-        eta"""
+        eta and an integer starting point. The solution expected by this
+        test is a float vector."""
         opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12,
                       'discrete': True,
                       'bounds': CConstraintBox(lb=0, ub=4)}
@@ -36,7 +38,7 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
         """Test for COptimizer.minimize() method on a quadratic function in
         a 2-dimensional space. This function tests the optimization in discrete
         space, with an integer eta, an integer starting point and without any
-        bound."""
+        bound. The solution expected by this test is an integer vector."""
 
         # test a simple function without any bound
         opt_params = {'eta': 1, 'eta_min': 1, 'eps': 1e-12,
@@ -53,7 +55,7 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
         """Test for COptimizer.minimize() method on a quadratic function in
         a 2-dimensional space. This function tests the optimization in discrete
         space, with an integer eta, an integer starting point with a box
-        constraint."""
+        constraint. The solution expected by this test is an integer vector."""
 
         # Testing bounded optimization
         opt_params = {'eta': 1, 'eta_min': 1, 'eps': 1e-12,
@@ -70,7 +72,8 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
         """Test for COptimizer.minimize() method on a quadratic function in
         a 100-dimensional space. This function tests the optimization in
         discrete space, with an integer eta, an integer starting point with
-        a box constraint."""
+        a box constraint. The solution expected by this test is an integer
+        vector."""
 
         opt_params = {'eta': 1, 'eta_min': 1, 'eps': 1e-12,
                       'discrete': True,
@@ -86,7 +89,8 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
         """Test for COptimizer.minimize() method on a polynomial function in
         a 2-dimensional space. This function tests the optimization in
         discrete space, with an integer eta, an floating starting point with
-        a box constraint."""
+        a box constraint. The solution expected by this test is an integer
+        vector."""
 
         opt_params = {'eta': 1, 'eta_min': 1, 'eps': 1e-12,
                       'discrete': True,
@@ -102,8 +106,8 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
         """Test for COptimizer.minimize() method on a polynomial function in
         a 2-dimensional space. This function tests the optimization in
         discrete space, with an integer eta, an integer starting point with
-        a box constraint. The solution of this problem is sparse (it is a
-        zero vecctor)"""
+        a box constraint. The solution of this problem is integer and sparse
+        (it is a zero vector)"""
         opt_params = {'eta': 1, 'eta_min': 1, 'eps': 1e-12,
                       'discrete': True,
                       'bounds': CConstraintBox(lb=-1, ub=1)}
@@ -118,7 +122,8 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
         """Test for COptimizer.minimize() method on a polynomial function in
         a 100-dimensional space. This function tests the optimization in
         discrete space, with an integer eta, an integer and sparse starting
-        point (it is a zero vector) with a box constraint."""
+        point (it is a zero vector) with a box constraint. The solution
+        expected by this test is an integer vector."""
         opt_params = {'eta': 1, 'eta_min': 1, 'eps': 1e-12,
                       'discrete': True,
                       'bounds': CConstraintBox(lb=-1, ub=1)}
