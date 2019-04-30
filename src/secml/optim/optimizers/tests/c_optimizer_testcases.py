@@ -101,13 +101,13 @@ class COptimizerTestCases(CUnitTest):
     def _create_poly(d):
         """Creates a polynomial function in d dimensions."""
 
-        def _exp_sum_fun(x):
+        def _poly_fun(x):
             return (x ** 4).sum() + x.sum() ** 2
 
-        def _exp_sum_grad(x):
+        def _poly_grad(x):
             return (4 * x ** 3) + 2 * x
 
-        int_fun = CFunction(fun=_exp_sum_fun, gradient=_exp_sum_grad)
+        int_fun = CFunction(fun=_poly_fun, gradient=_poly_grad)
         int_fun.global_min = lambda: 0.
         int_fun.global_min_x = lambda: CArray.zeros(d, )
 
