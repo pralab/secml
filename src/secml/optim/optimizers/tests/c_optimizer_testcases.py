@@ -74,7 +74,8 @@ class COptimizerTestCases(CUnitTest):
             'x0': CArray.ones((n,), dtype=int).tosparse(dtype=int) * 2
         }
 
-    def _quadratic_fun(self, d):
+    @staticmethod
+    def _quadratic_fun(d):
         """Creates a quadratic function in d dimensions."""
 
         def _quadratic_fun_min(A, b):
@@ -96,7 +97,8 @@ class COptimizerTestCases(CUnitTest):
 
         return discr_fun
 
-    def _create_poly(self, d):
+    @staticmethod
+    def _create_poly(d):
         """Creates a polynomial function in d dimensions."""
 
         def _exp_sum_fun(x):
