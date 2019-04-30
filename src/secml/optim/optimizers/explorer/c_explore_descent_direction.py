@@ -143,8 +143,9 @@ class _CExploreDescentDirection(CCreator):
         else:
             self._set_random_descent_direction(x)
 
-        # remove features that, if modified, violate the box constraint
-        x_feasible = self._filter_descent_direction(x)
+        # set to zero the dimensions that, if modified,
+        # violate the box constraint
+        self._filter_descent_direction(x)
 
         # if we are optimizing all features at once,
         # there's no need of sorting to find the best ones
@@ -152,40 +153,40 @@ class _CExploreDescentDirection(CCreator):
             # TODO: see argpartition (avoid sorting the whole array!)
             self.logger.info("Warning. Sorting full array.")
             self._idx_top_feat = (-abs(self._descent_direction)).argsort()
-        else:  # TODO: this is not required, we should avoid it.
+        else:
+            # TODO: this is not required, we should avoid it.
             self._idx_top_feat = CArray.randsample(x.size, x.size)
 
-        # TODO: this may be not required now.
+        # only check feasible feature manipulations
+        # excluding those violating the box constraint
         self._ff_idx_top_feat = self._idx_top_feat[
-            x_feasible[self._idx_top_feat.ravel()] == 1]
+            self._descent_direction[self._idx_top_feat.ravel()] != 0]
 
         self._ff_n_feat = self._ff_idx_top_feat.size
 
     def _filter_descent_direction(self, x):
-        """Exclude from descent direction those features which,
+        """
+        Exclude from descent direction those features which,
         if modified according to the given descent direction,
         would violate the box constraint.
-        """
-        if self.bounds is None:  # FIXME: PRETTY BAD FOR SPARSE, SEE BELOW
-            return CArray.ones(shape=x.shape, dtype=bool)
 
-        # feature manipulations that violate box
+        """
+        if self.bounds is None:
+            return  # all features are feasible
+
+        # x_lb and x_ub are feature manipulations that violate box
+        # (the first vector is potentially sparse, so it has to be
+        # the first argument of logical_and to avoid conversion to dense)
         # FIXME: the following condition is error-prone.
         #  Use (ad wrap in CArray) np.isclose with atol=1e-6, rtol=0
-        x_lb = (self._descent_direction > 0).logical_and(
-            x.round(6) == CArray(self.bounds.lb).round(6)).astype(int)
+        x_lb = (x.round(6) == CArray(self.bounds.lb).round(6)).logical_and(
+            self._descent_direction > 0).astype(bool)
 
-        x_ub = (self._descent_direction < 0).logical_and(
-            x.round(6) == CArray(self.bounds.ub).round(6)).astype(int)
-
-        # feature manipulations that do not violate box
-        # TODO: think of more efficient implementation for sparse data (if any)
-        x_feasible = (x_lb + x_ub) < 1
+        x_ub = (x.round(6) == CArray(self.bounds.ub).round(6)).logical_and(
+            self._descent_direction < 0).astype(bool)
 
         # reset gradient for unfeasible features
-        self._descent_direction *= x_feasible
-
-        return x_feasible
+        self._descent_direction[x_lb + x_ub] = 0
 
     def _set_gradient_descent_direction(self, x):
         """Sets the descent direction to the gradient of fun"""
