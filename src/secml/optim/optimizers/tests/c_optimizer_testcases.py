@@ -97,7 +97,7 @@ class COptimizerTestCases(CUnitTest):
         return discr_fun
 
     def _create_poly(self, d):
-        """Creates a polinomial sum function in d dimensions."""
+        """Creates a polynomial function in d dimensions."""
 
         def _exp_sum_fun(x):
             return (x ** 4).sum() + x.sum() ** 2
