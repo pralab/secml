@@ -54,7 +54,7 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
     def test_minimize_quad2d_bound(self):
         """Test for COptimizer.minimize() method on a quadratic function in
         a 2-dimensional space. This function tests the optimization in discrete
-        space, with an integer eta, an integer starting point with a box
+        space, with an integer eta, an integer starting point and with a box
         constraint. The solution expected by this test is an integer vector."""
 
         # Testing bounded optimization
