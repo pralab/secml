@@ -71,9 +71,9 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
     def test_minimize_quad100d_sparse(self):
         """Test for COptimizer.minimize() method on a quadratic function in
         a 100-dimensional space. This function tests the optimization in
-        discrete space, with an integer eta, an integer starting point with
-        a box constraint. The solution expected by this test is an integer
-        vector."""
+        discrete space, with an integer eta, an integer and sparse starting
+        point with box constraint. The solution expected by this test is an
+        integer and sparse vector."""
 
         opt_params = {'eta': 1, 'eta_min': 1, 'eps': 1e-12,
                       'discrete': True,
@@ -97,9 +97,9 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
                       'bounds': CConstraintBox(lb=-1, ub=1)}
 
         self._test_minimize(
-            COptimizerGradBLS, 'exp-sum-2',
+            COptimizerGradBLS, 'poly-2',
             opt_params=opt_params,
-            label='exp-sum-discrete-bounded',
+            label='poly-discrete-bounded',
         )
 
     def test_minimize_expsum100d_bounded(self):
@@ -113,28 +113,28 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
                       'bounds': CConstraintBox(lb=-1, ub=1)}
 
         self._test_minimize(
-            COptimizerGradBLS, 'exp-sum-100-int',
+            COptimizerGradBLS, 'poly-100-int',
             opt_params=opt_params,
-            label='exp-sum-int-discrete-bounded',
+            label='poly-int-discrete-bounded',
             out_int=True)
 
-    def test_minimize_expsum100d_bounded_sparse(self):
+    def test_minimize_poly_100d_bounded_sparse(self):
         """Test for COptimizer.minimize() method on a polynomial function in
         a 100-dimensional space. This function tests the optimization in
         discrete space, with an integer eta, an integer and sparse starting
         point (it is a zero vector) with a box constraint. The solution
-        expected by this test is an integer vector."""
+        expected by this test is an integer and sparse vector."""
         opt_params = {'eta': 1, 'eta_min': 1, 'eps': 1e-12,
                       'discrete': True,
                       'bounds': CConstraintBox(lb=-1, ub=1)}
 
         self._test_minimize(
-            COptimizerGradBLS, 'exp-sum-100-int-sparse',
+            COptimizerGradBLS, 'poly-100-int-sparse',
             opt_params=opt_params,
-            label='exp-sum-int-sparse-discrete-bounded',
+            label='poly-int-sparse-discrete-bounded',
             out_int=True)
 
-    def test_minimize_expsum100d_lc_constr(self):
+    def test_minimize_poly_100d_lc_constr(self):
         """Discrete optimization + L2 constraint is not supported. This
         function tests if the optimzier raises correctly an error when it
         receives as parameter discrete = True and an L2 constraint."""
