@@ -11,7 +11,7 @@ import six
 
 from secml.core import CCreator
 from secml.optim.function import CFunction
-from secml.optim.constraints import CConstraint
+from secml.optim.constraints import CConstraint, CConstraintBox
 
 
 @six.add_metaclass(ABCMeta)
@@ -33,7 +33,7 @@ class COptimizer(CCreator):
     """
     __super__ = 'COptimizer'
 
-    def __init__(self, fun, constr=None, bounds=None, discrete=False):
+    def __init__(self, fun, constr=None, bounds=None):
 
         # The following will set both f and fun
         # fun: the internal function to be always minimized
@@ -47,7 +47,6 @@ class COptimizer(CCreator):
         # Read/write attributes
         self.constr = constr
         self.bounds = bounds
-        self.discrete = discrete
 
         # Internal attributes
         self._x_opt = None  # solution point
@@ -112,10 +111,6 @@ class COptimizer(CCreator):
             raise TypeError(
                 "Input parameter is not a `CConstraint` object.")
 
-        if constr.class_type != 'l1' and constr.class_type != 'l2':
-            raise TypeError(
-                "Only l1 or l2 `CConstraint` objects are accepted as input.")
-
         self._constr = constr
 
     @property
@@ -130,25 +125,11 @@ class COptimizer(CCreator):
             self._bounds = None
             return
 
-        if not isinstance(bounds, CConstraint):
+        if not isinstance(bounds, CConstraintBox):
             raise TypeError(
-                "Input parameter is not a `CConstraint` object.")
-
-        if bounds.class_type != 'box':
-            raise TypeError(
-                "Only box `CConstraint` objects are accepted as input.")
+                "Input parameter is not a `CConstraintBox` object.")
 
         self._bounds = bounds
-
-    @property
-    def discrete(self):
-        """True if feature space is discrete, False if continuous."""
-        return self._discrete
-
-    @discrete.setter
-    def discrete(self, value):
-        """True if feature space is discrete, False if continuous."""
-        self._discrete = bool(value)
 
     ##########################################
     #                METHODS

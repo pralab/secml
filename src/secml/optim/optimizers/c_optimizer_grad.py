@@ -41,12 +41,7 @@ class COptimizerGrad(COptimizer):
                  max_iter=200):
 
         COptimizer.__init__(self, fun=fun,
-                            constr=constr, bounds=bounds,
-                            discrete=discrete)
-
-        if discrete is True:
-            raise NotImplementedError(
-                'Descent in discrete space not implemented!')
+                            constr=constr, bounds=bounds)
 
         # Read/write attributes
         self.eta = eta  # gradient step size

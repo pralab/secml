@@ -29,7 +29,7 @@ class TestLineSearch(CUnitTest):
         self.logger.info("f(x): " + str(fx))
 
         d = CArray([1.0])
-        x0, f0 = line_search.line_search(x, d, fx=fx)
+        x0, f0 = line_search.minimize(x, d, fx=fx)
 
         self.logger.info("x*: " + str(x0))
         self.logger.info("f(x*): " + str(f0))

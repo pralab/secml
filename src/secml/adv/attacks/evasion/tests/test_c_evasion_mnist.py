@@ -21,8 +21,8 @@ class TestEvasionMNIST(CUnitTest):
         self.y_target = None
 
         self.sparse = False
-        self.distance = 'l2'
-        self.dmax = 2
+        self.distance = 'l1'
+        self.dmax = 10
 
         self.eta = 1.0 / 255.0
         self.eta_min = 0.1

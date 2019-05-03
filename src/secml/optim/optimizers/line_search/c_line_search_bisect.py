@@ -27,21 +27,22 @@ class CLineSearchBisect(CLineSearch):
                  eta=1e-4, eta_min=0.1, eta_max=None,
                  max_iter=20):
 
-        super(CLineSearchBisect, self).__init__(
-            fun, constr, bounds, eta=eta, max_iter=max_iter)
+        CLineSearch.__init__(
+            self, fun=fun, constr=constr, bounds=bounds,
+            eta=eta, max_iter=max_iter)
 
-        # init attributes  # TODO: THESE CAN BE REMOVED IN LATEST PYCHARM VERS
+        # init attributes
         self._eta_max = None
         self._eta_min = None
 
-        # set attributes (with setters)
+        # init attributes (with setters)
         self.eta_max = eta_max
         self.eta_min = eta_min
 
         # other internal parameters
         self._n_iter = 0
-        self._fx = None  # value of fun at x (initial point)
-        self._fz = None  # value of fun at current z during line search
+        self._fx = None  # cached value of fun at x (initial point)
+        self._fz = None  # cached value of fun at current z during line search
         self._fun_idx_max = None
         self._fun_idx_min = None
 
@@ -109,11 +110,9 @@ class CLineSearchBisect(CLineSearch):
         return True
 
     def _select_best_point(self, x, d, idx_min, idx_max, **kwargs):
-        """Returns best point among x, and the two points found by the line search.
+        """Returns best point among x and the two points found by the search.
+        In practice, if f(x + eta*d) increases on d, we return x."""
 
-        In practice, if f(x + eta*d) increases on d, we return x.
-
-        """
         # dtype of x1 and x2 depends on x and eta (the grid discretization)
         if np.issubdtype(x.dtype, np.floating):
             # if x is float res dtype should be float
@@ -206,12 +205,71 @@ class CLineSearchBisect(CLineSearch):
         # feasible point, increasing score
         return False
 
-    def line_search(self, x, d, fx=None, tol=1e-4, **kwargs):
+    def _compute_eta_max(self, x, d, **kwargs):
+
+        # double eta each time until function increases or goes out of bounds
+        eta = self.eta if self.eta_min is None else self.eta_min
+
+        # eta_min may be too large, going out of bounds,
+        # or jumping out of the local minimum
+        # it this happens, we reduce it,
+        # ensuring a feasible point or a minimal step (multiple of self.eta)
+        # this helps getting closer to the violated constraint
+        t = CArray(eta / self.eta).round()
+
+        self.logger.debug(
+            "[_compute_eta_max] eta: " + str(eta) + ", x: " +
+            str(x[x != 0]) + ", f(x): " + str(self._fx))
+        # update z and fz
+        z = self._update_z(x, eta, d)
+
+        self.logger.debug(
+            "[_compute_eta_max] eta max, eta: " + str(eta) + ", z: " +
+            str(z[z != 0]) + ", f(z): " + str(self._fz))
+
+        # divide eta by 2 if x+eta*d goes out of bounds or fz decreases
+        # update (if required) z and fz
+        while eta > self.eta and \
+                (not self._is_feasible(z) or self._fz > self._fx):
+            t = CArray(t / 2).round()
+            eta = t * self.eta
+
+            # store fz (for current point)
+            z = self._update_z(x, eta, d)
+
+        # exponential line search starts here
+        while self._n_iter < self.max_iter:
+
+            # cache f_min
+            self._fun_idx_min = self._fz
+
+            eta *= 2
+
+            # update z and fz
+            z = self._update_z(x, eta, d)
+
+            # cache f_max
+            self._fun_idx_max = self._fz
+
+            self.logger.debug(
+                "[_compute_eta_max] eta: " + str(eta) + ", z: " +
+                str(z[z != 0]) + ", f(z): " + str(self._fz))
+
+            self._n_iter += 1
+
+            # function started increasing or end of bounds
+            if not self._is_decreasing(z, d, **kwargs):
+                return eta
+
+        self.logger.debug('Maximum iterations reached. Exiting.')
+        return eta
+
+    def minimize(self, x, d, fx=None, tol=1e-4, **kwargs):
         """Bisect line search (on discrete grid).
 
-        f ( x + a*eta*d ) = 0, with a = {0, 1, 2, ... }
+        The function f ( x + a*eta*d ) with a = {0, 1, 2, ... }
+        is minimized along the descent direction d.
 
-        fun is checked against zero.
         If f(x) >= 0, step_min=step
         else step_max = step
 
@@ -224,7 +282,7 @@ class CLineSearchBisect(CLineSearch):
         x : CArray
             The input point.
         d : CArray
-            The descent direction along which f(x) is optimized.
+            The descent direction along which f(x) is minimized.
         fx : int or float or None, optional
             The current value of f(x) (if available).
         tol : float, optional
@@ -324,63 +382,3 @@ class CLineSearchBisect(CLineSearch):
 
         self.logger.debug('Maximum iterations reached. Exiting.')
         return self._select_best_point(x, d, idx_min, idx_max, **kwargs)
-
-    def _compute_eta_max(self, x, d, **kwargs):
-
-        # double eta each time until function increases or goes out of bounds
-        eta = self.eta if self.eta_min is None else self.eta_min
-
-        # eta_min may be too large, going out of bounds,
-        # or jumping out of the local minimum
-        # it this happens, we reduce it,
-        # ensuring a feasible point or a minimal step (multiple of self.eta)
-        # this helps getting closer to the violated constraint
-        t = CArray(eta / self.eta).round()
-
-        self.logger.debug(
-            "[_compute_eta_max] eta: " + str(eta) + ", x: " +
-            str(x[x != 0]) + ", f(x): " + str(self._fx))
-        # update z and fz
-        z = self._update_z(x, eta, d)
-
-        self.logger.debug(
-            "[_compute_eta_max] eta max, eta: " + str(eta) + ", z: " +
-            str(z[z != 0]) + ", f(z): " + str(self._fz))
-
-        # divide eta by 2 if x+eta*d goes out of bounds or fz decreases
-        # update (if required) z and fz
-        while eta > self.eta and \
-                (not self._is_feasible(z) or self._fz > self._fx):
-            t = CArray(t / 2).round()
-            eta = t * self.eta
-
-            # store fz (for current point)
-            z = self._update_z(x, eta, d)
-
-        # exponential line search starts here
-        while self._n_iter < self.max_iter:
-
-            # cache f_min
-            self._fun_idx_min = self._fz
-
-            eta *= 2
-
-            # update z and fz
-            z = self._update_z(x, eta, d)
-
-            # cache f_max
-            self._fun_idx_max = self._fz
-
-            self.logger.debug(
-                "[_compute_eta_max] eta: " + str(eta) + ", z: " +
-                str(z[z != 0]) + ", f(z): " + str(self._fz))
-
-            self._n_iter += 1
-
-            # function started increasing or end of bounds
-            if not self._is_decreasing(z, d, **kwargs):
-                return eta
-
-        self.logger.debug('Maximum iterations reached. Exiting.')
-
-        return eta
