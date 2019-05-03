@@ -13,13 +13,13 @@ class TestEvasionNonLinearL1(CEvasionTestCases.TestCEvasion):
 
     def param_setter(self):
         self.type_dist = 'l1'
-        self.sparse = True  # sparse data support
+        self.sparse = False  # sparse data support
 
         self.dmax = 1.0
 
         self.discrete = False
         self.eta = 0.1
-        self.eta_min = 0.3
+        self.eta_min = 0.1
         self.eta_max = None
 
         self.normalizer = None
