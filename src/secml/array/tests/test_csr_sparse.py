@@ -9,7 +9,7 @@ from secml.array.c_sparse import CSparse
 
 class TestCSparse(CUnitTest):
     """Unit test for CSparse."""
-     
+
     def setUp(self):
         """Basic set up."""
         self.dense = CDense([[1, 0, 0, 0, 5],
@@ -68,6 +68,31 @@ class TestCSparse(CUnitTest):
 
         print(self.sparse_matrix[np.ravel(0)[0], np.ravel(0)[0]])
         print(type(self.sparse_matrix[np.ravel(0)[0], np.ravel(0)[0]]))
+
+    def test_round(self):
+        import numpy as np
+        from scipy.sparse import csr_matrix
+
+        # 1. creo una matrice sparsa con gli indici in disordine
+        indptr = np.array([0, 2])
+        indices = np.array([0, 1])
+        data = np.array([1, 2])
+        a = csr_matrix((data, indices, indptr), shape=(1, 2))
+        a = CSparse(a)
+        a._data.indices = np.array([1, 0])
+        print("Initial vector (with unsorted indices): ", a, a.todense())
+        a_old = a.deepcopy()
+
+        # round copies a.data, but passes indices and indptr as reference
+        b = a.round()
+        # the following operation sorts indices, hence manipulating values in a
+        v = b > 0
+
+        print(a_old.todense())
+        print(a.todense())
+
+        if (a_old - a).norm() > 1e-6:
+            raise ValueError("round and comparisons modify original vector.")
 
 
 if __name__ == '__main__':
