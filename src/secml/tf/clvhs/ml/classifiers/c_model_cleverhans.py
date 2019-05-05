@@ -72,7 +72,7 @@ class CModelCleverhans(Model):
         # Given a trained CClassifier, creates a tensorflow node for the
         # network output and one for its gradient
         self._fun = CFunction(fun=self._discriminant_function,
-                              gradient=clf.gradient_f_x)
+                              gradient=clf.grad_f_x)
         self._callable_fn = _CClassifierToTF(
             self._fun, self._out_dims)
 
@@ -198,15 +198,15 @@ class _CClassifierToTF(object):
 
         # if grads_in_np we can speed up the computation computing just one
         # gradient
-        gradient_f_x = self.fun.gradient
+        grad_f_x = self.fun.gradient
         if grads_in_np.sum(axis=None) == 1:
             y = grads_in_np.find(grads_in_np == 1)[0]
             if grads_in_np[y] == 1:
-                grads = gradient_f_x(x_carray, y=y).atleast_2d()
+                grads = grad_f_x(x_carray, y=y).atleast_2d()
         else:
             # otherwise we have to compute the gradient w.r.t all the classes
             for c in range(n_classes):
-                cgrad = gradient_f_x(
+                cgrad = grad_f_x(
                     x_carray[0, :], y=c)
                 grads[0, :] += (
                         cgrad * CArray(grads_in_np)[0, c])

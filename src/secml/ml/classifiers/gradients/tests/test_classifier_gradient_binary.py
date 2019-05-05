@@ -1,7 +1,9 @@
 from secml.testing import CUnitTest
+from secml.ml.classifiers.gradients.tests.utils.clfs_creation import \
+    binary_clf_creation
 
-from secml.ml.classifiers.gradients.tests import \
-    CClassifierGradientTestCases, binary_clf_creation
+from secml.ml.classifiers.gradients.tests.test_c_classifier_gradient import \
+    CClassifierGradientTestCases
 from secml.data.loader import CDLRandom
 
 
@@ -12,10 +14,11 @@ class TestCClassifierGradientBinary(
 
     @property
     def clf_list(self):
-        return ['ridge', 'logistic', 'lin-svm', 'rbf-svm', 'lin-mcs']
+        return ['ridge', 'logistic', 'lin-svm', 'rbf-svm', 'sgd-lin',
+                'sgd-rbf', 'lin-mcs']
         # fixme: read those classifier as soon as we will have fix their
         #  gradients
-        #'sgd-lin','sgd-rbf','kde',
+        # 'kde'
 
     @property
     def clf_creation_function(self):

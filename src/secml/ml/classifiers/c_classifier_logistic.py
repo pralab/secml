@@ -11,11 +11,12 @@ from sklearn.linear_model import LogisticRegression
 from secml.array import CArray
 from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.loss import CLoss
+
 from secml.ml.classifiers.gradients import \
-    CClassifierGradientLogistic
+    CClassifierGradientLogisticMixin
 
 
-class CClassifierLogistic(CClassifierLinear):
+class CClassifierLogistic(CClassifierLinear, CClassifierGradientLogisticMixin):
     """Logistic Regression (aka logit, MaxEnt) classifier.
 
     Parameters
@@ -29,23 +30,18 @@ class CClassifierLogistic(CClassifierLinear):
     __class_type = 'logistic'
 
     def __init__(self, C=1.0, max_iter=100, random_seed=None, preprocess=None):
-
         CClassifierLinear.__init__(self, preprocess=preprocess)
 
         self.C = C
         self.max_iter = max_iter
         self.random_seed = random_seed
 
-        self._classifier_loss = CLoss.create('log')
+        self._loss = CLoss.create('log')
 
         self._init_w = None
         self._init_b = None
 
-        self._gradients = CClassifierGradientLogistic()
-
-    @property
-    def gradients(self):
-        return self._gradients
+        CClassifierGradientLogisticMixin.__init__(self)
 
     @property
     def max_iter(self):
