@@ -85,6 +85,15 @@ class TestCSparse(CUnitTest):
 
         # round copies a.data, but passes indices and indptr as reference
         b = a.round()
+        self.logger.debug("#indices:")
+        self.logger.debug(a._data.indices)
+        self.logger.debug("#indptr:")
+        self.logger.debug(a._data.indptr)
+        self.logger.debug("#data:")
+        self.logger.debug(a._data.data)
+        self.logger.debug ("#vect:")
+        self.logger.debug(a.todense())
+
         # the following operation sorts indices, hence manipulating values in a
         v = b > 0
         self.logger.debug("#indices:")
@@ -97,8 +106,8 @@ class TestCSparse(CUnitTest):
         self.logger.debug(a._data.data)
         self.logger.debug(a_old._data.data)
         self.logger.debug ("#vect:")
-        self.logger.debug(a_old.todense())
         self.logger.debug(a.todense())
+        self.logger.debug(a_old.todense())
 
         if (a_old - a).norm() > 1e-6:
             raise ValueError("round and comparisons modify original vector.")
