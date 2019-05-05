@@ -24,7 +24,7 @@ class CAttackEvasion(CAttack):
     It requires classifier, surrogate_classifier, and surrogate_data.
     Note that surrogate_classifier is assumed to be trained (before
     passing it to this class) on surrogate_data.
-    
+
     Parameters
     ----------
     y_target : int or None, optional
@@ -33,7 +33,7 @@ class CAttackEvasion(CAttack):
             belonging to the y_target class.
 
     TODO: complete list of parameters
-            
+
     """
     __super__ = 'CAttackEvasion'
 

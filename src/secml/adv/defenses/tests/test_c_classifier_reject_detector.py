@@ -102,7 +102,7 @@ class TestCClassifierRejectDetector(
         return adv_dts_X
 
     def test_gradient(self):
-        """Unittest for gradient_f_x method."""
+        """Unittest for grad_f_x method."""
         # Training the classifier
         clf = self.clf.fit(self.dataset)
 

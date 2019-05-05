@@ -83,7 +83,7 @@ class TestCModelCleverhans(CUnitTest):
         # compute the gradient matrix with the CClassifier
         gradients = CArray.zeros((self.tr.num_classes, self.tr.num_features))
         for c in range(self.tr.num_classes):
-            gradients[c, :] = self.clf.gradient_f_x(x, y=c)
+            gradients[c, :] = self.clf.grad_f_x(x, y=c)
         gradients = gradients.tondarray()
 
         # compute the gradient matrix with the CClassifierCleverHans

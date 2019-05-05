@@ -9,12 +9,14 @@
 from secml.array import CArray
 from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.clf_utils import \
-    check_binary_labels, convert_binary_labels
+    check_binary_labels
 from secml.ml.kernel import CKernel
 from secml.utils.mixed_utils import check_is_fitted
+from secml.ml.classifiers.gradients import CClassifierGradientKDEMixin
+from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
-class CClassifierKDE(CClassifier):
+class CClassifierKDE(CClassifier, CClassifierGradientKDEMixin):
     """Kernel Density Estimator
     
     Parameters
@@ -50,10 +52,12 @@ class CClassifierKDE(CClassifier):
 
         self._training_samples = None  # slot store training samples
 
+        CClassifierGradientKDEMixin.__init__(self)
+
     def is_linear(self):
         """Return True if the classifier is linear."""
         if (self.preprocess is None or self.preprocess is not None and
-                self.preprocess.is_linear()) and self.is_kernel_linear():
+            self.preprocess.is_linear()) and self.is_kernel_linear():
             return True
         return False
 
@@ -186,48 +190,3 @@ class CClassifierKDE(CClassifier):
         else:
             return CArray(self.kernel.k(x, self._training_samples)).mean(
                                                         keepdims=False, axis=1)
-
-    def gradient_f_x(self, x, y=1, **kwargs):
-        """Computes the gradient of the classifier's output wrt input.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-        y : int, optional
-            Index of the class wrt the gradient must be computed. Default 1.
-        **kwargs
-            Optional parameters for the function that computes the
-            gradient of the decision function. See the description of
-            each classifier for a complete list of optional parameters.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the classifier's output wrt input. Vector-like array.
-
-        """
-        return super(CClassifierKDE, self).gradient_f_x(x, y, **kwargs)
-
-    def _gradient_f(self, x, y=1):
-        """Computes the gradient of the KDE classifier's decision function
-         wrt decision function input.
-
-        Returns
-        -------
-        x : CArray or None, optional
-            The gradient is computed in the neighborhood of x.
-        y : int, optional
-            Binary index of the class wrt the gradient must be computed.
-            Default is 1, corresponding to the positive class.
-
-        Returns
-        -------
-        gradient : CArray
-            The gradient of the linear classifier's decision function
-            wrt decision function input. Vector-like array.
-
-        """
-        k = self.kernel.gradient(self._training_samples, x)
-        # Gradient sign depends on input label (0/1)
-        return - convert_binary_labels(y) * k.mean(axis=0, keepdims=False)

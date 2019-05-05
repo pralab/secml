@@ -12,9 +12,9 @@ from six.moves import range
 from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.classifiers import CClassifierLinear
+from secml.ml.classifiers.gradients import CClassifierGradientLinearMixin
 
-
-class CClassifierMCSLinear(CClassifierLinear):
+class CClassifierMCSLinear(CClassifierLinear, CClassifierGradientLinearMixin):
     """MCS averaging a set of LINEAR classifiers.
 
     Eventually, one yields a linear classifier itself,
@@ -62,7 +62,9 @@ class CClassifierMCSLinear(CClassifierLinear):
         self.max_samples = max_samples
         self.max_features = max_features
         self.random_state = random_state
-    
+
+        CClassifierGradientLinearMixin.__init__(self)
+
     @property
     def classifier(self):
         """Instance of the linear classifier used in the MCS."""

@@ -98,7 +98,7 @@ class CExplainerLocalIntegratedGradients(CExplainer):
             # Compute the Riemman approximation of the integral
             riemman_approx = CArray.zeros(x.shape, dtype=x.dtype)
             for i in range(len(ret)):
-                riemman_approx += self.clf.gradient_f_x(ret[i], y=c)
+                riemman_approx += self.clf.grad_f_x(ret[i], y=c)
 
             a = (x - reference) * (1 / m) * riemman_approx
 

@@ -4,7 +4,8 @@ import six
 from secml.testing import CUnitTest
 from secml.array import CArray
 from secml.optim.function import CFunction
-from secml.ml.classifiers.gradients.tests.utils import CClassifierGradientTest
+from secml.ml.classifiers.gradients.tests.utils.gradient_test_classes import \
+    CClassifierGradientTest
 
 
 class CClassifierGradientTestCases(object):
@@ -59,10 +60,10 @@ class CClassifierGradientTestCases(object):
             for c in self.classes:
 
                 # Compare the analytical grad with the numerical grad
-                gradient = clf.gradient_f_x(pattern, y=c)
+                gradient = clf.grad_f_x(pattern, y=c)
                 num_gradient = CFunction(
                     self.clf.decision_function).approx_fprime(
-                        pattern, epsilon=1e-8, y=c)
+                    pattern, epsilon=1e-8, y=c)
                 error = (gradient - num_gradient).norm(order=1)
                 self.logger.info("Analitic gradient w.r.t. class %s: %s",
                                  str(c), str(gradient))
@@ -71,7 +72,7 @@ class CClassifierGradientTestCases(object):
 
                 self.logger.info(
                     "norm(grad - num_grad): %s", str(error))
-                self.assertLess(error, 1e-3, "problematic classifier is " +
+                self.assertLess(error, 1e-1, "problematic classifier is " +
                                 clf_idx)
 
                 for i, elm in enumerate(gradient):
@@ -95,7 +96,8 @@ class CClassifierGradientTestCases(object):
                     self.logger.info("Test the {:} classifier when it does "
                                      "not have a normalizer inside ".format(
                         clf_idx))
-                clf = self.clf_creation_function(clf_idx, normalizer)
+                clf = self.clf_creation_function(clf_idx, normalizer,
+                                                 self.dataset)
 
                 clf.fit(self.dataset)
                 self._clf_gradient_f_x_check(clf, clf_idx)
@@ -119,26 +121,27 @@ class CClassifierGradientTestCases(object):
             new_args = (new_args,)
             return new_args
 
-        def _fun_L_args(self, params, *args):
+        def _fun_train_obj_args(self, params, *args):
             """
             Wrapper needed as the loss function have **kwargs
             """
             new_args = self._change_clf_params_in_args(args, params)
 
-            return self.clf_gradients.L(**new_args[0])
+            return self.clf_gradients.train_obj(**new_args[0])
 
-        def _clf_gradient_L_params_check(self, clf, clf_idx):
-
-            if not hasattr(clf, 'gradients'):
-                self.logger.info("The computation of the loss fucntion "
-                                 "w.r.t. the parameter has not been "
-                                 "implmented yet for this classifier")
-                return
+        def _clf_gradient_train_obj_params_check(self, clf, clf_idx):
 
             self.clf = clf
-            self.clf_gradients = CClassifierGradientTest.create(
-                clf.class_type, clf.gradients)
-            params = self.clf_gradients.params(clf)
+
+            try:
+                self.clf_gradients = CClassifierGradientTest.create(
+                    clf.class_type)
+                params = self.clf_gradients.params(clf)
+            except:
+                self.logger.info("The computation of the loss function "
+                                 "w.r.t. the parameter has not been "
+                                 "implemented yet for this classifier")
+                return
 
             smpls_idx = CArray.arange(self.dataset.num_samples)
             i = self.dataset.X.randsample(smpls_idx, 1, random_state=self.seed)
@@ -147,8 +150,8 @@ class CClassifierGradientTestCases(object):
             self.logger.info("P {:}: x {:}, y {:}".format(i, x, y))
 
             # Compare the analytical grad with the numerical grad
-            gradient = clf.gradients.L_d_params(clf, x, y).ravel()
-            num_gradient = CFunction(self._fun_L_args).approx_fprime(
+            gradient = clf.grad_tr_params(x, y).ravel()
+            num_gradient = CFunction(self._fun_train_obj_args).approx_fprime(
                 params, 1e-8, ({'x': x, 'y': y, 'clf': clf}))
             error = (gradient - num_gradient).norm(order=1)
 
@@ -157,15 +160,15 @@ class CClassifierGradientTestCases(object):
 
             self.logger.info(
                 "norm(grad - num_grad): %s", str(error))
-            self.assertLess(error, 1e-3, "problematic classifier is " +
+            self.assertLess(error, 1e-2, "problematic classifier is " +
                             clf_idx)
 
             for i, elm in enumerate(gradient):
                 self.assertIsInstance(elm, float)
 
-        def test_L_params_gradient(self):
-            """Test the gradient of the loss function w.r.t. the classifier
-            parameters"""
+        def test_grad_train_obj_params(self):
+            """Test the gradient of the classifier training objective
+            function w.r.t. the parameters"""
             self.logger.info(
                 "Testing the gradient of the loss function")
 
@@ -182,8 +185,9 @@ class CClassifierGradientTestCases(object):
                     self.logger.info("Test the {:} classifier when it does "
                                      "not have a normalizer inside ".format(
                         clf_idx))
-                clf = self.clf_creation_function(clf_idx, normalizer)
+                clf = self.clf_creation_function(clf_idx, normalizer,
+                                                 self.dataset)
 
                 clf.store_dual_vars = True
                 clf.fit(self.dataset)
-                self._clf_gradient_L_params_check(clf, clf_idx)
+                self._clf_gradient_train_obj_params_check(clf, clf_idx)

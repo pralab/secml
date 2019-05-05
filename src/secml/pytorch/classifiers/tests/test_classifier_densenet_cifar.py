@@ -96,7 +96,7 @@ class TestCClassifierPyTorchDenseNetCifar(CClassifierTestCases):
         state = dl_pytorch_model('cifar10', 'densenet-bc-L100-K12')
         self.clf.load_state(state, dataparallel=True)
         
-        grad = self.clf.gradient_f_x(self.ts.X[100, :], y=3)
+        grad = self.clf.grad_f_x(self.ts.X[100, :], y=3)
 
         self.logger.info("Gradient:\n{:}".format(grad))
         self.logger.info("Shape: {:}".format(grad.shape))

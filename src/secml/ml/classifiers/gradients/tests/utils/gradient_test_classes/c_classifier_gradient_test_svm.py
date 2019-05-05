@@ -7,7 +7,8 @@
 """
 
 from secml.array import CArray
-from secml.ml.classifiers.gradients.tests.utils import CClassifierGradientTest
+from secml.ml.classifiers.gradients.tests.utils.gradient_test_classes import \
+    CClassifierGradientTest
 
 
 class CClassifierGradientTestSVM(CClassifierGradientTest):
@@ -17,24 +18,34 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
     """
     __class_type = 'svm'
 
-    def L(self, x, y, clf, regularized = True):
+    def l(self, x, y, clf):
         """
         Classifier  loss
         """
 
         # compute the loss on the training samples
         scores = clf.decision_function(x)
-        loss = self.gradients._loss.loss(y, score=scores).atleast_2d()
+        loss = clf._loss.loss(y, score=scores).atleast_2d()
+
+        loss = clf.C * loss
+
+        return loss
+
+    def train_obj(self, x, y, clf):
+        """
+        Classifier training objective function
+        """
+
+        loss = self.l(x, y, clf)
 
         xs, margin_sv_idx = clf.sv_margin()
         Kss = clf.kernel.k(xs, xs)
         alpha_s = clf.alpha[margin_sv_idx]
         reg = alpha_s.atleast_2d().dot(Kss.dot(alpha_s.T))
 
-        loss = clf.C * loss \
+        loss = clf.C * loss
 
-        if regularized:
-            loss += reg
+        loss += reg
 
         return loss
 
@@ -52,7 +63,8 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
         vector
         """
         new_clf = clf.deepcopy()
-        margin_sv_idx = clf.sv_margin_idx()  # get the idx of the margin support vector
+        # get the idx of the margin support vector
+        margin_sv_idx = clf.sv_margin_idx()
         new_clf._alpha[margin_sv_idx] = params[:-1]
         new_clf._b = params[-1]
         return new_clf
