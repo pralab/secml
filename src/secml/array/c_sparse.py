@@ -23,6 +23,7 @@ from secml.array.c_dense import CDense
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_intlike, is_int, is_bool
 from secml.core.constants import inf
+import copy
 
 
 def _expand_nnz_bool(array, nnz_val):
@@ -1032,8 +1033,8 @@ class CSparse(_CArrayInterface):
         """Evenly round to the given number of decimals."""
         data = np.round(self._data.data, decimals=decimals)
         return self.__class__(
-            (data, self._data.indices, self._data.indptr),
-            shape=self.shape)
+            (copy.deepcopy(data), copy.deepcopy(self._data.indices),
+             copy.deepcopy(self._data.indptr)), shape=self.shape)
 
     def ceil(self):
         """Return the ceiling of the input, element-wise."""
