@@ -11,7 +11,7 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
         return ['ridge', 'logistic', 'lin-svm', 'rbf-svm']
 
     def test_poisoning_2D_plot(self):
-        self.plot = True
+        self.plot = False
         if self.plot:
             self._make_plot()
 
