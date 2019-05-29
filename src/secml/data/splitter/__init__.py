@@ -7,3 +7,4 @@ from .c_datasplitter_labelkfold import CDataSplitterLabelKFold
 
 # Other splitting functions
 from .c_train_test_split import CTrainTestSplit
+from .c_chronological_splitter import CChronologicalSplitter
