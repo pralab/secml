@@ -665,9 +665,10 @@ class CSparse(_CArrayInterface):
                 raise NotImplementedError(
                     "using zero or a boolean False as power is not supported "
                     "for sparse arrays. Convert to dense if needed.")
+            # indices/indptr must passed as copies (pow creates new data)
             return self.__class__((pow(self._data.data, power),
                                    self._data.indices, self._data.indptr),
-                                  shape=self.shape)
+                                  shape=self.shape, copy=True)
         else:
             return NotImplemented
 
