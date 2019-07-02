@@ -1032,9 +1032,11 @@ class CSparse(_CArrayInterface):
     def round(self, decimals=0):
         """Evenly round to the given number of decimals."""
         data = np.round(self._data.data, decimals=decimals)
+        # Round does not allocate new memory (data.flags.OWNDATA = False)
+        # and indices/indptr must passed as copies
         return self.__class__(
-            (copy.deepcopy(data), copy.deepcopy(self._data.indices),
-             copy.deepcopy(self._data.indptr)), shape=self.shape)
+            (data, self._data.indices, self._data.indptr),
+            shape=self.shape, copy=True)
 
     def ceil(self):
         """Return the ceiling of the input, element-wise."""
