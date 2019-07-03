@@ -81,7 +81,7 @@ class CDataSplitterKFold(CDataSplitter):
 
         # We take sklearn indices (iterators) and map to list of CArrays
         for train_index, test_index in \
-                sk_splitter.split(dataset.X.tondarray()):
+                sk_splitter.split(dataset.X.get_data()):
             train_index = CArray(train_index)
             test_index = CArray(test_index)
             self._tr_idx.append(train_index)
