@@ -82,8 +82,8 @@ class CDataSplitterStratifiedKFold(CDataSplitter):
 
         # We take sklearn indices (iterators) and map to list of CArrays
         for train_index, test_index in \
-                sk_splitter.split(X=dataset.X.tondarray(),
-                                  y=dataset.Y.tondarray()):
+                sk_splitter.split(X=dataset.X.get_data(),
+                                  y=dataset.Y.get_data()):
             train_index = CArray(train_index)
             test_index = CArray(test_index)
             self._tr_idx.append(train_index)

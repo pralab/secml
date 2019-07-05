@@ -366,18 +366,18 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         # Check if we can return the i_th classifier
         for i in range(multiclass.num_classifiers):
 
-            ova_grad = multiclass._binary_classifiers[i].gradient_f_x(pattern)
+            ova_grad = multiclass._binary_classifiers[i].grad_f_x(pattern)
 
-            gradient = multiclass.gradient_f_x(pattern, y=i)
+            gradient = multiclass.grad_f_x(pattern, y=i)
             self.logger.info(
                 "Gradient of {:}^th sub-clf is:\n{:}".format(i, gradient))
 
             self.assertFalse((gradient != ova_grad).any())
 
         with self.assertRaises(ValueError):
-            multiclass.gradient_f_x(pattern, y=-1)
+            multiclass.grad_f_x(pattern, y=-1)
         with self.assertRaises(ValueError):
-            multiclass.gradient_f_x(pattern, y=100)
+            multiclass.grad_f_x(pattern, y=100)
 
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""

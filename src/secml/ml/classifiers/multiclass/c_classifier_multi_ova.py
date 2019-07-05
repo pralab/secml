@@ -10,6 +10,8 @@ from secml.array import CArray
 from secml.data import CDataset
 from secml.parallel import parfor2
 
+from secml.ml.classifiers.gradients import ClassifierGradientMulticlassOVAMixin
+
 
 def _fit_one_ova(
         tr_class_idx, multi_ova, dataset, verbose):
@@ -49,7 +51,8 @@ def _fit_one_ova(
     return classifier_instance
 
 
-class CClassifierMulticlassOVA(CClassifierMulticlass):
+class CClassifierMulticlassOVA(CClassifierMulticlass,
+                               ClassifierGradientMulticlassOVAMixin):
     """OVA (One-Vs-All) Multiclass Classifier.
 
     Parameters
@@ -65,6 +68,13 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
 
     """
     __class_type = 'ova'
+
+    def __init__(self, classifier, preprocess=None, **clf_params):
+        super(CClassifierMulticlassOVA, self).__init__(classifier=classifier,
+                                                       preprocess=preprocess,
+                                                       **clf_params)
+
+        ClassifierGradientMulticlassOVAMixin.__init__(self)
 
     def _fit(self, dataset, n_jobs=1):
         """Trains the classifier.
@@ -145,27 +155,3 @@ class CClassifierMulticlassOVA(CClassifierMulticlass):
         # Getting predicted scores for classifier associated with y
         # The decision function is always computed wrt positive class (1)
         return self._binary_classifiers[y].decision_function(x, y=1)
-
-    def _gradient_f(self, x, y):
-        """Computes the gradient of the classifier's decision function
-         wrt decision function input.
-
-        For a multiclass OVA classifier, the gradient of the y^th
-        binary classifier is returned.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-        y : int
-            Index of the binary classifier of which the gradient
-            of the decision function should be returned.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the classifier's df wrt its input. Vector-like array.
-
-        """
-        self._check_clf_index(y)  # Check the binary classifier input index
-        return self._binary_classifiers[y].gradient_f_x(x, y=1).ravel()

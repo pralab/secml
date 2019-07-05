@@ -32,8 +32,6 @@ class CExplainerLocalInfluence(CExplainerLocal):
         self._inv_H = None  # inverse hessian matrix
         self._grad_inner_loss_params = None
 
-        inner_loss_idx = self.clf.gradients.loss().class_type
-        self._inner_loss = CLoss.create(inner_loss_idx)
         self._outer_loss = CLoss.create(outer_loss_idx)
 
     def grad_outer_loss_params(self, x, y):
@@ -45,9 +43,8 @@ class CExplainerLocalInfluence(CExplainerLocal):
         :param y: its label
         :return: dL_params, CArray of shape (n_params +1 ) * n_samples
         """
-        grad = self.clf.gradients.L_d_params(self.clf, x, y,
-                                             loss=self._outer_loss,
-                                             regularized=False)
+        # FIXME: this is the validation loss. Why are we calling the clf?
+        grad = self.clf.grad_loss_params(x, y)
         return grad
 
     def grad_inner_loss_params(self, x, y):
@@ -57,9 +54,7 @@ class CExplainerLocalInfluence(CExplainerLocal):
         This is normally a regularized loss.
         :return:
         """
-        grad = self.clf.gradients.L_d_params(self.clf, x, y,
-                                             loss=self._inner_loss,
-                                             regularized=True)
+        grad = self.clf.grad_tr_params(x, y)
         return grad
 
     def hessian(self, x, y):
@@ -68,7 +63,7 @@ class CExplainerLocalInfluence(CExplainerLocal):
         :param w:
         :return:
         """
-        return self.clf.gradients.hessian(self._clf, x, y)
+        return self.clf.hessian_tr_params(x, y)
 
     def explain(self, x, y):
         """

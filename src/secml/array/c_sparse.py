@@ -388,6 +388,10 @@ class CSparse(_CArrayInterface):
         """Redefinition of the get (brackets) operator."""
         # Check for setitem value
         if isinstance(value, CDense):
+            if is_list_of_lists(idx) and value.is_vector_like:
+                # Scipy v1.3+, list of list indexing returns 1-D, ravel
+                # input if vector-like (otherwise error should be raised)
+                value = value.ravel()
             value = value.tondarray()
         elif isinstance(value, CSparse):
             value = value.tocsr()

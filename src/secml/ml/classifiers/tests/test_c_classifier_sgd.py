@@ -31,11 +31,12 @@ class TestCClassifierSGD(CClassifierTestCases):
                                   loss=CLossHinge(),
                                   random_state=0)
 
-        kernel_types = (None, CKernelLinear, CKernelRBF, CKernelPoly)
+        kernel_types = \
+            (None, CKernelLinear(), CKernelRBF(), CKernelPoly(degree=3))
         self.sgds = [CClassifierSGD(
             regularizer=CRegularizerL2(), loss=CLossHinge(),
             max_iter=500, random_state=0,
-            kernel=kernel() if kernel is not None else None)
+            kernel=kernel if kernel is not None else None)
                 for kernel in kernel_types]
         self.logger.info(
             "Testing SGD with kernel functions: %s", str(kernel_types))

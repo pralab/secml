@@ -142,8 +142,15 @@ class TestCDataSplitter(CUnitTest):
         kf = CDataSplitterStratifiedKFold(
             num_folds=2, random_state=5000).compute_indices(ds)
 
-        tr_idx_expected = [CArray([4, 5, 6, 8]), CArray([0, 1, 2, 3, 7, 9])]
-        ts_idx_expected = [CArray([0, 1, 2, 3, 7, 9]), CArray([4, 5, 6, 8])]
+        import sklearn
+        if sklearn.__version__ < '0.21':  # TODO: REMOVE AFTER BUMPING DEPS
+            # v0.21 fixed a bug where random_seed was not applied properly
+            # https://github.com/scikit-learn/scikit-learn/pull/13124
+            tr_idx_expected = [CArray([4, 5, 6, 8]), CArray([0, 1, 2, 3, 7, 9])]
+            ts_idx_expected = [CArray([0, 1, 2, 3, 7, 9]), CArray([4, 5, 6, 8])]
+        else:
+            tr_idx_expected = [CArray([4, 5, 6, 9]), CArray([0, 1, 2, 3, 7, 8])]
+            ts_idx_expected = [CArray([0, 1, 2, 3, 7, 8]), CArray([4, 5, 6, 9])]
 
         self.assertEqual(len(kf.tr_idx), 2)
         self.assertEqual(len(kf.ts_idx), 2)

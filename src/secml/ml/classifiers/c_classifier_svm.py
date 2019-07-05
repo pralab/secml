@@ -12,11 +12,11 @@ from secml.array import CArray
 from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.ml.kernel import CKernel
-from secml.ml.classifiers.gradients import CClassifierGradientSVM
+from secml.ml.classifiers.gradients import CClassifierGradientSVMMixin
 from secml.utils.mixed_utils import check_is_fitted
 
 
-class CClassifierSVM(CClassifierLinear):
+class CClassifierSVM(CClassifierLinear,CClassifierGradientSVMMixin):
     """Support Vector Machine (SVM) classifier.
 
     Parameters
@@ -87,7 +87,7 @@ class CClassifierSVM(CClassifierLinear):
         # DO NOT CLEAR
         self._k = None
 
-        self._gradients = CClassifierGradientSVM()
+        CClassifierGradientSVMMixin.__init__(self)
 
     def is_linear(self):
         """Return True if the classifier is linear."""
@@ -118,10 +118,6 @@ class CClassifierSVM(CClassifierLinear):
             check_is_fitted(self, 'w')
         # Then check the attributes of CClassifier
         check_is_fitted(self, ['classes', 'n_features'])
-
-    @property
-    def gradients(self):
-        return self._gradients
 
     @property
     def C(self):
@@ -389,7 +385,7 @@ class CClassifierSVM(CClassifierLinear):
             self._sv_idx = CArray(classifier.support_).ravel()
             # Compatibility fix for differences between sklearn versions
             self._alpha = convert_binary_labels(dataset.Y[self.sv_idx]) * \
-                abs(CArray(classifier.dual_coef_).todense().ravel())
+                          abs(CArray(classifier.dual_coef_).todense().ravel())
             self._sv = CArray(dataset.X[self.sv_idx, :])
             self.logger.debug("Classifier SVM dual weights (alphas): "
                               "\n{:}".format(self._alpha))
@@ -439,63 +435,3 @@ class CClassifierSVM(CClassifierLinear):
         m = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
         return CArray(m).todense().ravel() + self.b
 
-    def _gradient_f(self, x=None, y=1):
-        """Computes the gradient of the SVM classifier's decision function
-         wrt decision function input.
-
-        If the SVM classifier is linear, the gradient wrt input is equal
-        to the weights vector w. The point x can be in fact ignored.
-
-        Otherwise, for non-linear SVM, the gradient is computed
-        in the dual representation:
-
-        .. math::
-
-            \sum_i y_i alpha_i \diff{K(x,xi)}{x}
-
-        Parameters
-        ----------
-        x : CArray or None, optional
-            The gradient is computed in the neighborhood of x.
-            For non-linear classifiers, x is required.
-        y : int, optional
-            Binary index of the class wrt the gradient must be computed.
-            Default is 1, corresponding to the positive class.
-
-        Returns
-        -------
-        gradient : CArray
-            The gradient of the SVM classifier's decision function
-            wrt decision function input. Vector-like array.
-
-        """
-        if self.is_kernel_linear():  # Simply return w for a linear SVM
-            return CClassifierLinear._gradient_f(self, y=y)
-
-        # Point is required in the case of non-linear SVM
-        if x is None:
-            raise ValueError("point 'x' is required to compute the gradient")
-
-        # TODO: ADD OPTION FOR RANDOM SUBSAMPLING OF SVs
-        # Gradient in dual representation: \sum_i y_i alpha_i \diff{K(x,xi)}{x}
-        m = int(self.grad_sampling * self.n_sv.sum())  # Equivalent to floor
-        idx = CArray.randsample(self.alpha.size, m)  # adding some randomness
-
-        gradient = self.kernel.gradient(self.sv[idx, :], x).atleast_2d()
-
-        # Few shape check to ensure broadcasting works correctly
-        if gradient.shape != (idx.size, self.n_features):
-            raise ValueError("Gradient shape must be ({:}, {:})".format(
-                idx.size, self.n_features))
-
-        alpha_2d = self.alpha[idx].atleast_2d()
-        if gradient.issparse is True:  # To ensure the sparse dot is used
-            alpha_2d = alpha_2d.tosparse()
-        if alpha_2d.shape != (1, idx.size):
-            raise ValueError("Alpha vector shape must be ({:}, {:}) "
-                             "or ravel equivalent".format(1, idx.size))
-
-        gradient = alpha_2d.dot(gradient)
-
-        # Gradient sign depends on input label (0/1)
-        return convert_binary_labels(y) * gradient.ravel()

@@ -176,7 +176,7 @@ class CAttackEvasionBLS(CAttackEvasion):
         Returns
         -------
         f_obj: values of objective function at x
-        
+
         """
         # Make classification in the sparse domain if possible
         x = x.tosparse() if self.issparse is True else x
@@ -222,8 +222,8 @@ class CAttackEvasionBLS(CAttackEvasion):
 
         k, c = self._find_k_c(y_pred, scores)
 
-        grad = self._solver_clf.gradient_f_x(x, y=k.item()) - \
-               self._solver_clf.gradient_f_x(x, y=c.item())
+        grad = self._solver_clf.grad_f_x(x, y=k.item()) - \
+               self._solver_clf.grad_f_x(x, y=c.item())
 
         return grad if self.y_target is None else -grad
 
