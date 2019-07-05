@@ -221,12 +221,8 @@ class CSparse(_CArrayInterface):
             # Fake 2D index. Use ndarrays to mimic Matlab-like indexing
             idx = (np.asarray([0]), idx.tondarray())
 
-            # SPECIAL CASE: Matlab-like indexing
+            # Matlab-like indexing
             idx = np.ix_(*idx)
-
-            # Workaround for scipy indexing when 2 integer-like are passed
-            if idx[1].size == 1:
-                idx = tuple(elem.ravel()[0] for elem in idx)
 
         elif is_list_of_lists(idx):
             if len(idx) != 2:
@@ -248,9 +244,8 @@ class CSparse(_CArrayInterface):
             # Check the size of any boolean array inside tuple
             self._check_index_bool(idx)
 
-            # Convert indices for get_single_element scipy method
+            # Matlab-like indexing
             idx = np.ix_(*idx)
-            idx = tuple(elem.ravel()[0] for elem in idx)
 
         elif is_list(idx):
             # Check if array is vector-like
@@ -271,12 +266,8 @@ class CSparse(_CArrayInterface):
             # Check the size of any boolean array inside tuple
             self._check_index_bool(idx)
 
-            # SPECIAL CASE: Matlab-like indexing
+            # Matlab-like indexing
             idx = np.ix_(*idx)
-
-            # Workaround for scipy indexing when 2 integer-like are passed
-            if idx[1].size == 1:
-                idx = tuple(elem.ravel()[0] for elem in idx)
 
         elif is_slice(idx):
             # Check if array is vector-like
@@ -336,13 +327,9 @@ class CSparse(_CArrayInterface):
             # Converting back to tuple
             idx = tuple(idx_list)
 
-            # SPECIAL CASE: Matlab-like indexing
+            # Matlab-like indexing
             if all(is_ndarray(elem) for elem in idx):
                 idx = np.ix_(*idx)
-
-            # Workaround for scipy indexing when 2 integer-like are passed
-            if all(is_intlike(elem) for elem in idx):
-                idx = tuple(elem.ravel()[0] for elem in idx)
 
         else:
             # No other object is accepted for CSparse indexing
