@@ -29,5 +29,5 @@ class CLineSearch(CCreator):
         self.max_iter = max_iter
 
     @abstractmethod
-    def line_search(self, fun, x, d, constr, **kwargs):
+    def minimize(self, fun, x, d, constr, **kwargs):
         raise NotImplementedError

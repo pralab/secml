@@ -62,7 +62,6 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
                                  start_facecolor='r' if self.yc == 1 else 'b')
 
                 fig.tight_layout()
-                fig.show()
                 exp_idx = "2d_pois_"
                 exp_idx += clf_idx
                 if normalizer:
@@ -77,13 +76,16 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
         poisoning point.
         """
         self.logger.info("Test if the value of the attacker objective "
-                         "function improves after the attack")
+                         "function improves after the attack for the {:} "
+                         "classifier")
 
         normalizer_vals = [False, True]
         combinations_list = [(clf_idx, normalizer) for clf_idx in \
                              self.clf_list for normalizer in normalizer_vals]
 
         for clf_idx, normalizer in combinations_list:
+
+            self.logger.info("###############################################")
             if normalizer:
                 self.logger.info("Test the {:} classifier when it has "
                                  "a normalizer inside ".format(clf_idx))

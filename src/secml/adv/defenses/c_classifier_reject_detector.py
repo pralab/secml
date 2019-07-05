@@ -11,9 +11,12 @@ from secml.data.c_dataset import CDataset
 from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.loss import CSoftmax
 from secml.ml.classifiers.reject import CClassifierReject
+from secml.ml.classifiers.gradients import \
+    ClassifierGradientRejectDetectorMixin
 
 
-class CClassifierRejectDetector(CClassifierReject):
+class CClassifierRejectDetector(CClassifierReject,
+                                ClassifierGradientRejectDetectorMixin):
     """Classifier with reject based on detector.
 
     Classifier that rejects the evasion samples based on the score
@@ -57,6 +60,8 @@ class CClassifierRejectDetector(CClassifierReject):
                 "the preprocessor should be passed to the outer classifier.")
 
         super(CClassifierRejectDetector, self).__init__(preprocess=preprocess)
+
+        ClassifierGradientRejectDetectorMixin.__init__(self)
 
     @property
     def clf(self):
@@ -319,42 +324,3 @@ class CClassifierRejectDetector(CClassifierReject):
 
         return labels, scores
 
-    def _gradient_f(self, x, y):
-        """Computes the gradient of the classifier's decision function
-         wrt decision function input.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-        y : int
-            Index of the class wrt the gradient must be computed.
-            Use -1 to output the gradient w.r.t. the reject class.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the classifier's df wrt its input. Vector-like array.
-
-        """
-        if y == -1:
-            # return the gradient of the detector
-            # (it's binary so always return y=1)
-            grad = self._det.gradient_f_x(x, y=1)
-
-            # compute the gradient of the softmax used to rescale the scores
-            scores = self._det.predict(x, return_decision_function=True)[1]
-            softmax_grad = self._softmax.gradient(scores, y=1)[1]
-
-        elif y < self.n_classes:
-            grad = self._clf.gradient_f_x(x, y=y)
-
-            # compute the gradient of the softmax used to rescale the scores
-            scores = self._clf.predict(x, return_decision_function=True)[1]
-            softmax_grad = self._softmax.gradient(scores, y=y)[y]
-
-        else:
-            raise ValueError("The index of the class wrt the gradient must "
-                             "be computed is wrong.")
-
-        return softmax_grad.item() * grad.ravel()

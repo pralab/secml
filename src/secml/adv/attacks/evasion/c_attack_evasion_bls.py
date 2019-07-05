@@ -176,7 +176,7 @@ class CAttackEvasionBLS(CAttackEvasion):
         Returns
         -------
         f_obj: values of objective function at x
-        
+
         """
         # Make classification in the sparse domain if possible
         x = x.tosparse() if self.issparse is True else x
@@ -222,8 +222,8 @@ class CAttackEvasionBLS(CAttackEvasion):
 
         k, c = self._find_k_c(y_pred, scores)
 
-        grad = self._solver_clf.gradient_f_x(x, y=k.item()) - \
-               self._solver_clf.gradient_f_x(x, y=c.item())
+        grad = self._solver_clf.grad_f_x(x, y=k.item()) - \
+               self._solver_clf.grad_f_x(x, y=c.item())
 
         return grad if self.y_target is None else -grad
 
@@ -355,6 +355,9 @@ class CAttackEvasionBLS(CAttackEvasion):
          the objective function and sequence of attack points (if enabled).
 
         """
+        # whether to use or not double init for nonlinear clf
+        double_init = True  # FIXME: define as a parameter
+
         # x0 must 2-D, y0 scalar if a CArray of size 1
         x0 = x0.atleast_2d()
         y0 = y0.item() if isinstance(y0, CArray) else y0
@@ -382,7 +385,8 @@ class CAttackEvasionBLS(CAttackEvasion):
         self._solution_from_solver()
 
         # if classifier is linear, or dmax is 0, return
-        if self._classifier.is_linear() or self.dmax == 0:
+        if self._classifier.is_linear() or self.dmax == 0 or \
+                double_init is False:
             return self._x_opt, self._f_opt
 
         # value of objective function at x_opt
@@ -405,6 +409,7 @@ class CAttackEvasionBLS(CAttackEvasion):
         # discretize x_min_proj on grid
         # xk_proj = (xk_proj / self._solver.eta).round() * self._solver.eta
 
+        # double initialization
         if self._objective_function(xk_proj) < f_obj:
 
             self.logger.debug("Trying to improve current solution.")

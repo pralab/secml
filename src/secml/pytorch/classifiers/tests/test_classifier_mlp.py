@@ -208,9 +208,9 @@ class TestCClassifierPyTorchMLP(CClassifierTestCases):
         self.logger.info("Returning output for layer: {:}".format(layer))
         out = self.clf.get_layer_output(x, layer=layer)
         self.logger.info("Returning gradient for layer: {:}".format(layer))
-        grad = self.clf.gradient_f_x(x, w=out, layer=layer)
+        grad = self.clf.grad_f_x(x, w=out, layer=layer)
 
-        self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
+        self.logger.info("Output of grad_f_x:\n{:}".format(grad))
 
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)

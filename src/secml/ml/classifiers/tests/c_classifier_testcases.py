@@ -11,7 +11,7 @@ class CClassifierTestCases(CUnitTest):
 
     def _test_gradient_numerical(self, clf, x, extra_classes=None,
                                  th=1e-3, epsilon=eps, **grad_kwargs):
-        """Test for clf.gradient_f_x comparing to numerical gradient.
+        """Test for clf.grad_f_x comparing to numerical gradient.
 
         Parameters
         ----------
@@ -40,7 +40,7 @@ class CClassifierTestCases(CUnitTest):
             grad_kwargs['y'] = c  # Appending class to test_f_x
 
             # Analytical gradient
-            gradient = clf.gradient_f_x(x, **grad_kwargs)
+            gradient = clf.grad_f_x(x, **grad_kwargs)
 
             self.assertTrue(gradient.is_vector_like)
             self.assertEqual(x.size, gradient.size)
@@ -201,15 +201,15 @@ class CClassifierTestCases(CUnitTest):
 
             # Grad of clf without preprocessor inside (using transformed data)
             v_pre = data_pre[0, :]
-            clf_grad = clf.gradient_f_x(v_pre, y=c, **grad_kwargs)
+            clf_grad = clf.grad_f_x(v_pre, y=c, **grad_kwargs)
 
-            # Output of gradient_f_x should be a float vector
+            # Output of grad_f_x should be a float vector
             self.assertEqual(1, clf_grad.ndim)
             self.assertIsSubDtype(clf_grad.dtype, float)
 
             # Gradient of clf with preprocessor inside
             v = ds.X[0, :]
-            clf_pre_grad = clf_pre.gradient_f_x(v, y=c, **grad_kwargs)
+            clf_pre_grad = clf_pre.grad_f_x(v, y=c, **grad_kwargs)
 
             # Gradient of the preprocessor. Should be equal to the gradient
             # of the clf with preprocessor inside

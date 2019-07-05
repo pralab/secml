@@ -11,7 +11,8 @@ from secml.ml.peval.metrics import CMetricAccuracy
 from secml.ml.classifiers import \
     CClassifierSVM, CClassifierLogistic, CClassifierRidge
 from secml.ml.kernel import CKernelRBF
-from secml.ml.classifiers.gradients.tests.utils import CClassifierGradientTest
+from secml.ml.classifiers.gradients.tests.utils.gradient_test_classes import \
+    CClassifierGradientTest
 
 
 class TestCExplainerLocalInfluence(CUnitTest):
@@ -19,7 +20,6 @@ class TestCExplainerLocalInfluence(CUnitTest):
 
     @classmethod
     def setUpClass(cls):
-
         CUnitTest.setUpClass()
 
         cls._tr, cls._val, cls._ts = cls._create_mnist_dataset()
@@ -33,7 +33,6 @@ class TestCExplainerLocalInfluence(CUnitTest):
         self._test_explanation_simple_clf()
 
     def test_explanation_logistic(self):
-
         self._clf = CClassifierLogistic()
         self._clf_idx = 'logistic regression'
 
@@ -54,7 +53,6 @@ class TestCExplainerLocalInfluence(CUnitTest):
         self._test_explanation_simple_clf()
 
     def test_explanation_with_feat_nn_extraction(self):
-
         self._clf = CClassifierSVM(kernel=CKernelRBF())
         self._clf.store_dual_vars = True
         self._clf_idx = 'lin-rbf'
@@ -94,8 +92,7 @@ class TestCExplainerLocalInfluence(CUnitTest):
         self.assertGreater(acc, 0.70)
 
     def _compute_influences(self):
-
-        self._clf_loss = self._clf.gradients._loss.class_type
+        self._clf_loss = self._clf._loss.class_type
 
         self._clf.fit(self._tr)
 
@@ -105,7 +102,7 @@ class TestCExplainerLocalInfluence(CUnitTest):
                                                outer_loss_idx=self._clf_loss)
         self.influences = explanation.explain(self._ts.X, self._ts.Y)
         self.clf_gradients = CClassifierGradientTest.create(
-            self._clf.class_type, self._clf.gradients)
+            self._clf.class_type)
 
     def _get_tr_without_point(self, p_idx):
         """
@@ -143,8 +140,8 @@ class TestCExplainerLocalInfluence(CUnitTest):
 
         clf_copy.fit(new_dataset)
 
-        loss = (1 / self._ts.num_samples) * self.clf_gradients.L(
-            self._ts.X, self._ts.Y, clf_copy, regularized=False).sum(axis=None)
+        loss = (1 / self._ts.num_samples) * self.clf_gradients.l(
+            self._ts.X, self._ts.Y, clf_copy).sum(axis=None)
 
         return loss
 
@@ -179,7 +176,6 @@ class TestCExplainerLocalInfluence(CUnitTest):
                            "influent")
 
     def _test_explanation(self):
-
         self._compute_influences()
 
         self.assertEqual(self.influences.shape,

@@ -19,9 +19,6 @@ class CClassifierGradientTest(CCreator):
     """
     __super__ = 'CClassifierGradientTest'
 
-    def __init__(self, gradients):
-        self.gradients = gradients
-
     @abstractproperty
     def params(self):
         """
@@ -30,9 +27,16 @@ class CClassifierGradientTest(CCreator):
         raise NotImplementedError()
 
     @abstractmethod
-    def L(self, x, y, clf, regularized = True):
+    def l(self, x, y, clf):
         """
         Classifier loss
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def train_obj(self, x, y, clf):
+        """
+        Classifier training objective function
         """
         raise NotImplementedError()
 

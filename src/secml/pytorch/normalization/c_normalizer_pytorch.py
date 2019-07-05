@@ -152,7 +152,7 @@ class CNormalizerPyTorch(CNormalizer):
         softmax_outputs = self.pytorch_clf.softmax_outputs
         self.pytorch_clf.softmax_outputs = False
 
-        out_grad = self.pytorch_clf.gradient_f_x(
+        out_grad = self.pytorch_clf.grad_f_x(
             x, y=y, w=w, layer=self.out_layer)
 
         # Restore softmax-scaling option

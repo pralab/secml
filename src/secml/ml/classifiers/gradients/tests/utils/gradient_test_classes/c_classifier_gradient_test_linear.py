@@ -7,7 +7,8 @@
 """
 
 from secml.array import CArray
-from secml.ml.classifiers.gradients.tests.utils import CClassifierGradientTest
+from secml.ml.classifiers.gradients.tests.utils.gradient_test_classes import \
+    CClassifierGradientTest
 
 
 class CClassifierGradientTestLinear(CClassifierGradientTest):
@@ -16,24 +17,30 @@ class CClassifierGradientTestLinear(CClassifierGradientTest):
     the CClassifierGradientSVM class.
     """
 
-    def L(self, x, y, clf, regularized = True):
+    def l(self, x, y, clf):
         """
         Classifier loss
         """
         y = y.ravel()
 
         w = CArray(clf.w.ravel()).T  # column vector
-        C = self.gradients._C(clf)
+        C = clf.C
 
         x = x.atleast_2d()
 
         s = clf.decision_function(x)
 
-        loss = C * self.gradients._loss.loss(y,
-                                             score=s)
+        loss = C * clf._loss.loss(y,score=s)
 
-        if regularized:
-            loss += self.gradients._reg.regularizer(w)
+        return loss
+
+    def train_obj(self, x, y, clf):
+        """
+        Classifier loss
+        """
+        loss = self.l(x, y, clf)
+
+        loss += clf._reg.regularizer(clf.w)
 
         return loss
 

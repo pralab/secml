@@ -2044,44 +2044,34 @@ class CDense(_CArrayInterface):
         >>> a = [[1, 2, 3], [4, 5], [6, 7]]
 
         >>> CDense.comblist(a)
-        CDense([[ 1.,  4.,  6.],
-               [ 1.,  4.,  7.],
-               [ 1.,  5.,  6.],
-               [ 1.,  5.,  7.],
-               [ 2.,  4.,  6.],
-               [ 2.,  4.,  7.],
-               [ 2.,  5.,  6.],
-               [ 2.,  5.,  7.],
-               [ 3.,  4.,  6.],
-               [ 3.,  4.,  7.],
-               [ 3.,  5.,  6.],
-               [ 3.,  5.,  7.]])
+        CDense([[1., 4., 6.],
+               [1., 4., 7.],
+               [1., 5., 6.],
+               [1., 5., 7.],
+               [2., 4., 6.],
+               [2., 4., 7.],
+               [2., 5., 6.],
+               [2., 5., 7.],
+               [3., 4., 6.],
+               [3., 4., 7.],
+               [3., 5., 6.],
+               [3., 5., 7.]])
 
         """
         # Converting each list to array (skip empty arrays)
-        arrays = [cls(x) for x in list_of_list if len(x) > 0]
+        arrays = [np.array(x) for x in list_of_list if len(x) > 0]
 
         if len(arrays) == 0:  # Nothing to combine!
             return cls()
 
-        # Computing number of expected combinations
-        n = cls([x.size for x in arrays]).prod(keepdims=False).tolist()[0]
-        # If no custom target array is specified, initialize an array of zeros
-        out = cls.zeros((n, len(arrays)), dtype=dtype)
+        # Create the cartesian product using meshgrid and stack
+        mg = np.stack(np.meshgrid(*arrays, copy=False), -1)
 
-        # Computing how many times first parameter list should be replicated
-        m = int(n / arrays[0].size)
+        # Remove the unnecessary last axis and cast to desired dtype
+        out = mg.reshape(-1, len(arrays)).astype(dtype)
 
-        # Replicating first parameter values list
-        out[:, 0] = arrays[0].repeat(m).transpose()
-
-        if len(arrays) > 1:  # More than 1 list to combine, recursion!
-            # Rebuild the list of lists and call recursively
-            out[0:m, 1:] = cls.comblist([x.tolist() for x in arrays[1:]])
-            for j in range(1, arrays[0].size):
-                out[j * m:(j + 1) * m, 1:] = out[0:m, 1:]
-
-        return out
+        # Sort rows by first column to get the correct order
+        return cls(out[out[:, 0].argsort()])
 
     @classmethod
     def meshgrid(cls, xi, indexing='xy'):
