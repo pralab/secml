@@ -53,34 +53,35 @@ class COptimizerTestCases(CUnitTest):
             'x0': CArray.zeros((n,), dtype=int).tosparse(dtype=int),
         }
         n = 2
-        exp_sum = self._create_exp_sum(d=n)
-        self.test_funcs['exp-sum-2'] = {
-            'fun': exp_sum,
+        poly = self._create_poly(d=n)
+        self.test_funcs['poly-2'] = {
+            'fun': poly,
             'x0': CArray.ones((n,)) * 2,
             'vmin': -10, 'vmax': 5,
             'grid_limits': [(-1, 1), (-1, 1)]
         }
         n = 100
         # x0 is a sparse CArray and the solution is a zero vector
-        exp_sum = self._create_exp_sum(d=n)
-        self.test_funcs['exp-sum-100-int'] = {
-            'fun': exp_sum,
+        poly = self._create_poly(d=n)
+        self.test_funcs['poly-100-int'] = {
+            'fun': poly,
             'x0': CArray.ones((n,), dtype=int) * 2
         }
         n = 100
-        exp_sum = self._create_exp_sum(d=n)
-        self.test_funcs['exp-sum-100-int-sparse'] = {
-            'fun': exp_sum,
+        poly = self._create_poly(d=n)
+        self.test_funcs['poly-100-int-sparse'] = {
+            'fun': poly,
             'x0': CArray.ones((n,), dtype=int).tosparse(dtype=int) * 2
         }
 
-    def _quadratic_fun(self, d):
+    @staticmethod
+    def _quadratic_fun(d):
         """Creates a quadratic function in d dimensions."""
 
         def _quadratic_fun_min(A, b):
             from scipy import linalg
             min_x_scipy = linalg.solve(
-                (2*A).tondarray(), -b.tondarray(), sym_pos=True)
+                (2 * A).tondarray(), -b.tondarray(), sym_pos=True)
             return CArray(min_x_scipy).ravel()
 
         A = CArray.eye(d, d)
@@ -96,16 +97,17 @@ class COptimizerTestCases(CUnitTest):
 
         return discr_fun
 
-    def _create_exp_sum(self, d):
-        """Creates an exponential sum function in d dimensions."""
+    @staticmethod
+    def _create_poly(d):
+        """Creates a polynomial function in d dimensions."""
 
-        def _exp_sum_fun(x):
+        def _poly_fun(x):
             return (x ** 4).sum() + x.sum() ** 2
 
-        def _exp_sum_grad(x):
+        def _poly_grad(x):
             return (4 * x ** 3) + 2 * x
 
-        int_fun = CFunction(fun=_exp_sum_fun, gradient=_exp_sum_grad)
+        int_fun = CFunction(fun=_poly_fun, gradient=_poly_grad)
         int_fun.global_min = lambda: 0.
         int_fun.global_min_x = lambda: CArray.zeros(d, )
 
@@ -235,7 +237,7 @@ class COptimizerTestCases(CUnitTest):
 
         if method is None:
             filename = fm.join(test_img_fold_path,
-                solver.class_type + '-' + solver.f.class_type)
+                               solver.class_type + '-' + solver.f.class_type)
         else:
             filename = fm.join(
                 test_img_fold_path,
