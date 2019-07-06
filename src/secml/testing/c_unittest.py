@@ -11,6 +11,7 @@ import pytest
 import numpy as np
 import numpy.testing as npt
 
+from secml import global_filterwarnings
 from secml.utils import CLog
 from secml.settings import SECML_STORE_LOGS
 
@@ -40,6 +41,10 @@ class CUnitTest(unittest.TestCase):
             logger_id='unittest', add_stream=True,
             file_handler='unittests.log' if SECML_STORE_LOGS is True else None)
         cls._logger.set_level('DEBUG')
+
+        # As per python 3.2 filterwarnings are reset by unittests for each
+        # TestCase. We thus need to restore our filter for every TestCase
+        global_filterwarnings()
 
     def timer(self):
         """Returns a CTimer to be used as context manager."""
