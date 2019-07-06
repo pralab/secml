@@ -15,7 +15,7 @@ _logger_handle.setFormatter(logging.Formatter(
     "%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
 _logger.addHandler(_logger_handle)
 
-__all__ = ['_NoValue', '__version__']
+__all__ = ['_NoValue', '__version__', 'global_filterwarnings']
 
 _here = os.path.abspath(os.path.dirname(__file__))
 
@@ -89,3 +89,18 @@ try:
     __version__ = str(_v) if _v.is_prerelease else _v.public
 except:
     raise RuntimeError("Unable to find version string.")
+
+
+# The following are global filters for warnings
+def global_filterwarnings():
+
+    import warnings
+
+    import scipy.sparse as scs
+    warnings.filterwarnings(
+        "ignore", category=scs.SparseEfficiencyWarning,
+        message="Changing the sparsity structure of a csr_matrix is expensive.*")
+
+
+# Call the filterwarnings method to make it active project-wide
+global_filterwarnings()
