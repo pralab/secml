@@ -241,7 +241,7 @@ class CDense(_CArrayInterface):
             elif self.ndim > 1 and self.shape[0] == 1:
                 # Check validity of slice
                 self._check_index_slice(1, idx)
-                # Fake 2D index
+                # Fake 2D index to obtain 2D if self is 2D
                 idx = (np.asarray([0]), idx)
 
             else:
