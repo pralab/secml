@@ -23,6 +23,7 @@ from secml.array.c_dense import CDense
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_intlike, is_int, is_bool
 from secml.core.constants import inf
+import copy
 
 
 def _expand_nnz_bool(array, nnz_val):
@@ -668,9 +669,10 @@ class CSparse(_CArrayInterface):
                 raise NotImplementedError(
                     "using zero or a boolean False as power is not supported "
                     "for sparse arrays. Convert to dense if needed.")
+            # indices/indptr must passed as copies (pow creates new data)
             return self.__class__((pow(self._data.data, power),
                                    self._data.indices, self._data.indptr),
-                                  shape=self.shape)
+                                  shape=self.shape, copy=True)
         else:
             return NotImplemented
 
@@ -1035,9 +1037,11 @@ class CSparse(_CArrayInterface):
     def round(self, decimals=0):
         """Evenly round to the given number of decimals."""
         data = np.round(self._data.data, decimals=decimals)
+        # Round does not allocate new memory (data.flags.OWNDATA = False)
+        # and indices/indptr must passed as copies
         return self.__class__(
             (data, self._data.indices, self._data.indptr),
-            shape=self.shape)
+            shape=self.shape, copy=True)
 
     def ceil(self):
         """Return the ceiling of the input, element-wise."""

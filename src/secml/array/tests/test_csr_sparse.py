@@ -9,7 +9,7 @@ from secml.array.c_sparse import CSparse
 
 class TestCSparse(CUnitTest):
     """Unit test for CSparse."""
-     
+
     def setUp(self):
         """Basic set up."""
         self.dense = CDense([[1, 0, 0, 0, 5],
