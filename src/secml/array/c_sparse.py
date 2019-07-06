@@ -276,8 +276,12 @@ class CSparse(_CArrayInterface):
                 raise IndexError("vector-like indexing is only applicable "
                                  "to arrays with shape[0] == 1.")
 
-            # Fake 2D index. Use ndarrays to mimic Matlab-like indexing
-            idx = (np.asarray([0]), idx)
+            # Fake index for row. Slice for columns is fine
+            idx = (0, idx)
+
+            # For fast column slicing we use csc. Also, for slices with
+            # step != 1 the result will actually be wrong using csr format
+            self._data = self._data.tocsc()
 
         elif isinstance(idx, tuple):
 
@@ -318,8 +322,13 @@ class CSparse(_CArrayInterface):
                     t[e_i] = idx_list[e_i]
                     self._check_index_bool(tuple(t))
 
-                elif is_slice(e):  # slice excluded
+                elif is_slice(e):  # slice excluded (keep slice)
                     idx_list[e_i] = e
+                    if e_i == 1:
+                        # For fast column slicing we use csc.
+                        # Also, for slices with step != 1 the result
+                        # will actually be wrong using csr format
+                        self._data = self._data.tocsc()
 
                 else:
                     raise TypeError("{:} should not be used for "
@@ -368,7 +377,7 @@ class CSparse(_CArrayInterface):
         # Check index for all other cases
         idx = self._check_index(idx)
 
-        # Ready for numpy
+        # Ready for scipy
         return self.__class__(self._data.__getitem__(idx))
 
     def __setitem__(self, idx, value):
