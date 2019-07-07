@@ -2367,15 +2367,15 @@ class CArray(_CArrayInterface):
 
         Parameters
         ----------
-        array : CArray or array_like
-            The array like object holding the elements to compare
-            current array with. Must have the same shape of first
-            array.
+        array : CArray
+            The array holding the elements to compare current array with.
+            Must have the same shape of first array.
 
         Returns
         -------
         CArray
             The element-wise logical AND between the two arrays.
+            If one of the two arrays is sparse, result will be sparse.
 
         Examples
         --------
@@ -2393,12 +2393,19 @@ class CArray(_CArrayInterface):
         CArray([ True False False False])
 
         """
-        if self.issparse:
-            array = self.__class__(array, tosparse=True)
-        else:
-            array = self.__class__(array).todense()
+        # If any of the two arrays is self, we call the operation on the
+        # sparse array and convert the other one to sparse
+        if self.issparse:  # Self is sparse and array is dense
+            array1 = self
+            array2 = array.tosparse()
+        elif array.issparse:  # Self is dense and array is sparse
+            array1 = array
+            array2 = self.tosparse()
+        else:  # Self and array are dense
+            array1 = self
+            array2 = array
 
-        return self.__class__(self._data.logical_and(array._data))
+        return self.__class__(array1._data.logical_and(array2._data))
 
     def logical_or(self, array):
         """Element-wise logical OR of array elements.
