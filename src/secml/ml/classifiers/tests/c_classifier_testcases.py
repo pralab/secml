@@ -228,6 +228,47 @@ class CClassifierTestCases(CUnitTest):
                 clf_pre, ds.X[0, :], extra_classes=extra_classes,
                 th=th, epsilon=epsilon, **grad_kwargs)
 
+    def _test_sparse_linear(self, ds, clf):
+        """Test linear classifier operations on sparse data.
+
+        For linear classifiers, when training on sparse data, the weights
+        vector must be sparse. Also `grad_f_x` must return a sparse array.
+
+        Parameters
+        ----------
+        ds : CDataset
+        clf : CClassifier
+
+        """
+        self.logger.info("Testing {:} operations on sparse data.".format(
+            clf.__class__.__name__))
+
+        ds_sparse = ds.tosparse()
+
+        # Fitting on sparse data
+        clf.fit(ds_sparse)
+
+        # Resulting weights vector must be sparse
+        self.assertTrue(clf.w.issparse)
+
+        # Predictions on dense and sparse data
+        x = ds.X[0, :]
+        x_sparse = ds_sparse.X[0, :]
+
+        y, s = clf.predict(
+            x, return_decision_function=True)
+        y_sparse, s_sparse = clf.predict(
+            x_sparse, return_decision_function=True)
+
+        self.assert_array_equal(y, y_sparse)
+        self.assert_array_equal(s, s_sparse)
+
+        # Gradient must be sparse if training data is sparse
+        grad = clf.grad_f_x(x_sparse, y=0)
+        self.assertTrue(grad.issparse)
+        grad = clf.grad_f_x(x, y=0)
+        self.assertTrue(grad.issparse)
+
 
 if __name__ == '__main__':
     CUnitTest.main()

@@ -176,6 +176,11 @@ class TestCClassifierLogistic(CClassifierTestCases):
         # (all classes will be tested)
         self._test_gradient_numerical(self.log, pattern)
 
+    def test_sparse(self):
+        """Test classifier operations on sparse data."""
+
+        self._test_sparse_linear(self.dataset.tosparse(), self.log)
+
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""
         ds = CDLRandom().load()
