@@ -20,6 +20,10 @@ class TestCArrayUtilsComparison(CArrayTestCases):
 
             self.assertTrue((logical_and_res == expected).all())
 
+            if array1.issparse or array2.issparse:
+                # If a sparse array is involved, result must be sparse
+                self.assertTrue(logical_and_res.issparse)
+
         _logical_and(self.array_sparse, self.array_dense,
                      self.array_sparse.astype(bool))
         _logical_and(self.row_sparse, self.row_dense,

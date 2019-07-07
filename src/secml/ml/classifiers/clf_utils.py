@@ -26,7 +26,8 @@ def check_binary_labels(labels):
 
     """
     if (is_int(labels) and not (labels == 0 or labels == 1)) or \
-            CArray(CArray(labels != 0).logical_and(labels != 1)).any():
+            (isinstance(labels, CArray) and
+             (labels != 0).logical_and(labels != 1).any()):
         raise ValueError("input labels should be binary in {0, +1} interval.")
 
 
