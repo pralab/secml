@@ -246,7 +246,7 @@ triage:run:
   stage: triage
   extends: .triage
   script:
-    - gitlab-triage --debug --host-url $CI_PROJECT_DOMAIN --token $TRIAGE_API_TOKEN --project-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
+    - gitlab-triage --debug --host-url $CI_PROJECT_DOMAIN --token $TRIAGE_API_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
   only:
     - schedules
 
@@ -254,7 +254,7 @@ triage:run:dry:
   stage: triage
   extends: .triage
   script:
-    - gitlab-triage --dry-run --debug --host-url $CI_PROJECT_DOMAIN --token $TRIAGE_API_TOKEN --project-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
+    - gitlab-triage --dry-run --debug --host-url $CI_PROJECT_DOMAIN --token $TRIAGE_API_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
   only:
     - schedules
     - web
