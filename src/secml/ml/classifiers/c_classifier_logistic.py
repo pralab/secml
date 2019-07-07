@@ -30,6 +30,7 @@ class CClassifierLogistic(CClassifierLinear, CClassifierGradientLogisticMixin):
     __class_type = 'logistic'
 
     def __init__(self, C=1.0, max_iter=100, random_seed=None, preprocess=None):
+
         CClassifierLinear.__init__(self, preprocess=preprocess)
 
         self.C = C
@@ -37,9 +38,6 @@ class CClassifierLogistic(CClassifierLinear, CClassifierGradientLogisticMixin):
         self.random_seed = random_seed
 
         self._loss = CLoss.create('log')
-
-        self._init_w = None
-        self._init_b = None
 
         CClassifierGradientLogisticMixin.__init__(self)
 
@@ -109,21 +107,33 @@ class CClassifierLogistic(CClassifierLinear, CClassifierGradientLogisticMixin):
             warm_start=False,
         )
 
-    def _fit(self, ds):
-        """
-        Train the classifier.
+    def _fit(self, dataset):
+        """Trains the One-Vs-All Logistic classifier.
 
-        The weights and bias initialization is saved the first time that the
-        training function is runned and kept fixed
+        The following is a private method computing one single
+        binary (2-classes) classifier of the OVA schema.
 
-        :param ds:
-        :return:
+        Representation of each classifier attribute for the multiclass
+        case is explained in corresponding property description.
+
+        Parameters
+        ----------
+        dataset : CDataset
+            Binary (2-classes) training set. Must be a :class:`.CDataset`
+            instance with patterns data and corresponding labels.
+
+        Returns
+        -------
+        trained_cls : classifier
+            Instance of the used solver trained using input dataset.
+
         """
         self._init_clf()
 
-        self._sklearn_clf.fit(ds.X.tondarray(), ds.Y.tondarray())
+        self._sklearn_clf.fit(dataset.X.get_data(), dataset.Y.tondarray())
 
-        self._w = CArray(self._sklearn_clf.coef_)
-        self._b = CArray(self._sklearn_clf.intercept_)
+        self._w = CArray(
+            self._sklearn_clf.coef_, tosparse=dataset.issparse).ravel()
+        self._b = CArray(self._sklearn_clf.intercept_[0])[0]
 
         return self
