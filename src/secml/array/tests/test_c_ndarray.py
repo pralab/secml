@@ -5,7 +5,6 @@ from secml.array.c_dense import CDense
 import numpy as np
 from six.moves import range
 from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-import warnings
 
 
 class TestCDense(CUnitTest):
@@ -66,8 +65,8 @@ class TestCDense(CUnitTest):
 
         # For some reasons np.genfromtxt does not close the file here
         # Let's handle the resource warning abount unclosed file
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", message="unclosed file")
+        with self.logger.catch_warnings():
+            self.logger.filterwarnings("ignore", message="unclosed file")
             with self.assertRaises(IndexError) as e:
                 CDense().load(test_file, startrow=10)
         self.logger.info("Expected error: {:}".format(e.exception))

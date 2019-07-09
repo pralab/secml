@@ -10,6 +10,14 @@ from secml.figure import CFigure
 class TestCLda(CPreProcessTestCases):
     """Unittests for CLDA."""
 
+    def setUp(self):
+        # As our test cases are not always linearly independent,
+        # LDA will warn about "Variables are collinear".
+        # We can ignore the warning in this context
+        self.logger.filterwarnings("ignore", "Variables are collinear.")
+
+        super(TestCLda, self).setUp()
+
     def test_lda(self):
         """Test for LDA. This compares sklearn equivalent to our method."""
 
@@ -17,7 +25,7 @@ class TestCLda(CPreProcessTestCases):
             self.logger.info("Original array is:\n{:}".format(array))
 
             # Sklearn normalizer
-            sklearn_lda= LinearDiscriminantAnalysis().fit(
+            sklearn_lda = LinearDiscriminantAnalysis().fit(
                 array.tondarray(), y.tondarray())
             target = CArray(sklearn_lda.transform(array.tondarray()))
             # Our normalizer
@@ -65,32 +73,25 @@ class TestCLda(CPreProcessTestCases):
 
     def test_chain(self):
         """Test a chain of preprocessors."""
-        import warnings
-        with warnings.catch_warnings():
-            # As we are applying a chain of linear transformations,
-            # LDA will warn about "Variables are collinear".
-            # We can ignore the warning in this context
-            warnings.filterwarnings("ignore", "Variables are collinear.")
+        x_chain = self._test_chain(
+            self.array_dense,
+            ['min-max', 'mean-std', 'lda'],
+            [{'feature_range': (-5, 5)}, {}, {}],
+            y=CArray([1, 0, 1])  # LDA is supervised
+        )
 
-            x_chain = self._test_chain(
-                self.array_dense,
-                ['min-max', 'mean-std', 'lda'],
-                [{'feature_range': (-5, 5)}, {}, {}],
-                y=CArray([1, 0, 1])  # LDA is supervised
-            )
+        # Expected shape is (3, 1), as lda max n_components is classes - 1
+        self.assertEqual((self.array_dense.shape[0], 1), x_chain.shape)
 
-            # Expected shape is (3, 1), as lda max n_components is classes - 1
-            self.assertEqual((self.array_dense.shape[0], 1), x_chain.shape)
+        x_chain = self._test_chain(
+            self.array_dense,
+            ['mean-std', 'lda', 'min-max'],
+            [{}, {}, {}],
+            y=CArray([1, 0, 1])  # LDA is supervised
+        )
 
-            x_chain = self._test_chain(
-                self.array_dense,
-                ['mean-std', 'lda', 'min-max'],
-                [{}, {}, {}],
-                y=CArray([1, 0, 1])  # LDA is supervised
-            )
-
-            # Expected shape is (3, 1), as lda max n_components is classes - 1
-            self.assertEqual((self.array_dense.shape[0], 1), x_chain.shape)
+        # Expected shape is (3, 1), as lda max n_components is classes - 1
+        self.assertEqual((self.array_dense.shape[0], 1), x_chain.shape)
 
     # TODO: ADD TEST FOR GRADIENT (WHEN IMPLEMENTED)
 
