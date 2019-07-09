@@ -26,7 +26,7 @@ class TestCArraySystemOverloads(CArrayTestCases):
         self._test_operator_cycle(operators, items, expected_result)
 
         operators = [op.mul]
-        expected_result = [CSparse, CSparse, CDense, CDense]
+        expected_result = [CSparse, CSparse, CSparse, CDense]
         items = [(self.array_sparse, self.array_sparse),
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),

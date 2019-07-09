@@ -85,7 +85,7 @@ class CNormalizerLinear(CNormalizer):
             raise ValueError("array to normalize must have {:} "
                              "features (columns).".format(self.w.size))
 
-        return self.w * x + self.b
+        return (x * self.w).todense() + self.b
 
     def _revert(self, x):
         """Undo the linear normalization of input data.

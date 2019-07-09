@@ -862,8 +862,9 @@ class CArray(_CArrayInterface):
             return self.__class__(self._data.__mul__(other))
         elif isinstance(other, CArray):
             # dense vs sparse not supported (sparse vs dense IS supported)
+            # To preserve sparsity, we always perform sparse * dense
             if self.isdense is True and other.issparse is True:
-                other = other.todense()
+                return self.__class__(other._data.__mul__(self._data))
             return self.__class__(self._data.__mul__(other._data))
         elif is_ndarray(other) or is_scsarray(other):
             raise TypeError("unsupported operand type(s) for *: "
