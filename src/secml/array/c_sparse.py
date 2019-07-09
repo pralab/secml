@@ -401,6 +401,9 @@ class CSparse(_CArrayInterface):
         # The tuple can now be managed directly by scipy
         self._data.__setitem__(idx, value)
 
+        # Making sure the internal buffer is in csr format
+        self._data = self._data.tocsr()
+
         # Cleaning array after setting
         self.eliminate_zeros()
 
