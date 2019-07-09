@@ -11,6 +11,7 @@ import logging
 import time
 import sys
 import os
+import warnings
 from functools import wraps
 
 # Custom logging level that DISABLE logging of all messages
@@ -328,6 +329,43 @@ class CLog(object):
 
         """
         return CTimer.timed(log=self, msg=msg)
+
+    @staticmethod
+    def catch_warnings():
+        """A context manager that copies and restores the warnings filter upon
+        exiting the context.
+
+        Wrapper of `warnings.catch_warnings`.
+
+        """
+        return warnings.catch_warnings()
+
+    @staticmethod
+    def filterwarnings(action, message="", category=Warning,
+                       module="", lineno=0, append=False):
+        """Insert an entry into the list of warnings filters (at the front).
+
+        Wrapper of `warnings.filterwarnings`.
+
+        Parameters
+        ----------
+        action : str
+            One of "error", "ignore", "always", "default", "module", or "once".
+        message : str, optional
+            A regex that the warning message must match.
+        category : class, optional
+            A class that the warning must be a subclass of. Default `Warning`.
+        module : str, optional
+            A regex that the module name must match.
+        lineno : int, optional
+            An integer line number, 0 (default) matches all warnings.
+        append : bool, optional
+            If true, append to the list of filters.
+
+        """
+        return warnings.filterwarnings(
+            action, message=message, category=category,
+            module=module, lineno=lineno, append=append)
 
 
 class CTimer(object):
