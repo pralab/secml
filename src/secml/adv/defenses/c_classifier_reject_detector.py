@@ -93,11 +93,6 @@ class CClassifierRejectDetector(CClassifierReject,
         """Number of classes of training dataset."""
         return self._clf.n_classes
 
-    @property
-    def n_features(self):
-        """Number of features (before preprocessing)."""
-        return self._clf.n_features
-
     def _normalize_scores(self, orig_score):
         """Normalizes the scores using softmax."""
         return self._softmax.softmax(orig_score)
@@ -123,6 +118,8 @@ class CClassifierRejectDetector(CClassifierReject,
             Instance of the classifier trained using input dataset.
 
         """
+        self._n_features = dataset.num_features
+
         data_x = dataset.X
         # Transform data if a preprocess is defined
         if self.preprocess is not None:
