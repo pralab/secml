@@ -47,7 +47,7 @@ class CEvasionRejectTestCases(object):
 
         def setUp(self):
 
-            self.show_plot = False
+            self.show_plot = True
 
             import numpy as np
             np.random.seed(12345678)
@@ -350,7 +350,7 @@ class CEvasionRejectTestCases(object):
                 c = self.normalizer.revert(c)
                 x = self.normalizer.revert(x)
             constr = CConstraintL2(center=c, radius=r)
-            return constr.constraint(x)
+            return x.apply_along_axis(constr.constraint, axis=1)
 
         def _plot_decision_function(self, fig):
             """Plot the decision function of a multiclass classifier."""
