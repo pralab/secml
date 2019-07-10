@@ -11,6 +11,13 @@ class TestCArrayUtilsMathElementWise(CArrayTestCases):
         """Test for CArray.sqrt() method."""
         self.logger.info("Test for CArray.sqrt() method.")
 
+        # We are testing sqrt on negative values
+        self.logger.filterwarnings(
+            action="ignore",
+            message="invalid value encountered in sqrt",
+            category=RuntimeWarning
+        )
+
         def _check_sqrt(array, expected):
             self.logger.info("Array:\n{:}".format(array))
 
