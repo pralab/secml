@@ -103,6 +103,13 @@ def global_filterwarnings():
                 "matrices or deal with linear algebra*"
     )
 
+    # TODO: REMOVE AFTER SWITCHING TO PYTHON 3
+    warnings.filterwarnings(
+        "ignore", category=DeprecationWarning,
+        message="The SafeConfigParser class has been renamed to "
+                "ConfigParser in Python 3.2.*"
+    )
+
 
 # Call the filterwarnings method to make it active project-wide
 global_filterwarnings()
