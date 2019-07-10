@@ -167,6 +167,18 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         """Test for CArray.norm() method."""
         self.logger.info("Test for CArray.norm() method.")
 
+        # Few norms involve divisions by zeros in our test cases, that's ok
+        self.logger.filterwarnings(
+            action="ignore",
+            message="divide by zero encountered in reciprocal",
+            category=RuntimeWarning
+        )
+        self.logger.filterwarnings(
+            action="ignore",
+            message="divide by zero encountered in power",
+            category=RuntimeWarning
+        )
+
         def _check_norm(array):
             self.logger.info("array:\n{:}".format(array))
 
@@ -232,6 +244,18 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
     def test_norm_2d(self):
         """Test for CArray.norm_2d() method."""
         self.logger.info("Test for CArray.norm_2d() method.")
+
+        # Few norms involve divisions by zeros in our test cases, that's ok
+        self.logger.filterwarnings(
+            action="ignore",
+            message="divide by zero encountered in reciprocal",
+            category=RuntimeWarning
+        )
+        self.logger.filterwarnings(
+            action="ignore",
+            message="divide by zero encountered in power",
+            category=RuntimeWarning
+        )
 
         def _check_norm_2d(array):
             self.logger.info("array:\n{:}".format(array))
