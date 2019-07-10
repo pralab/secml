@@ -13,6 +13,7 @@ from secml.data.loader import CDLRandomBlobs
 from secml.ml.kernel import CKernelRBF
 from secml.ml.features import CPreProcess
 from secml.utils import fm
+from secml.figure import CFigure
 
 
 class TestCClassifierRejectDetector(
@@ -147,6 +148,31 @@ class TestCClassifierRejectDetector(
         # Mixed linear/nonlinear transformations without gradient
         self._test_preprocess(
             self.dataset, self.clf, ['pca', 'unit-norm'], [{}, {}])
+
+    def test_draw(self):
+        """ Compare the classifiers graphically"""
+        self.logger.info("Testing classifiers graphically")
+
+        fig = CFigure(width=10, markersize=8)
+        # Plot dataset points
+        fig.switch_sptype(sp_type='ds')
+
+        # mark the rejected samples
+        y = self.clf.predict(self.dataset.X)
+        fig.sp.plot_ds(
+            self.dataset[y == -1, :], colors=['k', 'k'], markersize=12)
+
+        # plot the dataset
+        fig.sp.plot_ds(self.dataset)
+
+        # Plot objective function
+        fig.switch_sptype(sp_type='function')
+        fig.sp.plot_fobj(self.clf.decision_function,
+                         grid_limits=self.dataset.get_bounds(),
+                         levels=[0.5], y=1)
+        fig.sp.title('Classifier with reject threshold')
+
+        fig.show()
 
 
 if __name__ == '__main__':

@@ -38,7 +38,7 @@ class TestCClassifierKDE(CClassifierTestCases):
         self.kde.fit(self.dataset)
 
         fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(self.kde.decision_function, y=1)
+        fig.sp.plot_fobj(self.kde.decision_function, y=1, plot_levels=False)
         fig.title('kde Classifier')
 
         self.logger.info(self.kde.predict(self.dataset.X))

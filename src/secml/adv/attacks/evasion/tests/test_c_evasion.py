@@ -185,7 +185,8 @@ class CEvasionTestCases(object):
             fig.switch_sptype(sp_type="function")
             fig.sp.plot_fobj(
                 func=evas.classifier.decision_function,
-                grid_limits=self.grid_limits, colorbar=False, y=1)
+                grid_limits=self.grid_limits, colorbar=False,
+                levels=[0], y=1)
             # construct and plot box
             if self.lb == "x0":
                 self.lb = self.x0
