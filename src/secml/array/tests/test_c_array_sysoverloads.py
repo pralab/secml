@@ -42,7 +42,14 @@ class TestCArraySystemOverloads(CArrayTestCases):
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
                  (self.array_dense, self.array_dense)]
-        self._test_operator_cycle(operators, items, expected_result)
+
+        with self.logger.catch_warnings():
+            # For 0 / 0 divisions
+            self.logger.filterwarnings(
+                action='ignore',
+                message="invalid value encountered in true_divide",
+                category=RuntimeWarning)
+            self._test_operator_cycle(operators, items, expected_result)
 
         operators = [op.pow, CArray.pow]
         expected_result = [CDense, CDense]
