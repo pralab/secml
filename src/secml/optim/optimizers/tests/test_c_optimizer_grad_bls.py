@@ -22,7 +22,10 @@ class TestCOptimizerGradBLS(COptimizerTestCases):
 
     def test_minimize_mc_cormick(self):
         """Test for COptimizer.minimize() method on mc-cormick fun."""
-        opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12}
+        from secml.optim.function import CFunctionMcCormick
+        from secml.optim.constraints import CConstraintBox
+        opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12,
+                      'bounds': CConstraintBox(*CFunctionMcCormick.bounds())}
 
         self._test_minimize(
             COptimizerGradBLS, 'mc-cormick', opt_params=opt_params)

@@ -137,7 +137,8 @@ class COptimizerScipy(COptimizer):
         # select method
         method = kwargs['method'] if 'method' in kwargs else None
         if method is None:
-            method = 'BFGS' if self.bounds is not None else 'L-BFGS-B'
+            # Only 'L-BFGS-B` supports bounds
+            method = 'BFGS' if self.bounds is None else 'L-BFGS-B'
         # check if method is supported
         if method not in SUPPORTED_METHODS:
             raise NotImplementedError("selected method is not supported.")
