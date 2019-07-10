@@ -121,6 +121,8 @@ class CUnitTest(unittest.TestCase):
         if desired is float:
             # To manage the built-in float as either np.float32 or np.float64
             desired = np.floating
+        else:  # Convert built-in types to numpy dtypes for using issubdtype
+            desired = np.dtype(desired).type
         if not np.issubdtype(actual, desired):
             raise AssertionError("{:} is not lower/equal to {:} in the type "
                                  "hierarchy.".format(actual, desired))
