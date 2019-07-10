@@ -214,7 +214,7 @@ class TestEvasionMNISTCleverhansAttack(CUnitTest):
         """
         self.logger.info("Test targeted attacks")
 
-        ids_untestable_clf = []
+        ids_untestable_clf = ['DeepFool']
         self._test_attack(y_target_idx=2, attack_type='targeted',
                           ids_untestable_clf=ids_untestable_clf)
 
