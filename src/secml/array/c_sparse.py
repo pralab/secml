@@ -398,10 +398,13 @@ class CSparse(_CArrayInterface):
         # Check index for all other cases
         idx = self._check_index(idx)
 
+        # We use lil format for efficient changing of sparsity structure
+        self._data = self._data.tolil()
+
         # The tuple can now be managed directly by scipy
         self._data.__setitem__(idx, value)
 
-        # Making sure the internal buffer is in csr format
+        # Convert the internal buffer back to csr format
         self._data = self._data.tocsr()
 
         # Cleaning array after setting
