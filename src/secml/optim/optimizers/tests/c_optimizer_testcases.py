@@ -150,9 +150,10 @@ class COptimizerTestCases(CUnitTest):
                 fun.__class__.__name__, opt.__class__.__name__))
 
         if fun.class_type == 'mc-cormick' and 'bounds' not in opt_params:
-            self.logger.info("Setting default bounds for mc-cormick function.")
-            # set default bounds
-            opt.bounds = CConstraint.create('box', *fun.bounds())
+            raise RuntimeError(
+                "mc-cormick always needs the following bounds for "
+                "correct optimization: {:}, {:}".format(*fun.bounds())
+            )
 
         min_x = opt.minimize(fun_dict['x0'], **minimize_params)
 
