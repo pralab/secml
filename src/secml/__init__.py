@@ -101,6 +101,13 @@ def global_filterwarnings():
         "ignore", category=scs.SparseEfficiencyWarning,
         message="Changing the sparsity structure of a csr_matrix is expensive.*")
 
+    # TODO: REMOVE WHEN SCIPY MIN VERSION WILL BE 1.3
+    warnings.filterwarnings(
+        "ignore", category=PendingDeprecationWarning,
+        message="the matrix subclass is not the recommended way to represent "
+                "matrices or deal with linear algebra*"
+    )
+
 
 # Call the filterwarnings method to make it active project-wide
 global_filterwarnings()
