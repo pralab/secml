@@ -26,8 +26,14 @@ class TestCArrayUtilsAppendMerge(CArrayTestCases):
                 self.assertEqual(1, append_res.ndim)
             else:  # ... but if array is sparse let's check for shape[0]
                 self.assertEqual(1, append_res.shape[0])
-            self.assertTrue((append_res[:array1.size] == array1.ravel()).all())
-            self.assertTrue((append_res[array1.size:] == array2.ravel()).all())
+            # Let's check the elements of the resulting array
+            a1_comp = array1.todense().ravel()
+            a2_comp = array2.todense().ravel()
+            if array1.issparse:  # result will be sparse, so always 2d
+                a1_comp = a1_comp.atleast_2d()
+                a2_comp = a2_comp.atleast_2d()
+            self.assert_array_equal(append_res[:array1.size], a1_comp)
+            self.assert_array_equal(append_res[array1.size:], a2_comp)
 
             array1_shape0 = array1.atleast_2d().shape[0]
             array1_shape1 = array1.atleast_2d().shape[1]
@@ -40,7 +46,7 @@ class TestCArrayUtilsAppendMerge(CArrayTestCases):
             self.assertEqual(array1_shape1, append_res.shape[1])
             self.assertEqual(
                 array1_shape0 + array2_shape0, append_res.shape[0])
-            self.assertTrue((append_res[array1_shape0:, :] == array2).all())
+            self.assert_array_equal(append_res[array1_shape0:, :], array2)
 
             # check append on axis 1 (horizontal)
             append_res = array1.append(array2, axis=1)
@@ -48,7 +54,7 @@ class TestCArrayUtilsAppendMerge(CArrayTestCases):
             self.assertEqual(
                 array1_shape1 + array2_shape1, append_res.shape[1])
             self.assertEqual(array1_shape0, append_res.shape[0])
-            self.assertTrue((append_res[:, array1_shape1:] == array2).all())
+            self.assert_array_equal(append_res[:, array1_shape1:], array2)
 
         _append_allaxis(self.array_dense, self.array_dense)
         _append_allaxis(self.array_sparse, self.array_sparse)

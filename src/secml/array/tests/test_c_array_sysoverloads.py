@@ -357,7 +357,14 @@ class TestCArraySystemOverloads(CArrayTestCases):
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
                  (self.array_dense, self.array_dense)]
-        self._test_operator_cycle(operators, items, expected_result)
+
+        with self.logger.catch_warnings():
+            # Comparing sparse arrays using ==, <= and >= is inefficient
+            self.logger.filterwarnings(
+                action='ignore',
+                message="Comparing sparse matrices using*",
+                category=scs.SparseEfficiencyWarning)
+            self._test_operator_cycle(operators, items, expected_result)
 
     def test_comparison_array_vs_scalar(self):
         """Test for comparison operators array vs scalar."""
@@ -367,7 +374,16 @@ class TestCArraySystemOverloads(CArrayTestCases):
                  (self.array_dense, 2),
                  (self.array_sparse, np.ravel(2)[0]),
                  (self.array_dense, np.ravel(2)[0])]
-        self._test_operator_cycle(operators, items, expected_result)
+        with self.logger.catch_warnings():
+            # Comparing a sparse matrix with a scalar greater than zero
+            # using < or <= is inefficient
+            # Comparing a sparse matrix with a nonzero scalar
+            # using != is inefficient
+            self.logger.filterwarnings(
+                action='ignore',
+                message="Comparing a sparse matrix*",
+                category=scs.SparseEfficiencyWarning)
+            self._test_operator_cycle(operators, items, expected_result)
 
     def test_comparison_array_vs_unsupported(self):
         """Test for comparison operators array vs unsupported types."""
@@ -598,35 +614,35 @@ class TestCArraySystemOverloads(CArrayTestCases):
         res = []
         for elem_id, elem in enumerate(self.array_dense):
             res.append(elem)
-            self.assertFalse(self.array_dense.ravel()[elem_id] != elem)
+            self.assertEqual(self.array_dense.ravel()[elem_id].item(),  elem)
         # Check if all array elements have been returned
         self.assertEqual(self.array_dense.size, len(res))
 
         res = []
         for elem_id, elem in enumerate(self.array_sparse):
             res.append(elem)
-            self.assertFalse(self.array_sparse.ravel()[elem_id] != elem)
+            self.assertEqual(self.array_sparse.ravel()[elem_id].item(), elem)
         # Check if all array elements have been returned
         self.assertEqual(self.array_sparse.size, len(res))
 
         res = []
         for elem_id, elem in enumerate(self.row_flat_dense):
             res.append(elem)
-            self.assertFalse(self.row_flat_dense[elem_id] != elem)
+            self.assertEqual(self.row_flat_dense[elem_id].item(), elem)
         # Check if all array elements have been returned
         self.assertEqual(self.row_flat_dense.size, len(res))
 
         res = []
         for elem_id, elem in enumerate(self.row_dense):
             res.append(elem)
-            self.assertFalse(self.row_dense[elem_id] != elem)
+            self.assertEqual(self.row_dense[elem_id].item(), elem)
         # Check if all array elements have been returned
         self.assertEqual(self.row_dense.size, len(res))
 
         res = []
         for elem_id, elem in enumerate(self.row_sparse):
             res.append(elem)
-            self.assertFalse(self.row_sparse[elem_id] != elem)
+            self.assertEqual(self.row_sparse[elem_id].item(), elem)
         # Check if all array elements have been returned
         self.assertEqual(self.row_sparse.size, len(res))
 

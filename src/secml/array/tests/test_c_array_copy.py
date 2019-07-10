@@ -21,7 +21,7 @@ class TestCArrayCopy(CArrayTestCases):
 
             # copy method must return a copy of data
             array_deepcopy[:, :] = 9
-            self.assertFalse((array_deepcopy == array).any())
+            self.assertTrue((array_deepcopy != array).all())
 
         _deepcopy(self.array_sparse)
         _deepcopy(self.array_dense)
