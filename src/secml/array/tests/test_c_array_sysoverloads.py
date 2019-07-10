@@ -180,7 +180,13 @@ class TestCArraySystemOverloads(CArrayTestCases):
             operators = [op.truediv, op.floordiv]
         expected_result = [CDense] * 5
         items = list(product(test_scalars, [self.array_dense]))
-        self._test_operator_cycle(operators, items, expected_result)
+        with self.logger.catch_warnings():
+            # we are dividing using arrays having zeros
+            self.logger.filterwarnings(
+                action='ignore',
+                message="divide by zero encountered in true_divide",
+                category=RuntimeWarning)
+            self._test_operator_cycle(operators, items, expected_result)
 
         # ZERO SCALAR / DENSE ARRAY
         # zero scalar / sparse array is not supported
@@ -190,7 +196,18 @@ class TestCArraySystemOverloads(CArrayTestCases):
             operators = [op.truediv, op.floordiv]
         expected_result = [CDense] * 5
         items = list(product(test_z_scalars, [self.array_dense]))
-        self._test_operator_cycle(operators, items, expected_result)
+        with self.logger.catch_warnings():
+            # we are dividing a zero scalar by something
+            self.logger.filterwarnings(
+                action='ignore',
+                message="divide by zero encountered in true_divide",
+                category=RuntimeWarning)
+            # For 0 / 0 divisions
+            self.logger.filterwarnings(
+                action='ignore',
+                message="invalid value encountered in true_divide",
+                category=RuntimeWarning)
+            self._test_operator_cycle(operators, items, expected_result)
 
         # ARRAY ** NONZERO SCALAR
         operators = [op.pow, CArray.pow]
