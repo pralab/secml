@@ -866,6 +866,13 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         self.logger.info(
             "Test for CArray.nanmin(), CArray.nanmax() method.")
 
+        # We are going to test few cases when the results actually contain nans
+        self.logger.filterwarnings(
+            action="ignore",
+            message="All-NaN slice encountered",
+            category=RuntimeWarning
+        )
+
         def _check_nanminnanmax(func, array, expected):
             # Adding few nans to array
             array = array.astype(float)  # Arrays with nans have float dtype
