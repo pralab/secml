@@ -11,6 +11,14 @@ class TestCPca(CPreProcessTestCases):
     def test_pca(self):
         """Test for PCA. This compares sklearn equivalent to our method."""
 
+        # Few test cases involve an all-zero column,
+        # so PCA will trigger a 0/0 warning
+        self.logger.filterwarnings(
+            action='ignore',
+            message='invalid value encountered in true_divide',
+            category=RuntimeWarning
+            )
+
         def sklearn_comp(array):
             self.logger.info("Original array is:\n{:}".format(array))
 

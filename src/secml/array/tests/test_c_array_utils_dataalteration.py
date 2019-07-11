@@ -21,16 +21,16 @@ class TestCArrayUtilsDataAlteration(CArrayTestCases):
 
             round_res = array_float.round()
             self.logger.info("a.round(): \n{:}".format(round_res))
-            self.assertTrue((round_res == array.astype(float)).all())
+            self.assert_array_equal(round_res, array.astype(float))
 
             round_res = array_float.round(decimals=2)
             self.logger.info("a.round(decimals=2): \n{:}".format(round_res))
             array_test = array * 1.02
-            self.assertTrue((round_res == array_test).all())
+            self.assert_array_equal(round_res, array_test)
 
             round_res = array_float.round(decimals=6)
             self.logger.info("a.round(decimals=6): \n{:}".format(round_res))
-            self.assertTrue((round_res == array_float).all())
+            self.assert_array_equal(round_res, array_float)
 
         _round(self.array_sparse)
         _round(self.row_sparse)

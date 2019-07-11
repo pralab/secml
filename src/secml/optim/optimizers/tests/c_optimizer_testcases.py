@@ -36,7 +36,7 @@ class COptimizerTestCases(CUnitTest):
         self.test_funcs['rosenbrock'] = {
             'fun': CFunction.create('rosenbrock'),
             'x0': CArray([-1, -1]),
-            'grid_limits': [(-1.1, 1.1), (-1.1, 1.1)],
+            'grid_limits': [(-2.1, 1.1), (-2.1, 1.1)],
             'vmin': 0, 'vmax': 10
         }
         quad = self._quadratic_fun(2)
@@ -205,7 +205,7 @@ class COptimizerTestCases(CUnitTest):
                          plot_background=True,
                          n_grid_points=30, n_colors=25,
                          grid_limits=grid_limits,
-                         levels=[1], levels_color='gray', levels_style='--',
+                         levels=[0.5], levels_color='gray', levels_style='--',
                          colorbar=True, func_args=(solver.f.fun, 1,),
                          vmin=vmin, vmax=vmax)
 

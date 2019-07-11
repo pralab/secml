@@ -96,10 +96,19 @@ def global_filterwarnings():
 
     import warnings
 
-    import scipy.sparse as scs
+    # TODO: REMOVE WHEN SCIPY MIN VERSION WILL BE 1.3
     warnings.filterwarnings(
-        "ignore", category=scs.SparseEfficiencyWarning,
-        message="Changing the sparsity structure of a csr_matrix is expensive.*")
+        "ignore", category=PendingDeprecationWarning,
+        message="the matrix subclass is not the recommended way to represent "
+                "matrices or deal with linear algebra*"
+    )
+
+    # TODO: REMOVE AFTER SWITCHING TO PYTHON 3
+    warnings.filterwarnings(
+        "ignore", category=DeprecationWarning,
+        message="The SafeConfigParser class has been renamed to "
+                "ConfigParser in Python 3.2.*"
+    )
 
 
 # Call the filterwarnings method to make it active project-wide

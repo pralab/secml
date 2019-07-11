@@ -147,7 +147,7 @@ class CAttackEvasionCleverhans(CAttackEvasion):
         self._clvrh_clf = CModelCleverhans(
             self._surrogate_classifier, out_dims=self._n_classes)
 
-        # create an istance of the chosen cleverhans attack
+        # create an instance of the chosen cleverhans attack
         clvrh_attack = self._clvrh_attack_class(
             self._clvrh_clf, sess=self._tfsess)
 
@@ -162,9 +162,17 @@ class CAttackEvasionCleverhans(CAttackEvasion):
 
         # create the tf operations to generate the attack
         if not self.y_target:
-            self._adv_x_T = clvrh_attack.generate(
-                self._initial_x_P, y=self._y_P, **self._clvrh_params)
+            if 'y' in clvrh_attack.feedable_kwargs:
+                self._adv_x_T = clvrh_attack.generate(
+                    self._initial_x_P, y=self._y_P, **self._clvrh_params)
+            else:  # 'y' not required by attack
+                self._adv_x_T = clvrh_attack.generate(
+                    self._initial_x_P, **self._clvrh_params)
         else:
+            if 'y_target' not in clvrh_attack.feedable_kwargs:
+                raise RuntimeError(
+                    "cannot perform a targeted {:} attack".format(
+                        clvrh_attack.__class__.__name__))
             self._adv_x_T = clvrh_attack.generate(
                 self._initial_x_P, y_target=self._y_P, **self._clvrh_params)
 

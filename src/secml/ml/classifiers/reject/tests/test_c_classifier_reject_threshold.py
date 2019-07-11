@@ -6,6 +6,7 @@ from secml.ml.classifiers import CClassifierSGD
 from secml.ml.classifiers.reject import CClassifierRejectThreshold
 from secml.ml.classifiers.loss import *
 from secml.ml.classifiers.regularizer import *
+from secml.figure import CFigure
 
 
 class TestCClassifierRejectThreshold(
@@ -25,6 +26,31 @@ class TestCClassifierRejectThreshold(
         self.clf = CClassifierRejectThreshold(self.clf_norej, threshold=0.6)
         self.clf.verbose = 2  # Enabling debug output for each classifier
         self.clf.fit(self.dataset)
+
+    def test_draw(self):
+        """ Compare the classifiers graphically"""
+        self.logger.info("Testing classifiers graphically")
+
+        fig = CFigure(width=10, markersize=8)
+        # Plot dataset points
+        fig.switch_sptype(sp_type='ds')
+
+        # mark the rejected samples
+        y = self.clf.predict(self.dataset.X)
+        fig.sp.plot_ds(
+            self.dataset[y == -1, :], colors=['k', 'k'], markersize=12)
+
+        # plot the dataset
+        fig.sp.plot_ds(self.dataset)
+
+        # Plot objective function
+        fig.switch_sptype(sp_type='function')
+        fig.sp.plot_fobj(self.clf.decision_function,
+                         grid_limits=self.dataset.get_bounds(),
+                         levels=[0], y=1)
+        fig.sp.title('Classifier with reject threshold')
+
+        fig.show()
 
 
 if __name__ == '__main__':
