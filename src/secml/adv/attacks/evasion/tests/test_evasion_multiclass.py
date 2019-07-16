@@ -88,16 +88,14 @@ class TestEvasionMulticlass(CUnitTest):
 
         dmax = 4
 
-        self.solver_type = 'gradient-bls'
         self.solver_params = {'eta': 1e-1, 'eta_min': 0.1}
 
         eva = CAttackEvasionBLS(classifier=self.multiclass,
-                             surrogate_classifier=self.multiclass,
-                             surrogate_data=self.ds,
-                             distance='l2', dmax=dmax, lb=lb, ub=ub,
-                             solver_type=self.solver_type,
-                             solver_params=self.solver_params,
-                             y_target=self.y_target)
+                                surrogate_classifier=self.multiclass,
+                                surrogate_data=self.ds,
+                                distance='l2', dmax=dmax, lb=lb, ub=ub,
+                                solver_params=self.solver_params,
+                                y_target=self.y_target)
 
         eva.verbose = 2
 

@@ -52,7 +52,6 @@ class TestCClassifierRejectDetector(
         self.dmax_lst = [1, 1.5]
         self.discrete = False
         self.type_dist = 'l2'
-        self.solver_type = 'gradient-bls'
         self.solver_params = {'eta': 0.1}
 
     def _generate_advx(self):
@@ -75,7 +74,6 @@ class TestCClassifierRejectDetector(
                 "discrete": self.discrete,
                 "attack_classes": 'all',
                 "y_target": None,
-                "solver_type": self.solver_type,
                 "solver_params": self.solver_params
             }
 

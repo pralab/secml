@@ -59,7 +59,6 @@ class CAttackEvasionBLS(CAttackEvasion):
                  discrete=False,
                  y_target=None,
                  attack_classes='all',
-                 solver_type=None,
                  solver_params=None):
 
         # INTERNALS
@@ -81,7 +80,7 @@ class CAttackEvasionBLS(CAttackEvasion):
                          discrete=discrete,
                          y_target=y_target,
                          attack_classes=attack_classes,
-                         solver_type=solver_type,
+                         solver_type='gradient-bls',
                          solver_params=solver_params)
 
     ###########################################################################
