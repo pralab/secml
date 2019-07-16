@@ -63,7 +63,6 @@ class TestEvasionMNIST(CUnitTest):
             ub=self.ub,
             dmax=self.dmax,
             y_target=self.y_target,
-            solver_type='gradient-bls',
             solver_params={'eta': self.eta,
                            'eta_min': self.eta_min,
                            'eta_max': self.eta_max,

@@ -183,11 +183,11 @@ class COptimizerGradBLS(COptimizer):
         grad[x_lb + x_ub] = 0
         return grad
 
-    def _xk(self, x, fx):
+    def _xk(self, x, fx, *args):
         """Returns a new point after gradient descent."""
 
         # compute gradient
-        grad = self._fun.gradient(x)
+        grad = self._fun.gradient(x, *args)
         self._grad = grad  # only used for visualization/convergence
 
         norm = grad.norm()
@@ -217,7 +217,7 @@ class COptimizerGradBLS(COptimizer):
         z, fz = self._line_search.minimize(x, -grad, fx)
         return z, fz
 
-    def minimize(self, x):
+    def minimize(self, x_init, args=(), **kwargs):
         """
         Interface to minimizers implementing
             min fun(x)
@@ -225,8 +225,10 @@ class COptimizerGradBLS(COptimizer):
 
         Parameters
         ----------
-        x : CArray
+        x_init : CArray
             The initial input point.
+        args : tuple, optional
+            Extra arguments passed to the objective function and its gradient.
 
         Returns
         -------
@@ -236,6 +238,11 @@ class COptimizerGradBLS(COptimizer):
             Array containing values of x during optimization.
 
         """
+        if len(kwargs) != 0:
+            raise ValueError(
+                "{:} does not accept additional parameters.".format(
+                    self.__class__.__name__))
+
         # reset fun and grad eval counts for both fun and f (by default fun==f)
         self._f.reset_eval()
         self._fun.reset_eval()
@@ -254,32 +261,35 @@ class COptimizerGradBLS(COptimizer):
                                        sparse=x0.issparse, dtype=x0.dtype)
             self._f_seq = CArray.zeros(1)
             self._x_seq[0, :] = x0
-            self._f_seq[0] = self._fun.fun(x0)
+            self._f_seq[0] = self._fun.fun(x0, *args)
             self._x_opt = x0
             return
 
         # eval fun at x
-        fx = self._fun.fun(x)
+        fx = self._fun.fun(x_init, *args)
 
         # if x is outside of the feasible domain, project it
-        if self.bounds is not None and self.bounds.is_violated(x):
-            x = self.bounds.projection(x)
+        if self.bounds is not None and self.bounds.is_violated(x_init):
+            x_init = self.bounds.projection(x_init)
 
-        if self.constr is not None and self.constr.is_violated(x):
-            x = self.constr.projection(x)
+        if self.constr is not None and self.constr.is_violated(x_init):
+            x_init = self.constr.projection(x_init)
 
-        if (self.bounds is not None and self.bounds.is_violated(x)) or \
-                (self.constr is not None and self.constr.is_violated(x)):
-            raise ValueError("x " + str(x) + " is outside of feasible domain.")
+        if (self.bounds is not None and self.bounds.is_violated(x_init)) or \
+                (self.constr is not None and self.constr.is_violated(x_init)):
+            raise ValueError(
+                "x_init " + str(x_init) + " is outside of feasible domain.")
 
         # initialize x_seq and f_seq
-        self._x_seq = CArray.zeros((self.max_iter, x.size), sparse=x.issparse)
+        self._x_seq = CArray.zeros(
+            (self.max_iter, x_init.size), sparse=x_init.issparse)
         if self.discrete is True:
-            self._x_seq.astype(x.dtype)  # this may set x_seq to int
+            self._x_seq.astype(x_init.dtype)  # this may set x_seq to int
         self._f_seq = CArray.zeros(self.max_iter)
 
         # The first point is obviously the starting point,
         # and the constraint is not violated (false...)
+        x = x_init
         self._x_seq[0, :] = x
         self._f_seq[0] = fx
 
@@ -290,7 +300,7 @@ class COptimizerGradBLS(COptimizer):
         for i in range(1, self.max_iter):
 
             # update point
-            x, fx = self._xk(x, fx=fx)
+            x, fx = self._xk(x, fx, *args)
 
             # Update history
             self._x_seq[i, :] = x
@@ -305,9 +315,9 @@ class COptimizerGradBLS(COptimizer):
             diff = abs(self.f_seq[i].item() - self.f_seq[i - 1].item())
 
             if diff < self.eps:
-                self.logger.debug("Flat region, exiting... {:}  {:}".format(
-                    self._f_seq[i].round(3).item(),
-                    self._f_seq[i - 1].round(3).item()))
+                self.logger.debug("Flat region, exiting... ({:.4f} / {:.4f})".format(
+                    self._f_seq[i].item(),
+                    self._f_seq[i - 1].item()))
                 self._x_seq = self.x_seq[:i + 1, :]
                 self._f_seq = self.f_seq[:i + 1]
                 return x

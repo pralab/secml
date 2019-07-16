@@ -92,7 +92,7 @@ class CFunction(CCreator):
         ----------
         x : CArray
             Argument of fun.
-        args, kwargs : any
+        args, kwargs
             Other optional parameter of the function.
 
         Returns
@@ -117,7 +117,7 @@ class CFunction(CCreator):
         ----------
         x : np.ndarray
             Argument of fun as ndarray.
-        args, kwargs : any
+        args, kwargs
             Other optional parameter of the function.
 
         Returns
@@ -136,7 +136,7 @@ class CFunction(CCreator):
         ----------
         x : CArray
             Argument of gradient. Single point.
-        args, kwargs : any
+        args, kwargs
             Other optional parameter of the function.
 
         Returns
@@ -161,7 +161,7 @@ class CFunction(CCreator):
         ----------
         x : ndarray
             Argument of gradient.
-        args, kwargs : any
+        args, kwargs
             Other optional parameter of the function.
 
         Returns
@@ -199,7 +199,7 @@ class CFunction(CCreator):
             If a scalar, uses the same finite difference delta for all partial
             derivatives.
             If an array, should contain one value per element of `x`.
-        *args, **kwargs : args, kwargs, optional
+        args, kwargs
             Any other arguments that are to be passed to `fun`.
 
         Returns
@@ -275,7 +275,7 @@ class CFunction(CCreator):
             If a scalar, uses the same finite difference delta for all partial
             derivatives.
             If an array, should contain one value per element of `x`.
-        *args, **kwargs : args, kwargs, optional
+        args, kwargs
             Extra arguments passed to `fun` and `fprime`.
 
         Returns

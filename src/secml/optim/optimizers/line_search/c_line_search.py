@@ -1,3 +1,10 @@
+"""
+.. module:: CLineSearch
+   :synopsis: Interface for line search methods.
+
+.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+
+"""
 from abc import ABCMeta, abstractmethod
 import six
 
@@ -29,5 +36,17 @@ class CLineSearch(CCreator):
         self.max_iter = max_iter
 
     @abstractmethod
-    def minimize(self, fun, x, d, constr, **kwargs):
+    def minimize(self, x, d, **kwargs):
+        """Line search.
+
+        Parameters
+        ----------
+        x : CArray
+            The input point.
+        d : CArray
+            The descent direction along which fun(x) is minimized.
+        kwargs : dict
+            Additional parameters required to evaluate fun(x, **kwargs).
+
+        """
         raise NotImplementedError

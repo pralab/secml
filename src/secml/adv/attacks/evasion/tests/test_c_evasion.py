@@ -71,9 +71,6 @@ class CEvasionTestCases(object):
 
             self.logger.info("Malicious sample: " + str(self.x0))
 
-            self.solver_type = 'gradient-bls'
-            # self.solver_type = 'gradient'
-
             self.solver_params = {
                 "eta": self.eta,
                 "eta_min": self.eta_min,
@@ -98,7 +95,6 @@ class CEvasionTestCases(object):
                 "discrete": self.discrete,
                 "attack_classes": CArray([1]),
                 "y_target": 0,
-                "solver_type": self.solver_type,
                 "solver_params": self.solver_params
             }
 

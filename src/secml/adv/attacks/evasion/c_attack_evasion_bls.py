@@ -59,7 +59,6 @@ class CAttackEvasionBLS(CAttackEvasion):
                  discrete=False,
                  y_target=None,
                  attack_classes='all',
-                 solver_type=None,
                  solver_params=None):
 
         # INTERNALS
@@ -81,7 +80,7 @@ class CAttackEvasionBLS(CAttackEvasion):
                          discrete=discrete,
                          y_target=y_target,
                          attack_classes=attack_classes,
-                         solver_type=solver_type,
+                         solver_type='gradient-bls',
                          solver_params=solver_params)
 
     ###########################################################################
@@ -239,10 +238,6 @@ class CAttackEvasionBLS(CAttackEvasion):
                         gradient=self._objective_function_gradient,
                         n_dim=self.n_dim)
 
-        solver_type = self._solver_type
-        if solver_type is None:
-            solver_type = 'gradient-bls'
-
         constr = CConstraint.create(self._distance)
         constr.center = self._x0
         constr.radius = self.dmax
@@ -254,7 +249,7 @@ class CAttackEvasionBLS(CAttackEvasion):
         bounds = CConstraint.create('box', lb=lb, ub=ub)
 
         self._solver = COptimizer.create(
-            solver_type,
+            self._solver_type,
             fun=fun, constr=constr,
             bounds=bounds,
             discrete=self._discrete,
