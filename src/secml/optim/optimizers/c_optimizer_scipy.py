@@ -151,7 +151,7 @@ class COptimizerScipy(COptimizer):
 
         # converting input parameters to scipy
         # 1) gradient (jac)
-        jac = kwargs['jac'] if 'jac' in kwargs else self.f.gradient_ndarray
+        jac = kwargs['jac'] if 'jac' in kwargs else self._fun.gradient_ndarray
         kwargs['jac'] = jac
         # 2) bounds
         bounds = kwargs['bounds'] if 'bounds' in kwargs else None
@@ -163,7 +163,7 @@ class COptimizerScipy(COptimizer):
             kwargs['options']['disp'] = True
 
         # call minimize now
-        sc_opt_out = sc_opt.minimize(self.f.fun_ndarray,
+        sc_opt_out = sc_opt.minimize(self._fun.fun_ndarray,
                                      x_init.ravel().tondarray(),
                                      args=args, **kwargs)
 
