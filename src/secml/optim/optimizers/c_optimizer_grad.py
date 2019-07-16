@@ -35,7 +35,6 @@ class COptimizerGrad(COptimizer):
     def __init__(self, fun,
                  constr=None,
                  bounds=None,
-                 discrete=False,
                  eta=1e-3,
                  eps=1e-4,
                  max_iter=200):
