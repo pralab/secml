@@ -8,6 +8,7 @@
 """
 from abc import ABCMeta, abstractmethod
 import six
+from functools import partial
 
 from secml.core import CCreator
 from secml.optim.function import CFunction
@@ -136,19 +137,58 @@ class COptimizer(CCreator):
     ##########################################
 
     @abstractmethod
-    def minimize(self, x_init, *args, **kwargs):
-        # TODO: ADD DOCSTRING
+    def minimize(self, x_init, args=(), **kwargs):
+        """
+        Interface to minimizers:
+            min fun(x)
+            s.t. constraint
+
+        Parameters
+        ----------
+        x_init : CArray
+            The initial input point.
+        args : tuple, optional
+            Extra arguments passed to the objective function and its gradient.
+        kwargs
+            Additional parameters of the minimization method.
+
+        """
         raise NotImplementedError('Function `minimize` is not implemented.')
 
-    def maximize(self, x_init, *args, **kwargs):
-        # TODO: ADD DOCSTRING
+    def maximize(self, x_init, args=(), **kwargs):
+        """
+        Interface to maximizers:
+            max fun(x)
+            s.t. constraint
 
-        # invert sign of fun(x) and grad(x) and run minimize
+        This is implemented by inverting the sign of fun and gradient and
+        running the `COptimizer.minimize()`.
+
+        Parameters
+        ----------
+        x_init : CArray
+            The initial input point.
+        args : tuple, optional
+            Extra arguments passed to the objective function and its gradient.
+        kwargs
+            Additional parameters of the minimization method.
+
+        """
+        # Invert sign of fun(x) and grad(x) and run minimize
+        # We use def statements and partial to respect PEP8 and scopes
+
+        def fun_inv(wrapped_fun, z, *f_args, **f_kwargs):
+            return -wrapped_fun(z, *f_args, **f_kwargs)
+
+        def grad_inv(wrapped_grad, z, *f_args, **f_kwargs):
+            return -wrapped_grad(z, *f_args, **f_kwargs)
+
         self._fun = CFunction(
-            fun=lambda z: -self._f.fun(z, *args),
-            gradient=lambda z: -self._f.gradient(z, *args))
+            fun=partial(fun_inv, self._f.fun),
+            gradient=partial(grad_inv, self._f.gradient)
+        )
 
-        x = self.minimize(x_init, *args, **kwargs)
+        x = self.minimize(x_init, args=args, **kwargs)
 
         # fix solution variables
         self._f_seq = -self._f_seq

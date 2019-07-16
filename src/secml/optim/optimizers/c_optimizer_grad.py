@@ -85,7 +85,7 @@ class COptimizerGrad(COptimizer):
     #                  METHODS
     #############################################
 
-    def minimize(self, x_init):
+    def minimize(self, x_init, args=(), **kwargs):
         """
         Interface to minimizers implementing
             min fun(x)
@@ -93,10 +93,10 @@ class COptimizerGrad(COptimizer):
 
         Parameters:
         ------
-        x:
-            the initial input point
-        eps:
-            a small number to check convergence
+        x_init : CArray
+            The initial input point.
+        args : tuple, optional
+            Extra arguments passed to the objective function and its gradient.
 
         Returns
         -------
@@ -106,6 +106,11 @@ class COptimizerGrad(COptimizer):
             Array containing values of x during optimization.
 
         """
+        if len(kwargs) != 0:
+            raise ValueError(
+                "{:} does not accept additional parameters.".format(
+                    self.__class__.__name__))
+
         # reset fun and grad eval counts for both fun and f (by default fun==f)
         self._f.reset_eval()
         self._fun.reset_eval()
@@ -124,7 +129,7 @@ class COptimizerGrad(COptimizer):
         for i in range(self._max_iter):
 
             self._x_seq[i, :] = x
-            self._f_seq[i] = self._fun.fun(x)
+            self._f_seq[i] = self._fun.fun(x, *args)
 
             if i > 0 and abs(self.f_seq[i - 1] - self.f_seq[i]) < self.eps:
                 self.logger.debug("Flat region, exiting... {:}  {:}".format(
@@ -143,7 +148,7 @@ class COptimizerGrad(COptimizer):
                 self._x_opt = self._x_seq[-4, :]
                 return self._x_opt
 
-            grad = self._fun.gradient(x)
+            grad = self._fun.gradient(x, *args)
 
             # debugging information
             self.logger.debug(

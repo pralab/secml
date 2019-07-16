@@ -48,7 +48,7 @@ class COptimizerScipy(COptimizer):
         # return scipy bounds
         return sc_opt.Bounds(lb, ub)
 
-    def minimize(self, x_init, *args, **kwargs):
+    def minimize(self, x_init, args=(), **kwargs):
         """Minimize function.
 
         Wrapper of `scipy.optimize.minimize`.
@@ -58,7 +58,7 @@ class COptimizerScipy(COptimizer):
         x_init : CArray
             Init point. Dense flat array of real elements of size 'n',
             where 'n' is the number of independent variables.
-        args : any, optional
+        args : tuple, optional
             Extra arguments passed to the objective function and its
             derivatives (`fun`, `jac` and `hess` functions).
 
