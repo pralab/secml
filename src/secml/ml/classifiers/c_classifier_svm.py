@@ -13,10 +13,11 @@ from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.ml.kernel import CKernel
 from secml.ml.classifiers.gradients import CClassifierGradientSVMMixin
+from secml.ml.classifiers.loss import CLossHinge
 from secml.utils.mixed_utils import check_is_fitted
 
 
-class CClassifierSVM(CClassifierLinear,CClassifierGradientSVMMixin):
+class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
     """Support Vector Machine (SVM) classifier.
 
     Parameters
@@ -58,6 +59,8 @@ class CClassifierSVM(CClassifierLinear,CClassifierGradientSVMMixin):
     """
     __class_type = 'svm'
 
+    _loss = CLossHinge()
+
     def __init__(self, kernel=None, C=1.0, class_weight=None,
                  preprocess=None, grad_sampling=1.0, store_dual_vars=None):
 
@@ -86,8 +89,6 @@ class CClassifierSVM(CClassifierLinear,CClassifierGradientSVMMixin):
         # slot for the computed kernel function (to speed up multiclass)
         # DO NOT CLEAR
         self._k = None
-
-        CClassifierGradientSVMMixin.__init__(self)
 
     def is_linear(self):
         """Return True if the classifier is linear."""

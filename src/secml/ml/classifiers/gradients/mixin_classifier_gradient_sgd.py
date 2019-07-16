@@ -1,63 +1,20 @@
 """
 .. module:: CClassifierGradientSGDMixin
-   :synopsis: Class to compute the gradient of the SGD classifier
+   :synopsis: Mixin for SGD classifier gradients.
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientLinearMixin
-from secml.ml.classifiers.loss import CLossSquare
-from secml.ml.classifiers.regularizer import CRegularizerL2
-
 from secml.ml.classifiers.clf_utils import convert_binary_labels
-
-from abc import abstractmethod
 
 
 class CClassifierGradientSGDMixin(CClassifierGradientLinearMixin):
-    __class_type = 'sgd'
-
-    def __init__(self):
-
-        super(CClassifierGradientSGDMixin, self).__init__()
-
-    @property
-    def C(self):
-        return 1.0 / self.alpha
-
-    # required classifier properties:
-
-    @property
-    @abstractmethod
-    def alpha(self):
-        pass
-
-    @property
-    @abstractmethod
-    def loss(self):
-        pass
-
-    @property
-    @abstractmethod
-    def regularizer(self):
-        pass
+    """Mixin class for CClassifierSGD gradients."""
 
     # train derivatives:
-    def hessian_tr_params(self, x, y):
-        """
-        Hessian of the training objective w.r.t. the classifier
-        parameters
-
-        Parameters
-        ----------
-        x : CArray
-            features of the dataset on which the training objective is computed
-        y :  CArray
-            dataset labels
-        """
-
-        raise NotImplementedError
 
     def grad_tr_params(self, x, y):
         """
@@ -67,15 +24,15 @@ class CClassifierGradientSGDMixin(CClassifierGradientLinearMixin):
         Parameters
         ----------
         x : CArray
-            features of the dataset on which the training objective is computed
-        y :  CArray
+            Features of the dataset on which the training objective is computed.
+        y : CArray
             dataset labels
+
         """
         raise NotImplementedError
 
     # test derivatives:
 
-    # fixme: remove as soon as we will have removed the kernel from the sgd
     def _grad_f_x(self, x=None, y=1):
         """Computes the gradient of the linear classifier's decision function
          wrt decision function input.
@@ -103,7 +60,7 @@ class CClassifierGradientSGDMixin(CClassifierGradientLinearMixin):
         if self.is_kernel_linear():  # Simply return w for a linear Ridge
             return CClassifierGradientLinearMixin._grad_f_x(self, y=y)
 
-        # Point is required in the case of non-linear Ridge
+        # Point is required in the case of non-linear
         if x is None:
             raise ValueError("point 'x' is required to compute the gradient")
 
@@ -118,9 +75,9 @@ class CClassifierGradientSGDMixin(CClassifierGradientLinearMixin):
         if gradient.issparse is True:  # To ensure the sparse dot is used
             w_2d = w_2d.tosparse()
         if w_2d.shape != (1, self._tr.shape[0]):
-            raise ValueError("Weight vector shape must be ({:}, {:}) "
-                             "or ravel equivalent".format(1,
-                                                          self._tr.shape[0]))
+            raise ValueError(
+                "Weight vector shape must be ({:}, {:}) or ravel "
+                "equivalent".format(1, self._tr.shape[0]))
 
         gradient = w_2d.dot(gradient)
 

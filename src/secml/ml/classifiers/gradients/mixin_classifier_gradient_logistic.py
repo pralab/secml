@@ -1,45 +1,36 @@
 """
-.. module:: ClassifierGradientLogisticMixin
-   :synopsis: Class to compute the gradient of the logistic classifier
+.. module:: CClassifierGradientLogisticMixin
+   :synopsis: Mixin for logistic classifier gradients.
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientLinearMixin
-from secml.ml.classifiers.regularizer import CRegularizerL2
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
 class CClassifierGradientLogisticMixin(CClassifierGradientLinearMixin):
-    __class_type = 'logistic'
-
-    def __init__(self):
-        self._reg = CRegularizerL2()
-
-        super(CClassifierGradientLogisticMixin, self).__init__()
+    """Mixin class for CClassifierLogistic gradients."""
 
     # train derivatives:
 
     def _sigm(self, y, s):
-        """
-        Sigmoid function
-        """
+        """Sigmoid function."""
         y = CArray(y)
         s = CArray(s)
         return 1.0 / (1.0 + (-y * s).exp())
 
     def hessian_tr_params(self, x, y):
-        """
-        Hessian of the training objective w.r.t. the classifier
-        parameters
+        """Hessian of the training objective w.r.t. the classifier parameters.
 
         Parameters
         ----------
         x : CArray
-            features of the dataset on which the training objective is computed
-        y :  CArray
-            dataset labels
+            Features of the dataset on which the training objective is computed.
+        y : CArray
+            Dataset labels.
+
         """
         y = y.ravel()
         y = convert_binary_labels(y)

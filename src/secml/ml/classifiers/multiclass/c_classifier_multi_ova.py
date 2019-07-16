@@ -6,11 +6,11 @@
 
 """
 from secml.ml.classifiers.multiclass import CClassifierMulticlass
+from secml.ml.classifiers.multiclass.mixin_classifier_gradient_multiclass_ova import \
+    CClassifierGradientMulticlassOVAMixin
 from secml.array import CArray
 from secml.data import CDataset
 from secml.parallel import parfor2
-
-from secml.ml.classifiers.gradients import ClassifierGradientMulticlassOVAMixin
 
 
 def _fit_one_ova(
@@ -52,7 +52,7 @@ def _fit_one_ova(
 
 
 class CClassifierMulticlassOVA(CClassifierMulticlass,
-                               ClassifierGradientMulticlassOVAMixin):
+                               CClassifierGradientMulticlassOVAMixin):
     """OVA (One-Vs-All) Multiclass Classifier.
 
     Parameters
@@ -70,11 +70,12 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
     __class_type = 'ova'
 
     def __init__(self, classifier, preprocess=None, **clf_params):
-        super(CClassifierMulticlassOVA, self).__init__(classifier=classifier,
-                                                       preprocess=preprocess,
-                                                       **clf_params)
 
-        ClassifierGradientMulticlassOVAMixin.__init__(self)
+        super(CClassifierMulticlassOVA, self).__init__(
+            classifier=classifier,
+            preprocess=preprocess,
+            **clf_params
+        )
 
     def _fit(self, dataset, n_jobs=1):
         """Trains the classifier.

@@ -70,8 +70,6 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
 
         self._tr = None  # slot for the training data
 
-        CClassifierGradientSGDMixin.__init__(self)
-
     def is_linear(self):
         """Return True if the classifier is linear."""
         if super(CClassifierSGD, self).is_linear() and self.is_kernel_linear():
@@ -116,6 +114,15 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
     def alpha(self, value):
         """Sets the Constant that multiplies the regularization term."""
         self._alpha = float(value)
+
+    @property
+    def C(self):
+        """Constant that multiplies the regularization term.
+
+        Equal to 1 / alpha.
+
+        """
+        return 1.0 / self.alpha
 
     @property
     def class_weight(self):

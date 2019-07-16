@@ -14,6 +14,7 @@ from secml.data import CDataset
 from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.gradients import CClassifierGradientLinearMixin
 
+
 class CClassifierMCSLinear(CClassifierLinear, CClassifierGradientLinearMixin):
     """MCS averaging a set of LINEAR classifiers.
 
@@ -62,8 +63,6 @@ class CClassifierMCSLinear(CClassifierLinear, CClassifierGradientLinearMixin):
         self.max_samples = max_samples
         self.max_features = max_features
         self.random_state = random_state
-
-        CClassifierGradientLinearMixin.__init__(self)
 
     @property
     def classifier(self):

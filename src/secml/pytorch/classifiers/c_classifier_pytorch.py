@@ -27,14 +27,14 @@ from secml.pytorch.settings import SECML_PYTORCH_USE_CUDA
 from secml.pytorch.data import CDatasetPyTorch
 from secml.pytorch.metrics import CMetricPyTorchAccuracy
 from secml.pytorch.utils.optim_utils import add_weight_decay
-
-from secml.ml.classifiers.gradients import ClassifierGradientPytorchMixin
+from secml.pytorch.classifiers.mixin_classifier_gradient_pytorch import \
+    CClassifierGradientPytorchMixin
 
 # Use CUDA ?!
 use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
 
 
-class CClassifierPyTorch(CClassifier, ClassifierGradientPytorchMixin):
+class CClassifierPyTorch(CClassifier, CClassifierGradientPytorchMixin):
     """PyTorch Neural Network classifier.
 
     Parameters
@@ -158,8 +158,6 @@ class CClassifierPyTorch(CClassifier, ClassifierGradientPytorchMixin):
             self.logger.info("Using CUDA for PyTorch computations!")
 
         super(CClassifierPyTorch, self).__init__(preprocess=preprocess)
-
-        ClassifierGradientPytorchMixin.__init__(self)
 
     @property
     def model_params(self):

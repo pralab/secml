@@ -10,7 +10,8 @@ from sklearn.linear_model import LogisticRegression
 
 from secml.array import CArray
 from secml.ml.classifiers import CClassifierLinear
-from secml.ml.classifiers.loss import CLoss
+from secml.ml.classifiers.loss import CLossLogistic
+from secml.ml.classifiers.regularizer import CRegularizerL2
 
 from secml.ml.classifiers.gradients import \
     CClassifierGradientLogisticMixin
@@ -29,6 +30,9 @@ class CClassifierLogistic(CClassifierLinear, CClassifierGradientLogisticMixin):
     """
     __class_type = 'logistic'
 
+    _loss = CLossLogistic()
+    _reg = CRegularizerL2()
+
     def __init__(self, C=1.0, max_iter=100, random_seed=None, preprocess=None):
 
         CClassifierLinear.__init__(self, preprocess=preprocess)
@@ -36,10 +40,6 @@ class CClassifierLogistic(CClassifierLinear, CClassifierGradientLogisticMixin):
         self.C = C
         self.max_iter = max_iter
         self.random_seed = random_seed
-
-        self._loss = CLoss.create('log')
-
-        CClassifierGradientLogisticMixin.__init__(self)
 
     @property
     def max_iter(self):

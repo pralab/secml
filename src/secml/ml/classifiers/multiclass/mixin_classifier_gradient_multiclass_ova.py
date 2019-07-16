@@ -1,24 +1,17 @@
 """
-.. module:: ClassifierGradientMulticlassOVAMixin
-   :synopsis: Mixin class for gradients of OVA classifiers
+.. module:: CClassifierGradientMulticlassOVAMixin
+   :synopsis: Mixin for OVA classifiers gradient.
 
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from abc import abstractmethod
-
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientMixin
 
 
-class ClassifierGradientMulticlassOVAMixin(CClassifierGradientMixin):
-    __class_type = 'OVA'
-
-    def __init__(self):
-        # required classifier attributes:
-        if not hasattr(self, '_binary_classifiers'):
-            raise NotImplementedError("The classifier should have a "
-                                      "_binary_classifiers attribute")
+class CClassifierGradientMulticlassOVAMixin(CClassifierGradientMixin):
+    """Mixin class for CClassifierMulticlassOVA gradients."""
 
     # test derivatives:
 

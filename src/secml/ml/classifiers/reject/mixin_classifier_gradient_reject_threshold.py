@@ -1,30 +1,16 @@
 """
-.. module:: ClassifierGradientRejectThresholdMixin
-   :synopsis: Mixin class for gradients of classifier with a reject based on a
-    threshold
+.. module:: CClassifierGradientRejectThresholdMixin
+   :synopsis: Mixin for classifier with a reject based on a threshold gradients.
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from abc import abstractmethod
-
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientMixin
 
 
-class ClassifierGradientRejectThresholdMixin(CClassifierGradientMixin):
-    __class_type = 'reject-threshold'
-
-    # required classifier properties:
-    @property
-    @abstractmethod
-    def n_classes(self):
-        pass
-
-    @property
-    @abstractmethod
-    def clf(self):
-        pass
+class CClassifierGradientRejectThresholdMixin(CClassifierGradientMixin):
+    """Mixin class for CClassifierRejectThreshold gradients."""
 
     # test derivatives:
 

@@ -1,42 +1,15 @@
 """
-.. module:: ClassifierGradientRejectDetectorMixin
-   :synopsis: Mixin class for gradients of classifier with a reject based on a
-    detector
+.. module:: CClassifierGradientRejectDetectorMixin
+   :synopsis: Mixin for classifier with a reject based on a detector gradients.
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod
-import six
-
 from secml.ml.classifiers.gradients import CClassifierGradientMixin
 
 
-@six.add_metaclass(ABCMeta)
-class ClassifierGradientRejectDetectorMixin(CClassifierGradientMixin):
-    __class_type = 'reject-detector'
-
-    def __init__(self):
-        # required classifier attributes:
-        if not hasattr(self, '_softmax'):
-            raise NotImplementedError("The classifier should have a "
-                                      "_softmax attribute")
-
-    # required classifier properties:
-    @property
-    @abstractmethod
-    def n_classes(self):
-        pass
-
-    @property
-    @abstractmethod
-    def clf(self):
-        pass
-
-    @property
-    @abstractmethod
-    def det(self):
-        pass
+class CClassifierGradientRejectDetectorMixin(CClassifierGradientMixin):
+    """Mixin class for CClassifierRejectDetector gradients."""
 
     # test derivatives:
 

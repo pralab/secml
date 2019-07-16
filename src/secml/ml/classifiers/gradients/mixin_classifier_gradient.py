@@ -1,9 +1,10 @@
 """
 .. module:: CClassifierGradientMixin
    :synopsis: Common interface for the implementations of the
-              classifier gradients
+              classifier gradients Mixin classes
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
 from abc import ABCMeta, abstractmethod
@@ -12,48 +13,34 @@ import six
 
 @six.add_metaclass(ABCMeta)
 class CClassifierGradientMixin(object):
-    """Abstract class that defines basic methods for
-    ClassifierGradientMixIn."""
-    __super__ = 'CClassifierGradientMixIn'
-
-    def __init__(self):
-        # required classifier attributes:
-        if not hasattr(self, 'preprocess'):
-            raise NotImplementedError("The classifier should have a "
-                                      "preprocess attribute")
-
-    # required classifier methods:
-    @property
-    @abstractmethod
-    def decision_function(self):
-        pass
+    """Abstract Mixin class that defines basic methods
+     for classifier gradients."""
 
     # train derivatives:
+
     def hessian_tr_params(self, x, y):
-        """
-        Hessian of the training objective w.r.t. the classifier
-        parameters
+        """Hessian of the training objective w.r.t. the classifier parameters.
 
         Parameters
         ----------
         x : CArray
-            features of the dataset on which the training objective is computed
+            Features of the dataset on which the training objective is computed.
         y :  CArray
-            dataset labels
+            Dataset labels.
+
         """
         raise NotImplementedError
 
     def grad_f_params(self, x, y):
-        """
-        Derivative of the decision function w.r.t. the classifier
-        parameters.
+        """Derivative of the decision function w.r.t. the classifier parameters.
 
         Parameters
         ----------
         x : CArray
-            features of the dataset on which the training objective is computed
+            Features of the dataset on which the training objective is computed
         y : int
             Index of the class wrt the gradient must be computed.
+
         """
         raise NotImplementedError
 
@@ -62,39 +49,39 @@ class CClassifierGradientMixin(object):
     # the presence of C, which is peculiar of some classifier in the code
     # that now uses this function, which should be general.)
     def grad_loss_params(self, x, y, loss=None):
-        """
-        Derivative of a given loss w.r.t. the
-        classifier parameters
+        """Derivative of a given loss w.r.t. the classifier parameters.
 
         Parameters
         ----------
         x : CArray
-            features of the dataset on which the loss is computed
+            Features of the dataset on which the loss is computed
         y :  CArray
-            dataset labels
+            Dataset labels
         loss: None (default) or CLoss
             If the loss is equal to None (default) the classifier loss is used
             to compute the derivative.
+
         """
         raise NotImplementedError
 
     def grad_tr_params(self, x, y):
         """
         Derivative of the classifier training objective function w.r.t. the
-        classifier parameters
+        classifier parameters.
 
         Parameters
         ----------
         x : CArray
-            features of the dataset on which the training objective is computed
+            Features of the dataset on which the training objective is computed.
         y :  CArray
-            dataset labels
+            Dataset labels.
+
         """
         raise NotImplementedError
 
     # test derivatives:
 
-    def grad_f_x(self, x, **kwargs):
+    def grad_f_x(self, x, y, **kwargs):
         """
         Derivative of the classifier decision function w.r.t. an input sample
 
@@ -104,6 +91,9 @@ class CClassifierGradientMixin(object):
             features of the dataset on which the decision function is computed
         y :  CArray
             The label of the class wrt the function should be calculated.
+        kwargs
+            Optional arguments for the gradient method.
+            See specific classifier for a full description.
 
         Returns
         -------
@@ -119,7 +109,7 @@ class CClassifierGradientMixin(object):
         x = self._preprocess_data(x)
 
         try:  # Get the derivative of decision_function
-            grad_f = self._grad_f_x(x, **kwargs)
+            grad_f = self._grad_f_x(x, y, **kwargs)
         except NotImplementedError:
             raise NotImplementedError("{:} does not implement `grad_f_x`"
                                       "".format(self.__class__.__name__))
@@ -144,25 +134,21 @@ class CClassifierGradientMixin(object):
         return grad_f  # No preprocess defined... return the clf grad
 
     @abstractmethod
-    def _grad_f_x(self, x=None, y=1):
-        """Computes the gradient of the linear classifier's decision function
+    def _grad_f_x(self, x, y):
+        """Computes the gradient of the classifier's decision function
          wrt decision function input.
-
-        For linear classifiers, the gradient wrt input is equal
-        to the weights vector w. The point x can be in fact ignored.
 
         Parameters
         ----------
-        x : CArray or None, optional
+        x : CArray
             The gradient is computed in the neighborhood of x.
-        y : int, optional
-            Binary index of the class wrt the gradient must be computed.
-            Default is 1, corresponding to the positive class.
+        y :  CArray
+            The label of the class wrt the function should be calculated.
 
         Returns
         -------
         gradient : CArray
-            The gradient of the linear classifier's decision function
+            The gradient of the classifier's decision function
             wrt decision function input. Vector-like array.
 
         """

@@ -11,13 +11,12 @@ from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.reject import CClassifierReject
-
-from secml.ml.classifiers.gradients import \
-    ClassifierGradientRejectThresholdMixin
+from secml.ml.classifiers.reject.mixin_classifier_gradient_reject_threshold import \
+    CClassifierGradientRejectThresholdMixin
 
 
 class CClassifierRejectThreshold(CClassifierReject,
-                                 ClassifierGradientRejectThresholdMixin):
+                                 CClassifierGradientRejectThresholdMixin):
     """Abstract class that defines basic methods for Classifiers with reject
      based on a certain threshold.
 
@@ -51,8 +50,6 @@ class CClassifierRejectThreshold(CClassifierReject,
                 "the preprocessor should be passed to the outer classifier.")
 
         super(CClassifierRejectThreshold, self).__init__(preprocess=preprocess)
-
-        ClassifierGradientRejectThresholdMixin.__init__(self)
 
     @property
     def clf(self):
