@@ -1,47 +1,25 @@
 """
-.. module:: ClassifierGradientPytorchMixin
-   :synopsis: Common mixin class for pytorch classifier
-              gradients
+.. module:: CClassifierGradientPytorchMixin
+   :synopsis: Mixin for Pytorch classifier gradients.
 
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from abc import abstractmethod
+from torch.autograd import Variable
+import torch
 
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientMixin
 from secml.ml.classifiers.loss import CSoftmax
-from torch.autograd import Variable
-import torch
 from secml.pytorch.settings import SECML_PYTORCH_USE_CUDA
 
 # Use CUDA ?!
 use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
 
 
-class ClassifierGradientPytorchMixin(CClassifierGradientMixin):
-    __super__ = 'ClassifierGradientPytorchMixin'
-
-    # required classifier properties:
-    @property
-    @abstractmethod
-    def softmax_outputs(self):
-        pass
-
-    @property
-    @abstractmethod
-    def _get_test_input_loader(self):
-        pass
-
-    @property
-    @abstractmethod
-    def _get_layer_output(self):
-        pass
-
-    @property
-    @abstractmethod
-    def _to_tensor(self):
-        pass
+class CClassifierGradientPytorchMixin(CClassifierGradientMixin):
+    """Mixin class for CClassifierPytorch gradients."""
 
     def grad_f_x(self, x, y=None, w=None, layer=None):
         """Computes the gradient of the classifier's output wrt input.
@@ -76,8 +54,8 @@ class ClassifierGradientPytorchMixin(CClassifierGradientMixin):
             Gradient of the classifier's output wrt input. Vector-like array.
 
         """
-        return CClassifierGradientMixin.grad_f_x(self,
-            x=x, y=y, w=w, layer=layer)
+        return CClassifierGradientMixin.grad_f_x(
+            self, x=x, y=y, w=w, layer=layer)
 
     def _grad_f_x(self, x, y=None, w=None, layer=None):
         """Computes the gradient of the classifier's decision function

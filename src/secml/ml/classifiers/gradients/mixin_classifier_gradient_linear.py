@@ -1,37 +1,18 @@
 """
-.. module:: ClassifierGradientLinearMixin
-   :synopsis: Common mixin class for linear classifier
-              gradients
+.. module:: CClassifierGradientLinearMixin
+   :synopsis: Mixin for linear classifier gradients.
 
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
-from abc import ABCMeta, abstractmethod
-import six
-
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientMixin
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
 class CClassifierGradientLinearMixin(CClassifierGradientMixin):
-    __class_type = 'linear'
-
-    # required classifier properties:
-
-    @property
-    def C(self):
-        pass
-
-    @property
-    @abstractmethod
-    def b(self):
-        pass
-
-    @property
-    @abstractmethod
-    def w(self):
-        pass
+    """Mixin class for CClassifierLinear gradients."""
 
     # train derivatives:
 
@@ -49,12 +30,15 @@ class CClassifierGradientLinearMixin(CClassifierGradientMixin):
 
     @staticmethod
     def _grad_f_b(x, d_l=None):
+        """Derivative of the classifier decision function w.r.t. the bias.
+
+        Parameters
+        ----------
+        d_l : ??
+
         """
-        Derivative of the classifier decision function w.r.t. the
-        bias
-        """
-        x = x.atleast_2d()  # where x is normalized if the classifier has a
-        # normalizer
+        # where x is normalized if the classifier has a normalizer
+        x = x.atleast_2d()
         k = x.shape[0]  # number of samples
         d = CArray.ones((1, k))
         if d_l is not None:
@@ -62,42 +46,42 @@ class CClassifierGradientLinearMixin(CClassifierGradientMixin):
         return d
 
     def grad_f_params(self, x, y=1):
-        """
-        Derivative of the decision function w.r.t. the classifier
-        parameters.
+        """Derivative of the decision function w.r.t. the classifier parameters.
 
         Parameters
         ----------
         x : CArray
-            features of the dataset on which the training objective is computed
+            Features of the dataset on which the training objective is computed.
         y : int
             Index of the class wrt the gradient must be computed.
+
         """
         if self.preprocess is not None:
             x = self.preprocess.transform(x)
 
         grad_f_w = self._grad_f_w(x)
         grad_f_b = self._grad_f_b(x)
+
         d = grad_f_w.append(grad_f_b, axis=0)
+
         return convert_binary_labels(y) * d
 
     def grad_loss_params(self, x, y, loss=None):
-        """
-        Derivative of the classifier loss w.r.t. the classifier parameters
+        """Derivative of the classifier loss w.r.t. the classifier parameters.
 
         d_loss / d_params = d_loss / d_f * d_f / d_params
 
         Parameters
         ----------
         x : CArray
-            features of the dataset on which the loss is computed
-        y :  CArray
-            dataset labels
+            Features of the dataset on which the loss is computed.
+        y : CArray
+            Dataset labels.
         loss: None (default) or CLoss
             If the loss is equal to None (default) the classifier loss is used
             to compute the derivative.
-        """
 
+        """
         if loss is None:
             loss = self._loss
 
@@ -126,7 +110,7 @@ class CClassifierGradientLinearMixin(CClassifierGradientMixin):
     def grad_tr_params(self, x, y):
         """
         Derivative of the classifier training objective w.r.t. the classifier
-         parameters
+         parameters.
 
         If the loss is equal to None (default) the classifier loss is used
         to compute the derivative.
@@ -137,11 +121,11 @@ class CClassifierGradientLinearMixin(CClassifierGradientMixin):
         Parameters
         ----------
         x : CArray
-            features of the dataset on which the loss is computed
-        y :  CArray
-            dataset labels
-        """
+            Features of the dataset on which the loss is computed.
+        y : CArray
+            Dataset labels.
 
+        """
         grad = self.grad_loss_params(x, y)
 
         w = CArray(self.w.ravel()).T  # column vector
@@ -151,19 +135,28 @@ class CClassifierGradientLinearMixin(CClassifierGradientMixin):
 
     # test derivatives:
 
-    def grad_f_x(self, x=None, y=1):
-        """
-        Derivative of the decision function w.r.t. an input sample x
+    def grad_f_x(self, x=None, y=1, **kwargs):
+        """Computes the gradient of the classifier's output wrt input.
 
         Parameters
         ----------
         x : CArray
-            features of the dataset on which the training objective is computed
-        y : int
-            Index of the class wrt the gradient must be computed.
+            The gradient is computed in the neighborhood of x.
+        y : int, optional
+            Index of the class wrt the gradient must be computed. Default 1.
+        **kwargs
+            Optional parameters for the function that computes the
+            gradient of the decision function. See the description of
+            each classifier for a complete list of optional parameters.
+
+        Returns
+        -------
+        gradient : CArray
+            Gradient of the classifier's output wrt input. Vector-like array.
+
         """
-        # Gradient sign depends on input label (0/1)
-        return super(CClassifierGradientLinearMixin, self).grad_f_x(x, y=y)
+        return super(
+            CClassifierGradientLinearMixin, self).grad_f_x(x, y, **kwargs)
 
     def _grad_f_x(self, x=None, y=1):
         """Computes the gradient of the linear classifier's decision function

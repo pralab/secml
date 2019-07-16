@@ -4,7 +4,6 @@
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
 
 """
 from sklearn.linear_model import RidgeClassifier
@@ -13,6 +12,8 @@ from secml.ml.classifiers import CClassifierLinear
 from secml.array import CArray
 from secml.ml.kernel import CKernel
 from secml.ml.classifiers.gradients import CClassifierGradientRidgeMixin
+from secml.ml.classifiers.loss import CLossSquare
+from secml.ml.classifiers.regularizer import CRegularizerL2
 from secml.utils.mixed_utils import check_is_fitted
 
 
@@ -33,6 +34,9 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
     """
     __class_type = 'ridge'
 
+    _loss = CLossSquare()
+    _reg = CRegularizerL2()
+
     def __init__(self, alpha=1.0, kernel=None,
                  max_iter=1e5, class_weight=None, tol=1e-4,
                  fit_intercept=True, preprocess=None):
@@ -52,8 +56,6 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
         self._kernel = kernel if kernel is None else CKernel.create(kernel)
 
         self._tr = None  # slot for the training data
-
-        CClassifierGradientRidgeMixin.__init__(self)
 
     def is_linear(self):
         """Return True if the classifier is linear."""
@@ -95,6 +97,15 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
     def alpha(self, value):
         """Sets the Constant that multiplies the regularization term."""
         self._alpha = float(value)
+
+    @property
+    def C(self):
+        """Constant that multiplies the regularization term.
+
+        Equal to 1 / alpha.
+
+        """
+        return 1.0 / self.alpha
 
     @property
     def class_weight(self):

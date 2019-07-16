@@ -52,8 +52,6 @@ class CClassifierKDE(CClassifier, CClassifierGradientKDEMixin):
 
         self._training_samples = None  # slot store training samples
 
-        CClassifierGradientKDEMixin.__init__(self)
-
     def is_linear(self):
         """Return True if the classifier is linear."""
         if (self.preprocess is None or self.preprocess is not None and

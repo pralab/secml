@@ -6,12 +6,3 @@ from .mixin_classifier_gradient_ridge import CClassifierGradientRidgeMixin
 from .mixin_classifier_gradient_svm import CClassifierGradientSVMMixin
 from .mixin_classifier_gradient_sgd import CClassifierGradientSGDMixin
 from .mixin_classifier_gradient_kde import CClassifierGradientKDEMixin
-
-from .mixin_classifier_gradient_reject_detector import \
-    ClassifierGradientRejectDetectorMixin
-from .mixin_classifier_gradient_reject_threshold import \
-    ClassifierGradientRejectThresholdMixin
-from .mixin_classifier_gradient_multiclass_ova import \
-    ClassifierGradientMulticlassOVAMixin
-
-from .mixin_classifier_gradient_pytorch import ClassifierGradientPytorchMixin

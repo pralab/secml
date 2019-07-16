@@ -1,6 +1,6 @@
 """
-.. module:: ClassifierGradientRidgeMixin
-   :synopsis: Class to compute the gradient of the Ridge classifier
+.. module:: CClassifierGradientRidgeMixin
+   :synopsis: Mixin for Ridge classifier gradients.
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
@@ -8,56 +8,25 @@
 """
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientLinearMixin
-from secml.ml.classifiers.loss import CLossSquare
-from secml.ml.classifiers.regularizer import CRegularizerL2
-
 from secml.ml.classifiers.clf_utils import convert_binary_labels
-
-from abc import abstractmethod
 
 
 class CClassifierGradientRidgeMixin(CClassifierGradientLinearMixin):
-    __class_type = 'ridge'
-
-    def __init__(self):
-        self._loss = CLossSquare()
-        self._reg = CRegularizerL2()
-
-        super(CClassifierGradientRidgeMixin, self).__init__()
-
-    @property
-    def C(self):
-        return 1.0 / self.alpha
-
-    # required classifier properties:
-
-    @property
-    @abstractmethod
-    def alpha(self):
-        pass
+    """Mixin class for CClassifierRidge gradients."""
 
     # train derivatives:
 
-    @staticmethod
-    def _g(d):
-        """
-        d number of features
-        """
-        return CArray.eye(d)
-
     def hessian_tr_params(self, x, y=None):
-        """
-        Hessian of the training objective w.r.t. the classifier
-        parameters
+        """Hessian of the training objective w.r.t. the classifier parameters.
 
         Parameters
         ----------
         x : CArray
-            features of the dataset on which the training objective is computed
-        y :  CArray
-            dataset labels
-        """
+            Features of the dataset on which the training objective is computed.
+        y : CArray
+            Dataset labels.
 
+        """
         alpha = self.alpha
 
         x = x.atleast_2d()
@@ -69,8 +38,8 @@ class CClassifierGradientRidgeMixin(CClassifierGradientLinearMixin):
         d = x.shape[1]  # number of features in the normalized space
 
         H = CArray.zeros(shape=(d + 1, d + 1))
-        Sigma = (x.T).dot(x)
-        dww = Sigma + alpha * self._g(d)
+        Sigma = x.T.dot(x)
+        dww = Sigma + alpha * CArray.eye(d)
         dwb = x.sum(axis=0)
         H[:-1, :-1] = dww
         H[-1, -1] = n  # + self.alpha
@@ -82,7 +51,6 @@ class CClassifierGradientRidgeMixin(CClassifierGradientLinearMixin):
 
     # test derivatives:
 
-    # fixme: remove as soon as we will have removed the kernel from the ridge
     def _grad_f_x(self, x=None, y=1):
         """Computes the gradient of the linear classifier's decision function
          wrt decision function input.

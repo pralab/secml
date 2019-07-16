@@ -11,12 +11,12 @@ from secml.data.c_dataset import CDataset
 from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.loss import CSoftmax
 from secml.ml.classifiers.reject import CClassifierReject
-from secml.ml.classifiers.gradients import \
-    ClassifierGradientRejectDetectorMixin
+from secml.adv.defenses.mixin_classifier_gradient_reject_detector import \
+    CClassifierGradientRejectDetectorMixin
 
 
 class CClassifierRejectDetector(CClassifierReject,
-                                ClassifierGradientRejectDetectorMixin):
+                                CClassifierGradientRejectDetectorMixin):
     """Classifier with reject based on detector.
 
     Classifier that rejects the evasion samples based on the score
@@ -60,8 +60,6 @@ class CClassifierRejectDetector(CClassifierReject,
                 "the preprocessor should be passed to the outer classifier.")
 
         super(CClassifierRejectDetector, self).__init__(preprocess=preprocess)
-
-        ClassifierGradientRejectDetectorMixin.__init__(self)
 
     @property
     def clf(self):
