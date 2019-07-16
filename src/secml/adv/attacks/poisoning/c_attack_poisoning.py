@@ -37,7 +37,7 @@ class CAttackPoisoning(CAttack):
                  discrete=False,
                  y_target=None,
                  attack_classes='all',
-                 solver_type=None,
+                 solver_type='gradient',
                  solver_params=None,
                  init_type='random',
                  random_seed=None):
@@ -207,15 +207,16 @@ class CAttackPoisoning(CAttack):
 
         bounds, constr = self._constraint_cretion()
 
-        solver_type = self._solver_type
-        if solver_type is None:
-            solver_type = 'gradient'
+        # FIXME: WHY 'gradient' IS THE DEFAULT SOLVER IF DOES NOT SUPPORT
+        #  DISCRETE? THE FOLLOWING IS A WORKAROUND TO TRIGGER A PROPER ERROR
+        solver_params = self.solver_params
+        if self.discrete is True:
+            solver_params['discrete'] = True
 
         self._solver = COptimizer.create(
-            solver_type,
+            self._solver_type,
             fun=fun, constr=constr,
             bounds=bounds,
-            discrete=self._discrete,
             **self.solver_params)
 
         self._solver.verbose = 0

@@ -25,7 +25,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
                  discrete=False,
                  y_target=None,
                  attack_classes='all',
-                 solver_type=None,
+                 solver_type='gradient',
                  solver_params=None,
                  init_type='random',
                  random_seed=None):
