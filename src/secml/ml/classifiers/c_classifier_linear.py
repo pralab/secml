@@ -6,6 +6,9 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
+from abc import ABCMeta
+import six
+
 from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.array import CArray
@@ -14,6 +17,7 @@ from secml import _NoValue
 from secml.utils.mixed_utils import check_is_fitted
 
 
+@six.add_metaclass(ABCMeta)
 class CClassifierLinear(CClassifier):
     """Abstract class that defines basic methods for linear classifiers.
 
@@ -208,49 +212,3 @@ class CClassifierLinear(CClassifier):
 
         return (labels, scores) if return_decision_function is True else labels
 
-    def gradient_f_x(self, x, y=1, **kwargs):
-        """Computes the gradient of the classifier's output wrt input.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-        y : int, optional
-            Index of the class wrt the gradient must be computed. Default 1.
-        **kwargs
-            Optional parameters for the function that computes the
-            gradient of the decision function. See the description of
-            each classifier for a complete list of optional parameters.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the classifier's output wrt input. Vector-like array.
-
-        """
-        return super(CClassifierLinear, self).gradient_f_x(x, y, **kwargs)
-
-    def _gradient_f(self, x=None, y=1):
-        """Computes the gradient of the linear classifier's decision function
-         wrt decision function input.
-
-        For linear classifiers, the gradient wrt input is equal
-        to the weights vector w. The point x can be in fact ignored.
-
-        Parameters
-        ----------
-        x : CArray or None, optional
-            The gradient is computed in the neighborhood of x.
-        y : int, optional
-            Binary index of the class wrt the gradient must be computed.
-            Default is 1, corresponding to the positive class.
-
-        Returns
-        -------
-        gradient : CArray
-            The gradient of the linear classifier's decision function
-            wrt decision function input. Vector-like array.
-
-        """
-        # Gradient sign depends on input label (0/1)
-        return convert_binary_labels(y) * self.w

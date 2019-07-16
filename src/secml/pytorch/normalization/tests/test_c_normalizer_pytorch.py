@@ -63,7 +63,7 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.logger.info("Returning gradient for layer: {:}".format(layer))
         grad = self.norm.gradient(x, y=0)
 
-        self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
+        self.logger.info("Output of grad_f_x:\n{:}".format(grad))
 
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
@@ -75,7 +75,7 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.logger.info("Returning gradient for layer: {:}".format(layer))
         grad = self.norm.gradient(x, w=out)
 
-        self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
+        self.logger.info("Output of grad_f_x:\n{:}".format(grad))
 
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
@@ -113,12 +113,12 @@ class TestCNormalizerPyTorch(CUnitTest):
         for c in self.ds.classes:
             self.logger.info("Gradient w.r.t. class {:}".format(c))
 
-            grad = self.clf.gradient_f_x(x, y=c)
+            grad = self.clf.grad_f_x(x, y=c)
 
-            self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
+            self.logger.info("Output of grad_f_x:\n{:}".format(grad))
 
             check_grad_val = CFunction(
-                self.clf.decision_function, self.clf.gradient_f_x).check_grad(
+                self.clf.decision_function, self.clf.grad_f_x).check_grad(
                     x, y=c, epsilon=1e-1)
             self.logger.info(
                 "norm(grad - num_grad): %s", str(check_grad_val))
@@ -141,8 +141,8 @@ class TestCNormalizerPyTorch(CUnitTest):
         self.logger.info("Scores:\n{:}".format(scores))
 
         self.logger.info("Testing 'linear1' layer gradient")
-        grad = self.clf.gradient_f_x(x, y=0)  # y is required for multiclassova
-        self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
+        grad = self.clf.grad_f_x(x, y=0)  # y is required for multiclassova
+        self.logger.info("Output of grad_f_x:\n{:}".format(grad))
 
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)

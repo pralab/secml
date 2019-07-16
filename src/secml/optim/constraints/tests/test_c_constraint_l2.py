@@ -39,7 +39,7 @@ class TestCConstraintL2(CConstraintTestCases):
             self.c_array, self.p1_inside, self.p2_outside, self.p3_on)
 
         # Test for sparse arrays, works only for a center defined as CArray
-        self._test_is_active(
+        self._test_is_violated(
             self.c_array, self.p1_inside.tosparse(),
             self.p2_outside.tosparse(), self.p3_on.tosparse())
 

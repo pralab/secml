@@ -79,7 +79,7 @@ class TestCRoc(CUnitTest):
         roc_plot = CFigure()
         roc_plot.subplot(sp_type='roc')
         roc_plot.sp.title('ROC Curve - Custom')
-        roc_plot.sp.xlim(0, 100)
+        roc_plot.sp.xlim(0.1, 100)
         roc_plot.sp.ylim(30, 100)
         roc_plot.sp.yticks([70, 80, 90, 100])
         roc_plot.sp.yticklabels(['70', '80', '90', '100'])

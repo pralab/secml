@@ -11,7 +11,7 @@ TODO: Add assertEqual statements to check the correctness of the test
 from secml.testing import CUnitTest
 from secml.adv.seceval.tests import CSecEvalTestCases
 
-from secml.adv.attacks.evasion import CAttackEvasion
+from secml.adv.attacks.evasion import CAttackEvasionBLS
 from secml.array import CArray
 
 
@@ -44,7 +44,7 @@ class TestCSecEvalEvasion(CSecEvalTestCases.TestCSecEval):
             "y_target": self.y_target,
             "attack_classes": self.attack_classes
         }
-        self.attack = CAttackEvasion(**params)
+        self.attack = CAttackEvasionBLS(**params)
         self.attack.verbose = 1
 
         # sec eval params

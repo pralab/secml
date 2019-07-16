@@ -862,8 +862,9 @@ class CArray(_CArrayInterface):
             return self.__class__(self._data.__mul__(other))
         elif isinstance(other, CArray):
             # dense vs sparse not supported (sparse vs dense IS supported)
+            # To preserve sparsity, we always perform sparse * dense
             if self.isdense is True and other.issparse is True:
-                other = other.todense()
+                return self.__class__(other._data.__mul__(self._data))
             return self.__class__(self._data.__mul__(other._data))
         elif is_ndarray(other) or is_scsarray(other):
             raise TypeError("unsupported operand type(s) for *: "
@@ -2367,15 +2368,15 @@ class CArray(_CArrayInterface):
 
         Parameters
         ----------
-        array : CArray or array_like
-            The array like object holding the elements to compare
-            current array with. Must have the same shape of first
-            array.
+        array : CArray
+            The array holding the elements to compare current array with.
+            Must have the same shape of first array.
 
         Returns
         -------
         CArray
             The element-wise logical AND between the two arrays.
+            If one of the two arrays is sparse, result will be sparse.
 
         Examples
         --------
@@ -2393,12 +2394,19 @@ class CArray(_CArrayInterface):
         CArray([ True False False False])
 
         """
-        if self.issparse:
-            array = self.__class__(array, tosparse=True)
-        else:
-            array = self.__class__(array).todense()
+        # If any of the two arrays is self, we call the operation on the
+        # sparse array and convert the other one to sparse
+        if self.issparse:  # Self is sparse and array is dense
+            array1 = self
+            array2 = array.tosparse()
+        elif array.issparse:  # Self is dense and array is sparse
+            array1 = array
+            array2 = self.tosparse()
+        else:  # Self and array are dense
+            array1 = self
+            array2 = array
 
-        return self.__class__(self._data.logical_and(array._data))
+        return self.__class__(array1._data.logical_and(array2._data))
 
     def logical_or(self, array):
         """Element-wise logical OR of array elements.
@@ -3944,6 +3952,90 @@ class CArray(_CArrayInterface):
 
         """
         return self._data.sha1()
+
+    def is_inf(self):
+        """Test element-wise for positive or negative infinity.
+
+        Returns
+        -------
+        CArray
+            Array of the same shape as x, with True where x == +/-inf,
+            otherwise False.
+
+        Examples
+        --------
+        >>> from secml.core.constants import inf, nan
+        >>> from secml.array import CArray
+
+        >>> a = CArray([1, inf, -inf, nan, 4.5])
+        >>> print(a.is_inf())
+        CArray([False  True  True False False])
+
+        """
+        return self.__class__(self._data.is_inf())
+
+    def is_posinf(self):
+        """Test element-wise for positive infinity.
+
+        Returns
+        -------
+        CArray
+            Array of the same shape as x, with True where x == +inf,
+            otherwise False.
+
+        Examples
+        --------
+        >>> from secml.core.constants import inf, nan
+        >>> from secml.array import CArray
+
+        >>> a = CArray([1, inf, -inf, nan, 4.5])
+        >>> print(a.is_posinf())
+        CArray([False  True False False False])
+
+        """
+        return self.__class__(self._data.is_posinf())
+
+    def is_neginf(self):
+        """Test element-wise for negative infinity.
+
+        Returns
+        -------
+        CArray
+            Array of the same shape as x, with True where x == -inf,
+            otherwise False.
+
+        Examples
+        --------
+        >>> from secml.core.constants import inf, nan
+        >>> from secml.array import CArray
+
+        >>> a = CArray([1, inf, -inf, nan, 4.5])
+        >>> print(a.is_neginf())
+        CArray([False False  True False False])
+
+        """
+        return self.__class__(self._data.is_neginf())
+
+    def is_nan(self):
+        """Test element-wise for Not a Number (NaN).
+
+        Returns
+        -------
+        CArray
+            Array of the same shape as x, with True where x == nan,
+            otherwise False.
+
+        Examples
+        --------
+        >>> from secml.core.constants import inf, nan
+        >>> from secml.array import CArray
+
+        >>> a = CArray([1, inf, -inf, nan, 4.5])
+        >>> print(a.is_nan())
+        CArray([False False False  True False])
+
+        """
+        return self.__class__(self._data.is_nan())
 
     # ----------------- #
     # MATH ELEMENT-WISE #

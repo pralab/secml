@@ -1,3 +1,65 @@
+## v0.6-dev (16/07/2019)
+- #455 Multiple improvements and fixes related to the support of sparse data.
+- #449 Internal refactoring of `COptimizer` and related classes, including faster processing of sparse data.
+- #427 `CAttackEvasion` now defines a generic evasion attack problem. The evasion attack leveraging the Bisect Line Search solver, is now available as `CAttackEvasionBLS`.
+- #426 Refactor of classifiers methods related to gradients. The following methods could now be available depending on the specific class: `grad_f_x` (replaces `gradient_f_x`), `grad_tr_params`, `grad_loss_params`, `grad_f_params`, `hessian_tr_params`. See documentation for more details.
+- #323 Added new class `data.splitter.CChronologicalSplitter` which splits a dataset in train and test using a timestamp as split point. `python-dateutil` is now added as a library dependency to conveniently parse timestamps.
+- #420 `CDataset` extra attributes are now stored in a separate **header** attribute inside a `CDatasetHeader` object. This allow easier indexing, cloning and merge of datasets without copying or losing the extra properties. Check docs for more informations.
+- #423 Added a loader for the `iCubWorld28` dataset [[ref](https://robotology.github.io/iCubWorld)].
+- #429, #420, #422 Added multiple new functions to `core` module.
+
+### Requirements (1 change)
+- #472 Minimum required version of `tensorflow` is now `1.14` in order to get latest updates and fix few `PendingDeprecationWarnings`.
+
+### Added (5 changes)
+- #429 Added new function `core.type_utils.is_bytes` to identify bytes strings. `to_builtin` function now converts numpy `bytes_` objects to built-in `bytes`.
+- #422 Added new functions in `core.type_utils`: `is_inf`, `is_posinf`, `is_neginf`, `is_nan`.
+- #420 Added new functions  in `core.attr_utils`: `as_protected`, `has_protected`, `add_readonly`, `add_readwrite`.
+- #422 Added new methods to `CArray`: `.is_inf`, `.is_posinf`, `.is_neginf`, `.is_nan`.
+- #407 Added wrappers of `warnings.catch_warnings` and `warnings.filterwarnings` in `CLog`.
+
+### Improved (12 changes)
+- #428 Improved performance of `COptimizerGradBLS` on sparse data.
+- #464 Weights are now stored in sparse format if training data is sparse by `CClassifierLogistic`.
+- #433 Using L2 constraint for discrete optimization is not supported in `COtimizerGradBLS`. Error is now properly raised in that case.
+- #418 `CConstraintBox` is now always considered inactive if bounds contain at least one `inf`. Also, blocked computation of `.constraint()` in that case. A new formulation for `.is_violated` check is now used that is more reliable in presence of `inf`.
+- #418 Improved input validation in `CConstraintBox`. If a bound is defined as scalar, will be equally applied to all dimensions. If defined as `CArray`, a different value for each dimension is expected.
+- #471 The internal buffer of `CSparse` is now converted to lil format before a set operation for efficient changing of sparsity structure.
+- #456 Multiplication between a sparse and a dense array now always return a sparse array (as the product does not alter the sparsity level).
+- #447 `CArray.logical_and()` now avoids converting input sparse array to dense.
+- #60 Improved performance of `CArray.comblist` by removing internal recursion.
+- #439 `COptimizerGradBLS` is now directly available from the `optim.optimizers` package.
+- #425 Removed unnecessary transformation to diag array in `CNormalizeLinear.gradient`.
+- #421 `CDataset` now inherits from `CCreator`, allowing use of all of our global superclass functionalities like `.create()`, `.deepcopy()`, `.set_params` and more.
+
+### Changed (2 changes)
+- #449 `CLineSearch.minimize()` now replaces method `CLineSearch.line_search()`.
+- #427 `CAttackEvasionCleverhans` now inherits from `CAttackEvasion`.
+
+### Fixed (17 changes)
+- #459 Fixed `CTrainTestSplit` not actually using random seed (if set).
+- #461 Fixed `CDatasSplitterKfold`, `CDatasSplitterStratKFold` and `CDatasSplitterShuffle` converting sparse datasets to dense before splitting them.
+- #443 Fixed list of lists assignment of sparse arrays when input is a 2-D dense array occurring in scipy v1.3+.
+- #468 Fixed a bug preventing assignment of a single-item sparse `CArray` to a sparse `CArray` while using Scipy v1.3+.
+- #465 Fixed indexing operations on sparse `CArray` not returning the correct result if slice step is different from 1.
+- #457 Fixed `CArray.round()` and `CArray.pow()` methods not creating a copy of the original array if sparse.
+- #463 Fixed `CClassifierLogistic` converting sparse training data to dense.
+- #470 Fixed `COptimizerScipy` using `BFGS` method instead of `L-BFGS-B` method when bounds are defined.
+- #441 Fixed `CClassifierRejectThreshold.n_features` property returning the number of training set features after preprocessing instead of before.
+- #442 Fixed `CClassifierRejectDetector.n_features` property returning the number of training set features after preprocessing instead of before.
+- #431 In case of discrete optimization in `COtimizerGradBLS`, the current descend direction is now correctly the sign of the gradient.
+- #449 Fixed `COptimizerScipy.maximize()` optimizing the wrong function (without the inverted sign).
+- #449 Fixed additional parameters of function and its gradient passed in `COptimizerGrad.minimize()` and `COptimizerGradBLS.minimize()`. Also fixed related behaviour of `COptimizer.maximize()`.
+- #444 Fixed setup installing pre-release versions of dependencies.
+- #366 Handled warnings related to matrix subclass using `scipy <= v1.3`.
+- #430 `core.type_utils.is_str` now correctly recognizes numpy `unicode_` objects as strings.
+- #419 Fixed `ConvergenceWarning` raised by `CClassifierLogistic` due to unnecessary custom initialization of weights.
+
+### Removed (2 changes)
+- #418 Removed setters for ub/lb attributes from `CConstraintBox`.
+- #449 Removed unused parameter `discrete` from `COptimizer` and `COptimizerGrad`. Only our solver `COptimizerGradBLS` currently supports discrete optimization.
+
+
 ## v0.5-dev (29/03/2019)
 - #198 `secml` now support Python >= 3.5. DEPRECATION: support for Python 2.7 will be dropped in a future release without advance notice.
 - #347 The `clear` framework (`CCreator.clear()` and `.is_clear()` methods) is now removed. Alternative methods have been added to different classes, if necessary, to replace its functionality.

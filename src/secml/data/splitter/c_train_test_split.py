@@ -131,6 +131,7 @@ class CTrainTestSplit(CCreator):
             CArray.arange(dataset.num_samples).tondarray(),
             train_size=self.train_size,
             test_size=self.test_size,
+            random_state=self.random_state,
             shuffle=self.shuffle)
 
         self._tr_idx = CArray(tr_idx)

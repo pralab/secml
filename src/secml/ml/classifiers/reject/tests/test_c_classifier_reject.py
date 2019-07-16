@@ -15,30 +15,6 @@ class CClassifierRejectTestCases(object):
     class TestCClassifierReject(CClassifierTestCases):
         """Unit test for CClassifierReject"""
 
-        def test_draw(self):
-            """ Compare the classifiers graphically"""
-            self.logger.info("Testing classifiers graphically")
-
-            fig = CFigure(width=10, markersize=8)
-            # Plot dataset points
-            fig.switch_sptype(sp_type='ds')
-
-            # mark the rejected samples
-            y = self.clf.predict(self.dataset.X)
-            fig.sp.plot_ds(
-                self.dataset[y == -1, :], colors=['k', 'k'], markersize=12)
-
-            # plot the dataset
-            fig.sp.plot_ds(self.dataset)
-
-            # Plot objective function
-            fig.switch_sptype(sp_type='function')
-            fig.sp.plot_fobj(self.clf.decision_function,
-                             grid_limits=self.dataset.get_bounds(), y=1)
-            fig.sp.title('Classifier with reject threshold')
-
-            fig.show()
-
         def test_fun(self):
             """Test for decision_function() and predict() methods."""
             self.logger.info(

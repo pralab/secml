@@ -173,6 +173,13 @@ class TestCPerfEvaluator(CUnitTest):
 
         self.logger.info("Testing metric with all nan")
 
+        # This test case involves an all-nan slice
+        self.logger.filterwarnings(
+            action="ignore",
+            message="All-NaN slice encountered",
+            category=RuntimeWarning
+        )
+
         all_nan_metric = CMetricAllNan()
 
         # Now we compare the parameters chosen before with a new evaluator

@@ -28,9 +28,9 @@ class TestCDataLoaderImgFolders(CUnitTest):
 
         self.assertEqual((2, 151875), ds.X.shape)
         self.assertEqual(2, ds.num_classes)
-        self.assertTrue((ds.img_w == 225).all())
-        self.assertTrue((ds.img_h == 225).all())
-        self.assertTrue((ds.img_c == 3).all())
+        self.assertTrue((ds.header.img_w == 225).all())
+        self.assertTrue((ds.header.img_h == 225).all())
+        self.assertTrue((ds.header.img_c == 3).all())
 
         self.logger.info("Testing loading grayscale dataset...")
 
@@ -44,9 +44,9 @@ class TestCDataLoaderImgFolders(CUnitTest):
 
         self.assertEqual((2, 50625), ds.X.shape)
         self.assertEqual(2, ds.num_classes)
-        self.assertTrue((ds.img_w == 225).all())
-        self.assertTrue((ds.img_h == 225).all())
-        self.assertTrue((ds.img_c == 1).all())
+        self.assertTrue((ds.header.img_w == 225).all())
+        self.assertTrue((ds.header.img_h == 225).all())
+        self.assertTrue((ds.header.img_c == 1).all())
 
     def test_load_paths(self):
         """Testing img dataset path loading."""

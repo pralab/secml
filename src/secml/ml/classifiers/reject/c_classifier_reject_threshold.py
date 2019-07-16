@@ -11,9 +11,12 @@ from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.reject import CClassifierReject
+from secml.ml.classifiers.reject.mixin_classifier_gradient_reject_threshold import \
+    CClassifierGradientRejectThresholdMixin
 
 
-class CClassifierRejectThreshold(CClassifierReject):
+class CClassifierRejectThreshold(CClassifierReject,
+                                 CClassifierGradientRejectThresholdMixin):
     """Abstract class that defines basic methods for Classifiers with reject
      based on a certain threshold.
 
@@ -82,11 +85,6 @@ class CClassifierRejectThreshold(CClassifierReject):
         """Number of classes of training dataset."""
         return self._clf.n_classes
 
-    @property
-    def n_features(self):
-        """Number of features"""
-        return self._clf.n_features
-
     def fit(self, dataset, n_jobs=1):
         """Trains the classifier.
 
@@ -108,6 +106,8 @@ class CClassifierRejectThreshold(CClassifierReject):
             Instance of the classifier trained using input dataset.
 
         """
+        self._n_features = dataset.num_features
+
         data_x = dataset.X
         # Transform data if a preprocess is defined
         if self.preprocess is not None:
@@ -276,37 +276,3 @@ class CClassifierRejectThreshold(CClassifierReject):
         scores = scores.append(rej_scores, axis=1)
 
         return (labels, scores) if return_decision_function is True else labels
-
-    def _gradient_f(self, x, y):
-        """Computes the gradient of the classifier's decision function
-         wrt decision function input.
-
-        The gradient taken w.r.t. the reject class can be thus set to 0,
-        being its output constant regardless of the input sample x.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-        y : int
-            Index of the class wrt the gradient must be computed.
-            Use -1 to output the gradient w.r.t. the reject class.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the classifier's df wrt its input. Vector-like array.
-
-        """
-        x = x.atleast_2d()
-
-        if y == -1:
-            # the gradient is a vector with all the elements equal to zero
-            return CArray.zeros(x.shape[1])
-
-        elif y < self.n_classes:
-            return self._clf.gradient_f_x(x, y=y)
-
-        else:
-            raise ValueError("The index of the class wrt the gradient must "
-                             "be computed is wrong.")

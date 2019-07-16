@@ -23,8 +23,14 @@ class TestCArrayClassMethods(CArrayTestCases):
                 self.assertEqual(1, concat_res.ndim)
             else:  # ... but if array is sparse let's check for shape[0]
                 self.assertEqual(1, concat_res.shape[0])
-            self.assertTrue((concat_res[:array1.size] == array1.ravel()).all())
-            self.assertTrue((concat_res[array1.size:] == array2.ravel()).all())
+            # Let's check the elements of the resulting array
+            a1_comp = array1.todense().ravel()
+            a2_comp = array2.todense().ravel()
+            if array1.issparse:  # result will be sparse, so always 2d
+                a1_comp = a1_comp.atleast_2d()
+                a2_comp = a2_comp.atleast_2d()
+            self.assert_array_equal(concat_res[:array1.size], a1_comp)
+            self.assert_array_equal(concat_res[array1.size:], a2_comp)
 
             array1_shape0 = array1.atleast_2d().shape[0]
             array1_shape1 = array1.atleast_2d().shape[1]
@@ -37,8 +43,8 @@ class TestCArrayClassMethods(CArrayTestCases):
             self.assertEqual(array1_shape1, concat_res.shape[1])
             self.assertEqual(
                 array1_shape0 + array2_shape0, concat_res.shape[0])
-            self.assertTrue((concat_res[:array1_shape0, :] == array1).all())
-            self.assertTrue((concat_res[array1_shape0:, :] == array2).all())
+            self.assert_array_equal(concat_res[:array1_shape0, :], array1)
+            self.assert_array_equal(concat_res[array1_shape0:, :], array2)
 
             # check append on axis 1 (horizontal)
             concat_res = CArray.concatenate(array1, array2, axis=1)
@@ -46,8 +52,8 @@ class TestCArrayClassMethods(CArrayTestCases):
             self.assertEqual(
                 array1_shape1 + array2_shape1, concat_res.shape[1])
             self.assertEqual(array1_shape0, concat_res.shape[0])
-            self.assertTrue((concat_res[:, :array1_shape1] == array1).all())
-            self.assertTrue((concat_res[:, array1_shape1:] == array2).all())
+            self.assert_array_equal(concat_res[:, :array1_shape1], array1)
+            self.assert_array_equal(concat_res[:, array1_shape1:], array2)
 
         _concat_allaxis(self.array_dense, self.array_dense)
         _concat_allaxis(self.array_sparse, self.array_sparse)
@@ -150,7 +156,7 @@ class TestCArrayClassMethods(CArrayTestCases):
                         self.assertEqual(res.dtype, float)
                     else:
                         self.assertEqual(res.dtype, dtype)
-                    self.assertFalse((res != 1).any())
+                    self.assertTrue((res == 1).all())
 
     def test_zeros(self):
         """Test for CArray.zeros() classmethod."""
@@ -254,10 +260,10 @@ class TestCArrayClassMethods(CArrayTestCases):
                             # Check if the diagonal is moving according to k
                             if k > 0:
                                 self.assertEqual(
-                                    0, res[0, min(n_cols-1, k-1)])
+                                    0, res[0, min(n_cols-1, k-1)].item())
                             elif k < 0:
                                 self.assertEqual(
-                                    0, res[min(n_rows-1, abs(k)-1), 0])
+                                    0, res[min(n_rows-1, abs(k)-1), 0].item())
                             else:  # The top left corner is a one
                                 self.assertEqual(1, res[0, 0])
 
@@ -272,7 +278,7 @@ class TestCArrayClassMethods(CArrayTestCases):
 
                             # Check if there are other elements apart from 0,1
                             self.assertFalse(
-                                ((res != 0).logical_and(res != 1)).any())
+                                ((res != 0).logical_and((res == 1).logical_not()).any()))
 
     def test_rand(self):
         """Test for CArray.rand() classmethod."""
@@ -344,11 +350,17 @@ class TestCArrayClassMethods(CArrayTestCases):
                             self.assertEqual(res.shape, (shape, ))
                     self.assertEqual(res.dtype, int)
 
+                # Checking intervals
                 if not isinstance(inter, tuple):
                     self.assertFalse((res < 0).any())
                     self.assertFalse((res >= inter).any())
                 else:
-                    self.assertFalse((res < inter[0]).any())
+                    if inter[0] > 0:
+                        # Comparing a sparse matrix with a scalar greater
+                        # than zero using < is inefficient, use >=
+                        self.assertTrue((res >= inter[0]).all())
+                    else:
+                        self.assertFalse((res < inter[0]).any())
                     self.assertFalse((res >= inter[1]).any())
 
     def test_randuniform(self):
@@ -380,11 +392,17 @@ class TestCArrayClassMethods(CArrayTestCases):
                             self.assertEqual(res.shape, (shape, ))
                     self.assertEqual(res.dtype, float)
 
+                # Checking intervals
                 if not isinstance(inter, tuple):
                     self.assertFalse((res < 0).any())
                     self.assertFalse((res >= inter).any())
                 else:
-                    self.assertFalse((res < inter[0]).any())
+                    if inter[0] > 0:
+                        # Comparing a sparse matrix with a scalar greater
+                        # than zero using < is inefficient, use >=
+                        self.assertTrue((res >= inter[0]).all())
+                    else:
+                        self.assertFalse((res < inter[0]).any())
                     self.assertFalse((res >= inter[1]).any())
 
         # Testing arrays as high/low

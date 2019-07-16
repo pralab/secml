@@ -23,6 +23,43 @@ from secml.array.c_dense import CDense
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_intlike, is_int, is_bool
 from secml.core.constants import inf
+import copy
+
+
+def _expand_nnz_bool(array, nnz_val):
+    """Convert a bool condition evaluated on `array.nnz_val` to full array shape.
+
+    Parameters
+    ----------
+    array : CSparse
+        Reference sparse array.
+    nnz_val : CDense
+        Dense array of bool, with True/False values of the desired
+        function evaluated on `nnz_data`
+
+    Returns
+    -------
+    CSparse
+        Convert the input dense array of bool evaluated on `nnz_data` to
+        a sparse array of bool, with True/False in the positions
+        corresponding to the `nnz_data`.
+
+    """
+    out = CSparse.empty(shape=array.shape, dtype=bool)
+
+    if array.size == 0:  # Empty array, return empty
+        return out
+
+    if len(nnz_val.shape) != 2:  # nnz_val must be (1, N)
+        raise RuntimeError("unexpected shape {:}".format(nnz_val.shape))
+
+    # Get the indices of array where the True values are
+    nnz_val_true_idx = nnz_val.find(nnz_val)[1]
+    true_idx = [[e[i] for i in nnz_val_true_idx] for e in array.nnz_indices]
+
+    out[true_idx] = True
+
+    return out
 
 
 class CSparse(_CArrayInterface):
@@ -185,12 +222,8 @@ class CSparse(_CArrayInterface):
             # Fake 2D index. Use ndarrays to mimic Matlab-like indexing
             idx = (np.asarray([0]), idx.tondarray())
 
-            # SPECIAL CASE: Matlab-like indexing
+            # Matlab-like indexing
             idx = np.ix_(*idx)
-
-            # Workaround for scipy indexing when 2 integer-like are passed
-            if idx[1].size == 1:
-                idx = tuple(elem.ravel()[0] for elem in idx)
 
         elif is_list_of_lists(idx):
             if len(idx) != 2:
@@ -212,9 +245,8 @@ class CSparse(_CArrayInterface):
             # Check the size of any boolean array inside tuple
             self._check_index_bool(idx)
 
-            # Convert indices for get_single_element scipy method
+            # Matlab-like indexing
             idx = np.ix_(*idx)
-            idx = tuple(elem.ravel()[0] for elem in idx)
 
         elif is_list(idx):
             # Check if array is vector-like
@@ -235,12 +267,8 @@ class CSparse(_CArrayInterface):
             # Check the size of any boolean array inside tuple
             self._check_index_bool(idx)
 
-            # SPECIAL CASE: Matlab-like indexing
+            # Matlab-like indexing
             idx = np.ix_(*idx)
-
-            # Workaround for scipy indexing when 2 integer-like are passed
-            if idx[1].size == 1:
-                idx = tuple(elem.ravel()[0] for elem in idx)
 
         elif is_slice(idx):
             # Check if array is vector-like
@@ -248,8 +276,12 @@ class CSparse(_CArrayInterface):
                 raise IndexError("vector-like indexing is only applicable "
                                  "to arrays with shape[0] == 1.")
 
-            # Fake 2D index. Use ndarrays to mimic Matlab-like indexing
-            idx = (np.asarray([0]), idx)
+            # Fake index for row. Slice for columns is fine
+            idx = (0, idx)
+
+            # For fast column slicing we use csc. Also, for slices with
+            # step != 1 the result will actually be wrong using csr format
+            self._data = self._data.tocsc()
 
         elif isinstance(idx, tuple):
 
@@ -290,8 +322,13 @@ class CSparse(_CArrayInterface):
                     t[e_i] = idx_list[e_i]
                     self._check_index_bool(tuple(t))
 
-                elif is_slice(e):  # slice excluded
+                elif is_slice(e):  # slice excluded (keep slice)
                     idx_list[e_i] = e
+                    if e_i == 1:
+                        # For fast column slicing we use csc.
+                        # Also, for slices with step != 1 the result
+                        # will actually be wrong using csr format
+                        self._data = self._data.tocsc()
 
                 else:
                     raise TypeError("{:} should not be used for "
@@ -300,13 +337,9 @@ class CSparse(_CArrayInterface):
             # Converting back to tuple
             idx = tuple(idx_list)
 
-            # SPECIAL CASE: Matlab-like indexing
+            # Matlab-like indexing
             if all(is_ndarray(elem) for elem in idx):
                 idx = np.ix_(*idx)
-
-            # Workaround for scipy indexing when 2 integer-like are passed
-            if all(is_intlike(elem) for elem in idx):
-                idx = tuple(elem.ravel()[0] for elem in idx)
 
         else:
             # No other object is accepted for CSparse indexing
@@ -344,13 +377,17 @@ class CSparse(_CArrayInterface):
         # Check index for all other cases
         idx = self._check_index(idx)
 
-        # Ready for numpy
+        # Ready for scipy
         return self.__class__(self._data.__getitem__(idx))
 
     def __setitem__(self, idx, value):
         """Redefinition of the get (brackets) operator."""
         # Check for setitem value
         if isinstance(value, CDense):
+            if is_list_of_lists(idx) and value.is_vector_like:
+                # Scipy v1.3+, list of list indexing returns 1-D, ravel
+                # input if vector-like (otherwise error should be raised)
+                value = value.ravel()
             value = value.tondarray()
         elif isinstance(value, CSparse):
             value = value.tocsr()
@@ -361,8 +398,14 @@ class CSparse(_CArrayInterface):
         # Check index for all other cases
         idx = self._check_index(idx)
 
+        # We use lil format for efficient changing of sparsity structure
+        self._data = self._data.tolil()
+
         # The tuple can now be managed directly by scipy
         self._data.__setitem__(idx, value)
+
+        # Convert the internal buffer back to csr format
+        self._data = self._data.tocsr()
 
         # Cleaning array after setting
         self.eliminate_zeros()
@@ -628,9 +671,10 @@ class CSparse(_CArrayInterface):
                 raise NotImplementedError(
                     "using zero or a boolean False as power is not supported "
                     "for sparse arrays. Convert to dense if needed.")
+            # indices/indptr must passed as copies (pow creates new data)
             return self.__class__((pow(self._data.data, power),
                                    self._data.indices, self._data.indptr),
-                                  shape=self.shape)
+                                  shape=self.shape, copy=True)
         else:
             return NotImplemented
 
@@ -995,9 +1039,11 @@ class CSparse(_CArrayInterface):
     def round(self, decimals=0):
         """Evenly round to the given number of decimals."""
         data = np.round(self._data.data, decimals=decimals)
+        # Round does not allocate new memory (data.flags.OWNDATA = False)
+        # and indices/indptr must passed as copies
         return self.__class__(
             (data, self._data.indices, self._data.indptr),
-            shape=self.shape)
+            shape=self.shape, copy=True)
 
     def ceil(self):
         """Return the ceiling of the input, element-wise."""
@@ -1735,6 +1781,26 @@ class CSparse(_CArrayInterface):
         h.update(np.ascontiguousarray(x.data))
 
         return h.hexdigest()
+
+    def is_inf(self):
+        """Test element-wise for positive or negative infinity."""
+        # Get the indices of array where inf values are
+        return _expand_nnz_bool(self, self.nnz_data.is_inf())
+
+    def is_posinf(self):
+        """Test element-wise for positive infinity."""
+        # Get the indices of array where +inf values are
+        return _expand_nnz_bool(self, self.nnz_data.is_posinf())
+
+    def is_neginf(self):
+        """Test element-wise for negative infinity."""
+        # Get the indices of array where -inf values are
+        return _expand_nnz_bool(self, self.nnz_data.is_neginf())
+
+    def is_nan(self):
+        """Test element-wise for Not a Number (NaN)."""
+        # Get the indices of array where nan values are
+        return _expand_nnz_bool(self, self.nnz_data.is_nan())
 
     # ----------------- #
     # MATH ELEMENT-WISE #

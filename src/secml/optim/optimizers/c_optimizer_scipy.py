@@ -37,18 +37,18 @@ class COptimizerScipy(COptimizer):
         if self.bounds is None:
             return None
 
-        # vector-like bounds
-        lb = self.bounds.lb.tondarray()
-        ub = self.bounds.ub.tondarray()
+        # Scalar or CArray
+        lb = self.bounds.lb
+        ub = self.bounds.ub
 
-        # scalar bounds (have to be scalars)
-        lb = lb if lb.size > 1 else float(lb)
-        ub = ub if ub.size > 1 else float(ub)
+        # If bounds are vectors, transform to ndarray
+        lb = lb.tondarray() if isinstance(lb, CArray) else lb
+        ub = ub.tondarray() if isinstance(ub, CArray) else ub
 
         # return scipy bounds
         return sc_opt.Bounds(lb, ub)
 
-    def minimize(self, x_init, *args, **kwargs):
+    def minimize(self, x_init, args=(), **kwargs):
         """Minimize function.
 
         Wrapper of `scipy.optimize.minimize`.
@@ -58,7 +58,7 @@ class COptimizerScipy(COptimizer):
         x_init : CArray
             Init point. Dense flat array of real elements of size 'n',
             where 'n' is the number of independent variables.
-        args : any, optional
+        args : tuple, optional
             Extra arguments passed to the objective function and its
             derivatives (`fun`, `jac` and `hess` functions).
 
@@ -137,7 +137,8 @@ class COptimizerScipy(COptimizer):
         # select method
         method = kwargs['method'] if 'method' in kwargs else None
         if method is None:
-            method = 'BFGS' if self.bounds is not None else 'L-BFGS-B'
+            # Only 'L-BFGS-B` supports bounds
+            method = 'BFGS' if self.bounds is None else 'L-BFGS-B'
         # check if method is supported
         if method not in SUPPORTED_METHODS:
             raise NotImplementedError("selected method is not supported.")
@@ -150,7 +151,7 @@ class COptimizerScipy(COptimizer):
 
         # converting input parameters to scipy
         # 1) gradient (jac)
-        jac = kwargs['jac'] if 'jac' in kwargs else self.f.gradient_ndarray
+        jac = kwargs['jac'] if 'jac' in kwargs else self._fun.gradient_ndarray
         kwargs['jac'] = jac
         # 2) bounds
         bounds = kwargs['bounds'] if 'bounds' in kwargs else None
@@ -162,7 +163,7 @@ class COptimizerScipy(COptimizer):
             kwargs['options']['disp'] = True
 
         # call minimize now
-        sc_opt_out = sc_opt.minimize(self.f.fun_ndarray,
+        sc_opt_out = sc_opt.minimize(self._fun.fun_ndarray,
                                      x_init.ravel().tondarray(),
                                      args=args, **kwargs)
 

@@ -26,7 +26,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
                  discrete=False,
                  y_target=None,
                  attack_classes='all',
-                 solver_type=None,
+                 solver_type='gradient',
                  solver_params=None,
                  init_type=None,
                  random_seed=None):
@@ -100,7 +100,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         xk = self._ts.X.atleast_2d()
         x = tr.X.atleast_2d()
 
-        H = clf.gradients.hessian(clf, x)
+        H = clf.hessian_tr_params(x)
 
         grad_loss_fk = CArray(loss_grad.ravel()).T  # column vector
 
@@ -123,7 +123,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         H += 1e-9 * (CArray.eye(d + 1))
 
         # # compute the derivatives of the classifier discriminant function
-        fd_params = self.classifier.gradients.fd_params(clf, xk)
+        fd_params = self.classifier.grad_f_params(xk)
         grad_loss_params = fd_params.dot(grad_loss_fk)
 
         # import time
@@ -138,7 +138,8 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         # print "time: ", end - start
 
         # propagating gradient back to input space
-        return gt if clf.preprocess is None else \
-            gt.dot(clf.preprocess.gradient(xc0)).ravel()
-        # fixme: change when the preprocessor gradient will take again a
-        #  w parameter
+        if clf.preprocess is not None:
+            return clf.preprocess.gradient(xc0, w=gt)
+
+        return gt
+

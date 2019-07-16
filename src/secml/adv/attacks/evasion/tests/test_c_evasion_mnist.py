@@ -2,7 +2,7 @@ from secml.testing import CUnitTest
 
 from numpy import random
 
-from secml.adv.attacks.evasion import CAttackEvasion
+from secml.adv.attacks.evasion import CAttackEvasionBLS
 from secml.ml.classifiers import CClassifierSVM
 from secml.ml.kernel import CKernel
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
@@ -21,8 +21,8 @@ class TestEvasionMNIST(CUnitTest):
         self.y_target = None
 
         self.sparse = False
-        self.distance = 'l2'
-        self.dmax = 2
+        self.distance = 'l1'
+        self.dmax = 10
 
         self.eta = 1.0 / 255.0
         self.eta_min = 0.1
@@ -53,7 +53,7 @@ class TestEvasionMNIST(CUnitTest):
         self._choose_x0()
 
         # adversarial example creation
-        self._evasion_obj = CAttackEvasion(
+        self._evasion_obj = CAttackEvasionBLS(
             classifier=self.classifier,
             surrogate_classifier=self.classifier,
             surrogate_data=self._val_dts,
@@ -63,7 +63,6 @@ class TestEvasionMNIST(CUnitTest):
             ub=self.ub,
             dmax=self.dmax,
             y_target=self.y_target,
-            solver_type='gradient-bls',
             solver_params={'eta': self.eta,
                            'eta_min': self.eta_min,
                            'eta_max': self.eta_max,
@@ -85,10 +84,6 @@ class TestEvasionMNIST(CUnitTest):
             'training', digits=self._digits, num_samples=n_tr+n_val)
         self._ts = loader.load(
             'testing', digits=self._digits, num_samples=n_ts)
-
-        # these properties are going to be moved in data loader/header
-        self.img_w = self._tr.img_w
-        self.img_h = self._tr.img_h
 
         if self.sparse is True:
             self._tr = self._tr.tosparse()
@@ -139,13 +134,16 @@ class TestEvasionMNIST(CUnitTest):
         fig = CFigure(height=5.0, width=15.0)
         fig.subplot(1, 3, 1)
         fig.sp.title(self._digits[y0.item()])
-        fig.sp.imshow(x0.reshape((self.img_h, self.img_w)), cmap='gray')
+        fig.sp.imshow(x0.reshape((self._tr.header.img_h,
+                                  self._tr.header.img_w)), cmap='gray')
         fig.subplot(1, 3, 2)
         fig.sp.imshow(
-            added_noise.reshape((self.img_h, self.img_w)), cmap='gray')
+            added_noise.reshape((self._tr.header.img_h,
+                                 self._tr.header.img_w)), cmap='gray')
         fig.subplot(1, 3, 3)
         fig.sp.title(self._digits[y_pred.item()])
-        fig.sp.imshow(xopt.reshape((self.img_h, self.img_w)), cmap='gray')
+        fig.sp.imshow(xopt.reshape((self._tr.header.img_h,
+                                    self._tr.header.img_w)), cmap='gray')
         fig.savefig(
             fm.join(fm.abspath(__file__), self.filename), file_format='pdf')
 

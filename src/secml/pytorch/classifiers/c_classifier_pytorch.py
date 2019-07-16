@@ -27,12 +27,14 @@ from secml.pytorch.settings import SECML_PYTORCH_USE_CUDA
 from secml.pytorch.data import CDatasetPyTorch
 from secml.pytorch.metrics import CMetricPyTorchAccuracy
 from secml.pytorch.utils.optim_utils import add_weight_decay
+from secml.pytorch.classifiers.mixin_classifier_gradient_pytorch import \
+    CClassifierGradientPytorchMixin
 
 # Use CUDA ?!
 use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
 
 
-class CClassifierPyTorch(CClassifier):
+class CClassifierPyTorch(CClassifier, CClassifierGradientPytorchMixin):
     """PyTorch Neural Network classifier.
 
     Parameters
@@ -447,7 +449,7 @@ class CClassifierPyTorch(CClassifier):
         dl = DataLoader(CDatasetPyTorch(x, y, transform=self.train_transform),
                         batch_size=self.batch_size,
                         shuffle=True,
-                        num_workers=n_jobs-1)
+                        num_workers=n_jobs - 1)
 
         if dl.dataset.transform is None:
             # Add a transformation that reshape samples to (C x H x W)
@@ -462,7 +464,7 @@ class CClassifierPyTorch(CClassifier):
         dl = DataLoader(CDatasetPyTorch(x),
                         batch_size=self.batch_size,
                         shuffle=False,
-                        num_workers=n_jobs-1)
+                        num_workers=n_jobs - 1)
 
         # Add a transformation that reshape samples to (C x H x W)
         dl.dataset.transform = transforms.Lambda(
@@ -727,21 +729,21 @@ class CClassifierPyTorch(CClassifier):
                 # Log progress of batch
                 self.logger.debug('Epoch: {epoch}, Batch: ({batch}/{size}) '
                                   'Loss: {loss:.4f} Acc: {acc:.2f}'.format(
-                                    epoch=self.start_epoch + 1,
-                                    batch=batch_idx + 1,
-                                    size=len(ds_loader),
-                                    loss=losses.avg,
-                                    acc=acc.avg,
-                                  ))
+                    epoch=self.start_epoch + 1,
+                    batch=batch_idx + 1,
+                    size=len(ds_loader),
+                    loss=losses.avg,
+                    acc=acc.avg,
+                ))
 
             # Log progress of epoch
             self.logger.info('Epoch: [{curr_epoch}|{epochs}] '
                              'Loss: {loss:.4f} Acc: {acc:.2f}'.format(
-                               curr_epoch=self.start_epoch + 1,
-                               epochs=self.epochs,
-                               loss=losses.avg,
-                               acc=acc.avg,
-                             ))
+                curr_epoch=self.start_epoch + 1,
+                epochs=self.epochs,
+                loss=losses.avg,
+                acc=acc.avg,
+            ))
 
             # Average accuracy after epoch FIXME: ON TRAINING SET
             self._acc = acc.avg
@@ -936,125 +938,6 @@ class CClassifierPyTorch(CClassifier):
 
         return (labels, scores) if return_decision_function is True else labels
 
-    def gradient_f_x(self, x, y=None, w=None, layer=None, **kwargs):
-        """Computes the gradient of the classifier's output wrt input.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-        y : int or None, optional
-            Index of the class wrt the gradient must be computed.
-            This is not required if:
-             - `w` is passed and the last layer is used but
-              softmax_outputs is False
-             - an intermediate layer is used
-        w : CArray or None, optional
-            If CArray, will be passed to backward and must have a proper shape
-            depending on the chosen output layer (the last one if `layer`
-            is None). This is required if `layer` is not None.
-        layer : str or None, optional
-            Name of the layer.
-            If None, the gradient at the last layer will be returned
-             and `y` is required if `w` is None or softmax_outputs is True.
-            If not None, `w` of proper shape is required.
-        **kwargs
-            Optional parameters for the function that computes the
-            gradient of the decision function. See the description of
-            each classifier for a complete list of optional parameters.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the classifier's output wrt input. Vector-like array.
-
-        """
-        return super(CClassifierPyTorch, self).gradient_f_x(
-            x, y, w=w, layer=layer, **kwargs)
-
-    def _gradient_f(self, x, y=None, w=None, layer=None):
-        """Computes the gradient of the classifier's decision function
-         wrt decision function input.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-        y : int or None, optional
-            Index of the class wrt the gradient must be computed.
-            This is not required if:
-             - `w` is passed and the last layer is used but
-              softmax_outputs is False
-             - an intermediate layer is used
-        w : CArray or None, optional
-            If CArray, will be passed to backward and must have a proper shape
-            depending on the chosen output layer (the last one if `layer`
-            is None). This is required if `layer` is not None.
-        layer : str or None, optional
-            Name of the layer.
-            If None, the gradient at the last layer will be returned
-             and `y` is required if `w` is None or softmax_outputs is True.
-            If not None, `w` of proper shape is required.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the classifier's df wrt its input. Vector-like array.
-
-        """
-        if x.is_vector_like is False:
-            raise ValueError("gradient can be computed on one sample only.")
-
-        dl = self._get_test_input_loader(x)
-
-        s = dl.dataset[0][0]  # Get the single and only point from the dl
-
-        if use_cuda is True:
-            s = s.cuda()
-        s = s.unsqueeze(0)   # unsqueeze to simulate a single point batch
-        s = Variable(s, requires_grad=True)
-
-        # Get the model output at specific layer
-        out = self._get_layer_output(s, layer=layer)
-
-        # unsqueeze if net output does not take into account the batch size
-        if len(out.shape) < len(s.shape):
-            out = out.unsqueeze(0)
-
-        if w is None:
-            if layer is not None:
-                raise ValueError(
-                    "grad can be implicitly created only for the last layer. "
-                    "`w` is needed when `layer` is not None.")
-            if y is None:  # if layer is None -> y is required
-                raise ValueError("The class label wrt compute the gradient "
-                                 "at the last layer is required.")
-
-            w_in = torch.FloatTensor(1, out.shape[-1])
-            if use_cuda is True:
-                w_in = w_in.cuda()
-            w_in.zero_()
-            w_in[0, y] = 1  # create a mask to get the gradient wrt y
-
-        else:
-            w_in = self._to_tensor(w.atleast_2d())
-
-        w_in = w_in.unsqueeze(0)  # unsqueeze to simulate a single point batch
-
-        # Apply softmax-scaling if needed
-        if layer is None and self.softmax_outputs is True:
-            out_carray = CArray(
-                out.squeeze(0).data.cpu().numpy()).astype(float)
-            softmax_grad = CSoftmax().gradient(out_carray, y=y)
-            w_in *= self._to_tensor(softmax_grad.atleast_2d()).unsqueeze(0)
-        elif w is not None and y is not None:
-            # Inform the user y has not been used
-            self.logger.warning("`y` will be ignored!")
-
-        out.backward(w_in)  # Backward on `out` (grad will appear on `s`)
-
-        return CArray(s.grad.data.cpu().numpy().ravel())
-
     def _get_layer_output(self, s, layer=None):
         """Returns the output of the desired net layer.
 
@@ -1079,7 +962,7 @@ class CClassifierPyTorch(CClassifier):
             s = self._model(s)  # Forward pass
 
         else:  # FIXME: THIS DOES NOT WORK IF THE FORWARD METHOD
-                # HAS ANY SPECIAL OPERATION INSIDE (LIKE DENSENET)
+            # HAS ANY SPECIAL OPERATION INSIDE (LIKE DENSENET)
             # Manual iterate the network and stop at desired layer
             # Use _model to iterate over first level modules only
             for m_k, m in self._model._modules.items():

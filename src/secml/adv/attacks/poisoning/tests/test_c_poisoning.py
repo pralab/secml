@@ -109,7 +109,7 @@ class CPoisoningTestCases(object):
             # self.solver_params = {'eta': 0.05, 'eps': 1e-9}
 
             self.solver_type = 'gradient-bls'
-            self.solver_params = {'eta': 0.05, 'eta_min': 0.1, 'eps': 1e-9}
+            self.solver_params = {'eta': 0.05, 'eta_min': 0.05, 'eps': 1e-9}
 
             self._poisoning_params = {
                 "classifier": self.classifier,

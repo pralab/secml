@@ -14,7 +14,7 @@ from secml.data.loader import CDLRandomBlobs
 from secml.figure import CFigure
 from secml.utils import fm
 
-from secml.adv.attacks.evasion import CAttackEvasion
+from secml.adv.attacks.evasion import CAttackEvasionBLS
 from secml.optim.constraints import \
     CConstraintBox, CConstraintL1, CConstraintL2
 
@@ -71,9 +71,6 @@ class CEvasionTestCases(object):
 
             self.logger.info("Malicious sample: " + str(self.x0))
 
-            self.solver_type = 'gradient-bls'
-            # self.solver_type = 'gradient'
-
             self.solver_params = {
                 "eta": self.eta,
                 "eta_min": self.eta_min,
@@ -98,11 +95,10 @@ class CEvasionTestCases(object):
                 "discrete": self.discrete,
                 "attack_classes": CArray([1]),
                 "y_target": 0,
-                "solver_type": self.solver_type,
                 "solver_params": self.solver_params
             }
 
-            self.evasion = CAttackEvasion(**params)
+            self.evasion = CAttackEvasionBLS(**params)
             self.evasion.verbose = 2
 
         # ####################################################################
@@ -185,7 +181,8 @@ class CEvasionTestCases(object):
             fig.switch_sptype(sp_type="function")
             fig.sp.plot_fobj(
                 func=evas.classifier.decision_function,
-                grid_limits=self.grid_limits, colorbar=False, y=1)
+                grid_limits=self.grid_limits, colorbar=False,
+                levels=[0], y=1)
             # construct and plot box
             if self.lb == "x0":
                 self.lb = self.x0

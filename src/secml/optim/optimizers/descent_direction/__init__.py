@@ -1,1 +1,0 @@
-from .c_optimizer_grad_bls import COptimizerGradBLS

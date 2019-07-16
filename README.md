@@ -34,7 +34,7 @@ However, to support additional advanced features more packages can be necessary
 depending on the Operating System used:
 - Linux (Ubuntu >= 16.04):
    - `python-tk` (Python 2.7), `python3-tk` (Python >= 3.5). For running Matplotlib Tk-based backends;
-   - NVIDIA® CUDA® Toolkit for running `tf-gpu` [extra component](#extra-components). See https://www.tensorflow.org/install/gpu
+   - NVIDIA<sup>®</sup> CUDA<sup>®</sup> Toolkit for running `tf-gpu` [extra component](#extra-components). See https://www.tensorflow.org/install/gpu
 - MacOS: **TODO**
 
 ### Installation process

@@ -65,23 +65,3 @@ class CClassifierReject(CClassifier):
 
         """
         raise NotImplementedError
-
-    def _gradient_f(self, x, y):
-        """Computes the gradient of the classifier's decision function
-         wrt decision function input.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-        y : int
-            Index of the class wrt the gradient must be computed.
-            Use -1 to output the gradient w.r.t. the reject class.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the classifier's df wrt its input. Vector-like array.
-
-        """
-        raise NotImplementedError

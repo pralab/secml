@@ -85,7 +85,7 @@ class CNormalizerLinear(CNormalizer):
             raise ValueError("array to normalize must have {:} "
                              "features (columns).".format(self.w.size))
 
-        return self.w * x + self.b
+        return (x * self.w).todense() + self.b
 
     def _revert(self, x):
         """Undo the linear normalization of input data.
@@ -128,15 +128,16 @@ class CNormalizerLinear(CNormalizer):
         -------
         gradient : CArray
             Gradient of the linear normalizer wrt input data.
-            Array of shape (x.shape[1], x.shape[1]) if `w` is None,
-            otherwise an array of shape (w.shape[0], x.shape[1]).
+            - a flat array of shape (x.shape[1], ) if `w` is None;
+            - if `w` is passed as input, will have (w.shape[0], x.shape[1]),
+              or (x.shape[1], ) if `w` is a flat array.
 
         """
         if x.atleast_2d().shape[1] != self.w.size:
             raise ValueError("input data must have {:} features (columns)."
                              "".format(self.w.size))
 
-        grad = self.w.diag()  # I * self.w
+        grad = self.w  # Should be I * self.w . We keep a vector for simplicity
 
         # Left multiply input `w` with normalizer gradient
-        return w.dot(grad) if w is not None else grad
+        return w * grad if w is not None else grad

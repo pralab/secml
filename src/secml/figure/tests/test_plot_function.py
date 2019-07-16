@@ -34,7 +34,7 @@ class TestCPlot(CUnitTest):
 
         fig.switch_sptype(sp_type='function')
         fig.sp.plot_fobj(self.clf.decision_function, y=1)
-        fig.sp.plot_fgrads(lambda x: self.clf.gradient_f_x(x))
+        fig.sp.plot_fgrads(lambda x: self.clf.grad_f_x(x))
         fig.show()
 
 

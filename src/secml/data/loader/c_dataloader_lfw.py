@@ -8,7 +8,7 @@
 from multiprocessing import Lock
 
 from secml.data.loader import CDataLoader
-from secml.data import CDataset
+from secml.data import CDataset, CDatasetHeader
 from secml.array import CArray
 from secml.utils import fm
 from secml.settings import SECML_DS_DIR
@@ -50,8 +50,9 @@ class CDataLoaderLFW(CDataLoader):
     def load(self, min_faces_per_person=None, funneled=True, color=False):
         """Load LFW dataset.
 
-        'img_w', 'img_h', 'y_names' (list with the name string
-        for each class), will be added as custom CDataset attributes.
+        Extra dataset attributes:
+         - 'img_w', 'img_h': size of the images in pixels.
+         - 'y_names': tuple with the name string for each class.
 
         Parameters
         ----------
@@ -79,9 +80,11 @@ class CDataLoaderLFW(CDataLoader):
         img_w = lfw_people.images.shape[2]
         img_h = lfw_people.images.shape[1]
 
-        y_names = lfw_people.target_names.tolist()
+        y_names = tuple(lfw_people.target_names.tolist())
 
-        return CDataset(x, y, img_w=img_w, img_h=img_h, y_names=y_names)
+        header = CDatasetHeader(img_w=img_w, img_h=img_h, y_names=y_names)
+
+        return CDataset(x, y, header=header)
 
     @staticmethod
     def clean_tmp():

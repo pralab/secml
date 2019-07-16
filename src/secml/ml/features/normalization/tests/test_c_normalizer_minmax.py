@@ -71,9 +71,8 @@ class TestCNormalizerLinear(CPreProcessTestCases):
             [{'feature_range': (-5, 5)}, {}, {'feature_range': (0, 1)}]
         )
 
-        # Expected shape is (n_feats, n_feats), so (4, 4)
-        self.assertEqual((self.array_dense.shape[1],
-                          self.array_dense.shape[1]), grad.shape)
+        # Expected shape is (n_feats, ), so (4, )
+        self.assertEqual((self.array_dense.shape[1], ), grad.shape)
 
 
 if __name__ == '__main__':

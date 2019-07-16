@@ -18,7 +18,11 @@ class TestCArrayUtilsComparison(CArrayTestCases):
             self.logger.info(
                 "a1.logical_and(a2): \n{:}".format(logical_and_res))
 
-            self.assertTrue((logical_and_res == expected).all())
+            self.assert_array_equal(logical_and_res, expected)
+
+            if array1.issparse or array2.issparse:
+                # If a sparse array is involved, result must be sparse
+                self.assertTrue(logical_and_res.issparse)
 
         _logical_and(self.array_sparse, self.array_dense,
                      self.array_sparse.astype(bool))
@@ -71,7 +75,7 @@ class TestCArrayUtilsComparison(CArrayTestCases):
             logical_or_res = array1.logical_or(array2)
             self.logger.info("a1.logical_or(a2): \n{:}".format(logical_or_res))
 
-            self.assertTrue((logical_or_res == expected).all())
+            self.assert_array_equal(logical_or_res, expected)
 
         _logical_or(self.array_sparse, self.array_dense,
                     self.array_sparse.astype(bool))
@@ -122,7 +126,7 @@ class TestCArrayUtilsComparison(CArrayTestCases):
             logical_not_res = array.logical_not()
             self.logger.info("a.logical_not(): \n{:}".format(logical_not_res))
 
-            self.assertTrue((logical_not_res == expected).all())
+            self.assert_array_equal(logical_not_res, expected)
 
         _logical_not(self.array_sparse_nozero,
                      self.array_sparse_allzero.astype(bool))
@@ -156,7 +160,9 @@ class TestCArrayUtilsComparison(CArrayTestCases):
             maximum_res = array1.maximum(array2)
             self.logger.info("a1.maximum(a2): \n{:}".format(maximum_res))
 
-            self.assertTrue((maximum_res == array2).all())
+            if array1.ndim == 2 or array2.ndim == 2:
+                array2 = array2.atleast_2d()
+            self.assert_array_equal(maximum_res, array2)
 
         _maximum(self.array_sparse, self.array_sparse)
         _maximum(self.array_dense, self.array_dense)
@@ -234,7 +240,9 @@ class TestCArrayUtilsComparison(CArrayTestCases):
             minimum_res = array1.minimum(array2)
             self.logger.info("a1.minimum(a2): \n{:}".format(minimum_res))
 
-            self.assertTrue((minimum_res == array1).all())
+            if array1.ndim == 2 or array2.ndim == 2:
+                array1 = array1.atleast_2d()
+            self.assert_array_equal(minimum_res, array1)
 
         _minimum(self.array_sparse, self.array_sparse)
         _minimum(self.array_dense, self.array_dense)

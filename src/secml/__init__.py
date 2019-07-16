@@ -15,7 +15,7 @@ _logger_handle.setFormatter(logging.Formatter(
     "%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
 _logger.addHandler(_logger_handle)
 
-__all__ = ['_NoValue', '__version__']
+__all__ = ['_NoValue', '__version__', 'global_filterwarnings']
 
 _here = os.path.abspath(os.path.dirname(__file__))
 
@@ -89,3 +89,27 @@ try:
     __version__ = str(_v) if _v.is_prerelease else _v.public
 except:
     raise RuntimeError("Unable to find version string.")
+
+
+# The following are global filters for warnings
+def global_filterwarnings():
+
+    import warnings
+
+    # TODO: REMOVE WHEN SCIPY MIN VERSION WILL BE 1.3
+    warnings.filterwarnings(
+        "ignore", category=PendingDeprecationWarning,
+        message="the matrix subclass is not the recommended way to represent "
+                "matrices or deal with linear algebra*"
+    )
+
+    # TODO: REMOVE AFTER SWITCHING TO PYTHON 3
+    warnings.filterwarnings(
+        "ignore", category=DeprecationWarning,
+        message="The SafeConfigParser class has been renamed to "
+                "ConfigParser in Python 3.2.*"
+    )
+
+
+# Call the filterwarnings method to make it active project-wide
+global_filterwarnings()

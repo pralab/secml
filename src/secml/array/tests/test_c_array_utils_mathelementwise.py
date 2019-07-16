@@ -11,6 +11,13 @@ class TestCArrayUtilsMathElementWise(CArrayTestCases):
         """Test for CArray.sqrt() method."""
         self.logger.info("Test for CArray.sqrt() method.")
 
+        # We are testing sqrt on negative values
+        self.logger.filterwarnings(
+            action="ignore",
+            message="invalid value encountered in sqrt",
+            category=RuntimeWarning
+        )
+
         def _check_sqrt(array, expected):
             self.logger.info("Array:\n{:}".format(array))
 
@@ -145,6 +152,13 @@ class TestCArrayUtilsMathElementWise(CArrayTestCases):
         """Test for CArray.log() method."""
         self.logger.info("Test for CArray.log() method.")
 
+        # We are testing log on zero values
+        self.logger.filterwarnings(
+            action="ignore",
+            message="divide by zero encountered in log",
+            category=RuntimeWarning
+        )
+
         def _check_log(array, expected):
             self.logger.info("Array:\n{:}".format(array))
 
@@ -174,6 +188,13 @@ class TestCArrayUtilsMathElementWise(CArrayTestCases):
     def test_log10(self):
         """Test for CArray.log10() method."""
         self.logger.info("Test for CArray.log10() method.")
+
+        # We are testing log10 on zero values
+        self.logger.filterwarnings(
+            action="ignore",
+            message="divide by zero encountered in log10",
+            category=RuntimeWarning
+        )
 
         def _check_log10(array, expected):
             self.logger.info("Array:\n{:}".format(array))

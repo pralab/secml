@@ -13,12 +13,12 @@ from secml.core.constants import inf
 from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.loss import CLoss
 from secml.ml.classifiers.regularizer import CRegularizer
-from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.ml.kernel import CKernel
 from secml.utils.mixed_utils import check_is_fitted
+from secml.ml.classifiers.gradients import CClassifierGradientSGDMixin
 
 
-class CClassifierSGD(CClassifierLinear):
+class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
     """Stochastic Gradient Descent Classifier.
 
     Parameters
@@ -114,6 +114,15 @@ class CClassifierSGD(CClassifierLinear):
     def alpha(self, value):
         """Sets the Constant that multiplies the regularization term."""
         self._alpha = float(value)
+
+    @property
+    def C(self):
+        """Constant that multiplies the regularization term.
+
+        Equal to 1 / alpha.
+
+        """
+        return 1.0 / self.alpha
 
     @property
     def class_weight(self):
@@ -268,53 +277,4 @@ class CClassifierSGD(CClassifierLinear):
         # Scores are given by the linear model
         return CClassifierLinear._decision_function(self, k, y=y)
 
-    def _gradient_f(self, x=None, y=1):
-        """Computes the gradient of the linear classifier's decision function
-         wrt decision function input.
-
-        For linear classifiers, the gradient wrt input is equal
-        to the weights vector w. The point x can be in fact ignored.
-
-        Parameters
-        ----------
-        x : CArray or None, optional
-            The gradient is computed in the neighborhood of x.
-        y : int, optional
-            Binary index of the class wrt the gradient must be computed.
-            Default is 1, corresponding to the positive class.
-
-        Returns
-        -------
-        gradient : CArray
-            The gradient of the linear classifier's decision function
-            wrt decision function input. Vector-like array.
-
-        """
-        x = x.atleast_2d()
-
-        if self.is_kernel_linear():  # Simply return w for a linear SGD
-            return CClassifierLinear._gradient_f(self, y=y)
-
-        # Point is required in the case of non-linear SGD
-        if x is None:
-            raise ValueError("point 'x' is required to compute the gradient")
-
-        gradient = self.kernel.gradient(self._tr, x).atleast_2d()
-
-        # Few shape check to ensure broadcasting works correctly
-        if gradient.shape != (self._tr.shape[0], self.n_features):
-            raise ValueError("Gradient shape must be ({:}, {:})".format(
-                x.shape[0], self.n_features))
-
-        w_2d = self.w.atleast_2d()
-        if gradient.issparse is True:  # To ensure the sparse dot is used
-            w_2d = w_2d.tosparse()
-        if w_2d.shape != (1, self._tr.shape[0]):
-            raise ValueError("Weight vector shape must be ({:}, {:}) "
-                             "or ravel equivalent".format(1, self._tr.shape[0]))
-
-        gradient = w_2d.dot(gradient)
-
-        # Gradient sign depends on input label (0/1)
-        return convert_binary_labels(y) * gradient.ravel()
 

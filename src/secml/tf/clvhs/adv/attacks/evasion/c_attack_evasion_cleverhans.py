@@ -109,6 +109,24 @@ class CAttackEvasionCleverhans(CAttackEvasion):
     #                              PRIVATE METHODS
     ###########################################################################
 
+    def _objective_function(self, x):
+        """Objective function.
+
+        Parameters
+        ----------
+        x : CArray or CDataset
+
+        Returns
+        -------
+        f_obj : float or CArray of floats
+
+        """
+        raise NotImplementedError
+
+    def _objective_function_gradient(self, x):
+        """Gradient of the objective function."""
+        raise NotImplementedError
+
     def _set_solver_classifier(self):
         """This function set the surrogate classifier,
         if differentiable; otherwise, it learns a smooth approximation for
@@ -129,7 +147,7 @@ class CAttackEvasionCleverhans(CAttackEvasion):
         self._clvrh_clf = CModelCleverhans(
             self._surrogate_classifier, out_dims=self._n_classes)
 
-        # create an istance of the chosen cleverhans attack
+        # create an instance of the chosen cleverhans attack
         clvrh_attack = self._clvrh_attack_class(
             self._clvrh_clf, sess=self._tfsess)
 
@@ -144,9 +162,17 @@ class CAttackEvasionCleverhans(CAttackEvasion):
 
         # create the tf operations to generate the attack
         if not self.y_target:
-            self._adv_x_T = clvrh_attack.generate(
-                self._initial_x_P, y=self._y_P, **self._clvrh_params)
+            if 'y' in clvrh_attack.feedable_kwargs:
+                self._adv_x_T = clvrh_attack.generate(
+                    self._initial_x_P, y=self._y_P, **self._clvrh_params)
+            else:  # 'y' not required by attack
+                self._adv_x_T = clvrh_attack.generate(
+                    self._initial_x_P, **self._clvrh_params)
         else:
+            if 'y_target' not in clvrh_attack.feedable_kwargs:
+                raise RuntimeError(
+                    "cannot perform a targeted {:} attack".format(
+                        clvrh_attack.__class__.__name__))
             self._adv_x_T = clvrh_attack.generate(
                 self._initial_x_P, y_target=self._y_P, **self._clvrh_params)
 
@@ -195,7 +221,6 @@ class CAttackEvasionCleverhans(CAttackEvasion):
 
         self._x0 = x0
         self._y0 = y0
-        self._init_solver()
 
         x = self._x0.atleast_2d().tondarray().astype(np.float32)
 

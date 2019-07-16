@@ -4,7 +4,7 @@ from six.moves import range
 from secml.testing import CUnitTest
 from secml.ml.classifiers.reject.tests import CClassifierRejectTestCases
 
-from secml.adv.attacks import CAttackEvasion
+from secml.adv.attacks import CAttackEvasionBLS
 from secml.adv.defenses import CClassifierRejectDetector
 from secml.adv.seceval import CSecEval
 from secml.array import CArray
@@ -13,6 +13,7 @@ from secml.data.loader import CDLRandomBlobs
 from secml.ml.kernel import CKernelRBF
 from secml.ml.features import CPreProcess
 from secml.utils import fm
+from secml.figure import CFigure
 
 
 class TestCClassifierRejectDetector(
@@ -51,7 +52,6 @@ class TestCClassifierRejectDetector(
         self.dmax_lst = [1, 1.5]
         self.discrete = False
         self.type_dist = 'l2'
-        self.solver_type = 'gradient-bls'
         self.solver_params = {'eta': 0.1}
 
     def _generate_advx(self):
@@ -74,11 +74,10 @@ class TestCClassifierRejectDetector(
                 "discrete": self.discrete,
                 "attack_classes": 'all',
                 "y_target": None,
-                "solver_type": self.solver_type,
                 "solver_params": self.solver_params
             }
 
-            self.evasion = CAttackEvasion(**params)
+            self.evasion = CAttackEvasionBLS(**params)
             self.evasion.verbose = 1
             self.sec_eval = CSecEval(attack=self.evasion, param_name='dmax',
                                      param_values=self.dmax_lst,
@@ -102,7 +101,7 @@ class TestCClassifierRejectDetector(
         return adv_dts_X
 
     def test_gradient(self):
-        """Unittest for gradient_f_x method."""
+        """Unittest for grad_f_x method."""
         # Training the classifier
         clf = self.clf.fit(self.dataset)
 
@@ -147,6 +146,31 @@ class TestCClassifierRejectDetector(
         # Mixed linear/nonlinear transformations without gradient
         self._test_preprocess(
             self.dataset, self.clf, ['pca', 'unit-norm'], [{}, {}])
+
+    def test_draw(self):
+        """ Compare the classifiers graphically"""
+        self.logger.info("Testing classifiers graphically")
+
+        fig = CFigure(width=10, markersize=8)
+        # Plot dataset points
+        fig.switch_sptype(sp_type='ds')
+
+        # mark the rejected samples
+        y = self.clf.predict(self.dataset.X)
+        fig.sp.plot_ds(
+            self.dataset[y == -1, :], colors=['k', 'k'], markersize=12)
+
+        # plot the dataset
+        fig.sp.plot_ds(self.dataset)
+
+        # Plot objective function
+        fig.switch_sptype(sp_type='function')
+        fig.sp.plot_fobj(self.clf.decision_function,
+                         grid_limits=self.dataset.get_bounds(),
+                         levels=[0.5], y=1)
+        fig.sp.title('Classifier with reject threshold')
+
+        fig.show()
 
 
 if __name__ == '__main__':

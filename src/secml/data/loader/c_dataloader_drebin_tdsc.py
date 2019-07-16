@@ -1,6 +1,6 @@
 """
-.. module:: DataLoaderDrebin
-   :synopsis: Loader the Drebin Android applications dataset
+.. module:: DataLoaderDrebinTDSC
+   :synopsis: Loader the Drebin Android applications dataset (TDSC version)
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
@@ -14,7 +14,7 @@ import csv
 import numpy as np
 
 from secml.data.loader import CDataLoader, CDataLoaderSvmLight
-from secml.data import CDataset
+from secml.data import CDataset, CDatasetHeader
 from secml.array import CArray
 from secml.utils import fm
 from secml.utils.download_utils import dl_file
@@ -22,22 +22,10 @@ from secml.utils.dict_utils import invert_dict
 from secml import settings
 
 DREBIN_URL = 'https://nue.diee.unica.it/public.php/webdav'
-DREBIN_USER = 'e5a854edbdda1739f1f2bfbc31085e2b'
-DREBIN_MD5 = 'ab73d749f2a8f51b30601ca7ed7c321b'
+DREBIN_USER = 'f0e4dc007baf02d54a306b0b73f2b53f'
+DREBIN_MD5 = '4c24ef53b837d1b54d4d304616313438'
 
 DREBIN_PATH = fm.join(settings.SECML_DS_DIR, 'drebin')
-
-OBFUSCATION_MAPPING = {
-    'ORIGINAL': 'ORIGINAL',
-    'CLASS_ENCRYPTION': 'CLASS ENCRYPTION',
-    'STRING_ENCRYPTION': 'STRING ENCRYPTION',
-    'REFLECTION': 'REFLECTION',
-    'TRIVIAL': 'TRIVIAL',
-    'TRIVIAL_STRING_ENCRYPTION': 'TRIVIAL STRING E',
-    'TRIVIAL_STRING_ENCRYPTION_REFLECTION': 'TRIVIAL STRING E + R',
-    'TRIVIAL_STRING_ENCRYPTION_REFLECTION_CLASS_ENCRYPTION':
-        'TRIVIAL STRING E + R + CLASS E'
-}
 
 FEAT_FAMILY_MAPPING = OrderedDict([
     ("Hardware components", ["features"]),
@@ -58,10 +46,11 @@ MANIFEST_FAMILIES = ["Hardware components", "Requested permissions",
                      "App components", "Filtered Intents"]
 
 
-class CDataLoaderDrebin(CDataLoader):
-    """Loads the Drebin Android applications dataset.
+class CDataLoaderDrebinTDSC(CDataLoader):
+    """Loads the Drebin Android applications dataset (TDSC version).
 
-    Available at: https://www.sec.cs.tu-bs.de/~danarp/drebin/download.html
+    Full version available at:
+        https://www.sec.cs.tu-bs.de/~danarp/drebin/download.html
 
     Attributes
     ----------
@@ -76,7 +65,6 @@ class CDataLoaderDrebin(CDataLoader):
     FEAT_FAMILY_MAPPING_INVERTED = FEAT_FAMILY_MAPPING_INVERTED
     DEXCODE_FAMILIES = DEXCODE_FAMILIES
     MANIFEST_FAMILIES = MANIFEST_FAMILIES
-    OBFUSCATION_MAPPING = OBFUSCATION_MAPPING
 
     def __init__(self):
 
@@ -86,7 +74,7 @@ class CDataLoaderDrebin(CDataLoader):
         self.feat_mapping_path = fm.join(DREBIN_PATH, 'feature_mapping.txt')
         self.families_path = fm.join(DREBIN_PATH, 'sha256_family.csv')
 
-        with CDataLoaderDrebin.__lock:
+        with CDataLoaderDrebinTDSC.__lock:
             # Download (if needed) data and extract it
             if not fm.file_exist(self.data_path):
                 self._get_data(DREBIN_URL, DREBIN_PATH)
@@ -98,15 +86,15 @@ class CDataLoaderDrebin(CDataLoader):
         and 5615 malware applications. Each sample is in sparse format,
         consisting of 1227080 binary (0-1) features each.
 
-        Custom CDataset attributes:
+        Extra dataset attributes:
          - 'infos': CArray with the 'hash.label' string for each point
-        (only if `feats_info` is True)
-         - 'original_idx': original index of each feature
-         - 'feat_family_idx': for each feature, the index of the family
-                relative to the CDataLoaderDrebin.FEAT_FAMILY_MAPPING
-         - 'feat_desc': dict with the description of each original feature
-         - 'app_family_map': dict with the id of each app family (0 is Benign,
-                others are malware)
+        (only if `feats_info` is True).
+         - 'original_idx': tuple with original index of each feature.
+         - 'feat_family_idx': tuple with, for each feature, the index of the
+             family relative to the CDataLoaderDrebinTDSC.FEAT_FAMILY_MAPPING.
+         - 'feat_desc': dict with the description of each original feature.
+         - 'app_family_map': dict with the id of each app family
+             (0 is Benign, others are malware).
          - 'mal_family': dict with the app family id for
                 each malware (hash). The hash can be retrieved from 'infos'.
 
@@ -138,13 +126,14 @@ class CDataLoaderDrebin(CDataLoader):
             "Loading feats freqs from {:}".format(self.feat_freqs_path))
 
         feat_freqs = np.genfromtxt(
-            self.feat_freqs_path, delimiter=',', dtype="|S500", autostrip=True)
+            self.feat_freqs_path, delimiter=',', dtype="|S500",
+            autostrip=True, loose=False)
         # Original index of each feature
         original_idx = CArray(feat_freqs[:, 1].astype(int))
 
         # Let's assign to each feature the index of the corresponding family
         # relative to the FEAT_FAMILY_MAPPING ordered dict
-        feat_family = CArray(feat_freqs[:, 2])
+        feat_family = CArray(feat_freqs[:, 2]).astype(str)
         feat_family_idx = CArray.empty(feat_family.size, dtype=int)
         for f_idx, feat_fam in enumerate(feat_family):
             fam_inv = FEAT_FAMILY_MAPPING_INVERTED[feat_fam]
@@ -155,12 +144,12 @@ class CDataLoaderDrebin(CDataLoader):
 
         feat_mapping = np.genfromtxt(
             self.feat_mapping_path, delimiter=',', dtype="|S500",
-            autostrip=True, skip_header=1)
+            autostrip=True, skip_header=1, loose=False)
 
         # Now create a dictionary with features ORIGINAL index as key
         # and the corresponding description as value
         feat_desc_idx = CArray(feat_mapping[:, 0].astype(int))
-        feat_desc_str = CArray(feat_mapping[:, 1])
+        feat_desc_str = CArray(feat_mapping[:, 1]).astype(str)
         feat_desc = {k: v for k, v in zip(feat_desc_idx, feat_desc_str)}
 
         self.logger.info(
@@ -171,7 +160,7 @@ class CDataLoaderDrebin(CDataLoader):
         # a dict with the family ID for each malware (hash)
         mal_fam = dict()
         mal_fam_map = {'Benign': 0}
-        with open(self.families_path, 'rb') as csvfile:
+        with open(self.families_path, 'r') as csvfile:
             mal_fam_reader = csv.reader(csvfile)
             next(mal_fam_reader)  # Skipping the first header line
             for row in mal_fam_reader:
@@ -181,12 +170,17 @@ class CDataLoaderDrebin(CDataLoader):
         # The next is the inverted dict with app family number as key
         mal_fam_map_inverted = {k[1]: k[0] for k in mal_fam_map.items()}
 
-        # Adding the extra parameters to the dataset object
-        ds.original_idx = original_idx
-        ds.feat_family_idx = feat_family_idx
-        ds.feat_desc = feat_desc
-        ds.app_family_map = mal_fam_map_inverted
-        ds.mal_family = mal_fam
+        # Create a new header with additional params
+        header = CDatasetHeader(
+            original_idx=tuple(original_idx.tolist()),
+            feat_family_idx=tuple(feat_family_idx.tolist()),
+            feat_desc=feat_desc,
+            app_family_map=mal_fam_map_inverted,
+            mal_family=mal_fam
+        )
+
+        # Append new header to existing header (as load_infos above is True)
+        ds.header = ds.header.append(header)
 
         return ds
 

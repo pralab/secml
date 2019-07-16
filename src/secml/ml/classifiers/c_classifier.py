@@ -84,11 +84,11 @@ class CClassifier(CCreator):
 
     @property
     def n_features(self):
-        """Number of features"""
+        """Number of features (before preprocessing)."""
         return self._n_features
 
     def is_linear(self):
-        """Return true for linear classifiers, false otherwise"""
+        """True for linear classifiers, False otherwise."""
         return False
 
     def is_fitted(self):
@@ -385,92 +385,3 @@ class CClassifier(CCreator):
 
         return best_params
 
-    def gradient_f_x(self, x, y, **kwargs):
-        """Computes the gradient of the classifier's output wrt input.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-        y : int
-            Index of the class wrt the gradient must be computed.
-        **kwargs
-            Optional parameters for the function that computes the
-            gradient of the decision function. See the description of
-            each classifier for a complete list of optional parameters.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the classifier's output wrt input. Vector-like array.
-
-        """
-        self._check_is_fitted()
-
-        x_in = x  # Original data
-
-        # If preprocess is defined, transform data before computing the grad
-        x = self._preprocess_data(x)
-
-        try:  # Get the derivative of decision_function
-            grad_f = self._gradient_f(x, y, **kwargs)  # May accept kwargs
-        except NotImplementedError:
-            raise NotImplementedError("{:} does not implement `gradient_f_x`"
-                                      "".format(self.__class__.__name__))
-
-        # The derivative of decision_function should be a vector
-        # as we are computing the gradient wrt a class `y`
-        if not grad_f.is_vector_like:
-            raise ValueError("`_gradient_f` must return a vector like array")
-
-        grad_f = grad_f.ravel()
-
-        # backpropagate the clf gradient to the preprocess (if defined)
-        if self.preprocess is not None:
-            # preprocess gradient will be accumulated in grad_f
-            # and a vector-like array should be returned
-            grad_p = self.preprocess.gradient(x_in, w=grad_f)
-            if not grad_p.is_vector_like:
-                raise ValueError(
-                    "`preprocess.gradient` must return a vector like array")
-            return grad_p.ravel()
-
-        return grad_f  # No preprocess defined... return the clf grad
-
-    def gradient_loss_params(self, **kwargs):
-        """Computed the gradient of the classifier's loss wrt train parameters.
-
-        Parameters
-        ----------
-        **kwargs
-            Optional parameters. See the description of each
-            classifier for a complete list of optional parameters.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the classifier's loss wrt train parameters.
-
-        """
-        raise NotImplementedError(
-            "{:} does not implement `gradient_loss_params`"
-            "".format(self.__class__.__name__))
-
-    def _gradient_f(self, x, y):
-        """Computes the gradient of the classifier's decision function
-         wrt decision function input.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-        y : int
-            Index of the class wrt the gradient must be computed.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the classifier's df wrt its input. Vector-like array.
-
-        """
-        raise NotImplementedError

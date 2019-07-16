@@ -5,7 +5,7 @@ from six.moves import range
 from secml.testing import CUnitTest
 
 from secml import _NoValue
-from secml.adv.attacks.evasion import CAttackEvasion
+from secml.adv.attacks.evasion import CAttackEvasionBLS
 from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.figure import CFigure
@@ -94,19 +94,14 @@ class CEvasionRejectTestCases(object):
 
             dmax = 5
 
-            # self.solver_type = 'gradient-bls'
-            # self.solver_params = {'eta': 1e-1, 'eta_min': 0.1}
-
-            self.solver_type = 'gradient'
             self.solver_params = {'eta': 0.5, 'max_iter': 3}
 
-            eva = CAttackEvasion(classifier=self.multiclass,
-                                 surrogate_classifier=self.multiclass,
-                                 surrogate_data=self.ds,
-                                 distance='l2', dmax=dmax, lb=lb, ub=ub,
-                                 solver_type=self.solver_type,
-                                 solver_params=self.solver_params,
-                                 y_target=self.y_target)
+            eva = CAttackEvasionBLS(classifier=self.multiclass,
+                                    surrogate_classifier=self.multiclass,
+                                    surrogate_data=self.ds,
+                                    distance='l2', dmax=dmax, lb=lb, ub=ub,
+                                    solver_params=self.solver_params,
+                                    y_target=self.y_target)
 
             eva.verbose = 0  # 2
 
@@ -129,7 +124,6 @@ class CEvasionRejectTestCases(object):
 
             x_seq = None  # TODO: append from empty 2d arrays not supported
             scores = CArray([])
-            f_seq = CArray([])
 
             x = x0
 
@@ -139,7 +133,6 @@ class CEvasionRejectTestCases(object):
             x, f_opt = eva._run(x0=x0, y0=y0, x_init=x)
             y_pred, score = self.multiclass.predict(
                 x, return_decision_function=True, n_jobs=_NoValue)
-            f_seq = f_seq.append(f_opt)
             # not considering all iterations, just values at dmax
             # for all iterations, you should bring eva.x_seq and eva.f_seq
             if x_seq is None:
@@ -148,8 +141,6 @@ class CEvasionRejectTestCases(object):
                 x_seq = x_seq.append(x, axis=0)
 
             s = score[:, y0 if self.y_target is None else self.y_target]
-
-            scores = scores.append(s)
 
             self.logger.info(
                 "Number of objective function evaluations: {:}".format(
@@ -234,8 +225,6 @@ class CEvasionRejectTestCases(object):
             self.logger.info("Score after evasion: {:}".format(s))
             self.logger.info(
                 "Objective function after evasion: {:}".format(f_opt))
-
-            x_opt = x_seq[-1, :]
 
             fig = CFigure(height=9, width=10, markersize=6, fontsize=12)
 
@@ -350,7 +339,7 @@ class CEvasionRejectTestCases(object):
                 c = self.normalizer.revert(c)
                 x = self.normalizer.revert(x)
             constr = CConstraintL2(center=c, radius=r)
-            return constr.constraint(x)
+            return x.apply_along_axis(constr.constraint, axis=1)
 
         def _plot_decision_function(self, fig):
             """Plot the decision function of a multiclass classifier."""

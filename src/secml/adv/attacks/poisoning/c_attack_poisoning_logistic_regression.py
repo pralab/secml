@@ -25,7 +25,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
                  discrete=False,
                  y_target=None,
                  attack_classes='all',
-                 solver_type=None,
+                 solver_type='gradient',
                  solver_params=None,
                  init_type='random',
                  random_seed=None):
@@ -112,7 +112,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
             raise ValueError("Error: The classifier does not have neither C "
                              "nor alpha")
 
-        H = clf.gradients.hessian(clf, tr.X, tr.Y)
+        H = clf.hessian_tr_params(tr.X, tr.Y)
 
         # change vector dimensions to match the mathematical formulation...
 
@@ -138,7 +138,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
 
         G = C * (dwx_c.append(dbx_c, axis=1))
 
-        fd_params = self.classifier.gradients.fd_params(clf, xk)
+        fd_params = self.classifier.grad_f_params(xk)
         grad_loss_params = fd_params.dot(grad_loss_fk)
 
         gt = self._compute_grad_inv(G, H, grad_loss_params)
@@ -146,7 +146,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         # gt = self._compute_grad_solve_iterative(G, H, grad_loss_params) #*
 
         # propagating gradient back to input space
-        return gt if clf.preprocess is None else \
-            gt.dot(clf.preprocess.gradient(xc0)).ravel()
-        # fixme: change when the preprocessor gradient will take again a
-        #  w parameter
+        if clf.preprocess is not None:
+            return clf.preprocess.gradient(xc0, w=gt)
+
+        return gt

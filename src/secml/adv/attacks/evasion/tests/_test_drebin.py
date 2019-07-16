@@ -1,10 +1,10 @@
 from __future__ import print_function
 
-from secml.adv.attacks import CAttackEvasion
+from secml.adv.attacks import CAttackEvasionBLS
 from secml.adv.seceval import CSecEval
 
 from secml.array import CArray
-from secml.data.loader import CDataLoaderDrebin
+from secml.data.loader import CDataLoaderDrebinTDSC
 from secml.ml.features.selection import CFeatSel
 from secml.ml.classifiers import CClassifierSVM
 from secml.utils import fm, pickle_utils
@@ -15,10 +15,12 @@ from secml.utils import fm, pickle_utils
 #  SHOULD BE REMOVED FROM MAIN BRANCH
 
 
-if not fm.file_exist('ds.gz'):
+if False or not fm.file_exist('ds.gz'):
     print("Creating the dataset")
 
-    ds = CDataLoaderDrebin().load()
+    dl = CDataLoaderDrebinTDSC()
+    dl.verbose = 1
+    ds = dl.load(feats_info=False)
 
     tr = ds[:30000, :]
     ts = ds[30000:, :]
@@ -36,7 +38,7 @@ else:
 mal_idx = ts.Y.find(ts.Y == 1)[:3]
 adv_ds = ts[mal_idx, :]
 
-if not fm.file_exist('clf.gz'):
+if False or not fm.file_exist('clf.gz'):
     print("Training the classifier")
 
     clf = CClassifierSVM()
@@ -46,7 +48,6 @@ if not fm.file_exist('clf.gz'):
 else:
     clf = pickle_utils.load('clf.gz', encoding='latin1')
 
-solver_type = 'gradient-bls'
 solver_params = {'eta': 1, 'eta_min': 1, 'eta_max': None, 'eps': 1e-4}
 lb = 'x0'  # None
 ub = 1     # None
@@ -68,11 +69,10 @@ params = {
     "discrete": discrete,
     "attack_classes": 'all',
     "y_target": y_target,
-    "solver_type": solver_type,
     "solver_params": solver_params
 }
 
-evasion = CAttackEvasion(**params)
+evasion = CAttackEvasionBLS(**params)
 evasion.verbose = 1
 
 param_name = 'dmax'

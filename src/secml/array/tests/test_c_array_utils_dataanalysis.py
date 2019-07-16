@@ -4,7 +4,7 @@ import numpy as np
 from six.moves import range
 
 from secml.array import CArray
-from secml.core.type_utils import is_scalar, is_int
+from secml.core.type_utils import is_scalar, is_int, is_list_of_lists
 from secml.core.constants import nan, inf
 
 
@@ -67,7 +67,6 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                     return_index=True, return_inverse=True, return_counts=True)
                 # Testing call without the optional parameters
                 array_unique_single = array.unique()
-                self.assertFalse((array_unique != array_unique_single).any())
             elif array.issparse:
                 # return_inverse parameters are not available
                 with self.assertRaises(NotImplementedError):
@@ -76,10 +75,11 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                     return_index=True, return_counts=True)
                 # Testing call without the optional parameters
                 array_unique_single = array.unique()
-                self.assertFalse((array_unique != array_unique_single).any())
             else:
                 raise ValueError("Unknown input array format")
             self.logger.info("array.unique():\n{:}".format(array_unique))
+
+            self.assert_array_equal(array_unique, array_unique_single)
 
             self.assertIsInstance(array_unique, CArray)
             # output of unique method must be dense
@@ -93,22 +93,30 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                     unique_ok = False
             self.assertTrue(unique_ok)
 
+            # To make assert_array_equal work with sparse
+            arr_comp = array_unique
+            if array.issparse:
+                arr_comp = arr_comp.atleast_2d()
+
             # unique_indices construct unique array from original FLAT one
             self.assertEqual(array_unique.size, u_indices.size)
             self.assertEqual(u_indices.dtype, int)
-            self.assertFalse(
-                (array.ravel()[u_indices] != array_unique).any())
+            self.assert_array_equal(array.ravel()[u_indices], arr_comp)
 
             self.assertEqual(array_unique.size, u_counts.size)
             self.assertEqual(u_counts.dtype, int)
             for e_idx, e in enumerate(array_unique):
-                self.assertEqual(u_counts[e_idx], sum(array == e))
+                if e == 0:
+                    # Comparing a sparse matrix with 0 using == is inefficient
+                    e_num = array.size - (array != e).sum()
+                else:
+                    e_num = (array == e).sum()
+                self.assertEqual(u_counts[e_idx].item(), e_num)
 
             if array.isdense:
                 self.assertEqual(array.size, u_inverse.size)
                 # unique_inverse reconstruct the original FLAT array
-                self.assertFalse(
-                    (array.ravel() != array_unique[u_inverse]).any())
+                self.assert_array_equal(array.ravel(), arr_comp[u_inverse])
 
         _unique(self.array_dense, CArray([0, 1, 2, 3, 4, 5, 6]))
         _unique(self.array_sparse, CArray([0, 1, 2, 3, 4, 5, 6]))
@@ -158,6 +166,18 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
     def test_norm(self):
         """Test for CArray.norm() method."""
         self.logger.info("Test for CArray.norm() method.")
+
+        # Few norms involve divisions by zeros in our test cases, that's ok
+        self.logger.filterwarnings(
+            action="ignore",
+            message="divide by zero encountered in reciprocal",
+            category=RuntimeWarning
+        )
+        self.logger.filterwarnings(
+            action="ignore",
+            message="divide by zero encountered in power",
+            category=RuntimeWarning
+        )
 
         def _check_norm(array):
             self.logger.info("array:\n{:}".format(array))
@@ -224,6 +244,18 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
     def test_norm_2d(self):
         """Test for CArray.norm_2d() method."""
         self.logger.info("Test for CArray.norm_2d() method.")
+
+        # Few norms involve divisions by zeros in our test cases, that's ok
+        self.logger.filterwarnings(
+            action="ignore",
+            message="divide by zero encountered in reciprocal",
+            category=RuntimeWarning
+        )
+        self.logger.filterwarnings(
+            action="ignore",
+            message="divide by zero encountered in power",
+            category=RuntimeWarning
+        )
 
         def _check_norm_2d(array):
             self.logger.info("array:\n{:}".format(array))
@@ -858,6 +890,13 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         self.logger.info(
             "Test for CArray.nanmin(), CArray.nanmax() method.")
 
+        # We are going to test few cases when the results actually contain nans
+        self.logger.filterwarnings(
+            action="ignore",
+            message="All-NaN slice encountered",
+            category=RuntimeWarning
+        )
+
         def _check_nanminnanmax(func, array, expected):
             # Adding few nans to array
             array = array.astype(float)  # Arrays with nans have float dtype
@@ -958,7 +997,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             self.logger.info("a.argmin(axis=None): \n{:}".format(argmin_res))
             self.assertIsInstance(argmin_res, int)
             min_res = array.min(axis=None)
-            self.assertEqual(array.ravel()[argmin_res], min_res)
+            self.assertEqual(array.ravel()[argmin_res].item(), min_res)
 
             self.logger.info("a: \n{:}".format(array))
             argmin_res = array.argmin(axis=0)
@@ -970,7 +1009,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             # We create a find_2d-like mask to check result
             argmin_res = [
                 argmin_res.ravel().tolist(), list(range(array.shape[1]))]
-            self.assertTrue((array[argmin_res] == min_res).all())
+            self.assert_array_equal(array[argmin_res], min_res)
 
             self.logger.info("a: \n{:}".format(array))
             argmin_res = array.argmin(axis=1)
@@ -982,7 +1021,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             # We create a find_2d-like mask to check result
             argmin_res = [
                 list(range(array.shape[0])), argmin_res.ravel().tolist()]
-            self.assertTrue((array[argmin_res] == min_res).all())
+            self.assert_array_equal(array[argmin_res], min_res)
 
         _argmin(self.array_sparse)
         _argmin(self.row_sparse)
@@ -1007,7 +1046,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             self.logger.info("a.argmax(axis=None): \n{:}".format(argmax_res))
             self.assertIsInstance(argmax_res, int)
             max_res = array.max(axis=None)
-            self.assertEqual(array.ravel()[argmax_res], max_res)
+            self.assertEqual(array.ravel()[argmax_res].item(), max_res)
 
             self.logger.info("a: \n{:}".format(array))
             argmax_res = array.argmax(axis=0)
@@ -1019,7 +1058,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             # We create a find_2d-like mask to check result
             argmax_res = [
                 argmax_res.ravel().tolist(), list(range(array.shape[1]))]
-            self.assertTrue((array[argmax_res] == max_res).all())
+            self.assert_array_equal(array[argmax_res], max_res)
 
             self.logger.info("a: \n{:}".format(array))
             argmax_res = array.argmax(axis=1)
@@ -1031,7 +1070,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             # We create a find_2d-like mask to check result
             argmax_res = [
                 list(range(array.shape[0])), argmax_res.ravel().tolist()]
-            self.assertTrue((array[argmax_res] == max_res).all())
+            self.assert_array_equal(array[argmax_res], max_res)
 
         _argmax(self.array_sparse)
         _argmax(self.row_sparse)
@@ -1295,6 +1334,75 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         import itertools
         for a, b in itertools.combinations(sha1_list, 2):
             self.assertNotEqual(a, b)
+
+    def test_is_inf_nan(self):
+        """Test for CArray .is_inf, .is_posinf, .is_neginf, .is_nan methods."""
+
+        def _check_is_inf_nan(fun, val, array, pos=None):
+
+            if pos is not None:
+                array = array.astype(float)  # To correctly assign inf/nan
+                array[pos] = val
+
+            self.logger.info("Array:\n{:}".format(array))
+
+            res = fun(array)
+            self.logger.info("array.{:}():\n{:}".format(fun.__name__, res))
+
+            self.assertIsInstance(res, CArray)
+            self.assertIsSubDtype(res.dtype, bool)
+            self.assertEqual(array.issparse, res.issparse)
+            self.assertEqual(array.shape, res.shape)
+
+            if pos is not None:
+                self.assertTrue(all(res[pos]))
+                self.assertEqual(
+                    len(pos[0]) if is_list_of_lists(pos) else len(pos), res.nnz)
+
+        for test_fun, sub_val in (
+                (CArray.is_inf, inf), (CArray.is_inf, -inf),
+                (CArray.is_posinf, inf), (CArray.is_neginf, -inf),
+                (CArray.is_nan, nan)):
+
+            self.logger.info(
+                "Test for CArray.{:}() method.".format(test_fun.__name__))
+
+            _check_is_inf_nan(
+                test_fun, sub_val, self.array_sparse, [[0, 1], [1, 2]]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.array_dense, [[0, 1], [1, 2]]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.array_dense_bool, [[0, 1], [1, 2]]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.array_sparse_bool, [[0, 1], [1, 2]]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.row_flat_dense, [1, 2]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.row_dense, [1, 2]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.row_sparse, [1, 2]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.column_dense, [[1, 2], [0, 0]]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.column_sparse, [[1, 2], [0, 0]]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.single_flat_dense, [0]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.single_dense, [0]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.single_sparse, [0]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.single_bool_flat_dense, [0]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.single_bool_dense, [0]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.single_bool_sparse, [0]),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.empty_flat_dense),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.empty_dense),
+            _check_is_inf_nan(
+                test_fun, sub_val, self.empty_sparse)
 
 
 if __name__ == '__main__':
