@@ -4,10 +4,10 @@ SecML is an open-source Python library for the **security evaluation** of Machin
 
 It comes with a set of powerful features:
 - **Dense/Sparse data support.** We provide full, transparent support for both dense (through `numpy` library) and sparse data (through `scipy` library) in a single data structure.
-- **Wide range of supported ML algorithms.** All supervised learning algorithms supported by `scikit-learn` are available, as well as Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform (optional).
+- **Wide range of supported ML algorithms.** All supervised learning algorithms supported by `scikit-learn` are available, as well as Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform _(coming soon)_.
 - **Built-in attack algorithms.** Evasion and poisoning attacks based on a custom-developed solver.
 - **Visualize your results.** We provide visualization and plotting framework based on the widely-known library [`matplotlib`](https://matplotlib.org/).
-- **Explain your results.** Explainable ML methods to interpret model decisions via influential features and prototypes.  
+- **Explain your results.** Explainable ML methods to interpret model decisions via influential features and prototypes. _(coming soon)_  
 - **Extensible.** Easily create new wrappers for ML models or attack algorithms extending our abstract interfaces.
 - **Multi-processing.** Do you want to save time further? We provide full compatibility with all the multi-processing features of `scikit-learn` and `pytorch`, along with built-in support of the [`joblib`](https://joblib.readthedocs.io/) library.
 
@@ -108,6 +108,9 @@ To specify the extra components to install, add the section `[extras]` while cal
 All the installation procedures via `pip` described above allow definition of the `[extras]` section.
 
 ### Available extra components
+  - None at the moment.
+
+### _Coming soon_:
   - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
     Will install: `torch >= 0.4.*`, `torchvision >= 0.1.8`
   - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
@@ -130,11 +133,11 @@ The `secml.adv` package contains evasion and poisoning attacks based on a custom
 
 The `secml.figure` package contains a visualization and plotting framework based on [`matplotlib`](https://matplotlib.org/).
 
-The `secml.explanation` package contains few different explainable Machine Learning methods that allow interpreting classifiers decisions by analyzing the relevant components such as features or training prototypes.
+_(coming soon)_ The `secml.explanation` package contains few different explainable Machine Learning methods that allow interpreting classifiers decisions by analyzing the relevant components such as features or training prototypes.
 
-The `secml.pytorch` package contains support classes for the [PyTorch](https://pytorch.org/) deep learning platform. This package will be available only if the extra component `pytorch` has been specified during installation.
+_(coming soon)_ The `secml.pytorch` package contains support classes for the [PyTorch](https://pytorch.org/) deep learning platform. This package will be available only if the extra component `pytorch` has been specified during installation.
 
-The `secml.tf.clvhs` package contains support classes for the [CleverHans](https://github.com/tensorflow/cleverhans) library for benchmarking machine learning systems' vulnerability to adversarial examples. 
+_(coming soon)_ The `secml.tf.clvhs` package contains support classes for the [CleverHans](https://github.com/tensorflow/cleverhans) library for benchmarking machine learning systems' vulnerability to adversarial examples. 
 This package will be available only if the extra component `cleverhans` has been specified during installation.
 
 ## Credits
