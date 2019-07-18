@@ -1,2 +1,0 @@
-from .c_distribution_gaussian import CDistributionGaussian
-from .c_density_estimation import CDensityEstimation
