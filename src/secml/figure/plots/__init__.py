@@ -4,3 +4,4 @@ from .c_plot_fun import CPlotFunction
 from .c_plot_ds import CPlotDataset
 from .c_plot_conf_matr import CPlotConfMatr
 from .c_plot_sec_eval import CPlotSecEval
+from .c_plot_stats import CPlotStats
