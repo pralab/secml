@@ -4,6 +4,7 @@ from secml.ml.classifiers.regularizer import CRegularizerL2
 from secml.ml.classifiers import CClassifierSVM, CClassifierKDE, \
     CClassifierSGD, CClassifierMCSLinear, CClassifierLogistic, CClassifierRidge
 
+
 def binary_clf_creation(clf_idx, normalizer=False, dataset = None):
 
     if clf_idx == 'lin-svm':

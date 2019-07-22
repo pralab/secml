@@ -3,9 +3,9 @@ from secml.testing import CUnitTest
 import numpy as np
 from scipy.stats import norm
 
-from secml.ml.stats import CDensityEstimation
 from secml.figure import CFigure
 from secml.array import CArray
+from secml.ml.stats import CDensityEstimation
 
 
 class TestCClass(CUnitTest):

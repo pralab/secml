@@ -1,6 +1,6 @@
 """
 .. module:: Settings
-   :synopsis: System settings for PraLib
+   :synopsis: System settings for SecML
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 

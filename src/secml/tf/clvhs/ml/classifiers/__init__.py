@@ -1,1 +1,0 @@
-from .c_model_cleverhans import CModelCleverhans
