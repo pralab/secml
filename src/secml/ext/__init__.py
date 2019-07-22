@@ -1,6 +1,6 @@
 import pkgutil
 import sys
-if sys.version_info < (3, 4):  # imp is deprecated since Py3.4
+if sys.version_info >= (3, 4):  # imp is deprecated since Py3.4
     import importlib as imp
 else:
     import imp
