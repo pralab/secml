@@ -218,7 +218,6 @@ class CPoisoningTestCases(object):
 
         def _plot_func(self, fig, func, **func_kwargs):
             """Plot poisoning objective function"""
-            fig.switch_sptype(sp_type="function")
             fig.sp.plot_fobj(
                 func=func,
                 grid_limits=self.grid_limits, plot_levels=False,
@@ -226,7 +225,6 @@ class CPoisoningTestCases(object):
 
         def _plot_obj_grads(self, fig, func, **func_kwargs):
             """Plot poisoning attacker objective function gradient"""
-            fig.switch_sptype(sp_type="function")
             fig.sp.plot_fgrads(
                 func,
                 grid_limits=self.grid_limits,
@@ -266,7 +264,6 @@ class CPoisoningTestCases(object):
                                )
 
             # Plotting multiclass decision function
-            fig.switch_sptype('function')
             fig.sp.plot_fobj(lambda x: clf.predict(x),
                              multipoint=True, cmap='Set2',
                              grid_limits=self.grid_limits,
@@ -282,12 +279,10 @@ class CPoisoningTestCases(object):
 
         def _plot_ds(self, fig, data):
             """Plot dataset"""
-            fig.switch_sptype(sp_type="ds")
             fig.sp.plot_ds(data)
 
         def _plot_box(self, fig):
             """Plot box constraint"""
-            fig.switch_sptype(sp_type="function")
             # construct and plot box
             if self.lb == "x0":
                 self.lb = self.x0

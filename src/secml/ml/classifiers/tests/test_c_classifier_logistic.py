@@ -27,12 +27,10 @@ class TestCClassifierLogistic(CClassifierTestCases):
         self.logger.info("Testing classifiers graphically")
         # Preparation of the grid
         fig = CFigure()
-        fig.switch_sptype(sp_type='ds')
         fig.sp.plot_ds(self.dataset)
 
         self.log.fit(self.dataset)
 
-        fig.switch_sptype(sp_type='function')
         fig.sp.plot_fobj(self.log.decision_function, y=1)
         fig.title('Logistic Classifier')
 

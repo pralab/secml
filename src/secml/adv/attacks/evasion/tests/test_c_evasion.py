@@ -176,9 +176,7 @@ class CEvasionTestCases(object):
 
         def _plot_dataset_clf_and_box(self, evas, fig):
             """Plot dataset and box constraints"""
-            fig.switch_sptype(sp_type="ds")
             fig.sp.plot_ds(self.dataset)
-            fig.switch_sptype(sp_type="function")
             fig.sp.plot_fobj(
                 func=evas.classifier.decision_function,
                 grid_limits=self.grid_limits, colorbar=False,
@@ -208,7 +206,6 @@ class CEvasionTestCases(object):
 
         def _plot_clf_warm_start(self, fig, clf, x_start, x):
             """Plot classifier and path for multistep evasion"""
-            fig.switch_sptype(sp_type="function")
             self._plot_grid_and_path(fig, x, x_start)
 
         def _plot_clf(self, evas, fig, x):
@@ -222,7 +219,6 @@ class CEvasionTestCases(object):
 
         def _plot_clf_grad(self, fig):
             """Plot classifier grad for standard evasion"""
-            fig.switch_sptype(sp_type="function")
             fig.sp.plot_fgrads(
                 self.clf_grad,
                 grid_limits=self.grid_limits,

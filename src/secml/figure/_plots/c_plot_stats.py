@@ -1,4 +1,12 @@
-from secml.figure.plots import CPlot
+"""
+.. module:: CPlotStats
+   :synopsis: Statistical functions plots.
+
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+
+"""
+from secml.figure._plots import CPlot
 from secml.ml.stats import CDensityEstimation
 
 
@@ -7,19 +15,8 @@ class CPlotStats(CPlot):
 
     Custom plotting parameters can be specified.
     Currently parameters default:
-     - show_legend: True. Set False to hide legend on next plot.
+     - show_legend: True.
      - grid: True.
-
-    Parameters
-    ----------
-    sp : Axes
-        Subplot to use for plotting. Instance of `matplotlib.axes.Axes`.
-    default_params : dict
-        Dictionary with default parameters.
-
-    Attributes
-    ----------
-    class_type : 'stats'
 
     See Also
     --------
@@ -27,23 +24,13 @@ class CPlotStats(CPlot):
     .CFigure : creates and handle figures.
 
     """
-    __class_type = 'stats'
 
-    def __init__(self, sp, default_params=None):
-
-        # Calling CPlot constructor
-        super(CPlotStats, self).__init__(
-            sp=sp, default_params=default_params)
-
-        # Specific plot parameters (use `set_params` to alter)
-        self.show_legend = True
-        self.grid(grid_on=True)
-
-    def _apply_params(self):
+    def apply_params_stats(self):
         """Apply defined parameters to active subplot."""
         fig_legend = self.get_legend()
-        if fig_legend is not None:
-            fig_legend.set_visible(self.show_legend)
+        if self.show_legend is not False and fig_legend is not None:
+            fig_legend.set_visible(True)
+        self.grid(grid_on=True)
 
     def plot_prob_density(self, scores, ts, **params):
         """Plot density estimation of benign and malicious class."""
@@ -55,4 +42,4 @@ class CPlotStats(CPlot):
         self.plot(xm, malicious_pdf, label="mal pdf")
 
         # Customizing figure
-        self._apply_params()
+        self.apply_params_stats()

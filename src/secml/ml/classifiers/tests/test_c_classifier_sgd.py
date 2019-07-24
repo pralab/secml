@@ -60,20 +60,18 @@ class TestCClassifierSGD(CClassifierTestCases):
         svm.fit(dataset)
 
         fig = CFigure(width=10, markersize=8)
-        fig.subplot(2, 1, 1, sp_type='ds')
+        fig.subplot(2, 1, 1)
         # Plot dataset points
         fig.sp.plot_ds(dataset)
         # Plot objective function
-        fig.switch_sptype(sp_type='function')
         fig.sp.plot_fobj(svm.decision_function,
                          grid_limits=dataset.get_bounds())
         fig.sp.title('SVM')
 
-        fig.subplot(2, 1, 2, sp_type='ds')
+        fig.subplot(2, 1, 2)
         # Plot dataset points
         fig.sp.plot_ds(dataset)
         # Plot objective function
-        fig.switch_sptype(sp_type='function')
         fig.sp.plot_fobj(self.sgds[0].decision_function,
                          grid_limits=dataset.get_bounds())
         fig.sp.title('SGD Classifier')

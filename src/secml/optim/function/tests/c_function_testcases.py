@@ -59,7 +59,6 @@ class CFunctionTestCases(CUnitTest):
         self.logger.info("Plotting 2D of {:}".format(fun_name))
 
         fig = CFigure(width=7)
-        fig.switch_sptype(sp_type='function')
         fig.sp.plot_fobj(func=fun.fun, plot_levels=True,
                          grid_limits=grid_limits, levels=levels,
                          n_grid_points=50, n_colors=200,

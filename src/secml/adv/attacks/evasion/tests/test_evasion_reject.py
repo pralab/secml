@@ -264,8 +264,6 @@ class CEvasionRejectTestCases(object):
             # Plotting multiclass evasion objective function
             fig.subplot(2, 2, 2)
 
-            fig.switch_sptype('function')
-
             fig = self._plot_decision_function(fig)
 
             fig.sp.plot_fobj(lambda x: eva._objective_function(x),
@@ -380,7 +378,6 @@ class CEvasionRejectTestCases(object):
                                label='c {:}'.format(c))
 
             # Plotting multiclass decision function
-            fig.switch_sptype('function')
             fig.sp.plot_fobj(
                 lambda x: self.multiclass.predict(x, n_jobs=_NoValue),
                 multipoint=True, cmap='Set2',

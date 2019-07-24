@@ -197,7 +197,6 @@ class CConstraintTestCases(CUnitTest):
 
         fig = CFigure(height=6, width=6)
 
-        fig.switch_sptype(sp_type='function')
         fig.sp.plot_fobj(func=c.constraint,
                          grid_limits=grid_limits,
                          n_grid_points=40,
