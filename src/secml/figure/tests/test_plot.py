@@ -1,5 +1,5 @@
-import unittest
 from secml.testing import CUnitTest
+
 from secml.figure import CFigure
 from secml.array.c_array import CArray
 from secml.core import constants
@@ -28,4 +28,4 @@ class TestCPlot(CUnitTest):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

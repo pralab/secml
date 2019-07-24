@@ -12,7 +12,6 @@ def f(array):
     return res
 
 fig = CFigure()
-fig.subplot(sp_type='function')
 
 fig.sp.plot_fobj(f, levels=[.5, 1, 1.5])
 

@@ -25,12 +25,10 @@ class TestCClassifierNearestCentroid(CClassifierTestCases):
         self.logger.info("Testing classifiers graphically")
         # Preparation of the grid
         fig = CFigure()
-        fig.switch_sptype(sp_type='ds')
         fig.sp.plot_ds(self.dataset)
 
         self.nc.fit(self.dataset)
 
-        fig.switch_sptype(sp_type='function')
         fig.sp.plot_fobj(self.nc.decision_function, y=1)
         fig.title('nearest centroid  Classifier')
 

@@ -1,7 +1,15 @@
+"""
+.. module:: CPlotRoc
+   :synopsis: Receiver Operating Characteristic (ROC) curve plots.
+
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+
+"""
 from __future__ import division
 from six.moves import range
 
-from secml.figure.plots import CPlot
+from secml.figure._plots import CPlot
 from secml.ml.peval.metrics import CRoc
 
 
@@ -13,27 +21,16 @@ class CPlotRoc(CPlot):
 
     Custom plotting parameters can be specified.
     Currently parameters default:
-     - show_legend: True. Set False to hide legend on next plot.
-     - ylabel: 'True Positive Rate (%)'.
-     - xlabel: 'False Positive Rate (%)'.
-     - yticks: [0, 20, 40, 60, 80, 100].
+     - show_legend: True
+     - ylabel: 'True Positive Rate (%)'
+     - xlabel: 'False Positive Rate (%)'
+     - yticks: [0, 20, 40, 60, 80, 100]
      - yticklabels: see yticks
-     - xticks: list. [0.1, 0.5, 1, 2, 5, 10, 20, 50, 100].
-     - xticklabels: see xticks.
-     - ylim: (0.1, 100).
-     - xlim: (0, 100).
-     - grid: True.
-
-    Parameters
-    ----------
-    sp : Axes
-        Subplot to use for plotting. Instance of `matplotlib.axes.Axes`.
-    default_params : dict
-        Dictionary with default parameters.
-
-    Attributes
-    ----------
-    class_type : 'roc'
+     - xticks: list. [0.1, 0.5, 1, 2, 5, 10, 20, 50, 100]
+     - xticklabels: see xticks
+     - ylim: (0.1, 100)
+     - xlim: (0, 100)
+     - grid: True
 
     See Also
     --------
@@ -42,212 +39,30 @@ class CPlotRoc(CPlot):
     .CFigure : creates and handle figures.
 
     """
-    __class_type = 'roc'
 
-    def __init__(self, sp, default_params=None):
-
-        # Calling CPlot constructor
-        super(CPlotRoc, self).__init__(
-            sp=sp, default_params=default_params)
-
-        # Specific plot parameters (use `set_params` to alter)
-        self.show_legend = True
-        self.grid(grid_on=True)
-        self.ylabel('True Positive Rate (%)')
-        self.xlabel('False Positive Rate (%)')
-        self.yticks([0, 20, 40, 60, 80, 100])
-        self.yticklabels(['0', '20', '40', '60', '80', '100'])
-        self.xticks([0.1, 0.5, 1, 2, 5, 10, 20, 50, 100])
-        self.xticklabels(['0.1', '0.5', '1', '2', '5', '10', '20', '50', '100'])
-        # Limits have to applied after ticks to be effective
-        self.ylim(0, 100)
-        self.xlim(0.1, 100)
-
-    def ylabel(self, label, *args, **kwargs):
-        """Set a label for the y axis
-
-        Parameters
-        ----------
-        label : string
-            Label's text.
-        *args, **kwargs
-            Same as :meth:`.text` method.
-
-        See Also
-        --------
-        .xlabel : Set a label for the x axis.
-
-        """
-        self._ylabel = label
-        super(CPlotRoc, self).ylabel(label, *args, **kwargs)
-
-    def xlabel(self, label, *args, **kwargs):
-        """Set a label for the x axis.
-
-        Parameters
-        ----------
-        label : string
-            Label's text.
-        *args, **kwargs
-            Same as :meth:`.text` method.
-
-        Examples
-        --------
-        .. plot:: pyplots/xlabel.py
-            :include-source:
-
-        """
-        self._xlabel = label
-        super(CPlotRoc, self).xlabel(label, *args, **kwargs)
-
-    def yticks(self, location_array, *args, **kwargs):
-        """Set the y-tick locations and labels.
-
-        Parameters
-        ----------
-        location_array : CArray or list
-            Contain ticks location.
-        *args, **kwargs
-            Same as :meth:`.text` method.
-
-        See Also
-        --------
-        .xticks : Set the x-tick locations and labels.
-
-        """
-        self._yticks = location_array
-        super(CPlotRoc, self).yticks(location_array, *args, **kwargs)
-
-    def yticklabels(self, labels, *args, **kwargs):
-        """Set the ytick labels.
-
-        Parameters
-        ----------
-        labels : list or CArray of string
-            Xtick labels.
-        *args, **kwargs
-            Same as :meth:`.text` method.
-
-        See Also
-        --------
-        .xticklabels : Set the xtick labels.
-
-        """
-        self._yticklabels = labels
-        super(CPlotRoc, self).yticklabels(labels, *args, **kwargs)
-
-    def xticks(self, location_array, *args, **kwargs):
-        """Set the x-tick locations and labels.
-
-        Parameters
-        ----------
-        location_array : CArray or list
-            Contain ticks location.
-        *args, **kwargs
-            Same as :meth:`.text` method.
-
-        Examples
-        --------
-        .. plot:: pyplots/xticks.py
-            :include-source:
-
-        """
-        self._xticks = location_array
-        super(CPlotRoc, self).xticks(location_array, *args, **kwargs)
-
-    def xticklabels(self, labels, *args, **kwargs):
-        """Set the xtick labels.
-
-        Parameters
-        ----------
-        labels : list or CArray of string
-            Xtick labels.
-        *args, **kwargs
-            Same as :meth:`.text` method.
-
-        Examples
-        --------
-        .. plot:: pyplots/xticklabels.py
-            :include-source:
-
-        """
-        self._xticklabels = labels
-        super(CPlotRoc, self).xticklabels(labels, *args, **kwargs)
-
-    def ylim(self, bottom=None, top=None):
-        """Set axes y limits.
-
-        Parameters
-        ----------
-        bottom : scalar
-            Starting value for the y axis.
-        top : scalar
-            Ending value for the y axis.
-
-        See Also
-        --------
-        .xlim : Set x axis limits.
-
-        """
-        self._ylim = (bottom, top)
-        super(CPlotRoc, self).ylim(bottom=bottom, top=top)
-
-    def xlim(self, bottom=None, top=None):
-        """Set axes x limits.
-
-        Parameters
-        ----------
-        bottom : scalar
-            Starting value for the x axis.
-        top : scalar
-            Ending value for the x axis.
-
-        Examples
-        --------
-        .. plot:: pyplots/xlim.py
-            :include-source:
-
-        """
-        self._xlim = (bottom, top)
-        super(CPlotRoc, self).xlim(bottom=bottom, top=top)
-
-    def _apply_params(self):
+    def apply_params_roc(self):
         """Apply defined parameters to active subplot."""
         fig_legend = self.get_legend()
-        if fig_legend is not None:
-            fig_legend.set_visible(self.show_legend)
-        # Other axis parameters
-        self.ylabel(self._ylabel)
-        self.xlabel(self._xlabel)
-        self.yticks(self._yticks)
-        self.yticklabels(self._yticklabels)
-        self.xticks(self._xticks)
-        self.xticklabels(self._xticklabels)
+        if self.show_legend is not False and fig_legend is not None:
+            fig_legend.set_visible(True)
+        self.grid(grid_on=True)
+        if self._ylabel is None:
+            self.ylabel('True Positive Rate (%)')
+        if self._xlabel is None:
+            self.xlabel('False Positive Rate (%)')
+        if self._yticks is None:
+            self.yticks([0, 20, 40, 60, 80, 100])
+        if self._yticklabels is None:
+            self.yticklabels(['0', '20', '40', '60', '80', '100'])
+        if self._xticks is None:
+            self.xticks([0.1, 0.5, 1, 2, 5, 10, 20, 50, 100])
+        if self._xticklabels is None:
+            self.xticklabels(['0.1', '0.5', '1', '2', '5', '10', '20', '50', '100'])
         # Limits have to applied after ticks to be effective
-        self.ylim(*self._ylim)
-        self.xlim(*self._xlim)
-
-    def _markers_idx(self, fpr):
-        """Returns the position of markers to plot.
-
-        Parameters
-        ----------
-        fpr : CArray
-            False Positive Rates.
-
-        Returns
-        -------
-        ticks_idx : list
-            List with the position of each xtick inside
-            false positives array.
-
-        Notes
-        -----
-        If a given xtick is not available inside `fpr` array,
-        the closest value's position will be returned.
-
-        """
-        return fpr.binary_search(self._sp.get_xticks()).tolist()
+        if self._ylim is None:
+            self.ylim(0, 100)
+        if self._xlim is None:
+            self.xlim(0.1, 100)
 
     # TODO: REMOVE STYLE
     def plot_roc(self, fpr, tpr, label=None, style=None, logx=True):
@@ -278,6 +93,9 @@ class CPlotRoc(CPlot):
         if fpr.size != tpr.size:
             raise ValueError("input tpr and fpr arrays must have same length.")
 
+        # Customizing figure
+        self.apply_params_roc()
+
         # TODO: REMOVE AFTER COLORMAPS ARE IMPLEMENTED IN CFIGURE
         styles = ['go-', 'yp--', 'rs-.', 'bD--', 'c-.', 'm-', 'y-.']
 
@@ -285,13 +103,15 @@ class CPlotRoc(CPlot):
 
         plot_func(fpr * 100, tpr * 100,
                   styles[self.n_lines % len(styles)] if style is None else style,
-                  label=label, markevery=self._markers_idx(fpr * 100))
+                  label=label, markevery=self.get_xticks_idx(fpr * 100))
 
         if label is not None:
             # Legend on the lower right
             self.legend(loc=1, labelspacing=0.4, handletextpad=0.3)
-        # Customizing figure
-        self._apply_params()
+
+        if logx is True:  # xticks have been reset by semilogx, reassign them
+            self.xticks(self._xticks)
+            self.xticklabels(self._xticklabels)
 
     # TODO: REMOVE STYLE
     def plot_mean(self, roc, label=None, invert_tpr=False,
@@ -331,13 +151,16 @@ class CPlotRoc(CPlot):
             raise ValueError("average for input roc has not been computed. "
                              "Use `CRoc.average()` first.")
 
+        # Customizing figure
+        self.apply_params_roc()
+
         # TODO: REMOVE AFTER COLORMAPS ARE IMPLEMENTED IN CFIGURE
         styles = ['go-', 'yp--', 'rs-.', 'bD--', 'c-.', 'm-', 'y-.']
 
         # If std should be plotted each run plots 2 curvers
         n_lines = int(self.n_lines / 2) if plot_std is True else self.n_lines
         # Get indices of fpr @ xticks
-        mkrs_idx = self._markers_idx(roc.mean_fpr * 100)
+        mkrs_idx = self.get_xticks_idx(roc.mean_fpr * 100)
 
         mean_tpr = roc.mean_tpr if invert_tpr is False else 1 - roc.mean_tpr
         plot_func = self.semilogx if logx is True else self.plot
@@ -356,8 +179,10 @@ class CPlotRoc(CPlot):
             # Legend on the lower right
             self.legend(loc=4 if invert_tpr is False else 1,
                         labelspacing=0.4, handletextpad=0.3)
-        # Customizing figure
-        self._apply_params()
+
+        if logx is True:  # xticks have been reset by semilogx, reassign them
+            self.xticks(self._xticks)
+            self.xticklabels(self._xticklabels)
 
     def plot_repetitions(self, roc, label=None, invert_tpr=False, logx=True):
         """Plot all input ROC curves.
@@ -414,6 +239,9 @@ class CPlotRoc(CPlot):
         if not isinstance(roc, CRoc):
             raise TypeError("input must be a `CRoc` instance.")
 
+        # Customizing figure
+        self.apply_params_roc()
+
         # TODO: REMOVE AFTER COLORMAPS ARE IMPLEMENTED IN CFIGURE
         styles = ['go-', 'yp--', 'rs-.', 'bD--', 'c-.', 'm-', 'y-.']
         # Storing number of lines already plotted to chose style accordingly
@@ -435,14 +263,15 @@ class CPlotRoc(CPlot):
             plot_func(fpr * 100, tpr * 100,
                       styles[(n_lines + rep_i) % len(styles)],
                       label=label_w_rep(label, rep_i),
-                      markevery=self._markers_idx(fpr * 100))
+                      markevery=self.get_xticks_idx(fpr * 100))
 
         if label is not None:
             # Legend on the lower right
             self.legend(loc=4 if invert_tpr is False else 1,
                         labelspacing=0.4, handletextpad=0.3)
 
-        # Customizing figure
-        self._apply_params()
+        if logx is True:  # xticks have been reset by semilogx, reassign them
+            self.xticks(self._xticks)
+            self.xticklabels(self._xticklabels)
 
 

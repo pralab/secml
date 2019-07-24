@@ -1,6 +1,15 @@
+"""
+.. module:: CPlotFunction
+   :synopsis: Function plots.
+
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+
+"""
 from six.moves import range
 
-from secml.figure.plots import CPlot
+from secml.figure._plots import CPlot
+from secml.figure._plots.plot_utils import create_points_grid
 from secml.array import CArray
 from secml.core.constants import inf
 
@@ -10,19 +19,8 @@ class CPlotFunction(CPlot):
 
     Custom plotting parameters can be specified.
     Currently parameters default:
-     - show_legend: True. Set False to hide legend on next plot.
-     - grid: True.
-
-    Parameters
-    ----------
-    sp : Axes
-        Subplot to use for plotting. Instance of `matplotlib.axes.Axes`.
-    default_params : dict
-        Dictionary with default parameters.
-
-    Attributes
-    ----------
-    class_type : 'function'
+     - show_legend: True
+     - grid: True
 
     See Also
     --------
@@ -30,55 +28,13 @@ class CPlotFunction(CPlot):
     .CFigure : creates and handle figures.
 
     """
-    __class_type = 'function'
 
-    def __init__(self, sp, default_params=None):
-
-        # Calling CPlot constructor
-        super(CPlotFunction, self).__init__(
-            sp=sp, default_params=default_params)
-
-        # Specific plot parameters (use `set_params` to alter)
-        self.show_legend = True
-        self.grid(grid_on=True)
-
-    def _apply_params(self):
+    def apply_params_fun(self):
         """Apply defined parameters to active subplot."""
         fig_legend = self.get_legend()
-        if fig_legend is not None:
-            fig_legend.set_visible(self.show_legend)
-
-    @staticmethod
-    def _create_points_grid(grid_limits, n_grid_points):
-        """Creates a grid of points.
-
-        Parameters
-        ----------
-        grid_limits : list of tuple
-            List with a tuple of min/max limits for each axis.
-            If None, [(0, 1), (0, 1)] limits will be used.
-        n_grid_points : int
-            Number of grid points.
-
-        """
-        grid_bounds = [(0, 1), (0, 1)] if grid_limits is None else grid_limits
-        x_min, x_max = (grid_bounds[0][0], grid_bounds[0][1])
-        y_min, y_max = (grid_bounds[1][0], grid_bounds[1][1])
-
-        # Padding x and y grid points
-        padding_x, padding_y = (0.05 * (x_max - x_min), 0.05 * (y_max - y_min))
-        # Create the equi-spaced indices for each axis
-        x_grid_points = CArray.linspace(
-            x_min - padding_x, x_max + padding_x, num=n_grid_points)
-        y_grid_points = CArray.linspace(
-            y_min - padding_y, y_max + padding_y, num=n_grid_points)
-        # Create the grid
-        pad_xgrid, pad_ygrid = CArray.meshgrid((x_grid_points, y_grid_points))
-        pad_grid_point_features = CArray.concatenate(
-            pad_xgrid.reshape((pad_xgrid.size, 1)),
-            pad_ygrid.reshape((pad_ygrid.size, 1)), axis=1)
-
-        return pad_grid_point_features, pad_xgrid, pad_ygrid
+        if self.show_legend is not False and fig_legend is not None:
+            fig_legend.set_visible(True)
+        self.grid(grid_on=True)
 
     def plot_fobj(self, func, multipoint=False,
                   plot_background=True, plot_levels=True,
@@ -150,7 +106,7 @@ class CPlotFunction(CPlot):
 
         # create the grid of the point where the function will be evaluated
         pad_grid_point_features, pad_xgrid, pad_ygrid = \
-            self._create_points_grid(grid_limits, n_grid_points)
+            create_points_grid(grid_limits, n_grid_points)
 
         # Evaluate function on each grid point
         if multipoint is True:
@@ -191,7 +147,7 @@ class CPlotFunction(CPlot):
                 linewidths=levels_linewidth, alpha=alpha_levels)
 
         # Customizing figure
-        self._apply_params()
+        self.apply_params_fun()
 
         return ch
 
@@ -225,7 +181,7 @@ class CPlotFunction(CPlot):
         """
         # create the grid of the point where the function will be evaluated
         pad_grid_point_features, pad_xgrid, pad_ygrid = \
-            self._create_points_grid(grid_limits, n_grid_points)
+            create_points_grid(grid_limits, n_grid_points)
 
         n_vals = pad_grid_point_features.shape[0]
         grad_point_values = CArray.zeros((n_vals, 2))
@@ -245,4 +201,4 @@ class CPlotFunction(CPlot):
                     linewidth=linewidth, alpha=alpha)
 
         # Customizing figure
-        self._apply_params()
+        self.apply_params_fun()

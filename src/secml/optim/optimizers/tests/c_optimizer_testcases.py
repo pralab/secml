@@ -198,7 +198,6 @@ class COptimizerTestCases(CUnitTest):
 
         """
         fig = CFigure(markersize=12)
-        fig.switch_sptype(sp_type='function')
 
         # Plot objective function
         fig.sp.plot_fobj(func=CArray.apply_along_axis,

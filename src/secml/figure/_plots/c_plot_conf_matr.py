@@ -1,34 +1,20 @@
+"""
+.. module:: CPlotConfMatr
+   :synopsis: Confusion matrix plots.
+
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+
+"""
 import numpy as np
 import itertools
 from six.moves import range
 
-from secml.figure.plots import CPlot
+from secml.figure._plots import CPlot
 
 
 class CPlotConfMatr(CPlot):
-    """Confusion Matrix Plot.
-
-    Attributes
-    ----------
-    class_type : 'conf-matrix'
-
-    """
-    __class_type = 'conf-matrix'
-
-    def __init__(self, sp, default_params=None):
-        # Calling CPlot constructor
-        super(CPlotConfMatr, self).__init__(
-            sp=sp, default_params=default_params)
-
-        # Specific plot parameters (use `set_params` to alter)
-        self.ylabel("True label")
-        self.xlabel("Predicted label")
-
-    def _apply_params(self):
-        """Apply defined parameters to active subplot."""
-        fig_legend = self.get_legend()
-        if fig_legend is not None:
-            fig_legend.set_visible(self.show_legend)
+    """Plots a Confusion Matrix."""
 
     def plot_confusion_matrix(
             self, cnf_matrix, title=None, normalize=True, cmap='jet'):
@@ -51,9 +37,6 @@ class CPlotConfMatr(CPlot):
         if title:
             self.title(title)
         self.colorbar(img)
-        #tick_marks = np.arange(len(class_names))
-        #self.xticks(tick_marks, class_names)  # rotatation 45
-        #self.yticks(tick_marks, class_names)
 
         cnf_matrix = cnf_matrix.tondarray()
         if normalize:
@@ -66,6 +49,3 @@ class CPlotConfMatr(CPlot):
             self.text(j, i, cnf_matrix[i, j].round(2),
                       horizontalalignment="center",
                       color="white" if cnf_matrix[i, j] > thresh else "black")
-
-        # Customizing figure
-        self._apply_params()

@@ -71,7 +71,6 @@ class TestPS(CUnitTest):
 
     def draw_selection(self, ds_reduced, rule):
         fig = CFigure(width=10, markersize=12)
-        fig.switch_sptype(sp_type='ds')
         # Plot dataset points
         fig.sp.plot_ds(self.dataset)
         fig.sp.plot(ds_reduced.X[:, 0], ds_reduced.X[:, 1], linestyle='None',

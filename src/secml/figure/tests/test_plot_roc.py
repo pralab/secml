@@ -45,7 +45,6 @@ class TestCRoc(CUnitTest):
 
         # Testing without input CFigure
         roc_plot = CFigure()
-        roc_plot.subplot(sp_type='roc')
         roc_plot.sp.title('ROC Curve Standard')
         # Plotting 2 times (to show multiple curves)
         # add one curve for repetition and call it rep 0 and rep 1 of roc 1
@@ -58,7 +57,6 @@ class TestCRoc(CUnitTest):
 
         # Testing without input CFigure
         roc_plot = CFigure()
-        roc_plot.subplot(sp_type='roc')
         roc_plot.sp.title('ROC Curve')
         # Plotting 2 times (to show 2 curves)
         roc_plot.sp.plot_mean(self.roc_wmean, label='roc1 mean', plot_std=True)
@@ -68,7 +66,6 @@ class TestCRoc(CUnitTest):
 
         # Testing mean plot with no average
         roc_plot = CFigure()
-        roc_plot.subplot(sp_type='roc')
         with self.assertRaises(ValueError):
             roc_plot.sp.plot_mean(self.roc_nomean)
 
@@ -77,7 +74,6 @@ class TestCRoc(CUnitTest):
 
         # Testing without input CFigure
         roc_plot = CFigure()
-        roc_plot.subplot(sp_type='roc')
         roc_plot.sp.title('ROC Curve - Custom')
         roc_plot.sp.xlim(0.1, 100)
         roc_plot.sp.ylim(30, 100)
@@ -94,7 +90,6 @@ class TestCRoc(CUnitTest):
 
         # Testing without input CFigure
         roc_plot = CFigure()
-        roc_plot.subplot(sp_type='roc')
         roc_plot.sp.title('ROC Curve Repetitions')
         # Plotting 2 times (to show multiple curves)
         # add one curve for repetition and call it rep 0 and rep 1 of roc 1
@@ -170,7 +165,7 @@ class TestCRoc(CUnitTest):
 
         self.logger.info("Plotting using our CPLotRoc")
 
-        roc_fig.subplot(1, 2, 2, sp_type='roc')
+        roc_fig.subplot(1, 2, 2)
 
         score = []
         true_y = []
@@ -196,7 +191,7 @@ class TestCRoc(CUnitTest):
 
         roc_fig.sp.xlim([-0.05 * 100, 1.05 * 100])
         roc_fig.sp.ylim([-0.05 * 100, 1.05 * 100])
-        roc_fig.sp.title('PRALIB Receiver operating characteristic example')
+        roc_fig.sp.title('SecML Receiver operating characteristic example')
         roc_fig.sp.legend(loc="lower right")
         roc_fig.show()
 

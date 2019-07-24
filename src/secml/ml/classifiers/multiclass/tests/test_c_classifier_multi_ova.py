@@ -189,7 +189,6 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
                            facecolors='none', linewidths=2)
 
         # Plotting multiclass decision function
-        fig.switch_sptype('function')
         fig.sp.plot_fobj(lambda x: multiclass.predict(x),
                          grid_limits=ds.get_bounds(offset=5), colorbar=False,
                          n_grid_points=50, plot_levels=False)

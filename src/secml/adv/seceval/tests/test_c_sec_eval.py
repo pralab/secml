@@ -127,7 +127,6 @@ class CSecEvalTestCases(object):
                                  self.sec_eval.sec_eval_data.param_name))
 
             # plot security evaluation
-            figure.switch_sptype('sec-eval')
             figure.sp.plot_metric(self.sec_eval.sec_eval_data)
 
             figure.subplots_adjust()
@@ -141,12 +140,10 @@ class CSecEvalTestCases(object):
                                  self.sec_eval.sec_eval_data.param_name))
 
             # plot security evaluation
-            figure.switch_sptype('sec-eval')
             figure.sp.plot_metric_for_class(self.sec_eval.sec_eval_data)
 
             figure.subplots_adjust()
             figure.show()
-
 
         def _fobj_plot(self):
             # figure creation

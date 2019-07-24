@@ -1,5 +1,5 @@
-import unittest
 from secml.testing import CUnitTest
+
 from secml.figure import CFigure
 from secml.ml.classifiers import CClassifierSVM
 from secml.data.loader import CDLRandom
@@ -19,24 +19,20 @@ class TestCPlot(CUnitTest):
     def test_fobj(self):
         """Test for CPlotFunction.plot_fobj method."""
         fig = CFigure()
-        fig.switch_sptype(sp_type='ds')
         fig.sp.plot_ds(self.dataset)
 
-        fig.switch_sptype(sp_type='function')
         fig.sp.plot_fobj(self.clf.decision_function, y=1)
         fig.show()
 
     def test_fgrads(self):
         """Test for CPlotFunction.plot_fgrads method."""
         fig = CFigure()
-        fig.switch_sptype(sp_type='ds')
         fig.sp.plot_ds(self.dataset)
 
-        fig.switch_sptype(sp_type='function')
         fig.sp.plot_fobj(self.clf.decision_function, y=1)
         fig.sp.plot_fgrads(lambda x: self.clf.grad_f_x(x))
         fig.show()
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

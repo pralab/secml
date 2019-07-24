@@ -1,8 +1,17 @@
+"""
+.. module:: CPlotDataset
+   :synopsis: Dataset plots.
+
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+
+"""
 from six.moves import range
 
-from secml.figure.plots import CPlot
-from secml.core.type_utils import is_list
 from matplotlib import cm
+
+from secml.figure._plots import CPlot
+from secml.core.type_utils import is_list
 
 
 class CPlotDataset(CPlot):
@@ -10,19 +19,8 @@ class CPlotDataset(CPlot):
 
     Custom plotting parameters can be specified.
     Currently parameters default:
-     - show_legend: True. Set False to hide legend on next plot.
-     - grid: True.
-
-    Parameters
-    ----------
-    sp : Axes
-        Subplot to use for plotting. Instance of `matplotlib.axes.Axes`.
-    default_params : dict
-        Dictionary with default parameters.
-
-    Attributes
-    ----------
-    class_type : 'ds'
+     - show_legend: True
+     - grid: True
 
     See Also
     --------
@@ -31,23 +29,13 @@ class CPlotDataset(CPlot):
     .CFigure : creates and handle figures.
 
     """
-    __class_type = 'ds'
 
-    def __init__(self, sp, default_params=None):
-
-        # Calling CPlot constructor
-        super(CPlotDataset, self).__init__(
-            sp=sp, default_params=default_params)
-
-        # Specific plot parameters (use `set_params` to alter)
-        self.show_legend = True
-        self.grid(grid_on=True)
-
-    def _apply_params(self):
+    def apply_params_ds(self):
         """Apply defined parameters to active subplot."""
         fig_legend = self.get_legend()
-        if fig_legend is not None:
-            fig_legend.set_visible(self.show_legend)
+        if self.show_legend is not False and fig_legend is not None:
+            fig_legend.set_visible(True)
+        self.grid(grid_on=True)
 
     def plot_ds(self, dataset, colors=None, markers='o', *args, **kwargs):
         """Plot patterns of each class with a different color/marker.
@@ -97,4 +85,4 @@ class CPlotDataset(CPlot):
                       linestyle='None', color=c, marker=m, *args, **kwargs)
 
         # Customizing figure
-        self._apply_params()
+        self.apply_params_ds()

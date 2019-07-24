@@ -39,9 +39,7 @@ class TestEvasionTreeL1(CEvasionTestCases.TestCEvasion):
     def _plot_dataset_clf_and_box(self, evas, fig):
         """Plot dataset and box constraints"""
         # Overriding as the threshold level of decision tree is 0.5
-        fig.switch_sptype(sp_type="ds")
         fig.sp.plot_ds(self.dataset)
-        fig.switch_sptype(sp_type="function")
         fig.sp.plot_fobj(
             func=evas.classifier.decision_function,
             grid_limits=self.grid_limits, colorbar=False,

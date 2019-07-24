@@ -1,5 +1,5 @@
-import unittest
 from secml.testing import CUnitTest
+
 from secml.figure import CFigure
 from secml.array import CArray
 
@@ -13,11 +13,10 @@ class TestCPlotConfMatr(CUnitTest):
     def test_conf_matr(self):
         """Test for CPlotFunction.plot_fobj method."""
         fig = CFigure()
-        fig.switch_sptype(sp_type='conf-matrix')
         fig.sp.plot_confusion_matrix(self.conf_matr, ['one', 'two', 'three'])
 
         fig.show()
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

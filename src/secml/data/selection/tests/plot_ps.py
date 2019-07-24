@@ -15,7 +15,7 @@ for rule_id, rule in enumerate(rules):
     ps.verbose = 2
     ds_reduced = ps.select(dataset, n_prototypes=5)
 
-    fig.subplot(1, len(rules), rule_id+1, sp_type='ds')
+    fig.subplot(1, len(rules), rule_id+1)
 
     # Plot dataset points
     fig.sp.scatter(dataset.X[:, 0], dataset.X[:, 1], linewidths=0, s=30)

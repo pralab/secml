@@ -1,10 +1,3 @@
-"""
-Created on 27/apr/2015
-Class to test CFigure
-@author: Davide Maiorca
-@author: Ambra Demontis
-
-"""
 from secml.testing import CUnitTest
 
 from secml.array import CArray
@@ -15,7 +8,7 @@ from secml.ml.kernel import CKernelRBF
 
 
 class TestCFigure(CUnitTest):
-    """Unit test for CFigure."""
+    """Unittest for CFigure."""
     
     def test_svm(self):
 
@@ -37,7 +30,6 @@ class TestCFigure(CUnitTest):
 
         self.logger.info("Test plot dataset method...")
 
-        self.fig.switch_sptype('ds')
         self.fig.sp.plot_ds(self.dataset)
 
         self.logger.info("Test plot path method...")
@@ -46,7 +38,6 @@ class TestCFigure(CUnitTest):
 
         self.logger.info("Test plot function method...")
         bounds = [(self.x_min, self.x_max), (self.y_min, self.y_max)]
-        self.fig.switch_sptype('function')
         self.fig.sp.plot_fobj(self.classifier.decision_function,
                               plot_levels=False, grid_limits=bounds)
 

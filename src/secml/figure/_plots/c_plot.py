@@ -1,3 +1,14 @@
+"""
+.. module:: CPlot
+   :synopsis: A standard plot.
+
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+
+"""
+import inspect
+import sys
+
 from matplotlib.axes import Axes
 
 from secml.core import CCreator
@@ -11,7 +22,7 @@ class CPlot(CCreator):
     This class provides an interface and few other methods useful
     for standard plot creation.
 
-    See examples for standard usage guidelines.
+    To be never explicitly instanced. Will be created by `CFigure`.
 
     Parameters
     ----------
@@ -20,17 +31,11 @@ class CPlot(CCreator):
     default_params : dict
         Dictionary with default parameters.
 
-    Attributes
-    ----------
-    class_type : 'standard'
-
     See Also
     --------
     .CFigure : creates and handle figures.
 
     """
-    __super__ = 'CPlot'
-    __class_type = 'standard'
 
     def __init__(self, sp, default_params):
 
@@ -41,20 +46,51 @@ class CPlot(CCreator):
         self._sp = sp
         # Store default parameters
         self._params = default_params
+        # Collect methods from subclasses
+        self._collect_spmethods()
+
+        # Callback parameter for showing the legend after
+        # applying custom plot parameters
+        self.show_legend = None
+
+        # Placeholders for plot parameters
+        self._ylabel = None
+        self._xlabel = None
+        self._yticks = None
+        self._yticklabels = None
+        self._xticks = None
+        self._xticklabels = None
+        self._xlim = None
+        self._ylim = None
+
+    def _collect_spmethods(self):
+        """Collects methods from CPlot subclasses and attach them to self."""
+        c_list = CPlot.get_subclasses()  # Retrieve all CPlot subclasses
+        methods_list = []
+        for c_info in c_list:  # For each CPlot subclass (name, class)
+            if c_info[0] == CPlot.__name__:
+                # Avoid adding methods of CPlot to CPlot
+                continue
+            # Get methods of each CPlot subclasses,
+            # use isfunction for Py3, ismethod for Py2  # TODO: REMOVE Python 2
+            pred = inspect.isfunction  # unbound methods or functions
+            if sys.version_info < (3, 0):  # Py2 this covers unbound methods
+                pred = inspect.ismethod
+            c_methods = inspect.getmembers(c_info[1], pred)
+            for method in c_methods:  # For each method (name, unbound method)
+                # Skip special methods and already added methods
+                if not method[0].startswith('__') and \
+                        method[0] not in methods_list and \
+                        not hasattr(self, method[0]):
+                    methods_list.append(method)
+        # Add methods to CPlot. Use __get__ to bound method to CPlot instance
+        for method in methods_list:
+            setattr(self, method[0], method[1].__get__(self))
 
     @property
     def n_lines(self):
         """Returns the number of lines inside current subplot."""
         return len(self.get_lines())
-
-    def _apply_params(self):
-        """Apply defined parameters to active subplot.
-
-        This method assigns custom parameters to proper
-        CFigure attributes depending on plot type.
-
-        """
-        raise NotImplementedError
 
     def _set_lines_params(self, kwargs):
         """Add lines-related parameters to input dictionary."""
@@ -81,6 +117,27 @@ class CPlot(CCreator):
     def get_legend_handles_labels(self):
         """Return handles and labels for legend contained by the subplot."""
         return self._sp.get_legend_handles_labels()
+
+    def get_xticks_idx(self, xticks):
+        """Returns the position of markers to plot.
+
+        Parameters
+        ----------
+        xticks : CArray
+            Ticks of x-axis where marker should be plotted.
+
+        Returns
+        -------
+        ticks_idx : list
+            List with the position of each xtick.
+
+        Notes
+        -----
+        If a given xtick is not exactly available,
+        the closest value's position will be returned.
+
+        """
+        return xticks.binary_search(self._sp.get_xticks()).tolist()
 
     def set_axisbelow(self, axisbelow=True):
         """Set axis ticks and gridlines below most artists."""
@@ -1236,6 +1293,7 @@ class CPlot(CCreator):
             :include-source:
 
         """
+        self._xlim = (bottom, top)
         self._sp.set_xlim(bottom, top)
 
     def ylim(self, bottom=None, top=None):
@@ -1253,6 +1311,7 @@ class CPlot(CCreator):
         .xlim : Set x axis limits.
 
         """
+        self._ylim = (bottom, top)
         self._sp.set_ylim(bottom, top)
 
     def xscale(self, scale_type, nonposx='mask', base=10, linthreshx=None):
@@ -1311,6 +1370,7 @@ class CPlot(CCreator):
         """
         if 'fontsize' not in kwargs:
             kwargs['fontsize'] = self._params['font.size']
+        self._xlabel = label
         self._sp.set_xlabel(label, *args, **kwargs)
 
     def ylabel(self, label, *args, **kwargs):
@@ -1330,6 +1390,7 @@ class CPlot(CCreator):
         """
         if 'fontsize' not in kwargs:
             kwargs['fontsize'] = self._params['font.size']
+        self._ylabel = label
         self._sp.set_ylabel(label, *args, **kwargs)
 
     def xticks(self, location_array, *args, **kwargs):
@@ -1350,6 +1411,7 @@ class CPlot(CCreator):
         """
         if isinstance(location_array, CArray):
             location_array = location_array.tondarray()
+        self._xticks = location_array
         self._sp.set_xticks(location_array, *args, **kwargs)
 
     def yticks(self, location_array, *args, **kwargs):
@@ -1369,6 +1431,7 @@ class CPlot(CCreator):
         """
         if isinstance(location_array, CArray):
             location_array = location_array.tondarray()
+        self._yticks = location_array
         self._sp.set_yticks(location_array, *args, **kwargs)
 
     def xticklabels(self, labels, *args, **kwargs):
@@ -1388,6 +1451,7 @@ class CPlot(CCreator):
 
         """
         labels = labels.tolist() if isinstance(labels, CArray) else labels
+        self._xticklabels = labels
         self._sp.set_xticklabels(labels, *args, **kwargs)
 
     def yticklabels(self, labels, *args, **kwargs):
@@ -1406,6 +1470,7 @@ class CPlot(CCreator):
 
         """
         labels = labels.tolist() if isinstance(labels, CArray) else labels
+        self._yticklabels = labels
         self._sp.set_yticklabels(labels, *args, **kwargs)
 
     def tick_params(self, *args, **kwargs):
@@ -1697,6 +1762,7 @@ class CPlot(CCreator):
         """
         if 'fontsize' not in kwargs:
             kwargs['fontsize'] = self._params['font.size']
+        self.show_legend = True
         return self._sp.legend(*args, **kwargs)
 
     def get_legend(self):

@@ -1,11 +1,19 @@
+"""
+.. module:: CPlotSecEval
+   :synopsis: Classifier Security Evaluation plots.
+
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+
+"""
 from six.moves import range
 
-from secml.figure.plots import CPlot
+from secml.figure._plots import CPlot
 from secml.ml.peval.metrics import CMetric
 from secml.array import CArray
 
 
-#FIXME: CLEANUP NEEDED
+# FIXME: CLEANUP NEEDED
 class CPlotSecEval(CPlot):
     """Plots Classifier Security Evaluation results.
 
@@ -13,22 +21,9 @@ class CPlotSecEval(CPlot):
     style data from `.CSecEvalData` class.
 
     Custom plotting parameters can be specified.
-
-    #fixme: update
     Currently parameters default:
      - show_CPlotSecEval: True. Set False to hide CPlotSecEval on next plot.
      - grid: True.
-
-    Parameters
-    ----------
-    sp : Axes
-        Subplot to use for plotting. Instance of `matplotlib.axes.Axes`.
-    default_params : dict
-        Dictionary with default parameters.
-
-    Attributes
-    ----------
-    class_type : 'sec-eval'
 
     See Also
     --------
@@ -37,223 +32,13 @@ class CPlotSecEval(CPlot):
     .CFigure : creates and handle figures.
 
     """
-    __class_type = 'sec-eval'
 
-    # FIXME: manage default params
-    def __init__(self, sp, default_params=None):
-
-        # Calling CPlot constructor
-        super(CPlotSecEval, self).__init__(
-            sp=sp, default_params=default_params)
-
-        # Specific plot parameters (use `set_params` to alter)
-        self.show_legend = True
-        self.grid(grid_on=True)
-
-        self._xlabel = None
-        self._ylabel = None
-        self._yticks = None
-        self._yticklabels = None
-        self._xticks = None
-        self._xticklabels = None
-        # Limits have to applied after ticks to be effective
-        self._ylim = None
-        self._xlim = None
-
-    def ylabel(self, label, *args, **kwargs):
-        """Set a label for the y axis
-
-        Parameters
-        ----------
-        label : string
-            Label's text.
-        *args, **kwargs
-            Same as :meth:`.text` method.
-
-        See Also
-        --------
-        .xlabel : Set a label for the x axis.
-
-        """
-        self._ylabel = label
-        super(CPlotSecEval, self).ylabel(label, *args, **kwargs)
-
-    def xlabel(self, label, *args, **kwargs):
-        """Set a label for the x axis.
-
-        Parameters
-        ----------
-        label : string
-            Label's text.
-        *args, **kwargs
-            Same as :meth:`.text` method.
-
-        Examples
-        --------
-        .. plot:: pyplots/xlabel.py
-            :include-source:
-
-        """
-        self._xlabel = label
-        super(CPlotSecEval, self).xlabel(label, *args, **kwargs)
-
-    def yticks(self, location_array, *args, **kwargs):
-        """Set the y-tick locations and labels.
-
-        Parameters
-        ----------
-        location_array : CArray or list
-            Contain ticks location.
-        *args, **kwargs
-            Same as :meth:`.text` method.
-
-        See Also
-        --------
-        .xticks : Set the x-tick locations and labels.
-
-        """
-        self._yticks = location_array
-        super(CPlotSecEval, self).yticks(location_array, *args, **kwargs)
-
-    def yticklabels(self, labels, *args, **kwargs):
-        """Set the ytick labels.
-
-        Parameters
-        ----------
-        labels : list or CArray of string
-            Xtick labels.
-        *args, **kwargs
-            Same as :meth:`.text` method.
-
-        See Also
-        --------
-        .xticklabels : Set the xtick labels.
-
-        """
-        self._yticklabels = labels
-        super(CPlotSecEval, self).yticklabels(labels, *args, **kwargs)
-
-    def xticks(self, location_array, *args, **kwargs):
-        """Set the x-tick locations and labels.
-
-        Parameters
-        ----------
-        location_array : CArray or list
-            Contain ticks location.
-        *args, **kwargs
-            Same as :meth:`.text` method.
-
-        Examples
-        --------
-        .. plot:: pyplots/xticks.py
-            :include-source:
-
-        """
-        self._xticks = location_array
-        super(CPlotSecEval, self).xticks(location_array, *args, **kwargs)
-
-    def xticklabels(self, labels, *args, **kwargs):
-        """Set the xtick labels.
-
-        Parameters
-        ----------
-        labels : list or CArray of string
-            Xtick labels.
-        *args, **kwargs
-            Same as :meth:`.text` method.
-
-        Examples
-        --------
-        .. plot:: pyplots/xticklabels.py
-            :include-source:
-
-        """
-        self._xticklabels = labels
-        super(CPlotSecEval, self).xticklabels(labels, *args, **kwargs)
-
-    def ylim(self, bottom=None, top=None):
-        """Set axes y limits.
-
-        Parameters
-        ----------
-        bottom : scalar
-            Starting value for the y axis.
-        top : scalar
-            Ending value for the y axis.
-
-        See Also
-        --------
-        .xlim : Set x axis limits.
-
-        """
-        self._ylim = (bottom, top)
-        super(CPlotSecEval, self).ylim(bottom=bottom, top=top)
-
-    def xlim(self, bottom=None, top=None):
-        """Set axes x limits.
-
-        Parameters
-        ----------
-        bottom : scalar
-            Starting value for the x axis.
-        top : scalar
-            Ending value for the x axis.
-
-        Examples
-        --------
-        .. plot:: pyplots/xlim.py
-            :include-source:
-
-        """
-        self._xlim = (bottom, top)
-        super(CPlotSecEval, self).xlim(bottom=bottom, top=top)
-
-    def _apply_params(self):
+    def apply_params_sec_eval(self):
         """Apply defined parameters to active subplot."""
         fig_legend = self.get_legend()
-        if fig_legend is not None:
-            fig_legend.set_visible(self.show_legend)
-        # Other axis parameters
-
-        if self._ylabel:
-            self.ylabel(self._ylabel)
-        if self._xlabel:
-            self.xlabel(self._xlabel)
-        if self._yticks:
-            self.yticks(self._yticks)
-        if self._yticklabels:
-            self.yticklabels(self._yticklabels)
-        if self._xticks:
-            self.xticks(self._xticks)
-        if self._xticklabels:
-            self.xticklabels(self._xticklabels)
-        # Limits have to applied after ticks to be effective
-        if self._ylim:
-            self.ylim(*self._ylim)
-        if self._xlim:
-            self.xlim(*self._xlim)
-
-    def _markers_idx(self, fpr):
-        """Returns the position of markers to plot.
-
-        Parameters
-        ----------
-        fpr : CArray
-            False Positive Rates.
-
-        Returns
-        -------
-        ticks_idx : list
-            List with the position of each xtick inside
-            false positives array.
-
-        Notes
-        -----
-        If a given xtick is not available inside `fpr` array,
-        the closest value's position will be returned.
-
-        """
-        return fpr.binary_search(self._sp.get_xticks()).tolist()
+        if self.show_legend is not False and fig_legend is not None:
+            fig_legend.set_visible(True)
+        self.grid(grid_on=True)
 
     def plot_metric(self, sec_eval_data, consider_target=False,
                     metric="accuracy", label=None, auc=False,
@@ -302,7 +87,7 @@ class CPlotSecEval(CPlot):
         if label is not None:
             self.legend(loc=4, labelspacing=0.4, handletextpad=0.3)
 
-        self._apply_params()
+        self.apply_params_sec_eval()
 
     def plot_metric_for_class(self, sec_eval_data,
                               consider_target=True,
@@ -335,7 +120,7 @@ class CPlotSecEval(CPlot):
             self.plot(sec_eval_data[0].param_values, perf[0], label=str(cls))
 
         self.legend(loc=1, labelspacing=0.4, handletextpad=0.3)
-        self._apply_params()
+        self.apply_params_sec_eval()
 
     def cmpt_au_sec(self, sec_eval_data, consider_target=False,
                     metric_name="test_error"):

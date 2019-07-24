@@ -71,10 +71,8 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
 
         fig = CFigure()
         # Plot dataset points
-        fig.switch_sptype(sp_type='ds')
         fig.sp.plot_ds(self.dataset)
         # Plot objective function
-        fig.switch_sptype(sp_type='function')
         fig.sp.plot_fobj(self.mcs.decision_function,
                          grid_limits=self.dataset.get_bounds())
         fig.show()

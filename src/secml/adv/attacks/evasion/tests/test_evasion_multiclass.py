@@ -192,8 +192,6 @@ class TestEvasionMulticlass(CUnitTest):
         fig.subplot(2, 2, 2)
         fig = self._plot_decision_function(fig)
 
-        fig.switch_sptype('function')
-
         # # Use the actual target used in evasion
         # target = self.ds.Y[p_idx] if target_class is None else target_class
         fig.sp.plot_fgrads(eva._objective_function_gradient,
@@ -311,8 +309,6 @@ class TestEvasionMulticlass(CUnitTest):
                            label='c {:}'.format(c))
 
         # Plotting multiclass decision function
-        fig.switch_sptype('function')
-
         colors = [style[3] for style in styles]
         # TODO: IMPLEMENT THIS IN CFIGURE
         cmap = matplotlib.colors.ListedColormap(
