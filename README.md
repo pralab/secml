@@ -115,9 +115,9 @@ All the installation procedures via `pip` described above allow definition of th
     Will install: `torch >= 0.4.*`, `torchvision >= 0.1.8`
   - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
     a Python library to benchmark machine learning systems' vulnerability to adversarial examples.  
-    Will install: `tensorflow >= 1.13.*, < 2`, `cleverhans`
+    Will install: `tensorflow >= 1.14.*, < 2`, `cleverhans`
   - `tf-gpu` : Shortcut for installing `TensorFlow` package with GPU support.  
-    Will install: `tensorflow-gpu >= 1.13.*, < 2`
+    Will install: `tensorflow-gpu >= 1.14.*, < 2`
 
 ## Usage Guide
 
