@@ -9,7 +9,7 @@ from secml.data.loader import CDLRandom
 
 
 class TestCRoc(CUnitTest):
-    """Unit test for CPlotRoc."""
+    """Unit test for CPlotMetric (ROC plots)."""
 
     def setUp(self):
 
