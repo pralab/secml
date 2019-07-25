@@ -27,14 +27,24 @@ class TestCPlotDecisionFunction(CUnitTest):
     def test_decision_function(self):
         """Test for CPlotFunction.plot_fobj method."""
 
+        # custom colormap (better than how we discretize jet)
         colors = ('red', 'blue', 'lightgreen', 'black', 'gray', 'cyan')
         cmap = ListedColormap(colors[:self.clf.n_classes])
 
-        fig = CFigure()
-        fig.sp.plot_decision_function(self.clf, n_grid_points=500, cmap=cmap)
+        fig = CFigure(width=10, height=5)
+
+        fig.subplot(1, 2, 1)
+        fig.sp.plot_decision_function(self.clf, n_grid_points=200, cmap=cmap,
+                                     plot_background=False)
         fig.sp.plot_ds(self.dataset, cmap=cmap)
         fig.sp.grid(grid_on=False)
-        fig.show()
+
+        fig.subplot(1, 2, 2)
+        fig.sp.plot_decision_function(self.clf, n_grid_points=200, cmap=cmap)
+        fig.sp.plot_ds(self.dataset, cmap=cmap)
+        fig.sp.grid(grid_on=False)
+
+        fig.savefig('test_plot_decision_function.pdf')
 
 
 if __name__ == '__main__':

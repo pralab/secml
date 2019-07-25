@@ -28,8 +28,9 @@ class CPlotDecisionFunction(CPlotFunction):
         """Apply defined parameters to active subplot."""
         self.grid(grid_on=False)
 
-    def plot_decision_function(self, clf, n_grid_points=100, cmap='jet'):
-        """Plot constraint bound."""
+    def plot_decision_function(self, clf, n_grid_points=100,
+                              plot_background=True, cmap='jet'):
+        """Plot decision boundaries and regions for the given classifier."""
 
         if not isinstance(clf, CClassifier):
             raise TypeError(
@@ -41,7 +42,7 @@ class CPlotDecisionFunction(CPlotFunction):
                        n_colors=clf.n_classes,
                        cmap=cmap,
                        levels=CArray.arange(0.5, clf.n_classes, 1).tolist(),
-                       plot_background=True,
+                       plot_background=plot_background,
                        n_grid_points=n_grid_points,
                        alpha=0.5)
 
