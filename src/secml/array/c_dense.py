@@ -1084,7 +1084,7 @@ class CDense(_CArrayInterface):
             np.clip(self.tondarray(), a_min=c_min, a_max=c_max))
 
     def sort(self, axis=-1, kind='quicksort', inplace=False, order=None):
-        """sort in place"""
+        """Sort array."""
         if inplace is True:
             self.atleast_2d()._data.sort(axis=axis, kind=kind, order=order)
             # We return ourselves for output consistency
