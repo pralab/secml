@@ -1,6 +1,6 @@
 from secml.ml.classifiers.tests import CClassifierTestCases
 
-from secml.data.loader import CDLRandomToy
+from secml.data.loader import CDLIris
 from secml.ml.classifiers import CClassifierDecisionTree
 from secml.array import CArray
 
@@ -9,7 +9,7 @@ class TestCClassifierDecisionTree(CClassifierTestCases):
     """Unit test for CDecisionTree."""
 
     def setUp(self):
-        self.dataset = CDLRandomToy('iris').load()
+        self.dataset = CDLIris().load()
         self.dec_tree = CClassifierDecisionTree()
 
     def test_classify(self):

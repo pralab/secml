@@ -9,6 +9,8 @@
 """
 from multiprocessing import Lock
 from six.moves import range
+import six
+from abc import ABCMeta, abstractproperty
 
 from secml.data.loader import CDataLoader
 from secml.data import CDataset
@@ -18,7 +20,7 @@ __all__ = ['CDLRandom', 'CDLRandomRegression',
            'CDLRandomBlobs', 'CDLRandomBlobsRegression',
            'CDLRandomCircles', 'CDLRandomCircleRegression',
            'CDLRandomMoons', 'CDLRandomBinary',
-           'CDLRandomToy']
+           'CDLIris', 'CDLDigits', 'CDLBoston', 'CDLDiabetes']
 
 
 class CDLRandom(CDataLoader):
@@ -79,7 +81,7 @@ class CDLRandom(CDataLoader):
         The fraction of samples whose class are randomly exchanged.
     class_sep : float, optional (default=1.0)
         The factor multiplying the hypercube dimension.
-    hypercube : boolean, optional (default=True)
+    hypercube : bool, optional (default=True)
         If True, the clusters are put on the vertices of a hypercube.
         If False, the clusters are put on the vertices
         of a random polytope.
@@ -554,85 +556,37 @@ class CDLRandomBinary(CDataLoader):
         return CDataset(patterns, labels)
 
 
+@six.add_metaclass(ABCMeta)
 class CDLRandomToy(CDataLoader):
-    """Loads random toy.
+    """Loads a random toy dataset (abstract interface).
 
     Available toy datasets:
-
-        - iris (classification)
-
-            The iris dataset is a classic and very easy multi-class
-            classification dataset.
-
-            =================   ==============
-            Classes                          3
-            Samples per class               50
-            Samples total                  150
-            Dimensionality                   4
-            Features            real, positive
-            =================   ==============
-
-        - digits (classification)
-
-            Each datapoint is a 8x8 image of a digit.
-
-            =================   ==============
-            Classes                         10
-            Samples per class             ~180
-            Samples total                 1797
-            Dimensionality                  64
-            Features             integers 0-16
-            =================   ==============
-
-        - boston (regression)
-
-            House-prices dataset.
-
-            ==============     ==============
-            Samples total                 506
-            Dimensionality                 13
-            Features           real, positive
-            Targets             real 5. - 50.
-            ==============     ==============
-
-        - diabetes (regression)
-
-            ==============      ==================
-            Samples total       442
-            Dimensionality      10
-            Features            real, -.2 < x < .2
-            Targets             integer 25 - 346
-            ==============      ==================
+     - iris (classification) -> `CDLIris`
+     - digits (classification) -> `CDLDigits`
+     - boston (regression) -> `CDLBoston`
+     - diabetes (regression) -> `CDLDiabetes`
 
     Parameters
     ----------
-    toy : str
-        Name of the toy dataset to load.
-        Currently supporting:
-            - 'iris'
-            - 'digits'
-            - 'boston'
-            - 'diabetes'
     class_list : list of string (default None)
         Each string is the name of data's class that we want
         in the new dataset.  If None every class will be keep
-    zero_one : Boolean
+    zero_one : bool
         If is true, and class list is equal to two, will be
         assigned 0 at the label with lower value, 1 to the other.
 
-    Attributes
-    ----------
-    class_type : 'toy'
-
     """
-    __class_type = 'toy'
     __lock = Lock()  # Lock to prevent multiple parallel download/extraction
 
-    def __init__(self, toy, class_list=None, zero_one=False):
+    def __init__(self, class_list=None, zero_one=False):
 
-        self.toy = toy
         self.class_list = class_list
         self.zero_one = zero_one
+
+    @abstractproperty
+    def toy(self):
+        """Identifier of the toy dataset."""
+        raise NotImplementedError
 
     def _select_classes(self, class_list, patterns, labels):
 
@@ -694,3 +648,127 @@ class CDLRandomToy(CDataLoader):
             return self._select_classes(self.class_list,
                                         CArray(toy_data.data),
                                         CArray(toy_data.target))
+
+
+class CDLIris(CDLRandomToy):
+    """Loads Iris dataset.
+
+    The iris dataset is a classic and very easy multi-class
+    classification dataset.
+
+    =================   ==============
+    Classes                          3
+    Samples per class               50
+    Samples total                  150
+    Dimensionality                   4
+    Features            real, positive
+    =================   ==============
+
+    Parameters
+    ----------
+    class_list : list of str (default None)
+        Each string is the name of data's class that we want
+        in the new dataset.  If None every class will be keep
+    zero_one : bool
+        If is true, and class list is equal to two, will be
+        assigned 0 at the label with lower value, 1 to the other.
+
+    Attributes
+    ----------
+    class_type : 'iris'
+
+    """
+    __class_type = 'iris'
+    toy = 'iris'
+
+
+class CDLDigits(CDLRandomToy):
+    """Loads Digits dataset.
+
+    The digits dataset is a classic and very easy multi-class
+    classification dataset. Each datapoint is a 8x8 image of a digit.
+
+    =================   ==============
+    Classes                         10
+    Samples per class             ~180
+    Samples total                 1797
+    Dimensionality                  64
+    Features             integers 0-16
+    =================   ==============
+
+    Parameters
+    ----------
+    class_list : list of str (default None)
+        Each string is the name of data's class that we want
+        in the new dataset.  If None every class will be keep
+    zero_one : bool
+        If is true, and class list is equal to two, will be
+        assigned 0 at the label with lower value, 1 to the other.
+
+    Attributes
+    ----------
+    class_type : 'digits'
+
+    """
+    __class_type = 'digits'
+    toy = 'digits'
+
+
+class CDLBoston(CDLRandomToy):
+    """Loads Boston dataset.
+
+    Boston house-prices dataset, useful for regression.
+
+    ==============     ==============
+    Samples total                 506
+    Dimensionality                 13
+    Features           real, positive
+    Targets             real 5. - 50.
+    ==============     ==============
+
+    Parameters
+    ----------
+    class_list : list of str (default None)
+        Each string is the name of data's class that we want
+        in the new dataset.  If None every class will be keep
+    zero_one : bool
+        If is true, and class list is equal to two, will be
+        assigned 0 at the label with lower value, 1 to the other.
+
+    Attributes
+    ----------
+    class_type : 'boston'
+
+    """
+    __class_type = 'boston'
+    toy = 'boston'
+
+
+class CDLDiabetes(CDLRandomToy):
+    """Loads Diabetes dataset.
+
+    Diabetes dataset, useful for regression.
+
+    ==============      ==================
+    Samples total       442
+    Dimensionality      10
+    Features            real, -.2 < x < .2
+    Targets             integer 25 - 346
+    ==============      ==================
+
+    Parameters
+    ----------
+    class_list : list of str (default None)
+        Each string is the name of data's class that we want
+        in the new dataset.  If None every class will be keep
+    zero_one : bool
+        If is true, and class list is equal to two, will be
+        assigned 0 at the label with lower value, 1 to the other.
+
+    Attributes
+    ----------
+    class_type : 'diabetes'
+
+    """
+    __class_type = 'diabetes'
+    toy = 'diabetes'
