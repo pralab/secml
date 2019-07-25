@@ -1066,7 +1066,7 @@ class CSparse(_CArrayInterface):
         self._data.eliminate_zeros()
 
     def sort(self, axis=-1, kind='quicksort', inplace=False):
-        """sort array in places"""
+        """Sort array."""
         if kind != 'quicksort':
             raise ValueError("only `quicksort` algorithm is supported")
 
