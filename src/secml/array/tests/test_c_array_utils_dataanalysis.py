@@ -800,22 +800,22 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         self.logger.info("Testing CArray.min()")
 
         _check_minmaxmean('min', self.array_sparse,
-                          (0, CArray([[1, 0, 0, 0]], tosparse=True),
-                           CArray([[0], [0], [0]], tosparse=True)))
+                          (0, CArray([[1, 0, 0, 0]]),
+                           CArray([[0], [0], [0]])))
         _check_minmaxmean('min', self.array_dense,
                           (0, CArray([[1, 0, 0, 0]]), CArray([[0], [0], [0]])))
 
         _check_minmaxmean('min', self.row_flat_dense,
                           (0, CArray([4, 0, 6]), 0))
         _check_minmaxmean('min', self.row_sparse,
-                          (0, CArray([[4, 0, 6]], tosparse=True),
-                           CArray([[0]], tosparse=True)))
+                          (0, CArray([[4, 0, 6]]),
+                           CArray([[0]])))
         _check_minmaxmean('min', self.row_dense,
                           (0, CArray([[4, 0, 6]]), CArray([[0]])))
 
         _check_minmaxmean('min', self.column_sparse,
-                          (0, CArray([[0]], tosparse=True),
-                           CArray([[4], [0], [6]], tosparse=True)))
+                          (0, CArray([[0]]),
+                           CArray([[4], [0], [6]])))
         _check_minmaxmean('min', self.column_dense,
                           (0, CArray([[0]]), CArray([[4], [0], [6]])))
 
@@ -824,28 +824,28 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         _check_minmaxmean('min', self.single_dense,
                           (4, CArray([[4]]), CArray([[4]])))
         _check_minmaxmean('min', self.single_sparse,
-                          (4, CArray([[4]], tosparse=True),
-                           CArray([[4]], tosparse=True)))
+                          (4, CArray([[4]]),
+                           CArray([[4]])))
 
         self.logger.info("Testing CArray.max()")
 
         _check_minmaxmean('max', self.array_sparse,
-                          (6, CArray([[3, 6, 0, 5]], tosparse=True),
-                           CArray([[5], [4], [6]], tosparse=True)))
+                          (6, CArray([[3, 6, 0, 5]]),
+                           CArray([[5], [4], [6]])))
         _check_minmaxmean('max', self.array_dense,
                           (6, CArray([[3, 6, 0, 5]]), CArray([[5], [4], [6]])))
 
         _check_minmaxmean('max', self.row_flat_dense,
                           (6, CArray([4, 0, 6]), CArray([6])))
         _check_minmaxmean('max', self.row_sparse,
-                          (6, CArray([[4, 0, 6]], tosparse=True),
-                           CArray([[6]], tosparse=True)))
+                          (6, CArray([[4, 0, 6]]),
+                           CArray([[6]])))
         _check_minmaxmean('max', self.row_dense,
                           (6, CArray([[4, 0, 6]]), CArray([[6]])))
 
         _check_minmaxmean('max', self.column_sparse,
-                          (6, CArray([[6]], tosparse=True),
-                           CArray([[4], [0], [6]], tosparse=True)))
+                          (6, CArray([[6]]),
+                           CArray([[4], [0], [6]])))
         _check_minmaxmean('max', self.column_dense,
                           (6, CArray([[6]]), CArray([[4], [0], [6]])))
 
@@ -854,8 +854,8 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         _check_minmaxmean('max', self.single_dense,
                           (4, CArray([[4]]), CArray([[4]])))
         _check_minmaxmean('max', self.single_sparse,
-                          (4, CArray([[4]], tosparse=True),
-                           CArray([[4]], tosparse=True)))
+                          (4, CArray([[4]]),
+                           CArray([[4]])))
 
         self.logger.info("Testing CArray.mean()")
 
@@ -1004,24 +1004,26 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             self.logger.info("a.argmin(axis=0): \n{:}".format(argmin_res))
             min_res = array.min(axis=0)
             self.assertIsInstance(min_res, CArray)
-            # One res for each column with keepdims
-            min_res = min_res.ravel()
+            self.assertEqual(1, min_res.shape[0])
             # We create a find_2d-like mask to check result
             argmin_res = [
                 argmin_res.ravel().tolist(), list(range(array.shape[1]))]
-            self.assert_array_equal(array[argmin_res], min_res)
+            self.assert_array_equal(
+                array[argmin_res].atleast_2d(), min_res)
 
             self.logger.info("a: \n{:}".format(array))
             argmin_res = array.argmin(axis=1)
             self.logger.info("a.argmin(axis=1): \n{:}".format(argmin_res))
             min_res = array.min(axis=1)
             self.assertIsInstance(min_res, CArray)
-            # One res for each row with keepdims
-            min_res = min_res.ravel()
+            self.assertEqual(1, min_res.shape[1])
+            # max will return a column but let's compare as a row
+            min_res = min_res.T
             # We create a find_2d-like mask to check result
             argmin_res = [
                 list(range(array.shape[0])), argmin_res.ravel().tolist()]
-            self.assert_array_equal(array[argmin_res], min_res)
+            self.assert_array_equal(
+                array[argmin_res].atleast_2d(), min_res)
 
         _argmin(self.array_sparse)
         _argmin(self.row_sparse)
@@ -1053,24 +1055,26 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             self.logger.info("a.argmax(axis=0): \n{:}".format(argmax_res))
             max_res = array.max(axis=0)
             self.assertIsInstance(max_res, CArray)
-            # One res for each column with keepdims
-            max_res = max_res.ravel()
+            self.assertEqual(1, max_res.shape[0])
             # We create a find_2d-like mask to check result
             argmax_res = [
                 argmax_res.ravel().tolist(), list(range(array.shape[1]))]
-            self.assert_array_equal(array[argmax_res], max_res)
+            self.assert_array_equal(
+                array[argmax_res].atleast_2d(), max_res)
 
             self.logger.info("a: \n{:}".format(array))
             argmax_res = array.argmax(axis=1)
             self.logger.info("a.argmax(axis=1): \n{:}".format(argmax_res))
             max_res = array.max(axis=1)
             self.assertIsInstance(max_res, CArray)
-            # One res for each row with keepdims
-            max_res = max_res.ravel()
+            self.assertEqual(1, max_res.shape[1])
+            # max will return a column but let's compare as a row
+            max_res = max_res.T
             # We create a find_2d-like mask to check result
             argmax_res = [
                 list(range(array.shape[0])), argmax_res.ravel().tolist()]
-            self.assert_array_equal(array[argmax_res], max_res)
+            self.assert_array_equal(
+                array[argmax_res].atleast_2d(), max_res)
 
         _argmax(self.array_sparse)
         _argmax(self.row_sparse)

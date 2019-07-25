@@ -1533,15 +1533,19 @@ class CSparse(_CArrayInterface):
 
     def max(self, axis=None, keepdims=True):
         """Max of array elements over a given axis."""
-        out_max = self.__class__(self._data.max(axis=axis))
-        return \
-            out_max.ravel() if axis is None or keepdims is False else out_max
+        out = self._data.max(axis=axis)
+        if axis is None:  # return scalar
+            return out
+        out = CDense(out.toarray())
+        return out.ravel() if keepdims is False else out
 
     def min(self, axis=None, keepdims=True):
         """Min of array elements over a given axis."""
-        out_min = self.__class__(self._data.min(axis=axis))
-        return \
-            out_min.ravel() if axis is None or keepdims is False else out_min
+        out = self._data.min(axis=axis)
+        if axis is None:  # return scalar
+            return out
+        out = CDense(out.toarray())
+        return out.ravel() if keepdims is False else out
 
     def argmax(self, axis=None):
         """Indices of the maximum values along an axis.
@@ -1741,9 +1745,10 @@ class CSparse(_CArrayInterface):
 
     def mean(self, axis=None, dtype=None, keepdims=True):
         """Mean of array elements over a given axis."""
-        out_mean = CDense(self._data.mean(axis=axis, dtype=dtype))
-        return \
-            out_mean.ravel() if axis is None or keepdims is False else out_mean
+        out = self._data.mean(axis=axis, dtype=dtype)
+        if axis is None:  # return scalar
+            return out
+        return CDense(out).ravel() if keepdims is False else CDense(out)
 
     def median(self, axis=None, keepdims=True):
         """Median of array elements over a given axis."""
