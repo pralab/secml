@@ -402,6 +402,10 @@ class CDense(_CArrayInterface):
         """Redefinition of the set operation."""
         # Check for setitem value
         if isinstance(value, CDense):
+            if value.is_vector_like and value.ndim > 1:
+                # We transform vector-like arrays of 2 or more dims to vectors
+                # in order to always perform the set operation correctly
+                value = value.ravel()
             value = value.tondarray()
         elif not (is_scalar(value) or is_bool(value)):
             raise TypeError("{:} cannot be used for setting "
