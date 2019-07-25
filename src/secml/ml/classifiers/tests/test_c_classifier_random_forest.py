@@ -1,6 +1,6 @@
 from secml.ml.classifiers.tests import CClassifierTestCases
 
-from secml.data.loader import CDLRandomToy
+from secml.data.loader import CDLIris
 from secml.ml.classifiers import CClassifierRandomForest
 from secml.array import CArray
 
@@ -9,7 +9,7 @@ class TestCClassifierRandomForest(CClassifierTestCases):
     """Unit test for CRandomForest."""
 
     def setUp(self):
-        self.dataset = CDLRandomToy('iris').load()
+        self.dataset = CDLIris().load()
 
         self.rnd_forest = CClassifierRandomForest(random_state=0)
        
