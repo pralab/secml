@@ -109,29 +109,3 @@ def md5(fname, blocksize=65536):
         for chunk in iter(lambda: f.read(blocksize), b""):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
-
-
-from secml.testing import CUnitTest
-class CTestDLUtils(CUnitTest):
-
-    def test_md5(self):
-
-        # Fixed long string to write to the file
-        x = 'abcd' * 10000
-
-        # Expected digest of the file
-        md5_test = '934f48695f0286ccfa0dddc060e2f152'
-
-        # Generate a temp file to test
-        import tempfile
-        with tempfile.NamedTemporaryFile() as fp:
-            fp.write(x)
-
-            md5_digest = md5(fp.name)
-
-            self.logger.info("MD5: {:}".format(md5_digest))
-            self.assertEqual(md5_test, md5_digest)
-
-
-if __name__ == '__main__':
-    CUnitTest.main()
