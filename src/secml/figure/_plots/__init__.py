@@ -6,3 +6,4 @@ from .c_plot_clf import CPlotClassifier
 from .c_plot_sec_eval import CPlotSecEval
 from .c_plot_stats import CPlotStats
 from .c_plot_constraint import CPlotConstraint
+from .c_plot_decision_function import CPlotDecisionFunction

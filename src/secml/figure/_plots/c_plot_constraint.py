@@ -14,8 +14,7 @@ class CPlotConstraint(CPlotFunction):
 
     Custom plotting parameters can be specified.
     Currently parameters default:
-     - show_legend: True.
-     - grid: True.
+     - grid: False.
 
     See Also
     --------
@@ -26,10 +25,7 @@ class CPlotConstraint(CPlotFunction):
 
     def apply_params(self):
         """Apply defined parameters to active subplot."""
-        fig_legend = self.get_legend()
-        if self.show_legend is not False and fig_legend is not None:
-            fig_legend.set_visible(True)
-        self.grid(grid_on=True)
+        self.grid(grid_on=False)
 
     def plot_constraint(self, constraint, n_grid_points=100):
         """Plot constraint bound."""
