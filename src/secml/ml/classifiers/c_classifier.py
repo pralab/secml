@@ -194,8 +194,9 @@ class CClassifier(CCreator):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : int
+        y : int or None
             The label of the class wrt the function should be calculated.
+            if None, return the output for all classes.
 
         Returns
         -------

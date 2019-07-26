@@ -64,7 +64,7 @@ class CClassifierInterface(CClassifier):
     __super__ = 'CClassifierInterface'
 
     def __init__(self, preprocess=None):
-        super(CClassifierInterface, self).__init__(preprocess=preprocess)
+        CClassifier.__init__(self, preprocess=preprocess)
 
     @abstractmethod
     def _decision_function(self, x, y):

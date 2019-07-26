@@ -11,3 +11,4 @@ from .c_classifier_nearest_centroid import CClassifierNearestCentroid
 from .c_classifier_random_forest import CClassifierRandomForest
 from .c_classifier_ridge import CClassifierRidge
 from .c_classifier_logistic import CClassifierLogistic
+from .c_classifier_sklearn import CClassifierSkLearn
