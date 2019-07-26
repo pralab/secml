@@ -10,11 +10,11 @@ import sklearn
 from sklearn import ensemble
 
 from secml.array import CArray
-from secml.ml.classifiers import CClassifier
+from secml.ml.classifiers import CClassifierInterface
 from secml.utils.mixed_utils import check_is_fitted
 
 
-class CClassifierRandomForest(CClassifier):
+class CClassifierRandomForest(CClassifierInterface):
     """Random Forest classifier.
 
     Parameters
@@ -36,7 +36,7 @@ class CClassifierRandomForest(CClassifier):
                  random_state=None, preprocess=None):
 
         # Calling CClassifier constructor
-        CClassifier.__init__(self, preprocess=preprocess)
+        CClassifierInterface.__init__(self, preprocess=preprocess)
 
         # Classifier Parameters
         self.n_estimators = n_estimators

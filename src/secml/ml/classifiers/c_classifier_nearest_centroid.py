@@ -10,13 +10,13 @@ from sklearn.neighbors import NearestCentroid
 from sklearn.metrics import pairwise_distances
 
 from secml.array import CArray
-from secml.ml.classifiers import CClassifier
+from secml.ml.classifiers import CClassifierInterface
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.utils.mixed_utils import check_is_fitted
 
 
 # TODO: EXPAND CLASS DOCSTRING
-class CClassifierNearestCentroid(CClassifier):
+class CClassifierNearestCentroid(CClassifierInterface):
     """CClassifierNearestCentroid.
 
     Parameters

@@ -9,7 +9,7 @@
 from secml import _NoValue
 from secml.array import CArray
 from secml.data import CDataset
-from secml.ml.classifiers import CClassifier
+from secml.ml.classifiers import CClassifierInterface
 from secml.ml.classifiers.reject import CClassifierReject
 from secml.ml.classifiers.reject.mixin_classifier_gradient_reject_threshold import \
     CClassifierGradientRejectThresholdMixin
@@ -28,7 +28,7 @@ class CClassifierRejectThreshold(CClassifierReject,
 
     Parameters
     ----------
-    clf : CClassifier
+    clf : CClassifierInterface
         Classifier to which we would like to apply a reject threshold.
     threshold : float
         Rejection threshold.
@@ -59,7 +59,7 @@ class CClassifierRejectThreshold(CClassifierReject,
     @clf.setter
     def clf(self, value):
         """Sets the inner classifier."""
-        if isinstance(value, CClassifier):
+        if isinstance(value, CClassifierInterface):
             self._clf = value
         else:
             raise ValueError(
@@ -102,7 +102,7 @@ class CClassifierRejectThreshold(CClassifierReject,
 
         Returns
         -------
-        trained_cls : CClassifier
+        trained_cls : CClassifierInterface
             Instance of the classifier trained using input dataset.
 
         """
@@ -130,7 +130,7 @@ class CClassifierRejectThreshold(CClassifierReject,
 
         Returns
         -------
-        trained_cls : CClassifier
+        trained_cls : CClassifierInterface
             Instance of the classifier trained using input dataset.
 
         """

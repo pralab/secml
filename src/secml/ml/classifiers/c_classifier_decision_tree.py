@@ -10,11 +10,11 @@ import sklearn
 from sklearn import tree
 
 from secml.array import CArray
-from secml.ml.classifiers import CClassifier
+from secml.ml.classifiers import CClassifierInterface
 from secml.utils.mixed_utils import check_is_fitted
 
 
-class CClassifierDecisionTree(CClassifier):
+class CClassifierDecisionTree(CClassifierInterface):
     """Decision Tree Classifier.
 
     Parameters
@@ -35,7 +35,7 @@ class CClassifierDecisionTree(CClassifier):
                  max_depth=None, min_samples_split=2, preprocess=None):
 
         # Calling CClassifier constructor
-        CClassifier.__init__(self, preprocess=preprocess)
+        CClassifierInterface.__init__(self, preprocess=preprocess)
 
         # Classifier Parameters
         self.criterion = criterion

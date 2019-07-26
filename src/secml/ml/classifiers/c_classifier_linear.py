@@ -9,7 +9,7 @@
 from abc import ABCMeta
 import six
 
-from secml.ml.classifiers import CClassifier
+from secml.ml.classifiers import CClassifierInterface
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.array import CArray
 from secml.data import CDataset
@@ -18,7 +18,7 @@ from secml.utils.mixed_utils import check_is_fitted
 
 
 @six.add_metaclass(ABCMeta)
-class CClassifierLinear(CClassifier):
+class CClassifierLinear(CClassifierInterface):
     """Abstract class that defines basic methods for linear classifiers.
 
     A linear classifier assign a label (class) to new patterns
@@ -43,7 +43,7 @@ class CClassifierLinear(CClassifier):
         self._b = None
 
         # Calling init of CClassifier
-        CClassifier.__init__(self, preprocess=preprocess)
+        CClassifierInterface.__init__(self, preprocess=preprocess)
 
     @property
     def w(self):
@@ -94,7 +94,7 @@ class CClassifierLinear(CClassifier):
 
         Returns
         -------
-        trained_cls : CClassifier
+        trained_cls : CClassifierInterface
             Instance of the classifier trained using input dataset.
 
         """

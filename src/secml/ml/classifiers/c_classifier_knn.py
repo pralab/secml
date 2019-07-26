@@ -9,11 +9,11 @@ from sklearn import neighbors
 import numpy as np
 
 from secml.array import CArray
-from secml.ml.classifiers import CClassifier
+from secml.ml.classifiers import CClassifierInterface
 from secml.utils.mixed_utils import check_is_fitted
 
 
-class CClassifierKNN(CClassifier):
+class CClassifierKNN(CClassifierInterface):
     """K Neighbors Classifiers.
 
     Parameters
@@ -36,7 +36,7 @@ class CClassifierKNN(CClassifier):
                  preprocess=None):
 
         # Calling constructor of CClassifier
-        CClassifier.__init__(self, preprocess=preprocess)
+        CClassifierInterface.__init__(self, preprocess=preprocess)
 
         self._n_neighbors = n_neighbors
         self._weights = weights

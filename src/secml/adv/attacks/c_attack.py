@@ -14,7 +14,7 @@ from secml.core import CCreator
 from secml.core.type_utils import is_int
 from secml.core.exceptions import NotFittedError
 from secml.array import CArray
-from secml.ml.classifiers import CClassifier
+from secml.ml.classifiers import CClassifierInterface
 from secml.data import CDataset
 
 
@@ -75,7 +75,7 @@ class CAttack(CCreator):
         self._issparse = False  # We work with dense data by default
 
         # set true/targeted classifier (and ndim)
-        if not isinstance(classifier, CClassifier):
+        if not isinstance(classifier, CClassifierInterface):
             raise ValueError("Classifier is not a CClassifier!")
         self._classifier = classifier
 
@@ -158,7 +158,7 @@ class CAttack(CCreator):
     @surrogate_classifier.setter
     def surrogate_classifier(self, clf):
         """Sets surrogate classifier"""
-        if not isinstance(clf, CClassifier):
+        if not isinstance(clf, CClassifierInterface):
             raise ValueError("Surrogate classifier is not a CClassifier!")
 
         # TODO: WE DO NOT CURRENTLY HAVE A RELIABLE WAY TO CHECK IF THE

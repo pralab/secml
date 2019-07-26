@@ -26,7 +26,7 @@ def _classify_one(tr_class_idx, clf, test_x, verbose):
     ----------
     tr_class_idx : int
         Index of the label against which the classifier should be trained.
-    clf : CClassifier
+    clf : CClassifierInterface
         Instance of the classifier.
     test_x : CArray
         Test data as 2D CArray.
@@ -43,7 +43,7 @@ def _classify_one(tr_class_idx, clf, test_x, verbose):
 
 
 @six.add_metaclass(ABCMeta)
-class CClassifier(CCreator):
+class CClassifierInterface(CCreator):
     """Abstract class that defines basic methods for Classifiers.
 
     A classifier assign a label (class) to new patterns using the
@@ -150,7 +150,7 @@ class CClassifier(CCreator):
 
         Returns
         -------
-        trained_cls : CClassifier
+        trained_cls : CClassifierInterface
             Instance of the classifier trained using input dataset.
 
         """
@@ -175,7 +175,7 @@ class CClassifier(CCreator):
 
         Returns
         -------
-        trained_cls : CClassifier
+        trained_cls : CClassifierInterface
             Instance of the classifier trained using input dataset.
 
         """

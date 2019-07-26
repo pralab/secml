@@ -9,17 +9,17 @@ from abc import ABCMeta, abstractmethod
 import six
 from six.moves import range
 
-from secml.ml.classifiers import CClassifier
+from secml.ml.classifiers import CClassifierInterface
 from secml.array import CArray
 
 
 @six.add_metaclass(ABCMeta)
-class CClassifierMulticlass(CClassifier):
+class CClassifierMulticlass(CClassifierInterface):
     """Generic interface for Multiclass Classifiers.
 
     Parameters
     ----------
-    classifier : CClassifier.__class__
+    classifier : CClassifierInterface.__class__
         Unbound (not initialized) CClassifier subclass.
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.
@@ -35,17 +35,17 @@ class CClassifierMulticlass(CClassifier):
         # Calling init of CClassifier
         super(CClassifierMulticlass, self).__init__(preprocess=preprocess)
         # Binary classifier to use
-        if not issubclass(classifier, CClassifier):
+        if not issubclass(classifier, CClassifierInterface):
             raise TypeError(
                 "Input classifier must be a subclass of CClassifier")
         # List of binary classifiers
         self._binary_classifiers = [classifier(**clf_params)]
 
-    @CClassifier.verbose.setter
+    @CClassifierInterface.verbose.setter
     def verbose(self, level):
         """Set verbosity level and propagate to trained classifiers."""
         # Calling superclass setter of verbose property
-        CClassifier.verbose.fset(self, level)
+        CClassifierInterface.verbose.fset(self, level)
         # Propagate verbosity level to trained binary classifiers
         for i in range(self.num_classifiers):
             self._binary_classifiers[i].verbose = level
