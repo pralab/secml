@@ -1,6 +1,7 @@
 from secml.testing import CUnitTest
 
 from secml.data.loader import CDataLoaderImgClients
+from secml.array import CArray
 from secml.utils import fm
 
 
@@ -54,6 +55,10 @@ class TestCDataLoaderImgClients(CUnitTest):
                          fm.split(ds.X[0, :].item())[1].replace('.jpeg', ''))
         self.assertEqual(ds.Y[1].item(),
                          fm.split(ds.X[1, :].item())[1].replace('.jpeg', ''))
+
+        # Checking behavior of `get_labels_ovr`
+        ovr = ds.get_labels_ovr(pos_label='tiger')  # Y : ['coyote', 'tiger']
+        self.assert_array_equal(ovr, CArray([0, 1]))
 
 
 if __name__ == '__main__':

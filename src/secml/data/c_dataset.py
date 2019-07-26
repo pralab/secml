@@ -10,6 +10,7 @@ from six.moves import range
 from secml.core import CCreator
 from secml.array import CArray
 from secml.data import CDatasetHeader
+from secml.data.data_utils import label_binarize_onehot
 
 
 class CDataset(CCreator):
@@ -357,48 +358,55 @@ class CDataset(CCreator):
         """
         return self.__class__(self.X.todense(), self.Y, header=self.header)
 
-    def get_labels_asbinary(self, pos_class=None):
-        """Return binarized dataset labels.
-
-        Binarizes dataset's labels in [0, 1] range.
+    def get_labels_ovr(self, pos_label):
+        """Return dataset labels in one-vs-rest encoding.
 
         Parameters
         ----------
-        pos_class : scalar or str, optional
-            Label of the class to consider as positive (label 1).
+        pos_label : scalar or str
+            Label of the class to consider as positive.
 
         Returns
         -------
-        binary_labels : CArray
-            If pos_class has been defined, flat array with 1 when the
-            class label is equal to input positive class's label, else 0.
-            If pos_class is None, returns a (num_samples, num_classes) array
-            with the dataset labels extended using a one-vs-all scheme.
+        CArray
+            Flat array with 1 when the class label is equal
+            to input positive class's label, else 0.
 
         Examples
         --------
         >>> ds = CDataset([[11,22],[33,44],[55,66],[77,88]], [1,0,2,1])
-        >>> print(ds.get_labels_asbinary(2))
+        >>> print(ds.get_labels_ovr(2))
         CArray([0 0 1 0])
-        >>> print(ds.get_labels_asbinary(1))
+        >>> print(ds.get_labels_ovr(1))
         CArray([1 0 0 1])
-        >>> print(ds.get_labels_asbinary())
+
+        """
+        # Assigning 1 for each label of positive class and 0 to all others
+        return CArray([1 if e == pos_label else 0 for e in self.Y])
+
+    def get_labels_onehot(self):
+        """Return dataset labels in one-hot encoding.
+
+        Returns
+        -------
+        binary_labels : CArray
+            A (num_samples, num_classes) array with the dataset labels
+            one-hot encoded.
+
+        Examples
+        --------
+        >>> ds = CDataset([[11,22],[33,44],[55,66],[77,88]], [1,0,2,1])
+        >>> print(ds.get_labels_ovr())
         CArray([[0 1 0]
          [1 0 0]
          [0 0 1]
          [0 1 0]])
 
         """
-        if pos_class is not None:
-            # Assigning 1 for each label of positive class and 0 to all others
-            return CArray([1 if e == pos_class else 0 for e in self.Y])
-        else:  # Return a (num_samples, num_classes) array with OVA labels
-            new_labels = CArray.zeros((self.num_samples, self.num_classes),
-                                      dtype=self.Y.dtype)
-            # We use list of list indexing (find-like)
-            new_labels[[list(range(self.num_samples)),
-                        CArray(self.Y).tolist()]] = 1
-            return new_labels
+        # Our convention is that the labels are from 0 ... N (integers only)
+        # Do not use `self.classes` directly as Y can contain only a subset
+        # of the known classes
+        return label_binarize_onehot(self.Y)
 
     def get_bounds(self, offset=0.0):
         """Return dataset boundaries plus an offset.

@@ -200,6 +200,29 @@ class TestDataset(CUnitTest):
         self.assertEqual(ds_params['age'], 34)
         self.assert_array_equal(ds_params['colors'], CArray([1, 2, 3]))
 
+    def test_labels_binarize(self):
+        """Unittests for `.get_labels_ovr` and `.get_labels_onehot`."""
+        self.logger.info("Testing `CDataset.get_labels_onehot() method")
+        onehot = self.dataset.get_labels_onehot()
+
+        self.assertEqual(
+            (self.dataset.num_labels, self.dataset.Y.max() + 1), onehot.shape)
+        self.assertFalse((onehot != 0).logical_and(onehot != 1).any())
+        self.assertIsSubDtype(onehot.dtype, int)
+
+        self.logger.info("Testing `CDataset.get_labels_ovr() method")
+        for y_pos in (0, 1, 2):
+            ovr = self.dataset.get_labels_ovr(pos_label=y_pos)
+            self.logger.info("{:}".format(ovr))
+
+            self.assertIsSubDtype(onehot.dtype, int)
+
+            if y_pos not in self.dataset.classes:
+                self.assertFalse((ovr != 0).any())
+            else:
+                self.assertTrue((ovr == 1).any())
+                self.assertFalse((ovr != 0).logical_and(ovr != 1).any())
+
 
 if __name__ == "__main__":
     CUnitTest.main()

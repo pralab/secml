@@ -1,6 +1,7 @@
 from secml.testing import CUnitTest
 
 from secml.data.loader import CDataLoaderImgFolders
+from secml.array import CArray
 from secml.utils import fm
 
 
@@ -64,6 +65,10 @@ class TestCDataLoaderImgFolders(CUnitTest):
 
         # TODO: USE 'U' AFTER TRANSITION TO PYTHON 3
         self.assertIn(ds.X.dtype.char, ('S', 'U'))
+
+        # Checking behavior of `get_labels_ovr`
+        ovr = ds.get_labels_ovr(pos_label='tiger')  # Y : ['coyote', 'tiger']
+        self.assert_array_equal(ovr, CArray([0, 1]))
 
 
 if __name__ == '__main__':
