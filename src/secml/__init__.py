@@ -103,6 +103,14 @@ def global_filterwarnings():
                 "matrices or deal with linear algebra*"
     )
 
+    # Warnings related to data-type size changed. # TODO: fixed in numpy 1.16.1
+    warnings.filterwarnings(
+        "ignore", category=RuntimeWarning, message="numpy.dtype size changed*"
+    )
+    warnings.filterwarnings(
+        "ignore", category=RuntimeWarning, message="numpy.ufunc size changed*"
+    )
+
     # TODO: REMOVE AFTER SWITCHING TO PYTHON 3
     warnings.filterwarnings(
         "ignore", category=DeprecationWarning,
