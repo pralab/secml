@@ -5,7 +5,7 @@ from secml.array import CArray
 
 
 class TestCPlotClassifier(CUnitTest):
-    """Unittests for CPlotClassifier."""
+    """Unittests for CPlotMetric."""
 
     def test_confusion_matrix(self):
         """Test for `CPlot.plot_confusion_matrix()` method."""
