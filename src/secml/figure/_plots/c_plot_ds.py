@@ -37,7 +37,8 @@ class CPlotDataset(CPlot):
             fig_legend.set_visible(True)
         self.grid(grid_on=True)
 
-    def plot_ds(self, dataset, colors=None, markers='o', *args, **kwargs):
+    def plot_ds(self, dataset, colors=None, markers='o', cmap='jet',
+                *args, **kwargs):
         """Plot patterns of each class with a different color/marker.
 
         Parameters
@@ -67,7 +68,7 @@ class CPlotDataset(CPlot):
                 colors = ['b', 'r']
             else:  # Next returns an ndarray classes.size X 4 (RGB + Alpha)
                 colors = cm.ScalarMappable(
-                    cmap='jet').to_rgba(range(classes.size))
+                    cmap=cmap).to_rgba(range(classes.size))
         else:
             if len(colors) != classes.size:
                 raise ValueError(
