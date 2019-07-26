@@ -1,3 +1,4 @@
+from .c_classifier import CClassifier
 from .c_classifier_interface import CClassifierInterface
 from .c_classifier_linear import CClassifierLinear
 from .c_classifier_svm import CClassifierSVM

@@ -10,7 +10,7 @@ from abc import ABCMeta, abstractmethod
 import six
 from six.moves import range
 
-from secml.ml.classifiers import CClassifier
+from secml.core import CCreator
 from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.features import CPreProcess
@@ -43,7 +43,7 @@ def _classify_one(tr_class_idx, clf, test_x, verbose):
 
 
 @six.add_metaclass(ABCMeta)
-class CClassifierInterface(CClassifier):
+class CClassifier(CCreator):
     """Abstract class that defines basic methods for Classifiers.
 
     A classifier assign a label (class) to new patterns using the
