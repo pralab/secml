@@ -12,6 +12,7 @@ from secml.figure._plots import CPlot
 from secml.figure._plots.plot_utils import create_points_grid
 from secml.array import CArray
 from secml.core.constants import inf
+from secml.core.type_utils import is_list
 
 
 class CPlotFunction(CPlot):
@@ -36,69 +37,69 @@ class CPlotFunction(CPlot):
             fig_legend.set_visible(True)
         self.grid(grid_on=True)
 
-    def plot_fobj(self, func, multipoint=False,
-                  plot_background=True, plot_levels=True,
-                  levels=None, levels_color='k', levels_style=None,
-                  levels_linewidth=1.0, n_colors=50, cmap='jet',
-                  alpha=1.0, alpha_levels=1.0, vmin=None, vmax=None,
-                  colorbar=True, n_grid_points=30,
-                  grid_limits=None, func_args=(), **func_kwargs):
+    def plot_fun(self, func, multipoint=False,
+                 plot_background=True, plot_levels=True,
+                 levels=None, levels_color='k', levels_style=None,
+                 levels_linewidth=1.0, n_colors=50, cmap='jet',
+                 alpha=1.0, alpha_levels=1.0, vmin=None, vmax=None,
+                 colorbar=True, n_grid_points=30,
+                 grid_limits=None, func_args=(), **func_kwargs):
         """Plot a function (used for decision functions or boundaries).
 
         Parameters
         ----------
         func : unbound function
             Function to be plotted.
-        multipoint : bool
+        multipoint : bool, optional
             If True, all grid points will be passed to the function.
             If False (default), function is iterated over each
             point of the grid.
-        plot_background : bool
+        plot_background : bool, optional
             Specifies whether to plot the value of func at each point
             in the background using a colorbar.
-        plot_levels : bool
+        plot_levels : bool, optional
             Specify if function levels should be plotted (default True).
-        levels : list
+        levels : list, optional
             List of levels to be plotted.
             If None, 0 (zero) level will be plotted.
-        levels_color : str or tuple or None (default 'k')
+        levels_color : str or tuple or None, optional
             If None, the colormap specified by cmap will be used.
             If a string, like 'k', all levels will be plotted in this color.
             If a tuple of colors (string, float, rgb, etc),
             different levels will be plotted in different colors
-            in the order specified.
-        levels_style: [ None | 'solid' | 'dashed' | 'dashdot' | 'dotted' ]
+            in the order specified. Default 'k'.
+        levels_style : [ None | 'solid' | 'dashed' | 'dashdot' | 'dotted' ]
             If levels_style is None, the default is 'solid'.
             levels_style can also be an iterable of the above strings
             specifying a set of levels_style to be used. If this iterable
             is shorter than the number of contour levels it will be
             repeated as necessary.
-        levels_linewidth : float or list of floats
+        levels_linewidth : float or list of floats, optional
             The line width of the contour lines. Default 1.0.
-        n_colors : int
+        n_colors : int, optional
             Number of color levels of background plot. Default 50.
-        cmap : str
-            Colormap to use (default 'jet').
-        alpha : float
+        cmap : str or list or `matplotlib.pyplot.cm`, optional
+            Colormap to use (default 'jet'). Could be a list of colors.
+        alpha : float, optional
             The alpha blending value of the background. Default 1.0.
-        alpha_levels : float
+        alpha_levels : float, optional
             The alpha blending value of the levels. Default 1.0.
-        vmin, vmax : float or None
+        vmin, vmax : float or None, optional
             Limits of the colors used for function plotting.
             If None, colors are determined by the colormap.
-        colorbar : bool
+        colorbar : bool, optional
             True if colorbar should be displayed.
-        n_grid_points : int
+        n_grid_points : int, optional
             Number of grid points.
-        grid_limits : list of tuple
+        grid_limits : list of tuple, optional
             List with a tuple of min/max limits for each axis.
             If None, [(0, 1), (0, 1)] limits will be used.
-        func_args, func_kwargs : any
+        func_args, func_kwargs
             Other arguments or keyword arguments to pass to `func`.
 
         Examples
         --------
-        .. plot:: pyplots/plot_fobj.py
+        .. plot:: pyplots/plot_fun.py
             :include-source:
 
         """
@@ -124,6 +125,10 @@ class CPlotFunction(CPlot):
         clip_max = inf if vmax is None else vmax
         grid_points_val_reshaped = grid_points_val_reshaped.clip(
             clip_min, clip_max)
+
+        if is_list(cmap):  # Convert list of colors to colormap
+            from matplotlib.colors import ListedColormap
+            cmap = ListedColormap(cmap)
 
         ch = None
         if plot_background is True:

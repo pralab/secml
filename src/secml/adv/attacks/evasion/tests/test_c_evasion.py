@@ -177,7 +177,7 @@ class CEvasionTestCases(object):
         def _plot_dataset_clf_and_box(self, evas, fig):
             """Plot dataset and box constraints"""
             fig.sp.plot_ds(self.dataset)
-            fig.sp.plot_fobj(
+            fig.sp.plot_fun(
                 func=evas.classifier.decision_function,
                 grid_limits=self.grid_limits, colorbar=False,
                 levels=[0], y=1)
@@ -187,20 +187,20 @@ class CEvasionTestCases(object):
             if self.ub == "x0":
                 self.ub = self.x0
             box = CConstraintBox(lb=self.lb, ub=self.ub)
-            fig.sp.plot_fobj(func=box.constraint,
-                             plot_background=False,
-                             n_grid_points=20,
-                             grid_limits=self.grid_limits,
-                             levels=[0], colorbar=False)
+            fig.sp.plot_fun(func=box.constraint,
+                            plot_background=False,
+                            n_grid_points=20,
+                            grid_limits=self.grid_limits,
+                            levels=[0], colorbar=False)
 
         def _plot_grid_and_path(self, fig, x, x_start):
 
             # plot distance constraint
-            fig.sp.plot_fobj(func=self._distance,
-                             plot_background=False,
-                             n_grid_points=20,
-                             grid_limits=self.grid_limits,
-                             levels=[0], colorbar=False)
+            fig.sp.plot_fun(func=self._distance,
+                            plot_background=False,
+                            n_grid_points=20,
+                            grid_limits=self.grid_limits,
+                            levels=[0], colorbar=False)
             # plot optimization trace
             fig.sp.plot_path(self.x_evas)
 

@@ -73,8 +73,8 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
         # Plot dataset points
         fig.sp.plot_ds(self.dataset)
         # Plot objective function
-        fig.sp.plot_fobj(self.mcs.decision_function,
-                         grid_limits=self.dataset.get_bounds())
+        fig.sp.plot_fun(self.mcs.decision_function,
+                        grid_limits=self.dataset.get_bounds())
         fig.show()
 
     def test_fun(self):

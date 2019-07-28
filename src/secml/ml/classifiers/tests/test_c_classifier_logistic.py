@@ -31,7 +31,7 @@ class TestCClassifierLogistic(CClassifierTestCases):
 
         self.log.fit(self.dataset)
 
-        fig.sp.plot_fobj(self.log.decision_function, y=1)
+        fig.sp.plot_fun(self.log.decision_function, y=1)
         fig.title('Logistic Classifier')
 
         self.logger.info(self.log.predict(self.dataset.X))

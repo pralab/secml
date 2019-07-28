@@ -197,11 +197,11 @@ class CConstraintTestCases(CUnitTest):
 
         fig = CFigure(height=6, width=6)
 
-        fig.sp.plot_fobj(func=c.constraint,
-                         grid_limits=grid_limits,
-                         n_grid_points=40,
-                         levels=[0],
-                         levels_linewidth=1.5)
+        fig.sp.plot_fun(func=c.constraint,
+                        grid_limits=grid_limits,
+                        n_grid_points=40,
+                        levels=[0],
+                        levels_linewidth=1.5)
 
         colors = ['g', 'r', 'c', 'm', 'y', 'k', 'w']
         for p_i, p in enumerate(points):
