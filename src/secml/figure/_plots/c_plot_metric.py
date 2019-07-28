@@ -114,8 +114,8 @@ class CPlotMetric(CPlot):
             self.xticklabels(self._xticklabels)
 
     # TODO: REMOVE STYLE
-    def plot_mean(self, roc, label=None, invert_tpr=False,
-                  style=None, plot_std=False, logx=True):
+    def plot_roc_mean(self, roc, label=None, invert_tpr=False,
+                      style=None, plot_std=False, logx=True):
         """Plot the mean of ROC curves.
 
         Curves will be plotted inside the active figure or
@@ -184,7 +184,7 @@ class CPlotMetric(CPlot):
             self.xticks(self._xticks)
             self.xticklabels(self._xticklabels)
 
-    def plot_repetitions(self, roc, label=None, invert_tpr=False, logx=True):
+    def plot_roc_reps(self, roc, label=None, invert_tpr=False, logx=True):
         """Plot all input ROC curves.
 
         Curves will be plotted inside the active figure or
