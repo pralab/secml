@@ -250,14 +250,14 @@ class CEvasionRejectTestCases(object):
             # plot distance constraint
             # for d_idx, d in enumerate([dmax]):
             for d in range(1, dmax + 1):
-                fig.sp.plot_fobj(func=self._rescaled_distance,
-                                 multipoint=True,
-                                 plot_background=False,
-                                 n_grid_points=20, levels_color='gray',
-                                 grid_limits=ds_bounds,
-                                 levels=[0], colorbar=False,
-                                 levels_style=':',
-                                 alpha_levels=.4, c=x0, r=d)
+                fig.sp.plot_fun(func=self._rescaled_distance,
+                                multipoint=True,
+                                plot_background=False,
+                                n_grid_points=20, levels_color='gray',
+                                grid_limits=ds_bounds,
+                                levels=[0], colorbar=False,
+                                levels_style=':',
+                                alpha_levels=.4, c=x0, r=d)
 
             fig.sp.grid(linestyle='--', alpha=.5, zorder=0)
 
@@ -266,11 +266,11 @@ class CEvasionRejectTestCases(object):
 
             fig = self._plot_decision_function(fig)
 
-            fig.sp.plot_fobj(lambda x: eva._objective_function(x),
-                             multipoint=True,
-                             grid_limits=ds_bounds,
-                             colorbar=False, n_grid_points=20,
-                             plot_levels=False)
+            fig.sp.plot_fun(lambda x: eva._objective_function(x),
+                            multipoint=True,
+                            grid_limits=ds_bounds,
+                            colorbar=False, n_grid_points=20,
+                            plot_levels=False)
 
             fig.sp.plot_fgrads(eva._objective_function_gradient,
                                grid_limits=ds_bounds, n_grid_points=20,
@@ -283,14 +283,14 @@ class CEvasionRejectTestCases(object):
 
             # plot distance constraint
             for d in range(1, dmax + 1):
-                fig.sp.plot_fobj(func=self._rescaled_distance,
-                                 multipoint=True,
-                                 plot_background=False,
-                                 n_grid_points=20, levels_color='w',
-                                 grid_limits=ds_bounds,
-                                 levels=[0], colorbar=False,
-                                 levels_style=':',
-                                 alpha_levels=.5, c=x0, r=d)
+                fig.sp.plot_fun(func=self._rescaled_distance,
+                                multipoint=True,
+                                plot_background=False,
+                                n_grid_points=20, levels_color='w',
+                                grid_limits=ds_bounds,
+                                levels=[0], colorbar=False,
+                                levels_style=':',
+                                alpha_levels=.5, c=x0, r=d)
 
             fig.sp.grid(linestyle='--', alpha=.5, zorder=0)
 
@@ -378,7 +378,7 @@ class CEvasionRejectTestCases(object):
                                label='c {:}'.format(c))
 
             # Plotting multiclass decision function
-            fig.sp.plot_fobj(
+            fig.sp.plot_fun(
                 lambda x: self.multiclass.predict(x, n_jobs=_NoValue),
                 multipoint=True, cmap='Set2',
                 grid_limits=self.ds.get_bounds(offset=5),

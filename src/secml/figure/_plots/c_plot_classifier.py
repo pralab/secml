@@ -52,15 +52,15 @@ class CPlotClassifier(CPlotFunction):
         if not isinstance(clf, CClassifier):
             raise TypeError("'clf' must be an instance of `CClassifier`.")
 
-        self.plot_fobj(func=clf.predict,
-                       multipoint=True,
-                       colorbar=False,
-                       n_colors=clf.n_classes,
-                       cmap=cmap,
-                       levels=CArray.arange(0.5, clf.n_classes).tolist(),
-                       plot_background=plot_background,
-                       grid_limits=grid_limits,
-                       n_grid_points=n_grid_points,
-                       alpha=0.5)
+        self.plot_fun(func=clf.predict,
+                      multipoint=True,
+                      colorbar=False,
+                      n_colors=clf.n_classes,
+                      cmap=cmap,
+                      levels=CArray.arange(0.5, clf.n_classes).tolist(),
+                      plot_background=plot_background,
+                      grid_limits=grid_limits,
+                      n_grid_points=n_grid_points,
+                      alpha=0.5)
 
         self.apply_params_clf()

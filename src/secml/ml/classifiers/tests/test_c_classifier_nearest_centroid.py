@@ -29,7 +29,7 @@ class TestCClassifierNearestCentroid(CClassifierTestCases):
 
         self.nc.fit(self.dataset)
 
-        fig.sp.plot_fobj(self.nc.decision_function, y=1)
+        fig.sp.plot_fun(self.nc.decision_function, y=1)
         fig.title('nearest centroid  Classifier')
 
         self.logger.info(self.nc.predict(self.dataset.X))
