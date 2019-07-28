@@ -12,6 +12,7 @@ from secml.figure._plots import CPlot
 from secml.figure._plots.plot_utils import create_points_grid
 from secml.array import CArray
 from secml.core.constants import inf
+from secml.core.type_utils import is_list
 
 
 class CPlotFunction(CPlot):
@@ -77,8 +78,8 @@ class CPlotFunction(CPlot):
             The line width of the contour lines. Default 1.0.
         n_colors : int
             Number of color levels of background plot. Default 50.
-        cmap : str
-            Colormap to use (default 'jet').
+        cmap : str or list or `matplotlib.pyplot.cm`
+            Colormap to use (default 'jet'). Could be a list of colors.
         alpha : float
             The alpha blending value of the background. Default 1.0.
         alpha_levels : float
@@ -124,6 +125,10 @@ class CPlotFunction(CPlot):
         clip_max = inf if vmax is None else vmax
         grid_points_val_reshaped = grid_points_val_reshaped.clip(
             clip_min, clip_max)
+
+        if is_list(cmap):  # Convert list of colors to colormap
+            from matplotlib.colors import ListedColormap
+            cmap = ListedColormap(cmap)
 
         ch = None
         if plot_background is True:
