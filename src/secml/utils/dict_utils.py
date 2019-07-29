@@ -5,7 +5,10 @@
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-from collections import MutableMapping
+try:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+    from collections.abc import MutableMapping
+except ImportError:
+    from collections import MutableMapping
 
 from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 
