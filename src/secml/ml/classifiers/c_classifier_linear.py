@@ -126,12 +126,11 @@ class CClassifierLinear(CClassifierInterface):
             Dense flat array of shape (n_patterns,).
 
         """
-        if y != 1:
-            raise ValueError(
-                "decision function is always computed wrt positive class.")
         x = x.atleast_2d()  # Ensuring input is 2-D
         # Computing: `x * w^T`
-        return CArray(x.dot(self.w.T)).todense().ravel() + self.b
+        score = CArray(x.dot(self.w.T)).todense().ravel() + self.b
+        sign = convert_binary_labels(y)  # Sign depends on input label (0/1)
+        return sign * score
 
     def decision_function(self, x, y=1):
         """Computes the decision function for each pattern in x.
@@ -166,9 +165,7 @@ class CClassifierLinear(CClassifierInterface):
         # Transform data if a preprocess is defined
         x = self._preprocess_data(x)
 
-        sign = convert_binary_labels(y)  # Sign depends on input label (0/1)
-
-        return sign * self._decision_function(x)
+        return self._decision_function(x, y)
 
     def predict(self, x, return_decision_function=False, n_jobs=_NoValue):
         """Perform classification of each pattern in x.
@@ -211,4 +208,3 @@ class CClassifierLinear(CClassifierInterface):
         labels = scores.argmax(axis=1).ravel()
 
         return (labels, scores) if return_decision_function is True else labels
-

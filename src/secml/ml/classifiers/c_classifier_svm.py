@@ -422,17 +422,12 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
 
         """
         if self.is_kernel_linear():  # Scores are given by the linear model
-            return CClassifierLinear._decision_function(
-                self, x, y=y)
+            return CClassifierLinear._decision_function(self, x, y=y)
 
         # Non-linear SVM
-
-        if y != 1:
-            raise ValueError(
-                "decision function is always computed wrt positive class.")
-
         x = x.atleast_2d()  # Ensuring input is 2-D
 
         m = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
-        return CArray(m).todense().ravel() + self.b
-
+        score = CArray(m).todense().ravel() + self.b
+        sign = convert_binary_labels(y)  # adjust sign based on y
+        return sign * score

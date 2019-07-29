@@ -4,6 +4,7 @@ from secml.data import CDataset
 from secml.ml.features import CPreProcess
 from secml.optim.function import CFunction
 from secml.core.constants import eps
+from secml.array import CArray
 
 
 class CClassifierTestCases(CUnitTest):
@@ -36,7 +37,6 @@ class CClassifierTestCases(CUnitTest):
             classes = clf.classes
 
         for c in classes:
-
             grad_kwargs['y'] = c  # Appending class to test_f_x
 
             # Analytical gradient
@@ -195,7 +195,6 @@ class CClassifierTestCases(CUnitTest):
             classes = clf.classes
 
         for c in classes:
-
             self.logger.info(
                 "Testing grad wrt. class {:}".format(c))
 
@@ -268,6 +267,90 @@ class CClassifierTestCases(CUnitTest):
         self.assertTrue(grad.issparse)
         grad = clf.grad_f_x(x, y=0)
         self.assertTrue(grad.issparse)
+
+    def _test_fun(self, clf, ds):
+        """Test for decision_function() and predict() methods."""
+        self.logger.info(
+            "Test for decision_function() and predict() methods.")
+
+        def _check_df_scores(s, n_samples):
+            self.assertEqual(type(s), CArray)
+            self.assertTrue(s.isdense)
+            self.assertEqual(1, s.ndim)
+            self.assertEqual((n_samples,), s.shape)
+            self.assertEqual(float, s.dtype)
+
+        def _check_classify_scores(l, s, n_samples, n_classes):
+            self.assertEqual(type(l), CArray)
+            self.assertEqual(type(s), CArray)
+            self.assertTrue(l.isdense)
+            self.assertTrue(s.isdense)
+            self.assertEqual(1, l.ndim)
+            self.assertEqual(2, s.ndim)
+            self.assertEqual((n_samples,), l.shape)
+            self.assertEqual((n_samples, n_classes), s.shape)
+            self.assertEqual(int, l.dtype)
+            self.assertEqual(float, s.dtype)
+
+        clf.fit(ds)
+
+        x = x_norm = ds.X
+        p = p_norm = ds.X[0, :].ravel()
+
+        # Transform data if preprocess is defined
+        if clf.preprocess is not None:
+            x_norm = clf.preprocess.transform(x)
+            p_norm = clf.preprocess.transform(p)
+
+        # Testing decision_function on multiple points
+        df, df_priv = [], []
+        for y in range(ds.num_classes):
+            df.append(clf.decision_function(x, y=y))
+            df_priv.append(clf._decision_function(x_norm, y=y))
+            self.logger.info(
+                "decision_function(x, y={:}): {:}".format(y, df[y]))
+            self.logger.info(
+                "_decision_function(x_norm, y={:}): {:}".format(y, df_priv[y]))
+            _check_df_scores(df_priv[y], ds.num_samples)
+            _check_df_scores(df[y], ds.num_samples)
+            self.assertFalse((df[y] != df_priv[y]).any())
+
+        # Testing predict on multiple points
+        labels, scores = clf.predict(
+            x, return_decision_function=True)
+        self.logger.info(
+            "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
+        _check_classify_scores(
+            labels, scores, ds.num_samples, clf.n_classes)
+
+        # Comparing output of decision_function and predict
+        for y in range(ds.num_classes):
+            self.assertFalse((df[y] != scores[:, y].ravel()).any())
+
+        # Testing decision_function on single point
+        df, df_priv = [], []
+        for y in range(ds.num_classes):
+            df.append(clf.decision_function(p, y=y))
+            df_priv.append(clf._decision_function(p_norm, y=y))
+            self.logger.info(
+                "decision_function(p, y={:}): {:}".format(y, df[y]))
+            _check_df_scores(df[y], 1)
+            self.logger.info(
+                "_decision_function(p_norm, y={:}): {:}".format(y, df_priv[y]))
+            _check_df_scores(df_priv[y], 1)
+            self.assertFalse((df[y] != df_priv[y]).any())
+
+        self.logger.info("Testing predict on single point")
+
+        labels, scores = clf.predict(
+            p, return_decision_function=True)
+        self.logger.info(
+            "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
+        _check_classify_scores(labels, scores, 1, clf.n_classes)
+
+        # Comparing output of decision_function and predict
+        for y in range(ds.num_classes):
+            self.assertFalse((df[y] != scores[:, y].ravel()).any())
 
 
 if __name__ == '__main__':

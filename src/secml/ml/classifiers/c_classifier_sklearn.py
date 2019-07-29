@@ -3,7 +3,6 @@ from secml.array import CArray
 
 
 class CClassifierSkLearn(CClassifier):
-
     __class_type = 'sklearn-clf'
 
     def __init__(self, sklearn_model, preprocess=None):
@@ -22,6 +21,7 @@ class CClassifierSkLearn(CClassifier):
         else:
             scores = self._sklearn_model.predict_proba(x.get_data())
             probs = True
+
         scores = CArray(scores)
 
         # two-class classifiers outputting only scores for class 1
@@ -35,8 +35,10 @@ class CClassifierSkLearn(CClassifier):
             raise ValueError(
                 "Number of columns is not equal to number of classes!")
 
+        scores.atleast_2d()
+
         if y is not None:
-            return scores[y]
+            return scores[:, y]
         # else
         return scores
 

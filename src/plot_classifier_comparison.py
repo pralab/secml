@@ -62,6 +62,8 @@ for i in range(len(classifiers)):
             data, params, splitter='kfold', metric='accuracy')
         print("  - param. est.: " + str(best_params))
         clf.set_params(best_params)
+        print(clf._sklearn_model.get_params())
+        print(clf.get_params())
 
     clf.fit(data)
     error = (clf.predict(data.X) != data.Y).mean()
