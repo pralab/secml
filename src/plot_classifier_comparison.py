@@ -1,9 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.datasets import make_moons, make_circles, make_classification
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
@@ -16,7 +10,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 
 from secml.array import CArray
-from secml.data.loader import CDLRandomMoons, CDLRandomBlobs
+from secml.data.loader import CDLRandomBlobs
 from secml.ml.features.normalization import CNormalizerMinMax
 from secml.figure import CFigure
 
@@ -24,29 +18,32 @@ from matplotlib.colors import ListedColormap
 
 from secml.ml.classifiers import CClassifierSkLearn
 
-
-names = ["Nearest Neighbors", "Linear SVM", "RBF SVM", "Gaussian Process",
+names = ["Nearest Neighbors", "Linear SVM", "RBF SVM",
          "Decision Tree", "Random Forest", "Neural Net", "AdaBoost",
-         "Naive Bayes", "QDA"]
+         # These clf below only work on dense data!
+         # "Gaussian Process", "Naive Bayes", "QDA"
+         ]
 
 classifiers = [
     KNeighborsClassifier(3),
     SVC(kernel="linear", C=0.025, decision_function_shape='ovr'),
-    SVC(gamma=2, C=1),
-    GaussianProcessClassifier(1.0 * RBF(1.0)),
+    SVC(kernel="rbf", gamma=2, C=1),
     DecisionTreeClassifier(max_depth=5),
     RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
     MLPClassifier(alpha=1, max_iter=1000),
     AdaBoostClassifier(),
-    GaussianNB(),
-    QuadraticDiscriminantAnalysis()]
+    # These clf below only work on dense data!
+    # GaussianProcessClassifier(1.0 * RBF(1.0)),
+    # GaussianNB(),
+    # QuadraticDiscriminantAnalysis()
+    ]
 
 n_classes = 4
 
 # data = CDLRandomMoons(noise=0.1).load()
 data = CDLRandomBlobs(random_state=3, n_features=2, centers=n_classes).load()
 scaler = CNormalizerMinMax()
-data.X = scaler.fit_transform(data.X, data.Y)
+data.X = scaler.fit_transform(data.X, data.Y).tosparse()
 
 colors = ('red', 'blue', 'lightgreen', 'black', 'gray', 'cyan')
 cmap = ListedColormap(colors[:n_classes])
@@ -56,6 +53,16 @@ for i in range(len(classifiers)):
     print("Classifier: " + names[i])
     sklearn_model = classifiers[i]
     clf = CClassifierSkLearn(sklearn_model)
+
+    if names[i] == 'Linear SVM' or names[i] == 'RBF SVM':
+        # try setting C (it works!)
+        params = {'C': [1, 10, 100],
+                  'gamma': list(10.0 ** CArray.arange(-4, 4))}
+        best_params = clf.estimate_parameters(
+            data, params, splitter='kfold', metric='accuracy')
+        print("  - param. est.: " + str(best_params))
+        clf.set_params(best_params)
+
     clf.fit(data)
     error = (clf.predict(data.X) != data.Y).mean()
     print("  - training error: " + str(round(error * 100, 1)) + "%")

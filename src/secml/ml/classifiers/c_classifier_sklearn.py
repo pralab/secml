@@ -11,16 +11,16 @@ class CClassifierSkLearn(CClassifier):
         self._sklearn_model = sklearn_model
 
     def _fit(self, dataset):
-        # TODO: handle sparse data...
-        self._sklearn_model.fit(dataset.X.tondarray(), dataset.Y.tondarray())
+        """Fit sklearn model."""
+        self._sklearn_model.fit(dataset.X.get_data(), dataset.Y.get_data())
 
     def decision_function(self, x, y=None):
         """ TODO docstrings"""
         if hasattr(self._sklearn_model, "decision_function"):
-            scores = self._sklearn_model.decision_function(x.tondarray())
+            scores = self._sklearn_model.decision_function(x.get_data())
             probs = False
         else:
-            scores = self._sklearn_model.predict_proba(x.tondarray())
+            scores = self._sklearn_model.predict_proba(x.get_data())
             probs = True
         scores = CArray(scores)
 
