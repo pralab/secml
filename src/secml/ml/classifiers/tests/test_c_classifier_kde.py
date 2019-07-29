@@ -48,25 +48,6 @@ class TestCClassifierKDE(CClassifierTestCases):
         self.logger.info(
             "Test for decision_function() and predict() methods.")
 
-        def _check_df_scores(s, n_samples):
-            self.assertEqual(type(s), CArray)
-            self.assertTrue(s.isdense)
-            self.assertEqual(1, s.ndim)
-            self.assertEqual((n_samples,), s.shape)
-            self.assertEqual(float, s.dtype)
-
-        def _check_classify_scores(l, s, n_samples, n_classes):
-            self.assertEqual(type(l), CArray)
-            self.assertEqual(type(s), CArray)
-            self.assertTrue(l.isdense)
-            self.assertTrue(s.isdense)
-            self.assertEqual(1, l.ndim)
-            self.assertEqual(2, s.ndim)
-            self.assertEqual((n_samples,), l.shape)
-            self.assertEqual((n_samples, n_classes), s.shape)
-            self.assertEqual(int, l.dtype)
-            self.assertEqual(float, s.dtype)
-
         self.kde.fit(self.dataset)
 
         x = x_norm = self.dataset.X
@@ -82,100 +63,114 @@ class TestCClassifierKDE(CClassifierTestCases):
         df_scores_neg = self.kde.decision_function(x, y=0)
         self.logger.info(
             "decision_function(p_norm, y=0):\n{:}".format(df_scores_neg))
-        _check_df_scores(df_scores_neg, self.dataset.num_samples)
+        self._check_df_scores(df_scores_neg, self.dataset.num_samples)
 
         df_scores_pos = self.kde.decision_function(x, y=1)
         self.logger.info(
             "decision_function(x, y=1):\n{:}".format(df_scores_pos))
-        _check_df_scores(df_scores_pos, self.dataset.num_samples)
+        self._check_df_scores(df_scores_pos, self.dataset.num_samples)
 
-        self.assertFalse(((1 - df_scores_neg) != df_scores_pos).any())
+        self.assert_array_equal(1 - df_scores_neg, df_scores_pos)
 
         # Testing _decision_function on multiple points
 
         ds_priv_scores_neg = self.kde._decision_function(x_norm, y=0)
         self.logger.info("_decision_function(x_norm, y=0):\n"
                          "{:}".format(ds_priv_scores_neg))
-        _check_df_scores(ds_priv_scores_neg, self.dataset.num_samples)
+        self._check_df_scores(ds_priv_scores_neg, self.dataset.num_samples)
 
         ds_priv_scores_pos = self.kde._decision_function(x_norm, y=1)
         self.logger.info("_decision_function(x_norm, y=1):\n"
                          "{:}".format(ds_priv_scores_pos))
-        _check_df_scores(ds_priv_scores_pos, self.dataset.num_samples)
+        self._check_df_scores(ds_priv_scores_pos, self.dataset.num_samples)
 
         # Comparing output of public and private
 
-        self.assertFalse((df_scores_pos != ds_priv_scores_pos).any())
-        self.assertFalse((df_scores_neg != ds_priv_scores_neg).any())
+        self.assert_array_equal(df_scores_pos, ds_priv_scores_pos)
+        self.assert_array_equal(df_scores_neg, ds_priv_scores_neg)
 
         # Testing predict on multiple points
 
         labels, scores = self.kde.predict(x, return_decision_function=True)
         self.logger.info(
             "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
-        _check_classify_scores(
+        self._check_classify_scores(
             labels, scores, self.dataset.num_samples, self.kde.n_classes)
 
         # Comparing output of decision_function and predict
 
-        self.assertFalse((df_scores_neg != scores[:, 0].ravel()).any())
-        self.assertFalse((df_scores_pos != scores[:, 1].ravel()).any())
+        self.assert_array_equal(df_scores_neg, scores[:, 0].ravel())
+        self.assert_array_equal(df_scores_pos, scores[:, 1].ravel())
 
         # Testing decision_function on single point
 
         df_scores_neg = self.kde.decision_function(p, y=0)
         self.logger.info(
             "decision_function(p, y=0):\n{:}".format(df_scores_neg))
-        _check_df_scores(df_scores_neg, 1)
+        self._check_df_scores(df_scores_neg, 1)
 
         df_scores_pos = self.kde.decision_function(p, y=1)
         self.logger.info(
             "decision_function(p, y=1):\n{:}".format(df_scores_pos))
-        _check_df_scores(df_scores_pos, 1)
+        self._check_df_scores(df_scores_pos, 1)
 
-        self.assertFalse(((1 - df_scores_neg) != df_scores_pos).any())
+        self.assert_array_equal(1 - df_scores_neg, df_scores_pos)
 
         # Testing _decision_function on single point
 
         df_priv_scores_neg = self.kde._decision_function(p_norm, y=0)
         self.logger.info("_decision_function(p_norm, y=0):\n"
                          "{:}".format(df_priv_scores_neg))
-        _check_df_scores(df_priv_scores_neg, 1)
+        self._check_df_scores(df_priv_scores_neg, 1)
 
         df_priv_scores_pos = self.kde._decision_function(p_norm, y=1)
         self.logger.info("_decision_function(p_norm, y=1):\n"
                          "{:}".format(df_priv_scores_pos))
-        _check_df_scores(df_priv_scores_pos, 1)
+        self._check_df_scores(df_priv_scores_pos, 1)
 
         # Comparing output of public and private
 
-        self.assertFalse((df_scores_pos != df_priv_scores_pos).any())
-        self.assertFalse((df_scores_neg != df_priv_scores_neg).any())
+        self.assert_array_equal(df_scores_pos, df_priv_scores_pos)
+        self.assert_array_equal(df_scores_neg, df_priv_scores_neg)
 
         self.logger.info("Testing predict on single point")
 
         labels, scores = self.kde.predict(p, return_decision_function=True)
         self.logger.info(
             "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
-        _check_classify_scores(labels, scores, 1, self.kde.n_classes)
+        self._check_classify_scores(labels, scores, 1, self.kde.n_classes)
 
         # Comparing output of decision_function and predict
 
-        self.assertFalse(
-            (df_scores_neg != CArray(scores[:, 0]).ravel()).any())
-        self.assertFalse(
-            (df_scores_pos != CArray(scores[:, 1]).ravel()).any())
+        self.assert_array_equal(df_scores_neg, CArray(scores[:, 0]).ravel())
+        self.assert_array_equal(df_scores_pos, CArray(scores[:, 1]).ravel())
 
     def test_gradient(self):
         """Unittest for `gradient_f_x` method."""
-        self.kde.fit(self.dataset)
+        i = 5  # IDX of the point to test
+        pattern = self.dataset.X[i, :]
+        self.logger.info("P {:}: {:}".format(i, pattern))
 
-        import random
-        pattern = CArray(random.choice(self.dataset.X.get_data()))
-        self.logger.info("Randomly selected pattern:\n%s", str(pattern))
+        self.logger.info("Testing dense data...")
+        ds = self.dataset.todense()
+        self.kde.fit(ds)
 
-        # Comparison with numerical gradient
-        self._test_gradient_numerical(self.kde, pattern)
+        # Run the comparison with numerical gradient
+        # (all classes will be tested)
+        grads_d = self._test_gradient_numerical(self.kde, pattern.todense())
+
+        self.logger.info("Testing sparse data...")
+        ds = self.dataset.tosparse()
+        self.kde.fit(ds)
+
+        # Run the comparison with numerical gradient
+        # (all classes will be tested)
+        grads_s = self._test_gradient_numerical(self.kde, pattern.tosparse())
+
+        # Compare dense gradients with sparse gradients
+        for grad_i, grad in enumerate(grads_d):
+            self.assert_array_almost_equal(
+                grad.atleast_2d(), grads_s[grad_i])
 
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""
