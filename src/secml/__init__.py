@@ -118,6 +118,17 @@ def global_filterwarnings():
                 "ConfigParser in Python 3.2.*"
     )
 
+    # TODO: fixed in scipy 1.3.1
+    warnings.filterwarnings(
+        "ignore", category=FutureWarning,
+        message="future versions will not create a writeable array "
+                "from broadcast_array*"
+    )
+    # TODO: fixed in scipy 1.3.1
+    warnings.filterwarnings(
+        "ignore", category=DeprecationWarning,
+        message="Numpy has detected that you (may be)*")  # same as before
+
 
 # Call the filterwarnings method to make it active project-wide
 global_filterwarnings()
