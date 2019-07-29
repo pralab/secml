@@ -129,6 +129,12 @@ def global_filterwarnings():
         "ignore", category=DeprecationWarning,
         message="Numpy has detected that you (may be)*")  # same as before
 
+    # TODO: check after upgrading to matplotlib 3
+    warnings.filterwarnings(
+        "ignore", category=DeprecationWarning,
+        message="Using or importing the ABCs from 'collections' instead of "
+                "from 'collections.abc' is deprecated*")
+
 
 # Call the filterwarnings method to make it active project-wide
 global_filterwarnings()
