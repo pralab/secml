@@ -41,11 +41,12 @@ class TestCClassifierKDE(CClassifierTestCases):
 
         self.logger.info(self.kde.predict(self.dataset.X))
 
-        fig.show()
+        fig.savefig('test_c_classifier_kde.pdf')
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self._test_fun(self.kde, self.dataset)
+        self._test_fun(self.kde, self.dataset.todense())
+        self._test_fun(self.kde, self.dataset.tosparse())
 
     def test_gradient(self):
         """Unittest for `gradient_f_x` method."""

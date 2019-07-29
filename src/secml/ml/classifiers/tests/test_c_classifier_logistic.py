@@ -36,11 +36,12 @@ class TestCClassifierLogistic(CClassifierTestCases):
 
         self.logger.info(self.log.predict(self.dataset.X))
 
-        fig.show()
+        fig.savefig('test_c_classifier_logistic.pdf')
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self._test_fun(self.log, self.dataset)
+        self._test_fun(self.log, self.dataset.todense())
+        self._test_fun(self.log, self.dataset.tosparse())
 
     def test_gradient(self):
         """Unittests for gradient_f_x."""

@@ -76,7 +76,7 @@ class TestCClassifierSGD(CClassifierTestCases):
                          grid_limits=dataset.get_bounds())
         fig.sp.title('SGD Classifier')
 
-        fig.show()
+        fig.savefig('test_c_classifier_sgd1.pdf')
 
     def test_performance(self):
         """ Compare the classifiers performance"""
@@ -140,12 +140,13 @@ class TestCClassifierSGD(CClassifierTestCases):
                        dataset.X[:, 1].ravel(),
                        c=dataset.Y, s=40)
 
-        fig.show()
+        fig.savefig('test_c_classifier_sgd2.pdf')
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
         for clf in self.sgds:
-            self._test_fun(clf, self.dataset)
+            self._test_fun(clf, self.dataset.todense())
+            self._test_fun(clf, self.dataset.tosparse())
 
     def test_gradient(self):
         """Unittests for gradient_f_x."""

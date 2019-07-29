@@ -34,11 +34,12 @@ class TestCClassifierNearestCentroid(CClassifierTestCases):
 
         self.logger.info(self.nc.predict(self.dataset.X))
 
-        fig.show()
+        fig.savefig('test_c_classifier_nearest_centroid.pdf')
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self._test_fun(self.nc, self.dataset)
+        self._test_fun(self.nc, self.dataset.todense())
+        self._test_fun(self.nc, self.dataset.tosparse())
 
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""

@@ -82,7 +82,7 @@ class TestCClassifierRidge(CClassifierTestCases):
                          grid_limits=dataset.get_bounds())
         fig.sp.title('ridge Classifier')
 
-        fig.show()
+        fig.savefig('test_c_classifier_ridge.pdf')
 
     def test_performance(self):
         """ Compare the classifiers performance"""
@@ -115,7 +115,8 @@ class TestCClassifierRidge(CClassifierTestCases):
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
         for ridge in self.ridges:
-            self._test_fun(ridge, self.dataset)
+            self._test_fun(ridge, self.dataset.todense())
+            self._test_fun(ridge, self.dataset.tosparse())
 
     def test_gradient(self):
         """Unittests for gradient_f_x."""

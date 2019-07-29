@@ -75,11 +75,13 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
         # Plot objective function
         fig.sp.plot_fobj(self.mcs.decision_function,
                          grid_limits=self.dataset.get_bounds())
-        fig.show()
+        fig.savefig('test_c_classifier_mcs_linear.pdf')
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self._test_fun(self.mcs, self.dataset)
+        self._test_fun(self.mcs, self.dataset.todense())
+        self._test_fun(self.mcs, self.dataset.tosparse())
+
 
     def test_gradient(self):
         """Unittest for `gradient_f_x` method."""

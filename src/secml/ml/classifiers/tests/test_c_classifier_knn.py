@@ -61,7 +61,7 @@ class TestCClassifierKNN(CClassifierTestCases):
         plt.scatter(self.dataset.X.get_data()[:, 0].ravel(),
                     self.dataset.X.get_data()[:, 1].ravel(),
                     c=self.dataset.Y.get_data(), marker='o', cmap=cmap_bold)
-        plt.show()
+        plt.savefig('test_c_classifier_knn.pdf')
 
     def test_classification(self):
         self.logger.info("Check the classification method... ")
@@ -106,7 +106,8 @@ class TestCClassifierKNN(CClassifierTestCases):
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self._test_fun(self.knn, self.dataset)
+        self._test_fun(self.knn, self.dataset.todense())
+        self._test_fun(self.knn, self.dataset.tosparse())
 
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""

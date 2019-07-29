@@ -239,8 +239,7 @@ class TestCClassifierSVM(CClassifierTestCases):
         fig.sp.plot(xx, wyy, 'k--', label='with weights')
         fig.sp.scatter(X[:, 0].ravel(), X[:, 1].ravel(), c=y)
         fig.sp.legend()
-
-        fig.show()
+        fig.savefig('test_c_classifier_svm.pdf')
 
     def test_store_dual_vars(self):
         """Test of parameters that control storing of dual space variables."""
@@ -294,7 +293,8 @@ class TestCClassifierSVM(CClassifierTestCases):
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
         for clf in self.svms:
-            self._test_fun(clf, self.dataset)
+            self._test_fun(clf, self.dataset.todense())
+            self._test_fun(clf, self.dataset.tosparse())
 
     def test_gradient(self):
         """Performs tests on gradient."""

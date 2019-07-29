@@ -2,7 +2,6 @@ from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml.data.loader import CDLIris
 from secml.ml.classifiers import CClassifierRandomForest
-from secml.array import CArray
 
 
 class TestCClassifierRandomForest(CClassifierTestCases):
@@ -45,7 +44,8 @@ class TestCClassifierRandomForest(CClassifierTestCases):
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self._test_fun(self.rnd_forest, self.dataset)
+        self._test_fun(self.rnd_forest, self.dataset.todense())
+        self._test_fun(self.rnd_forest, self.dataset.tosparse())
 
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""
