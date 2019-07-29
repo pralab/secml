@@ -18,6 +18,7 @@ It comes with a set of powerful features:
 [![Platform Linux | MacOS ](https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey.svg)]()
 [![GNU GPLv3](https://img.shields.io/badge/license-GPL%20(%3E%3D%203)-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
+
 ## Installation Guide
 As generally recommended for any Python project, SecML should be installed 
  in a specific environment along with its dependencies. Common frameworks to 
@@ -27,6 +28,7 @@ As generally recommended for any Python project, SecML should be installed
  procedure.
 
 ### Operating System requirements
+
 SecML can run under Python 2.7 and Python >= 3.5 with no configuration steps required, 
 as ll its dependencies are available as wheel packages for the main macOS and Linux 
 distributions.
@@ -36,6 +38,7 @@ depending on the Operating System used:
    - `python-tk` (Python 2.7), `python3-tk` (Python >= 3.5). For running Matplotlib Tk-based backends;
    - NVIDIA<sup>®</sup> CUDA<sup>®</sup> Toolkit for running `tf-gpu` [extra component](#extra-components). See https://www.tensorflow.org/install/gpu
 - MacOS: **TODO**
+
 
 ### Installation process
 
@@ -49,16 +52,8 @@ Once the environment is set up, SecML can installed and run by
  multiple means:
  1. Install from official PyPI repository **(not yet supported)**
     - `pip install secml`
- 2. Install from zip/wheel package:
+ 2. Install from wheel/zip package:
     - `pip install <package-file>`
- 3. Install from local GitLab repository:
-    - Clone the project repository in a directory of your choice
-    - Run installation as: `pip install .`
- 4. Install from remote GitLab repository. In this case, given
-    `{repourl}` in the format, es., `pragit.diee.unica.it/secml/secml`:
-    - `pip install git+ssh://git@{repourl}.git[@branch]#egg=secml`
-    A specific branch to install can be specified using `[@branch]` parameter.
-    If omitted, the default branch will be installed.
 
 In all cases, the setup process will try to install the correct dependencies.
 In case something goes wrong during the install process, try to install
@@ -69,10 +64,70 @@ SecML should now be importable in python via: `import secml`.
 To update a current installation using any of the previous methods, add the 
  `-U` parameter after the `pip install` directive.
 
-SecML can be added as a dependency for other libraries/project.
-Just add `secml` (**not yet supported**) or the full repository
-path command `git+ssh://git@{repourl}.git[@branch]#egg=secml` to
-your `requirements.txt` file.
+
+## Extra Components
+
+SecML comes with a set of extras components that can be installed if desired.
+
+To specify the extra components to install, add the section `[extras]` while calling `pip install`.
+`extras` will be a comma-separated list of components you want to install. Example:
+- `pip install secml[extra1,extra2]`
+
+All the installation procedures via `pip` described above allow definition of the `[extras]` section.
+
+### Available extra components
+  - None at the moment.
+
+### _Coming soon_:
+  - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
+    Will install: `torch >= 0.4.*`, `torchvision >= 0.1.8`
+  - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
+    a Python library to benchmark machine learning systems' vulnerability to adversarial examples.  
+    Will install: `tensorflow >= 1.14.*, < 2`, `cleverhans`
+  - `tf-gpu` : Shortcut for installing `TensorFlow` package with GPU support.  
+    Will install: `tensorflow-gpu >= 1.14.*, < 2`
+
+
+## Usage Guide
+
+SecML is based on [`numpy`](http://www.numpy.org/), [`scipy`](https://www.scipy.org/), [`scikit-learn`](https://scikit-learn.org/) and [`pytorch`](https://pytorch.org/), widely-used packages for scientific 
+computing and machine learning with Python. As a result, most of the interfaces of the 
+library should be pretty familiar to frequent users of those packages.
+
+The primary data class is the `secml.array.CArray`, multi-dimensional (currently limited to 2 dimensions) array structure which embeds both dense and sparse data accepting as input `numpy.ndarray` and `scipy.sparse.csr_matrix` (more sparse formats will be supported soon). This structure is the standard input and output of all other classes in the library.
+
+The `secml.ml` package contains all the Machine Learning algorithms and support classes, including classifiers, loss and regularizer functions, kernels and performance evaluation functions.
+
+The `secml.adv` package contains evasion and poisoning attacks based on a custom-developed solver, along with classes to easily perform security evaluation of Machine Learning algorithms.
+
+The `secml.figure` package contains a visualization and plotting framework based on [`matplotlib`](https://matplotlib.org/).
+
+_(coming soon)_ The `secml.explanation` package contains few different explainable Machine Learning methods that allow interpreting classifiers decisions by analyzing the relevant components such as features or training prototypes.
+
+_(coming soon)_ The `secml.pytorch` package contains support classes for the [PyTorch](https://pytorch.org/) deep learning platform. This package will be available only if the extra component `pytorch` has been specified during installation.
+
+_(coming soon)_ The `secml.tf.clvhs` package contains support classes for the [CleverHans](https://github.com/tensorflow/cleverhans) library for benchmarking machine learning systems' vulnerability to adversarial examples. 
+This package will be available only if the extra component `cleverhans` has been specified during installation.
+
+
+## Contributors
+
+**Your contribution is foundamental!**
+
+If you want to help the development of SecML, just set up the project locally
+by the following means:
+ 1. _(devs only)_ Install from local GitLab repository:
+    - Clone the project repository in a directory of your choice
+    - Run installation as: `pip install .`
+ 2. _(devs only)_ Install from remote GitLab repository. In this case, given
+    `{repourl}` in the format, es., `pragit.diee.unica.it/secml/secml`:
+    - `pip install git+ssh://git@{repourl}.git[@branch]#egg=secml`
+    A specific branch to install can be specified using `[@branch]` parameter.
+    If omitted, the default branch will be installed.
+    
+SecML can also be added as a dependency for other libraries/project.
+Just add `secml` (**not yet supported**) or the full repository path command 
+`git+ssh://git@{repourl}.git[@branch]#egg=secml` to the `requirements.txt` file.
 
 #### Editable Installation (development mode)
 
@@ -97,48 +152,6 @@ Editable installs are also available while using SecML as a
 dependency of other libraries/projects (see "Installation Guide"
 section for more information).
 
-## Extra Components
-
-SecML comes with a set of extras components that can be installed if desired.
-
-To specify the extra components to install, add the section `[extras]` while calling `pip install`.
-`extras` will be a comma-separated list of components you want to install. Example:
-- `pip install secml[extra1,extra2]`
-
-All the installation procedures via `pip` described above allow definition of the `[extras]` section.
-
-### Available extra components
-  - None at the moment.
-
-### _Coming soon_:
-  - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
-    Will install: `torch >= 0.4.*`, `torchvision >= 0.1.8`
-  - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
-    a Python library to benchmark machine learning systems' vulnerability to adversarial examples.  
-    Will install: `tensorflow >= 1.14.*, < 2`, `cleverhans`
-  - `tf-gpu` : Shortcut for installing `TensorFlow` package with GPU support.  
-    Will install: `tensorflow-gpu >= 1.14.*, < 2`
-
-## Usage Guide
-
-SecML is based on [`numpy`](http://www.numpy.org/), [`scipy`](https://www.scipy.org/), [`scikit-learn`](https://scikit-learn.org/) and [`pytorch`](https://pytorch.org/), widely-used packages for scientific 
-computing and machine learning with Python. As a result, most of the interfaces of the 
-library should be pretty familiar to frequent users of those packages.
-
-The primary data class is the `secml.array.CArray`, multi-dimensional (currently limited to 2 dimensions) array structure which embeds both dense and sparse data accepting as input `numpy.ndarray` and `scipy.sparse.csr_matrix` (more sparse formats will be supported soon). This structure is the standard input and output of all other classes in the library.
-
-The `secml.ml` package contains all the Machine Learning algorithms and support classes, including classifiers, loss and regularizer functions, kernels and performance evaluation functions.
-
-The `secml.adv` package contains evasion and poisoning attacks based on a custom-developed solver, along with classes to easily perform security evaluation of Machine Learning algorithms.
-
-The `secml.figure` package contains a visualization and plotting framework based on [`matplotlib`](https://matplotlib.org/).
-
-_(coming soon)_ The `secml.explanation` package contains few different explainable Machine Learning methods that allow interpreting classifiers decisions by analyzing the relevant components such as features or training prototypes.
-
-_(coming soon)_ The `secml.pytorch` package contains support classes for the [PyTorch](https://pytorch.org/) deep learning platform. This package will be available only if the extra component `pytorch` has been specified during installation.
-
-_(coming soon)_ The `secml.tf.clvhs` package contains support classes for the [CleverHans](https://github.com/tensorflow/cleverhans) library for benchmarking machine learning systems' vulnerability to adversarial examples. 
-This package will be available only if the extra component `cleverhans` has been specified during installation.
 
 ## Credits
 SecML has been developed by [PRALab](https://pralab.diee.unica.it) - Pattern Recognition and Applications lab under [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html) license. Copyright 2019.
