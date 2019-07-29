@@ -15,6 +15,12 @@ class CClassifierSkLearn(CClassifier):
 
     def decision_function(self, x, y=None):
         """ TODO docstrings"""
+
+        x = x.atleast_2d()  # Ensuring input is 2-D
+
+        # Transform data if preprocess is defined
+        x = self._preprocess_data(x)
+
         if hasattr(self._sklearn_model, "decision_function"):
             scores = self._sklearn_model.decision_function(x.get_data())
             probs = False
@@ -38,7 +44,7 @@ class CClassifierSkLearn(CClassifier):
         scores.atleast_2d()
 
         if y is not None:
-            return scores[:, y]
+            return scores[:, y].ravel()
         # else
         return scores
 
@@ -82,8 +88,6 @@ class CClassifierSkLearn(CClassifier):
          score of the other class.
 
         """
-        x = x.atleast_2d()  # Ensuring input is 2-D
-
         scores = self.decision_function(x, y=None)
 
         # The classification label is the label of the class
