@@ -126,7 +126,7 @@ class CClassifierMCSLinear(CClassifierLinear, CClassifierGradientLinearMixin):
         num_samples = int(self.max_samples * dataset.num_samples)
         num_features = int(self.max_features * dataset.num_features)
 
-        self._w = CArray.zeros(dataset.num_features)
+        self._w = CArray.zeros(dataset.num_features, sparse=dataset.issparse)
         self._b = CArray(0.0)
         
         for i in range(self.n_classifiers):
