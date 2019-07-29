@@ -140,9 +140,8 @@ class CClassifierNearestCentroid(CClassifierInterface):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : {1}
+        y : {0,1}
             The label of the class wrt the function should be calculated.
-            decision function is always computed wrt positive class (1).
 
         Returns
         -------
@@ -151,10 +150,6 @@ class CClassifierNearestCentroid(CClassifierInterface):
             Dense flat array of shape (n_patterns,).
 
         """
-        if y != 1:
-            raise ValueError(
-                "decision function is always computed wrt positive class.")
-
         x = x.atleast_2d()  # Ensuring input is 2-D
 
         dist_from_ben_centroid = pairwise_distances(
@@ -164,5 +159,6 @@ class CClassifierNearestCentroid(CClassifierInterface):
             x.get_data(), self.centroids[1, :].atleast_2d().get_data(),
             metric=self.metric)
 
-        return CArray(
-                dist_from_ben_centroid - dis_from_mal_centroid).ravel()
+        score = CArray(dist_from_ben_centroid - dis_from_mal_centroid).ravel()
+        sign = convert_binary_labels(y)  # adjust sign based on y
+        return sign * score
