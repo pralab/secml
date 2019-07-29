@@ -82,132 +82,37 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
         self.logger.info(
             "Test for decision_function() and predict() methods.")
 
-        def _check_df_scores(s, n_samples):
-            self.assertEqual(type(s), CArray)
-            self.assertTrue(s.isdense)
-            self.assertEqual(1, s.ndim)
-            self.assertEqual((n_samples,), s.shape)
-            self.assertEqual(float, s.dtype)
+        scores_d = self._test_fun(self.mcs, self.dataset.todense())
+        scores_s = self._test_fun(self.mcs, self.dataset.tosparse())
 
-        def _check_classify_scores(l, s, n_samples, n_classes):
-            self.assertEqual(type(l), CArray)
-            self.assertEqual(type(s), CArray)
-            self.assertTrue(l.isdense)
-            self.assertTrue(s.isdense)
-            self.assertEqual(1, l.ndim)
-            self.assertEqual(2, s.ndim)
-            self.assertEqual((n_samples,), l.shape)
-            self.assertEqual((n_samples, n_classes), s.shape)
-            self.assertEqual(int, l.dtype)
-            self.assertEqual(float, s.dtype)
-
-        self.mcs.fit(self.dataset)
-
-        x = x_norm = self.dataset.X
-        p = p_norm = self.dataset.X[0, :].ravel()
-
-        # Transform data if a preprocess is defined
-        if self.mcs.preprocess is not None:
-            x_norm = self.mcs.preprocess.transform(x)
-            p_norm = self.mcs.preprocess.transform(p)
-
-        # Testing decision_function on multiple points
-
-        df_scores_neg = self.mcs.decision_function(x, y=0)
-        self.logger.info(
-            "decision_function(x, y=0):\n{:}".format(df_scores_neg))
-        _check_df_scores(df_scores_neg, self.dataset.num_samples)
-
-        df_scores_pos = self.mcs.decision_function(x, y=1)
-        self.logger.info(
-            "decision_function(x, y=1):\n{:}".format(df_scores_pos))
-        _check_df_scores(df_scores_pos, self.dataset.num_samples)
-
-        self.assertFalse(
-            ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
-
-        # Testing _decision_function on multiple points
-
-        ds_priv_scores = self.mcs._decision_function(x_norm, y=1)
-        self.logger.info("_decision_function(x_norm, y=1):\n"
-                         "{:}".format(ds_priv_scores))
-        _check_df_scores(ds_priv_scores, self.dataset.num_samples)
-
-        # Comparing output of public and private
-
-        self.assertFalse((df_scores_pos != ds_priv_scores).any())
-
-        # Testing predict on multiple points
-
-        labels, scores = self.mcs.predict(x, return_decision_function=True)
-        self.logger.info(
-            "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
-        _check_classify_scores(
-            labels, scores, self.dataset.num_samples, self.mcs.n_classes)
-
-        # Comparing output of decision_function and predict
-
-        self.assertFalse((df_scores_neg != scores[:, 0].ravel()).any())
-        self.assertFalse((df_scores_pos != scores[:, 1].ravel()).any())
-
-        # Testing decision_function on single point
-
-        df_scores_neg = self.mcs.decision_function(p, y=0)
-        self.logger.info(
-            "decision_function(p, y=0):\n{:}".format(df_scores_neg))
-        _check_df_scores(df_scores_neg, 1)
-
-        df_scores_pos = self.mcs.decision_function(p, y=1)
-        self.logger.info(
-            "decision_function(p, y=1):\n{:}".format(df_scores_pos))
-        _check_df_scores(df_scores_pos, 1)
-
-        self.assertFalse(
-            ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
-
-        # Testing _decision_function on single point
-
-        df_priv_scores = self.mcs._decision_function(p_norm, y=1)
-        self.logger.info("_decision_function(p_norm, y=1):\n"
-                         "{:}".format(df_priv_scores))
-        _check_df_scores(df_priv_scores, 1)
-
-        # Comparing output of public and private
-
-        self.assertFalse((df_scores_pos != df_priv_scores).any())
-
-        self.logger.info("Testing predict on single point")
-
-        labels, scores = self.mcs.predict(p, return_decision_function=True)
-        self.logger.info(
-            "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
-        _check_classify_scores(labels, scores, 1, self.mcs.n_classes)
-
-        # Comparing output of decision_function and predict
-
-        self.assertFalse(
-            (df_scores_neg != CArray(scores[:, 0]).ravel()).any())
-        self.assertFalse(
-            (df_scores_pos != CArray(scores[:, 1]).ravel()).any())
-
-        # Testing error raising
-
-        with self.assertRaises(ValueError):
-            self.mcs._decision_function(x_norm, y=0)
-        with self.assertRaises(ValueError):
-            self.mcs._decision_function(p_norm, y=0)
+        self.assert_array_almost_equal(scores_d, scores_s)
 
     def test_gradient(self):
         """Unittest for `gradient_f_x` method."""
-        self.mcs.fit(self.dataset)
-        self.logger.info("Trained MCS.")
+        i = 5  # IDX of the point to test
+        pattern = self.dataset.X[i, :]
+        self.logger.info("P {:}: {:}".format(i, pattern))
 
-        import random
-        pattern = CArray(random.choice(self.dataset.X.get_data()))
-        self.logger.info("Randomly selected pattern:\n%s", str(pattern))
+        self.logger.info("Testing dense data...")
+        ds = self.dataset.todense()
+        self.mcs.fit(ds)
 
-        # Comparison with numerical gradient
-        self._test_gradient_numerical(self.mcs, pattern)
+        # Run the comparison with numerical gradient
+        # (all classes will be tested)
+        grads_d = self._test_gradient_numerical(self.mcs, pattern.todense())
+
+        self.logger.info("Testing sparse data...")
+        ds = self.dataset.tosparse()
+        self.mcs.fit(ds)
+
+        # Run the comparison with numerical gradient
+        # (all classes will be tested)
+        grads_s = self._test_gradient_numerical(self.mcs, pattern.tosparse())
+
+        # Compare dense gradients with sparse gradients
+        for grad_i, grad in enumerate(grads_d):
+            self.assert_array_almost_equal(
+                grad.atleast_2d(), grads_s[grad_i])
 
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""
