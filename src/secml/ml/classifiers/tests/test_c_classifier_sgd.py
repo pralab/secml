@@ -37,7 +37,7 @@ class TestCClassifierSGD(CClassifierTestCases):
             regularizer=CRegularizerL2(), loss=CLossHinge(),
             max_iter=500, random_state=0,
             kernel=kernel if kernel is not None else None)
-                for kernel in kernel_types]
+            for kernel in kernel_types]
         self.logger.info(
             "Testing SGD with kernel functions: %s", str(kernel_types))
 
@@ -65,7 +65,7 @@ class TestCClassifierSGD(CClassifierTestCases):
         fig.sp.plot_ds(dataset)
         # Plot objective function
         fig.sp.plot_fobj(svm.decision_function,
-                         grid_limits=dataset.get_bounds())
+                         grid_limits=dataset.get_bounds(), y=1)
         fig.sp.title('SVM')
 
         fig.subplot(2, 1, 2)
@@ -73,7 +73,7 @@ class TestCClassifierSGD(CClassifierTestCases):
         fig.sp.plot_ds(dataset)
         # Plot objective function
         fig.sp.plot_fobj(self.sgds[0].decision_function,
-                         grid_limits=dataset.get_bounds())
+                         grid_limits=dataset.get_bounds(), y=1)
         fig.sp.title('SGD Classifier')
 
         fig.savefig('test_c_classifier_sgd1.pdf')
@@ -84,7 +84,6 @@ class TestCClassifierSGD(CClassifierTestCases):
                          "classifiers on the training set")
 
         for sgd in self.sgds:
-
             self.logger.info("SGD kernel: {:}".format(sgd.kernel))
 
             svm = CClassifierSVM(sgd.kernel)
@@ -130,7 +129,7 @@ class TestCClassifierSGD(CClassifierTestCases):
         for (i, j), val in np.ndenumerate(X1):
             x1 = val
             x2 = X2[i, j]
-            Z[i, j] = clf.decision_function(CArray([x1, x2]))
+            Z[i, j] = clf.decision_function(CArray([x1, x2]), y=1)
         levels = [-1.0, 0.0, 1.0]
         linestyles = ['dashed', 'solid', 'dashed']
         colors = 'k'

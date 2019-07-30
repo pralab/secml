@@ -74,7 +74,7 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
         fig.sp.plot_ds(self.dataset)
         # Plot objective function
         fig.sp.plot_fobj(self.mcs.decision_function,
-                         grid_limits=self.dataset.get_bounds())
+                         grid_limits=self.dataset.get_bounds(), y=1)
         fig.savefig('test_c_classifier_mcs_linear.pdf')
 
     def test_fun(self):

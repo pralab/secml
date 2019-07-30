@@ -398,7 +398,7 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
 
         return classifier
 
-    def _decision_function(self, x, y=1):
+    def _decision_function(self, x, y=None):
         """Computes the distance from the separating hyperplane for each pattern in x.
 
         For non linear SVM, the kernel between input patterns and
@@ -412,7 +412,6 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
             (n_patterns, n_features).
         y : {1}
             The label of the class wrt the function should be calculated.
-            decision function is always computed wrt positive class (1).
 
         Returns
         -------
@@ -424,10 +423,15 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         if self.is_kernel_linear():  # Scores are given by the linear model
             return CClassifierLinear._decision_function(self, x, y=y)
 
-        # Non-linear SVM
-        x = x.atleast_2d()  # Ensuring input is 2-D
-
         m = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
         score = CArray(m).todense().ravel() + self.b
-        sign = convert_binary_labels(y)  # adjust sign based on y
-        return sign * score
+
+        scores = CArray.ones(shape=(x.shape[0], self.n_classes))
+        scores[:, 0] = -score.ravel().T
+        scores[:, 1] = score.ravel().T
+
+        if y is not None:
+            return scores[:, y].ravel()
+        else:
+            return scores
+

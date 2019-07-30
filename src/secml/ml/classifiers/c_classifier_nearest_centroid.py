@@ -115,6 +115,7 @@ class CClassifierNearestCentroid(CClassifier):
         """
         scores = CArray.ones(shape=(x.shape[0], self.n_classes))
 
+        # TODO: nonsense. Call sklearn function!
         dist_from_ben_centroid = pairwise_distances(
             x.get_data(), self.centroids[0, :].atleast_2d().get_data(),
             metric=self.metric)

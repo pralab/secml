@@ -71,7 +71,7 @@ class TestCClassifierRidge(CClassifierTestCases):
         fig.sp.plot_ds(dataset)
         # Plot objective function
         fig.sp.plot_fobj(svm.decision_function,
-                         grid_limits=dataset.get_bounds())
+                         grid_limits=dataset.get_bounds(), y=1)
         fig.sp.title('SVM')
 
         fig.subplot(2, 1, 2)
@@ -79,7 +79,7 @@ class TestCClassifierRidge(CClassifierTestCases):
         fig.sp.plot_ds(dataset)
         # Plot objective function
         fig.sp.plot_fobj(self.ridges[0].decision_function,
-                         grid_limits=dataset.get_bounds())
+                         grid_limits=dataset.get_bounds(), y=1)
         fig.sp.title('ridge Classifier')
 
         fig.savefig('test_c_classifier_ridge.pdf')
