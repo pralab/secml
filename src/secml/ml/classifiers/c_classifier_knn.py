@@ -2,18 +2,16 @@
 .. module:: KNeighborsClassifier
    :synopsis: K-Neighbors classifier
 
-.. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
+.. moduleauthor::
 
 """
 from sklearn import neighbors
-import numpy as np
 
 from secml.array import CArray
-from secml.ml.classifiers import CClassifier
-from secml.utils.mixed_utils import check_is_fitted
+from secml.ml.classifiers import CClassifierSkLearn
 
 
-class CClassifierKNN(CClassifier):
+class CClassifierKNN(CClassifierSkLearn):
     """K Neighbors Classifiers.
 
     Parameters
@@ -35,9 +33,6 @@ class CClassifierKNN(CClassifier):
                  metric='minkowski', metric_params=None,
                  preprocess=None):
 
-        # Calling constructor of CClassifier
-        CClassifier.__init__(self, preprocess=preprocess)
-
         self._n_neighbors = n_neighbors
         self._weights = weights
         self._algorithm = algorithm
@@ -48,7 +43,17 @@ class CClassifierKNN(CClassifier):
 
         self._n_samples_training = 0
         self._tr_dataset = None
-        self._KNC = None
+
+        knn = neighbors.KNeighborsClassifier(self._n_neighbors,
+                                                   self._weights,
+                                                   self._algorithm,
+                                                   self._leaf_size,
+                                                   self._p,
+                                                   self._metric,
+                                                   self._metric_params)
+
+        CClassifierSkLearn.__init__(self, sklearn_model=knn,
+                                    preprocess=preprocess)
 
     @property
     def n_neighbors(self):
@@ -120,63 +125,16 @@ class CClassifierKNN(CClassifier):
         """Sets classifier metric_params."""
         self._metric_params = value
 
-    def _check_is_fitted(self):
-        """Check if the classifier is trained (fitted).
-
-        Raises
-        ------
-        NotFittedError
-            If the classifier is not fitted.
-
-        """
-        check_is_fitted(self, ['_KNC', '_tr_dataset'])
-        super(CClassifierKNN, self)._check_is_fitted()
-
     def _fit(self, dataset):
         """Trains the KNeighbors classifier.
 
         Training dataset is stored to use in kneighbors() method.
 
         """
-        self._tr_dataset = dataset
+        self._tr_dataset = dataset  # TODO: do we need this?
         self._n_samples_training = dataset.Y.shape[0]
 
-        self._KNC = neighbors.KNeighborsClassifier(self._n_neighbors,
-                                                   self._weights,
-                                                   self._algorithm,
-                                                   self._leaf_size,
-                                                   self._p,
-                                                   self._metric,
-                                                   self._metric_params)
-
-        self._KNC.fit(dataset.X.get_data(), dataset.Y.tondarray())
-
-        return self._KNC
-
-    def _decision_function(self, x, y=None):
-        """Computes the decision function (probability estimates) for each pattern in x.
-
-        Parameters
-        ----------
-        x : CArray
-            Array with new patterns to classify, 2-Dimensional of shape
-            (n_patterns, n_features).
-        y : int
-            The label of the class wrt the function should be calculated.
-
-        Returns
-        -------
-        score : CArray
-            Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
-
-        """
-        scores = CArray(self._KNC.predict_proba(x.get_data()))
-
-        if y is not None:
-            return scores[:, y].ravel()
-        else:
-            return scores
+        return CClassifierSkLearn._fit(self, dataset)
 
     def kneighbors(self, x, num_samples, return_distance=True):
         '''
@@ -198,14 +156,12 @@ class CClassifierKNN(CClassifier):
         index_point: CArray
             Indices of the nearest points in the training set
         tr_dataset.X: CArray
-            Training samples 
-
-
+            Training samples
         '''
-        dist, index_point = self._KNC.kneighbors(x.get_data(),
+        dist, index_point = self._sklearn_model.kneighbors(x.get_data(),
                                                  num_samples,
                                                  return_distance)
 
-        index_point = CArray(index_point, dtype=np.int).ravel()
+        index_point = CArray(index_point, dtype=int).ravel()
 
         return CArray(dist), index_point, self._tr_dataset.X[index_point, :]
