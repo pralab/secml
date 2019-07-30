@@ -61,7 +61,7 @@ class TestCClassifierSkLearn(CClassifierTestCases):
             # create a fake private _decision_function to run tests
             # but this is basically the same in CClassifierSkLearn
             # - we need to think better tests!
-            def _decision_function(x, y):
+            def _decision_function(x, y=None):
                 x = x.atleast_2d()
                 try:
                     scores = CArray(
@@ -79,7 +79,10 @@ class TestCClassifierSkLearn(CClassifierTestCases):
                     outputs[:, 0] = -scores if probs is False else 1 - scores
                     scores = outputs
                 scores.atleast_2d()
-                return scores[:, y].ravel()
+                if y is not None:
+                    return scores[:, y].ravel()
+                else:
+                    return scores
 
             clf._decision_function = _decision_function
 

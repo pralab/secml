@@ -54,7 +54,7 @@ for i in range(len(classifiers)):
     sklearn_model = classifiers[i]
     clf = CClassifierSkLearn(sklearn_model)
 
-    if names[i] == 'Linear SVM' or names[i] == 'RBF SVM':
+    if names[i] == 'RBF SVM':
         # try setting C (it works!)
         params = {'C': [1, 10, 100],
                   'gamma': list(10.0 ** CArray.arange(-4, 4))}

@@ -178,16 +178,12 @@ class CClassifier(CCreator):
         return self
 
     @abstractmethod
-    def decision_function(self, x, y):
+    def _decision_function(self, x, y=None):
         """Computes the decision function for each pattern in x.
 
-        If a preprocess has been specified, input is normalized
-        before computing the decision function.
-
         .. note::
-
-            The actual decision function should be implemented
-            case by case inside :meth:`_decision_function` method.
+            preprocessing is already handled by decision_function, along with
+            ensuring that x is a 2D array.
 
         Parameters
         ----------
@@ -203,23 +199,47 @@ class CClassifier(CCreator):
         score : CArray
             Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
-
-        Warnings
-        --------
-        This method implements a generic formulation where the
-         decision function is computed separately for each pattern.
-         It's convenient to override this when the function can be computed
-         for all patterns at once to improve performance.
-
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
-    @abstractmethod
-    def predict(self, x, return_decision_function=False, n_jobs=1):
+    def decision_function(self, x, y=None):
+        """Computes the decision function for each pattern in x.
+
+        If a preprocess has been specified, input is normalized
+        before computing the decision function.
+
+        .. note::
+
+            The actual decision function should be implemented
+            inside :meth:`_decision_function` method.
+
+        Parameters
+        ----------
+        x : CArray
+            Array with new patterns to classify, 2-Dimensional of shape
+            (n_patterns, n_features).
+        y : int or None
+            The label of the class wrt the function should be calculated.
+            if None, return the output for all classes.
+
+        Returns
+        -------
+        score : CArray
+            Value of the decision function for each test pattern.
+            Dense flat array of shape (n_patterns,).
+        """
+        self._check_is_fitted()
+        x = x.atleast_2d()  # Ensuring input is 2-D
+        x = self._preprocess_data(x)  # handle preprocessing
+
+        # TODO: we can try here to run with n_jobs, as done in fit
+        return self._decision_function(x, y)
+
+    def predict(self, x, return_decision_function=False):
         """Perform classification of each pattern in x.
 
-        If a preprocess has been specified,
-         input is normalized before classification.
+        If preprocess has been specified,
+        input is normalized before classification.
 
         Parameters
         ----------
@@ -244,18 +264,16 @@ class CClassifier(CCreator):
             Array of shape (n_patterns, n_classes) with classification
              score of each test pattern with respect to each training class.
             Will be returned only if `return_decision_function` is True.
-
-        Warnings
-        --------
-        This method implements a generic formulation where the
-         classification score is computed separately for training class.
-         It's convenient to override this when the score can be computed
-         for one of the classes only, e.g. for binary classifiers the score
-         for the positive/negative class is commonly the negative of the
-         score of the other class.
-
         """
-        raise NotImplementedError()
+
+        # TODO: we can try here to run with n_jobs, as done in fit
+        scores = self.decision_function(x, y=None)
+
+        # The classification label is the label of the class
+        # associated with the highest score
+        labels = scores.argmax(axis=1).ravel()
+
+        return (labels, scores) if return_decision_function is True else labels
 
     def estimate_parameters(self, dataset, parameters, splitter, metric,
                             pick='first', perf_evaluator='xval', n_jobs=1):

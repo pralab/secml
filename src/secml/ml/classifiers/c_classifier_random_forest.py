@@ -2,7 +2,6 @@
 .. module:: CClassifierRandomForest
    :synopsis: Random Forest classifier
 
-.. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
@@ -10,11 +9,11 @@ import sklearn
 from sklearn import ensemble
 
 from secml.array import CArray
-from secml.ml.classifiers import CClassifierInterface
+from secml.ml.classifiers import CClassifier
 from secml.utils.mixed_utils import check_is_fitted
 
 
-class CClassifierRandomForest(CClassifierInterface):
+class CClassifierRandomForest(CClassifier):
     """Random Forest classifier.
 
     Parameters
@@ -36,7 +35,7 @@ class CClassifierRandomForest(CClassifierInterface):
                  random_state=None, preprocess=None):
 
         # Calling CClassifier constructor
-        CClassifierInterface.__init__(self, preprocess=preprocess)
+        CClassifier.__init__(self, preprocess=preprocess)
 
         # Classifier Parameters
         self.n_estimators = n_estimators
@@ -97,7 +96,7 @@ class CClassifierRandomForest(CClassifierInterface):
 
         return self._rf
 
-    def _decision_function(self, x, y):
+    def _decision_function(self, x, y=None):
         """Computes the decision function (probability estimates) for each pattern in x.
 
         Parameters
@@ -115,5 +114,9 @@ class CClassifierRandomForest(CClassifierInterface):
             Dense flat array of shape (n_patterns,).
 
         """
-        x = x.atleast_2d()  # Ensuring input is 2-D
-        return CArray(self._rf.predict_proba(x.get_data())[:, y]).ravel()
+        scores = CArray(self._rf.predict_proba(x.get_data()))
+
+        if y is not None:
+            return scores[:, y].ravel()
+        else:
+            return scores

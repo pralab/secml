@@ -292,11 +292,12 @@ class CClassifierTestCases(CUnitTest):
             self.assertEqual(int, l.dtype)
             self.assertEqual(float, s.dtype)
 
-
         clf.fit(ds)
 
-        x = x_norm = ds.X
-        p = p_norm = ds.X[0, :].ravel()
+        # we have to ensure at least 2d here, since _decision_function is not
+        # applying this change anymore (while decision_function does).
+        x = x_norm = ds.X.atleast_2d()
+        p = p_norm = ds.X[0, :].ravel().atleast_2d()
 
         # Transform data if preprocess is defined
         if clf.preprocess is not None:

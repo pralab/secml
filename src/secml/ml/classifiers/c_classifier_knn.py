@@ -9,11 +9,11 @@ from sklearn import neighbors
 import numpy as np
 
 from secml.array import CArray
-from secml.ml.classifiers import CClassifierInterface
+from secml.ml.classifiers import CClassifier
 from secml.utils.mixed_utils import check_is_fitted
 
 
-class CClassifierKNN(CClassifierInterface):
+class CClassifierKNN(CClassifier):
     """K Neighbors Classifiers.
 
     Parameters
@@ -36,7 +36,7 @@ class CClassifierKNN(CClassifierInterface):
                  preprocess=None):
 
         # Calling constructor of CClassifier
-        CClassifierInterface.__init__(self, preprocess=preprocess)
+        CClassifier.__init__(self, preprocess=preprocess)
 
         self._n_neighbors = n_neighbors
         self._weights = weights
@@ -153,7 +153,7 @@ class CClassifierKNN(CClassifierInterface):
 
         return self._KNC
 
-    def _decision_function(self, x, y):
+    def _decision_function(self, x, y=None):
         """Computes the decision function (probability estimates) for each pattern in x.
 
         Parameters
@@ -171,8 +171,12 @@ class CClassifierKNN(CClassifierInterface):
             Dense flat array of shape (n_patterns,).
 
         """
-        x = x.atleast_2d()  # Ensuring input is 2-D
-        return CArray(self._KNC.predict_proba(x.get_data())[:, y]).ravel()
+        scores = CArray(self._KNC.predict_proba(x.get_data()))
+
+        if y is not None:
+            return scores[:, y].ravel()
+        else:
+            return scores
 
     def kneighbors(self, x, num_samples, return_distance=True):
         '''

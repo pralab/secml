@@ -10,13 +10,12 @@ from sklearn.neighbors import NearestCentroid
 from sklearn.metrics import pairwise_distances
 
 from secml.array import CArray
-from secml.ml.classifiers import CClassifierInterface
-from secml.ml.classifiers.clf_utils import convert_binary_labels
+from secml.ml.classifiers import CClassifier
 from secml.utils.mixed_utils import check_is_fitted
 
 
 # TODO: EXPAND CLASS DOCSTRING
-class CClassifierNearestCentroid(CClassifierInterface):
+class CClassifierNearestCentroid(CClassifier):
     """CClassifierNearestCentroid.
 
     Parameters
@@ -93,43 +92,7 @@ class CClassifierNearestCentroid(CClassifierInterface):
 
         return self._nc
 
-    def decision_function(self, x, y=1):
-        """Computes the decision function for each pattern in x.
-
-        The score is the distance of each pattern
-         from the centroid of class `y`
-
-        If a preprocess has been specified, input is normalized
-         before computing the decision function.
-
-        Parameters
-        ----------
-        x : CArray
-            Array with new patterns to classify, 2-Dimensional of shape
-            (n_patterns, n_features).
-        y : {0, 1}, optional
-            The label of the class wrt the function should be calculated.
-            Default is 1.
-
-        Returns
-        -------
-        score : CArray
-            Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
-
-        """
-        self._check_is_fitted()
-
-        x = x.atleast_2d()  # Ensuring input is 2-D
-
-        # Transform data if a preprocess is defined
-        x = self._preprocess_data(x)
-
-        sign = convert_binary_labels(y)  # Sign depends on input label (0/1)
-
-        return sign * self._decision_function(x)
-
-    def _decision_function(self, x, y=1):
+    def _decision_function(self, x, y=None):
         """Computes the decision function for each pattern in x.
 
         The score is the distance of each pattern
@@ -150,7 +113,7 @@ class CClassifierNearestCentroid(CClassifierInterface):
             Dense flat array of shape (n_patterns,).
 
         """
-        x = x.atleast_2d()  # Ensuring input is 2-D
+        scores = CArray.ones(shape=(x.shape[0], self.n_classes))
 
         dist_from_ben_centroid = pairwise_distances(
             x.get_data(), self.centroids[0, :].atleast_2d().get_data(),
@@ -159,6 +122,11 @@ class CClassifierNearestCentroid(CClassifierInterface):
             x.get_data(), self.centroids[1, :].atleast_2d().get_data(),
             metric=self.metric)
 
-        score = CArray(dist_from_ben_centroid - dis_from_mal_centroid).ravel()
-        sign = convert_binary_labels(y)  # adjust sign based on y
-        return sign * score
+        score = dis_from_mal_centroid - dist_from_ben_centroid
+        scores[:, 0] = CArray(score)
+        scores[:, 1] = -scores[:, 0]
+
+        if y is not None:
+            return scores[:, y].ravel()
+        else:
+            return scores
