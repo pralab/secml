@@ -10,10 +10,8 @@ from abc import ABCMeta
 import six
 
 from secml.ml.classifiers import CClassifier
-from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.array import CArray
 from secml.data import CDataset
-from secml import _NoValue
 from secml.utils.mixed_utils import check_is_fitted
 
 
@@ -108,7 +106,7 @@ class CClassifierLinear(CClassifier):
         return super(CClassifierLinear, self).fit(dataset, n_jobs=n_jobs)
 
     def _decision_function(self, x, y=None):
-        """Computes the distance from the separating hyperplane for each pattern in x.
+        """Computes the distance of each pattern in x to the hyperplane.
 
         Parameters
         ----------

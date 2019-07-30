@@ -277,7 +277,6 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
             Dense flat array of shape (n_patterns,).
 
         """
-        x = x.atleast_2d()  # Ensuring input is 2-D
         # Compute decision function in kernel space if necessary
         k = x if self.is_kernel_linear() else CArray(self.kernel.k(x, self._tr))
         # Scores are given by the linear model

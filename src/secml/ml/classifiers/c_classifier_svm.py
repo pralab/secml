@@ -423,8 +423,8 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         if self.is_kernel_linear():  # Scores are given by the linear model
             return CClassifierLinear._decision_function(self, x, y=y)
 
-        m = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
-        score = CArray(m).todense().ravel() + self.b
+        k = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
+        score = CArray(k).todense().ravel() + self.b
 
         scores = CArray.ones(shape=(x.shape[0], self.n_classes))
         scores[:, 0] = -score.ravel().T
