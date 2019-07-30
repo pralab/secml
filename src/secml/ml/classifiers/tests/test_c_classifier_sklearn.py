@@ -20,10 +20,15 @@ class TestCClassifierSkLearn(CClassifierTestCases):
     """Unit test for SkLearn classifiers."""
 
     def setUp(self):
-        self.dataset = CDLIris().load()
-        # self.dataset = CDLRandom(
-        #     n_features=100, n_redundant=20, n_informative=25,
-        #     n_clusters_per_class=2, random_state=0).load()
+
+        multiclass = True
+
+        if multiclass is True:
+            self.dataset = CDLIris().load()
+        else:
+            self.dataset = CDLRandom(
+                n_features=100, n_redundant=20, n_informative=25,
+                n_clusters_per_class=2, random_state=0).load()
 
         self.skclfs = [
             KNeighborsClassifier(3),
@@ -51,7 +56,7 @@ class TestCClassifierSkLearn(CClassifierTestCases):
 
         for i, clf in enumerate(self.classifiers):
 
-            print(clf._sklearn_model)
+            self.logger.info("Classifier:\n - " + str(clf._sklearn_model))
 
             # create a fake private _decision_function to run tests
             # but this is basically the same in CClassifierSkLearn
@@ -69,8 +74,9 @@ class TestCClassifierSkLearn(CClassifierTestCases):
                 # two-class classifiers outputting only scores for class 1
                 if len(scores.shape) == 1:  # duplicate column for class 0
                     outputs = CArray.ones(shape=(x.shape[0], clf.n_classes))
-                    outputs[:, 1] = scores.T
-                    outputs[:, 0] = -scores.T if probs is False else 1 - scores.T
+                    scores = scores.T
+                    outputs[:, 1] = scores
+                    outputs[:, 0] = -scores if probs is False else 1 - scores
                     scores = outputs
                 scores.atleast_2d()
                 return scores[:, y].ravel()
