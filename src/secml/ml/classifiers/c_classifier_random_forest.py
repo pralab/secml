@@ -2,18 +2,16 @@
 .. module:: CClassifierRandomForest
    :synopsis: Random Forest classifier
 
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
-import sklearn
-from sklearn import ensemble
+from secml.ml.classifiers import CClassifierSkLearn
 
-from secml.array import CArray
-from secml.ml.classifiers import CClassifier
-from secml.utils.mixed_utils import check_is_fitted
+from sklearn.ensemble import RandomForestClassifier
 
 
-class CClassifierRandomForest(CClassifier):
+class CClassifierRandomForest(CClassifierSkLearn):
     """Random Forest classifier.
 
     Parameters
@@ -33,10 +31,6 @@ class CClassifierRandomForest(CClassifier):
     def __init__(self, n_estimators=10, criterion='gini',
                  max_depth=None, min_samples_split=2,
                  random_state=None, preprocess=None):
-
-        # Calling CClassifier constructor
-        CClassifier.__init__(self, preprocess=preprocess)
-
         # Classifier Parameters
         self.n_estimators = n_estimators
         self.criterion = criterion
@@ -44,7 +38,16 @@ class CClassifierRandomForest(CClassifier):
         self.min_samples_split = min_samples_split
         self.random_state = random_state
 
-        self._rf = None  # sklearn random forest classifier
+        rf = RandomForestClassifier(
+            n_estimators=self.n_estimators,
+            criterion=self.criterion,
+            max_depth=self.max_depth,
+            min_samples_split=self.min_samples_split,
+            random_state=self.random_state
+        )
+
+        CClassifierSkLearn.__init__(self, sklearn_model=rf,
+                                    preprocess=preprocess)
 
     @property
     def n_estimators(self):
@@ -65,58 +68,3 @@ class CClassifierRandomForest(CClassifier):
     def min_samples_split(self, value):
         """Sets classifier min_samples_split."""
         self._min_samples_split = value
-
-    def _check_is_fitted(self):
-        """Check if the classifier is trained (fitted).
-
-        Raises
-        ------
-        NotFittedError
-            If the classifier is not fitted.
-
-        """
-        check_is_fitted(self, '_rf')
-        super(CClassifierRandomForest, self)._check_is_fitted()
-
-    def _fit(self, dataset):
-        """Trains the Random Forest classifier."""
-        if dataset.issparse is True and sklearn.__version__ < '0.16':
-            raise ValueError(
-                "sparse dataset is not supported if sklearn version < 0.16.")
-
-        self._rf = ensemble.RandomForestClassifier(
-            n_estimators=self.n_estimators,
-            criterion=self.criterion,
-            max_depth=self.max_depth,
-            min_samples_split=self.min_samples_split,
-            random_state=self.random_state
-        )
-
-        self._rf.fit(dataset.X.get_data(), dataset.Y.tondarray())
-
-        return self._rf
-
-    def _decision_function(self, x, y=None):
-        """Computes the decision function (probability estimates) for each pattern in x.
-
-        Parameters
-        ----------
-        x : CArray
-            Array with new patterns to classify, 2-Dimensional of shape
-            (n_patterns, n_features).
-        y : int
-            The label of the class wrt the function should be calculated.
-
-        Returns
-        -------
-        score : CArray
-            Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
-
-        """
-        scores = CArray(self._rf.predict_proba(x.get_data()))
-
-        if y is not None:
-            return scores[:, y].ravel()
-        else:
-            return scores

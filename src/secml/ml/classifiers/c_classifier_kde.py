@@ -7,16 +7,15 @@
 
 """
 from secml.array import CArray
-from secml.ml.classifiers import CClassifierInterface
+from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.clf_utils import \
     check_binary_labels
 from secml.ml.kernel import CKernel
 from secml.utils.mixed_utils import check_is_fitted
 from secml.ml.classifiers.gradients import CClassifierGradientKDEMixin
-from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
-class CClassifierKDE(CClassifierInterface, CClassifierGradientKDEMixin):
+class CClassifierKDE(CClassifier, CClassifierGradientKDEMixin):
     """Kernel Density Estimator
     
     Parameters

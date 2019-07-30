@@ -1,5 +1,5 @@
 from .c_classifier import CClassifier
-from .c_classifier_parallel import CClassifierInterface
+from .c_classifier_sklearn import CClassifierSkLearn
 from .c_classifier_linear import CClassifierLinear
 from .c_classifier_svm import CClassifierSVM
 from .c_classifier_sgd import CClassifierSGD
@@ -11,4 +11,3 @@ from .c_classifier_nearest_centroid import CClassifierNearestCentroid
 from .c_classifier_random_forest import CClassifierRandomForest
 from .c_classifier_ridge import CClassifierRidge
 from .c_classifier_logistic import CClassifierLogistic
-from .c_classifier_sklearn import CClassifierSkLearn

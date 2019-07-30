@@ -8,11 +8,11 @@
 from abc import abstractmethod, ABCMeta
 import six
 
-from secml.ml.classifiers import CClassifierInterface
+from secml.ml.classifiers import CClassifier
 
 
 @six.add_metaclass(ABCMeta)
-class CClassifierReject(CClassifierInterface):
+class CClassifierReject(CClassifier):
     """Abstract class that defines basic methods for Classifiers with reject.
 
     A classifier assign a label (class) to new patterns using the
