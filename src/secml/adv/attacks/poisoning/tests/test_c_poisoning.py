@@ -105,9 +105,6 @@ class CPoisoningTestCases(object):
 
         def _pois_obj_creation(self):
 
-            # self.solver_type = 'gradient'
-            # self.solver_params = {'eta': 0.05, 'eps': 1e-9}
-
             self.solver_type = 'gradient-bls'
             self.solver_params = {'eta': 0.05, 'eta_min': 0.05, 'eps': 1e-9}
 

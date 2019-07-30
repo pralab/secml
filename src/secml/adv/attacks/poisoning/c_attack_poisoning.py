@@ -37,7 +37,7 @@ class CAttackPoisoning(CAttack):
                  discrete=False,
                  y_target=None,
                  attack_classes='all',
-                 solver_type='gradient',
+                 solver_type='gradient-bls',
                  solver_params=None,
                  init_type='random',
                  random_seed=None):
@@ -207,8 +207,8 @@ class CAttackPoisoning(CAttack):
 
         bounds, constr = self._constraint_cretion()
 
-        # FIXME: WHY 'gradient' IS THE DEFAULT SOLVER IF DOES NOT SUPPORT
-        #  DISCRETE? THE FOLLOWING IS A WORKAROUND TO TRIGGER A PROPER ERROR
+        # FIXME: FEW SOLVERS DO NOT SUPPORT DISCRETE. THE FOLLOWING IS A
+        #  WORKAROUND TO TRIGGER A PROPER ERROR
         solver_params = self.solver_params
         if self.discrete is True:
             solver_params['discrete'] = True
