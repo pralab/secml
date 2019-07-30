@@ -16,25 +16,24 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 
 
-class TestCClassifierDecisionTree(CClassifierTestCases):
-    """Unit test for CDecisionTree."""
+class TestCClassifierSkLearn(CClassifierTestCases):
+    """Unit test for SkLearn classifiers."""
 
     def setUp(self):
         self.dataset = CDLIris().load()
 
         self.skclfs = [
-            # KNeighborsClassifier(3),
+            KNeighborsClassifier(3),
             SVC(kernel="linear", C=0.025, decision_function_shape='ovr'),
             SVC(kernel="rbf", gamma=2, C=1),
-            # DecisionTreeClassifier(max_depth=5),
-            # RandomForestClassifier(max_depth=5, n_estimators=10,
-            #                       max_features=1),
-            # MLPClassifier(alpha=1, max_iter=1000),
-            # AdaBoostClassifier(),
+            DecisionTreeClassifier(max_depth=5, random_state=0),
+            RandomForestClassifier(max_depth=5, n_estimators=5, random_state=0),
+            MLPClassifier(alpha=1, max_iter=1000, random_state=0),
+            AdaBoostClassifier(random_state=0),
             # These clf below only work on dense data!
-            # GaussianProcessClassifier(1.0 * RBF(1.0)),
-            # GaussianNB(),
-            # QuadraticDiscriminantAnalysis()
+            GaussianProcessClassifier(1.0 * RBF(1.0)),
+            GaussianNB(),
+            QuadraticDiscriminantAnalysis()
         ]
 
         self.classifiers = []
@@ -49,13 +48,21 @@ class TestCClassifierDecisionTree(CClassifierTestCases):
             # create a fake private decision_function to run tests
             def _decision_function(x, y):
                 x = x.atleast_2d()
-                scores = CArray(self.skclfs[i].decision_function(x.get_data()))
+                try:
+                    scores = CArray(
+                        self.skclfs[i].decision_function(x.get_data()))
+                except AttributeError:
+                    scores = CArray(self.skclfs[i].predict_proba(x.get_data()))
                 return scores[:, y].ravel()
             clf._decision_function = _decision_function
 
             # execute tests
             self._test_fun(clf, self.dataset.todense())
-            self._test_fun(clf, self.dataset.tosparse())
+            try:
+                self._test_fun(clf, self.dataset.tosparse())
+            except TypeError:
+                self.logger.info(
+                    "This sklearn model does not support sparse data!")
 
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""

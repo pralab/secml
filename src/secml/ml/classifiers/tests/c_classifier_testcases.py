@@ -292,6 +292,7 @@ class CClassifierTestCases(CUnitTest):
             self.assertEqual(int, l.dtype)
             self.assertEqual(float, s.dtype)
 
+
         clf.fit(ds)
 
         x = x_norm = ds.X
