@@ -9,12 +9,12 @@ from abc import ABCMeta, abstractmethod
 import six
 from six.moves import range
 
-from secml.ml.classifiers import CClassifierInterface
+from secml.ml.classifiers import CClassifier
 from secml.array import CArray
 
 
 @six.add_metaclass(ABCMeta)
-class CClassifierMulticlass(CClassifierInterface):
+class CClassifierMulticlass(CClassifier):
     """Generic interface for Multiclass Classifiers.
 
     Parameters
@@ -35,17 +35,17 @@ class CClassifierMulticlass(CClassifierInterface):
         # Calling init of CClassifier
         super(CClassifierMulticlass, self).__init__(preprocess=preprocess)
         # Binary classifier to use
-        if not issubclass(classifier, CClassifierInterface):
+        if not issubclass(classifier, CClassifier):
             raise TypeError(
                 "Input classifier must be a subclass of CClassifier")
         # List of binary classifiers
         self._binary_classifiers = [classifier(**clf_params)]
 
-    @CClassifierInterface.verbose.setter
+    @CClassifier.verbose.setter
     def verbose(self, level):
         """Set verbosity level and propagate to trained classifiers."""
         # Calling superclass setter of verbose property
-        CClassifierInterface.verbose.fset(self, level)
+        CClassifier.verbose.fset(self, level)
         # Propagate verbosity level to trained binary classifiers
         for i in range(self.num_classifiers):
             self._binary_classifiers[i].verbose = level
@@ -257,43 +257,6 @@ class CClassifierMulticlass(CClassifierInterface):
 
         """
         raise NotImplementedError
-
-    def decision_function(self, x, y):
-        """Computes the decision function for each pattern in x.
-
-        If a preprocess has been specified, input is normalized
-        before computing the decision function.
-
-        .. note::
-
-            The actual decision function should be implemented
-            case by case inside :meth:`_decision_function` method.
-
-        Parameters
-        ----------
-        x : CArray
-            Array with new patterns to classify, 2-Dimensional of shape
-            (n_patterns, n_features).
-        y : int
-            The label of the class wrt the function should be calculated.
-
-        Returns
-        -------
-        score : CArray
-            Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
-
-        """
-        self._check_is_fitted()
-
-        x = x.atleast_2d()  # Ensuring input is 2-D
-
-        # Transform data if a preprocess is defined
-        x = self._preprocess_data(x)
-
-        self._check_clf_index(y)  # Check the binary classifier input index
-
-        return self._decision_function(x, y)
 
     def apply_method(self, method, *args, **kwargs):
         """Apply input method to all trained classifiers.

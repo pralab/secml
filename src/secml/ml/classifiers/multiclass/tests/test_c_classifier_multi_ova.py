@@ -30,7 +30,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
 
         multiclass.fit(self.dataset, n_jobs=2)
         class_pred, score_pred = multiclass.predict(
-            self.dataset.X, n_jobs=2, return_decision_function=True)
+            self.dataset.X, return_decision_function=True)
 
         self.logger.info("Predicted: \n{:}".format(class_pred))
         self.logger.info("Real: \n{:}".format(self.dataset.Y))

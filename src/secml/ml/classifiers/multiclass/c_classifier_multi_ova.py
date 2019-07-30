@@ -130,7 +130,7 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
             dataset.X, dataset.get_labels_ovr(dataset.classes[class_idx]),
             header=dataset.header)
 
-    def _decision_function(self, x, y):
+    def _decision_function(self, x, y=None):
         """Computes the decision function for each pattern in x.
 
         For One-Vs-All (OVA) multiclass scheme,
@@ -151,8 +151,14 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
             Dense flat array of shape (n_patterns,).
 
         """
-        self.logger.info(
-            "Getting decision function against class: {:}".format(y))
         # Getting predicted scores for classifier associated with y
-        # The decision function is always computed wrt positive class (1)
-        return self._binary_classifiers[y].decision_function(x, y=1)
+        if y is not None:
+            self.logger.info(
+                "Getting decision function against class: {:}".format(y))
+            return self._binary_classifiers[y].decision_function(x, y=1)
+        else:
+            scores = CArray.ones(shape=(x.shape[0], self.n_classes))
+            for i in range(self.n_classes):  # TODO parfor
+                scores[:, i] = self._binary_classifiers[i].decision_function(
+                    x, y=1).ravel().T
+            return scores
