@@ -203,10 +203,14 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
             Instance of the used solver trained using input dataset.
 
         """
+        # TODO: remove this check from here.
+        #  It should be handled in CClassifierLinear
         if dataset.num_classes != 2:
             raise ValueError("training can be performed on binary "
                              "(2-classes) datasets only.")
 
+        # TODO: remove this object init from here. Put into constructor
+        #  See RandomForest / DT and inherit from CClassifierSKlearn
         # Setting up classifier parameters
         sgd = linear_model.SGDClassifier(
             loss=self.loss.class_type,
@@ -229,6 +233,7 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
         # Pass regularizer function parameters to classifier
         sgd.set_params(**self.regularizer.get_params())
 
+        # TODO: remove unconventional kernel usage. This is a linear classifier
         # Storing training dataset (will be used by decision function)
         self._tr = dataset.X if not self.is_kernel_linear() else None
 
@@ -250,6 +255,7 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
 
         return sgd
 
+    # TODO: this function can be removed when removing kernel support
     def _decision_function(self, x, y=1):
         """Computes the distance from the separating hyperplane for each pattern in x.
 

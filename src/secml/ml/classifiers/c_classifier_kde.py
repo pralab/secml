@@ -15,6 +15,7 @@ from secml.utils.mixed_utils import check_is_fitted
 from secml.ml.classifiers.gradients import CClassifierGradientKDEMixin
 
 
+# TODO: extend to multiclass, use SkLearn!
 class CClassifierKDE(CClassifier, CClassifierGradientKDEMixin):
     """Kernel Density Estimator
     
