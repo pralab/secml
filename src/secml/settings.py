@@ -202,8 +202,8 @@ def _config_fpath():
         - On Windows, `($HOME, $USERPROFILE, $HOMEPATH, $HOMEDRIVE)/secml-data/secml.conf`
      - Lastly, it looks in `INSTALL/secml/secml.conf` for a
        system-defined copy.
-       INSTALL is something like /usr/lib/python3.5/site-packages on Linux,
-       and maybe C:\Python35\Lib\site-packages on Windows.
+       INSTALL is something like `/usr/lib/python3.5/site-packages` on Linux,
+       and maybe `C:\\Python35\\Lib\\site-packages` on Windows.
 
     Returns
     -------

@@ -85,15 +85,30 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
 
     def test_gradient(self):
         """Unittest for `gradient_f_x` method."""
-        self.mcs.fit(self.dataset)
-        self.logger.info("Trained MCS.")
+        i = 5  # IDX of the point to test
+        pattern = self.dataset.X[i, :]
+        self.logger.info("P {:}: {:}".format(i, pattern))
 
-        import random
-        pattern = CArray(random.choice(self.dataset.X.get_data()))
-        self.logger.info("Randomly selected pattern:\n%s", str(pattern))
+        self.logger.info("Testing dense data...")
+        ds = self.dataset.todense()
+        self.mcs.fit(ds)
 
-        # Comparison with numerical gradient
-        self._test_gradient_numerical(self.mcs, pattern)
+        # Run the comparison with numerical gradient
+        # (all classes will be tested)
+        grads_d = self._test_gradient_numerical(self.mcs, pattern.todense())
+
+        self.logger.info("Testing sparse data...")
+        ds = self.dataset.tosparse()
+        self.mcs.fit(ds)
+
+        # Run the comparison with numerical gradient
+        # (all classes will be tested)
+        grads_s = self._test_gradient_numerical(self.mcs, pattern.tosparse())
+
+        # Compare dense gradients with sparse gradients
+        for grad_i, grad in enumerate(grads_d):
+            self.assert_array_almost_equal(
+                grad.atleast_2d(), grads_s[grad_i])
 
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""

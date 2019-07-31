@@ -172,8 +172,9 @@ class CClassifierGradientSVMMixin(CClassifierGradientLinearMixin):
         if gradient.issparse is True:  # To ensure the sparse dot is used
             alpha_2d = alpha_2d.tosparse()
         if alpha_2d.shape != (1, idx.size):
-            raise ValueError("Alpha vector shape must be ({:}, {:}) "
-                             "or ravel equivalent".format(1, idx.size))
+            raise ValueError(
+                "Alpha vector shape must be "
+                "({:}, {:}) or ravel equivalent".format(1, idx.size))
 
         gradient = alpha_2d.dot(gradient)
 

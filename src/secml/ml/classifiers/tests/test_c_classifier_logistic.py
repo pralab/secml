@@ -31,7 +31,7 @@ class TestCClassifierLogistic(CClassifierTestCases):
 
         self.log.fit(self.dataset)
 
-        fig.sp.plot_fobj(self.log.decision_function, y=1)
+        fig.sp.plot_fun(self.log.decision_function, y=1)
         fig.title('Logistic Classifier')
 
         self.logger.info(self.log.predict(self.dataset.X))
@@ -48,16 +48,29 @@ class TestCClassifierLogistic(CClassifierTestCases):
         self.logger.info("Testing log.gradient_f_x() method")
 
         i = 5  # IDX of the point to test
-
-        # Randomly extract a pattern to test
         pattern = self.dataset.X[i, :]
         self.logger.info("P {:}: {:}".format(i, pattern))
 
-        self.log.fit(self.dataset)
+        self.logger.info("Testing dense data...")
+        ds = self.dataset.todense()
+        self.log.fit(ds)
 
         # Run the comparison with numerical gradient
         # (all classes will be tested)
-        self._test_gradient_numerical(self.log, pattern)
+        grads_d = self._test_gradient_numerical(self.log, pattern.todense())
+
+        self.logger.info("Testing sparse data...")
+        ds = self.dataset.tosparse()
+        self.log.fit(ds)
+
+        # Run the comparison with numerical gradient
+        # (all classes will be tested)
+        grads_s = self._test_gradient_numerical(self.log, pattern.tosparse())
+
+        # Compare dense gradients with sparse gradients
+        for grad_i, grad in enumerate(grads_d):
+            self.assert_array_almost_equal(
+                grad.atleast_2d(), grads_s[grad_i])
 
     def test_sparse(self):
         """Test classifier operations on sparse data."""

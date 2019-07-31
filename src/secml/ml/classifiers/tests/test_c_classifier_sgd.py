@@ -152,8 +152,6 @@ class TestCClassifierSGD(CClassifierTestCases):
         self.logger.info("Testing SGD.gradient_f_x() method")
 
         i = 5  # IDX of the point to test
-
-        # Randomly extract a pattern to test
         pattern = self.dataset.X[i, :]
         self.logger.info("P {:}: {:}".format(i, pattern))
 
@@ -167,11 +165,27 @@ class TestCClassifierSGD(CClassifierTestCases):
             if hasattr(sgd.kernel, 'degree'):  # set degree for poly
                 sgd.set('degree', 3)
 
-            sgd.fit(self.dataset)
+            self.logger.info("Testing dense data...")
+            ds = self.dataset.todense()
+            sgd.fit(ds)
 
             # Run the comparison with numerical gradient
             # (all classes will be tested)
-            self._test_gradient_numerical(sgd, pattern)
+            grads_d = self._test_gradient_numerical(sgd, pattern.todense())
+
+            self.logger.info("Testing sparse data...")
+            ds = self.dataset.tosparse()
+            sgd.fit(ds)
+
+            # Run the comparison with numerical gradient
+            # (all classes will be tested)
+            grads_s = self._test_gradient_numerical(sgd, pattern.tosparse())
+
+            # FIXME: WHY THIS TEST IS CRASHING? RANDOM_STATE MAYBE?
+            # Compare dense gradients with sparse gradients
+            # for grad_i, grad in enumerate(grads_d):
+            #     self.assert_array_almost_equal(
+            #         grad.atleast_2d(), grads_s[grad_i])
 
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""

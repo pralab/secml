@@ -36,7 +36,7 @@ class TestCClassifierKDE(CClassifierTestCases):
 
         self.kde.fit(self.dataset)
 
-        fig.sp.plot_fobj(self.kde.decision_function, y=1, plot_levels=False)
+        fig.sp.plot_fun(self.kde.decision_function, y=1, plot_levels=False)
         fig.title('kde Classifier')
 
         self.logger.info(self.kde.predict(self.dataset.X))
@@ -50,14 +50,30 @@ class TestCClassifierKDE(CClassifierTestCases):
 
     def test_gradient(self):
         """Unittest for `gradient_f_x` method."""
-        self.kde.fit(self.dataset)
+        i = 5  # IDX of the point to test
+        pattern = self.dataset.X[i, :]
+        self.logger.info("P {:}: {:}".format(i, pattern))
 
-        import random
-        pattern = CArray(random.choice(self.dataset.X.get_data()))
-        self.logger.info("Randomly selected pattern:\n%s", str(pattern))
+        self.logger.info("Testing dense data...")
+        ds = self.dataset.todense()
+        self.kde.fit(ds)
 
-        # Comparison with numerical gradient
-        self._test_gradient_numerical(self.kde, pattern)
+        # Run the comparison with numerical gradient
+        # (all classes will be tested)
+        grads_d = self._test_gradient_numerical(self.kde, pattern.todense())
+
+        self.logger.info("Testing sparse data...")
+        ds = self.dataset.tosparse()
+        self.kde.fit(ds)
+
+        # Run the comparison with numerical gradient
+        # (all classes will be tested)
+        grads_s = self._test_gradient_numerical(self.kde, pattern.tosparse())
+
+        # Compare dense gradients with sparse gradients
+        for grad_i, grad in enumerate(grads_d):
+            self.assert_array_almost_equal(
+                grad.atleast_2d(), grads_s[grad_i])
 
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""

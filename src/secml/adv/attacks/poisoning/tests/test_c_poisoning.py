@@ -105,9 +105,6 @@ class CPoisoningTestCases(object):
 
         def _pois_obj_creation(self):
 
-            # self.solver_type = 'gradient'
-            # self.solver_params = {'eta': 0.05, 'eps': 1e-9}
-
             self.solver_type = 'gradient-bls'
             self.solver_params = {'eta': 0.05, 'eta_min': 0.05, 'eps': 1e-9}
 
@@ -218,7 +215,7 @@ class CPoisoningTestCases(object):
 
         def _plot_func(self, fig, func, **func_kwargs):
             """Plot poisoning objective function"""
-            fig.sp.plot_fobj(
+            fig.sp.plot_fun(
                 func=func,
                 grid_limits=self.grid_limits, plot_levels=False,
                 n_grid_points=10, colorbar=True, **func_kwargs)
@@ -264,13 +261,13 @@ class CPoisoningTestCases(object):
                                )
 
             # Plotting multiclass decision function
-            fig.sp.plot_fobj(lambda x: clf.predict(x),
-                             multipoint=True, cmap='Set2',
-                             grid_limits=self.grid_limits,
-                             colorbar=False, n_grid_points=10,
-                             plot_levels=True,
-                             plot_background=background, levels=[0, 1, 2],
-                             levels_color=line_color, levels_style='--')
+            fig.sp.plot_fun(lambda x: clf.predict(x),
+                            multipoint=True, cmap='Set2',
+                            grid_limits=self.grid_limits,
+                            colorbar=False, n_grid_points=10,
+                            plot_levels=True,
+                            plot_background=background, levels=[0, 1, 2],
+                            levels_color=line_color, levels_style='--')
 
             fig.sp.xlim(x_bounds[0] - .05, x_bounds[1] + .05)
             fig.sp.ylim(y_bounds[0] - .05, y_bounds[1] + .05)
@@ -289,11 +286,11 @@ class CPoisoningTestCases(object):
             if self.ub == "x0":
                 self.ub = self.x0
             box = CConstraintBox(lb=self.lb, ub=self.ub)
-            fig.sp.plot_fobj(func=box.constraint,
-                             plot_background=False,
-                             n_grid_points=10,
-                             grid_limits=self.grid_limits,
-                             levels=[self.discr_f_level], colorbar=False)
+            fig.sp.plot_fun(func=box.constraint,
+                            plot_background=False,
+                            n_grid_points=10,
+                            grid_limits=self.grid_limits,
+                            levels=[self.discr_f_level], colorbar=False)
 
         def _test_accuracy(self, clf):
             metric = CMetric.create('accuracy')

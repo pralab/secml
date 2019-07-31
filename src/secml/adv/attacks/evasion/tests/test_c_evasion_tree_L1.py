@@ -40,7 +40,7 @@ class TestEvasionTreeL1(CEvasionTestCases.TestCEvasion):
         """Plot dataset and box constraints"""
         # Overriding as the threshold level of decision tree is 0.5
         fig.sp.plot_ds(self.dataset)
-        fig.sp.plot_fobj(
+        fig.sp.plot_fun(
             func=evas.classifier.decision_function,
             grid_limits=self.grid_limits, colorbar=False,
             levels=[0.5], y=1)
@@ -50,11 +50,11 @@ class TestEvasionTreeL1(CEvasionTestCases.TestCEvasion):
         if self.ub == "x0":
             self.ub = self.x0
         box = CConstraintBox(lb=self.lb, ub=self.ub)
-        fig.sp.plot_fobj(func=box.constraint,
-                         plot_background=False,
-                         n_grid_points=20,
-                         grid_limits=self.grid_limits,
-                         levels=[0], colorbar=False)
+        fig.sp.plot_fun(func=box.constraint,
+                        plot_background=False,
+                        n_grid_points=20,
+                        grid_limits=self.grid_limits,
+                        levels=[0], colorbar=False)
 
 
 if __name__ == '__main__':

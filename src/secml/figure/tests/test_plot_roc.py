@@ -59,15 +59,14 @@ class TestCRoc(CUnitTest):
         roc_plot = CFigure()
         roc_plot.sp.title('ROC Curve')
         # Plotting 2 times (to show 2 curves)
-        roc_plot.sp.plot_mean(self.roc_wmean, label='roc1 mean', plot_std=True)
-        roc_plot.sp.plot_repetitions(self.roc_wmean, label='roc1')
+        roc_plot.sp.plot_roc_mean(self.roc_wmean, label='roc1 mean', plot_std=True)
+        roc_plot.sp.plot_roc_reps(self.roc_wmean, label='roc1')
 
         roc_plot.show()
 
         # Testing mean plot with no average
-        roc_plot = CFigure()
         with self.assertRaises(ValueError):
-            roc_plot.sp.plot_mean(self.roc_nomean)
+            roc_plot.sp.plot_roc_mean(self.roc_nomean)
 
     def test_custom_params(self):
         """Plot of ROC altering default parameters."""
@@ -80,8 +79,8 @@ class TestCRoc(CUnitTest):
         roc_plot.sp.yticks([70, 80, 90, 100])
         roc_plot.sp.yticklabels(['70', '80', '90', '100'])
         # Plotting 2 times (to show 2 curves)
-        roc_plot.sp.plot_mean(self.roc_wmean, label='roc1')
-        roc_plot.sp.plot_mean(self.roc_wmean, label='roc2')
+        roc_plot.sp.plot_roc_mean(self.roc_wmean, label='roc1')
+        roc_plot.sp.plot_roc_mean(self.roc_wmean, label='roc2')
 
         roc_plot.show()
 
@@ -93,9 +92,9 @@ class TestCRoc(CUnitTest):
         roc_plot.sp.title('ROC Curve Repetitions')
         # Plotting 2 times (to show multiple curves)
         # add one curve for repetition and call it rep 0 and rep 1 of roc 1
-        roc_plot.sp.plot_repetitions(self.roc_nomean, label='roc1')
+        roc_plot.sp.plot_roc_reps(self.roc_nomean, label='roc1')
         # add one curve for repetition and call it rep 0 and rep 1 of roc 2
-        roc_plot.sp.plot_repetitions(self.roc_nomean, label='roc2')
+        roc_plot.sp.plot_roc_reps(self.roc_nomean, label='roc2')
 
         roc_plot.show()
 
@@ -184,7 +183,7 @@ class TestCRoc(CUnitTest):
         roc_fig.sp.xticks([0, 20, 40, 60, 80, 100])
         roc_fig.sp.xticklabels(['0', '20', '40', '60', '80', '100'])
 
-        roc_fig.sp.plot_mean(
+        roc_fig.sp.plot_roc_mean(
             self.roc_wmean, plot_std=True, logx=False, style='go-',
             label='Mean ROC (area = %0.2f)' % (auc(fp.tondarray(),
                                                    tp.tondarray())))

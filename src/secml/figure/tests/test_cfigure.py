@@ -38,8 +38,8 @@ class TestCFigure(CUnitTest):
 
         self.logger.info("Test plot function method...")
         bounds = [(self.x_min, self.x_max), (self.y_min, self.y_max)]
-        self.fig.sp.plot_fobj(self.classifier.decision_function,
-                              plot_levels=False, grid_limits=bounds, y=1)
+        self.fig.sp.plot_fun(self.classifier.decision_function,
+                             plot_levels=False, grid_limits=bounds)
 
         self.fig.sp.xlim(self.x_min, self.x_max)
         self.fig.sp.ylim(self.y_min, self.y_max)

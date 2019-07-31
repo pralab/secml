@@ -76,8 +76,8 @@ class CClassifierGradientSGDMixin(CClassifierGradientLinearMixin):
             w_2d = w_2d.tosparse()
         if w_2d.shape != (1, self._tr.shape[0]):
             raise ValueError(
-                "Weight vector shape must be ({:}, {:}) or ravel "
-                "equivalent".format(1, self._tr.shape[0]))
+                "Weight vector shape must be "
+                "({:}, {:}) or ravel equivalent".format(1, self._tr.shape[0]))
 
         gradient = w_2d.dot(gradient)
 

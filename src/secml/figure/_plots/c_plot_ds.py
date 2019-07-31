@@ -47,8 +47,8 @@ class CPlotDataset(CPlot):
             Dataset that contain samples which we want plot.
         colors : list or None, optional
             Color to be used for plotting each class.
-            If not None, the number of input colors should be
-            always equal to the number of dataset's classes.
+            If a list, each color will be assigned to a dataset's class,
+            with repetitions if necessary.
             If None and the number of classes is 1, blue will be used.
             If None and the number of classes is 2, blue and red will be used.
             If None and the number of classes is > 2, 'jet' colormap is used.
@@ -65,14 +65,17 @@ class CPlotDataset(CPlot):
         classes = dataset.classes
         if colors is None:
             if classes.size <= 2:
-                colors = ['b', 'r']
-            else:  # Next returns an ndarray classes.size X 4 (RGB + Alpha)
-                colors = cm.ScalarMappable(
-                    cmap=cmap).to_rgba(range(classes.size))
+                from matplotlib.colors import ListedColormap
+                cmap = ListedColormap(['b', 'r'])
+            else:
+                cmap = 'jet'
         else:
-            if len(colors) != classes.size:
-                raise ValueError(
-                    "{:} markers must be specified.".format(classes.size))
+            from matplotlib.colors import ListedColormap
+            cmap = ListedColormap(colors)
+
+        # Next returns an ndarray classes.size X 4 (RGB + Alpha)
+        colors = cm.ScalarMappable(
+            cmap=cmap).to_rgba(range(classes.size))
 
         if is_list(markers) and len(markers) != classes.size:
             raise ValueError(

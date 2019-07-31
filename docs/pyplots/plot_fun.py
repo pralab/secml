@@ -11,9 +11,10 @@ def f(array):
         res[r] = x + y
     return res
 
+
 fig = CFigure()
 
-fig.sp.plot_fobj(f, levels=[.5, 1, 1.5])
+fig.sp.plot_fun(f, levels=[.5, 1, 1.5])
 
 fig.sp.grid()
 fig.show()

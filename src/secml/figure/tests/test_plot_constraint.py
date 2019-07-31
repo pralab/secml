@@ -14,12 +14,8 @@ class TestCPlotConstraint(CUnitTest):
             CConstraint.create("l2", center=0.5, radius=0.5)
         ]
 
-    def test_exception(self):
-        fig = CFigure()
-        self.assertRaises(TypeError, fig.sp.plot_constraint, 'aaaa')
-
     def test_constraint(self):
-        """Test for CPlotFunction.plot_fobj method."""
+        """Test for CPlotFunction.plot_fun method."""
         fig = CFigure()
         for constraint in self.constraints:
             fig.sp.plot_constraint(constraint)

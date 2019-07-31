@@ -16,12 +16,12 @@ class TestCPlot(CUnitTest):
         self.dataset.X = CNormalizerMinMax().fit_transform(self.dataset.X)
         self.clf.fit(self.dataset)
 
-    def test_fobj(self):
-        """Test for CPlotFunction.plot_fobj method."""
+    def test_fun(self):
+        """Test for CPlotFunction.plot_fun method."""
         fig = CFigure()
         fig.sp.plot_ds(self.dataset)
 
-        fig.sp.plot_fobj(self.clf.decision_function, y=1)
+        fig.sp.plot_fun(self.clf.decision_function, y=1)
         fig.show()
 
     def test_fgrads(self):
@@ -29,7 +29,7 @@ class TestCPlot(CUnitTest):
         fig = CFigure()
         fig.sp.plot_ds(self.dataset)
 
-        fig.sp.plot_fobj(self.clf.decision_function, y=1)
+        fig.sp.plot_fun(self.clf.decision_function, y=1)
         fig.sp.plot_fgrads(lambda x: self.clf.grad_f_x(x))
         fig.show()
 

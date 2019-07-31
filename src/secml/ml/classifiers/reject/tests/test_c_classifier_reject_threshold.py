@@ -43,9 +43,9 @@ class TestCClassifierRejectThreshold(
         fig.sp.plot_ds(self.dataset)
 
         # Plot objective function
-        fig.sp.plot_fobj(self.clf.decision_function,
-                         grid_limits=self.dataset.get_bounds(),
-                         levels=[0], y=1)
+        fig.sp.plot_fun(self.clf.decision_function,
+                        grid_limits=self.dataset.get_bounds(),
+                        levels=[0], y=1)
         fig.sp.title('Classifier with reject threshold')
 
         fig.show()

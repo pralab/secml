@@ -177,14 +177,14 @@ class TestEvasionMulticlass(CUnitTest):
                          final_edgewidth=1.7)
 
         # plot distance constraint
-        fig.sp.plot_fobj(func=self._rescaled_distance,
-                         multipoint=True,
-                         plot_background=False,
-                         n_grid_points=100, levels_color='k',
-                         grid_limits=ds_bounds,
-                         levels=[0], colorbar=False,
-                         levels_linewidth=2.0, levels_style=':',
-                         alpha_levels=.4, c=x0, r=dmax)
+        fig.sp.plot_fun(func=self._rescaled_distance,
+                        multipoint=True,
+                        plot_background=False,
+                        n_grid_points=100, levels_color='k',
+                        grid_limits=ds_bounds,
+                        levels=[0], colorbar=False,
+                        levels_linewidth=2.0, levels_style=':',
+                        alpha_levels=.4, c=x0, r=dmax)
 
         fig.sp.grid(grid_on=False)
 
@@ -206,20 +206,20 @@ class TestEvasionMulticlass(CUnitTest):
                          final_edgewidth=1.7)
 
         # plot distance constraint
-        fig.sp.plot_fobj(func=self._rescaled_distance,
-                         multipoint=True,
-                         plot_background=False,
-                         n_grid_points=100, levels_color='w',
-                         grid_limits=ds_bounds,
-                         levels=[0], colorbar=False,
-                         levels_style=':', levels_linewidth=2.0,
-                         alpha_levels=.5, c=x0, r=dmax)
+        fig.sp.plot_fun(func=self._rescaled_distance,
+                        multipoint=True,
+                        plot_background=False,
+                        n_grid_points=100, levels_color='w',
+                        grid_limits=ds_bounds,
+                        levels=[0], colorbar=False,
+                        levels_style=':', levels_linewidth=2.0,
+                        alpha_levels=.5, c=x0, r=dmax)
 
-        fig.sp.plot_fobj(lambda x: eva._objective_function(x),
-                         multipoint=True,
-                         grid_limits=ds_bounds,
-                         colorbar=False, n_grid_points=100,
-                         plot_levels=False)
+        fig.sp.plot_fun(lambda x: eva._objective_function(x),
+                        multipoint=True,
+                        grid_limits=ds_bounds,
+                        colorbar=False, n_grid_points=100,
+                        plot_levels=False)
 
         fig.sp.grid(grid_on=False)
 
@@ -314,13 +314,13 @@ class TestEvasionMulticlass(CUnitTest):
         cmap = matplotlib.colors.ListedColormap(
             colors, name='from_list', N=None)
 
-        fig.sp.plot_fobj(lambda x: self.multiclass.predict(x),
-                         multipoint=True, cmap=cmap,
-                         grid_limits=self.ds.get_bounds(offset=5),
-                         colorbar=False, n_grid_points=300, plot_levels=True,
-                         plot_background=True, levels=[-1, 0, 1, 2],
-                         levels_color='k', levels_style='-', alpha=.9,
-                         levels_linewidth=0.9)
+        fig.sp.plot_fun(lambda x: self.multiclass.predict(x),
+                        multipoint=True, cmap=cmap,
+                        grid_limits=self.ds.get_bounds(offset=5),
+                        colorbar=False, n_grid_points=300, plot_levels=True,
+                        plot_background=True, levels=[-1, 0, 1, 2],
+                        levels_color='k', levels_style='-', alpha=.9,
+                        levels_linewidth=0.9)
 
         fig.sp.xlim(x_bounds[0] - .05, x_bounds[1] + .05)
         fig.sp.ylim(y_bounds[0] - .05, y_bounds[1] + .05)

@@ -311,15 +311,38 @@ class TestCClassifierSVM(CClassifierTestCases):
             if hasattr(svm.kernel, 'degree'):  # set degree for poly
                 svm.set('degree', 3)
 
-            svm.fit(self.dataset)
+            samps = random.sample(range(self.dataset.num_samples), 5)
 
-            for i in random.sample(range(self.dataset.num_samples), 10):
+            self.logger.info("Testing dense data...")
+            ds = self.dataset.todense()
+            svm.fit(ds)
+
+            grads_d = []
+            for i in samps:
                 # Randomly extract a pattern to test
-                pattern = self.dataset.X[i, :]
+                pattern = ds.X[i, :]
                 self.logger.info("P {:}: {:}".format(i, pattern))
                 # Run the comparison with numerical gradient
                 # (all classes will be tested)
-                self._test_gradient_numerical(svm, pattern)
+                grads_d += self._test_gradient_numerical(svm, pattern)
+
+            self.logger.info("Testing sparse data...")
+            ds = self.dataset.tosparse()
+            svm.fit(ds)
+
+            grads_s = []
+            for i in samps:
+                # Randomly extract a pattern to test
+                pattern = ds.X[i, :]
+                self.logger.info("P {:}: {:}".format(i, pattern))
+                # Run the comparison with numerical gradient
+                # (all classes will be tested)
+                grads_s += self._test_gradient_numerical(svm, pattern)
+
+            # Compare dense gradients with sparse gradients
+            for grad_i, grad in enumerate(grads_d):
+                self.assert_array_almost_equal(
+                    grad.atleast_2d(), grads_s[grad_i])
 
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""

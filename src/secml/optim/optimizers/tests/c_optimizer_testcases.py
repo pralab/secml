@@ -200,25 +200,25 @@ class COptimizerTestCases(CUnitTest):
         fig = CFigure(markersize=12)
 
         # Plot objective function
-        fig.sp.plot_fobj(func=CArray.apply_along_axis,
-                         plot_background=True,
-                         n_grid_points=30, n_colors=25,
-                         grid_limits=grid_limits,
-                         levels=[0.5], levels_color='gray', levels_style='--',
-                         colorbar=True, func_args=(solver.f.fun, 1,),
-                         vmin=vmin, vmax=vmax)
+        fig.sp.plot_fun(func=CArray.apply_along_axis,
+                        plot_background=True,
+                        n_grid_points=30, n_colors=25,
+                        grid_limits=grid_limits,
+                        levels=[0.5], levels_color='gray', levels_style='--',
+                        colorbar=True, func_args=(solver.f.fun, 1,),
+                        vmin=vmin, vmax=vmax)
 
         if solver.bounds is not None:  # Plot box constraint
-            fig.sp.plot_fobj(func=lambda x: solver.bounds.constraint(x),
-                             plot_background=False, n_grid_points=20,
-                             grid_limits=grid_limits, levels=[0],
-                             colorbar=False)
+            fig.sp.plot_fun(func=lambda x: solver.bounds.constraint(x),
+                            plot_background=False, n_grid_points=20,
+                            grid_limits=grid_limits, levels=[0],
+                            colorbar=False)
 
         if solver.constr is not None:  # Plot distance constraint
-            fig.sp.plot_fobj(func=lambda x: solver.constr.constraint(x),
-                             plot_background=False, n_grid_points=20,
-                             grid_limits=grid_limits, levels=[0],
-                             colorbar=False)
+            fig.sp.plot_fun(func=lambda x: solver.constr.constraint(x),
+                            plot_background=False, n_grid_points=20,
+                            grid_limits=grid_limits, levels=[0],
+                            colorbar=False)
 
         # Plot optimization trace
         if solver.x_seq is not None:
