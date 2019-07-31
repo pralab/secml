@@ -69,7 +69,6 @@ class CClassifierNearestCentroid(CClassifierSkLearn):
             (i.e., similarity w/ centroid).
 
         """
-
         dist = CArray(pairwise_distances(
             x.get_data(), self._sklearn_model.centroids_,
             metric=self._sklearn_model.metric)).atleast_2d()

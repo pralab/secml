@@ -256,7 +256,7 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
         return sgd
 
     # TODO: this function can be removed when removing kernel support
-    def _decision_function(self, x, y=1):
+    def _decision_function(self, x, y=None):
         """Computes the distance from the separating hyperplane for each pattern in x.
 
         The scores are computed in kernel space if kernel is defined.
@@ -266,19 +266,21 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : {1}
+        y : {0, 1, None}
             The label of the class wrt the function should be calculated.
-            decision function is always computed wrt positive class (1).
+            If None, return the output for all classes.
 
         Returns
         -------
         score : CArray
             Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
+            Dense flat array of shape (n_samples,) if `y` is not None,
+            otherwise a (n_samples, n_classes) array.
 
         """
         # Compute decision function in kernel space if necessary
-        k = x if self.is_kernel_linear() else CArray(self.kernel.k(x, self._tr))
+        k = x if self.is_kernel_linear() else \
+            CArray(self.kernel.k(x, self._tr))
         # Scores are given by the linear model
         return CClassifierLinear._decision_function(self, k, y=y)
 

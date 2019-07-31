@@ -35,7 +35,7 @@ class CClassifierSkLearn(CClassifier):
     def __getattribute__(self, key):
         """Get an attribute.
 
-        This allow getting attributes of the internal sklearn model.
+        This allow getting also the attributes of the internal sklearn model.
 
         """
         try:
@@ -50,7 +50,7 @@ class CClassifierSkLearn(CClassifier):
     def __setattr__(self, key, value):
         """Set an attribute.
 
-        This allow setting attributes of the internal sklearn model.
+        This allow setting also the attributes of the internal sklearn model.
 
         """
         if hasattr(self, '_sklearn_model') and \

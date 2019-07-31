@@ -21,14 +21,17 @@ class TestCClassifierSkLearn(CClassifierTestCases):
 
     def setUp(self):
 
+        # QuadraticDiscriminantAnalysis will raise a warning
+        self.logger.filterwarnings(
+            "ignore", message="Variables are collinear", category=UserWarning)
+
         multiclass = True
 
-        if multiclass is True:
-            self.dataset = CDLIris().load()
-        else:
-            self.dataset = CDLRandom(
-                n_features=100, n_redundant=20, n_informative=25,
-                n_clusters_per_class=2, random_state=0).load()
+        n_classes = 3 if multiclass is True else 2
+        self.dataset = CDLRandom(
+            n_features=25, n_redundant=10, n_informative=5,
+            n_classes=n_classes, n_samples=25,
+            n_clusters_per_class=2, random_state=0).load()
 
         self.skclfs = [
             KNeighborsClassifier(3),

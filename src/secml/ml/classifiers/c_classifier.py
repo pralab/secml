@@ -226,7 +226,9 @@ class CClassifier(CCreator):
         -------
         score : CArray
             Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
+            Dense flat array of shape (n_samples,) if y is not None,
+            otherwise a (n_samples, n_classes) array.
+
         """
         self._check_is_fitted()
         x = x.atleast_2d()  # Ensuring input is 2-D

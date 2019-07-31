@@ -275,7 +275,8 @@ class CClassifierTestCases(CUnitTest):
             ds, clf, pre_id_list, kwargs_list)
 
         self.logger.info(
-            "Testing clf with preprocessor inside:\n{:}".format(clf_pre))
+            "Testing {:} with preprocessor inside:\n{:}".format(
+                clf.__class__.__name__, clf_pre))
 
         y1, score1 = clf_pre.predict(ds.X, return_decision_function=True)
         y2, score2 = clf.predict(data_pre, return_decision_function=True)

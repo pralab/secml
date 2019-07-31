@@ -410,16 +410,22 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : {1}
+        y : {0, 1, None}
             The label of the class wrt the function should be calculated.
+            If None, return the output for all classes.
 
         Returns
         -------
         score : CArray
             Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
+            Dense flat array of shape (n_samples,) if `y` is not None,
+            otherwise a (n_samples, n_classes) array.
 
         """
+        if y not in (0, 1, None):
+            raise ValueError("decision function cannot be computed "
+                             "against class {:}.".format(y))
+
         if self.is_kernel_linear():  # Scores are given by the linear model
             return CClassifierLinear._decision_function(self, x, y=y)
 
@@ -430,8 +436,5 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         scores[:, 0] = -score.ravel().T
         scores[:, 1] = score.ravel().T
 
-        if y is not None:
-            return scores[:, y].ravel()
-        else:
-            return scores
+        return scores[:, y].ravel() if y is not None else scores
 

@@ -115,14 +115,20 @@ class CClassifierLinear(CClassifier):
             (n_patterns, n_features).
         y : {0, 1, None}
             The label of the class wrt the function should be calculated.
+            If None, return the output for all classes.
 
         Returns
         -------
         score : CArray
             Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
+            Dense flat array of shape (n_samples,) if y is not None,
+            otherwise a (n_samples, n_classes) array.
 
         """
+        if y not in (0, 1, None):
+            raise ValueError("decision function cannot be computed "
+                             "against class {:}.".format(y))
+
         # Computing: `x * w^T`
         score = CArray(x.dot(self.w.T)).todense().ravel() + self.b
 

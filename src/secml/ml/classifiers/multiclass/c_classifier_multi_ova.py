@@ -141,14 +141,16 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : int
+        y : int or None, optional
             The label of the class wrt the function should be calculated.
+            If None, return the output for all classes.
 
         Returns
         -------
         score : CArray
             Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
+            Dense flat array of shape (n_samples,) if y is not None,
+            otherwise a (n_samples, n_classes) array.
 
         """
         # Getting predicted scores for classifier associated with y
