@@ -209,10 +209,8 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         mc = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                       class_weight='balanced')
 
-        scores_d = self._test_fun_multiclass(mc, self.dataset.todense())
-        scores_s = self._test_fun_multiclass(mc, self.dataset.tosparse())
-
-        self.assert_array_almost_equal(scores_d, scores_s)
+        self._test_fun(mc, self.dataset.todense())
+        self._test_fun(mc, self.dataset.tosparse())
 
     def test_gradient(self):
         """Unittests for gradient() function."""
