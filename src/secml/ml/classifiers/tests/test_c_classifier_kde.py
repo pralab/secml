@@ -2,10 +2,9 @@ from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierKDE
-from secml.array import CArray
 from secml.ml.kernel import CKernelRBF
 from secml.ml.features.normalization import CNormalizerMinMax
-from secml.figure import CFigure
+from secml.utils import fm
 
 
 class TestCClassifierKDE(CClassifierTestCases):
@@ -27,123 +26,24 @@ class TestCClassifierKDE(CClassifierTestCases):
         self.logger.info(
             "Testing Stochastic gradient descent classifier training ")
 
-    def test_draw(self):
+    def test_plot(self):
         """ Compare the classifiers graphically"""
-        self.logger.info("Testing classifiers graphically")
-        # Preparation of the grid
-        fig = CFigure()
-        fig.sp.plot_ds(self.dataset)
-
-        self.kde.fit(self.dataset)
-
-        fig.sp.plot_fun(self.kde.decision_function, y=1, plot_levels=False)
-        fig.title('kde Classifier')
-
-        self.logger.info(self.kde.predict(self.dataset.X))
-
-        fig.show()
+        with self.logger.catch_warnings():
+            # KDE do not return the labels in 0, 1, ..
+            self.logger.filterwarnings(
+                "ignore",
+                message="No contour levels were found*",
+                category=UserWarning)
+            fig = self._test_plot(self.kde, self.dataset, levels=[5e-4])
+            fig.savefig(fm.join(fm.abspath(__file__), 'figs',
+                                'test_c_classifier_kde.pdf'))
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self.logger.info(
-            "Test for decision_function() and predict() methods.")
+        scores_d = self._test_fun(self.kde, self.dataset.todense())
+        scores_s = self._test_fun(self.kde, self.dataset.tosparse())
 
-        self.kde.fit(self.dataset)
-
-        x = x_norm = self.dataset.X
-        p = p_norm = self.dataset.X[0, :].ravel()
-
-        # Transform data if a preprocess is defined
-        if self.kde.preprocess is not None:
-            x_norm = self.kde.preprocess.transform(x)
-            p_norm = self.kde.preprocess.transform(p)
-
-        # Testing decision_function on multiple points
-
-        df_scores_neg = self.kde.decision_function(x, y=0)
-        self.logger.info(
-            "decision_function(p_norm, y=0):\n{:}".format(df_scores_neg))
-        self._check_df_scores(df_scores_neg, self.dataset.num_samples)
-
-        df_scores_pos = self.kde.decision_function(x, y=1)
-        self.logger.info(
-            "decision_function(x, y=1):\n{:}".format(df_scores_pos))
-        self._check_df_scores(df_scores_pos, self.dataset.num_samples)
-
-        self.assert_array_equal(1 - df_scores_neg, df_scores_pos)
-
-        # Testing _decision_function on multiple points
-
-        ds_priv_scores_neg = self.kde._decision_function(x_norm, y=0)
-        self.logger.info("_decision_function(x_norm, y=0):\n"
-                         "{:}".format(ds_priv_scores_neg))
-        self._check_df_scores(ds_priv_scores_neg, self.dataset.num_samples)
-
-        ds_priv_scores_pos = self.kde._decision_function(x_norm, y=1)
-        self.logger.info("_decision_function(x_norm, y=1):\n"
-                         "{:}".format(ds_priv_scores_pos))
-        self._check_df_scores(ds_priv_scores_pos, self.dataset.num_samples)
-
-        # Comparing output of public and private
-
-        self.assert_array_equal(df_scores_pos, ds_priv_scores_pos)
-        self.assert_array_equal(df_scores_neg, ds_priv_scores_neg)
-
-        # Testing predict on multiple points
-
-        labels, scores = self.kde.predict(x, return_decision_function=True)
-        self.logger.info(
-            "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
-        self._check_classify_scores(
-            labels, scores, self.dataset.num_samples, self.kde.n_classes)
-
-        # Comparing output of decision_function and predict
-
-        self.assert_array_equal(df_scores_neg, scores[:, 0].ravel())
-        self.assert_array_equal(df_scores_pos, scores[:, 1].ravel())
-
-        # Testing decision_function on single point
-
-        df_scores_neg = self.kde.decision_function(p, y=0)
-        self.logger.info(
-            "decision_function(p, y=0):\n{:}".format(df_scores_neg))
-        self._check_df_scores(df_scores_neg, 1)
-
-        df_scores_pos = self.kde.decision_function(p, y=1)
-        self.logger.info(
-            "decision_function(p, y=1):\n{:}".format(df_scores_pos))
-        self._check_df_scores(df_scores_pos, 1)
-
-        self.assert_array_equal(1 - df_scores_neg, df_scores_pos)
-
-        # Testing _decision_function on single point
-
-        df_priv_scores_neg = self.kde._decision_function(p_norm, y=0)
-        self.logger.info("_decision_function(p_norm, y=0):\n"
-                         "{:}".format(df_priv_scores_neg))
-        self._check_df_scores(df_priv_scores_neg, 1)
-
-        df_priv_scores_pos = self.kde._decision_function(p_norm, y=1)
-        self.logger.info("_decision_function(p_norm, y=1):\n"
-                         "{:}".format(df_priv_scores_pos))
-        self._check_df_scores(df_priv_scores_pos, 1)
-
-        # Comparing output of public and private
-
-        self.assert_array_equal(df_scores_pos, df_priv_scores_pos)
-        self.assert_array_equal(df_scores_neg, df_priv_scores_neg)
-
-        self.logger.info("Testing predict on single point")
-
-        labels, scores = self.kde.predict(p, return_decision_function=True)
-        self.logger.info(
-            "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
-        self._check_classify_scores(labels, scores, 1, self.kde.n_classes)
-
-        # Comparing output of decision_function and predict
-
-        self.assert_array_equal(df_scores_neg, CArray(scores[:, 0]).ravel())
-        self.assert_array_equal(df_scores_pos, CArray(scores[:, 1]).ravel())
+        self.assert_array_almost_equal(scores_d, scores_s)
 
     def test_gradient(self):
         """Unittest for `gradient_f_x` method."""

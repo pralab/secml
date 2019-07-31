@@ -1,4 +1,5 @@
 from .c_classifier import CClassifier
+from .c_classifier_sklearn import CClassifierSkLearn
 from .c_classifier_linear import CClassifierLinear
 from .c_classifier_svm import CClassifierSVM
 from .c_classifier_sgd import CClassifierSGD

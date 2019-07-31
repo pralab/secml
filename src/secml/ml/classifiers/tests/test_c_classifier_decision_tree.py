@@ -1,8 +1,8 @@
 from secml.ml.classifiers.tests import CClassifierTestCases
 
-from secml.data.loader import CDLIris
+from secml.data.loader import CDLIris, CDLRandomBlobs
 from secml.ml.classifiers import CClassifierDecisionTree
-from secml.array import CArray
+from secml.utils import fm
 
 
 class TestCClassifierDecisionTree(CClassifierTestCases):
@@ -45,13 +45,8 @@ class TestCClassifierDecisionTree(CClassifierTestCases):
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self.logger.info(
-            "Test for decision_function() and predict() methods.")
-
-        scores_d = self._test_fun_multiclass(
-            self.dec_tree, self.dataset.todense())
-        scores_s = self._test_fun_multiclass(
-            self.dec_tree, self.dataset.tosparse())
+        scores_d = self._test_fun(self.dec_tree, self.dataset.todense())
+        scores_s = self._test_fun(self.dec_tree, self.dataset.tosparse())
 
         self.assert_array_almost_equal(scores_d, scores_s)
 
@@ -65,6 +60,13 @@ class TestCClassifierDecisionTree(CClassifierTestCases):
         # Mixed linear/nonlinear transformations
         self._test_preprocess(self.dataset, self.dec_tree,
                               ['pca', 'unit-norm'], [{}, {}])
+
+    def test_plot(self):
+        ds = CDLRandomBlobs(n_samples=100, centers=3, n_features=2,
+                            random_state=1).load()
+        fig = self._test_plot(self.dec_tree, ds, levels=[0.5])
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
+                            'test_c_classifier_decision_tree.pdf'))
 
 
 if __name__ == '__main__':

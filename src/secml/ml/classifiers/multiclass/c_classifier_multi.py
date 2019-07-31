@@ -258,43 +258,6 @@ class CClassifierMulticlass(CClassifier):
         """
         raise NotImplementedError
 
-    def decision_function(self, x, y):
-        """Computes the decision function for each pattern in x.
-
-        If a preprocess has been specified, input is normalized
-        before computing the decision function.
-
-        .. note::
-
-            The actual decision function should be implemented
-            case by case inside :meth:`_decision_function` method.
-
-        Parameters
-        ----------
-        x : CArray
-            Array with new patterns to classify, 2-Dimensional of shape
-            (n_patterns, n_features).
-        y : int
-            The label of the class wrt the function should be calculated.
-
-        Returns
-        -------
-        score : CArray
-            Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
-
-        """
-        self._check_is_fitted()
-
-        x = x.atleast_2d()  # Ensuring input is 2-D
-
-        # Transform data if a preprocess is defined
-        x = self._preprocess_data(x)
-
-        self._check_clf_index(y)  # Check the binary classifier input index
-
-        return self._decision_function(x, y)
-
     def apply_method(self, method, *args, **kwargs):
         """Apply input method to all trained classifiers.
 

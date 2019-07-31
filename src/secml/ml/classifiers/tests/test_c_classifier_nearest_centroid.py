@@ -1,10 +1,9 @@
 from secml.ml.classifiers.tests import CClassifierTestCases
 
-from secml.data.loader import CDLRandom
+from secml.data.loader import CDLRandom, CDLRandomBlobs
 from secml.ml.classifiers import CClassifierNearestCentroid
-from secml.array import CArray
-from secml.figure import CFigure
 from secml.ml.features.normalization import CNormalizerMinMax
+from secml.utils import fm
 
 
 class TestCClassifierNearestCentroid(CClassifierTestCases):
@@ -20,27 +19,16 @@ class TestCClassifierNearestCentroid(CClassifierTestCases):
 
         self.nc = CClassifierNearestCentroid()
 
-    def test_draw(self):
+    def test_plot(self):
         """ Compare the classifiers graphically"""
-        self.logger.info("Testing classifiers graphically")
-        # Preparation of the grid
-        fig = CFigure()
-        fig.sp.plot_ds(self.dataset)
-
-        self.nc.fit(self.dataset)
-
-        fig.sp.plot_fun(self.nc.decision_function, y=1)
-        fig.title('nearest centroid  Classifier')
-
-        self.logger.info(self.nc.predict(self.dataset.X))
-
-        fig.show()
+        ds = CDLRandomBlobs(n_samples=100, centers=3, n_features=2,
+                            random_state=1).load()
+        fig = self._test_plot(self.nc, ds, [-10])
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
+                            'test_c_classifier_nearest_centroid.pdf'))
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self.logger.info(
-            "Test for decision_function() and predict() methods.")
-
         scores_d = self._test_fun(self.nc, self.dataset.todense())
         scores_s = self._test_fun(self.nc, self.dataset.tosparse())
 

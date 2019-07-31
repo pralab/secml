@@ -30,7 +30,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
 
         multiclass.fit(self.dataset, n_jobs=2)
         class_pred, score_pred = multiclass.predict(
-            self.dataset.X, n_jobs=2, return_decision_function=True)
+            self.dataset.X, return_decision_function=True)
 
         self.logger.info("Predicted: \n{:}".format(class_pred))
         self.logger.info("Real: \n{:}".format(self.dataset.Y))
@@ -189,8 +189,8 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
                            facecolors='none', linewidths=2)
 
         # Plotting multiclass decision function
-        fig.sp.plot_decision_function(multiclass, n_grid_points=100,
-                                      grid_limits=ds.get_bounds(offset=5))
+        fig.sp.plot_decision_regions(multiclass, n_grid_points=100,
+                                     grid_limits=ds.get_bounds(offset=5))
 
         fig.sp.xlim(x_bounds[0] - .5 * x_bounds[1],
                     x_bounds[1] + .5 * x_bounds[1])
@@ -209,8 +209,8 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         mc = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                       class_weight='balanced')
 
-        scores_d = self._test_fun_multiclass(mc, self.dataset.todense())
-        scores_s = self._test_fun_multiclass(mc, self.dataset.tosparse())
+        scores_d = self._test_fun(mc, self.dataset.todense())
+        scores_s = self._test_fun(mc, self.dataset.tosparse())
 
         self.assert_array_almost_equal(scores_d, scores_s)
 

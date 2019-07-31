@@ -4,6 +4,7 @@ from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.features import CPreProcess
 from secml.optim.function import CFunction
+from secml.figure import CFigure
 from secml.core.constants import eps
 
 
@@ -43,6 +44,9 @@ class CClassifierTestCases(CUnitTest):
             Classifier scores computed on a single point.
 
         """
+        self.logger.info(
+            "Test for decision_function() and predict() methods.")
+
         if ds.issparse:
             self.logger.info("Testing on sparse data...")
         else:
@@ -50,210 +54,53 @@ class CClassifierTestCases(CUnitTest):
 
         clf.fit(ds)
 
-        x = x_norm = ds.X
-        p = p_norm = ds.X[0, :].ravel()
+        # we have to ensure at least 2d here, since _decision_function is not
+        # applying this change anymore (while decision_function does).
+        x = x_norm = ds.X.atleast_2d()
+        p = p_norm = ds.X[0, :].ravel().atleast_2d()
 
-        # Transform data if a preprocess is defined
+        # Transform data if preprocess is defined
         if clf.preprocess is not None:
             x_norm = clf.preprocess.transform(x)
             p_norm = clf.preprocess.transform(p)
 
         # Testing decision_function on multiple points
-        df_scores_neg = clf.decision_function(x, y=0)
-        self.logger.info("decision_function(x, y=0):\n"
-                         "{:}".format(df_scores_neg))
-        self._check_df_scores(df_scores_neg, ds.num_samples)
-
-        df_scores_pos = clf.decision_function(x, y=1)
-        self.logger.info("decision_function(x, y=1):\n"
-                         "{:}".format(df_scores_pos))
-        self._check_df_scores(df_scores_pos, ds.num_samples)
-
-        self.assert_array_equal(
-            (df_scores_pos.sign() * -1), df_scores_neg.sign())
-
-        # Testing _decision_function on multiple points
-
-        ds_priv_scores = clf._decision_function(x_norm, y=1)
-        self.logger.info("_decision_function(x_norm, y=1):\n"
-                         "{:}".format(ds_priv_scores))
-        self._check_df_scores(ds_priv_scores, ds.num_samples)
-
-        # Comparing output of public and private
-
-        self.assert_array_equal(df_scores_pos, ds_priv_scores)
+        df, df_priv = [], []
+        for y in range(ds.num_classes):
+            df.append(clf.decision_function(x, y=y))
+            df_priv.append(clf._decision_function(x_norm, y=y))
+            self.logger.info(
+                "decision_function(x, y={:}): {:}".format(y, df[y]))
+            self.logger.info(
+                "_decision_function(x_norm, y={:}): {:}".format(y, df_priv[y]))
+            self._check_df_scores(df_priv[y], ds.num_samples)
+            self._check_df_scores(df[y], ds.num_samples)
+            self.assertFalse((df[y] != df_priv[y]).any())
 
         # Testing predict on multiple points
-
-        labels, scores = clf.predict(ds.X, return_decision_function=True)
-        self.logger.info("predict(x):\nlabels: {:}\n"
-                         "scores: {:}".format(labels, scores))
-        self._check_classify_scores(labels, scores, ds.num_samples, clf.n_classes)
-
-        # Comparing output of decision_function and predict
-        self.assert_array_equal(df_scores_neg, scores[:, 0].ravel())
-        self.assert_array_equal(df_scores_pos, scores[:, 1].ravel())
-
-        # Testing decision_function on single point
-
-        df_scores_neg = clf.decision_function(p, y=0)
-        self.logger.info("decision_function(p, y=0):\n"
-                         "{:}".format(df_scores_neg))
-        self._check_df_scores(df_scores_neg, 1)
-
-        df_scores_pos = clf.decision_function(p, y=1)
-        self.logger.info("decision_function(p, y=1):\n"
-                         "{:}".format(df_scores_pos))
-        self._check_df_scores(df_scores_pos, 1)
-
-        self.assert_array_equal(
-            (df_scores_pos.sign() * -1), df_scores_neg.sign())
-
-        # Testing _decision_function on single point
-
-        df_priv_scores = clf._decision_function(p_norm, y=1)
-        self.logger.info("_decision_function(p_norm, y=1):\n"
-                         "{:}".format(df_priv_scores))
-        self._check_df_scores(df_priv_scores, 1)
-
-        # Comparing output of public and private
-
-        self.assert_array_equal(df_scores_pos, df_priv_scores)
-
-        self.logger.info("Testing predict on single point")
-
-        labels, scores = clf.predict(p, return_decision_function=True)
-        self.logger.info("predict(p):\nlabels: {:}\n"
-                         "scores: {:}".format(labels, scores))
-        self._check_classify_scores(labels, scores, 1, clf.n_classes)
-
-        # Comparing output of decision_function and predict
-
-        self.assert_array_equal(df_scores_neg, CArray(scores[:, 0]).ravel())
-        self.assert_array_equal(df_scores_pos, CArray(scores[:, 1]).ravel())
-
-        return scores
-
-    # FIXME: MERGE THIS WITH _test_fun
-    def _test_fun_multiclass(self, clf, ds):
-        """Test for `decision_function` and `predict` (multiclass
-
-        Parameters
-        ----------
-        clf : CClassifier
-        ds : CDataset
-
-        Returns
-        -------
-        scores : CArray
-            Classifier scores computed on a single point.
-
-        """
-
-        clf.fit(ds)
-
-        x = x_norm = ds.X
-        p = p_norm = ds.X[0, :].ravel()
-
-        # Transform data if a preprocess is defined
-        if clf.preprocess is not None:
-            x_norm = clf.preprocess.transform(x)
-            p_norm = clf.preprocess.transform(p)
-
-        # Testing decision_function on multiple points
-
-        df_scores_0 = clf.decision_function(x, y=0)
-        self.logger.info(
-            "decision_function(x, y=0):\n{:}".format(df_scores_0))
-        self._check_df_scores(df_scores_0, ds.num_samples)
-
-        df_scores_1 = clf.decision_function(x, y=1)
-        self.logger.info(
-            "decision_function(x, y=1):\n{:}".format(df_scores_1))
-        self._check_df_scores(df_scores_1, ds.num_samples)
-
-        df_scores_2 = clf.decision_function(x, y=2)
-        self.logger.info(
-            "decision_function(x, y=2):\n{:}".format(df_scores_2))
-        self._check_df_scores(df_scores_2, ds.num_samples)
-
-        # Testing _decision_function on multiple points
-
-        ds_priv_scores_0 = clf._decision_function(x_norm, y=0)
-        self.logger.info("_decision_function(x_norm, y=0):\n"
-                         "{:}".format(ds_priv_scores_0))
-        self._check_df_scores(ds_priv_scores_0, ds.num_samples)
-
-        ds_priv_scores_1 = clf._decision_function(x_norm, y=1)
-        self.logger.info("_decision_function(x_norm, y=1):\n"
-                         "{:}".format(ds_priv_scores_1))
-        self._check_df_scores(ds_priv_scores_1, ds.num_samples)
-
-        ds_priv_scores_2 = clf._decision_function(x_norm, y=2)
-        self.logger.info("_decision_function(x_norm, y=2):\n"
-                         "{:}".format(ds_priv_scores_2))
-        self._check_df_scores(ds_priv_scores_2, ds.num_samples)
-
-        # Comparing output of public and private
-
-        self.assert_array_equal(df_scores_0, ds_priv_scores_0)
-        self.assert_array_equal(df_scores_1, ds_priv_scores_1)
-        self.assert_array_equal(df_scores_2, ds_priv_scores_2)
-
-        # Testing predict on multiple points
-
         labels, scores = clf.predict(
             x, return_decision_function=True)
         self.logger.info(
-            "predict(x):\nlabels: {:}\nscores:{:}".format(labels, scores))
+            "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
         self._check_classify_scores(
             labels, scores, ds.num_samples, clf.n_classes)
 
         # Comparing output of decision_function and predict
-
-        self.assert_array_equal(df_scores_0, scores[:, 0].ravel())
-        self.assert_array_equal(df_scores_1, scores[:, 1].ravel())
-        self.assert_array_equal(df_scores_2, scores[:, 2].ravel())
+        for y in range(ds.num_classes):
+            self.assertFalse((df[y] != scores[:, y].ravel()).any())
 
         # Testing decision_function on single point
-
-        df_scores_0 = clf.decision_function(p, y=0)
-        self.logger.info(
-            "decision_function(p, y=0):\n{:}".format(df_scores_0))
-        self._check_df_scores(df_scores_0, 1)
-
-        df_scores_1 = clf.decision_function(p, y=1)
-        self.logger.info(
-            "decision_function(p, y=1):\n{:}".format(df_scores_1))
-        self._check_df_scores(df_scores_1, 1)
-
-        df_scores_2 = clf.decision_function(p, y=2)
-        self.logger.info(
-            "decision_function(p, y=2):\n{:}".format(df_scores_2))
-        self._check_df_scores(df_scores_2, 1)
-
-        # Testing _decision_function on single point
-
-        df_priv_scores_0 = clf._decision_function(p_norm, y=0)
-        self.logger.info("_decision_function(p_norm, y=0):\n"
-                         "{:}".format(df_priv_scores_0))
-        self._check_df_scores(df_priv_scores_0, 1)
-
-        df_priv_scores_1 = clf._decision_function(p_norm, y=1)
-        self.logger.info("_decision_function(p_norm, y=1):\n"
-                         "{:}".format(df_priv_scores_1))
-        self._check_df_scores(df_priv_scores_1, 1)
-
-        df_priv_scores_2 = clf._decision_function(p_norm, y=2)
-        self.logger.info("_decision_function(p_norm, y=2):\n"
-                         "{:}".format(df_priv_scores_2))
-        self._check_df_scores(df_priv_scores_2, 1)
-
-        # Comparing output of public and private
-
-        self.assert_array_equal(df_scores_0, df_priv_scores_0)
-        self.assert_array_equal(df_scores_1, df_priv_scores_1)
-        self.assert_array_equal(df_scores_2, df_priv_scores_2)
+        df, df_priv = [], []
+        for y in range(ds.num_classes):
+            df.append(clf.decision_function(p, y=y))
+            df_priv.append(clf._decision_function(p_norm, y=y))
+            self.logger.info(
+                "decision_function(p, y={:}): {:}".format(y, df[y]))
+            self._check_df_scores(df[y], 1)
+            self.logger.info(
+                "_decision_function(p_norm, y={:}): {:}".format(y, df_priv[y]))
+            self._check_df_scores(df_priv[y], 1)
+            self.assertFalse((df[y] != df_priv[y]).any())
 
         self.logger.info("Testing predict on single point")
 
@@ -264,12 +111,31 @@ class CClassifierTestCases(CUnitTest):
         self._check_classify_scores(labels, scores, 1, clf.n_classes)
 
         # Comparing output of decision_function and predict
-
-        self.assert_array_equal(df_scores_0, CArray(scores[:, 0]).ravel())
-        self.assert_array_equal(df_scores_1, CArray(scores[:, 1]).ravel())
-        self.assert_array_equal(df_scores_2, CArray(scores[:, 2]).ravel())
+        for y in range(ds.num_classes):
+            self.assertFalse((df[y] != scores[:, y].ravel()).any())
 
         return scores
+
+    def _test_plot(self, clf, ds, levels=None):
+        """Plot the decision function of a classifier."""
+        self.logger.info("Testing classifiers graphically")
+        # Preparation of the grid
+        fig = CFigure(width=8, height=4, fontsize=8)
+        clf.fit(ds)
+
+        fig.subplot(1, 2, 1)
+        fig.sp.plot_ds(ds)
+        fig.sp.plot_decision_regions(
+            clf, n_grid_points=50, grid_limits=ds.get_bounds())
+        fig.sp.title("Decision regions")
+
+        fig.subplot(1, 2, 2)
+        fig.sp.plot_ds(ds)
+        fig.sp.plot_fun(clf.decision_function, grid_limits=ds.get_bounds(),
+                        levels=levels, y=1)
+        fig.sp.title("Discriminant function for y=1")
+
+        return fig
 
     def _test_gradient_numerical(self, clf, x, extra_classes=None,
                                  th=1e-3, epsilon=eps, **grad_kwargs):
@@ -409,7 +275,8 @@ class CClassifierTestCases(CUnitTest):
             ds, clf, pre_id_list, kwargs_list)
 
         self.logger.info(
-            "Testing clf with preprocessor inside:\n{:}".format(clf_pre))
+            "Testing {:} with preprocessor inside:\n{:}".format(
+                clf.__class__.__name__, clf_pre))
 
         y1, score1 = clf_pre.predict(ds.X, return_decision_function=True)
         y2, score2 = clf.predict(data_pre, return_decision_function=True)

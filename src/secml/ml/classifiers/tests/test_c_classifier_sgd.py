@@ -11,6 +11,7 @@ from secml.data.loader import CDLRandom, CDLRandomBlobs
 from secml.ml.features.normalization import CNormalizerMinMax
 from secml.ml.peval.metrics import CMetric
 from secml.figure import CFigure
+from secml.utils import fm
 
 
 class TestCClassifierSGD(CClassifierTestCases):
@@ -65,7 +66,7 @@ class TestCClassifierSGD(CClassifierTestCases):
         fig.sp.plot_ds(dataset)
         # Plot objective function
         fig.sp.plot_fun(svm.decision_function,
-                        grid_limits=dataset.get_bounds())
+                        grid_limits=dataset.get_bounds(), y=1)
         fig.sp.title('SVM')
 
         fig.subplot(2, 1, 2)
@@ -73,10 +74,11 @@ class TestCClassifierSGD(CClassifierTestCases):
         fig.sp.plot_ds(dataset)
         # Plot objective function
         fig.sp.plot_fun(self.sgds[0].decision_function,
-                        grid_limits=dataset.get_bounds())
+                        grid_limits=dataset.get_bounds(), y=1)
         fig.sp.title('SGD Classifier')
 
-        fig.show()
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
+                            'test_c_classifier_sgd1.pdf'))
 
     def test_performance(self):
         """ Compare the classifiers performance"""
@@ -130,7 +132,7 @@ class TestCClassifierSGD(CClassifierTestCases):
         for (i, j), val in np.ndenumerate(X1):
             x1 = val
             x2 = X2[i, j]
-            Z[i, j] = clf.decision_function(CArray([x1, x2]))
+            Z[i, j] = clf.decision_function(CArray([x1, x2]), y=1)
         levels = [-1.0, 0.0, 1.0]
         linestyles = ['dashed', 'solid', 'dashed']
         colors = 'k'
@@ -140,28 +142,20 @@ class TestCClassifierSGD(CClassifierTestCases):
                        dataset.X[:, 1].ravel(),
                        c=dataset.Y, s=40)
 
-        fig.show()
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
+                            'test_c_classifier_sgd2.pdf'))
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self.logger.info(
-            "Test for decision_function() and predict() methods.")
+        for clf in self.sgds:
 
-        for sgd in self.sgds:
+            self.logger.info("SGD kernel: {:}".format(clf.kernel))
 
-            self.logger.info("SGD kernel: {:}".format(sgd.kernel))
-
-            scores_d = self._test_fun(sgd, self.dataset.todense())
-            scores_s = self._test_fun(sgd, self.dataset.tosparse())
+            scores_d = self._test_fun(clf, self.dataset.todense())
+            scores_s = self._test_fun(clf, self.dataset.tosparse())
 
             # FIXME: WHY THIS TEST IS CRASHING? RANDOM_STATE MAYBE?
             # self.assert_array_almost_equal(scores_d, scores_s)
-
-            # Testing error raising
-            with self.assertRaises(ValueError):
-                sgd._decision_function(self.dataset.X, y=0)
-            with self.assertRaises(ValueError):
-                sgd._decision_function(self.dataset.X[0, :], y=0)
 
     def test_gradient(self):
         """Unittests for gradient_f_x."""

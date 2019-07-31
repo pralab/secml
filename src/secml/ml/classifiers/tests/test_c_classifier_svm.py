@@ -11,6 +11,7 @@ from secml.array import CArray
 from secml.ml.classifiers import CClassifierSVM
 from secml.figure import CFigure
 from secml.ml.kernel import *
+from secml.utils import fm
 
 
 class TestCClassifierSVM(CClassifierTestCases):
@@ -166,7 +167,8 @@ class TestCClassifierSVM(CClassifierTestCases):
 
         def _check_sparsedata(y, score, y_sparse, score_sparse):
 
-            self.assertFalse((y != y_sparse).any(), "Predicted labels on sparse data are different.")
+            self.assertFalse((y != y_sparse).any(),
+                             "Predicted labels on sparse data are different.")
             # Rounding scores to prevent false positives in assert
             score_rounded = score[:, 1].ravel().round(3)
             score_sparse_rounded = score_sparse[:, 1].ravel().round(3)
@@ -240,7 +242,8 @@ class TestCClassifierSVM(CClassifierTestCases):
         fig.sp.scatter(X[:, 0].ravel(), X[:, 1].ravel(), c=y)
         fig.sp.legend()
 
-        fig.show()
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
+                            'test_c_classifier_svm.pdf'))
 
     def test_store_dual_vars(self):
         """Test of parameters that control storing of dual space variables."""
@@ -293,23 +296,14 @@ class TestCClassifierSVM(CClassifierTestCases):
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self.logger.info(
-            "Test for decision_function() and predict() methods.")
+        for clf in self.svms:
 
-        for svm in self.svms:
+            self.logger.info("SVM kernel: {:}".format(clf.kernel))
 
-            self.logger.info("SVM kernel: {:}".format(svm.kernel))
-
-            scores_d = self._test_fun(svm, self.dataset.todense())
-            scores_s = self._test_fun(svm, self.dataset.tosparse())
+            scores_d = self._test_fun(clf, self.dataset.todense())
+            scores_s = self._test_fun(clf, self.dataset.tosparse())
 
             self.assert_array_almost_equal(scores_d, scores_s)
-
-            # Testing error raising
-            with self.assertRaises(ValueError):
-                svm._decision_function(self.dataset.X, y=0)
-            with self.assertRaises(ValueError):
-                svm._decision_function(self.dataset.X[0, :], y=0)
 
     def test_gradient(self):
         """Performs tests on gradient."""

@@ -4,10 +4,10 @@ from sklearn.svm import SVC
 from sklearn.ensemble import BaggingClassifier
 
 from secml.array import CArray
-from secml.figure import CFigure
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierMCSLinear, CClassifierSVM
 from secml.ml.peval.metrics import CMetric
+from secml.utils import fm
 
 
 class TestCClassifierMCSLinear(CClassifierTestCases):
@@ -59,29 +59,14 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
             "Performance difference is: {:}".format(abs(f1_mcs - f1_skbag)))
 
     def test_plot(self):
-
-        self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
-                                 n_clusters_per_class=1).load()
-
-        self.logger.info("Training MCS on 2D Dataset... ")
-        self.mcs = CClassifierMCSLinear(CClassifierSVM(),
-                                        max_features=0.5,
-                                        max_samples=0.5)
-        self.mcs.fit(self.dataset)
-
-        fig = CFigure()
-        # Plot dataset points
-        fig.sp.plot_ds(self.dataset)
-        # Plot objective function
-        fig.sp.plot_fun(self.mcs.decision_function,
-                        grid_limits=self.dataset.get_bounds())
-        fig.show()
+        ds = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
+                       n_clusters_per_class=1).load()
+        fig = self._test_plot(self.mcs, ds)
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
+                            'test_c_classifier_mcs_linear.pdf'))
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self.logger.info(
-            "Test for decision_function() and predict() methods.")
-
         scores_d = self._test_fun(self.mcs, self.dataset.todense())
         scores_s = self._test_fun(self.mcs, self.dataset.tosparse())
 

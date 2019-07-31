@@ -398,7 +398,7 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
 
         return classifier
 
-    def _decision_function(self, x, y=1):
+    def _decision_function(self, x, y=None):
         """Computes the distance from the separating hyperplane for each pattern in x.
 
         For non linear SVM, the kernel between input patterns and
@@ -410,29 +410,31 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : {1}
+        y : {0, 1, None}
             The label of the class wrt the function should be calculated.
-            decision function is always computed wrt positive class (1).
+            If None, return the output for all classes.
 
         Returns
         -------
         score : CArray
             Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
+            Dense flat array of shape (n_samples,) if `y` is not None,
+            otherwise a (n_samples, n_classes) array.
 
         """
+        if y not in (0, 1, None):
+            raise ValueError("decision function cannot be computed "
+                             "against class {:}.".format(y))
+
         if self.is_kernel_linear():  # Scores are given by the linear model
-            return CClassifierLinear._decision_function(
-                self, x, y=y)
+            return CClassifierLinear._decision_function(self, x, y=y)
 
-        # Non-linear SVM
+        k = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
+        score = CArray(k).todense().ravel() + self.b
 
-        if y != 1:
-            raise ValueError(
-                "decision function is always computed wrt positive class.")
+        scores = CArray.ones(shape=(x.shape[0], self.n_classes))
+        scores[:, 0] = -score.ravel().T
+        scores[:, 1] = score.ravel().T
 
-        x = x.atleast_2d()  # Ensuring input is 2-D
-
-        m = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
-        return CArray(m).todense().ravel() + self.b
+        return scores[:, y].ravel() if y is not None else scores
 

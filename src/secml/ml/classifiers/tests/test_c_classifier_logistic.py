@@ -2,9 +2,8 @@ from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierLogistic
-from secml.array import CArray
 from secml.ml.features.normalization import CNormalizerMinMax
-from secml.figure import CFigure
+from secml.utils import fm
 
 
 class TestCClassifierLogistic(CClassifierTestCases):
@@ -22,27 +21,14 @@ class TestCClassifierLogistic(CClassifierTestCases):
         
         self.log = CClassifierLogistic(random_seed=99)
 
-    def test_draw(self):
+    def test_plot(self):
         """ Compare the classifiers graphically"""
-        self.logger.info("Testing classifiers graphically")
-        # Preparation of the grid
-        fig = CFigure()
-        fig.sp.plot_ds(self.dataset)
-
-        self.log.fit(self.dataset)
-
-        fig.sp.plot_fun(self.log.decision_function, y=1)
-        fig.title('Logistic Classifier')
-
-        self.logger.info(self.log.predict(self.dataset.X))
-
-        fig.show()
+        fig = self._test_plot(self.log, self.dataset)
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
+                            'test_c_classifier_logistic.pdf'))
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self.logger.info(
-            "Test for decision_function() and predict() methods.")
-
         scores_d = self._test_fun(self.log, self.dataset.todense())
         scores_s = self._test_fun(self.log, self.dataset.tosparse())
 

@@ -1,12 +1,11 @@
 from secml.ml.classifiers.tests import CClassifierTestCases
 
-from secml.array import CArray
 from secml.ml.classifiers import CClassifierRidge, CClassifierSVM
 from secml.ml.kernel import *
 from secml.data.loader import CDLRandom
 from secml.ml.features.normalization import CNormalizerMinMax
 from secml.ml.peval.metrics import CMetric
-from secml.figure import CFigure
+from secml.utils import fm
 
 
 class TestCClassifierRidge(CClassifierTestCases):
@@ -52,38 +51,14 @@ class TestCClassifierRidge(CClassifierTestCases):
             self.logger.info(
                 "Execution time of ridge: {:}".format(t_ridge.interval))
 
-    def test_draw(self):
+    def test_plot(self):
         """ Compare the classifiers graphically"""
-        self.logger.info("Testing classifiers graphically")
-
-        # generate 2D synthetic data
-        dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=2,
-                            n_clusters_per_class=1, random_state=0).load()
-        dataset.X = CNormalizerMinMax().fit_transform(dataset.X)
-
-        self.ridges[0].fit(dataset)
-
-        svm = CClassifierSVM()
-        svm.fit(dataset)
-
-        fig = CFigure(width=10, markersize=8)
-        fig.subplot(2, 1, 1)
-        # Plot dataset points
-        fig.sp.plot_ds(dataset)
-        # Plot objective function
-        fig.sp.plot_fun(svm.decision_function,
-                        grid_limits=dataset.get_bounds())
-        fig.sp.title('SVM')
-
-        fig.subplot(2, 1, 2)
-        # Plot dataset points
-        fig.sp.plot_ds(dataset)
-        # Plot objective function
-        fig.sp.plot_fun(self.ridges[0].decision_function,
-                        grid_limits=dataset.get_bounds())
-        fig.sp.title('ridge Classifier')
-
-        fig.show()
+        ds = CDLRandom(n_features=2, n_redundant=0, n_informative=2,
+                       n_clusters_per_class=1, random_state=0).load()
+        ds.X = CNormalizerMinMax().fit_transform(ds.X)
+        fig = self._test_plot(self.ridges[0], ds)
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
+                            'test_c_classifier_ridge.pdf'))
 
     def test_performance(self):
         """ Compare the classifiers performance"""
@@ -91,7 +66,6 @@ class TestCClassifierRidge(CClassifierTestCases):
                          "classifiers on the training set")
 
         for ridge in self.ridges:
-
             self.logger.info("RIDGE kernel: {:}".format(ridge.kernel))
 
             svm = CClassifierSVM(ridge.kernel)
@@ -116,9 +90,6 @@ class TestCClassifierRidge(CClassifierTestCases):
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self.logger.info(
-            "Test for decision_function() and predict() methods.")
-
         for ridge in self.ridges:
 
             self.logger.info("RIDGE kernel: {:}".format(ridge.kernel))
@@ -128,12 +99,6 @@ class TestCClassifierRidge(CClassifierTestCases):
 
             # FIXME: WHY THIS TEST IS CRASHING? RANDOM_STATE MAYBE?
             # self.assert_array_almost_equal(scores_d, scores_s)
-
-            # Testing error raising
-            with self.assertRaises(ValueError):
-                ridge._decision_function(self.dataset.X, y=0)
-            with self.assertRaises(ValueError):
-                ridge._decision_function(self.dataset.X[0, :], y=0)
 
     def test_gradient(self):
         """Unittests for gradient_f_x."""
