@@ -2,6 +2,7 @@ from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml.data.loader import CDLIris, CDLRandomBlobs
 from secml.ml.classifiers import CClassifierRandomForest
+from secml.utils import fm
 
 
 class TestCClassifierRandomForest(CClassifierTestCases):
@@ -65,7 +66,8 @@ class TestCClassifierRandomForest(CClassifierTestCases):
         ds = CDLRandomBlobs(n_samples=100, centers=3, n_features=2,
                             random_state=1).load()
         fig = self._test_plot(self.rnd_forest, ds)
-        fig.savefig('test_c_classifier_random_forest.pdf')
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
+                            'test_c_classifier_random_forest.pdf'))
 
 
 if __name__ == '__main__':

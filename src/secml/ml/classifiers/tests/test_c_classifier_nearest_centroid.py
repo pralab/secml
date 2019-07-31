@@ -3,6 +3,7 @@ from secml.ml.classifiers.tests import CClassifierTestCases
 from secml.data.loader import CDLRandom, CDLRandomBlobs
 from secml.ml.classifiers import CClassifierNearestCentroid
 from secml.ml.features.normalization import CNormalizerMinMax
+from secml.utils import fm
 
 
 class TestCClassifierNearestCentroid(CClassifierTestCases):
@@ -23,7 +24,8 @@ class TestCClassifierNearestCentroid(CClassifierTestCases):
         ds = CDLRandomBlobs(n_samples=100, centers=3, n_features=2,
                             random_state=1).load()
         fig = self._test_plot(self.nc, ds)
-        fig.savefig('test_c_classifier_nearest_centroid.pdf')
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
+                            'test_c_classifier_nearest_centroid.pdf'))
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""

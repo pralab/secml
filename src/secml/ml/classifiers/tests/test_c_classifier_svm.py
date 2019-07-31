@@ -11,6 +11,7 @@ from secml.array import CArray
 from secml.ml.classifiers import CClassifierSVM
 from secml.figure import CFigure
 from secml.ml.kernel import *
+from secml.utils import fm
 
 
 class TestCClassifierSVM(CClassifierTestCases):
@@ -166,7 +167,8 @@ class TestCClassifierSVM(CClassifierTestCases):
 
         def _check_sparsedata(y, score, y_sparse, score_sparse):
 
-            self.assertFalse((y != y_sparse).any(), "Predicted labels on sparse data are different.")
+            self.assertFalse((y != y_sparse).any(),
+                             "Predicted labels on sparse data are different.")
             # Rounding scores to prevent false positives in assert
             score_rounded = score[:, 1].ravel().round(3)
             score_sparse_rounded = score_sparse[:, 1].ravel().round(3)
@@ -240,7 +242,8 @@ class TestCClassifierSVM(CClassifierTestCases):
         fig.sp.scatter(X[:, 0].ravel(), X[:, 1].ravel(), c=y)
         fig.sp.legend()
 
-        fig.savefig('test_c_classifier_svm.pdf')
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
+                            'test_c_classifier_svm.pdf'))
 
     def test_store_dual_vars(self):
         """Test of parameters that control storing of dual space variables."""

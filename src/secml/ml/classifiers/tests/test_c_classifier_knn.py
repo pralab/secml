@@ -5,6 +5,7 @@ from six.moves import range
 from secml.ml.classifiers import CClassifierKNN
 from secml.data.loader import CDLRandom, CDLRandomBlobs
 from secml.ml.peval.metrics import CMetricAccuracy
+from secml.utils import fm
 
 
 class TestCClassifierKNN(CClassifierTestCases):
@@ -27,7 +28,8 @@ class TestCClassifierKNN(CClassifierTestCases):
         ds = CDLRandomBlobs(n_samples=100, centers=3, n_features=2,
                             random_state=1).load()
         fig = self._test_plot(self.knn, ds)
-        fig.savefig('test_c_classifier_knn.pdf')
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
+                            'test_c_classifier_knn.pdf'))
 
     def test_classification(self):
         self.logger.info("Check the classification method... ")

@@ -2,10 +2,9 @@ from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierKDE
-from secml.array import CArray
 from secml.ml.kernel import CKernelRBF
 from secml.ml.features.normalization import CNormalizerMinMax
-from secml.figure import CFigure
+from secml.utils import fm
 
 
 class TestCClassifierKDE(CClassifierTestCases):
@@ -30,7 +29,8 @@ class TestCClassifierKDE(CClassifierTestCases):
     def test_plot(self):
         """ Compare the classifiers graphically"""
         fig = self._test_plot(self.kde, self.dataset)
-        fig.savefig('test_c_classifier_kde.pdf')
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
+                            'test_c_classifier_kde.pdf'))
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""

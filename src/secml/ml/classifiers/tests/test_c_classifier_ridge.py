@@ -1,12 +1,11 @@
 from secml.ml.classifiers.tests import CClassifierTestCases
 
-from secml.array import CArray
 from secml.ml.classifiers import CClassifierRidge, CClassifierSVM
 from secml.ml.kernel import *
 from secml.data.loader import CDLRandom
 from secml.ml.features.normalization import CNormalizerMinMax
 from secml.ml.peval.metrics import CMetric
-from secml.figure import CFigure
+from secml.utils import fm
 
 
 class TestCClassifierRidge(CClassifierTestCases):
@@ -55,10 +54,11 @@ class TestCClassifierRidge(CClassifierTestCases):
     def test_plot(self):
         """ Compare the classifiers graphically"""
         ds = CDLRandom(n_features=2, n_redundant=0, n_informative=2,
-                            n_clusters_per_class=1, random_state=0).load()
+                       n_clusters_per_class=1, random_state=0).load()
         ds.X = CNormalizerMinMax().fit_transform(ds.X)
         fig = self._test_plot(self.ridges[0], ds)
-        fig.savefig('test_c_classifier_ridge.pdf')
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
+                            'test_c_classifier_ridge.pdf'))
 
     def test_performance(self):
         """ Compare the classifiers performance"""

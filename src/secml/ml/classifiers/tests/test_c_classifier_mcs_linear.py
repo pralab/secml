@@ -4,10 +4,10 @@ from sklearn.svm import SVC
 from sklearn.ensemble import BaggingClassifier
 
 from secml.array import CArray
-from secml.figure import CFigure
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierMCSLinear, CClassifierSVM
 from secml.ml.peval.metrics import CMetric
+from secml.utils import fm
 
 
 class TestCClassifierMCSLinear(CClassifierTestCases):
@@ -62,7 +62,8 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
         ds = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
                        n_clusters_per_class=1).load()
         fig = self._test_plot(self.mcs, ds)
-        fig.savefig('test_c_classifier_mcs_linear.pdf')
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
+                            'test_c_classifier_mcs_linear.pdf'))
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
