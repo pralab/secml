@@ -19,9 +19,12 @@ class CClassifierSkLearn(CClassifier):
         if hasattr(self._sklearn_model, "decision_function"):
             scores = self._sklearn_model.decision_function(x.get_data())
             probs = False
-        else:
+        elif hasattr(self._sklearn_model, "predict_proba"):
             scores = self._sklearn_model.predict_proba(x.get_data())
             probs = True
+        else:
+            raise AttributeError(
+                "This model has neither decision_function nor predict_proba.")
 
         scores = CArray(scores)
 
