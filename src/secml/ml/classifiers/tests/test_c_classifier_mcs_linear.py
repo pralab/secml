@@ -62,7 +62,7 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
         ds = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
                        n_clusters_per_class=1).load()
         fig = self._test_plot(self.mcs, ds)
-        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
                             'test_c_classifier_mcs_linear.pdf'))
 
     def test_fun(self):

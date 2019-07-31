@@ -24,7 +24,7 @@ class TestCClassifierLogistic(CClassifierTestCases):
     def test_plot(self):
         """ Compare the classifiers graphically"""
         fig = self._test_plot(self.log, self.dataset)
-        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
                             'test_c_classifier_logistic.pdf'))
 
     def test_fun(self):

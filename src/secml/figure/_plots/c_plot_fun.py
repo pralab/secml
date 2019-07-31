@@ -59,7 +59,7 @@ class CPlotFunction(CPlot):
             in the background using a colorbar.
         plot_levels : bool, optional
             Specify if function levels should be plotted (default True).
-        levels : list, optional
+        levels : list or None, optional
             List of levels to be plotted.
             If None, 0 (zero) level will be plotted.
         levels_color : str or tuple or None, optional

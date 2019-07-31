@@ -27,8 +27,8 @@ class TestCClassifierKNN(CClassifierTestCases):
     def test_plot(self):
         ds = CDLRandomBlobs(n_samples=100, centers=3, n_features=2,
                             random_state=1).load()
-        fig = self._test_plot(self.knn, ds)
-        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
+        fig = self._test_plot(self.knn, ds, levels=[0.5])
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
                             'test_c_classifier_knn.pdf'))
 
     def test_classification(self):

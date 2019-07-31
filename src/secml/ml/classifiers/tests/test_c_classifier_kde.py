@@ -28,9 +28,15 @@ class TestCClassifierKDE(CClassifierTestCases):
 
     def test_plot(self):
         """ Compare the classifiers graphically"""
-        fig = self._test_plot(self.kde, self.dataset)
-        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
-                            'test_c_classifier_kde.pdf'))
+        with self.logger.catch_warnings():
+            # KDE do not return the labels in 0, 1, ..
+            self.logger.filterwarnings(
+                "ignore",
+                message="No contour levels were found*",
+                category=UserWarning)
+            fig = self._test_plot(self.kde, self.dataset, levels=[5e-4])
+            fig.savefig(fm.join(fm.abspath(__file__), 'figs',
+                                'test_c_classifier_kde.pdf'))
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""

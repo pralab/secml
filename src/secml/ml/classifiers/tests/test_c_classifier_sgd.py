@@ -77,7 +77,8 @@ class TestCClassifierSGD(CClassifierTestCases):
                         grid_limits=dataset.get_bounds(), y=1)
         fig.sp.title('SGD Classifier')
 
-        fig.savefig('test_c_classifier_sgd1.pdf')
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
+                            'test_c_classifier_sgd1.pdf'))
 
     def test_performance(self):
         """ Compare the classifiers performance"""
@@ -141,7 +142,7 @@ class TestCClassifierSGD(CClassifierTestCases):
                        dataset.X[:, 1].ravel(),
                        c=dataset.Y, s=40)
 
-        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
                             'test_c_classifier_sgd2.pdf'))
 
     def test_fun(self):

@@ -57,7 +57,7 @@ class TestCClassifierRidge(CClassifierTestCases):
                        n_clusters_per_class=1, random_state=0).load()
         ds.X = CNormalizerMinMax().fit_transform(ds.X)
         fig = self._test_plot(self.ridges[0], ds)
-        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
                             'test_c_classifier_ridge.pdf'))
 
     def test_performance(self):

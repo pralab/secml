@@ -242,7 +242,7 @@ class TestCClassifierSVM(CClassifierTestCases):
         fig.sp.scatter(X[:, 0].ravel(), X[:, 1].ravel(), c=y)
         fig.sp.legend()
 
-        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
                             'test_c_classifier_svm.pdf'))
 
     def test_store_dual_vars(self):

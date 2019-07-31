@@ -23,8 +23,8 @@ class TestCClassifierNearestCentroid(CClassifierTestCases):
         """ Compare the classifiers graphically"""
         ds = CDLRandomBlobs(n_samples=100, centers=3, n_features=2,
                             random_state=1).load()
-        fig = self._test_plot(self.nc, ds)
-        fig.savefig(fm.join(fm.abspath(__file__), 'figs' ,
+        fig = self._test_plot(self.nc, ds, [-10])
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
                             'test_c_classifier_nearest_centroid.pdf'))
 
     def test_fun(self):

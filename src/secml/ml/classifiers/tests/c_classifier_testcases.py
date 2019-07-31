@@ -116,7 +116,7 @@ class CClassifierTestCases(CUnitTest):
 
         return scores
 
-    def _test_plot(self, clf, ds):
+    def _test_plot(self, clf, ds, levels=None):
         """Plot the decision function of a classifier."""
         self.logger.info("Testing classifiers graphically")
         # Preparation of the grid
@@ -131,8 +131,8 @@ class CClassifierTestCases(CUnitTest):
 
         fig.subplot(1, 2, 2)
         fig.sp.plot_ds(ds)
-        fig.sp.plot_fun(
-            clf.decision_function, grid_limits=ds.get_bounds(), y=1)
+        fig.sp.plot_fun(clf.decision_function, grid_limits=ds.get_bounds(),
+                        levels=levels, y=1)
         fig.sp.title("Discriminant function for y=1")
 
         return fig

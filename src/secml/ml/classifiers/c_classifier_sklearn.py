@@ -41,7 +41,4 @@ class CClassifierSkLearn(CClassifier):
 
         scores.atleast_2d()
 
-        if y is not None:
-            return scores[:, y].ravel()
-        else:
-            return scores
+        return scores[:, y].ravel() if y is not None else scores
