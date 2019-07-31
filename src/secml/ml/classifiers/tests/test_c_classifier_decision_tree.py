@@ -1,6 +1,6 @@
 from secml.ml.classifiers.tests import CClassifierTestCases
 
-from secml.data.loader import CDLIris
+from secml.data.loader import CDLIris, CDLRandomBlobs
 from secml.ml.classifiers import CClassifierDecisionTree
 
 
@@ -57,6 +57,12 @@ class TestCClassifierDecisionTree(CClassifierTestCases):
         # Mixed linear/nonlinear transformations
         self._test_preprocess(self.dataset, self.dec_tree,
                               ['pca', 'unit-norm'], [{}, {}])
+
+    def test_plot(self):
+        ds = CDLRandomBlobs(n_samples=100, centers=3, n_features=2,
+                            random_state=1).load()
+        fig = self._test_plot(self.dec_tree, ds)
+        fig.savefig('test_c_classifier_decision_tree.pdf')
 
 
 if __name__ == '__main__':

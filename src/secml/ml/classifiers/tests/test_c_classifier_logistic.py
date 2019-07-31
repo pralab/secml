@@ -22,20 +22,9 @@ class TestCClassifierLogistic(CClassifierTestCases):
         
         self.log = CClassifierLogistic(random_seed=99)
 
-    def test_draw(self):
+    def test_plot(self):
         """ Compare the classifiers graphically"""
-        self.logger.info("Testing classifiers graphically")
-        # Preparation of the grid
-        fig = CFigure()
-        fig.sp.plot_ds(self.dataset)
-
-        self.log.fit(self.dataset)
-
-        fig.sp.plot_fun(self.log.decision_function, y=1)
-        fig.title('Logistic Classifier')
-
-        self.logger.info(self.log.predict(self.dataset.X))
-
+        fig = self._test_plot(self.log, self.dataset)
         fig.savefig('test_c_classifier_logistic.pdf')
 
     def test_fun(self):

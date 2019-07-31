@@ -106,14 +106,15 @@ class CClassifierTestCases(CUnitTest):
 
         fig.subplot(1,2,1)
         fig.sp.plot_ds(ds)
-        fig.sp.plot_decision_regions(clf, grid_limits=ds.get_bounds())
-        fig.title("Decision regions")
+        fig.sp.plot_decision_regions(
+            clf, n_grid_points=50, grid_limits=ds.get_bounds())
+        fig.sp.title("Decision regions")
 
         fig.subplot(1,2,2)
         fig.sp.plot_ds(ds)
-        fig.sp.plot_fun(clf.decision_function,
-                        grid_limits=ds.get_bounds(), y=1)
-        fig.title("Discriminant function for y=1")
+        fig.sp.plot_fun(
+            clf.decision_function, grid_limits=ds.get_bounds(), y=1)
+        fig.sp.title("Discriminant function for y=1")
         return fig
 
     def _test_gradient_numerical(self, clf, x, extra_classes=None,

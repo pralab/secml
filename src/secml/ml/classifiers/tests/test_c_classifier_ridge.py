@@ -51,37 +51,12 @@ class TestCClassifierRidge(CClassifierTestCases):
             self.logger.info(
                 "Execution time of ridge: {:}".format(t_ridge.interval))
 
-    def test_draw(self):
+    def test_plot(self):
         """ Compare the classifiers graphically"""
-        self.logger.info("Testing classifiers graphically")
-
-        # generate 2D synthetic data
-        dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=2,
+        ds = CDLRandom(n_features=2, n_redundant=0, n_informative=2,
                             n_clusters_per_class=1, random_state=0).load()
-        dataset.X = CNormalizerMinMax().fit_transform(dataset.X)
-
-        self.ridges[0].fit(dataset)
-
-        svm = CClassifierSVM()
-        svm.fit(dataset)
-
-        fig = CFigure(width=10, markersize=8)
-        fig.subplot(2, 1, 1)
-        # Plot dataset points
-        fig.sp.plot_ds(dataset)
-        # Plot objective function
-        fig.sp.plot_fun(svm.decision_function,
-                         grid_limits=dataset.get_bounds(), y=1)
-        fig.sp.title('SVM')
-
-        fig.subplot(2, 1, 2)
-        # Plot dataset points
-        fig.sp.plot_ds(dataset)
-        # Plot objective function
-        fig.sp.plot_fun(self.ridges[0].decision_function,
-                         grid_limits=dataset.get_bounds(), y=1)
-        fig.sp.title('ridge Classifier')
-
+        ds.X = CNormalizerMinMax().fit_transform(ds.X)
+        fig = self._test_plot(self.ridges[0], ds)
         fig.savefig('test_c_classifier_ridge.pdf')
 
     def test_performance(self):

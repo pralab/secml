@@ -1,6 +1,6 @@
 from secml.ml.classifiers.tests import CClassifierTestCases
 
-from secml.data.loader import CDLIris
+from secml.data.loader import CDLIris, CDLRandomBlobs
 from secml.ml.classifiers import CClassifierRandomForest
 
 
@@ -57,6 +57,13 @@ class TestCClassifierRandomForest(CClassifierTestCases):
         # Mixed linear/nonlinear transformations
         self._test_preprocess(self.dataset, self.rnd_forest,
                               ['pca', 'unit-norm'], [{}, {}])
+
+    def test_plot(self):
+        """ Compare the classifiers graphically"""
+        ds = CDLRandomBlobs(n_samples=100, centers=3, n_features=2,
+                            random_state=1).load()
+        fig = self._test_plot(self.rnd_forest, ds)
+        fig.savefig('test_c_classifier_random_forest.pdf')
 
 
 if __name__ == '__main__':

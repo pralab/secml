@@ -26,7 +26,6 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
                                         random_state=0)
 
     def test_classification(self):
-
         with self.timer():
             self.mcs.fit(self.dataset)
             self.logger.info("Trained MCS.")
@@ -59,29 +58,15 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
             "Performance difference is: {:}".format(abs(f1_mcs - f1_skbag)))
 
     def test_plot(self):
-
-        self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
-                                 n_clusters_per_class=1).load()
-
-        self.logger.info("Training MCS on 2D Dataset... ")
-        self.mcs = CClassifierMCSLinear(CClassifierSVM(),
-                                        max_features=0.5,
-                                        max_samples=0.5)
-        self.mcs.fit(self.dataset)
-
-        fig = CFigure()
-        # Plot dataset points
-        fig.sp.plot_ds(self.dataset)
-        # Plot objective function
-        fig.sp.plot_fun(self.mcs.decision_function,
-                         grid_limits=self.dataset.get_bounds(), y=1)
+        ds = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
+                       n_clusters_per_class=1).load()
+        fig = self._test_plot(self.mcs, ds)
         fig.savefig('test_c_classifier_mcs_linear.pdf')
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
         self._test_fun(self.mcs, self.dataset.todense())
         self._test_fun(self.mcs, self.dataset.tosparse())
-
 
     def test_gradient(self):
         """Unittest for `gradient_f_x` method."""
