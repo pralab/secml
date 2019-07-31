@@ -33,7 +33,7 @@ class TestCPlotClassifier(CUnitTest):
         fig.subplot(1, 2, 2)
         fig.sp.plot_ds(self.dataset, colors=colors)
         fig.sp.plot_decision_regions(
-            self.clf,  n_grid_points=200, cmap=colors)
+            self.clf, n_grid_points=200, cmap=colors)
 
         fig.show()
 

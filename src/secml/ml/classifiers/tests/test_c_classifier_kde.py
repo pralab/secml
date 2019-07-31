@@ -27,20 +27,9 @@ class TestCClassifierKDE(CClassifierTestCases):
         self.logger.info(
             "Testing Stochastic gradient descent classifier training ")
 
-    def test_draw(self):
+    def test_plot(self):
         """ Compare the classifiers graphically"""
-        self.logger.info("Testing classifiers graphically")
-        # Preparation of the grid
-        fig = CFigure()
-        fig.sp.plot_ds(self.dataset)
-
-        self.kde.fit(self.dataset)
-
-        fig.sp.plot_fun(self.kde.decision_function, y=1, plot_levels=False)
-        fig.title('kde Classifier')
-
-        self.logger.info(self.kde.predict(self.dataset.X))
-
+        fig = self._test_plot(self.kde, self.dataset)
         fig.savefig('test_c_classifier_kde.pdf')
 
     def test_fun(self):

@@ -1,6 +1,6 @@
 from secml.testing import CUnitTest
 
-from secml.array import CArray
+from secml.figure import CFigure
 from secml.data import CDataset
 from secml.ml.features import CPreProcess
 from secml.optim.function import CFunction
@@ -96,6 +96,25 @@ class CClassifierTestCases(CUnitTest):
         # Comparing output of decision_function and predict
         for y in range(ds.num_classes):
             self.assertFalse((df[y] != scores[:, y].ravel()).any())
+
+    def _test_plot(self, clf, ds):
+        """ Compare the classifiers graphically"""
+        self.logger.info("Testing classifiers graphically")
+        # Preparation of the grid
+        fig = CFigure(width=8, height=4, fontsize=8)
+        clf.fit(ds)
+
+        fig.subplot(1,2,1)
+        fig.sp.plot_ds(ds)
+        fig.sp.plot_decision_regions(clf, grid_limits=ds.get_bounds())
+        fig.title("Decision regions")
+
+        fig.subplot(1,2,2)
+        fig.sp.plot_ds(ds)
+        fig.sp.plot_fun(clf.decision_function,
+                        grid_limits=ds.get_bounds(), y=1)
+        fig.title("Discriminant function for y=1")
+        return fig
 
     def _test_gradient_numerical(self, clf, x, extra_classes=None,
                                  th=1e-3, epsilon=eps, **grad_kwargs):
