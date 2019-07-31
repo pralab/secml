@@ -2,20 +2,21 @@
 .. module:: CClassifierNearestCentroid
    :synopsis: Nearest Centroid Classifier
 
+.. moduleauthor:: Biggio Battista <battista.biggio@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 """
 from sklearn.neighbors import NearestCentroid
-from sklearn.metrics import pairwise_distances
 
 from secml.array import CArray
-from secml.ml.classifiers import CClassifier
-from secml.utils.mixed_utils import check_is_fitted
+from secml.ml.classifiers import CClassifierSkLearn
+
+from sklearn.metrics.pairwise import pairwise_distances
 
 
 # TODO: EXPAND CLASS DOCSTRING
-class CClassifierNearestCentroid(CClassifier):
+class CClassifierNearestCentroid(CClassifierSkLearn):
     """CClassifierNearestCentroid.
 
     Parameters
@@ -35,99 +36,40 @@ class CClassifierNearestCentroid(CClassifier):
     def __init__(self, metric='euclidean',
                  shrink_threshold=None, preprocess=None):
 
-        # Calling CClassifier init
-        super(CClassifierNearestCentroid, self).__init__(preprocess=preprocess)
+        nc = NearestCentroid(metric=metric,
+                             shrink_threshold=shrink_threshold)
 
-        self._metric = metric
-        self._shrink_threshold = shrink_threshold
-
-        self._nc = None
-        self._centroids = None
+        super(CClassifierNearestCentroid,
+              self).__init__(sklearn_model=nc, preprocess=preprocess)
 
     @property
     def metric(self):
-        return self._metric
+        return CArray(self._sklearn_model.metric)
 
     @property
     def centroids(self):
-        return self._centroids
-
-    def _check_is_fitted(self):
-        """Check if the classifier is trained (fitted).
-
-        Raises
-        ------
-        NotFittedError
-            If the classifier is not fitted.
-
-        """
-        check_is_fitted(self, 'centroids')
-        super(CClassifierNearestCentroid, self)._check_is_fitted()
-
-    def _fit(self, dataset):
-        """Trains classifier 
-    
-        Parameters
-        ----------
-        dataset : CDataset
-            Binary (2-class) training set. Must be a :class:`.CDataset`
-            instance with patterns data and corresponding labels.
-
-        Returns
-        -------
-        trained_cls : CClassifierKernelDensityEstimator
-            Instance of the KDE classifier trained using input dataset.
-
-        """
-        if dataset.num_classes > 2:
-            raise ValueError("training can be performed on (1-classes) or "
-                             "binary datasets only. If dataset is binary only "
-                             "negative class are considered.")
-
-        self._nc = NearestCentroid(self._metric, self._shrink_threshold)
-
-        self._nc.fit(dataset.X.get_data(), dataset.Y.tondarray())
-
-        self._centroids = CArray(self._nc.centroids_)
-
-        return self._nc
+        return CArray(self._sklearn_model.centroids_)
 
     def _decision_function(self, x, y=None):
-        """Computes the decision function for each pattern in x.
-
-        The score is the distance of each pattern
-         from the centroid of class `label`
+        """ This sklearn classifier only supports predict.
+        So we also implement a simple decision function
+        based on pairwise distances.
 
         Parameters
         ----------
-        x : CArray
-            Array with new patterns to classify, 2-Dimensional of shape
-            (n_patterns, n_features).
-        y : {0,1}
-            The label of the class wrt the function should be calculated.
+        x: input sample(s) after preprocessing
+        y: {0, 1, ..., K-1} or None
+        class label of the output decision function. None returns all outputs
 
         Returns
         -------
-        score : CArray
-            Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
-
+        Negative distance values to centroids (i.e., similarity w/ centroid).
         """
-        scores = CArray.ones(shape=(x.shape[0], self.n_classes))
 
-        # TODO: nonsense. Call sklearn function!
-        dist_from_ben_centroid = pairwise_distances(
-            x.get_data(), self.centroids[0, :].atleast_2d().get_data(),
-            metric=self.metric)
-        dis_from_mal_centroid = pairwise_distances(
-            x.get_data(), self.centroids[1, :].atleast_2d().get_data(),
-            metric=self.metric)
-
-        score = dis_from_mal_centroid - dist_from_ben_centroid
-        scores[:, 0] = CArray(score)
-        scores[:, 1] = -scores[:, 0]
-
-        if y is not None:
-            return scores[:, y].ravel()
+        dist = CArray(pairwise_distances(
+            x.get_data(), self._sklearn_model.centroids_,
+            metric=self._sklearn_model.metric)).atleast_2d()
+        if y is None:
+            return -dist
         else:
-            return scores
+            return -dist[:, y].ravel()

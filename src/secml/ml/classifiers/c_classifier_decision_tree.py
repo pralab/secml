@@ -44,13 +44,3 @@ class CClassifierDecisionTree(CClassifierSkLearn):
 
         CClassifierSkLearn.__init__(self, sklearn_model=dt,
                                     preprocess=preprocess)
-
-    @property
-    def min_samples_split(self):
-        """Return decision tree min_samples_split."""
-        return self._min_samples_split
-
-    @min_samples_split.setter
-    def min_samples_split(self, value):
-        """Return decision tree min_samples_split."""
-        self._min_samples_split = int(value)

@@ -83,10 +83,8 @@ class TestCClassifierKNN(CClassifierTestCases):
         array_samples = self.test.X[1:11, :]
 
         self.logger.info("Checking KNN classifier on a single sample...")
-        num_samp = 3
         with self.timer():
-            dist, index_n, corresp = self.knn.kneighbors(
-                single_sample, num_samp)
+            dist, index_n, corresp = self.knn.kneighbors(single_sample)
         self.logger.info("Sample to evaluate: {:}".format(single_sample))
         self.logger.info("")
         self.logger.info("Closest: {:}, index {:}, distance {:}"

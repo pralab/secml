@@ -48,23 +48,3 @@ class CClassifierRandomForest(CClassifierSkLearn):
 
         CClassifierSkLearn.__init__(self, sklearn_model=rf,
                                     preprocess=preprocess)
-
-    @property
-    def n_estimators(self):
-        """Returns classifier estimators."""
-        return self._n_estimators
-
-    @n_estimators.setter
-    def n_estimators(self, value):
-        """Sets classifier estimators."""
-        self._n_estimators = int(value)
-
-    @property
-    def min_samples_split(self):
-        """Returns classifier min_samples_split."""
-        return self._min_samples_split
-
-    @min_samples_split.setter
-    def min_samples_split(self, value):
-        """Sets classifier min_samples_split."""
-        self._min_samples_split = value
