@@ -40,7 +40,7 @@ class TestCClassifierSkLearn(CClassifierTestCases):
                                    random_state=0),
             MLPClassifier(alpha=1, max_iter=1000, random_state=0),
             AdaBoostClassifier(random_state=0),
-            OneVsRestClassifier(SVC()),
+            OneVsRestClassifier(SVC(kernel='linear')),
             # These clf below only work on dense data!
             GaussianProcessClassifier(1.0 * RBF(1.0)),
             GaussianNB(),
