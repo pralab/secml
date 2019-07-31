@@ -239,6 +239,7 @@ class TestCClassifierSVM(CClassifierTestCases):
         fig.sp.plot(xx, wyy, 'k--', label='with weights')
         fig.sp.scatter(X[:, 0].ravel(), X[:, 1].ravel(), c=y)
         fig.sp.legend()
+
         fig.savefig('test_c_classifier_svm.pdf')
 
     def test_store_dual_vars(self):
@@ -293,8 +294,13 @@ class TestCClassifierSVM(CClassifierTestCases):
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
         for clf in self.svms:
-            self._test_fun(clf, self.dataset.todense())
-            self._test_fun(clf, self.dataset.tosparse())
+
+            self.logger.info("SVM kernel: {:}".format(clf.kernel))
+
+            scores_d = self._test_fun(clf, self.dataset.todense())
+            scores_s = self._test_fun(clf, self.dataset.tosparse())
+
+            self.assert_array_almost_equal(scores_d, scores_s)
 
     def test_gradient(self):
         """Performs tests on gradient."""

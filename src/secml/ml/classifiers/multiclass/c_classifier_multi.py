@@ -19,7 +19,7 @@ class CClassifierMulticlass(CClassifier):
 
     Parameters
     ----------
-    classifier : CClassifierInterface.__class__
+    classifier : CClassifier.__class__
         Unbound (not initialized) CClassifier subclass.
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.

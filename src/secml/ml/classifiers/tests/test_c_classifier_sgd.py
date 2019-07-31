@@ -37,7 +37,7 @@ class TestCClassifierSGD(CClassifierTestCases):
             regularizer=CRegularizerL2(), loss=CLossHinge(),
             max_iter=500, random_state=0,
             kernel=kernel if kernel is not None else None)
-            for kernel in kernel_types]
+                for kernel in kernel_types]
         self.logger.info(
             "Testing SGD with kernel functions: %s", str(kernel_types))
 
@@ -65,7 +65,7 @@ class TestCClassifierSGD(CClassifierTestCases):
         fig.sp.plot_ds(dataset)
         # Plot objective function
         fig.sp.plot_fun(svm.decision_function,
-                         grid_limits=dataset.get_bounds(), y=1)
+                        grid_limits=dataset.get_bounds(), y=1)
         fig.sp.title('SVM')
 
         fig.subplot(2, 1, 2)
@@ -73,7 +73,7 @@ class TestCClassifierSGD(CClassifierTestCases):
         fig.sp.plot_ds(dataset)
         # Plot objective function
         fig.sp.plot_fun(self.sgds[0].decision_function,
-                         grid_limits=dataset.get_bounds(), y=1)
+                        grid_limits=dataset.get_bounds(), y=1)
         fig.sp.title('SGD Classifier')
 
         fig.savefig('test_c_classifier_sgd1.pdf')
@@ -84,6 +84,7 @@ class TestCClassifierSGD(CClassifierTestCases):
                          "classifiers on the training set")
 
         for sgd in self.sgds:
+
             self.logger.info("SGD kernel: {:}".format(sgd.kernel))
 
             svm = CClassifierSVM(sgd.kernel)
@@ -144,8 +145,14 @@ class TestCClassifierSGD(CClassifierTestCases):
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
         for clf in self.sgds:
-            self._test_fun(clf, self.dataset.todense())
-            self._test_fun(clf, self.dataset.tosparse())
+
+            self.logger.info("SGD kernel: {:}".format(clf.kernel))
+
+            scores_d = self._test_fun(clf, self.dataset.todense())
+            scores_s = self._test_fun(clf, self.dataset.tosparse())
+
+            # FIXME: WHY THIS TEST IS CRASHING? RANDOM_STATE MAYBE?
+            # self.assert_array_almost_equal(scores_d, scores_s)
 
     def test_gradient(self):
         """Unittests for gradient_f_x."""

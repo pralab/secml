@@ -56,19 +56,22 @@ class CClassifierNearestCentroid(CClassifierSkLearn):
 
         Parameters
         ----------
-        x: input sample(s) after preprocessing
-        y: {0, 1, ..., K-1} or None
-        class label of the output decision function. None returns all outputs
+        x : CArray
+            Input sample(s) after preprocessing
+        y : {0, 1, ..., K-1} or None
+            Class label of the output decision function.
+            None returns all outputs.
 
         Returns
         -------
-        Negative distance values to centroids (i.e., similarity w/ centroid).
+        CArray
+            Negative distance values to centroids
+            (i.e., similarity w/ centroid).
+
         """
 
         dist = CArray(pairwise_distances(
             x.get_data(), self._sklearn_model.centroids_,
             metric=self._sklearn_model.metric)).atleast_2d()
-        if y is None:
-            return -dist
-        else:
-            return -dist[:, y].ravel()
+
+        return -dist if y is None else -dist[:, y].ravel()

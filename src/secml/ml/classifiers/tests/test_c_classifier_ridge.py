@@ -25,7 +25,7 @@ class TestCClassifierRidge(CClassifierTestCases):
         kernel_types = (None, CKernelLinear, CKernelRBF, CKernelPoly)
         self.ridges = [CClassifierRidge(
             kernel=kernel() if kernel is not None else None)
-            for kernel in kernel_types]
+                for kernel in kernel_types]
         self.logger.info(
             "Testing RIDGE with kernel unctions: %s", str(kernel_types))
 
@@ -38,6 +38,7 @@ class TestCClassifierRidge(CClassifierTestCases):
         self.logger.info("Testing training speed of ridge compared to SVM ")
 
         for ridge in self.ridges:
+
             self.logger.info("RIDGE kernel: {:}".format(ridge.kernel))
 
             svm = CClassifierSVM(ridge.kernel)
@@ -90,8 +91,14 @@ class TestCClassifierRidge(CClassifierTestCases):
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
         for ridge in self.ridges:
-            self._test_fun(ridge, self.dataset.todense())
-            self._test_fun(ridge, self.dataset.tosparse())
+
+            self.logger.info("RIDGE kernel: {:}".format(ridge.kernel))
+
+            scores_d = self._test_fun(ridge, self.dataset.todense())
+            scores_s = self._test_fun(ridge, self.dataset.tosparse())
+
+            # FIXME: WHY THIS TEST IS CRASHING? RANDOM_STATE MAYBE?
+            # self.assert_array_almost_equal(scores_d, scores_s)
 
     def test_gradient(self):
         """Unittests for gradient_f_x."""

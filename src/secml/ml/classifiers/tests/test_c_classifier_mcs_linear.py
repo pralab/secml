@@ -26,6 +26,7 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
                                         random_state=0)
 
     def test_classification(self):
+
         with self.timer():
             self.mcs.fit(self.dataset)
             self.logger.info("Trained MCS.")
@@ -65,8 +66,10 @@ class TestCClassifierMCSLinear(CClassifierTestCases):
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self._test_fun(self.mcs, self.dataset.todense())
-        self._test_fun(self.mcs, self.dataset.tosparse())
+        scores_d = self._test_fun(self.mcs, self.dataset.todense())
+        scores_s = self._test_fun(self.mcs, self.dataset.tosparse())
+
+        self.assert_array_almost_equal(scores_d, scores_s)
 
     def test_gradient(self):
         """Unittest for `gradient_f_x` method."""

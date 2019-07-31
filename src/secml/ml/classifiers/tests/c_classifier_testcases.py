@@ -1,11 +1,11 @@
 from secml.testing import CUnitTest
 
-from secml.figure import CFigure
+from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.features import CPreProcess
 from secml.optim.function import CFunction
+from secml.figure import CFigure
 from secml.core.constants import eps
-from secml.array import CArray
 
 
 class CClassifierTestCases(CUnitTest):
@@ -31,9 +31,26 @@ class CClassifierTestCases(CUnitTest):
         self.assertEqual(float, s.dtype)
 
     def _test_fun(self, clf, ds):
-        """Test for decision_function() and predict() methods."""
+        """Test for `decision_function` and `predict`
+
+        Parameters
+        ----------
+        clf : CClassifier
+        ds : CDataset
+
+        Returns
+        -------
+        scores : CArray
+            Classifier scores computed on a single point.
+
+        """
         self.logger.info(
             "Test for decision_function() and predict() methods.")
+
+        if ds.issparse:
+            self.logger.info("Testing on sparse data...")
+        else:
+            self.logger.info("Testing on dense data...")
 
         clf.fit(ds)
 
@@ -97,24 +114,27 @@ class CClassifierTestCases(CUnitTest):
         for y in range(ds.num_classes):
             self.assertFalse((df[y] != scores[:, y].ravel()).any())
 
+        return scores
+
     def _test_plot(self, clf, ds):
-        """ Compare the classifiers graphically"""
+        """Plot the decision function of a classifier."""
         self.logger.info("Testing classifiers graphically")
         # Preparation of the grid
         fig = CFigure(width=8, height=4, fontsize=8)
         clf.fit(ds)
 
-        fig.subplot(1,2,1)
+        fig.subplot(1, 2, 1)
         fig.sp.plot_ds(ds)
         fig.sp.plot_decision_regions(
             clf, n_grid_points=50, grid_limits=ds.get_bounds())
         fig.sp.title("Decision regions")
 
-        fig.subplot(1,2,2)
+        fig.subplot(1, 2, 2)
         fig.sp.plot_ds(ds)
         fig.sp.plot_fun(
             clf.decision_function, grid_limits=ds.get_bounds(), y=1)
         fig.sp.title("Discriminant function for y=1")
+
         return fig
 
     def _test_gradient_numerical(self, clf, x, extra_classes=None,
@@ -150,6 +170,7 @@ class CClassifierTestCases(CUnitTest):
 
         grads = []
         for c in classes:
+
             grad_kwargs['y'] = c  # Appending class to test_f_x
 
             # Analytical gradient
@@ -312,6 +333,7 @@ class CClassifierTestCases(CUnitTest):
             classes = clf.classes
 
         for c in classes:
+
             self.logger.info(
                 "Testing grad wrt. class {:}".format(c))
 

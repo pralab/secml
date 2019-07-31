@@ -6,4 +6,3 @@ from .c_plot_metric import CPlotMetric
 from .c_plot_sec_eval import CPlotSecEval
 from .c_plot_constraint import CPlotConstraint
 from .c_plot_stats import CPlotStats
-from .c_plot_constraint import CPlotConstraint

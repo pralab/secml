@@ -29,8 +29,10 @@ class TestCClassifierLogistic(CClassifierTestCases):
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self._test_fun(self.log, self.dataset.todense())
-        self._test_fun(self.log, self.dataset.tosparse())
+        scores_d = self._test_fun(self.log, self.dataset.todense())
+        scores_s = self._test_fun(self.log, self.dataset.tosparse())
+
+        self.assert_array_almost_equal(scores_d, scores_s)
 
     def test_gradient(self):
         """Unittests for gradient_f_x."""

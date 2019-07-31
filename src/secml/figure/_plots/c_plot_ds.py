@@ -37,8 +37,7 @@ class CPlotDataset(CPlot):
             fig_legend.set_visible(True)
         self.grid(grid_on=True)
 
-    def plot_ds(self, dataset, colors=None, markers='o', cmap='jet',
-                *args, **kwargs):
+    def plot_ds(self, dataset, colors=None, markers='o', *args, **kwargs):
         """Plot patterns of each class with a different color/marker.
 
         Parameters

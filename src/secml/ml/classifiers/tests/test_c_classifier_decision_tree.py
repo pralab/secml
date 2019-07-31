@@ -44,8 +44,10 @@ class TestCClassifierDecisionTree(CClassifierTestCases):
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self._test_fun(self.dec_tree, self.dataset.todense())
-        self._test_fun(self.dec_tree, self.dataset.tosparse())
+        scores_d = self._test_fun(self.dec_tree, self.dataset.todense())
+        scores_s = self._test_fun(self.dec_tree, self.dataset.tosparse())
+
+        self.assert_array_almost_equal(scores_d, scores_s)
 
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""

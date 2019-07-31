@@ -28,7 +28,7 @@ class CClassifierRejectThreshold(CClassifierReject,
 
     Parameters
     ----------
-    clf : CClassifierInterface
+    clf : CClassifier
         Classifier to which we would like to apply a reject threshold.
     threshold : float
         Rejection threshold.
@@ -102,7 +102,7 @@ class CClassifierRejectThreshold(CClassifierReject,
 
         Returns
         -------
-        trained_cls : CClassifierInterface
+        trained_cls : CClassifier
             Instance of the classifier trained using input dataset.
 
         """
@@ -130,7 +130,7 @@ class CClassifierRejectThreshold(CClassifierReject,
 
         Returns
         -------
-        trained_cls : CClassifierInterface
+        trained_cls : CClassifier
             Instance of the classifier trained using input dataset.
 
         """

@@ -127,7 +127,7 @@ class CClassifier(CCreator):
 
         Returns
         -------
-        trained_cls : CClassifierInterface
+        trained_cls : CClassifier
             Instance of the classifier trained using input dataset.
 
         """
@@ -152,7 +152,7 @@ class CClassifier(CCreator):
 
         Returns
         -------
-        trained_cls : CClassifierInterface
+        trained_cls : CClassifier
             Instance of the classifier trained using input dataset.
 
         """
@@ -190,9 +190,9 @@ class CClassifier(CCreator):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : int or None
+        y : int or None, optional
             The label of the class wrt the function should be calculated.
-            if None, return the output for all classes.
+            If None, return the output for all classes.
 
         Returns
         -------
@@ -218,9 +218,9 @@ class CClassifier(CCreator):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : int or None
+        y : int or None, optional
             The label of the class wrt the function should be calculated.
-            if None, return the output for all classes.
+            If None, return the output for all classes.
 
         Returns
         -------
@@ -264,6 +264,7 @@ class CClassifier(CCreator):
             Array of shape (n_patterns, n_classes) with classification
              score of each test pattern with respect to each training class.
             Will be returned only if `return_decision_function` is True.
+
         """
 
         # TODO: we can try here to run with n_jobs, as done in fit

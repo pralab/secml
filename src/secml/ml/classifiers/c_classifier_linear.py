@@ -92,7 +92,7 @@ class CClassifierLinear(CClassifier):
 
         Returns
         -------
-        trained_cls : CClassifierInterface
+        trained_cls : CClassifier
             Instance of the classifier trained using input dataset.
 
         """
@@ -130,7 +130,4 @@ class CClassifierLinear(CClassifier):
         scores[:, 0] = -score.ravel().T
         scores[:, 1] = score.ravel().T
 
-        if y is not None:
-            return scores[:, y].ravel()
-        else:
-            return scores
+        return scores[:, y].ravel() if y is not None else scores
