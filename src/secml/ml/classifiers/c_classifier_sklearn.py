@@ -1,13 +1,63 @@
+"""
+.. module:: CClassifierSkLearn
+   :synopsis: Generic wrapper for SkLearn classifiers.
+
+.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+
+"""
 from secml.ml.classifiers import CClassifier
 from secml.array import CArray
+from secml.utils.dict_utils import merge_dicts, SubLevelsDict
 
 
 class CClassifierSkLearn(CClassifier):
+    """Generic wrapper for SkLearn classifiers."""
     __class_type = 'sklearn-clf'
 
     def __init__(self, sklearn_model, preprocess=None):
         CClassifier.__init__(self, preprocess=preprocess)
         self._sklearn_model = sklearn_model
+
+    def get_params(self):
+        """Returns the dictionary of class and SkLearn model parameters.
+
+        A parameter is a PUBLIC or READ/WRITE attribute.
+
+        """
+        # We extract the PUBLIC (pub) and the READ/WRITE (rw) attributes
+        # from the class dictionary, than we build a new dictionary using
+        # as keys the attributes names without the accessibility prefix
+        # We merge our dict with the sklearn `.get_params()` dict
+        return SubLevelsDict(
+            merge_dicts(super(CClassifierSkLearn, self).get_params(),
+                        self._sklearn_model.get_params()))
+
+    def __getattribute__(self, key):
+        """Get an attribute.
+
+        This allow getting attributes of the internal sklearn model.
+
+        """
+        try:
+            # If we are not getting the sklearn model itself
+            if key != '_sklearn_model' and hasattr(self, '_sklearn_model'):
+                return self._sklearn_model.get_params()[key]
+        except KeyError:
+            pass  # Parameter not found in sklearn model
+        # Try to get the parameter from self
+        return super(CClassifierSkLearn, self).__getattribute__(key)
+
+    def __setattr__(self, key, value):
+        """Set an attribute.
+
+        This allow setting attributes of the internal sklearn model.
+
+        """
+        if hasattr(self, '_sklearn_model') and \
+                key in self._sklearn_model.get_params():
+            self._sklearn_model.set_params(**{key: value})
+        else:  # Otherwise, normal python set behavior
+            super(CClassifierSkLearn, self).__setattr__(key, value)
 
     def _fit(self, dataset):
         """Fit sklearn model."""
