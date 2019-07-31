@@ -189,8 +189,8 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
                            facecolors='none', linewidths=2)
 
         # Plotting multiclass decision function
-        fig.sp.plot_decision_function(multiclass, n_grid_points=100,
-                                      grid_limits=ds.get_bounds(offset=5))
+        fig.sp.plot_decision_regions(multiclass, n_grid_points=100,
+                                     grid_limits=ds.get_bounds(offset=5))
 
         fig.sp.xlim(x_bounds[0] - .5 * x_bounds[1],
                     x_bounds[1] + .5 * x_bounds[1])

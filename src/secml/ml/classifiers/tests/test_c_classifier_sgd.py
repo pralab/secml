@@ -64,7 +64,7 @@ class TestCClassifierSGD(CClassifierTestCases):
         # Plot dataset points
         fig.sp.plot_ds(dataset)
         # Plot objective function
-        fig.sp.plot_fobj(svm.decision_function,
+        fig.sp.plot_fun(svm.decision_function,
                          grid_limits=dataset.get_bounds(), y=1)
         fig.sp.title('SVM')
 
@@ -72,7 +72,7 @@ class TestCClassifierSGD(CClassifierTestCases):
         # Plot dataset points
         fig.sp.plot_ds(dataset)
         # Plot objective function
-        fig.sp.plot_fobj(self.sgds[0].decision_function,
+        fig.sp.plot_fun(self.sgds[0].decision_function,
                          grid_limits=dataset.get_bounds(), y=1)
         fig.sp.title('SGD Classifier')
 

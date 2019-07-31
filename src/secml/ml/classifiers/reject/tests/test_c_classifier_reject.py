@@ -33,11 +33,8 @@ class CClassifierRejectTestCases(object):
             self.logger.info(
                 "Test for decision_function() and predict() methods.")
 
-            scores_d = self._test_fun(self.clf, self.dataset.todense())
-            scores_s = self._test_fun(self.clf, self.dataset.tosparse())
-
-            # FIXME: WHY THIS TEST IS CRASHING? RANDOM_STATE MAYBE?
-            # self.assert_array_almost_equal(scores_d, scores_s)
+            self._test_fun(self.clf, self.dataset.todense())
+            self._test_fun(self.clf, self.dataset.tosparse())
 
         def test_reject(self):
             clf = self.clf_norej.deepcopy()

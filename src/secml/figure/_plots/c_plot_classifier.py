@@ -29,8 +29,8 @@ class CPlotClassifier(CPlotFunction):
         """Apply defined parameters to active subplot."""
         self.grid(grid_on=False)
 
-    def plot_decision_function(self, clf, plot_background=True,
-                               grid_limits=None, n_grid_points=30, cmap='jet'):
+    def plot_decision_regions(self, clf, plot_background=True,
+                              grid_limits=None, n_grid_points=30, cmap='jet'):
         """Plot decision boundaries and regions for the given classifier.
 
         Parameters

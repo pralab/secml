@@ -30,17 +30,12 @@ class CClassifierDecisionTree(CClassifierSkLearn):
 
     def __init__(self, criterion='gini', splitter='best',
                  max_depth=None, min_samples_split=2, preprocess=None):
-        # Classifier Parameters
-        self.criterion = criterion
-        self.splitter = splitter
-        self.max_depth = max_depth
-        self.min_samples_split = min_samples_split
 
         dt = tree.DecisionTreeClassifier(
-            criterion=self.criterion,
-            splitter=self.splitter,
-            max_depth=self.max_depth,
-            min_samples_split=self.min_samples_split)
+            criterion=criterion,
+            splitter=splitter,
+            max_depth=max_depth,
+            min_samples_split=min_samples_split)
 
         CClassifierSkLearn.__init__(self, sklearn_model=dt,
                                     preprocess=preprocess)

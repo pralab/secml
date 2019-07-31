@@ -31,19 +31,13 @@ class CClassifierRandomForest(CClassifierSkLearn):
     def __init__(self, n_estimators=10, criterion='gini',
                  max_depth=None, min_samples_split=2,
                  random_state=None, preprocess=None):
-        # Classifier Parameters
-        self.n_estimators = n_estimators
-        self.criterion = criterion
-        self.max_depth = max_depth
-        self.min_samples_split = min_samples_split
-        self.random_state = random_state
 
         rf = RandomForestClassifier(
-            n_estimators=self.n_estimators,
-            criterion=self.criterion,
-            max_depth=self.max_depth,
-            min_samples_split=self.min_samples_split,
-            random_state=self.random_state
+            n_estimators=n_estimators,
+            criterion=criterion,
+            max_depth=max_depth,
+            min_samples_split=min_samples_split,
+            random_state=random_state
         )
 
         CClassifierSkLearn.__init__(self, sklearn_model=rf,

@@ -22,7 +22,7 @@ class TestCPlotDecisionFunction(CUnitTest):
 
     def test_exception(self):
         fig = CFigure()
-        self.assertRaises(TypeError, fig.sp.plot_decision_function, 'aaaa')
+        self.assertRaises(TypeError, fig.sp.plot_decision_regions, 'aaaa')
 
     def test_decision_function(self):
         """Test for CPlotFunction.plot_fobj method."""
@@ -34,13 +34,13 @@ class TestCPlotDecisionFunction(CUnitTest):
         fig = CFigure(width=10, height=5)
 
         fig.subplot(1, 2, 1)
-        fig.sp.plot_decision_function(self.clf, n_grid_points=200, cmap=cmap,
+        fig.sp.plot_decision_regions(self.clf, n_grid_points=200, cmap=cmap,
                                      plot_background=False)
         fig.sp.plot_ds(self.dataset, cmap=cmap)
         fig.sp.grid(grid_on=False)
 
         fig.subplot(1, 2, 2)
-        fig.sp.plot_decision_function(self.clf, n_grid_points=200, cmap=cmap)
+        fig.sp.plot_decision_regions(self.clf, n_grid_points=200, cmap=cmap)
         fig.sp.plot_ds(self.dataset, cmap=cmap)
         fig.sp.grid(grid_on=False)
 

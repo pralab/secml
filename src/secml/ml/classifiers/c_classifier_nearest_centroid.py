@@ -36,11 +36,10 @@ class CClassifierNearestCentroid(CClassifierSkLearn):
     def __init__(self, metric='euclidean',
                  shrink_threshold=None, preprocess=None):
 
-        nc = NearestCentroid(metric=metric,
-                             shrink_threshold=shrink_threshold)
+        nc = NearestCentroid(metric=metric, shrink_threshold=shrink_threshold)
 
-        super(CClassifierNearestCentroid,
-              self).__init__(sklearn_model=nc, preprocess=preprocess)
+        super(CClassifierNearestCentroid, self).__init__(
+            sklearn_model=nc, preprocess=preprocess)
 
     @property
     def metric(self):
