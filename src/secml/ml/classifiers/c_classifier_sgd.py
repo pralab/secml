@@ -177,6 +177,11 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
         """Kernel function."""
         return self._kernel
 
+    @kernel.setter
+    def kernel(self, kernel):
+        """Setting up the Kernel function (None if a linear classifier)."""
+        self._kernel = kernel
+
     @property
     def n_tr_samples(self):
         """Returns the number of training samples."""

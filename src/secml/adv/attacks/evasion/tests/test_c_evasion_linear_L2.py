@@ -12,7 +12,7 @@ class TestEvasionLinearL2(CEvasionTestCases.TestCEvasion):
         self.type_dist = 'l2'
         self.sparse = True
 
-        self.dmax = 1.0  # On un-normalized data
+        self.dmax = 1.05  # On un-normalized data
 
         self.discrete = False
         self.eta = 0.5
@@ -29,8 +29,8 @@ class TestEvasionLinearL2(CEvasionTestCases.TestCEvasion):
         self.n_clusters = 2  # Number of dataset clusters
         self.n_features = 2  # Number of dataset features
 
-        self.lb = -1.5
-        self.ub = +1.5
+        self.lb = -0.67
+        self.ub = +0.67
 
         self.grid_limits = [(-1.5, 1.5), (-1.5, 1.5)]
         self.filename = 'test_c_evasion_linear_L2.pdf'

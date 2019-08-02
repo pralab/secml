@@ -63,9 +63,10 @@ class CPlotDataset(CPlot):
         """
         classes = dataset.classes
         if colors is None:
-            if classes.size <= 2:
+            if classes.size <= 6:
+                colors = ['blue', 'red', 'lightgreen', 'black', 'gray', 'cyan']
                 from matplotlib.colors import ListedColormap
-                cmap = ListedColormap(['b', 'r'])
+                cmap = ListedColormap(colors[:classes.size])
             else:
                 cmap = 'jet'
         else:

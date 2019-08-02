@@ -1,11 +1,11 @@
 from secml.optim.optimizers.tests import COptimizerTestCases
 
-from secml.optim.optimizers import COptimizerGradBLS
+from secml.optim.optimizers import COptimizerPGDLS
 from secml.optim.constraints import CConstraintBox, CConstraintL2
 
 
-class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
-    """Unittests for COptimizerGradBLSDiscrete."""
+class TestCOptimizerPGDLSDiscrete(COptimizerTestCases):
+    """Unittests for COptimizerPGDLSDiscrete."""
 
     def test_minimize_3h_camel(self):
         """Test for COptimizer.minimize() method on 3h-camel fun. This
@@ -17,7 +17,7 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
                       'discrete': True,
                       'bounds': CConstraintBox(lb=-1, ub=1)}
 
-        self._test_minimize(COptimizerGradBLS, '3h-camel',
+        self._test_minimize(COptimizerPGDLS, '3h-camel',
                             opt_params=opt_params,
                             label='discrete')
 
@@ -30,7 +30,7 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
                       'discrete': True,
                       'bounds': CConstraintBox(lb=0, ub=4)}
 
-        self._test_minimize(COptimizerGradBLS, 'beale',
+        self._test_minimize(COptimizerPGDLS, 'beale',
                             opt_params=opt_params,
                             label='discrete')
 
@@ -46,7 +46,7 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
 
         # both the starting point and eta are integer,
         # therefore we expect an integer solution
-        self._test_minimize(COptimizerGradBLS, 'quad-2',
+        self._test_minimize(COptimizerPGDLS, 'quad-2',
                             opt_params=opt_params,
                             label='quad-2-discrete',
                             out_int=True)
@@ -63,7 +63,7 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
                       'bounds': CConstraintBox(lb=-2, ub=3)}
 
         self._test_minimize(
-            COptimizerGradBLS, 'quad-2',
+            COptimizerPGDLS, 'quad-2',
             opt_params=opt_params,
             label='quad-2-discrete-bounded',
             out_int=True)
@@ -80,7 +80,7 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
                       'bounds': CConstraintBox(lb=-2, ub=3)}
 
         self._test_minimize(
-            COptimizerGradBLS, 'quad-100-sparse',
+            COptimizerPGDLS, 'quad-100-sparse',
             opt_params=opt_params,
             label='quad-100-sparse-discrete-bounded',
             out_int=True)
@@ -97,7 +97,7 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
                       'bounds': CConstraintBox(lb=-1, ub=1)}
 
         self._test_minimize(
-            COptimizerGradBLS, 'poly-2',
+            COptimizerPGDLS, 'poly-2',
             opt_params=opt_params,
             label='poly-discrete-bounded',
         )
@@ -113,7 +113,7 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
                       'bounds': CConstraintBox(lb=-1, ub=1)}
 
         self._test_minimize(
-            COptimizerGradBLS, 'poly-100-int',
+            COptimizerPGDLS, 'poly-100-int',
             opt_params=opt_params,
             label='poly-int-discrete-bounded',
             out_int=True)
@@ -129,7 +129,7 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
                       'bounds': CConstraintBox(lb=-1, ub=1)}
 
         self._test_minimize(
-            COptimizerGradBLS, 'poly-100-int-sparse',
+            COptimizerPGDLS, 'poly-100-int-sparse',
             opt_params=opt_params,
             label='poly-int-sparse-discrete-bounded',
             out_int=True)
@@ -143,7 +143,7 @@ class TestCOptimizerGradBLSDiscrete(COptimizerTestCases):
             opt_params = {'eta': 1e-6, 'eta_min': 1e-4, 'eps': 1e-12,
                           'discrete': True, 'constr': CConstraintL2()}
             self._test_minimize(
-                COptimizerGradBLS, 'beale', opt_params=opt_params)
+                COptimizerPGDLS, 'beale', opt_params=opt_params)
 
 
 if __name__ == '__main__':

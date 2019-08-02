@@ -52,7 +52,7 @@ class CAttackEvasion(CAttack):
     #                              PUBLIC METHODS
     ###########################################################################
 
-    def run(self, x, y, ds_init=None):
+    def run(self, x, y, ds_init=None, *args, **kargs):
         """Runs evasion on a dataset.
 
         Parameters
@@ -101,7 +101,7 @@ class CAttackEvasion(CAttack):
             k = idx[i].item()  # idx of sample that can be modified
 
             xi = x[k, :] if x_init is None else x_init[k, :]
-            x_opt, f_opt = self._run(x[k, :], y[k], x_init=xi)
+            x_opt, f_opt = self._run(x[k, :], y[k], x_init=xi, *args, **kargs)
 
             self.logger.info(
                 "Point: {:}/{:}, dmax:{:}, f(x):{:}, eval:{:}/{:}".format(
@@ -120,6 +120,23 @@ class CAttackEvasion(CAttack):
         f_obj = fs_opt.mean()
 
         return y_pred, scores, adv_ds, f_obj
+
+    def objective_function(self, x):
+        """Objective function.
+
+        Parameters
+        ----------
+        x : CArray
+            Array with points on which the objective function
+            should be computed.
+
+        Returns
+        -------
+        CArray
+            Value of the objective function on each point.
+
+        """
+        return self._objective_function(x)
 
     @abstractmethod
     def _run(self, x0, y0, x_init=None):

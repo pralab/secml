@@ -26,7 +26,7 @@ def _generate_advx(dataset, clf_norej):
         dmax_lst = [0.1, 0.2]
         discrete = False
         type_dist = 'l2'
-        solver_type = 'gradient-bls'
+        solver_type = 'pgd-ls'
         solver_params = {'eta': 0.1}
 
         params = {

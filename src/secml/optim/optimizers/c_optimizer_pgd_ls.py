@@ -1,6 +1,6 @@
 """
-.. module:: COptimizerGradBLS
-   :synopsis: This class explores a descent direction using Bisect Line Search.
+.. module:: COptimizerPGDLS
+   :synopsis: Optimizer using Projected Gradient Descent with Bisect Line Search.
    Differently from standard line searches, it explores a subset of
    n_dimensions at a time. In this sense, it is an extension of the
    classical line-search approach.
@@ -16,7 +16,7 @@ from secml.optim.optimizers import COptimizer
 from secml.optim.optimizers.line_search import CLineSearchBisect
 
 
-class COptimizerGradBLS(COptimizer):
+class COptimizerPGDLS(COptimizer):
     """Solves the following problem:
 
         min  f(x)
@@ -35,10 +35,10 @@ class COptimizerGradBLS(COptimizer):
 
     Attributes
     ----------
-    class_type : 'gradient-bls'
+    class_type : 'pgd-ls'
 
     """
-    __class_type = 'gradient-bls'
+    __class_type = 'pgd-ls'
 
     def __init__(self, fun,
                  constr=None, bounds=None,
@@ -173,11 +173,13 @@ class COptimizerGradBLS(COptimizer):
         # the first argument of logical_and to avoid conversion to dense)
         # FIXME: the following condition is error-prone.
         #  Use (ad wrap in CArray) np.isclose with atol=1e-6, rtol=0
+        # FIXME: converting grad to dense as the sparse vs sparse logical_and
+        #  is too slow
         x_lb = (x.round(6) == CArray(self.bounds.lb).round(6)).logical_and(
-            grad > 0).astype(bool)
+            grad.todense() > 0).astype(bool)
 
         x_ub = (x.round(6) == CArray(self.bounds.ub).round(6)).logical_and(
-            grad < 0).astype(bool)
+            grad.todense() < 0).astype(bool)
 
         # reset gradient for unfeasible features
         grad[x_lb + x_ub] = 0
@@ -196,7 +198,7 @@ class COptimizerGradBLS(COptimizer):
 
         grad = grad / norm
 
-        # filter modifications that would violate bounds
+        # filter modifications that would violate bounds (to sparsify gradient)
         grad = self._box_projected_gradient(x, grad)
 
         if self.discrete or (
@@ -211,6 +213,12 @@ class COptimizerGradBLS(COptimizer):
             grad = CArray(x - self.constr.projection(next_point))
             if self.constr.class_type == 'l1':
                 grad = grad.sign()  # to move along the l1 ball surface
+            z, fz = self._line_search.minimize(x, -grad, fx)
+            return z, fz
+
+        if self.bounds is not None and self.bounds.is_violated(next_point):
+            self.logger.debug("Line-search on box constraint.")
+            grad = CArray(x - self.bounds.projection(next_point))
             z, fz = self._line_search.minimize(x, -grad, fx)
             return z, fz
 
@@ -310,7 +318,7 @@ class COptimizerGradBLS(COptimizer):
             self.logger.debug('Iter.: ' + str(i) +
                               ', f(x): ' + str(fx) +
                               ', norm(gr(x)): ' +
-                              str(CArray(self._grad)))
+                              str(CArray(self._grad).norm()))
 
             diff = abs(self.f_seq[i].item() - self.f_seq[i - 1].item())
 

@@ -88,6 +88,11 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
         """Kernel function."""
         return self._kernel
 
+    @kernel.setter
+    def kernel(self, kernel):
+        """Setting up the Kernel function (None if a linear classifier)."""
+        self._kernel = kernel
+
     @property
     def alpha(self):
         """Returns the Constant that multiplies the regularization term."""

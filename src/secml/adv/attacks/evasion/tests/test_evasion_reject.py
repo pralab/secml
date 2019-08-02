@@ -5,7 +5,7 @@ from six.moves import range
 from secml.testing import CUnitTest
 
 from secml import _NoValue
-from secml.adv.attacks.evasion import CAttackEvasionBLS
+from secml.adv.attacks.evasion import CAttackEvasionPGDLS
 from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.figure import CFigure
@@ -96,12 +96,12 @@ class CEvasionRejectTestCases(object):
 
             self.solver_params = {'eta': 0.5, 'max_iter': 3}
 
-            eva = CAttackEvasionBLS(classifier=self.multiclass,
-                                    surrogate_classifier=self.multiclass,
-                                    surrogate_data=self.ds,
-                                    distance='l2', dmax=dmax, lb=lb, ub=ub,
-                                    solver_params=self.solver_params,
-                                    y_target=self.y_target)
+            eva = CAttackEvasionPGDLS(classifier=self.multiclass,
+                                      surrogate_classifier=self.multiclass,
+                                      surrogate_data=self.ds,
+                                      distance='l2', dmax=dmax, lb=lb, ub=ub,
+                                      solver_params=self.solver_params,
+                                      y_target=self.y_target)
 
             eva.verbose = 0  # 2
 

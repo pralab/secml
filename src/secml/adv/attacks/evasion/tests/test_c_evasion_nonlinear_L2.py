@@ -13,11 +13,11 @@ class TestEvasionNonLinearL2(CEvasionTestCases.TestCEvasion):
         self.type_dist = 'l2'
         self.sparse = False
 
-        self.dmax = 1.5
+        self.dmax = 1.25
 
         self.discrete = False
-        self.eta = 0.1
-        self.eta_min = 0.1
+        self.eta = 0.01
+        self.eta_min = 0.01
         self.eta_max = None
 
         self.normalizer = CNormalizerMinMax(feature_range=(-1, 1))
@@ -31,8 +31,8 @@ class TestEvasionNonLinearL2(CEvasionTestCases.TestCEvasion):
         self.n_clusters = 2  # Number of dataset clusters
         self.n_features = 2  # Number of dataset features
 
-        self.lb = -2
-        self.ub = 2
+        self.lb = -0.65
+        self.ub = 1
 
         self.grid_limits = [(-2.5, 2.5), (-2.5, 2.5)]
         self.filename = 'test_c_evasion_nonlinear_L2.pdf'

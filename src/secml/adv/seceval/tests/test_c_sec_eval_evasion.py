@@ -1,7 +1,7 @@
 from secml.testing import CUnitTest
 
 from secml.adv.seceval import CSecEval
-from secml.adv.attacks.evasion import CAttackEvasionBLS
+from secml.adv.attacks.evasion import CAttackEvasionPGDLS
 from secml.array import CArray
 from secml.data.loader import CDLRandomBlobs
 from secml.figure import CFigure
@@ -66,7 +66,7 @@ class TestCSecEval(CUnitTest):
                 "attack_classes": attack_classes,
                 "solver_params": {'eta': 0.5, 'eps': 1e-2}
             }
-            attack = CAttackEvasionBLS(**params)
+            attack = CAttackEvasionPGDLS(**params)
             attack.verbose = 1
         
             # sec eval params
