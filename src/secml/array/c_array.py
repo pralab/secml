@@ -1996,7 +1996,7 @@ class CArray(_CArrayInterface):
         return self.__class__(self._data.clip(c_min, c_max))
 
     def sort(self, axis=-1, kind='quicksort', inplace=False):
-        """Sort an array, in-place.
+        """Sort an array.
 
         Parameters
         ----------
@@ -2011,7 +2011,7 @@ class CArray(_CArrayInterface):
         Returns
         -------
         CArray
-            Sorted array. This will be a new array only if inplace is False.
+            Sorted array.
 
         Notes
         -----

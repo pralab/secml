@@ -74,22 +74,6 @@ class CClassifierLogistic(CClassifierLinear, CClassifierGradientLogisticMixin):
         """
         self._C = float(value)
 
-    @property
-    def w(self):
-        return self._w
-
-    @property
-    def b(self):
-        return self._b
-
-    @w.setter
-    def w(self, value):
-        self._w = value
-
-    @b.setter
-    def b(self, value):
-        self._b = value
-
     def _init_clf(self):
         self._sklearn_clf = LogisticRegression(
             penalty='l2',

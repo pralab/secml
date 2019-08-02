@@ -33,7 +33,6 @@ class TestCClassifierRejectThreshold(
 
         fig = CFigure(width=10, markersize=8)
         # Plot dataset points
-        fig.switch_sptype(sp_type='ds')
 
         # mark the rejected samples
         y = self.clf.predict(self.dataset.X)
@@ -44,10 +43,9 @@ class TestCClassifierRejectThreshold(
         fig.sp.plot_ds(self.dataset)
 
         # Plot objective function
-        fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(self.clf.decision_function,
-                         grid_limits=self.dataset.get_bounds(),
-                         levels=[0], y=1)
+        fig.sp.plot_fun(self.clf.decision_function,
+                        grid_limits=self.dataset.get_bounds(),
+                        levels=[0], y=1)
         fig.sp.title('Classifier with reject threshold')
 
         fig.show()

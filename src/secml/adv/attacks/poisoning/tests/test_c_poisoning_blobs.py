@@ -52,7 +52,7 @@ class TestCPoisoningBlob(CPoisoningTestCases.TestCPoisoning):
                                  start_facecolor='r' if self.yc == 1 else 'b')
 
                 fig.subplot(n_rows, n_cols, grid_slot=2)
-                fig.sp.title('Classification error on ts')
+                fig.sp.title('Classification error on val')
                 self._plot_func(fig, self.poisoning._objective_function,
                                 acc=True)
                 self._plot_ds(fig, self.tr)

@@ -9,7 +9,7 @@ from secml.data.loader import CDLRandom
 
 
 class TestCRoc(CUnitTest):
-    """Unit test for CPlotRoc."""
+    """Unit test for CPlotMetric (ROC plots)."""
 
     def setUp(self):
 
@@ -45,7 +45,6 @@ class TestCRoc(CUnitTest):
 
         # Testing without input CFigure
         roc_plot = CFigure()
-        roc_plot.subplot(sp_type='roc')
         roc_plot.sp.title('ROC Curve Standard')
         # Plotting 2 times (to show multiple curves)
         # add one curve for repetition and call it rep 0 and rep 1 of roc 1
@@ -58,34 +57,30 @@ class TestCRoc(CUnitTest):
 
         # Testing without input CFigure
         roc_plot = CFigure()
-        roc_plot.subplot(sp_type='roc')
         roc_plot.sp.title('ROC Curve')
         # Plotting 2 times (to show 2 curves)
-        roc_plot.sp.plot_mean(self.roc_wmean, label='roc1 mean', plot_std=True)
-        roc_plot.sp.plot_repetitions(self.roc_wmean, label='roc1')
+        roc_plot.sp.plot_roc_mean(self.roc_wmean, label='roc1 mean', plot_std=True)
+        roc_plot.sp.plot_roc_reps(self.roc_wmean, label='roc1')
 
         roc_plot.show()
 
         # Testing mean plot with no average
-        roc_plot = CFigure()
-        roc_plot.subplot(sp_type='roc')
         with self.assertRaises(ValueError):
-            roc_plot.sp.plot_mean(self.roc_nomean)
+            roc_plot.sp.plot_roc_mean(self.roc_nomean)
 
     def test_custom_params(self):
         """Plot of ROC altering default parameters."""
 
         # Testing without input CFigure
         roc_plot = CFigure()
-        roc_plot.subplot(sp_type='roc')
         roc_plot.sp.title('ROC Curve - Custom')
         roc_plot.sp.xlim(0.1, 100)
         roc_plot.sp.ylim(30, 100)
         roc_plot.sp.yticks([70, 80, 90, 100])
         roc_plot.sp.yticklabels(['70', '80', '90', '100'])
         # Plotting 2 times (to show 2 curves)
-        roc_plot.sp.plot_mean(self.roc_wmean, label='roc1')
-        roc_plot.sp.plot_mean(self.roc_wmean, label='roc2')
+        roc_plot.sp.plot_roc_mean(self.roc_wmean, label='roc1')
+        roc_plot.sp.plot_roc_mean(self.roc_wmean, label='roc2')
 
         roc_plot.show()
 
@@ -94,13 +89,12 @@ class TestCRoc(CUnitTest):
 
         # Testing without input CFigure
         roc_plot = CFigure()
-        roc_plot.subplot(sp_type='roc')
         roc_plot.sp.title('ROC Curve Repetitions')
         # Plotting 2 times (to show multiple curves)
         # add one curve for repetition and call it rep 0 and rep 1 of roc 1
-        roc_plot.sp.plot_repetitions(self.roc_nomean, label='roc1')
+        roc_plot.sp.plot_roc_reps(self.roc_nomean, label='roc1')
         # add one curve for repetition and call it rep 0 and rep 1 of roc 2
-        roc_plot.sp.plot_repetitions(self.roc_nomean, label='roc2')
+        roc_plot.sp.plot_roc_reps(self.roc_nomean, label='roc2')
 
         roc_plot.show()
 
@@ -170,7 +164,7 @@ class TestCRoc(CUnitTest):
 
         self.logger.info("Plotting using our CPLotRoc")
 
-        roc_fig.subplot(1, 2, 2, sp_type='roc')
+        roc_fig.subplot(1, 2, 2)
 
         score = []
         true_y = []
@@ -189,14 +183,14 @@ class TestCRoc(CUnitTest):
         roc_fig.sp.xticks([0, 20, 40, 60, 80, 100])
         roc_fig.sp.xticklabels(['0', '20', '40', '60', '80', '100'])
 
-        roc_fig.sp.plot_mean(
+        roc_fig.sp.plot_roc_mean(
             self.roc_wmean, plot_std=True, logx=False, style='go-',
             label='Mean ROC (area = %0.2f)' % (auc(fp.tondarray(),
                                                    tp.tondarray())))
 
         roc_fig.sp.xlim([-0.05 * 100, 1.05 * 100])
         roc_fig.sp.ylim([-0.05 * 100, 1.05 * 100])
-        roc_fig.sp.title('PRALIB Receiver operating characteristic example')
+        roc_fig.sp.title('SecML Receiver operating characteristic example')
         roc_fig.sp.legend(loc="lower right")
         roc_fig.show()
 

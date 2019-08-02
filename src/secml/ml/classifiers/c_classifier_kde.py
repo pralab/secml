@@ -13,9 +13,9 @@ from secml.ml.classifiers.clf_utils import \
 from secml.ml.kernel import CKernel
 from secml.utils.mixed_utils import check_is_fitted
 from secml.ml.classifiers.gradients import CClassifierGradientKDEMixin
-from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
+# TODO: extend to multiclass, use SkLearn!
 class CClassifierKDE(CClassifier, CClassifierGradientKDEMixin):
     """Kernel Density Estimator
     
@@ -128,38 +128,7 @@ class CClassifierKDE(CClassifier, CClassifierGradientKDEMixin):
 
         return self
 
-    def decision_function(self, x, y=1):
-        """Computes the decision function for each pattern in x.
-
-        If a preprocess has been specified, input is normalized
-         before computing the decision function.
-
-        Parameters
-        ----------
-        x : CArray
-            Array with new patterns to classify, 2-Dimensional of shape
-            (n_patterns, n_features).
-        y : {0, 1}, optional
-            The label of the class wrt the function should be calculated.
-            Default is 1.
-
-        Returns
-        -------
-        score : CArray
-            Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
-
-        """
-        self._check_is_fitted()
-
-        x = x.atleast_2d()  # Ensuring input is 2-D
-
-        # Transform data if a preprocess is defined
-        x = self._preprocess_data(x)
-
-        return self._decision_function(x, y=y)
-
-    def _decision_function(self, x, y=1):
+    def _decision_function(self, x, y=None):
         """Computes the decision function for each pattern in x.
 
         Parameters
@@ -180,11 +149,12 @@ class CClassifierKDE(CClassifier, CClassifierGradientKDEMixin):
         """
         check_binary_labels(y)  # Label should be in {0, 1}
 
-        x = x.atleast_2d()  # Ensuring input is 2-D
+        scores = CArray.ones(shape=(x.shape[0], self.n_classes))
+        k = self.kernel.k(x, self._training_samples)
+        scores[:, 0] = CArray(k).mean(keepdims=False, axis=1).T
+        scores[:, 1] = 1 - scores[:, 0]
 
-        if y == 1:
-            return 1 - CArray(self.kernel.k(x, self._training_samples)).mean(
-                                                        keepdims=False, axis=1)
+        if y is not None:
+            return scores[:, y].ravel()
         else:
-            return CArray(self.kernel.k(x, self._training_samples)).mean(
-                                                        keepdims=False, axis=1)
+            return scores

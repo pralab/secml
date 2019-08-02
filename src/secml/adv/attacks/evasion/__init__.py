@@ -1,2 +1,3 @@
 from .c_attack_evasion import CAttackEvasion
-from .c_attack_evasion_bls import CAttackEvasionBLS
+from .c_attack_evasion_pgd_ls import CAttackEvasionPGDLS
+from .c_attack_evasion_pgd import CAttackEvasionPGD

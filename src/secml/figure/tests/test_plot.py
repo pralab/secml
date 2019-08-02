@@ -1,7 +1,7 @@
-import unittest
 from secml.testing import CUnitTest
+
 from secml.figure import CFigure
-from secml.array.c_array import CArray
+from secml.array import CArray
 from secml.core import constants
 
 
@@ -9,7 +9,7 @@ class TestCPlot(CUnitTest):
     """Unit test for TestCPlot."""
 
     def test_quiver(self):
-        """Plot gradient arrows."""
+        """Test for `CPlot.quiver()` method."""
 
         # gradient values creation
         xv = CArray.arange(0, 2 * constants.pi, .2)
@@ -28,4 +28,4 @@ class TestCPlot(CUnitTest):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    CUnitTest.main()

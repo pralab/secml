@@ -35,5 +35,7 @@ class CClassifierGradientKDEMixin(CClassifierGradientMixin):
 
         """
         k = self.kernel.gradient(self._training_samples, x)
+        grad = k.mean(axis=0, keepdims=False)
+        grad = grad.tosparse() if k.issparse else grad
         # Gradient sign depends on input label (0/1)
-        return -convert_binary_labels(y) * k.mean(axis=0, keepdims=False)
+        return -convert_binary_labels(y) * grad

@@ -1,13 +1,141 @@
 from secml.testing import CUnitTest
 
+from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.features import CPreProcess
 from secml.optim.function import CFunction
+from secml.figure import CFigure
 from secml.core.constants import eps
 
 
 class CClassifierTestCases(CUnitTest):
     """Unittests interface for CClassifier."""
+
+    def _check_df_scores(self, s, n_samples):
+        self.assertEqual(type(s), CArray)
+        self.assertTrue(s.isdense)
+        self.assertEqual(1, s.ndim)
+        self.assertEqual((n_samples,), s.shape)
+        self.assertEqual(float, s.dtype)
+
+    def _check_classify_scores(self, l, s, n_samples, n_classes):
+        self.assertEqual(type(l), CArray)
+        self.assertEqual(type(s), CArray)
+        self.assertTrue(l.isdense)
+        self.assertTrue(s.isdense)
+        self.assertEqual(1, l.ndim)
+        self.assertEqual(2, s.ndim)
+        self.assertEqual((n_samples,), l.shape)
+        self.assertEqual((n_samples, n_classes), s.shape)
+        self.assertEqual(int, l.dtype)
+        self.assertEqual(float, s.dtype)
+
+    def _test_fun(self, clf, ds):
+        """Test for `decision_function` and `predict`
+
+        Parameters
+        ----------
+        clf : CClassifier
+        ds : CDataset
+
+        Returns
+        -------
+        scores : CArray
+            Classifier scores computed on a single point.
+
+        """
+        self.logger.info(
+            "Test for decision_function() and predict() methods.")
+
+        if ds.issparse:
+            self.logger.info("Testing on sparse data...")
+        else:
+            self.logger.info("Testing on dense data...")
+
+        clf.fit(ds)
+
+        # we have to ensure at least 2d here, since _decision_function is not
+        # applying this change anymore (while decision_function does).
+        x = x_norm = ds.X.atleast_2d()
+        p = p_norm = ds.X[0, :].ravel().atleast_2d()
+
+        # Transform data if preprocess is defined
+        if clf.preprocess is not None:
+            x_norm = clf.preprocess.transform(x)
+            p_norm = clf.preprocess.transform(p)
+
+        # Testing decision_function on multiple points
+        df, df_priv = [], []
+        for y in range(ds.num_classes):
+            df.append(clf.decision_function(x, y=y))
+            df_priv.append(clf._decision_function(x_norm, y=y))
+            self.logger.info(
+                "decision_function(x, y={:}): {:}".format(y, df[y]))
+            self.logger.info(
+                "_decision_function(x_norm, y={:}): {:}".format(y, df_priv[y]))
+            self._check_df_scores(df_priv[y], ds.num_samples)
+            self._check_df_scores(df[y], ds.num_samples)
+            self.assertFalse((df[y] != df_priv[y]).any())
+
+        # Testing predict on multiple points
+        labels, scores = clf.predict(
+            x, return_decision_function=True)
+        self.logger.info(
+            "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
+        self._check_classify_scores(
+            labels, scores, ds.num_samples, clf.n_classes)
+
+        # Comparing output of decision_function and predict
+        for y in range(ds.num_classes):
+            self.assertFalse((df[y] != scores[:, y].ravel()).any())
+
+        # Testing decision_function on single point
+        df, df_priv = [], []
+        for y in range(ds.num_classes):
+            df.append(clf.decision_function(p, y=y))
+            df_priv.append(clf._decision_function(p_norm, y=y))
+            self.logger.info(
+                "decision_function(p, y={:}): {:}".format(y, df[y]))
+            self._check_df_scores(df[y], 1)
+            self.logger.info(
+                "_decision_function(p_norm, y={:}): {:}".format(y, df_priv[y]))
+            self._check_df_scores(df_priv[y], 1)
+            self.assertFalse((df[y] != df_priv[y]).any())
+
+        self.logger.info("Testing predict on single point")
+
+        labels, scores = clf.predict(
+            p, return_decision_function=True)
+        self.logger.info(
+            "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
+        self._check_classify_scores(labels, scores, 1, clf.n_classes)
+
+        # Comparing output of decision_function and predict
+        for y in range(ds.num_classes):
+            self.assertFalse((df[y] != scores[:, y].ravel()).any())
+
+        return scores
+
+    def _test_plot(self, clf, ds, levels=None):
+        """Plot the decision function of a classifier."""
+        self.logger.info("Testing classifiers graphically")
+        # Preparation of the grid
+        fig = CFigure(width=8, height=4, fontsize=8)
+        clf.fit(ds)
+
+        fig.subplot(1, 2, 1)
+        fig.sp.plot_ds(ds)
+        fig.sp.plot_decision_regions(
+            clf, n_grid_points=50, grid_limits=ds.get_bounds())
+        fig.sp.title("Decision regions")
+
+        fig.subplot(1, 2, 2)
+        fig.sp.plot_ds(ds)
+        fig.sp.plot_fun(clf.decision_function, grid_limits=ds.get_bounds(),
+                        levels=levels, y=1)
+        fig.sp.title("Discriminant function for y=1")
+
+        return fig
 
     def _test_gradient_numerical(self, clf, x, extra_classes=None,
                                  th=1e-3, epsilon=eps, **grad_kwargs):
@@ -26,6 +154,11 @@ class CClassifierTestCases(CUnitTest):
         grad_kwargs : kwargs
             Any extra parameter for the gradient function.
 
+        Returns
+        -------
+        grads : list of CArray
+            A list with the gradients computed wrt each class.
+
         """
         if 'y' in grad_kwargs:
             raise ValueError("`y` cannot be passed to this unittest.")
@@ -35,19 +168,22 @@ class CClassifierTestCases(CUnitTest):
         else:
             classes = clf.classes
 
+        grads = []
         for c in classes:
 
             grad_kwargs['y'] = c  # Appending class to test_f_x
 
             # Analytical gradient
             gradient = clf.grad_f_x(x, **grad_kwargs)
+            grads.append(gradient)
 
             self.assertTrue(gradient.is_vector_like)
             self.assertEqual(x.size, gradient.size)
+            self.assertEqual(x.issparse, gradient.issparse)
 
             # Numerical gradient
             num_gradient = CFunction(
-                clf.decision_function).approx_fprime(x, epsilon, y=c)
+                clf.decision_function).approx_fprime(x.todense(), epsilon, y=c)
 
             # Compute the norm of the difference
             error = (gradient - num_gradient).norm()
@@ -62,6 +198,8 @@ class CClassifierTestCases(CUnitTest):
             self.assertLess(error, th)
 
             self.assertIsSubDtype(gradient.dtype, float)
+
+        return grads
 
     @staticmethod
     def _create_preprocess_chain(pre_id_list, kwargs_list):
@@ -137,7 +275,8 @@ class CClassifierTestCases(CUnitTest):
             ds, clf, pre_id_list, kwargs_list)
 
         self.logger.info(
-            "Testing clf with preprocessor inside:\n{:}".format(clf_pre))
+            "Testing {:} with preprocessor inside:\n{:}".format(
+                clf.__class__.__name__, clf_pre))
 
         y1, score1 = clf_pre.predict(ds.X, return_decision_function=True)
         y2, score2 = clf.predict(data_pre, return_decision_function=True)

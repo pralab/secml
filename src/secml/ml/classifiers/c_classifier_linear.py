@@ -10,10 +10,8 @@ from abc import ABCMeta
 import six
 
 from secml.ml.classifiers import CClassifier
-from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.array import CArray
 from secml.data import CDataset
-from secml import _NoValue
 from secml.utils.mixed_utils import check_is_fitted
 
 
@@ -107,108 +105,35 @@ class CClassifierLinear(CClassifier):
 
         return super(CClassifierLinear, self).fit(dataset, n_jobs=n_jobs)
 
-    def _decision_function(self, x, y=1):
-        """Computes the distance from the separating hyperplane for each pattern in x.
+    def _decision_function(self, x, y=None):
+        """Computes the distance of each pattern in x to the hyperplane.
 
         Parameters
         ----------
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : {1}
+        y : {0, 1, None}
             The label of the class wrt the function should be calculated.
-            decision function is always computed wrt positive class (1).
+            If None, return the output for all classes.
 
         Returns
         -------
         score : CArray
             Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
+            Dense flat array of shape (n_samples,) if y is not None,
+            otherwise a (n_samples, n_classes) array.
 
         """
-        if y != 1:
-            raise ValueError(
-                "decision function is always computed wrt positive class.")
-        x = x.atleast_2d()  # Ensuring input is 2-D
+        if y not in (0, 1, None):
+            raise ValueError("decision function cannot be computed "
+                             "against class {:}.".format(y))
+
         # Computing: `x * w^T`
-        return CArray(x.dot(self.w.T)).todense().ravel() + self.b
+        score = CArray(x.dot(self.w.T)).todense().ravel() + self.b
 
-    def decision_function(self, x, y=1):
-        """Computes the decision function for each pattern in x.
+        scores = CArray.ones(shape=(x.shape[0], self.n_classes))
+        scores[:, 0] = -score.ravel().T
+        scores[:, 1] = score.ravel().T
 
-        For a linear classifier the decision function is given by::
-
-            .. math:: f[i] =  (x[i] * w^T) + b
-
-        If a preprocess has been specified, input is normalized
-        before computing the decision function.
-
-        Parameters
-        ----------
-        x : CArray
-            Array with new patterns to classify, 2-Dimensional of shape
-            (n_patterns, n_features).
-        y : {0, 1}, optional
-            The label of the class wrt the function should be calculated.
-            Default is 1.
-
-        Returns
-        -------
-        score : CArray
-            Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
-
-        """
-        self._check_is_fitted()
-
-        x = x.atleast_2d()  # Ensuring input is 2-D
-
-        # Transform data if a preprocess is defined
-        x = self._preprocess_data(x)
-
-        sign = convert_binary_labels(y)  # Sign depends on input label (0/1)
-
-        return sign * self._decision_function(x)
-
-    def predict(self, x, return_decision_function=False, n_jobs=_NoValue):
-        """Perform classification of each pattern in x.
-
-        If a preprocess has been specified,
-        input is normalized before classification.
-
-        Parameters
-        ----------
-        x : CArray
-            Array with new patterns to classify, 2-Dimensional of shape
-            (n_patterns, n_features).
-        return_decision_function : bool, optional
-            Whether to return the decision_function value along
-            with predictions. Default False.
-
-        Returns
-        -------
-        labels : CArray
-            Flat dense array of shape (n_patterns,) with the label assigned
-             to each test pattern. The classification label is the label of
-             the class associated with the highest score.
-        scores : CArray, optional
-            Array of shape (n_patterns, 1) with classification
-             score of each test pattern with respect to {0, +1} classes.
-            Will be returned only if `return_decision_function` is True.
-
-        """
-        if n_jobs is not _NoValue:
-            raise ValueError("`n_jobs` not supported")
-
-        # decision function is called once (2 classes)
-        s_tmp = CArray(
-            self.decision_function(CArray(x).atleast_2d(), y=1))
-        # Assembling scores for positive and negative class
-        scores = CArray([[-elem, elem] for elem in s_tmp])
-
-        # The classification label is the label of the class
-        # associated with the highest score
-        labels = scores.argmax(axis=1).ravel()
-
-        return (labels, scores) if return_decision_function is True else labels
-
+        return scores[:, y].ravel() if y is not None else scores

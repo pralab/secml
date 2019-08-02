@@ -384,10 +384,15 @@ class CSparse(_CArrayInterface):
         """Redefinition of the get (brackets) operator."""
         # Check for setitem value
         if isinstance(value, CDense):
-            if is_list_of_lists(idx) and value.is_vector_like:
-                # Scipy v1.3+, list of list indexing returns 1-D, ravel
-                # input if vector-like (otherwise error should be raised)
-                value = value.ravel()
+            if value.is_vector_like:
+                if value.ndim > 1:
+                    # vector-like arrays of 2 or more dims to vectors
+                    # in order to always perform the set operation correctly
+                    value = value.ravel()
+                elif is_list_of_lists(idx):
+                    # Scipy v1.3+, list of list indexing returns 1-D, ravel
+                    # input if vector-like (otherwise error should be raised)
+                    value = value.ravel()
             value = value.tondarray()
         elif isinstance(value, CSparse):
             value = value.tocsr()
@@ -1061,7 +1066,7 @@ class CSparse(_CArrayInterface):
         self._data.eliminate_zeros()
 
     def sort(self, axis=-1, kind='quicksort', inplace=False):
-        """sort array in places"""
+        """Sort array."""
         if kind != 'quicksort':
             raise ValueError("only `quicksort` algorithm is supported")
 
@@ -1528,15 +1533,19 @@ class CSparse(_CArrayInterface):
 
     def max(self, axis=None, keepdims=True):
         """Max of array elements over a given axis."""
-        out_max = self.__class__(self._data.max(axis=axis))
-        return \
-            out_max.ravel() if axis is None or keepdims is False else out_max
+        out = self._data.max(axis=axis)
+        if axis is None:  # return scalar
+            return out
+        out = CDense(out.toarray())
+        return out.ravel() if keepdims is False else out
 
     def min(self, axis=None, keepdims=True):
         """Min of array elements over a given axis."""
-        out_min = self.__class__(self._data.min(axis=axis))
-        return \
-            out_min.ravel() if axis is None or keepdims is False else out_min
+        out = self._data.min(axis=axis)
+        if axis is None:  # return scalar
+            return out
+        out = CDense(out.toarray())
+        return out.ravel() if keepdims is False else out
 
     def argmax(self, axis=None):
         """Indices of the maximum values along an axis.
@@ -1736,9 +1745,10 @@ class CSparse(_CArrayInterface):
 
     def mean(self, axis=None, dtype=None, keepdims=True):
         """Mean of array elements over a given axis."""
-        out_mean = CDense(self._data.mean(axis=axis, dtype=dtype))
-        return \
-            out_mean.ravel() if axis is None or keepdims is False else out_mean
+        out = self._data.mean(axis=axis, dtype=dtype)
+        if axis is None:  # return scalar
+            return out
+        return CDense(out).ravel() if keepdims is False else CDense(out)
 
     def median(self, axis=None, keepdims=True):
         """Median of array elements over a given axis."""
@@ -1773,7 +1783,7 @@ class CSparse(_CArrayInterface):
         h = hashlib.new('sha1')
 
         # Hash by taking into account shape and sparse matrix internals
-        h.update(bytes(x.shape))
+        h.update(hex(hash(x.shape)).encode('utf-8'))
         # The returned sha1 could be different for same data
         # but different memory order. Use C order to be consistent
         h.update(np.ascontiguousarray(x.indices))

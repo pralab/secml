@@ -39,7 +39,7 @@ class CClassifierGradientRejectThresholdMixin(CClassifierGradientMixin):
 
         if y == -1:
             # the gradient is a vector with all the elements equal to zero
-            return CArray.zeros(x.shape[1])
+            return CArray.zeros(x.shape[1], sparse=x.issparse)
 
         elif y < self.n_classes:
             return self.clf.grad_f_x(x, y=y)
