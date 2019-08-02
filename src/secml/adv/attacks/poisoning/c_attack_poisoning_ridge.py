@@ -12,12 +12,12 @@ from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
 class CAttackPoisoningRidge(CAttackPoisoning):
-    __class_type = 'kkt-ridge'
+    __class_type = 'p-ridge'
 
     def __init__(self, classifier,
                  training_data,
                  surrogate_classifier,
-                 ts,
+                 val,
                  surrogate_data=None,
                  distance='l2',
                  dmax=0,
@@ -26,7 +26,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
                  discrete=False,
                  y_target=None,
                  attack_classes='all',
-                 solver_type='gradient',
+                 solver_type='pgd-ls',
                  solver_params=None,
                  init_type=None,
                  random_seed=None):
@@ -52,7 +52,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         CAttackPoisoning.__init__(self, classifier=classifier,
                                   training_data=training_data,
                                   surrogate_classifier=surrogate_classifier,
-                                  ts=ts,
+                                  val=val,
                                   surrogate_data=surrogate_data,
                                   distance=distance,
                                   dmax=dmax,
@@ -97,7 +97,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         xc0 = xc.deepcopy()
 
         # take validation points
-        xk = self._ts.X.atleast_2d()
+        xk = self._val.X.atleast_2d()
         x = tr.X.atleast_2d()
 
         H = clf.hessian_tr_params(x)

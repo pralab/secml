@@ -11,6 +11,7 @@ from secml.array import CArray
 from secml.ml.classifiers import CClassifierSVM
 from secml.figure import CFigure
 from secml.ml.kernel import *
+from secml.utils import fm
 
 
 class TestCClassifierSVM(CClassifierTestCases):
@@ -166,7 +167,8 @@ class TestCClassifierSVM(CClassifierTestCases):
 
         def _check_sparsedata(y, score, y_sparse, score_sparse):
 
-            self.assertFalse((y != y_sparse).any(), "Predicted labels on sparse data are different.")
+            self.assertFalse((y != y_sparse).any(),
+                             "Predicted labels on sparse data are different.")
             # Rounding scores to prevent false positives in assert
             score_rounded = score[:, 1].ravel().round(3)
             score_sparse_rounded = score_sparse[:, 1].ravel().round(3)
@@ -240,7 +242,8 @@ class TestCClassifierSVM(CClassifierTestCases):
         fig.sp.scatter(X[:, 0].ravel(), X[:, 1].ravel(), c=y)
         fig.sp.legend()
 
-        fig.show()
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
+                            'test_c_classifier_svm.pdf'))
 
     def test_store_dual_vars(self):
         """Test of parameters that control storing of dual space variables."""
@@ -293,128 +296,14 @@ class TestCClassifierSVM(CClassifierTestCases):
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self.logger.info(
-            "Test for decision_function() and predict() methods.")
+        for clf in self.svms:
 
-        def _check_df_scores(s, n_samples):
-            self.assertEqual(type(s), CArray)
-            self.assertTrue(s.isdense)
-            self.assertEqual(1, s.ndim)
-            self.assertEqual((n_samples,), s.shape)
-            self.assertEqual(float, s.dtype)
+            self.logger.info("SVM kernel: {:}".format(clf.kernel))
 
-        def _check_classify_scores(l, s, n_samples, n_classes):
-            self.assertEqual(type(l), CArray)
-            self.assertEqual(type(s), CArray)
-            self.assertTrue(l.isdense)
-            self.assertTrue(s.isdense)
-            self.assertEqual(1, l.ndim)
-            self.assertEqual(2, s.ndim)
-            self.assertEqual((n_samples,), l.shape)
-            self.assertEqual((n_samples, n_classes), s.shape)
-            self.assertEqual(int, l.dtype)
-            self.assertEqual(float, s.dtype)
+            scores_d = self._test_fun(clf, self.dataset.todense())
+            scores_s = self._test_fun(clf, self.dataset.tosparse())
 
-        for svm in self.svms:
-
-            self.logger.info("SVM kernel: {:}".format(svm.kernel))
-
-            svm.fit(self.dataset)
-
-            x = x_norm = self.dataset.X
-            p = p_norm = self.dataset.X[0, :].ravel()
-
-            # Transform data if a preprocess is defined
-            if svm.preprocess is not None:
-                x_norm = svm.preprocess.transform(x)
-                p_norm = svm.preprocess.transform(p)
-
-            # Testing decision_function on multiple points
-
-            df_scores_neg = svm.decision_function(x, y=0)
-            self.logger.info("decision_function(x, y=0):\n"
-                             "{:}".format(df_scores_neg))
-            _check_df_scores(df_scores_neg, self.dataset.num_samples)
-
-            df_scores_pos = svm.decision_function(x, y=1)
-            self.logger.info("decision_function(x, y=1):\n"
-                             "{:}".format(df_scores_pos))
-            _check_df_scores(df_scores_pos, self.dataset.num_samples)
-
-            self.assertFalse(
-                ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
-
-            # Testing _decision_function on multiple points
-
-            ds_priv_scores = svm._decision_function(x_norm, y=1)
-            self.logger.info("_decision_function(x_norm, y=1):\n"
-                             "{:}".format(ds_priv_scores))
-            _check_df_scores(ds_priv_scores, self.dataset.num_samples)
-
-            # Comparing output of public and private
-
-            self.assertFalse((df_scores_pos != ds_priv_scores).any())
-
-            # Testing predict on multiple points
-
-            labels, scores = svm.predict(
-                self.dataset.X, return_decision_function=True)
-            self.logger.info("predict(x):\nlabels: {:}\n"
-                             "scores: {:}".format(labels, scores))
-            _check_classify_scores(
-                labels, scores, self.dataset.num_samples, svm.n_classes)
-
-            # Comparing output of decision_function and predict
-
-            self.assertFalse((df_scores_neg != scores[:, 0].ravel()).any())
-            self.assertFalse((df_scores_pos != scores[:, 1].ravel()).any())
-
-            # Testing decision_function on single point
-
-            df_scores_neg = svm.decision_function(p, y=0)
-            self.logger.info("decision_function(p, y=0):\n"
-                             "{:}".format(df_scores_neg))
-            _check_df_scores(df_scores_neg, 1)
-
-            df_scores_pos = svm.decision_function(p, y=1)
-            self.logger.info("decision_function(p, y=1):\n"
-                             "{:}".format(df_scores_pos))
-            _check_df_scores(df_scores_pos, 1)
-
-            self.assertFalse(
-                ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
-
-            # Testing _decision_function on single point
-
-            df_priv_scores = svm._decision_function(p_norm, y=1)
-            self.logger.info("_decision_function(p_norm, y=1):\n"
-                             "{:}".format(df_priv_scores))
-            _check_df_scores(df_priv_scores, 1)
-
-            # Comparing output of public and private
-
-            self.assertFalse((df_scores_pos != df_priv_scores).any())
-
-            self.logger.info("Testing predict on single point")
-
-            labels, scores = svm.predict(p, return_decision_function=True)
-            self.logger.info("predict(p):\nlabels: {:}\n"
-                             "scores: {:}".format(labels, scores))
-            _check_classify_scores(labels, scores, 1, svm.n_classes)
-
-            # Comparing output of decision_function and predict
-
-            self.assertFalse(
-                (df_scores_neg != CArray(scores[:, 0]).ravel()).any())
-            self.assertFalse(
-                (df_scores_pos != CArray(scores[:, 1]).ravel()).any())
-
-            # Testing error raising
-
-            with self.assertRaises(ValueError):
-                svm._decision_function(x_norm, y=0)
-            with self.assertRaises(ValueError):
-                svm._decision_function(p_norm, y=0)
+            self.assert_array_almost_equal(scores_d, scores_s)
 
     def test_gradient(self):
         """Performs tests on gradient."""
@@ -431,15 +320,38 @@ class TestCClassifierSVM(CClassifierTestCases):
             if hasattr(svm.kernel, 'degree'):  # set degree for poly
                 svm.set('degree', 3)
 
-            svm.fit(self.dataset)
+            samps = random.sample(range(self.dataset.num_samples), 5)
 
-            for i in random.sample(range(self.dataset.num_samples), 10):
+            self.logger.info("Testing dense data...")
+            ds = self.dataset.todense()
+            svm.fit(ds)
+
+            grads_d = []
+            for i in samps:
                 # Randomly extract a pattern to test
-                pattern = self.dataset.X[i, :]
+                pattern = ds.X[i, :]
                 self.logger.info("P {:}: {:}".format(i, pattern))
                 # Run the comparison with numerical gradient
                 # (all classes will be tested)
-                self._test_gradient_numerical(svm, pattern)
+                grads_d += self._test_gradient_numerical(svm, pattern)
+
+            self.logger.info("Testing sparse data...")
+            ds = self.dataset.tosparse()
+            svm.fit(ds)
+
+            grads_s = []
+            for i in samps:
+                # Randomly extract a pattern to test
+                pattern = ds.X[i, :]
+                self.logger.info("P {:}: {:}".format(i, pattern))
+                # Run the comparison with numerical gradient
+                # (all classes will be tested)
+                grads_s += self._test_gradient_numerical(svm, pattern)
+
+            # Compare dense gradients with sparse gradients
+            for grad_i, grad in enumerate(grads_d):
+                self.assert_array_almost_equal(
+                    grad.atleast_2d(), grads_s[grad_i])
 
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""

@@ -196,7 +196,8 @@ class TestCArrayIndexing(CArrayTestCases):
 
             for selector_idx, selector in enumerate(selector_list):
 
-                self.logger.info("Set: array[{:}] = {:}".format(selector, assignment_list[selector_idx]))
+                self.logger.info("Set: array[{:}] = {:}".format(
+                    selector, assignment_list[selector_idx]))
                 array_copy = input_array.deepcopy()
                 try:  # Using a try to easier debug
                     array_copy[selector] = assignment_list[selector_idx]
@@ -205,7 +206,8 @@ class TestCArrayIndexing(CArrayTestCases):
                 self.logger.info("Result is: \n" + str(array_copy))
 
                 self.assertFalse(CArray(array_copy != target_list[selector_idx]).any(),
-                                 "{:} is different from {:}".format(array_copy, target_list[selector_idx]))
+                                 "{:} is different from {:}".format(
+                                     array_copy, target_list[selector_idx]))
 
                 if hasattr(target_list[selector_idx], 'shape'):
                     self.assertEqual(array_copy.shape, target_list[selector_idx].shape)
@@ -275,8 +277,8 @@ class TestCArrayIndexing(CArrayTestCases):
                            [[0, 0], [np.ravel(2)[0], np.ravel(0)[0]]],
                            [[np.ravel(0)[0], np.ravel(0)[0]], [2, 0]],
                            [[np.ravel(0)[0], np.ravel(0)[0]], [np.ravel(2)[0], np.ravel(0)[0]]],
-                           CArray([[True, False, True]]),
-                           CArray([True, False, True])
+                           CArray([[True, False, True]]), CArray([True, False, True]),
+                           CArray([[True, False, True]]), CArray([True, False, True])
                            ]
             selectors_row = [0, np.ravel(0)[0], [0], CArray([0]),
                              -1, np.ravel(-1)[0], [-1], CArray([-1]),
@@ -285,8 +287,13 @@ class TestCArrayIndexing(CArrayTestCases):
                              slice(1, 3), [False, True, True], CArray([False, True, True])]
             selectors = selectors_a + [(x, y) for x in selectors_row for y in selectors_col]
 
-            assignments_a = 2 * [CArray([10, 20])] + 2 * [CArray([[10, 20]])] + 2 * [CArray([10, 20])]
-            assignments_b = [0] + [10, 10] + 2 * [CArray([[10, 20]])] + 3 * [CArray([10, 20])]
+            assignments_a = 2 * [CArray([10, 20])] + \
+                            2 * [CArray([[10, 20]])] + \
+                            2 * [CArray([10, 20])] + \
+                            2 * [CArray([[10, 20]])]
+            assignments_b = [0] + [10, 10] + \
+                            2 * [CArray([[10, 20]])] + \
+                            3 * [CArray([10, 20])]
             assignments = assignments_a + 12 * assignments_b
 
             targets_a = CArray([20, 0, 10])
@@ -295,10 +302,10 @@ class TestCArrayIndexing(CArrayTestCases):
             targets_d = CArray([4, 10, 20])
             # Output always flat for flat arrays
             if array.ndim == 1:
-                targets = 4 * [targets_a] + 2 * [targets_b] + \
+                targets = 4 * [targets_a] + 4 * [targets_b] + \
                           12 * ([CArray([4, 0, 6])] + 2 * [targets_c] + 5 * [targets_d])
             else:
-                targets = 4 * [targets_a.atleast_2d()] + 2 * [targets_b.atleast_2d()] + \
+                targets = 4 * [targets_a.atleast_2d()] + 4 * [targets_b.atleast_2d()] + \
                             12 * ([CArray([[4, 0, 6]])] +
                                   2 * [targets_c.atleast_2d()] + 5 * [targets_d.atleast_2d()])
 

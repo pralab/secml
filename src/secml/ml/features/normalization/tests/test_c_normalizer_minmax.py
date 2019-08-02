@@ -36,10 +36,10 @@ class TestCNormalizerLinear(CPreProcessTestCases):
             self.logger.info("Testing out of range normalization")
 
             # Sklearn normalizer (requires float dtype input)
-            target = CArray(sk_norm.transform(array_sk + 1))
+            target = CArray(sk_norm.transform(array_sk * 2))
 
             # Our normalizer
-            result = our_norm.transform(array + 1)
+            result = our_norm.transform(array * 2)
 
             self.logger.info("Correct result is:\n{:}".format(target))
             self.logger.info("Our result is:\n{:}".format(result))
@@ -47,9 +47,11 @@ class TestCNormalizerLinear(CPreProcessTestCases):
             self.assert_array_almost_equal(target, result)
 
         sklearn_comp(self.array_dense)
-        sklearn_comp(self.array_dense)
+        sklearn_comp(self.array_sparse)
         sklearn_comp(self.row_dense.atleast_2d())
+        sklearn_comp(self.row_sparse)
         sklearn_comp(self.column_dense)
+        sklearn_comp(self.column_sparse)
 
     def test_chain(self):
         """Test a chain of preprocessors."""

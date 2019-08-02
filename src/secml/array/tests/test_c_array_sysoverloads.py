@@ -193,6 +193,10 @@ class TestCArraySystemOverloads(CArrayTestCases):
                 action='ignore',
                 message="divide by zero encountered in true_divide",
                 category=RuntimeWarning)
+            self.logger.filterwarnings(
+                action='ignore',
+                message="divide by zero encountered in divide",
+                category=RuntimeWarning)
             self._test_operator_cycle(operators, items, expected_result)
 
         # ZERO SCALAR / DENSE ARRAY
@@ -213,6 +217,10 @@ class TestCArraySystemOverloads(CArrayTestCases):
             self.logger.filterwarnings(
                 action='ignore',
                 message="invalid value encountered in true_divide",
+                category=RuntimeWarning)
+            self.logger.filterwarnings(
+                action='ignore',
+                message="invalid value encountered in divide",
                 category=RuntimeWarning)
             self._test_operator_cycle(operators, items, expected_result)
 

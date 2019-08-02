@@ -10,12 +10,12 @@ from secml.array import CArray
 
 
 class CAttackPoisoningSVM(CAttackPoisoning):
-    __class_type = 'kkt-svm'
+    __class_type = 'p-svm'
 
     def __init__(self, classifier,
                  training_data,
                  surrogate_classifier,
-                 ts,
+                 val,
                  surrogate_data=None,
                  distance='l1',
                  dmax=0,
@@ -24,7 +24,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
                  discrete=False,
                  y_target=None,
                  attack_classes='all',
-                 solver_type='gradient',
+                 solver_type='pgd-ls',
                  solver_params=None,
                  init_type='random',
                  random_seed=None):
@@ -50,7 +50,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         CAttackPoisoning.__init__(self, classifier=classifier,
                                   training_data=training_data,
                                   surrogate_classifier=surrogate_classifier,
-                                  ts=ts,
+                                  val=val,
                                   surrogate_data=surrogate_data,
                                   distance=distance,
                                   dmax=dmax,
@@ -65,7 +65,10 @@ class CAttackPoisoningSVM(CAttackPoisoning):
                                   random_seed=random_seed)
 
         # enforce storing dual variables in SVM
-        self._surrogate_classifier.store_dual_vars = True
+        if not self._surrogate_classifier.store_dual_vars and \
+                self._surrogate_classifier.is_linear():
+            raise ValueError(
+                "please retrain the classifier with `store_dual_vars=True`")
 
         # indices of support vectors (at previous iteration)
         # used to check if warm_start can be used in the iterative solver
@@ -190,7 +193,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
             return grad
 
         # take only validation points with non-null loss
-        xk = self._ts.X[abs(loss_grad) > 0, :].atleast_2d()
+        xk = self._val.X[abs(loss_grad) > 0, :].atleast_2d()
         grad_loss_fk = CArray(loss_grad[abs(loss_grad) > 0]).T
 
         # gt is the gradient in feature space

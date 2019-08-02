@@ -16,10 +16,6 @@ class TestCClassifierGradientMulticlass(
     def clf_list(self):
         return ['OVA']
 
-    # fixme: read those classifier as soon as we will have fix their
-    #  gradients
-    # 'pytorch_nn'
-
     @property
     def clf_creation_function(self):
         return multiclass_clf_creation

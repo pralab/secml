@@ -18,6 +18,11 @@ class TestCPca(CPreProcessTestCases):
             message='invalid value encountered in true_divide',
             category=RuntimeWarning
             )
+        self.logger.filterwarnings(
+            action='ignore',
+            message='invalid value encountered in divide',
+            category=RuntimeWarning
+            )
 
         def sklearn_comp(array):
             self.logger.info("Original array is:\n{:}".format(array))

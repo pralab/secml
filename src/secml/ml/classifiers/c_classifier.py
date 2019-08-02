@@ -19,29 +19,6 @@ from secml.utils.mixed_utils import check_is_fitted
 from secml.core.exceptions import NotFittedError
 
 
-def _classify_one(tr_class_idx, clf, test_x, verbose):
-    """Performs classification wrt class of label `tr_class_idx`.
-
-    Parameters
-    ----------
-    tr_class_idx : int
-        Index of the label against which the classifier should be trained.
-    clf : CClassifier
-        Instance of the classifier.
-    test_x : CArray
-        Test data as 2D CArray.
-    verbose : int
-        Verbosity level of the logger.
-
-    """
-    # Resetting verbosity level. This is needed as objects
-    # change id  when passed to subprocesses and our logging
-    # level is stored per-object looking to id
-    clf.verbose = verbose
-    # Getting predicted data for current class classifier
-    return clf.decision_function(test_x, y=tr_class_idx)
-
-
 @six.add_metaclass(ABCMeta)
 class CClassifier(CCreator):
     """Abstract class that defines basic methods for Classifiers.
@@ -201,29 +178,31 @@ class CClassifier(CCreator):
         return self
 
     @abstractmethod
-    def _decision_function(self, x, y):
-        """Private method that computes the decision function.
+    def _decision_function(self, x, y=None):
+        """Computes the decision function for each pattern in x.
 
-        .. warning:: Must be reimplemented by a subclass of `.CClassifier`.
+        .. note::
+            preprocessing is already handled by decision_function, along with
+            ensuring that x is a 2D array.
 
         Parameters
         ----------
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : int
+        y : int or None, optional
             The label of the class wrt the function should be calculated.
+            If None, return the output for all classes.
 
         Returns
         -------
         score : CArray
             Value of the decision function for each test pattern.
             Dense flat array of shape (n_patterns,).
-
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
-    def decision_function(self, x, y):
+    def decision_function(self, x, y=None):
         """Computes the decision function for each pattern in x.
 
         If a preprocess has been specified, input is normalized
@@ -232,48 +211,37 @@ class CClassifier(CCreator):
         .. note::
 
             The actual decision function should be implemented
-            case by case inside :meth:`_decision_function` method.
+            inside :meth:`_decision_function` method.
 
         Parameters
         ----------
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : int
+        y : int or None, optional
             The label of the class wrt the function should be calculated.
+            If None, return the output for all classes.
 
         Returns
         -------
         score : CArray
             Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
-
-        Warnings
-        --------
-        This method implements a generic formulation where the
-         decision function is computed separately for each pattern.
-         It's convenient to override this when the function can be computed
-         for all patterns at once to improve performance.
+            Dense flat array of shape (n_samples,) if y is not None,
+            otherwise a (n_samples, n_classes) array.
 
         """
         self._check_is_fitted()
-
         x = x.atleast_2d()  # Ensuring input is 2-D
+        x = self._preprocess_data(x)  # handle preprocessing
 
-        # Transform data if a preprocess is defined
-        x = self._preprocess_data(x)
+        # TODO: we can try here to run with n_jobs, as done in fit
+        return self._decision_function(x, y)
 
-        score = CArray.ones(shape=x.shape[0])
-        for i in range(x.shape[0]):
-            score[i] = self._decision_function(x[i, :], y)
-
-        return score
-
-    def predict(self, x, return_decision_function=False, n_jobs=1):
+    def predict(self, x, return_decision_function=False):
         """Perform classification of each pattern in x.
 
-        If a preprocess has been specified,
-         input is normalized before classification.
+        If preprocess has been specified,
+        input is normalized before classification.
 
         Parameters
         ----------
@@ -299,27 +267,10 @@ class CClassifier(CCreator):
              score of each test pattern with respect to each training class.
             Will be returned only if `return_decision_function` is True.
 
-        Warnings
-        --------
-        This method implements a generic formulation where the
-         classification score is computed separately for training class.
-         It's convenient to override this when the score can be computed
-         for one of the classes only, e.g. for binary classifiers the score
-         for the positive/negative class is commonly the negative of the
-         score of the other class.
-
         """
-        x = x.atleast_2d()  # Ensuring input is 2-D
 
-        scores = CArray.ones(shape=(x.shape[0], self.n_classes))
-
-        # Compute the decision function for each training class in parallel
-        res = parfor2(_classify_one, self.n_classes,
-                      n_jobs, self, x, self.verbose)
-
-        # Build results array by extracting the scores for each training class
-        for i in range(self.n_classes):
-            scores[:, i] = CArray(res[i]).T
+        # TODO: we can try here to run with n_jobs, as done in fit
+        scores = self.decision_function(x, y=None)
 
         # The classification label is the label of the class
         # associated with the highest score
@@ -384,4 +335,3 @@ class CClassifier(CCreator):
         self.set_params(best_params)
 
         return best_params
-

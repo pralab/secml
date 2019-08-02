@@ -103,12 +103,37 @@ def global_filterwarnings():
                 "matrices or deal with linear algebra*"
     )
 
+    # Warnings related to data-type size changed. # TODO: fixed in numpy 1.16.1
+    warnings.filterwarnings(
+        "ignore", category=RuntimeWarning, message="numpy.dtype size changed*"
+    )
+    warnings.filterwarnings(
+        "ignore", category=RuntimeWarning, message="numpy.ufunc size changed*"
+    )
+
     # TODO: REMOVE AFTER SWITCHING TO PYTHON 3
     warnings.filterwarnings(
         "ignore", category=DeprecationWarning,
         message="The SafeConfigParser class has been renamed to "
                 "ConfigParser in Python 3.2.*"
     )
+
+    # TODO: fixed in scipy 1.3.1
+    warnings.filterwarnings(
+        "ignore", category=FutureWarning,
+        message="future versions will not create a writeable array "
+                "from broadcast_array*"
+    )
+    # TODO: fixed in scipy 1.3.1
+    warnings.filterwarnings(
+        "ignore", category=DeprecationWarning,
+        message="Numpy has detected that you (may be)*")  # same as before
+
+    # TODO: check after upgrading to matplotlib 3
+    warnings.filterwarnings(
+        "ignore", category=DeprecationWarning,
+        message="Using or importing the ABCs from 'collections' instead of "
+                "from 'collections.abc' is deprecated*")
 
 
 # Call the filterwarnings method to make it active project-wide

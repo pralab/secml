@@ -7,10 +7,8 @@
 """
 from secml.array import CArray
 from secml.ml.features.normalization import CNormalizerLinear
-from secml.core.constants import inf
 
 
-# TODO: ADD SPARSE ARRAYS SUPPORT
 class CNormalizerMinMax(CNormalizerLinear):
     """Standardizes array by scaling each feature to a given range.
 
@@ -27,10 +25,6 @@ class CNormalizerMinMax(CNormalizerLinear):
         X_scaled = X_std * (max - min) + min
 
     where min, max = feature_range.
-
-    .. warning::
-
-        Currently this normalizer works correctly with dense arrays only.
 
     Parameters
     ----------
@@ -75,7 +69,7 @@ class CNormalizerMinMax(CNormalizerLinear):
     __class_type = 'min-max'
 
     def __init__(self, feature_range=None, preprocess=None):
-        """Class constructor"""
+
         # The following SHOULD NOT be reset:
         # _n, _v and _feature_range does not depends on training
         self._n = None
@@ -188,10 +182,6 @@ class CNormalizerMinMax(CNormalizerLinear):
         CArray([ 2.  1.  2.])
 
         """
-        if x.issparse:
-            raise NotImplementedError(
-                "normalization of sparse arrays is not yet supported!")
-
         self._data_min = x.min(axis=0, keepdims=False)
         self._data_max = x.max(axis=0, keepdims=False)
 

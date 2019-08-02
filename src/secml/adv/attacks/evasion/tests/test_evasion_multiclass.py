@@ -14,7 +14,7 @@ from secml.figure import CFigure
 from secml.optim.constraints import CConstraintL2
 from secml.ml.features.normalization import CNormalizerMinMax
 
-from secml.adv.attacks.evasion import CAttackEvasionBLS
+from secml.adv.attacks.evasion import CAttackEvasionPGDLS
 
 
 class TestEvasionMulticlass(CUnitTest):
@@ -90,12 +90,12 @@ class TestEvasionMulticlass(CUnitTest):
 
         self.solver_params = {'eta': 1e-1, 'eta_min': 0.1}
 
-        eva = CAttackEvasionBLS(classifier=self.multiclass,
-                                surrogate_classifier=self.multiclass,
-                                surrogate_data=self.ds,
-                                distance='l2', dmax=dmax, lb=lb, ub=ub,
-                                solver_params=self.solver_params,
-                                y_target=self.y_target)
+        eva = CAttackEvasionPGDLS(classifier=self.multiclass,
+                                  surrogate_classifier=self.multiclass,
+                                  surrogate_data=self.ds,
+                                  distance='l2', dmax=dmax, lb=lb, ub=ub,
+                                  solver_params=self.solver_params,
+                                  y_target=self.y_target)
 
         eva.verbose = 2
 
@@ -177,22 +177,20 @@ class TestEvasionMulticlass(CUnitTest):
                          final_edgewidth=1.7)
 
         # plot distance constraint
-        fig.sp.plot_fobj(func=self._rescaled_distance,
-                         multipoint=True,
-                         plot_background=False,
-                         n_grid_points=100, levels_color='k',
-                         grid_limits=ds_bounds,
-                         levels=[0], colorbar=False,
-                         levels_linewidth=2.0, levels_style=':',
-                         alpha_levels=.4, c=x0, r=dmax)
+        fig.sp.plot_fun(func=self._rescaled_distance,
+                        multipoint=True,
+                        plot_background=False,
+                        n_grid_points=100, levels_color='k',
+                        grid_limits=ds_bounds,
+                        levels=[0], colorbar=False,
+                        levels_linewidth=2.0, levels_style=':',
+                        alpha_levels=.4, c=x0, r=dmax)
 
         fig.sp.grid(grid_on=False)
 
         # Plotting multiclass evasion objective function
         fig.subplot(2, 2, 2)
         fig = self._plot_decision_function(fig)
-
-        fig.switch_sptype('function')
 
         # # Use the actual target used in evasion
         # target = self.ds.Y[p_idx] if target_class is None else target_class
@@ -208,20 +206,20 @@ class TestEvasionMulticlass(CUnitTest):
                          final_edgewidth=1.7)
 
         # plot distance constraint
-        fig.sp.plot_fobj(func=self._rescaled_distance,
-                         multipoint=True,
-                         plot_background=False,
-                         n_grid_points=100, levels_color='w',
-                         grid_limits=ds_bounds,
-                         levels=[0], colorbar=False,
-                         levels_style=':', levels_linewidth=2.0,
-                         alpha_levels=.5, c=x0, r=dmax)
+        fig.sp.plot_fun(func=self._rescaled_distance,
+                        multipoint=True,
+                        plot_background=False,
+                        n_grid_points=100, levels_color='w',
+                        grid_limits=ds_bounds,
+                        levels=[0], colorbar=False,
+                        levels_style=':', levels_linewidth=2.0,
+                        alpha_levels=.5, c=x0, r=dmax)
 
-        fig.sp.plot_fobj(lambda x: eva._objective_function(x),
-                         multipoint=True,
-                         grid_limits=ds_bounds,
-                         colorbar=False, n_grid_points=100,
-                         plot_levels=False)
+        fig.sp.plot_fun(lambda x: eva._objective_function(x),
+                        multipoint=True,
+                        grid_limits=ds_bounds,
+                        colorbar=False, n_grid_points=100,
+                        plot_levels=False)
 
         fig.sp.grid(grid_on=False)
 
@@ -311,20 +309,18 @@ class TestEvasionMulticlass(CUnitTest):
                            label='c {:}'.format(c))
 
         # Plotting multiclass decision function
-        fig.switch_sptype('function')
-
         colors = [style[3] for style in styles]
         # TODO: IMPLEMENT THIS IN CFIGURE
         cmap = matplotlib.colors.ListedColormap(
             colors, name='from_list', N=None)
 
-        fig.sp.plot_fobj(lambda x: self.multiclass.predict(x),
-                         multipoint=True, cmap=cmap,
-                         grid_limits=self.ds.get_bounds(offset=5),
-                         colorbar=False, n_grid_points=300, plot_levels=True,
-                         plot_background=True, levels=[-1, 0, 1, 2],
-                         levels_color='k', levels_style='-', alpha=.9,
-                         levels_linewidth=0.9)
+        fig.sp.plot_fun(lambda x: self.multiclass.predict(x),
+                        multipoint=True, cmap=cmap,
+                        grid_limits=self.ds.get_bounds(offset=5),
+                        colorbar=False, n_grid_points=300, plot_levels=True,
+                        plot_background=True, levels=[-1, 0, 1, 2],
+                        levels_color='k', levels_style='-', alpha=.9,
+                        levels_linewidth=0.9)
 
         fig.sp.xlim(x_bounds[0] - .05, x_bounds[1] + .05)
         fig.sp.ylim(y_bounds[0] - .05, y_bounds[1] + .05)

@@ -2,7 +2,7 @@ from secml.testing import CUnitTest
 
 from numpy import random
 
-from secml.adv.attacks.evasion import CAttackEvasionBLS
+from secml.adv.attacks.evasion import CAttackEvasionPGDLS
 from secml.ml.classifiers import CClassifierSVM
 from secml.ml.kernel import CKernel
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
@@ -53,7 +53,7 @@ class TestEvasionMNIST(CUnitTest):
         self._choose_x0()
 
         # adversarial example creation
-        self._evasion_obj = CAttackEvasionBLS(
+        self._evasion_obj = CAttackEvasionPGDLS(
             classifier=self.classifier,
             surrogate_classifier=self.classifier,
             surrogate_data=self._val_dts,

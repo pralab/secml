@@ -2,7 +2,6 @@ from secml.ml.features.normalization import CNormalizerMinMax
 from secml.ml.classifiers.reject import CClassifierRejectThreshold
 import os
 from six.moves import range
-from secml.adv.defenses import CClassifierRejectDetector
 from secml.ml.classifiers import CClassifierSVM
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.array import CArray
@@ -27,7 +26,7 @@ def _generate_advx(dataset, clf_norej):
         dmax_lst = [0.1, 0.2]
         discrete = False
         type_dist = 'l2'
-        solver_type = 'gradient'
+        solver_type = 'pgd-ls'
         solver_params = {'eta': 0.1}
 
         params = {
@@ -78,23 +77,6 @@ def rej_clf_creation(clf_idx, normalizer=False, dataset=None):
             preprocess=None, kernel=kernel)
         clf.verbose = 0
         clf = CClassifierRejectThreshold(clf, 0.6)
-
-    elif clf_idx == 'reject-detector':
-
-        kernel = CKernelRBF(gamma=1)
-
-        clf_norej = CClassifierMulticlassOVA(
-            classifier=CClassifierSVM, class_weight='balanced',
-            preprocess=None, kernel=kernel)
-        clf_norej.verbose = 0
-
-        clf_norej.fit(dataset)
-
-        adv_x = _generate_advx(dataset, clf_norej)
-
-        det = CClassifierSVM(kernel='rbf')
-        clf = CClassifierRejectDetector(
-            clf_norej, det=det, adv_x=adv_x)
 
     else:
         raise ValueError("classifier idx not managed!")

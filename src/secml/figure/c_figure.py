@@ -1,13 +1,13 @@
 """
-.. module:: Figure
-   :synopsis: Class that defines and manage figures
+.. module:: CFigure
+   :synopsis: A figure for making plots.
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
 from secml.core import CCreator
-from secml.figure.plots import CPlot
+from secml.figure._plots import CPlot
 from secml.utils import LastInDict
 from secml.core.type_utils import is_tuple
 
@@ -24,36 +24,36 @@ import matplotlib.gridspec as gridspec
 class CFigure(CCreator):
     """Creates a Figure.
 
-    A Figure is a collection of `.CPlot` subplots.
-    Each plotting function must be accessed calling `CFigure.sp` handle,
-    which always references to the last active subplot.
-    Each subplot is identified by an index inside an imaginary
-    grid (n_rows, n_columns), counting from left to right,
+    A Figure is a collection of subplots. The last active subplot can be
+    accessed by calling CFigure.sp`, followed by the desired plotting
+    function (plot, scatter, contour, etc.).
+    Each subplot is identified by an index (grid slot) inside an imaginary
+    grid (n_rows, n_columns, grid_slot), counting from left to right,
     from top to bottom. By default, a subplot is created in a single-row,
     single-column imaginary grid (1, 1, 1).
-    Each subplot has a type. Default is 'std_plot', which has every
-    standard plotting function (plot, scatter, contour, etc.). Subplot
-    type can be changed using `CFigure.switch_sptype(newtype)`.
 
     Parameters
     ----------
-    height : Float, default 6.
-        Height of the new figure.
-    width : Float, default 6.
-        Width of the new figure.
-    title : String, default ""
+    height : scalar, optional
+        Height of the new figure. Default 6.
+    width : scalar, optional
+        Width of the new figure. Default 6.
+    title : str, optional
         Super title of the new figure. This is not the subplot title.
         To set a title for active subplot use :meth:`.subtitle`.
-    linewidth : Float, default 2.
-        Define default linewidth for all subplots.
-    fontsize : Integer, default 12.
-        Define default fontsize for all subplots.
-    markersize : Float, default 7.
-        Define default markersize for all subplots.
+        Default is to not set a super title.
+    linewidth : float, optional
+        Define default linewidth for all subplots. Default 2.
+    fontsize : int, optional
+        Define default fontsize for all subplots. Default 12.
+    markersize : scalar, optional
+        Define default markersize for all subplots. Default 7.
 
-    See Also
-    --------
-    CPlot : creator and manager of subplots.
+    Notes
+    -----
+    Not all `matplotlib` methods and/or parameters are currently available.
+    If needed, directly access the `matplotlib.Axes` active subplot instance
+    through the `CFigure.sp._sp` parameter.
 
     Examples
     --------
@@ -94,11 +94,9 @@ class CFigure(CCreator):
         If no subplot is available, creates a new standard subplot
         in `(1,1,1)` position and returns its reference.
 
-        Subplot is an instance `.CPlot` or one of its subclasses.
-
         """
         if self.n_sp == 0:
-            self.subplot(1, 1, 1, sp_type=None)
+            self.subplot(1, 1, 1)
         return self._sp_data.lastin
 
     @property
@@ -106,15 +104,14 @@ class CFigure(CCreator):
         """Returns the number of created subplots."""
         return len(self._sp_data)
 
-    def subplot(self, n_rows=1, n_cols=1, grid_slot=1,
-                sp_type='standard', **kwargs):
+    def subplot(self, n_rows=1, n_cols=1, grid_slot=1, **kwargs):
         """Create a new subplot into specific position.
 
         Creates a new subplot placing it in the n_plot position of the
         n_rows * n_cols imaginary grid. Position is indexed in raster-scan.
 
         If subplot is created in a slot occupied by another subplot,
-         old subplot will be destroyed.
+         old subplot will be used.
 
         Parameters
         ----------
@@ -131,9 +128,6 @@ class CFigure(CCreator):
             e.g. in a 3 x 3 subplot grid, grid_slot=(0, slice(1, 3))
             will create a subplot at row index 0 that spans between
             columns index 1 and 2.
-        sp_type : str, optional
-            Type of the subplot to create.
-            By default a standard subplot is created.
 
         Examples
         --------
@@ -148,7 +142,7 @@ class CFigure(CCreator):
         # If grid_slot is not a tuple, assume we want to use a single slot
         grid_slot = grid_slot-1 if not is_tuple(grid_slot) else grid_slot
 
-        # Calling matplotlib suplot switcher
+        # Calling matplotlib subplot switcher
         axes = self._fig.add_subplot(self._gs[grid_slot], **kwargs)
 
         # Set default parameters
@@ -157,31 +151,11 @@ class CFigure(CCreator):
         sp_id = hex(id(axes))  # Index of the subplot
 
         # Create the subplot if not available or switch lastitem reference
-        if sp_id not in self._sp_data or \
-                self._sp_data[sp_id].class_type != sp_type:
-            self._sp_data[sp_id] = CPlot.create(
-                sp_type, sp=axes, default_params=self._default_params)
+        if sp_id not in self._sp_data:
+            self._sp_data[sp_id] = CPlot(
+                sp=axes, default_params=self._default_params)
         else:
             self._sp_data.lastin_key = sp_id
-
-        return self.sp
-
-    def switch_sptype(self, sp_type):
-        """Switch the type of active subplot.
-
-        Parameters
-        ----------
-        sp_type : str
-            Type of the subplot to create.
-            By default a standard subplot is created (`stp_plot`).
-
-        """
-        if self.n_sp == 0:
-            self.subplot(1, 1, 1, sp_type=sp_type)
-        else:  # Preserve current axis (gca) while switching CPlot class
-            self._sp_data[self._sp_data.lastin_key] = CPlot.create(
-                sp_type, sp=self._fig.gca(),
-                default_params=self._default_params)
 
         return self.sp
 

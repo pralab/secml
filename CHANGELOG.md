@@ -1,3 +1,53 @@
+## v0.7-dev (02/08/2019)
+- #352 Added `CClassifierSkLearn`, a generic wrapper for any `scikit-learn` classifier.
+- #76 Removed necessity to switch between subplot types in `CFigure`, using `.switch_sptype()` method, in order to get non-standard plot functions from `CPlot` subclasses (like `CPlotRoc`, etc.). All methods from `CPlot` subclasses are now available upon creation of a new subplot.
+- #485 Added notebooks with tutorials for end user.
+
+### Added (3 changes)
+- #126 Added `data.data_utils.label_binarize_onehot` function which allow to encode a labels array to one-hot format.
+- #486 Added new plotting function `plot_decision_regions` which plots decision boundaries and regions for the given classifier. Improved colormap support for `.plot_fun` and `.plot_ds`.
+- #487 Added new plotting function `plot_contraint` which plots constraint bounds on bi-dimensional feature spaces.
+
+### Improved (5 changes)
+- #83 `CNormalizerMinMax` can now be used on sparse data.
+- #36 Improved performance of `CClassifierDecisionTree`, `CClassifierKNN` and `CClassifierRandomForest` by classifying all input samples at once.
+- #352 `CClassifier.decision_function` now accepts `None` as a value for the `y` parameter, which will make the function return the function wrt. all the classes.
+- #352 `CClassifierNearestCentroid` is now natively multiclass.
+- #451 Added ability to activate/deactivate double initialization when calling `CAttackEvasionPGDLS.run()`.
+
+### Changed (10 changes)
+- #364 `CDataset.get_labels_asbinary` is now `get_labels_ovr`, with parameter `pos_class` renamed to `pos_label` and always required. New separate method `CDataset.get_labels_onehot` to return the dataset labels in on-hot encoding.
+- #483 `gradient-bls` is now the default solver for `CAttackPoisoning` and subclasses.
+- #496 `secml.testing` is no more included in the library package.
+- #493 Plotting method `.plot_fobj` renamed to `.plot_fun`.
+- #492 Renamed method `CPlotMetric.plot_repetitions` to `.plot_roc_reps` and `CPlotMetric.plot_mean` to `.plot_roc_mean`.
+- #467 `CPlotSecEval.plot_metric` is now `.plot_sec_eval`. Removed obsolete methods `CPlotSecEval.plot_metric_for_class`, `CPlotSecEval.compute_mean_metric` and `CPlotSecEval.compute_metric_at_param`.
+- #167 Moved `plot_confusion_matrix` to new class `CPlotMetric`. The function now accepts true and predicted labels and internally generates the confusion matrix. Parameters normalize and colorbar are now False by default. Default colorbar is now 'Blues'. Merged `CPlotRoc` with `CPlotMetric`.
+- #507 `COptimizerGrad` is now `COptimizerPGD` ('pgd') and `COptimizerGradBLS` is now `COptimizerPGDLS` ('pgd-ls'). Also updated evasion attacks accordingly. Added new class `CAttackEvasionPGD`.
+- #508 Default for `CAttackPoisoning` is now to choose the random initialization points from the surrogate dataset instead of the validation dataset. Also renamed parameter `ts` of `CAttackPoisoning` to `val` in order to better explain its purpose.
+- #164 `CDLRandomToy` has been split in specific loaders: `CDLIris`, `CDLDigits`, `CDLBoston`, `CDLDiabetes`.
+
+### Fixed (10 changes)
+- #484 `CArray.min`, `CArray.max`, `CArray.mean` now correctly return a dense array when computing values on a specific axis.
+- #452 Fixed setitem operation of `CArray` when index is a boolean mask and input array has more than 1 dimension.
+- #497 Filtering out warning introduced by `numpy` v1.17 raised by `scipy` v1.3 during set operation on lil matrices.
+- #499 Fixed `DeprecationWarning` related to invalid escape sequence from `settings.py` under Python 3.7.
+- #498 We now correctly import `MutableMapping` from `collections.abc` under Python 3 and from `collections` under Python 2.
+- #84 Fixed `CClassifierMCSLinear` not storing the weights in sparse format when training dataset is sparse.
+- #84 Fixed `CClassifierKDE` and `CClassifierReject` gradient not returning a sparse array when input is sparse.
+- #503 Fixed computation of `sha1` on arrays having big shape.
+- #504 Fixed kernel parameter of `CClassifierSGD` and `CClassifierRidge` not being settable.
+- #451 Fixed `COtimizerPGDLS` not projecting on box bounds when using an `l2` constraint.
+
+### Documentation (2 changes)
+- #475 Improved documentation of `CArray.sort` method.
+- #474 Updated README.md to reflect the version of `tensorflow` that will be installed (`1.14`).
+
+### Removed (2 changes)
+- #352 Temporarly removed parallelization from `CClassifier.predict` and `CClassifier.fit`. Will be re-added at a later stage.
+- #323 The following packages have been removed and will be released at a later stage: `adv.defenses`, `explanation`, `ml.features.selection`, `optim.optimizers.learning_rate`, `pytorch`, `tf`.
+
+
 ## v0.6-dev (16/07/2019)
 - #455 Multiple improvements and fixes related to the support of sparse data.
 - #449 Internal refactoring of `COptimizer` and related classes, including faster processing of sparse data.

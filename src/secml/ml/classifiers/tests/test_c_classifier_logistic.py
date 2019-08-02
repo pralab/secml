@@ -2,9 +2,8 @@ from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierLogistic
-from secml.array import CArray
 from secml.ml.features.normalization import CNormalizerMinMax
-from secml.figure import CFigure
+from secml.utils import fm
 
 
 class TestCClassifierLogistic(CClassifierTestCases):
@@ -22,159 +21,47 @@ class TestCClassifierLogistic(CClassifierTestCases):
         
         self.log = CClassifierLogistic(random_seed=99)
 
-    def test_draw(self):
+    def test_plot(self):
         """ Compare the classifiers graphically"""
-        self.logger.info("Testing classifiers graphically")
-        # Preparation of the grid
-        fig = CFigure()
-        fig.switch_sptype(sp_type='ds')
-        fig.sp.plot_ds(self.dataset)
-
-        self.log.fit(self.dataset)
-
-        fig.switch_sptype(sp_type='function')
-        fig.sp.plot_fobj(self.log.decision_function, y=1)
-        fig.title('Logistic Classifier')
-
-        self.logger.info(self.log.predict(self.dataset.X))
-
-        fig.show()
+        fig = self._test_plot(self.log, self.dataset)
+        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
+                            'test_c_classifier_logistic.pdf'))
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self.logger.info(
-            "Test for decision_function() and predict() methods.")
+        scores_d = self._test_fun(self.log, self.dataset.todense())
+        scores_s = self._test_fun(self.log, self.dataset.tosparse())
 
-        def _check_df_scores(s, n_samples):
-            self.assertEqual(type(s), CArray)
-            self.assertTrue(s.isdense)
-            self.assertEqual(1, s.ndim)
-            self.assertEqual((n_samples,), s.shape)
-            self.assertEqual(float, s.dtype)
-
-        def _check_classify_scores(l, s, n_samples, n_classes):
-            self.assertEqual(type(l), CArray)
-            self.assertEqual(type(s), CArray)
-            self.assertTrue(l.isdense)
-            self.assertTrue(s.isdense)
-            self.assertEqual(1, l.ndim)
-            self.assertEqual(2, s.ndim)
-            self.assertEqual((n_samples,), l.shape)
-            self.assertEqual((n_samples, n_classes), s.shape)
-            self.assertEqual(int, l.dtype)
-            self.assertEqual(float, s.dtype)
-
-        self.log.fit(self.dataset)
-
-        x = x_norm = self.dataset.X
-        p = p_norm = self.dataset.X[0, :].ravel()
-
-        # Preprocessing data if a preprocess is defined
-        if self.log.preprocess is not None:
-            x_norm = self.log.preprocess.transform(x)
-            p_norm = self.log.preprocess.transform(p)
-
-        # Testing decision_function on multiple points
-
-        df_scores_neg = self.log.decision_function(x, y=0)
-        self.logger.info("decision_function(x, y=0):\n"
-                         "{:}".format(df_scores_neg))
-        _check_df_scores(df_scores_neg, self.dataset.num_samples)
-
-        df_scores_pos = self.log.decision_function(x, y=1)
-        self.logger.info("decision_function(x, y=1):\n"
-                         "{:}".format(df_scores_pos))
-        _check_df_scores(df_scores_pos, self.dataset.num_samples)
-
-        self.assertFalse(
-            ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
-
-        # Testing _decision_function on multiple points
-
-        ds_priv_scores = self.log._decision_function(x_norm, y=1)
-        self.logger.info("_decision_function(x_norm, y=1):\n"
-                         "{:}".format(ds_priv_scores))
-        _check_df_scores(ds_priv_scores, self.dataset.num_samples)
-
-        # Comparing output of public and private
-
-        self.assertFalse((df_scores_pos != ds_priv_scores).any())
-
-        # Testing predict on multiple points
-
-        labels, scores = self.log.predict(x, return_decision_function=True)
-        self.logger.info("predict(x):\nlabels: {:}\n"
-                         "scores: {:}".format(labels, scores))
-        _check_classify_scores(
-            labels, scores, self.dataset.num_samples, self.log.n_classes)
-
-        # Comparing output of decision_function and predict
-
-        self.assertFalse((df_scores_neg != scores[:, 0].ravel()).any())
-        self.assertFalse((df_scores_pos != scores[:, 1].ravel()).any())
-
-        # Testing decision_function on single point
-
-        df_scores_neg = self.log.decision_function(p, y=0)
-        self.logger.info("decision_function(p, y=0):\n"
-                         "{:}".format(df_scores_neg))
-        _check_df_scores(df_scores_neg, 1)
-
-        df_scores_pos = self.log.decision_function(p, y=1)
-        self.logger.info("decision_function(p, y=1):\n"
-                         "{:}".format(df_scores_pos))
-        _check_df_scores(df_scores_pos, 1)
-
-        self.assertFalse(
-            ((df_scores_pos.sign() * -1) != df_scores_neg.sign()).any())
-
-        # Testing _decision_function on single point
-
-        df_priv_scores = self.log._decision_function(p_norm, y=1)
-        self.logger.info("_decision_function(p_norm, y=1):\n"
-                         "{:}".format(df_priv_scores))
-        _check_df_scores(df_priv_scores, 1)
-
-        # Comparing output of public and private
-
-        self.assertFalse((df_scores_pos != df_priv_scores).any())
-
-        self.logger.info("Testing predict on single point")
-
-        labels, scores = self.log.predict(p, return_decision_function=True)
-        self.logger.info("predict(p):\nlabels: {:}\n"
-                         "scores: {:}".format(labels, scores))
-        _check_classify_scores(labels, scores, 1, self.log.n_classes)
-
-        # Comparing output of decision_function and predict
-
-        self.assertFalse(
-            (df_scores_neg != CArray(scores[:, 0]).ravel()).any())
-        self.assertFalse(
-            (df_scores_pos != CArray(scores[:, 1]).ravel()).any())
-
-        # Testing error raising
-
-        with self.assertRaises(ValueError):
-            self.log._decision_function(x_norm, y=0)
-        with self.assertRaises(ValueError):
-            self.log._decision_function(p_norm, y=0)
+        self.assert_array_almost_equal(scores_d, scores_s)
 
     def test_gradient(self):
         """Unittests for gradient_f_x."""
         self.logger.info("Testing log.gradient_f_x() method")
 
         i = 5  # IDX of the point to test
-
-        # Randomly extract a pattern to test
         pattern = self.dataset.X[i, :]
         self.logger.info("P {:}: {:}".format(i, pattern))
 
-        self.log.fit(self.dataset)
+        self.logger.info("Testing dense data...")
+        ds = self.dataset.todense()
+        self.log.fit(ds)
 
         # Run the comparison with numerical gradient
         # (all classes will be tested)
-        self._test_gradient_numerical(self.log, pattern)
+        grads_d = self._test_gradient_numerical(self.log, pattern.todense())
+
+        self.logger.info("Testing sparse data...")
+        ds = self.dataset.tosparse()
+        self.log.fit(ds)
+
+        # Run the comparison with numerical gradient
+        # (all classes will be tested)
+        grads_s = self._test_gradient_numerical(self.log, pattern.tosparse())
+
+        # Compare dense gradients with sparse gradients
+        for grad_i, grad in enumerate(grads_d):
+            self.assert_array_almost_equal(
+                grad.atleast_2d(), grads_s[grad_i])
 
     def test_sparse(self):
         """Test classifier operations on sparse data."""

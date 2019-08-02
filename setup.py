@@ -158,16 +158,13 @@ setup(
         'git+ssh://git@pragit.diee.unica.it/secml/secml.git#egg=secml',
     maintainer='Marco Melis',
     maintainer_email='marco.melis@diee.unica.it',
-    packages=find_packages('src', exclude=["*.tests", "*.tests.*",
-                                           "tests.*", "tests"]),
+    packages=find_packages('src', exclude=[
+        "*.tests", "*.tests.*", "tests.*", "tests", "*.testing"]),
     package_dir={'': 'src'},
     include_package_data=True,
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
     install_requires=REQ_PKGS,
     extras_require={
-        'pytorch': ["torch>=0.4", "torchvision>=0.1.8"],
-        'cleverhans': ["tensorflow>=1.14,<2", "cleverhans"],
-        'tf-gpu': ["tensorflow-gpu>=1.14,<2"],
         'unittests': ['pytest>=4.2', 'pytest-cov>=2.6.1']
     },
     zip_safe=False

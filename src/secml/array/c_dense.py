@@ -402,6 +402,10 @@ class CDense(_CArrayInterface):
         """Redefinition of the set operation."""
         # Check for setitem value
         if isinstance(value, CDense):
+            if value.is_vector_like and value.ndim > 1:
+                # We transform vector-like arrays of 2 or more dims to vectors
+                # in order to always perform the set operation correctly
+                value = value.ravel()
             value = value.tondarray()
         elif not (is_scalar(value) or is_bool(value)):
             raise TypeError("{:} cannot be used for setting "
@@ -1080,7 +1084,7 @@ class CDense(_CArrayInterface):
             np.clip(self.tondarray(), a_min=c_min, a_max=c_max))
 
     def sort(self, axis=-1, kind='quicksort', inplace=False, order=None):
-        """sort in place"""
+        """Sort array."""
         if inplace is True:
             self.atleast_2d()._data.sort(axis=axis, kind=kind, order=order)
             # We return ourselves for output consistency
@@ -1516,7 +1520,7 @@ class CDense(_CArrayInterface):
         h = hashlib.new('sha1')
 
         # Hash by taking into account shape and data
-        h.update(bytes(x.shape))
+        h.update(hex(hash(x.shape)).encode('utf-8'))
         # The returned sha1 could be different for same data
         # but different memory order. Use C order to be consistent
         h.update(np.ascontiguousarray(x))
