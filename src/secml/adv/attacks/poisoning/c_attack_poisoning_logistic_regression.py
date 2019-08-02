@@ -11,12 +11,12 @@ from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
 class CAttackPoisoningLogisticRegression(CAttackPoisoning):
-    __class_type = 'kkt-lr'
+    __class_type = 'p-logistic'
 
     def __init__(self, classifier,
                  training_data,
                  surrogate_classifier,
-                 ts,
+                 val,
                  surrogate_data=None,
                  distance='l1',
                  dmax=0,
@@ -25,7 +25,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
                  discrete=False,
                  y_target=None,
                  attack_classes='all',
-                 solver_type='gradient-bls',
+                 solver_type='pgd-ls',
                  solver_params=None,
                  init_type='random',
                  random_seed=None):
@@ -51,7 +51,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         CAttackPoisoning.__init__(self, classifier=classifier,
                                   training_data=training_data,
                                   surrogate_classifier=surrogate_classifier,
-                                  ts=ts,
+                                  val=val,
                                   surrogate_data=surrogate_data,
                                   distance=distance,
                                   dmax=dmax,
@@ -124,7 +124,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         grad_loss_fk = CArray(loss_grad.ravel()).T  # column vector
 
         # validation points
-        xk = self.ts.X.atleast_2d()
+        xk = self.val.X.atleast_2d()
         # handle normalizer, if present
         xc = xc if clf.preprocess is None else clf.preprocess.transform(xc)
 

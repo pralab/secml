@@ -28,7 +28,7 @@ class CAttackPoisoning(CAttack):
     def __init__(self, classifier,
                  training_data,
                  surrogate_classifier,
-                 ts,
+                 val,
                  surrogate_data=None,
                  distance='l2',
                  dmax=0,
@@ -37,7 +37,7 @@ class CAttackPoisoning(CAttack):
                  discrete=False,
                  y_target=None,
                  attack_classes='all',
-                 solver_type='gradient-bls',
+                 solver_type='pgd-ls',
                  solver_params=None,
                  init_type='random',
                  random_seed=None):
@@ -110,7 +110,7 @@ class CAttackPoisoning(CAttack):
         self._n_points = None  # FIXME: WHY THIS HAS A SETTER IF NOT AN INIT PARAM?
 
         # READ/WRITE
-        self.ts = ts  # this is for validation set
+        self.val = val  # this is for validation set
         self.training_data = training_data
         self.random_seed = random_seed
 
@@ -129,19 +129,19 @@ class CAttackPoisoning(CAttack):
     ###########################################################################
 
     @property
-    def ts(self):
+    def val(self):
         """Returns the attacker's validation data"""
-        return self._ts
+        return self._val
 
-    @ts.setter
-    def ts(self, value):
+    @val.setter
+    def val(self, value):
         """Sets the attacker's validation data"""
         if value is None:
-            self._ts = None
+            self._val = None
             return
         if not isinstance(value, CDataset):
-            raise TypeError('ts should be a CDataset!')
-        self._ts = value
+            raise TypeError('val should be a CDataset!')
+        self._val = value
 
     @property
     def training_data(self):
@@ -223,16 +223,14 @@ class CAttackPoisoning(CAttack):
         self._warm_start = None
 
     def _rnd_init_poisoning_points(
-            self, n_points=None, init_from_val=True, val=None):
-        """
-        Returns a set of n_points poisoning points randomly drawn
-        from surrogate_data with flipped labels.
-        """
+            self, n_points=None, init_from_val=False, val=None):
+        """Returns a random set of poisoning points randomly with
+        flipped labels."""
         if init_from_val:
             if val:
                 init_dataset = val
             else:
-                init_dataset = self.ts
+                init_dataset = self.val
         else:
             init_dataset = self.surrogate_data
 
@@ -250,7 +248,8 @@ class CAttackPoisoning(CAttack):
 
         xc = init_dataset.X[idx, :].deepcopy()
 
-        if not self.discrete:  # if the attack is in a continuous space we add a
+        if not self.discrete:
+            # if the attack is in a continuous space we add a
             # little perturbation to the initial poisoning point
             random_noise = CArray.rand(shape=xc.shape,
                                        random_state=self.random_seed)
@@ -351,9 +350,9 @@ class CAttackPoisoning(CAttack):
         clf, tr = self._update_poisoned_clf()
 
         # targeted attacks
-        y_ts = self._y_target if self._y_target is not None else self.ts.Y
+        y_ts = self._y_target if self._y_target is not None else self.val.Y
 
-        y_pred, score = clf.predict(self.ts.X, return_decision_function=True)
+        y_pred, score = clf.predict(self.val.X, return_decision_function=True)
 
         # TODO: binary loss check
         if self._attacker_loss.class_type != 'softmax':
@@ -392,10 +391,10 @@ class CAttackPoisoning(CAttack):
         self._xc[idx, :] = xc
         clf, tr = self._update_poisoned_clf()
 
-        y_ts = self._y_target if self._y_target is not None else self.ts.Y
+        y_ts = self._y_target if self._y_target is not None else self.val.Y
 
         # computing gradient of loss(y, f(x)) w.r.t. f
-        score = clf.predict(self.ts.X, return_decision_function=True)[1]
+        score = clf.predict(self.val.X, return_decision_function=True)[1]
 
         grad = CArray.zeros((xc.size,))
 
@@ -441,7 +440,7 @@ class CAttackPoisoning(CAttack):
 
         :param xc: init poisoning points
         :param yc: poisoning point labels
-        :param ts: validation dataset
+        :param val: validation dataset
         :param n_iter: maximum number of solver iterations
         :param idx: index of point in xc to be manipulated to poison clf
         :return:
@@ -469,7 +468,7 @@ class CAttackPoisoning(CAttack):
     #                              PUBLIC METHODS
     ###########################################################################
 
-    def run(self, x, y, ds_init=None, max_iter=2):
+    def run(self, x, y, ds_init=None, max_iter=5):
         """Runs poisoning on multiple points.
 
         It reads n_points (previously set), initializes xc, yc at random,
@@ -477,7 +476,7 @@ class CAttackPoisoning(CAttack):
 
         Parameters
         ----------
-        x: ts set for evaluating classifier performance
+        x: val set for evaluating classifier performance
             (this is not the validation data used by the attacker!)
         y: true labels of testing points
         ds_init: for warm starts
@@ -485,8 +484,8 @@ class CAttackPoisoning(CAttack):
 
         Returns
         -------
-        y_pred: predicted labels for all ts samples by targeted classifier
-        scores: scores for all ts samples by targeted classifier
+        y_pred: predicted labels for all val samples by targeted classifier
+        scores: scores for all val samples by targeted classifier
         adv_xc: manipulated poisoning points xc (for subsequents warm starts)
 
         """

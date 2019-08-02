@@ -1277,7 +1277,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
 
     def test_sha1(self):
         """Test for CArray.sha1() method."""
-        self.logger.info("Test for CArray.prod() method.")
+        self.logger.info("Test for CArray.sha1() method.")
 
         def _check_sha1(array):
             self.logger.info("Array:\n{:}".format(array))

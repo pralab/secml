@@ -30,7 +30,7 @@ class CPlotClassifier(CPlotFunction):
         self.grid(grid_on=False)
 
     def plot_decision_regions(self, clf, plot_background=True, levels=None,
-                              grid_limits=None, n_grid_points=30, cmap='jet'):
+                              grid_limits=None, n_grid_points=30, cmap=None):
         """Plot decision boundaries and regions for the given classifier.
 
         Parameters
@@ -48,12 +48,22 @@ class CPlotClassifier(CPlotFunction):
             If None, [(0, 1), (0, 1)] limits will be used.
         n_grid_points : int, optional
             Number of grid points. Default 30.
-        cmap : str or list or `matplotlib.pyplot.cm`
-            Colormap to use (default 'jet'). Could be a list of colors.
+        cmap : str or list or `matplotlib.pyplot.cm` or None, optional
+            Colormap to use. Could be a list of colors. If None and the
+            number of dataset classes is `<= 6`, colors will be chosen
+            from ['blue', 'red', 'lightgreen', 'black', 'gray', 'cyan'].
+            Otherwise the 'jet' colormap will be used.
 
         """
         if not isinstance(clf, CClassifier):
             raise TypeError("'clf' must be an instance of `CClassifier`.")
+
+        if cmap is None:
+            if clf.n_classes <= 6:
+                colors = ['blue', 'red', 'lightgreen', 'black', 'gray', 'cyan']
+                cmap = colors[:clf.n_classes]
+            else:
+                cmap = 'jet'
 
         if levels is None:
             levels = CArray.arange(0.5, clf.n_classes).tolist()

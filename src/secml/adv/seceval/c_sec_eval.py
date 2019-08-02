@@ -40,8 +40,6 @@ class CSecEval(CCreator):
     def __init__(self, attack, param_name, param_values,
                  save_adv_ds=False):
 
-        self.verbose = 1
-
         # initialize read-write attribute
         self._attack = None
 
@@ -197,7 +195,8 @@ class CSecEval(CCreator):
             self._sec_eval_data.scores[k] = scores
             self._sec_eval_data.fobj[k] = fobj
             self._sec_eval_data.time[k] = time.time() - start_time
-            self.logger.info("Time: " + str(self._sec_eval_data.time[k]))
+
+            self.logger.debug("Time: " + str(self._sec_eval_data.time[k]))
 
     def save_data(self, path):
         """Store Sec Eval data to file."""

@@ -18,21 +18,19 @@ class TestCPlotClassifier(CUnitTest):
         self.dataset.X = CNormalizerMinMax().fit_transform(self.dataset.X)
         self.clf.fit(self.dataset)
 
-    def test_decision_function(self):
-        """Test for `.plot_decision_function` method."""
-        colors = ['blue', 'red', 'lightgreen', 'black']
-
+    def test_plot_decision_regions(self):
+        """Test for `.plot_decision_regions` method."""
         fig = CFigure(width=10, height=5)
 
         fig.subplot(1, 2, 1)
-        fig.sp.plot_ds(self.dataset, colors=colors)
+        fig.sp.plot_ds(self.dataset)
         fig.sp.plot_decision_regions(
-            self.clf, n_grid_points=200, cmap=colors, plot_background=False)
+            self.clf, n_grid_points=200, plot_background=False)
 
         fig.subplot(1, 2, 2)
-        fig.sp.plot_ds(self.dataset, colors=colors)
+        fig.sp.plot_ds(self.dataset)
         fig.sp.plot_decision_regions(
-            self.clf, n_grid_points=200, cmap=colors)
+            self.clf, n_grid_points=200)
 
         fig.show()
 

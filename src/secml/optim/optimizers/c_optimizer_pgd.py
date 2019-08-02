@@ -1,6 +1,6 @@
 """
-.. module:: COptimizerGrad
-   :synopsis: This class optimize with the standard gradient approach
+.. module:: COptimizerPGD
+   :synopsis: Optimizer using Projected Gradient Descent
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
@@ -12,7 +12,7 @@ from secml.array import CArray
 from secml.optim.optimizers import COptimizer
 
 
-class COptimizerGrad(COptimizer):
+class COptimizerPGD(COptimizer):
     """Solves the following problem:
 
         min  f(x)
@@ -27,10 +27,10 @@ class COptimizerGrad(COptimizer):
 
     Attributes
     ----------
-    class_type : 'gradient'
+    class_type : 'pgd'
 
     """
-    __class_type = 'gradient'
+    __class_type = 'pgd'
 
     def __init__(self, fun,
                  constr=None,

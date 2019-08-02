@@ -1,7 +1,6 @@
 """
-.. module:: CAttackEvasionBLS
-   :synopsis: Class performs evasion attacks against a classifier,
-                under different constraints, using Bisect Line Search.
+.. module:: CAttackEvasionPGDLS
+   :synopsis: Evasion attack using Projected Gradient Descent with Bisect Line Search.
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
@@ -20,8 +19,8 @@ from secml.optim.constraints import CConstraint
 from secml.ml.classifiers.reject import CClassifierReject
 
 
-class CAttackEvasionBLS(CAttackEvasion):
-    """Class that implements evasion attacks using Bisect Line Search.
+class CAttackEvasionPGDLS(CAttackEvasion):
+    """Evasion attacks using Projected Gradient Descent with Bisect Line Search.
 
     It requires classifier, surrogate_classifier, and surrogate_data.
     Note that surrogate_classifier is assumed to be trained (before
@@ -44,10 +43,10 @@ class CAttackEvasionBLS(CAttackEvasion):
 
     Attributes
     ----------
-    class_type : 'evasion'
+    class_type : 'e-pgd-ls'
 
     """
-    __class_type = 'evasion'
+    __class_type = 'e-pgd-ls'
 
     def __init__(self, classifier,
                  surrogate_classifier,
@@ -80,7 +79,7 @@ class CAttackEvasionBLS(CAttackEvasion):
                          discrete=discrete,
                          y_target=y_target,
                          attack_classes=attack_classes,
-                         solver_type='gradient-bls',
+                         solver_type='pgd-ls',
                          solver_params=solver_params)
 
     ###########################################################################
@@ -321,7 +320,7 @@ class CAttackEvasionBLS(CAttackEvasion):
     #                              PUBLIC METHODS
     ###########################################################################
 
-    def _run(self, x0, y0, x_init=None):
+    def _run(self, x0, y0, x_init=None, double_init=False):
         """Perform evasion for a given dmax on a single pattern.
 
         It solves:
@@ -336,6 +335,9 @@ class CAttackEvasionBLS(CAttackEvasion):
             The true label of x0.
         x_init : CArray or None, optional
             Initialization point. If None, it is set to x0.
+        double_init : bool, optional
+            Whether to use or not double init for non-linear classifiers.
+            Default True.
 
         Returns
         -------
@@ -350,9 +352,6 @@ class CAttackEvasionBLS(CAttackEvasion):
          the objective function and sequence of attack points (if enabled).
 
         """
-        # whether to use or not double init for nonlinear clf
-        double_init = True  # FIXME: define as a parameter
-
         # x0 must 2-D, y0 scalar if a CArray of size 1
         x0 = x0.atleast_2d()
         y0 = y0.item() if isinstance(y0, CArray) else y0

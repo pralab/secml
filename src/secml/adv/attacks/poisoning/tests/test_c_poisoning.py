@@ -105,7 +105,7 @@ class CPoisoningTestCases(object):
 
         def _pois_obj_creation(self):
 
-            self.solver_type = 'gradient-bls'
+            self.solver_type = 'pgd-ls'
             self.solver_params = {'eta': 0.05, 'eta_min': 0.05, 'eps': 1e-9}
 
             self._poisoning_params = {
@@ -113,7 +113,7 @@ class CPoisoningTestCases(object):
                 "training_data": self.tr,
                 "surrogate_classifier": self.classifier,
                 "surrogate_data": self.tr,
-                "ts": self.ts,
+                "val": self.ts,
                 "lb": self.lb,
                 "ub": self.ub,
                 "discrete": False,
