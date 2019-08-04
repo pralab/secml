@@ -274,6 +274,7 @@ class CPlotMetric(CPlot):
             self.xticks(self._xticks)
             self.xticklabels(self._xticklabels)
 
+    # FIXME: accept a CMetricConfusionMatrix object instead
     def plot_confusion_matrix(self, y_true, y_pred,
                               normalize=False, labels=None,
                               title=None, cmap='Blues', colorbar=False):

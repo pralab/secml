@@ -1,5 +1,5 @@
 """
-.. module:: MetricTestError
+.. module:: CMetricTestError
    :synopsis: Performance Metric: Test Error
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

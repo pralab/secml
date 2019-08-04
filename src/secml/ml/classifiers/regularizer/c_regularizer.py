@@ -1,5 +1,5 @@
 """
-.. module:: Regularizer
+.. module:: CRegularizer
    :synopsis: Interface for Regularizer Functions
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

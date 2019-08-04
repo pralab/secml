@@ -1,6 +1,6 @@
 """
-.. module:: LinearFunction
-   :synopsis: Manager for linear function
+.. module:: CFunctionLinear
+   :synopsis: Linear function
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 

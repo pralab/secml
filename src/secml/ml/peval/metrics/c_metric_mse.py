@@ -1,5 +1,5 @@
 """
-.. module:: MetricMSE
+.. module:: CMetricMSE
    :synopsis: Performance Metric: Mean Squared Error
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

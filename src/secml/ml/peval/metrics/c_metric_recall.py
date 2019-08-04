@@ -1,5 +1,5 @@
 """
-.. module:: MetricRecall
+.. module:: CMetricRecall
    :synopsis: Performance Metric: Recall
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

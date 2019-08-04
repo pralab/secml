@@ -14,14 +14,15 @@ class CPlotStats(CPlot):
     """Plots for statistical functions.
 
     Custom plotting parameters can be specified.
+
     Currently parameters default:
-     - show_legend: True.
+     - `show_legend`: True.
      - grid: True.
 
     See Also
     --------
-    .CPlot : basic subplot functions.
-    .CFigure : creates and handle figures.
+    CPlot : basic subplot functions.
+    CFigure : creates and handle figures.
 
     """
 

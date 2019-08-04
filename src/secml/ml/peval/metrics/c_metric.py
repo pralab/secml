@@ -1,6 +1,6 @@
 """
-.. module:: PerformanceMetrics
-   :synopsis: Collection of metrics for performance evaluation
+.. module:: CMetric
+   :synopsis: Interface for for performance evaluation metrics.
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
@@ -56,6 +56,7 @@ class CMetric(CCreator):
          - y_pred (predicted labels)
          - score (predicted scores)
          - or any other data
+
         Check documentation of each metric for more informations.
 
         If not all the required data is passed, TypeError will be raised.

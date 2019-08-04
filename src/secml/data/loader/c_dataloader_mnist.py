@@ -94,7 +94,7 @@ class CDataLoaderMNIST(CDataLoader):
         num_samples : int or None, optional
             Number of expected samples in resulting ds.
             If int, an equal number of samples will be taken
-             from each class until num_samples have been loaded.
+            from each class until `num_samples` have been loaded.
             If None, all samples will be loaded.
 
         """

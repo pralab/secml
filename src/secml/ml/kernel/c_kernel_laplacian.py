@@ -1,8 +1,8 @@
 """
-.. module:: KernelLaplacian
+.. module:: CKernelLaplacian
    :synopsis: Laplacian kernel
 
-.. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
 
 """
@@ -10,7 +10,6 @@ from sklearn import metrics
 
 from secml.array import CArray
 from secml.ml.kernel import CKernel
-import numpy as np
 
 
 class CKernelLaplacian(CKernel):
@@ -95,7 +94,7 @@ class CKernelLaplacian(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.k` : Main computation interface for kernels.
+        :meth:`CKernel.k` : Main computation interface for kernels.
 
         """
         return CArray(metrics.pairwise.laplacian_kernel(
@@ -170,7 +169,7 @@ class CKernelLaplacian(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.gradient` : Gradient computation interface for kernels.
+        :meth:`CKernel.gradient` : Gradient computation interface for kernels.
 
         """
         if v.shape[0] > 1:

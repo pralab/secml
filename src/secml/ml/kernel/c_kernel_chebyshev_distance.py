@@ -1,5 +1,5 @@
 """
-.. module:: KernelChebyshevDistance
+.. module:: CKernelChebyshevDistance
    :synopsis: Chebyshev distances kernel
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -86,7 +86,7 @@ class CKernelChebyshevDistance(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.k` : Main computation interface for kernels.
+        :meth:`CKernel.k` : Main computation interface for kernels.
 
         """
         return CArray(metrics.pairwise.pairwise_distances(
@@ -114,7 +114,7 @@ class CKernelChebyshevDistance(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.gradient` : Gradient computation interface for kernels.
+        :meth:`CKernel.gradient` : Gradient computation interface for kernels.
 
         """
         u_carray = CArray(u)

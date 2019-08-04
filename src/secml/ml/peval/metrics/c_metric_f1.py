@@ -1,5 +1,5 @@
 """
-.. module:: MetricF1
+.. module:: CMetricF1
    :synopsis: Performance Metric: F1
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

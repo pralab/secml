@@ -1,8 +1,8 @@
 """
-.. module:: CAttackPoisoning
-   :synopsis: TODO
+.. module:: CAttackPoisoningSVM
+   :synopsis: Poisoning attacks against Support Vector Machine
 
-    @author: Battista Biggio
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
 from secml.adv.attacks.poisoning import CAttackPoisoning
@@ -38,7 +38,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         TODO: complete list of parameters
 
         Parameters
-        ------
+        ----------
         discrete: True/False (default: false).
                   If True, input space is considered discrete (integer-valued),
                   otherwise continuous.

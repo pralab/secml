@@ -16,7 +16,7 @@ from secml.core import CCreator
 class CPreProcess(CCreator):
     """Common interface for feature preprocessing algorithms.
 
-    Properties
+    Parameters
     ----------
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.
@@ -44,8 +44,8 @@ class CPreProcess(CCreator):
         class_items : list of str or class instances
             A list of mixed class types or CPreProcess instances.
             The object created with the first type/instance of the list
-             will be the preprocess of the object created using the second
-             type/instance in the list and so on until the end of the list.
+            will be the preprocess of the object created using the second
+            type/instance in the list and so on until the end of the list.
         kwargs_list : list of dict
             A list of dictionaries, one for each item in `class_items`,
             to specify any additional argument for each specific preprocessor.

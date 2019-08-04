@@ -1,5 +1,5 @@
 """
-.. module:: MetricAccuracy
+.. module:: CMetricAccuracy
    :synopsis: Performance Metric: Accuracy
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

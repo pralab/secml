@@ -32,11 +32,11 @@ class CDataLoaderImgClients(CDataLoader):
         """Load all images of specified format inside given path.
 
         Extra dataset attributes:
-        - 'id': last `ds_path` folder.
-        - 'img_w', 'img_h': size of the images in pixels.
-        - 'img_c': images number of channels.
-        - Any other custom attribute is retrieved from 'attributes.txt' file.
-          Only attributes of `str` type are currently supported.
+         - 'id': last `ds_path` folder.
+         - 'img_w', 'img_h': size of the images in pixels.
+         - 'img_c': images number of channels.
+         - Any other custom attribute is retrieved from 'attributes.txt' file.
+           Only attributes of `str` type are currently supported.
 
         Parameters
         ----------

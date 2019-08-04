@@ -1,5 +1,5 @@
 """
-.. module:: KernelRBF
+.. py:module:: CKernelRBF
    :synopsis: Radial basis function (RBF) kernel
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
@@ -92,7 +92,7 @@ class CKernelRBF(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.k` : Main computation interface for kernels.
+        :meth:`CKernel.k` : Main computation interface for kernels.
 
         """
         return CArray(metrics.pairwise.rbf_kernel(
@@ -167,7 +167,7 @@ class CKernelRBF(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.gradient` : Gradient computation interface for kernels.
+        :meth:`CKernel.gradient` : Gradient computation interface for kernels.
 
         """
         u_carray = CArray(u)

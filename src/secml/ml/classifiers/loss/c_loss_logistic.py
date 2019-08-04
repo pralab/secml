@@ -33,14 +33,14 @@ class CLossLogistic(CLossClassification):
         score : CArray
             Outputs (predicted), targets.
             2-D array of shape (n_samples, n_classes) or 1-D flat array
-             of shape (n_samples,). If 1-D array, the probabilities
-             provided are assumed to be that of the positive class.
+            of shape (n_samples,). If 1-D array, the probabilities
+            provided are assumed to be that of the positive class.
         pos_label : {0, 1}, optional
             The class wrt compute the loss function. Default 1.
             If `score` is a 1-D flat array, this parameter is ignored.
         bound : scalar or None, optional
             Set an upper bound for a linear approximation when -y*s is large
-             to avoid numerical overflows.
+            to avoid numerical overflows.
             10 is a generally acceptable -> log(1+exp(10)) = 10.000045
 
         Returns
@@ -78,14 +78,14 @@ class CLossLogistic(CLossClassification):
         score : CArray
             Outputs (predicted), targets.
             2-D array of shape (n_samples, n_classes) or 1-D flat array
-             of shape (n_samples,). If 1-D array, the probabilities
-             provided are assumed to be that of the positive class.
+            of shape (n_samples,). If 1-D array, the probabilities
+            provided are assumed to be that of the positive class.
         pos_label : {0, 1}, optional
             The class wrt compute the loss function derivative. Default 1.
             If `score` is a 1-D flat array, this parameter is ignored.
         bound : scalar or None, optional
             Set an upper bound for a linear approximation when -y*s is large
-             to avoid numerical overflows.
+            to avoid numerical overflows.
             10 is a generally acceptable -> log(1+exp(10)) = 10.000045
 
         Returns

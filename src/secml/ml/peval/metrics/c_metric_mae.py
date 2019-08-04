@@ -1,5 +1,5 @@
 """
-.. module:: MetricMAE
+.. module:: CMetricMAE
    :synopsis: Performance Metric: Mean Absolute Error
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

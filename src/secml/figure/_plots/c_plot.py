@@ -1264,13 +1264,15 @@ class CPlot(CCreator):
             intersection point and extend the filled region up to this point.
         step : {'pre', 'post', 'mid'}, optional
             Define step if the filling should be a step function,
-            i.e. constant in between x. The value determines where
-            the step will occur:
-            'pre': The y value is continued constantly to the left from
-             every x position, i.e. the interval (x[i-1], x[i]] has the value y[i].
-            'post': The y value is continued constantly to the right from
-             every x position, i.e. the interval [x[i], x[i+1]) has the value y[i].
-            'mid': Steps occur half-way between the x positions.
+            i.e. constant in between x.
+            The value determines where the step will occur:
+             - 'pre': The y value is continued constantly to the left from
+               every x position, i.e. the interval (x[i-1], x[i]] has the
+               value y[i].
+             - 'post': The y value is continued constantly to the right from
+               every x position, i.e. the interval [x[i], x[i+1]) has the
+               value y[i].
+             - 'mid': Steps occur half-way between the x positions.
 
         """
         x, y1, y2, where = tuple_sequence_tondarray((x, y1, y2, where))
@@ -1314,43 +1316,37 @@ class CPlot(CCreator):
         self._ylim = (bottom, top)
         self._sp.set_ylim(bottom, top)
 
-    def xscale(self, scale_type, nonposx='mask', base=10, linthreshx=None):
+    def xscale(self, scale_type, nonposx='mask', basex=10, **kwargs):
         """Set scale for x axis.
 
         Parameters
         ----------
-        scale_type : 'linear' or 'log', default is linear
-            Scale for x axis.
+        scale_type : {'linear', 'log', 'symlog', 'logit'}
+            Scale for x axis. Default 'linear'.
         nonposx: [ 'mask' | 'clip' ], default 'mask'
             Non-positive values in x can be masked as invalid,
             or clipped to a very small positive number.
-        base : integer
+        basex : int
             The base of the logarithm, must be higger than 1.
-        linthreshx : scalar
-            The limit within which the plot is linear.
 
         """
-        self._sp.set_xscale(
-            scale_type, nonposx=nonposx, base=base, linthreshx=linthreshx)
+        self._sp.set_xscale(scale_type, nonposx=nonposx, basex=basex, **kwargs)
 
-    def yscale(self, scale_type, nonposy='mask', base=10, linthreshy=None):
+    def yscale(self, scale_type, nonposy='mask', basey=10, **kwargs):
         """Set scale for y axis.
 
         Parameters
         ----------
-        scale_type : 'linear' or 'log', default is linear
-            Scale for y axis.
+        scale_type : {'linear', 'log', 'symlog', 'logit'}
+            Scale for y axis. Default 'linear'.
         nonposy: [ 'mask' | 'clip' ], default 'mask'
             Non-positive values in y can be masked as invalid,
             or clipped to a very small positive number.
-        base : integer
+        basey : int
             The base of the logarithm, must be higger than 1.
-        linthreshy : scalar
-            The limit within which the plot is linear.
 
         """
-        self._sp.set_yscale(
-            scale_type, nonposy=nonposy, base=base, linthreshy=linthreshy)
+        self._sp.set_yscale(scale_type, nonposy=nonposy, basey=basey, **kwargs)
 
     def xlabel(self, label, *args, **kwargs):
         """Set a label for the x axis.

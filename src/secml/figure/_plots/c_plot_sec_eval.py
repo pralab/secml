@@ -47,8 +47,9 @@ class CPlotSecEval(CPlot):
     style data from `.CSecEvalData` class.
 
     Custom plotting parameters can be specified.
+
     Currently parameters default:
-     - show_CPlotSecEval: True. Set False to hide CPlotSecEval on next plot.
+     - `show_legend`: True. Set False to hide `show_legend` on next plot.
      - grid: True.
 
     See Also

@@ -16,7 +16,7 @@ def parfor(task, processes, args):
     processes : int
         Maximum number of concurrent processes to be used in the pool.
         If higher than multiprocessing.cpu_count(),
-         all processor's cores will be used.
+        all processor's cores will be used.
     args : any
         Iterable object, where each element is an argument for task.
     
@@ -37,22 +37,22 @@ def parfor(task, processes, args):
 def parfor2(task, n_reps, processes, *args):
     """Parallel For.
 
-    Run function *task* using each argument in *args* as input,
+    Run function `task` using each argument in `args` as input,
     using a pool of concurrent processes.
-    The *task* should take as first input the index of parfor iteration.
+    The `task` should take as first input the index of parfor iteration.
 
     Parameters
     ----------
     task : function
-        Function object that should process each element in args.
+        Function object that should process each element in `args`.
     n_reps : int
-        Number of times the *task* should be run.
+        Number of times the `task` should be run.
     processes : int
         Maximum number of concurrent processes to be used in the pool.
-        If higher than multiprocessing.cpu_count(),
-         all processor's cores will be used.
+        If higher than `multiprocessing.cpu_count()`,
+        all processor's cores will be used.
     args : any, optional
-        Tuple with input arguments for *task*
+        Tuple with input arguments for `task`.
 
     Returns
     -------

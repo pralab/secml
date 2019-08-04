@@ -18,6 +18,7 @@ class CPlotDataset(CPlot):
     """Plots a Dataset.
 
     Custom plotting parameters can be specified.
+
     Currently parameters default:
      - show_legend: True
      - grid: True

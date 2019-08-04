@@ -1,5 +1,5 @@
 """
-.. module:: KernelEuclidean
+.. module:: CKernelEuclidean
    :synopsis: Euclidean distances kernel.
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

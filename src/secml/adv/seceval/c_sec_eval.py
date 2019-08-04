@@ -2,7 +2,7 @@
 .. module:: CSecEval
    :synopsis: Security evaluation for attack classes
 
-.. moduleauthor:: Battista Biggio <davide.maiorca@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """

@@ -1,5 +1,5 @@
 """
-.. module:: KernelPolynomial
+.. module:: CKernelPoly
    :synopsis: Polynomial kernel
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>

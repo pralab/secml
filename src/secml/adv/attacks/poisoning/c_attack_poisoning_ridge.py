@@ -1,9 +1,8 @@
 """
-.. module:: CAttackPoisoning
-   :synopsis: TODO
+.. module:: CAttackPoisoningRidge
+   :synopsis: Poisoning attacks against ridge
 
-    @author: Ambra Demontis
-    @author: Battista Biggio
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
 from secml.adv.attacks.poisoning import CAttackPoisoning
@@ -40,7 +39,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         TODO: complete list of parameters
 
         Parameters
-        ------
+        ----------
         discrete: True/False (default: false).
                   If True, input space is considered discrete (integer-valued),
                   otherwise continuous.

@@ -1,6 +1,6 @@
 """
-.. module:: ArrayInterface
-   :synopsis: Class that defines an interface for array classes
+.. module:: _CArrayInterface
+   :synopsis: Interface for array classes
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 

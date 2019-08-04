@@ -19,10 +19,13 @@ class CSoftmax(CCreator):
         The softmax function is defined for the vector `s`
         and for the i-th class as:
 
-          \text{SoftMax}(y, s) = [a_1,..,a_n] -> [s_1,..,s_n]
+        .. math::
 
-        where:
-          \text s_y = \frac{e^{a_j}}{\sum_{i=1}^N e^a_i} \forall 1=1..N
+           \\text{SoftMax}(y, s) =
+                        \\left[ a_1,\\ldots,a_n] -> [s_1,\\ldots,s_n \\right]
+
+           where:
+             \\text s_y = \\frac{e^{a_j}}{\\sum_{i=1}^N e^a_i} \\forall 1=1..N
 
 
         Parameters
@@ -59,20 +62,22 @@ class CSoftmax(CCreator):
         The derivative of the y-th output of the
         softmax function w.r.t. all the inputs is given by:
 
-          [\frac{\prime s_y}{\prime a_1},..,\frac{\prime s_y}{\prime a_n}]
+        .. math::
 
-        where:
-          \text {\prime s_y}{\prime a_i} = s_y (\delta - s_i)
+           \\left[ \\frac{s'_y}{a'_1}, \\ldots, \\frac{s'_y}{a'_n} \\right]
 
-        with:
-          \text \delta = 1 if i = j
-          \text \delta = 0 if i \ne j
+           where:
+             \\frac{s'_y}{a'_i} = s_y (\\delta - s_i)
+
+           with:
+             \\delta = 1 if i = j
+             \\delta = 0 if i \\ne j
 
         Parameters
         ----------
         s : CArray
             2-D array of shape (1, n_classes) with input data.
-        pos_label : int
+        y : int
             The class wrt compute the gradient.
 
         Returns

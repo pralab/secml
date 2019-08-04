@@ -1,9 +1,8 @@
 """
-.. module:: SparseArray
-   :synopsis: Class for wrapping scipy.sparse.csr_matrix sparse matrix format
+.. module:: CSparse
+   :synopsis: Wrapper of `scipy.sparse` sparse matrices
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
@@ -1014,9 +1013,9 @@ class CSparse(_CArrayInterface):
         order : {'C', 'F'}, optional
             Read the elements using this index order.
             'C' means to read and write the elements using C-like index order;
-             e.g. read entire first row, then second row, etc.
+            e.g. read entire first row, then second row, etc.
             'F' means to read and write the elements using Fortran-like index
-             order; e.g. read entire first column, then second column, etc.
+            order; e.g. read entire first column, then second column, etc.
         copy : bool, optional
             Indicates whether or not attributes of self should be copied
             whenever possible. The degree to which attributes are copied

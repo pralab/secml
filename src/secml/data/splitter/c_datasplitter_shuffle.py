@@ -1,5 +1,5 @@
 """
-.. module:: ShuffleSplitting
+.. module:: CDataSplitterShuffle
    :synopsis: Random permutation splitting
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>

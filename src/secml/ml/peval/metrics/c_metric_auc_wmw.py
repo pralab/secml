@@ -1,5 +1,5 @@
 """
-.. module:: MetricAUCWMW
+.. module:: CMetricAUCWMW
    :synopsis: Performance Metric: Area Under (ROC) Curve using Wilcoxon-Mann-Whitney statistic
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

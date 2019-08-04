@@ -1,5 +1,5 @@
 """
-.. module:: KFold
+.. module:: CDataSplitterKFold
    :synopsis: K-Fold splitting
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
