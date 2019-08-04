@@ -468,7 +468,7 @@ class CAttackPoisoning(CAttack):
     #                              PUBLIC METHODS
     ###########################################################################
 
-    def run(self, x, y, ds_init=None, max_iter=5):
+    def run(self, x, y, ds_init=None, max_iter=1):
         """Runs poisoning on multiple points.
 
         It reads n_points (previously set), initializes xc, yc at random,
@@ -476,17 +476,23 @@ class CAttackPoisoning(CAttack):
 
         Parameters
         ----------
-        x: val set for evaluating classifier performance
-            (this is not the validation data used by the attacker!)
-        y: true labels of testing points
-        ds_init: for warm starts
-        max_iter: number of iterations to re-optimize poisoning data
+        x : CArray
+            Validation set for evaluating classifier performance.
+            Note that this is not the validation data used by the attacker,
+            which should be passed instead to `CAttackPoisoning` init.
+        y : CArray
+            Corresponding true labels for samples in `x`.
+        ds_init : CDataset or None, optional.
+            Dataset for warm start.
+        max_iter : int, optional
+            Number of iterations to re-optimize poisoning data. Default 1.
 
         Returns
         -------
-        y_pred: predicted labels for all val samples by targeted classifier
-        scores: scores for all val samples by targeted classifier
-        adv_xc: manipulated poisoning points xc (for subsequents warm starts)
+        y_pred : predicted labels for all val samples by targeted classifier
+        scores : scores for all val samples by targeted classifier
+        adv_xc : manipulated poisoning points xc (for subsequents warm starts)
+        f_opt : final value of the objective function
 
         """
         if self._n_points is None or self._n_points == 0:
