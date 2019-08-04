@@ -3,7 +3,6 @@
    :synopsis: Log and store code informations on disk.
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
 
 """
 from __future__ import print_function

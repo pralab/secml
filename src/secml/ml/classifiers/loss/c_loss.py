@@ -127,10 +127,10 @@ class CLossClassification(CLoss):
         score : CArray
             Outputs (predicted), targets.
             2-D array of shape (n_samples, n_classes) or
-             1-D flat array of shape (n_samples,).
+            1-D flat array of shape (n_samples,).
         pos_label : int or None, optional
             Default None, meaning that the function is computed
-             for each sample wrt the corresponding true label.
+            for each sample wrt the corresponding true label.
             Otherwise, this is the class wrt compute the loss function.
             If `score` is a 1-D flat array, this parameter is ignored.
 
@@ -152,10 +152,10 @@ class CLossClassification(CLoss):
         score : CArray
             Outputs (predicted), targets.
             2-D array of shape (n_samples, n_classes) or 1-D flat array
-             of shape (n_samples,).
+            of shape (n_samples,).
         pos_label : int or None, optional
             Default None, meaning that the function derivative is computed
-             for each sample wrt the corresponding true label.
+            for each sample wrt the corresponding true label.
             Otherwise, this is the class wrt compute the derivative.
             If `score` is a 1-D flat array, this parameter is ignored.
 
@@ -173,14 +173,14 @@ def _check_binary_score(score, pos_label=1):
 
     If score is a 1-D flat array, the probabilities are returned as is.
     If score is 2-D (n_samples, n_classes), it is checked to be
-     binary (2-classes) and the column corresponding to pos_label is returned.
+    binary (2-classes) and the column corresponding to pos_label is returned.
 
     Parameters
     ----------
     score : CArray
         Outputs (predicted), targets.
         2-D array of shape (n_samples, n_classes) or
-         1-D flat array of shape (n_samples,).
+        1-D flat array of shape (n_samples,).
     pos_label : {0, 1}, optional
         The index of the column to return. Default 1.
         If `score` is a 1-D flat array, this parameter is ignored.

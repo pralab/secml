@@ -1,5 +1,5 @@
 """
-.. module:: KernelHamming
+.. module:: CKernelHamming
    :synopsis: Hamming distances kernel
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>

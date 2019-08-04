@@ -1,5 +1,5 @@
 """
-.. module:: MetricPrecision
+.. module:: CMetricPrecision
    :synopsis: Performance Metric: Precision
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

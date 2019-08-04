@@ -31,7 +31,7 @@ class CAttack(CCreator):
     TODO: complete list of parameters
 
     Parameters
-    ------
+    ----------
     discrete: True/False (default: false).
               If True, input space is considered discrete (integer-valued),
               otherwise continuous.

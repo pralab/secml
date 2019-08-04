@@ -1,5 +1,5 @@
 """
-.. module:: Open World K-Fold
+.. module:: CDataSplitterOpenWorldKFold
    :synopsis: Open World K-Fold splitting
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

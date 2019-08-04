@@ -36,7 +36,7 @@ class CClassifierKDE(CClassifier, CClassifierGradientKDEMixin):
 
     See Also
     --------
-    .CKernel : Pairwise kernels and metrics.
+    CKernel : Pairwise kernels and metrics.
 
     """
     __class_type = 'kde'

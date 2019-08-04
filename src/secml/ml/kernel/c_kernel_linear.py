@@ -1,5 +1,5 @@
 """
-.. module:: KernelLinear
+.. module:: CKernelLinear
    :synopsis: Linear kernel
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
@@ -60,7 +60,7 @@ class CKernelLinear(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.k` : Main computation interface for kernels.
+        :meth:`CKernel.k` : Main computation interface for kernels.
 
         """
         return CArray(metrics.pairwise.linear_kernel(
@@ -89,7 +89,7 @@ class CKernelLinear(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.gradient` : Gradient computation interface for kernels.
+        :meth:`CKernel.gradient` : Gradient computation interface for kernels.
 
         Examples
         --------

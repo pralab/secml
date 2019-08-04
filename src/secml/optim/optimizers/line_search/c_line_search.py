@@ -46,7 +46,7 @@ class CLineSearch(CCreator):
         d : CArray
             The descent direction along which fun(x) is minimized.
         kwargs : dict
-            Additional parameters required to evaluate fun(x, **kwargs).
+            Additional parameters required to evaluate `fun(x, **kwargs)`.
 
         """
         raise NotImplementedError

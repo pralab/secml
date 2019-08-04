@@ -1,5 +1,5 @@
 """
-.. module:: MetricAUC
+.. module:: CMetricAUC
    :synopsis: Performance Metric: Area Under (ROC) Curve
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

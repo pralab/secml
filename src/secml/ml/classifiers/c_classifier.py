@@ -245,30 +245,25 @@ class CClassifier(CCreator):
 
         Parameters
         ----------
-        return_decision_function
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
         return_decision_function : bool, optional
-            Whether to return the decision_function value along
+            Whether to return the `decision_function` value along
             with predictions. Default False.
-        n_jobs : int, optional
-            Number of parallel workers to use for classification.
-            Default 1. Cannot be higher than processor's number of cores.
 
         Returns
         -------
         labels : CArray
             Flat dense array of shape (n_patterns,) with the label assigned
-             to each test pattern. The classification label is the label of
-             the class associated with the highest score.
+            to each test pattern. The classification label is the label of
+            the class associated with the highest score.
         scores : CArray, optional
             Array of shape (n_patterns, n_classes) with classification
-             score of each test pattern with respect to each training class.
+            score of each test pattern with respect to each training class.
             Will be returned only if `return_decision_function` is True.
 
         """
-
         # TODO: we can try here to run with n_jobs, as done in fit
         scores = self.decision_function(x, y=None)
 
@@ -287,9 +282,9 @@ class CClassifier(CCreator):
         dataset : CDataset
             Dataset to be used for evaluating parameters.
         parameters : dict
-            Dictionary with each entry as {parameter: list of values to test}.
-            Example: {'C': [1, 10, 100],
-                      'gamma': list(10.0 ** CArray.arange(-4, 4))}
+            Dictionary with each entry as `{parameter: list of values to test}`.
+            Example:
+            `{'C': [1, 10, 100], 'gamma': list(10.0 ** CArray.arange(-4, 4))}`
         splitter : CDataSplitter or str
             Object to use for splitting the dataset into train and validation.
             A splitter type can be passed as string, in this case all

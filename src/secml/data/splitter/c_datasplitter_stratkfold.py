@@ -1,5 +1,5 @@
 """
-.. module:: KFoldStratified
+.. module:: CDataSplitterStratifiedKFold
    :synopsis: Stratified K-Fold
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

@@ -16,7 +16,7 @@ from secml.utils.mixed_utils import check_is_fitted
 class CLDA(CReducer):
     """Linear Discriminant Analysis (LDA).
 
-    Properties
+    Parameters
     ----------
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.

@@ -15,6 +15,8 @@ from secml.optim.optimizers import COptimizer
 class COptimizerPGD(COptimizer):
     """Solves the following problem:
 
+    .. math::
+
         min  f(x)
         s.t. d(x,x0) <= dmax
              x_lb <= x <= x_ub
@@ -88,11 +90,14 @@ class COptimizerPGD(COptimizer):
     def minimize(self, x_init, args=(), **kwargs):
         """
         Interface to minimizers implementing
-            min fun(x)
-            s.t. constraint
 
-        Parameters:
-        ------
+        .. math::
+
+           min fun(x)
+           s.t. constraint
+
+        Parameters
+        ----------
         x_init : CArray
             The initial input point.
         args : tuple, optional

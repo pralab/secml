@@ -15,6 +15,7 @@ class CPlotClassifier(CPlotFunction):
     """Plot a classifier.
 
     Custom plotting parameters can be specified.
+
     Currently parameters default:
      - grid: False.
 

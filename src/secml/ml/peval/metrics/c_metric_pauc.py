@@ -1,5 +1,5 @@
 """
-.. module:: MetricPartialAUC
+.. module:: CMetricPartialAUC
    :synopsis: Performance Metric: Partial Area Under (ROC) Curve
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

@@ -1,5 +1,5 @@
 """
-.. module:: McCormickFunction
+.. module:: CFunctionMcCormick
    :synopsis: McCormick function
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

@@ -1,5 +1,5 @@
 """
-.. module:: CLossEpsilonInsensitive & CLossEpsilonInsensitiveSquared
+.. module:: CLossEpsilonInsensitive
    :synopsis: Epsilon-Insensitive Loss Functions
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -14,8 +14,8 @@ class CLossEpsilonInsensitive(CLossRegression):
     """Epsilon-Insensitive Loss Function.
 
     Any difference between the current prediction and
-     the ground truth is ignored if is less than the
-     `epsilon` threshold.
+    the ground truth is ignored if is less than the
+    `epsilon` threshold.
 
     Epsilon-Insensitive loss is used by support vector regression.
 
@@ -23,7 +23,8 @@ class CLossEpsilonInsensitive(CLossRegression):
 
     .. math::
 
-        L_{\epsilon-\text{insensitive}}(y, s) = \max\left\{|y - s| - \epsilon, 0\right\}
+       L_{\\epsilon-\\text{ins}} (y, s) =
+                             \\max \\left\\{ |y - s| - \\epsilon, 0 \\right\\}
 
     Attributes
     ----------
@@ -113,14 +114,15 @@ class CLossEpsilonInsensitiveSquared(CLossEpsilonInsensitive):
     """Squared Epsilon-Insensitive Loss Function.
 
     Any difference between the current prediction and
-     the ground truth is ignored if is less than the
-     `epsilon` threshold.
+    the ground truth is ignored if is less than the
+    `epsilon` threshold.
 
     The Squared Epsilon-Insensitive loss is defined as:
 
     .. math::
 
-        L^2_{\epsilon-\text{insensitive}}(y, s) = \left\(\max\left\{|y - s| - \epsilon, 0\right\}\right\)^2
+       L^2_{\\epsilon-\\text{ins}} (y, s) =
+        {\\left( \\max\\left\\{ |y - s| - \\epsilon, 0 \\right\\} \\right)}^2
 
     Attributes
     ----------

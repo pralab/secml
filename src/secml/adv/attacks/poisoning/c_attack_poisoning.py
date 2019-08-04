@@ -1,8 +1,8 @@
 """
 .. module:: CAttackPoisoning
-   :synopsis: TODO
+   :synopsis: Interface for poisoning attacks
 
-    @author: Battista Biggio
+.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 
 """
 import warnings
@@ -51,7 +51,7 @@ class CAttackPoisoning(CAttack):
         TODO: complete list of parameters
 
         Parameters
-        ------
+        ----------
         discrete: True/False (default: false).
                   If True, input space is considered discrete (integer-valued),
                   otherwise continuous.
@@ -183,7 +183,7 @@ class CAttackPoisoning(CAttack):
     #                              PRIVATE METHODS
     ###########################################################################
 
-    def _constraint_cretion(self):
+    def _constraint_creation(self):
 
         # only feature increments or decrements are allowed
         lb = self._x0 if self.lb == 'x0' else self.lb
@@ -205,7 +205,7 @@ class CAttackPoisoning(CAttack):
                         gradient=self._objective_function_gradient,
                         n_dim=self._classifier.n_features)
 
-        bounds, constr = self._constraint_cretion()
+        bounds, constr = self._constraint_creation()
 
         # FIXME: FEW SOLVERS DO NOT SUPPORT DISCRETE. THE FOLLOWING IS A
         #  WORKAROUND TO TRIGGER A PROPER ERROR
@@ -587,7 +587,7 @@ class CAttackPoisoning(CAttack):
                 c_xc[idx] += eta
 
                 self._x0 = c_xc
-                bounds, constr = self._constraint_cretion()
+                bounds, constr = self._constraint_creation()
                 if bounds.is_violated(c_xc) or \
                         bounds.is_violated(c_xc):
                     c_xc = orig_xc.deepcopy()
@@ -597,7 +597,7 @@ class CAttackPoisoning(CAttack):
                     # update a randomly chosen feature of xc if does not
                     # violates any constraint
                     self._x0 = c_xc
-                    bounds, constr = self._constraint_cretion()
+                    bounds, constr = self._constraint_creation()
                     if bounds.is_violated(c_xc) or \
                             bounds.is_violated(c_xc):
                         c_xc = orig_xc.deepcopy()

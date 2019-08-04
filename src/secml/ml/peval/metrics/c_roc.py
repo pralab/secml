@@ -1,5 +1,5 @@
 """
-.. module:: ROC
+.. module:: CROC
    :synopsis: Receiver Operating Characteristic (ROC) Curve
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

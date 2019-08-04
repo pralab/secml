@@ -1,6 +1,6 @@
 """
 .. module:: KernelInterface
-   :synopsis: Common interface for Kernel metrics
+   :synopsis: Interface for Kernel metrics
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -79,8 +79,8 @@ class CKernel(CCreator):
             Kernel between x and y. Array of shape (n_x, n_y) or scalar
             if both x and y are vector-like.
 
-        Note
-        ----
+        Notes
+        -----
         We use a caching strategy to optimize memory consumption during
         kernel computation. However, the parameter cache_size should be
         chosen wisely: a small cache can highly improve memory consumption

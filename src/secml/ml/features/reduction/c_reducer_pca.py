@@ -16,7 +16,7 @@ __all__ = ['CPCA']
 class CPCA(CReducer):
     """Principal Component Analysis (PCA).
 
-    Properties
+    Parameters
     ----------
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.

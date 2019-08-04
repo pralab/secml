@@ -4,7 +4,6 @@
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
 
 """
 from scipy import optimize as sc_opt
@@ -209,8 +208,8 @@ class CFunction(CCreator):
 
         See Also
         --------
-        `.check_grad` : Check correctness of function gradient
-            against `approx_fprime`.
+        check_grad : Check correctness of function gradient against
+            :meth:`approx_fprime`.
 
         Notes
         -----
@@ -293,7 +292,7 @@ class CFunction(CCreator):
 
         See Also
         --------
-        `.approx_fprime` : Finite-difference approximation of the gradient of a scalar function.
+        approx_fprime : Finite-difference approximation of the gradient of a scalar function.
 
         Examples
         --------

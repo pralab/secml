@@ -22,10 +22,10 @@ class CDataset(CCreator):
 
     Parameters
     ----------
-    x : array_like or CArray
+    x : `array_like` or CArray
         Dataset patterns, one for each row.
         Array is converted to 2-Dimensions before storing.
-    y : array_like or CArray
+    y : `array_like` or CArray
         Dataset labels. Array is converted to dense format
         and flattened before storing.
     header : CDatasetHeader or None, optional
@@ -59,7 +59,8 @@ class CDataset(CCreator):
     >>> print(ds.Y)
     CArray([1 0 1])
 
-    # The number of labels must be equal to the number of samples
+    The number of labels must be equal to the number of samples
+
     >>> ds = CDataset([[1,2],[3,4]],1)
     Traceback (most recent call last):
      ...
@@ -110,7 +111,7 @@ class CDataset(CCreator):
 
         Parameters
         ----------
-        value : array_like or CArray
+        value : `array_like` or CArray
             Array containing patterns. Data is converted to 2-Dimensions
             before storing.
 
@@ -131,7 +132,7 @@ class CDataset(CCreator):
 
         Parameters
         ----------
-        value : array_like or CArray
+        value : `array_like` or CArray
             Array containing labels. Array is converted to dense format
             and flattened before storing.
 
@@ -260,7 +261,7 @@ class CDataset(CCreator):
 
         See Also
         --------
-        CArray.append : More informations about arrays append.
+        :meth:`CArray.append` : More informations about arrays append.
 
         Examples
         --------

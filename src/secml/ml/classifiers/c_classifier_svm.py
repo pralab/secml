@@ -53,8 +53,8 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
 
     See Also
     --------
-    .CKernel : Pairwise kernels and metrics.
-    .CClassifierLinear : Common interface for linear classifiers.
+    CKernel : Pairwise kernels and metrics.
+    CClassifierLinear : Common interface for linear classifiers.
 
     """
     __class_type = 'svm'

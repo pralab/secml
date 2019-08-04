@@ -1,5 +1,5 @@
 """
-.. module:: RegularizerL1
+.. module:: CRegularizerL1
    :synopsis: L1-Norm Regularizer Function
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
@@ -16,9 +16,9 @@ class CRegularizerL1(CRegularizer):
 
     L1 Regularizer is given by:
 
-    ..math:
+    .. math::
 
-        R(w) := \sum_{i=1}^{n} |w_i|
+       R(w) := \sum_{i=1}^{n} |w_i|
 
     Attributes
     ----------

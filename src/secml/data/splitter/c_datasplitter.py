@@ -1,5 +1,5 @@
 """
-.. module:: DatasetSplitter
+.. module:: CDataSplitter
    :synopsis: Common interface for dataset splitting
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>

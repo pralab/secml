@@ -19,7 +19,7 @@ def save(file_path, obj):
     """Save object to file using cPickle.
 
     This functions stores a generic python object into
-    a compressed gzip file (*.gz).
+    a compressed gzip file (`*.gz`).
 
     Saved objects can be loaded using `.load`.
 

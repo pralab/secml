@@ -1,7 +1,6 @@
 """
 .. module:: CAttackEvasion
-   :synopsis: Class performs evasion attacks against a classifier,
-                under different constraints.
+   :synopsis: Interface for evasion attacks
 
 .. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>

@@ -16,7 +16,7 @@ class CPrototypesSelector(CCreator):
     """Selection of Prototypes.
 
     Prototype selection methods help reducing the number of samples
-    in a dataset by **carefully** selecting a subset of prototypes.
+    in a dataset by carefully selecting a subset of prototypes.
 
     [1]_ A good selection strategy should satisfy the following
     three conditions. First, if some prototypes are similar-that is,
@@ -31,10 +31,9 @@ class CPrototypesSelector(CCreator):
 
     References
     ----------
-    .. [1] Spillmann, Barbara, et al. "Transforming strings to vector
-    spaces using prototype selection." Structural, Syntactic,
-    and Statistical Pattern Recognition.
-    Springer Berlin Heidelberg, 2006. 287-296.
+    .. [1] Spillmann, Barbara, et al. "Transforming strings to vector spaces
+       using prototype selection." Structural, Syntactic, and Statistical
+       Pattern Recognition. Springer Berlin Heidelberg, 2006. 287-296.
 
     """
     __super__ = 'CPrototypesSelector'

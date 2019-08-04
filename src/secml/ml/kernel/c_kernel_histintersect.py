@@ -1,5 +1,5 @@
 """
-.. module:: KernelHistIntersect
+.. module:: CKernelHistIntersect
    :synopsis: Histogram Intersection kernel
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

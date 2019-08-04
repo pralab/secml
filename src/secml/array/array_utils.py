@@ -45,8 +45,8 @@ def tuple_atomic_tolist(idx):
     """Convert tuple atomic elements to list.
 
     Atomic objects converted:
-        - int, np.integer
-        - bool, np.bool_
+        - `int`, `np.integer`
+        - `bool`, `np.bool_`
 
     Parameters
     ----------
@@ -68,10 +68,10 @@ def tuple_sequence_tondarray(idx):
     """Convert sequences inside tuple to ndarray.
 
     A sequence can be:
-        - int, np.integer
-        - bool, np.bool_
+        - int, `np.integer`
+        - bool, `np.bool_`
         - list
-        - ndarray
+        - `np.ndarray`
         - CDense
         - CSparse (are converted to dense first)
         - CArray

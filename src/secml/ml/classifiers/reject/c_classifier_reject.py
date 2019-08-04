@@ -37,7 +37,7 @@ class CClassifierReject(CClassifier):
         """Perform classification of each pattern in x.
 
         If a preprocess has been specified,
-         input is normalized before classification.
+        input is normalized before classification.
 
         Parameters
         ----------
@@ -55,12 +55,12 @@ class CClassifierReject(CClassifier):
         -------
         labels : CArray
             Flat dense array of shape (n_patterns,) with the label assigned
-             to each test pattern. The classification label is the label of
-             the class associated with the highest score. The rejected
-             samples have label -1.
+            to each test pattern. The classification label is the label of
+            the class associated with the highest score. The rejected samples
+            have label -1.
         scores : CArray, optional
             Array of shape (n_patterns, n_classes) with classification
-             score of each test pattern with respect to each training class.
+            score of each test pattern with respect to each training class.
             Will be returned only if `return_decision_function` is True.
 
         """

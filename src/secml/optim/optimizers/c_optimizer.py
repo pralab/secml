@@ -20,9 +20,11 @@ class COptimizer(CCreator):
     """
     Class serving as interface to define optimization problems in the form:
 
-    minimize f(x)
-    s.t. gi(x) <= 0, i=1,...,m  (inequality constraints)
-         hj(x) = 0, j = 1,..., n (equality constraints)
+    .. math::
+
+       minimize f(x)
+       s.t. gi(x) <= 0, i=1,...,m  (inequality constraints)
+            hj(x) = 0, j = 1,..., n (equality constraints)
 
     Parameters
     ----------
@@ -138,10 +140,12 @@ class COptimizer(CCreator):
 
     @abstractmethod
     def minimize(self, x_init, args=(), **kwargs):
-        """
-        Interface to minimizers:
-            min fun(x)
-            s.t. constraint
+        """Interface to minimizers:
+
+        .. math::
+
+           min fun(x)
+           s.t. constraint
 
         Parameters
         ----------
@@ -156,9 +160,11 @@ class COptimizer(CCreator):
         raise NotImplementedError('Function `minimize` is not implemented.')
 
     def maximize(self, x_init, args=(), **kwargs):
-        """
-        Interface to maximizers:
-            max fun(x)
+        """Interface to maximizers:
+
+        .. math::
+
+           max fun(x)
             s.t. constraint
 
         This is implemented by inverting the sign of fun and gradient and

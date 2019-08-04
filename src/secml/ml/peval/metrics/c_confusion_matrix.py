@@ -1,6 +1,6 @@
 """
-.. module:: Confusion Matrix
-   :synopsis:  Confusion Matrix
+.. module:: CMetricConfusionMatrix
+   :synopsis: Confusion Matrix
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 

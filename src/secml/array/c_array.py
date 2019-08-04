@@ -1,6 +1,6 @@
 """
-.. module:: ArrayContainer
-   :synopsis: Class that defines and manage data arrays
+.. module:: CArray
+   :synopsis: Multidimensional and multiformat arrays
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
@@ -87,11 +87,6 @@ class CArray(_CArrayInterface):
         If True, input data will be converted to sparse format.
         Otherwise (default), if input is not a CArray, a dense
         array is returned, or if CArray, its format is preserved.
-
-    See Also
-    --------
-    .CDense : Array container for dense data.
-    .CSparse : Array container for sparse data.
 
     Examples
     --------
@@ -249,7 +244,7 @@ class CArray(_CArrayInterface):
 
         See Also
         --------
-        .CArray.transpose : bound method to transpose an array.
+        transpose : bound method to transpose an array.
 
         """
         return self.__class__(self._data.T)
@@ -324,8 +319,8 @@ class CArray(_CArrayInterface):
 
         See Also
         --------
-        `.tondarray()` : returns a np.ndarray, regardless of array format.
-        `.tocsr()` : returns a scipy.sparse.csr_matrix, regardless of array format.
+        tondarray : returns a np.ndarray, regardless of array format.
+        tocsr : returns a scipy.sparse.csr_matrix, regardless of array format.
 
         """
         return self.tondarray() if self.isdense is True else self.tocsr()
@@ -668,14 +663,14 @@ class CArray(_CArrayInterface):
         other : CArray
             Array to check for shape compatibility
 
-        Return
-        ------
+        Returns
+        -------
         bool
             True if input array has compatible shape with current array.
 
         See Also
         --------
-        .is_vector_like : check if an array is vector-like.
+        is_vector_like : check if an array is vector-like.
 
         Examples
         --------
@@ -855,7 +850,7 @@ class CArray(_CArrayInterface):
 
         See Also
         --------
-        .dot : inner/outer product between arrays.
+        dot : inner/outer product between arrays.
 
         """
         if is_scalar(other) or is_bool(other):
@@ -889,7 +884,7 @@ class CArray(_CArrayInterface):
 
         See Also
         --------
-        .dot : inner/outer product between arrays.
+        dot : inner/outer product between arrays.
 
         """
         if is_scalar(other) or is_bool(other):
@@ -1858,8 +1853,8 @@ class CArray(_CArrayInterface):
 
         See Also
         --------
-        .CArray.ceil : Return the ceiling of the input, element-wise.
-        .CArray.floor : Return the floor of the input, element-wise.
+        ceil : Return the ceiling of the input, element-wise.
+        floor : Return the floor of the input, element-wise.
 
         Examples
         --------
@@ -1894,8 +1889,8 @@ class CArray(_CArrayInterface):
 
         See Also
         --------
-        .CArray.round : Evenly round to the given number of decimals.
-        .CArray.floor : Return the floor of the input, element-wise.
+        round : Evenly round to the given number of decimals.
+        floor : Return the floor of the input, element-wise.
 
         Examples
         --------
@@ -2963,7 +2958,7 @@ class CArray(_CArrayInterface):
             Norm of the array.
             If axis is None, float is returned.
             Otherwise, a CArray with shape and number of dimensions consistent
-             with the original array and the axis parameter is returned.
+            with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -3052,7 +3047,7 @@ class CArray(_CArrayInterface):
             Sum of the elements in the array.
             If axis is None, float is returned.
             Otherwise, a CArray with shape and number of dimensions consistent
-             with the original array and the axis parameter is returned.
+            with the original array and the axis parameter is returned.
 
         Examples
         --------
@@ -3149,7 +3144,7 @@ class CArray(_CArrayInterface):
             Product of the elements in the array.
             If axis is None, scalar is returned.
             Otherwise, a CArray with shape and number of dimensions consistent
-             with the original array and the axis parameter is returned.
+            with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -3214,8 +3209,8 @@ class CArray(_CArrayInterface):
             Logical AND element-wise.
             If axis is None, bool is returned.
             Otherwise, a CArray of booleans with shape and number of
-             dimensions consistent with the original array and the
-             axis parameter is returned.
+            dimensions consistent with the original array and the
+            axis parameter is returned.
 
         Notes
         -----
@@ -3274,8 +3269,8 @@ class CArray(_CArrayInterface):
             Logical OR element-wise.
             If axis is None, bool is returned.
             Otherwise, a CArray of booleans with shape and number of
-             dimensions consistent with the original array and the
-             axis parameter is returned.
+            dimensions consistent with the original array and the
+            axis parameter is returned.
 
         Notes
         -----
@@ -3327,7 +3322,7 @@ class CArray(_CArrayInterface):
             Maximum of the array.
             If axis is None, scalar is returned.
             Otherwise, a CArray with shape and number of dimensions consistent
-             with the original array and the axis parameter is returned.
+            with the original array and the axis parameter is returned.
 
 
         Notes
@@ -3385,7 +3380,7 @@ class CArray(_CArrayInterface):
             Minimum of the array.
             If axis is None, scalar is returned.
             Otherwise, a CArray with shape and number of dimensions consistent
-             with the original array and the axis parameter is returned.
+            with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -3438,7 +3433,7 @@ class CArray(_CArrayInterface):
             Index of the maximum of the array.
             If axis is None, int is returned.
             Otherwise, a CArray with shape and number of dimensions consistent
-             with the original array and the axis parameter is returned.
+            with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -3486,7 +3481,7 @@ class CArray(_CArrayInterface):
             Index of the minimum of the array.
             If axis is None, int is returned.
             Otherwise, a CArray with shape and number of dimensions consistent
-             with the original array and the axis parameter is returned.
+            with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -3543,7 +3538,7 @@ class CArray(_CArrayInterface):
             Maximum of the array ignoring NaNs.
             If axis is None, scalar is returned.
             Otherwise, a CArray with shape and number of dimensions consistent
-             with the original array and the axis parameter is returned.
+            with the original array and the axis parameter is returned.
 
         Examples
         --------
@@ -3596,7 +3591,7 @@ class CArray(_CArrayInterface):
             Index of the minimum of the array ignoring NaNs.
             If axis is None, scalar is returned.
             Otherwise, a CArray with shape and number of dimensions consistent
-             with the original array and the axis parameter is returned.
+            with the original array and the axis parameter is returned.
 
         Examples
         --------
@@ -3646,7 +3641,7 @@ class CArray(_CArrayInterface):
             Index of the maximum of the array ignoring NaNs.
             If axis is None, int is returned.
             Otherwise, a CArray with shape and number of dimensions consistent
-             with the original array and the axis parameter is returned.
+            with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -3699,7 +3694,7 @@ class CArray(_CArrayInterface):
             Index of the minimum of the array ignoring NaNs.
             If axis is None, int is returned.
             Otherwise, a CArray with shape and number of dimensions consistent
-             with the original array and the axis parameter is returned.
+            with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -3759,7 +3754,7 @@ class CArray(_CArrayInterface):
             Mean of the elements in the array.
             If axis is None, float is returned.
             Otherwise, a CArray with shape and number of dimensions consistent
-             with the original array and the axis parameter is returned.
+            with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -3823,7 +3818,7 @@ class CArray(_CArrayInterface):
             Median of the elements in the array.
             If axis is None, float is returned.
             Otherwise, a CArray with shape and number of dimensions consistent
-             with the original array and the axis parameter is returned.
+            with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -3884,7 +3879,7 @@ class CArray(_CArrayInterface):
             Standard deviation of the elements in the array.
             If axis is None, float is returned.
             Otherwise, a CArray with shape and number of dimensions consistent
-             with the original array and the axis parameter is returned.
+            with the original array and the axis parameter is returned.
 
         Notes
         -----
@@ -4391,11 +4386,11 @@ class CArray(_CArrayInterface):
         CArray
             The extracted diagonal or constructed diagonal dense array.
             If array is 2-Dimensional, returns its k-th diagonal.
-             Depending on numpy version resulting array can be read-only
-             or a view of the original array's diagonal. To make output
-             array writable, use deepcopy().
-            If array is vector_like, return a 2-D array with
-             the array on the k-th diagonal.
+            Depending on numpy version resulting array can be read-only
+            or a view of the original array's diagonal. To make output
+            array writable, use `deepcopy()`.
+            If array is vector-like, return a 2-D array with
+            the array on the k-th diagonal.
 
         Examples
         --------
@@ -4442,7 +4437,7 @@ class CArray(_CArrayInterface):
         scalar or CArray
             Result of dot product.
             A CArray with the same format of first argument or
-            scalar if out.size == 1.
+            scalar if `out.size == 1`.
 
         Examples
         --------
@@ -4455,16 +4450,19 @@ class CArray(_CArrayInterface):
         >>> print(CArray([10,20]).dot(CArray([[1],[0]], tosparse=True)))
         10
 
-        # OUTER PRODUCT
+        OUTER PRODUCT
+
         >>> print(CArray([[10],[20]]).dot(CArray([1,0], tosparse=True)))
         CArray([[10  0]
          [20  0]])
 
-        # INNER PRODUCT BETWEEN VECTORS
+        INNER PRODUCT BETWEEN VECTORS
+
         >>> print(CArray([10,20]).dot(CArray([1,0])))
         10
 
-        # Inner product between vector-like arrays is a matrix multiplication
+        Inner product between vector-like arrays is a matrix multiplication
+
         >>> print(CArray([10,20]).dot(CArray([1,0], tosparse=True).T))
         10
         >>> print(CArray([10,20], tosparse=True).dot(CArray([1,0]).T))
@@ -4594,7 +4592,7 @@ class CArray(_CArrayInterface):
         ----------
         rcond : float
             Cutoff for small singular values. Singular values smaller
-            (in modulus) than rcond * largest_singular_value
+            (in modulus) than rcond * `largest_singular_value`
             (again, in modulus) are set to zero.
 
         Returns
@@ -4624,7 +4622,7 @@ class CArray(_CArrayInterface):
         References
         ----------
         .. [1] G. Strang, *Linear Algebra and Its Applications*, 2nd Ed., Orlando,
-               FL, Academic Press, Inc., 1980, pp. 139-142.
+           FL, Academic Press, Inc., 1980, pp. 139-142.
 
         Examples
         --------
@@ -4632,10 +4630,12 @@ class CArray(_CArrayInterface):
 
         The following example checks that:
             array * array_pinv * array == array and array_pinv * array * array_pinv == array_pinv
+
         >>> array = CArray([[1,3],[0,5],[8,2]])
         >>> array_pinv = array.pinv()
         >>> (array == array.dot(array_pinv.dot(array)).round()).all()
         True
+
         >>> (array_pinv.round(2) == array_pinv.dot(array.dot(array_pinv)).round(2)).all()
         True
 

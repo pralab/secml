@@ -124,8 +124,8 @@ def check_is_fitted(obj, attributes, msg=None, check_all=True):
         Attribute or list of attributes to check.
         Es.: `['classes', 'n_features', ...], 'classes'`
     msg : str or None, optional
-        If None, the default error message is,
-          "this `{name}` is not trained. Call `.fit()` first.".
+        If None, the default error message is:
+        "this `{name}` is not trained. Call `.fit()` first.".
         For custom messages if '{name}' is present in the message string,
         it is substituted by the class name of the checked object.
     check_all : bool, optional

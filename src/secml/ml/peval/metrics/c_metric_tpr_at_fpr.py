@@ -1,5 +1,5 @@
 """
-.. module:: MetricTPRatFPR
+.. module:: CMetricTPRatFPR
    :synopsis: Performance Metric: True Positive Rate @ False Positive Rate
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

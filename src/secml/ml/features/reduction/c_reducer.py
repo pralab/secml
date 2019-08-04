@@ -1,6 +1,6 @@
 """
-.. module:: FeatureReducer
-   :synopsis: Common interface for feature reduction algorithms.
+.. module:: CReducer
+   :synopsis: Interface for feature dimensionality reduction algorithms.
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
 
@@ -13,5 +13,5 @@ from secml.ml.features import CPreProcess
 
 @six.add_metaclass(ABCMeta)
 class CReducer(CPreProcess):
-    """Common interface for feature reduction algorithms."""
+    """Interface for feature dimensionality reduction algorithms."""
     __super__ = 'CReducer'

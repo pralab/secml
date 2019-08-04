@@ -184,9 +184,8 @@ class CLineSearchBisect(CLineSearch):
 
     def _is_decreasing(self, x, d, **kwargs):
         """
-        Returns True if function at x + eps*d is decreasing,
+        Returns True if function at `x + eps*d` is decreasing,
         or False if it is increasing or out of feasible domain.
-
         """
         # IMPORTANT: requires self._fz to be set to fun.fun(z)
         # This is done to save function evaluations
@@ -267,35 +266,37 @@ class CLineSearchBisect(CLineSearch):
     def minimize(self, x, d, fx=None, tol=1e-4, **kwargs):
         """Bisect line search (on discrete grid).
 
-        The function fun ( x + a*eta*d ) with a = {0, 1, 2, ... }
+        The function `fun( x + a*eta*d )` with `a = {0, 1, 2, ... }`
         is minimized along the descent direction d.
 
-        If fun(x) >= 0, step_min=step
+        If `fun(x) >= 0` -> step_min = step
         else step_max = step
 
-        if eta_max is not None, it runs a bisect line search in
-        [x+eta_min*d, x+eta_max*d]; otherwise, it runs an exponential line
-        search in [x+eta*d, ..., x+eta_min*d, ...]
+        If eta_max is not None, it runs a bisect line search in
+        `[x + eta_min*d, x + eta_max*d];
+        otherwise, it runs an exponential line search in
+        `[x + eta*d, ..., x + eta_min*d, ...]`
 
         Parameters
         ----------
         x : CArray
             The input point.
         d : CArray
-            The descent direction along which fun(x) is minimized.
+            The descent direction along which `fun(x)` is minimized.
         fx : int or float or None, optional
-            The current value of fun(x) (if available).
+            The current value of `fun(x)` (if available).
         tol : float, optional
             Tolerance for convergence to the local minimum.
         kwargs : dict
-            Additional parameters required to evaluate fun(x, **kwargs).
+            Additional parameters required to evaluate `fun(x, **kwargs)`.
 
         Returns
         -------
         x' : CArray
-            Point x'=x+eta*d that approximately solves min f(x+eta*d).
+            Point `x' = x + eta * d` that approximately
+            solves `min f(x + eta*d)`.
         fx': int or float or None, optional
-            The value f(x').
+            The value `f(x')`.
 
         """
         d = CArray(d, tosparse=d.issparse).ravel()

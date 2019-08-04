@@ -210,18 +210,18 @@ class CClassifierRejectThreshold(CClassifierReject,
 
         The score matrix of this classifier is equal to the predicted outputs
         plus a column (corresponding to the reject class) with all its values
-        equal to :math:`\theta`, being :math:`\theta` the reject threshold.
+        equal to :math:`\\theta`, being :math:`\\theta` the reject threshold.
 
         The predicted class is therefore:
 
-        .. math:: c = \arg\max_k f_k(x)
+        .. math:: c = \\operatorname*{argmin}_k f_k(x)
 
         where :math:`c` correspond to the rejection class (i.e., :math:`c=-1`)
         only when the maximum taken over the other classes (excluding the
-        reject one) is not greater than the reject threshold :math:`\theta`.
+        reject one) is not greater than the reject threshold :math:`\\theta`.
 
-        If a preprocess has been specified,
-         input is normalized before classification.
+        If a preprocess has been specified, input is normalized before
+        classification.
 
         Parameters
         ----------
@@ -229,22 +229,23 @@ class CClassifierRejectThreshold(CClassifierReject,
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
         return_decision_function : bool, optional
-            Whether to return the decision_function value along
+            Whether to return the `decision_function` value along
             with predictions. Default False.
         n_jobs : int, optional
             Number of parallel workers to use for classification.
-            Default _NoValue. Cannot be higher than processor's number of cores.
+            Default `_NoValue`. Cannot be higher than processor's
+            number of cores.
 
         Returns
         -------
         labels : CArray
             Flat dense array of shape (n_patterns,) with the label assigned
-             to each test pattern. The classification label is the label of
-             the class associated with the highest score. The samples for which
-             the label is equal -1 are the ones rejected by the classifier
+            to each test pattern. The classification label is the label of
+            the class associated with the highest score. The samples for which
+            the label is equal -1 are the ones rejected by the classifier
         scores : CArray, optional
             Array of shape (n_patterns, n_classes) with classification
-             score of each test pattern with respect to each training class.
+            score of each test pattern with respect to each training class.
             Will be returned only if `return_decision_function` is True.
 
         """

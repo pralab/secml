@@ -1,5 +1,5 @@
 """
-.. module:: TrainTestSplitter
+.. module:: CTrainTestSplit
    :synopsis: Train and Test Sets splitter permutation splitting
 
 .. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>

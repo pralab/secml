@@ -99,8 +99,8 @@ class CSecEvalData(CCreator):
     @property
     def scores(self):
         """
-        Returns:
-        ----------
+        Returns
+        -------
         scores: list of CArray
             Contain one element for each attack power value.
             Each element contain score assigned by the classifier to all the
@@ -123,8 +123,8 @@ class CSecEvalData(CCreator):
     @property
     def Y_pred(self):
         """
-        Returns:
-        ----------
+        Returns
+        -------
         Y_pred : list of CArray
             Contain one element for each attack power value.
             Each element contain label assigned to all the dataset
@@ -145,8 +145,8 @@ class CSecEvalData(CCreator):
     @property
     def adv_ds(self):
         """
-        Returns:
-        ----------
+        Returns
+        -------
          adv_ds : list of CDataset.
             containing one dataset for each different parameter value.
         """
@@ -165,8 +165,8 @@ class CSecEvalData(CCreator):
     @property
     def time(self):
         """
-        Returns:
-        ----------
+        Returns
+        -------
         time: CArray (n_patterns, num parameter values)
             Each array row contain the times of the attack for one samples.
             Each row element represent a different attack power."""
