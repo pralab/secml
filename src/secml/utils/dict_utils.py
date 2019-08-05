@@ -68,7 +68,7 @@ def merge_dicts(*dicts):
     >>> d2 = {'attr3': 300, 'attr1': 999}  # Redefining `attr1`
 
     >>> merge_dicts(d1, d2)  # Value of `attr1` will be set according to `d2` dictionary
-    {'attr2': 200, 'attr3': 300, 'attr1': 999}
+    {'attr3': 300, 'attr2': 200, 'attr1': 999}
 
     """
     result = {}
@@ -114,7 +114,7 @@ def invert_dict(d):
             if v in new_d:
                 # If the key has already been set create a list for the values
                 i = tolist(i)
-                i += tolist(new_d[v])
+                i = tolist(new_d[v]) + i
             new_d[v] = i
     return new_d
 

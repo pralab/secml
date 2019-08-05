@@ -342,14 +342,14 @@ class CArray(_CArrayInterface):
         >>> array
         array([1, 2, 3])
         >>> type(array)
-        <type 'numpy.ndarray'>
+        <class 'numpy.ndarray'>
 
         >>> array = CArray([[1,2],[0,4]],tosparse=True).tondarray()
         >>> array
         array([[1, 2],
-               [0, 4]])
+               [0, 4]], dtype=int64)
         >>> type(array)
-        <type 'numpy.ndarray'>
+        <class 'numpy.ndarray'>
 
         """
         return self._data.tondarray()
@@ -2342,7 +2342,7 @@ class CArray(_CArrayInterface):
         >>> print(x.repeat(2, axis=1))  # No columns to repeat
         Traceback (most recent call last):
           ...
-        AxisError: axis 1 is out of bounds for array of dimension 1
+        numpy.core._internal.AxisError: axis 1 is out of bounds for array of dimension 1
 
         """
         if isinstance(repeats, (self.__class__, list)):
@@ -3943,7 +3943,7 @@ class CArray(_CArrayInterface):
         >>> from secml.array import CArray
 
         >>> print(CArray([0,1,3]).sha1())
-        58e199b94a1dfbc5da9def27110d2a4ae28b4123
+        9d9d15176c022373488fb8a2b34be0ba3046f5c6
 
         """
         return self._data.sha1()
@@ -4574,7 +4574,7 @@ class CArray(_CArrayInterface):
         >>> CArray([[1.,2.,3.], [4., 5.,6.]]).inv()
         Traceback (most recent call last):
             ...
-        LinAlgError: Last 2 dimensions of the array must be square
+        numpy.linalg.linalg.LinAlgError: Last 2 dimensions of the array must be square
 
         """
         return self.__class__(self._data.inv())

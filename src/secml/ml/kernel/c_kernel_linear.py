@@ -36,12 +36,12 @@ class CKernelLinear(CKernel):
     >>> from secml.ml.kernel.c_kernel_linear import CKernelLinear
 
     >>> print(CKernelLinear().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
-    CArray([[  50.  110.]
-     [ 110.  250.]])
+    CArray([[ 50. 110.]
+     [110. 250.]])
 
     >>> print(CKernelLinear().k(CArray([[1,2],[3,4]])))
-    CArray([[  5.  11.]
-     [ 11.  25.]])
+    CArray([[ 5. 11.]
+     [11. 25.]])
 
     """
     __class_type = 'linear'

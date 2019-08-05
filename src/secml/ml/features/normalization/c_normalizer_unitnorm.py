@@ -139,16 +139,16 @@ class CNormalizerUnitNorm(CNormalizer):
         >>> normalizer = CNormalizerUnitNorm().fit(array)
         >>> array_normalized = normalizer.transform(array)
         >>> print(array_normalized)  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	0.408248290464
-          (0, 1)	-0.408248290464
-          (0, 2)	0.816496580928
+        CArray(  (0, 0)	0.4082482904638631
+          (0, 1)	-0.4082482904638631
+          (0, 2)	0.8164965809277261
           (1, 0)	1.0
-          (2, 1)	0.707106781187
-          (2, 2)	-0.707106781187)
+          (2, 1)	0.7071067811865475
+          (2, 2)	-0.7071067811865475)
         >>> print(array_normalized.todense().norm_2d(order=normalizer.order, axis=1))
-        CArray([[ 1.]
-         [ 1.]
-         [ 1.]])
+        CArray([[1.]
+         [1.]
+         [1.]])
 
         """
         x = x.atleast_2d()

@@ -322,9 +322,7 @@ class CLog(object):
         ...     print("Hello world!")
 
         >>> abc()  # doctest: +ELLIPSIS
-        2... - root - DEBUG - Entering timed block `abc`...
         Hello world!
-        2... - root - DEBUG - Elapsed time: ... ms
 
         """
         return CTimer.timed(log=self, msg=msg)

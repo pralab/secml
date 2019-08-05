@@ -1198,14 +1198,14 @@ class CSparse(_CArrayInterface):
 
         >>> CSparse([[-1,0],[2,0]]).logical_and(CSparse([[2,-1],[2,-1]])).todense()
         CDense([[ True, False],
-               [ True, False]], dtype=bool)
+               [ True, False]])
 
         >>> CSparse([-1]).logical_and(CSparse([2])).todense()
-        CDense([[ True]], dtype=bool)
+        CDense([[ True]])
 
         >>> array = CSparse([1,0,2,-1])
         >>> (array > 0).logical_and(array < 2).todense()
-        CDense([[ True, False, False, False]], dtype=bool)
+        CDense([[ True, False, False, False]])
 
         """
         if self.shape != array.shape:
@@ -1260,14 +1260,14 @@ class CSparse(_CArrayInterface):
 
         >>> CSparse([[-1,0],[2,0]]).logical_or(CSparse([[2,0],[2,-1]])).todense()
         CDense([[ True, False],
-               [ True,  True]], dtype=bool)
+               [ True,  True]])
 
         >>> CSparse([False]).logical_and(CSparse([False])).todense()
-        CDense([[False]], dtype=bool)
+        CDense([[False]])
 
         >>> array = CSparse([1,0,2,-1])
         >>> (array > 0).logical_or(array < 2).todense()
-        CDense([[ True,  True,  True,  True]], dtype=bool)
+        CDense([[ True,  True,  True,  True]])
 
         """
         if self.shape != array.shape:
@@ -1571,14 +1571,14 @@ class CSparse(_CArrayInterface):
         >>> from secml.array.c_sparse import CSparse
 
         >>> CSparse([-1, 0, 3]).argmax()
-        CDense([2])
+        CDense([2], dtype=int64)
 
         >>> CSparse([[-1, 0],[4, 3]]).argmax(axis=0)  # We return the index of minimum for each row
-        CDense([[1, 1]])
+        CDense([[1, 1]], dtype=int64)
 
         >>> CSparse([[-1, 0],[4, 3]]).argmax(axis=1)  # We return the index of maximum for each column
         CDense([[1],
-               [0]])
+               [0]], dtype=int64)
 
         """
         if self.size == 0:
@@ -1663,14 +1663,14 @@ class CSparse(_CArrayInterface):
         >>> from secml.array.c_sparse import CSparse
 
         >>> CSparse([-1, 0, 3]).argmin()
-        CDense([0])
+        CDense([0], dtype=int64)
 
         >>> CSparse([[-1, 0],[4, 3]]).argmin(axis=0)  # We return the index of minimum for each row
-        CDense([[0, 0]])
+        CDense([[0, 0]], dtype=int64)
 
         >>> CSparse([[-1, 0],[4, 3]]).argmin(axis=1)  # We return the index of maximum for each column
         CDense([[0],
-               [1]])
+               [1]], dtype=int64)
 
         """
         if self.size == 0:

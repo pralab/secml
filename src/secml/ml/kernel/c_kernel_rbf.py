@@ -40,12 +40,12 @@ class CKernelRBF(CKernel):
     >>> from secml.ml.kernel.c_kernel_rbf import CKernelRBF
 
     >>> print(CKernelRBF(gamma=0.001).k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
-    CArray([[ 0.66697681  0.10177406]
-     [ 0.73712337  0.13199384]])
+    CArray([[0.666977 0.101774]
+     [0.737123 0.131994]])
 
     >>> print(CKernelRBF().k(CArray([[1,2],[3,4]])))
-    CArray([[  1.00000000e+00   3.35462628e-04]
-     [  3.35462628e-04   1.00000000e+00]])
+    CArray([[1.000000e+00 3.354626e-04]
+     [3.354626e-04 1.000000e+00]])
 
     """
     __class_type = 'rbf'
@@ -128,11 +128,11 @@ class CKernelRBF(CKernel):
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])
         >>> print(CKernelRBF(gamma=1e-4).gradient(array, vector))
-        CArray([[ 0.00245619  0.00377875]
-         [ 0.00556703  0.00647329]])
+        CArray([[0.002456 0.003779]
+         [0.005567 0.006473]])
 
         >>> print(CKernelRBF().gradient(vector, vector))
-        CArray([ 0.  0.])
+        CArray([0. 0.])
 
         """
         x_carray = CArray(x).atleast_2d()
