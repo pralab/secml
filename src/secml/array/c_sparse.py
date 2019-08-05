@@ -1755,7 +1755,7 @@ class CSparse(_CArrayInterface):
 
     def std(self, axis=None, ddof=0, keepdims=True):
         """Standard deviation of matrix over the given axis."""
-        array_mean = self.mean(axis=axis).atleast_2d()
+        array_mean = CDense(self.mean(axis=axis)).atleast_2d()
 
         centered_array = self - array_mean.repmat(
             [1 if array_mean.shape[0] == self.shape[0] else self.shape[0]][0],
