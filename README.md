@@ -205,10 +205,13 @@ section for more information).
 This library is managed and maintained by [PRALab](https://pralab.diee.unica.it).
 
 List of contributors:
- - Marco Melis (maintainer)
- - Ambra Demontis
- - Battista Biggio
- - Maura Pintor
+ - Marco Melis (maintainer) [1]_
+ - Ambra Demontis [1]_
+ - Maura Pintor [1]_
+ - Battista Biggio [1]_ , [2]_
+
+.. [1] Department of Electrical and Electronic Engineering, University of Cagliari, Italy  
+.. [2] Pluribus One, Italy
 
 
 ## Credits
