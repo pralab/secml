@@ -201,12 +201,28 @@ dependency of other libraries/projects (see "Installation Guide"
 section for more information).
 
 
-## Credits
-SecML has been developed by [PRALab](https://pralab.diee.unica.it) - 
-Pattern Recognition and Applications lab under [GNU GPLv3](
-https://www.gnu.org/licenses/gpl-3.0.en.html) license. Copyright 2019.
+## Authors
+This library is managed and maintained by [PRALab](https://pralab.diee.unica.it).
 
-Authors (Mail to: `<name>.<surname>@diee.unica.it`):
+List of contributors:
  - Marco Melis (maintainer)
  - Ambra Demontis
  - Battista Biggio
+ - Maura Pintor
+
+
+## Credits
+- `numpy` Travis E, Oliphant. "A guide to NumPy", USA: Trelgol Publishing, 2006.
+- `scipy` Travis E. Oliphant. "Python for Scientific Computing", Computing in 
+  Science & Engineering, 9, 10-20, 2007.
+- `scikit-learn` [Pedregosa et al., "Scikit-learn: Machine Learning in Python", 
+  JMLR 12, pp. 2825-2830, 2011.](http://jmlr.csail.mit.edu/papers/v12/pedregosa11a.html)
+- `matplotlib` [J. D. Hunter, "Matplotlib: A 2D Graphics Environment", 
+  Computing in Science & Engineering, vol. 9, no. 3, pp. 90-95, 2007.](
+  https://doi.org/10.1109/MCSE.2007.55)
+
+
+## Copyright
+SecML has been developed by [PRALab](https://pralab.diee.unica.it) - 
+Pattern Recognition and Applications lab under [GNU GPLv3](
+https://www.gnu.org/licenses/gpl-3.0.en.html) license. Copyright 2019.
