@@ -27,7 +27,7 @@ It comes with a set of powerful features:
 If you encounter any bug, please report them using the 
 [GitLab issue tracker](https://gitlab.com/secml/secml).
 
-[![Status DEV](https://img.shields.io/badge/status-dev-red.svg)](.)
+[![Status Alpha](https://img.shields.io/badge/status-alpha-yellow.svg)](.)
 [![Python 2.7 | 3.5 | 3.6 | 3.7](https://img.shields.io/badge/python-2.7%20%7C%203.5%20%7C%203.6%20%7C%203.7-brightgreen.svg)](.)
 [![Platform Linux | MacOS ](https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey.svg)](.)
 [![GNU GPLv3](https://img.shields.io/badge/license-GPL%20>%3D%203-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
