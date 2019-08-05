@@ -25,7 +25,7 @@ It comes with a set of powerful features:
 
 ### SecML is currently in development.
 If you encounter any bug, please report them using the 
-[GitLab issue tracker](https://gitlab.com/secml/secml).
+[GitLab bug tracker](https://gitlab.com/secml/secml/issues).
 
 [![Status Alpha](https://img.shields.io/badge/status-alpha-yellow.svg)](.)
 [![Python 2.7 | 3.5 | 3.6 | 3.7](https://img.shields.io/badge/python-2.7%20%7C%203.5%20%7C%203.6%20%7C%203.7-brightgreen.svg)](.)
