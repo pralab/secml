@@ -3,7 +3,7 @@
    :synopsis: Interface for equality/inequality constraints
                 in the canonic form c(x) <= 0
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod

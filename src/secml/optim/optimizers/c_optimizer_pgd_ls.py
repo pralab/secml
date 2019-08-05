@@ -2,7 +2,7 @@
 .. module:: COptimizerPGDLS
    :synopsis: Optimizer using Projected Gradient Descent with Bisect Line Search.
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from six.moves import range

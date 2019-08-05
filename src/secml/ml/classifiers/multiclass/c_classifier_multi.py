@@ -2,7 +2,7 @@
 .. module:: CClassifierMulticlass
    :synopsis: Interface for multiclass classifiers
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod

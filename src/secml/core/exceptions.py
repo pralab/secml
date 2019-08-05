@@ -2,7 +2,7 @@
 .. module:: Exceptions
    :synopsis: Custom errors and warnings
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 

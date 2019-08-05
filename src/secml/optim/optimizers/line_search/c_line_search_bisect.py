@@ -2,7 +2,7 @@
 .. module:: CLineSearchBisect
    :synopsis: Binary line search.
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from __future__ import division

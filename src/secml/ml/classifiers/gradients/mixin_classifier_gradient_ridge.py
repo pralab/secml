@@ -2,8 +2,8 @@
 .. module:: CClassifierGradientRidgeMixin
    :synopsis: Mixin for Ridge classifier gradients.
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from secml.array import CArray

@@ -172,7 +172,7 @@ setup(
         "Source Code": "https://gitlab.com/secml/secml",
     },
     maintainer='Marco Melis',
-    maintainer_email='marco.melis@diee.unica.it',
+    maintainer_email='marco.melis@unica.it',
     packages=find_packages('src', exclude=[
         "*.tests", "*.tests.*", "tests.*", "tests", "*.testing"]),
     package_dir={'': 'src'},

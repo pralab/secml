@@ -2,7 +2,7 @@
 .. module:: CLossHinge
    :synopsis: Hinge Loss Functions
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.ml.classifiers.loss import CLossClassification

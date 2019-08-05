@@ -2,7 +2,7 @@
 .. module:: CAttackPoisoningLogisticRegression
    :synopsis: Poisoning attacks against logistic regression
 
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from secml.adv.attacks.poisoning import CAttackPoisoning

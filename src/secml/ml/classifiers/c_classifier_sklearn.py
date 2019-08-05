@@ -2,7 +2,7 @@
 .. module:: CClassifierSkLearn
    :synopsis: Generic wrapper for SkLearn classifiers.
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from secml.ml.classifiers import CClassifier

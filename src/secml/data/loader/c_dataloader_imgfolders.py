@@ -2,7 +2,7 @@
 .. module:: DataLoaderImages-w-Folder
    :synopsis: Loader of an image dataset where clients are specified as different folders.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.data.loader import CDataLoader

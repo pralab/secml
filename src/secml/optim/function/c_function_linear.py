@@ -2,7 +2,7 @@
 .. module:: CFunctionLinear
    :synopsis: Linear function
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.optim.function import CFunction

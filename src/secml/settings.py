@@ -2,7 +2,7 @@
 .. module:: Settings
    :synopsis: System settings for SecML
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 import os

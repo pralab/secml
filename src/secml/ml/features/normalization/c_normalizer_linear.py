@@ -2,7 +2,7 @@
 .. module:: CNormalizerLinear
    :synopsis: Interface for linear normalizers.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from abc import abstractproperty

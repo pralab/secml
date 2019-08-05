@@ -3,7 +3,7 @@
    :synopsis: Classifier that perform classification with
     rejection based on a defined threshold
 
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from secml import _NoValue

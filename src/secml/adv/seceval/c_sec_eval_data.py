@@ -2,7 +2,7 @@
 .. module:: CSecEvalData
    :synopsis: Security evaluation data for attack classes
 
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from secml.core import CCreator

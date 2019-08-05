@@ -2,7 +2,7 @@
 .. module:: Creator
    :synopsis: Superclass and factory for all the other classes
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from importlib import import_module

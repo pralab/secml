@@ -2,7 +2,7 @@
 .. module:: CChronologicalSplitter
    :synopsis: Dataset splitter based on timestamps
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from __future__ import division

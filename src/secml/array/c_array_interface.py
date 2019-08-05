@@ -2,7 +2,7 @@
 .. module:: _CArrayInterface
    :synopsis: Interface for array classes
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod, abstractproperty

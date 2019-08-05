@@ -2,7 +2,7 @@
 .. module:: CFunctionQuadratic
    :synopsis: Quadratic function
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from secml.optim.function import CFunction

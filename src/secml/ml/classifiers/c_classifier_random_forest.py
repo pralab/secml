@@ -3,7 +3,7 @@
    :synopsis: Random Forest classifier
 
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.ml.classifiers import CClassifierSkLearn

@@ -2,7 +2,7 @@
 .. module:: CMetricF1
    :synopsis: Performance Metric: F1
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 import sklearn.metrics as skm

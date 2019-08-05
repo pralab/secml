@@ -2,7 +2,7 @@
 .. module:: CClassifierSGD
    :synopsis: Stochastic Gradient Descent (SGD) classifier
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from sklearn import linear_model

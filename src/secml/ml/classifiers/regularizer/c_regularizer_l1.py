@@ -2,8 +2,8 @@
 .. module:: CRegularizerL1
    :synopsis: L1-Norm Regularizer Function
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from secml.ml.classifiers.regularizer import CRegularizer

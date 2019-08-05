@@ -2,7 +2,7 @@
 .. module:: LoaderUtils
    :synopsis: Collection of mixed utilities for Data Loaders
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 .. moduleauthor:: Angelo Sotgiu
 
 """

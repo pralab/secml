@@ -2,7 +2,7 @@
 .. module:: CMetric
    :synopsis: Interface for for performance evaluation metrics.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod

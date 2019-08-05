@@ -2,7 +2,7 @@
 .. module:: CArray
    :synopsis: Multidimensional and multiformat arrays
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from copy import deepcopy

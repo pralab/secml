@@ -2,8 +2,8 @@
 .. module:: COptimizerScipy
    :synopsis: Interface for function optimization and minimization
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from scipy import optimize as sc_opt

@@ -2,7 +2,7 @@
 .. module:: CLineSearch
    :synopsis: Interface for line search methods.
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod

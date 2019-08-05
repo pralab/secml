@@ -2,7 +2,7 @@
 .. module:: PlotUtils
    :synopsis: Collection of mixed utilities for Plots
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.array import CArray

@@ -2,7 +2,7 @@
 .. module:: DataLoaderMNIST
    :synopsis: Loader the MNIST Handwritten digits dataset
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from __future__ import division
