@@ -1,0 +1,7 @@
+include README.md
+include CHANGELOG.md
+include update/*
+include requirements.txt
+include src/secml/VERSION
+include src/secml/VERSION_REV
+include src/secml/secml.conf

@@ -1,0 +1,9 @@
+sphinx >= 2.1.2
+sphinx_rtd_theme
+m2r
+numpydoc
+matplotlib
+ipython
+pandoc
+nbsphinx
+nbsphinx-link
