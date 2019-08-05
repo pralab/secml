@@ -71,7 +71,7 @@ Be sure to obtain the latest version by calling: `pip install -U setuptools`
 
 Once the environment is set up, SecML can installed and run by multiple means:
 
- 1. Install from official PyPI repository **(not yet supported)**
+ 1. Install from official PyPI repository:
     - `pip install secml`
     
  2. Install from wheel/zip package:
@@ -166,13 +166,13 @@ by the following means:
     - Run installation as: `pip install .`
     
  2. _(devs only)_ Install from remote GitLab repository. In this case, given
-    `{repourl}` in the format, es., `pragit.diee.unica.it/secml/secml`:
+    `{repourl}` in the format, es., `gitlab.com/secml/secml`:
     - `pip install git+ssh://git@{repourl}.git[@branch]#egg=secml`
     A specific branch to install can be specified using `[@branch]` parameter.
     If omitted, the default branch will be installed.
     
 SecML can also be added as a dependency for other libraries/project.
-Just add `secml` (**not yet supported**) or the full repository path command 
+Just add `secml` or the full repository path command 
 `git+ssh://git@{repourl}.git[@branch]#egg=secml` to the `requirements.txt` file.
 
 #### Editable Installation (development mode)

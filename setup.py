@@ -6,6 +6,13 @@ import subprocess
 
 here = os.path.abspath(os.path.dirname(__file__))
 
+# Check if we want to building a release package
+is_release = False
+try:
+    is_release = bool(os.environ['SECML_ISRELEASE'])
+except KeyError:
+    pass
+
 
 def read(*path_parts):
     with open(os.path.join(here, *path_parts), 'r', encoding='ascii') as fp:
@@ -52,19 +59,23 @@ def find_version(*path_parts):
     """This function read version number and revision number if available."""
     try:
         _v_f = read(*path_parts)  # Read main version file
-        _v_git = git_version()
-        if _v_git == 'Unknown':
-            try:  # Try to read rev from file. May not exists
-                _v_git = read('src', 'secml', 'VERSION_REV')
-            except:
-                pass  # _v_git will stay "Unknown"
+        if not is_release:  # Override for is_release checks
+            _v_git = git_version()
+            if _v_git == 'Unknown':
+                try:  # Try to read rev from file. May not exists
+                    _v_git = read('src', 'secml', 'VERSION_REV')
+                except:
+                    pass  # _v_git will stay "Unknown"
+            else:
+                write_rev(_v_git, 'src', 'secml', 'VERSION_REV')
+            # Append rev number only if available
+            _v = _v_f if _v_git == 'Unknown' else _v_f + '+' + _v_git
         else:
-            write_rev(_v_git, 'src', 'secml', 'VERSION_REV')
-        # Append rev number only if available
-        _v = _v_f if _v_git == 'Unknown' else _v_f + '+' + _v_git
+            _v = _v_f  # release package
         _v = parse_version(_v)  # Integrity checks
-        # Display rev number (if available) for prereleases only
-        return str(_v) if _v.is_prerelease else _v.public
+        # Display rev number (if available) for dev releases only
+        # alpha/beta/rc/final only display public
+        return str(_v) if _v._version.dev is not None else _v.public
     except:
         raise RuntimeError("Unable to find version string.")
 
@@ -126,7 +137,7 @@ LONG_DESCRIPTION = parse_readme('README.md')
 
 # List of classifiers: https://pypi.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = """\
-Development Status :: 2 - Pre-Alpha
+Development Status :: 3 - Alpha
 Intended Audience :: Science/Research
 Intended Audience :: Developers
 License :: OSI Approved
@@ -148,14 +159,18 @@ Operating System :: MacOS
 setup(
     name='secml',
     version=find_version("src", "secml", "VERSION"),
-    description='A library for Secure Machine Learning',
+    description='A library for Secure and Explainable Machine Learning',
     long_description=LONG_DESCRIPTION,
+    long_description_content_type="text/markdown",
     license='GNU GPLv3',
     classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
     platforms=["Linux", "Mac OS-X", "Unix"],
-    url='https://sec-ml.pluribus-one.it/lib/',
-    download_url=
-        'git+ssh://git@pragit.diee.unica.it/secml/secml.git#egg=secml',
+    url='https://secml.gitlab.io',
+    download_url="https://pypi.python.org/pypi/secml#files",
+    project_urls={
+        "Bug Tracker": "https://gitlab.com/secml/secml/issues",
+        "Source Code": "https://gitlab.com/secml/secml",
+    },
     maintainer='Marco Melis',
     maintainer_email='marco.melis@diee.unica.it',
     packages=find_packages('src', exclude=[
