@@ -76,7 +76,7 @@ Once the environment is set up, SecML can installed and run by multiple means:
  1. Install from official PyPI repository:
     - `pip install secml`
     
- 2. Install from wheel/zip package:
+ 2. Install from wheel/zip package (https://pypi.python.org/pypi/secml#files):
     - `pip install <package-file>`
 
 In all cases, the setup process will try to install the correct dependencies.
