@@ -223,6 +223,6 @@ List of contributors:
 
 
 ## Copyright
-SecML has been developed by [PRALab](https://pralab.diee.unica.it) - 
-Pattern Recognition and Applications lab under [Apache License 2.0](
+SecML has been developed by [PRALab - Pattern Recognition and Applications lab](
+https://pralab.diee.unica.it) under [Apache License 2.0](
 https://www.apache.org/licenses/LICENSE-2.0). Copyright 2019.
