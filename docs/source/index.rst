@@ -49,3 +49,4 @@
 
    modindex
    changelog
+   roadmap

@@ -25,7 +25,9 @@ It comes with a set of powerful features:
 
 ### SecML is currently in development.
 If you encounter any bug, please report them using the 
-[GitLab bug tracker](https://gitlab.com/secml/secml/issues).
+[GitLab bug tracker](https://gitlab.com/secml/secml/issues).  
+Please see our [ROADMAP](https://secml.gitlab.io/roadmap.html) for an overview 
+of the future development directions.
 
 [![Status Alpha](https://img.shields.io/badge/status-alpha-yellow.svg)](.)
 [![Python 2.7 | 3.5 | 3.6 | 3.7](https://img.shields.io/badge/python-2.7%20%7C%203.5%20%7C%203.6%20%7C%203.7-brightgreen.svg)](.)
@@ -46,7 +48,7 @@ procedure.
 
 SecML can run under Python 2.7 and Python >= 3.5 with no configuration steps 
 required, as all its dependencies are available as wheel packages for the main 
-macOSX and Linux distributions.
+macOS versions and Linux distributions.
 
 However, to support additional advanced features more packages can be necessary
 depending on the Operating System used:
@@ -58,7 +60,7 @@ depending on the Operating System used:
      [extra component](#extra-components).
      See the [TensorFlow Guide](https://www.tensorflow.org/install/gpu).
       
- - MacOS (Mac OS X >= 10.12 Sierra)
+ - macOS (macOS >= 10.12 Sierra)
 
 
 ### Installation process
