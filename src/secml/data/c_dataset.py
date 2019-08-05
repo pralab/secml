@@ -2,7 +2,7 @@
 .. module:: CDataset
    :synopsis: A dataset with an array of patterns and corresponding labels
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from six.moves import range

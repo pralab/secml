@@ -25,12 +25,14 @@ It comes with a set of powerful features:
 
 ### SecML is currently in development.
 If you encounter any bug, please report them using the 
-[GitLab issue tracker](https://gitlab.com/secml/secml).
+[GitLab issue tracker](https://gitlab.com/secml/secml/issues).  
+Please see our [ROADMAP](https://secml.gitlab.io/roadmap.html) for an overview 
+of the future development directions.
 
-[![Status DEV](https://img.shields.io/badge/status-dev-red.svg)](.)
+[![Status Alpha](https://img.shields.io/badge/status-alpha-yellow.svg)](.)
 [![Python 2.7 | 3.5 | 3.6 | 3.7](https://img.shields.io/badge/python-2.7%20%7C%203.5%20%7C%203.6%20%7C%203.7-brightgreen.svg)](.)
 [![Platform Linux | MacOS ](https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey.svg)](.)
-[![GNU GPLv3](https://img.shields.io/badge/license-GPL%20>%3D%203-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![Apache License 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 
 ## Installation Guide
@@ -46,7 +48,7 @@ procedure.
 
 SecML can run under Python 2.7 and Python >= 3.5 with no configuration steps 
 required, as all its dependencies are available as wheel packages for the main 
-macOSX and Linux distributions.
+macOS versions and Linux distributions.
 
 However, to support additional advanced features more packages can be necessary
 depending on the Operating System used:
@@ -58,7 +60,7 @@ depending on the Operating System used:
      [extra component](#extra-components).
      See the [TensorFlow Guide](https://www.tensorflow.org/install/gpu).
       
- - MacOS (Mac OS X >= 10.12 Sierra)
+ - macOS (macOS >= 10.12 Sierra)
 
 
 ### Installation process
@@ -171,6 +173,9 @@ by the following means:
     A specific branch to install can be specified using `[@branch]` parameter.
     If omitted, the default branch will be installed.
     
+Contributions can be sent in the form of a merge request via our 
+[GitLab issue tracker](https://gitlab.com/secml/secml/issues).
+    
 SecML can also be added as a dependency for other libraries/project.
 Just add `secml` or the full repository path command 
 `git+ssh://git@{repourl}.git[@branch]#egg=secml` to the `requirements.txt` file.
@@ -197,16 +202,35 @@ Two common scenarios are listed below:
     - The new repository can then be updated using standard `git` commands
 
 Editable installs are also available while using SecML as a
-dependency of other libraries/projects (see "Installation Guide"
-section for more information).
+dependency of other libraries/projects
+(see [Installation Guide](#installation-guide) for more information).
+
+
+## Authors
+This library is managed and maintained by [PRALab](https://pralab.diee.unica.it).
+
+List of contributors:
+ - Marco Melis (maintainer) [1]_
+ - Ambra Demontis [1]_
+ - Maura Pintor [1]_
+ - Battista Biggio [1]_ , [2]_
+
+.. [1] Department of Electrical and Electronic Engineering, University of Cagliari, Italy  
+.. [2] Pluribus One, Italy
 
 
 ## Credits
-SecML has been developed by [PRALab](https://pralab.diee.unica.it) - 
-Pattern Recognition and Applications lab under [GNU GPLv3](
-https://www.gnu.org/licenses/gpl-3.0.en.html) license. Copyright 2019.
+- `numpy` Travis E, Oliphant. "A guide to NumPy", USA: Trelgol Publishing, 2006.
+- `scipy` Travis E. Oliphant. "Python for Scientific Computing", Computing in 
+  Science & Engineering, 9, 10-20, 2007.
+- `scikit-learn` [Pedregosa et al., "Scikit-learn: Machine Learning in Python", 
+  JMLR 12, pp. 2825-2830, 2011.](http://jmlr.csail.mit.edu/papers/v12/pedregosa11a.html)
+- `matplotlib` [J. D. Hunter, "Matplotlib: A 2D Graphics Environment", 
+  Computing in Science & Engineering, vol. 9, no. 3, pp. 90-95, 2007.](
+  https://doi.org/10.1109/MCSE.2007.55)
 
-Authors (Mail to: `<name>.<surname>@diee.unica.it`):
- - Marco Melis (maintainer)
- - Ambra Demontis
- - Battista Biggio
+
+## Copyright
+SecML has been developed by [PRALab - Pattern Recognition and Applications lab](
+https://pralab.diee.unica.it) under [Apache License 2.0](
+https://www.apache.org/licenses/LICENSE-2.0). Copyright 2019.

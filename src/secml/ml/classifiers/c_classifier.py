@@ -2,8 +2,8 @@
 .. module:: CClassifier
    :synopsis: Interface and common functions for classification
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod

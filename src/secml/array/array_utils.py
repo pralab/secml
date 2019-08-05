@@ -2,7 +2,7 @@
 .. module:: ArrayUtils
    :synopsis: Collection of utility functions for CArray and subclasses
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 import numpy as np

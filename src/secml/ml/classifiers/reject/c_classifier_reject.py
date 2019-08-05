@@ -2,7 +2,7 @@
 .. module:: CClassifierReject
    :synopsis: Interface and common functions for classification with rejection
 
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from abc import abstractmethod, ABCMeta

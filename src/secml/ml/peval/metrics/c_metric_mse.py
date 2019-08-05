@@ -2,7 +2,7 @@
 .. module:: CMetricMSE
    :synopsis: Performance Metric: Mean Squared Error
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 import sklearn.metrics as skm

@@ -2,7 +2,7 @@
 .. module:: DictionaryUtils
    :synopsis: Collection of mixed utilities for Dictionaries
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 try:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3

@@ -2,7 +2,7 @@
 .. module:: CAttackPoisoning
    :synopsis: Interface for poisoning attacks
 
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 import warnings

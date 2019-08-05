@@ -2,7 +2,7 @@
 .. module:: CKernelHistIntersect
    :synopsis: Histogram Intersection kernel
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from sklearn import metrics

@@ -2,7 +2,7 @@
 .. module:: CNormalizerMinMax
    :synopsis: Scales input array features to a given range.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.array import CArray

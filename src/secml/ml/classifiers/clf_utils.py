@@ -2,7 +2,7 @@
 .. module:: ClassifierUtils
    :synopsis: Collection of mixed utilities for Classifiers
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.core.type_utils import is_int

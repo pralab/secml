@@ -2,8 +2,8 @@
 .. module:: CClassifierLogistic
    :synopsis: Logistic Regression (aka logit, MaxEnt) classifier
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from sklearn.linear_model import LogisticRegression

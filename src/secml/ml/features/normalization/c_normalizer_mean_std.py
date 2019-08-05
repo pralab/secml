@@ -2,7 +2,7 @@
 .. module:: CNormalizerMeanSTD
    :synopsis: Scales input array features using specific mean and variance.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from __future__ import division

@@ -2,7 +2,7 @@
 .. module:: FunctionUtils
    :synopsis: Collection of mixed utility classes and functions
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 

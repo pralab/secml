@@ -2,7 +2,7 @@
 .. module:: CClassifierGradientRejectThresholdMixin
    :synopsis: Mixin for classifier with a reject based on a threshold gradients.
 
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from secml.array import CArray

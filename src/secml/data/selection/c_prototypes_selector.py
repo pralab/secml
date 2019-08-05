@@ -2,7 +2,7 @@
 .. module:: PrototypesSelector
    :synopsis: Selector of prototypes to be used for Classification/Regression
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod

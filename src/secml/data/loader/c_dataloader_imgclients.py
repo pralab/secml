@@ -2,7 +2,7 @@
 .. module:: DataLoaderImages-w-Clients
    :synopsis: Loader of an image dataset where clients are specified in a text file
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.data.loader import CDataLoader

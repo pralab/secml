@@ -2,7 +2,7 @@
 .. module:: CFunctionBeale
    :synopsis: Beale function
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.optim.function.c_function import CFunction

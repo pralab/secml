@@ -2,7 +2,7 @@
 .. module:: TypeUtils
    :synopsis: Collection of utility functions for types management
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 import six

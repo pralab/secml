@@ -2,7 +2,7 @@
 .. module:: CNormalizerUnitNorm
    :synopsis: Normalize patterns individually to unit norm.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.array import CArray

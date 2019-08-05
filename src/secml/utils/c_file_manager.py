@@ -2,7 +2,7 @@
 .. module:: FileManager
    :synopsis: A collection of useful methods for directories and files managing.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 import os

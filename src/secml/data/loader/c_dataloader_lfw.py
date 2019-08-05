@@ -2,7 +2,7 @@
 .. module:: DataLoaderLFW
    :synopsis: Loader of the LFW Labeled Faces in the Wild dataset
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from multiprocessing import Lock

@@ -2,7 +2,7 @@
 .. module:: DataLoaderCIFAR
    :synopsis: Loader the CIFAR tiny images datasets
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 import tarfile

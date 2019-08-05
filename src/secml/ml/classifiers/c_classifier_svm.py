@@ -2,8 +2,8 @@
 .. module:: CClassifierSVM
    :synopsis: Support Vector Machine (SVM) classifier
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from sklearn.svm import SVC

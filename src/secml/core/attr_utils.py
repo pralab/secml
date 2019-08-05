@@ -2,7 +2,7 @@
 .. module:: AttributesUtils
    :synopsis: Collection of utilities for attributes management
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml import _NoValue
