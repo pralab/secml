@@ -24,8 +24,11 @@ class CKernelEuclidean(CKernel):
     Attributes
     ----------
     class_type : 'euclidean'
-    cache_size : int
-        Size of the cache used for kernel computation. Default 100.
+
+    Parameters
+    ----------
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     Examples
     --------
@@ -42,10 +45,6 @@ class CKernelEuclidean(CKernel):
 
     """
     __class_type = 'euclidean'
-
-    def __init__(self, cache_size=100):
-
-        super(CKernelEuclidean, self).__init__(cache_size=cache_size)
 
     def _k(self, x, y, squared=False,
            x_norm_squared=None, y_norm_squared=None):

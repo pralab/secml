@@ -26,18 +26,17 @@ class CKernel(CCreator):
     "more similar" than objects a and c.
     A kernel must also be positive semi-definite.
 
-    Attributes
+    Parameters
     ----------
-    cache_size : int, size of the cache used for kernel computation. Default 100.
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     """
     __super__ = 'CKernel'
 
-    cache_size = 100
+    def __init__(self, batch_size=None):
 
-    def __init__(self, cache_size=100):
-        # cache_size is a class attribute
-        self.cache_size = cache_size
+        self.batch_size = batch_size
 
     @abstractmethod
     def _k(self, x, y):
@@ -81,8 +80,8 @@ class CKernel(CCreator):
 
         Notes
         -----
-        We use a caching strategy to optimize memory consumption during
-        kernel computation. However, the parameter cache_size should be
+        We use a batching strategy to optimize memory consumption during
+        kernel computation. However, the parameter `batch_size` should be
         chosen wisely: a small cache can highly improve memory consumption
         but can significantly slow down the computation process.
 
@@ -121,12 +120,16 @@ class CKernel(CCreator):
         kernel = CArray.empty(
             shape=(x_carray_2d.shape[0], y_carray_2d.shape[0]))
 
-        # cache_size is the range step
-        for patterns_done in range(0, x_carray_2d.shape[0], self.cache_size):
+        batch_size = self.batch_size
+        if self.batch_size is None:
+            batch_size = x_carray_2d.shape[0]
+
+        # batch_size is the range step
+        for patterns_done in range(0, x_carray_2d.shape[0], batch_size):
 
             # This avoids indexing errors during computation of the last fold
             nxt_pattern_idx = min(
-                patterns_done + self.cache_size, x_carray_2d.shape[0])
+                patterns_done + batch_size, x_carray_2d.shape[0])
 
             # Subsampling patterns to improve memory usage
             x_sel = x_carray_2d[patterns_done:nxt_pattern_idx, :].atleast_2d()

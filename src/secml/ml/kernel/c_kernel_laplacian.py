@@ -24,13 +24,13 @@ class CKernelLaplacian(CKernel):
     Attributes
     ----------
     class_type : 'laplacian'
-    cache_size : int
-        Size of the cache used for kernel computation. Default 100.
 
     Parameters
     ----------
     gamma : float
         Default is 1.0.
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     Examples
     --------
@@ -48,9 +48,10 @@ class CKernelLaplacian(CKernel):
     """
     __class_type = 'laplacian'
 
-    def __init__(self, gamma=1.0, cache_size=100):
-        # Calling CKernel constructor
-        super(CKernelLaplacian, self).__init__(cache_size=cache_size)
+    def __init__(self, gamma=1.0, batch_size=None):
+
+        super(CKernelLaplacian, self).__init__(batch_size=batch_size)
+
         # Using a float gamma to avoid dtype casting problems
         self.gamma = gamma
 

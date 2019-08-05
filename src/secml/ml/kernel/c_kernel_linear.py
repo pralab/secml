@@ -24,8 +24,11 @@ class CKernelLinear(CKernel):
     Attributes
     ----------
     class_type : 'linear'
-    cache_size : int
-        Size of the cache used for kernel computation. Default 100.
+
+    Parameters
+    ----------
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     Examples
     --------
