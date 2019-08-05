@@ -36,12 +36,12 @@ class CKernelEuclidean(CKernel):
     >>> from secml.ml.kernel.c_kernel_euclidean import CKernelEuclidean
 
     >>> print(CKernelEuclidean().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
-    CArray([[ 20.124612  47.801674]
-     [ 17.464249  45.      ]])
+    CArray([[20.124612 47.801674]
+     [17.464249 45.      ]])
 
     >>> print(CKernelEuclidean().k(CArray([[1,2],[3,4]])))
-    CArray([[ 0.        2.828427]
-     [ 2.828427  0.      ]])
+    CArray([[0.       2.828427]
+     [2.828427 0.      ]])
 
     """
     __class_type = 'euclidean'
@@ -117,7 +117,7 @@ class CKernelEuclidean(CKernel):
          [ -86 -100]])
 
         >>> print(CKernelEuclidean().gradient(vector, vector))
-        CArray([ 0.  0.])
+        CArray([0. 0.])
 
         """
         # Checking if second array is a vector

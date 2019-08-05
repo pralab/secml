@@ -43,12 +43,12 @@ class CKernelPoly(CKernel):
     >>> from secml.ml.kernel.c_kernel_poly import CKernelPoly
 
     >>> print(CKernelPoly(degree=3, gamma=0.001, coef0=2).k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
-    CArray([[  8.615125   9.393931]
-     [  9.393931  11.390625]])
+    CArray([[ 8.615125  9.393931]
+     [ 9.393931 11.390625]])
 
     >>> print(CKernelPoly().k(CArray([[1,2],[3,4]])))
-    CArray([[  36.  144.]
-     [ 144.  676.]])
+    CArray([[ 36. 144.]
+     [144. 676.]])
 
     """
     __class_type = 'poly'
@@ -172,11 +172,11 @@ class CKernelPoly(CKernel):
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])
         >>> print(CKernelPoly(degree=3, gamma=1e-4, coef0=2).gradient(array, vector))
-        CArray([[ 0.01828008  0.0304668 ]
-         [ 0.05598899  0.06843098]])
+        CArray([[0.01828  0.030467]
+         [0.055989 0.068431]])
 
         >>> print(CKernelPoly().gradient(vector, vector))
-        CArray([ 240.  600.])
+        CArray([240. 600.])
 
         """
         u_carray = CArray(u)

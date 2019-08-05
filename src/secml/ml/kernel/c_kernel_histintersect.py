@@ -36,12 +36,12 @@ class CKernelHistIntersect(CKernel):
     >>> from secml.ml.kernel.c_kernel_histintersect import CKernelHistIntersect
 
     >>> print(CKernelHistIntersect().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
-    CArray([[ 3.  3.]
-     [ 7.  7.]])
+    CArray([[3. 3.]
+     [7. 7.]])
 
     >>> print(CKernelHistIntersect().k(CArray([[1,2],[3,4]])))
-    CArray([[ 3.  3.]
-     [ 3.  7.]])
+    CArray([[3. 3.]
+     [3. 7.]])
 
     """
     __class_type = 'hist-intersect'

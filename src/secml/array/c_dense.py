@@ -1785,7 +1785,7 @@ class CDense(_CArrayInterface):
         >>> from secml.array.c_dense import CDense
         >>> array = CDense.zeros(2)
         >>> print(array)
-        [ 0.  0.]
+        [0. 0.]
         >>> print(array.shape)
         (2,)
 
@@ -1818,7 +1818,7 @@ class CDense(_CArrayInterface):
         >>> from secml.array.c_dense import CDense
         >>> array = CDense.ones(2)
         >>> print(array)
-        [ 1.  1.]
+        [1. 1.]
         >>> print(array.shape)
         (2,)
 
@@ -1854,8 +1854,8 @@ class CDense(_CArrayInterface):
         >>> from secml.array.c_dense import CDense
         >>> array = CDense.eye(2)
         >>> print(array)
-        [[ 1.  0.]
-         [ 0.  1.]]
+        [[1. 0.]
+         [0. 1.]]
         >>> print(array.shape)
         (2, 2)
 

@@ -397,7 +397,7 @@ class CDataset(CCreator):
         Examples
         --------
         >>> ds = CDataset([[11,22],[33,44],[55,66],[77,88]], [1,0,2,1])
-        >>> print(ds.get_labels_ovr())
+        >>> print(ds.get_labels_onehot())
         CArray([[0 1 0]
          [1 0 0]
          [0 0 1]

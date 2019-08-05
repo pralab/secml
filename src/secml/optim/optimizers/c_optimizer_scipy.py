@@ -121,7 +121,7 @@ class COptimizerScipy(COptimizer):
         >>> print(x_opt)
         CArray([1. 1.])
         >>> print(opt.f_opt)
-        9.29438398164e-19
+        9.294383981640425e-19
 
         """
         if x_init.issparse is True or x_init.is_vector_like is False:

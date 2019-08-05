@@ -45,8 +45,8 @@ class CSoftmax(CCreator):
 
         >>> a = CArray([[1, 2, 3], [2, 4, 5]])
         >>> print(CSoftmax().softmax(a))
-        CArray([[ 0.090031  0.244728  0.665241]
-         [ 0.035119  0.259496  0.705385]])
+        CArray([[0.090031 0.244728 0.665241]
+         [0.035119 0.259496 0.705385]])
 
         """
         x = s.atleast_2d()  # Working with 2-D arrays only

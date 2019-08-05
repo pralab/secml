@@ -284,8 +284,6 @@ class CCreator(object):
         This function natively takes as input the dictionary
         created by `.get_params`.
         Only parameters, i.e. PUBLIC or READ/WRITE attributes, can be set.
-        RW parameters must be set using their real name, e.g. use
-        `attr` instead of `_rw_attr`.
 
         For more informations on the setting behaviour see `.CCreator.set`.
 
@@ -314,8 +312,6 @@ class CCreator(object):
         """Set a parameter that has a specific name to a specific value.
 
         Only parameters, i.e. PUBLIC or READ/WRITE attributes, can be set.
-        RW parameters must be set using their real name, e.g. use
-        `attr` instead of `_rw_attr`.
 
         The following checks are performed before setting:
          - if parameter is an attribute of current class, set directly;

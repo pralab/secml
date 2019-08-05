@@ -38,12 +38,12 @@ class CKernelLaplacian(CKernel):
     >>> from secml.ml.kernel.c_kernel_laplacian import CKernelLaplacian
 
     >>> print(CKernelLaplacian(gamma=0.01).k(CArray([[1,2],[3,4]]), CArray([[10,0],[0,40]])))
-    CArray([[ 0.895834  0.677057]
-     [ 0.895834  0.677057]])
+    CArray([[0.895834 0.677057]
+     [0.895834 0.677057]])
 
     >>> print(CKernelLaplacian().k(CArray([[1,2],[3,4]])))
-    CArray([[ 1.        0.018316]
-     [ 0.018316  1.      ]])
+    CArray([[1.       0.018316]
+     [0.018316 1.      ]])
 
     """
     __class_type = 'laplacian'
@@ -134,7 +134,7 @@ class CKernelLaplacian(CKernel):
          [-0.005945  0.005945]])
 
         >>> print(CKernelLaplacian().gradient(vector, vector))
-        CArray([ 0.  0.])
+        CArray([0. 0.])
 
         """
         # Checking if second array is a vector

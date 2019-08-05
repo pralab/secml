@@ -22,7 +22,49 @@ from secml.optim.function import CFunction
 
 @six.add_metaclass(ABCMeta)
 class CAttackPoisoning(CAttack):
-    """Class for implementing poisoning attacks."""
+    """Interface for poisoning attacks.
+
+    Parameters
+    ----------
+    classifier : CClassifier
+        Target classifier.
+    training_data : CDataset
+        Dataset on which the the classifier has been trained on.
+    surrogate_classifier : CClassifier
+        Surrogate classifier, assumed to be already trained.
+    val : CDataset
+        Validation set.
+    surrogate_data : CDataset or None, optional
+        Dataset on which the the surrogate classifier has been trained on.
+        Is only required if the classifier is nonlinear.
+    distance : {'l1' or 'l2'}, optional
+        Norm to use for computing the distance of the adversarial example
+        from the original sample. Default 'l2'.
+    dmax : scalar, optional
+        Maximum value of the perturbation. Default 1.
+    lb, ub : int or CArray, optional
+        Lower/Upper bounds. If int, the same bound will be applied to all
+        the features. If CArray, a different bound can be specified for each
+        feature. Default `lb = 0`, `ub = 1`.
+    y_target : int or None, optional
+        If None an error-generic attack will be performed, else a
+        error-specific attack to have the samples misclassified as
+        belonging to the `y_target` class.
+    attack_classes : 'all' or CArray, optional
+        Array with the classes that can be manipulated by the attacker or
+         'all' (default) if all classes can be manipulated.
+    solver_type : str or None, optional
+        Identifier of the solver to be used. Default 'pgd-ls'.
+    solver_params : dict or None, optional
+        Parameters for the solver. Default None, meaning that default
+        parameters will be used.
+    init_type : {'random', 'loss_based'}, optional
+        Strategy used to chose the initial random samples. Default 'random'.
+    random_seed : int or None, optional
+        If int, random_state is the seed used by the random number generator.
+        If None, no fixed seed will be set.
+
+    """
     __super__ = 'CAttackPoisoning'
 
     def __init__(self, classifier,
@@ -41,31 +83,6 @@ class CAttackPoisoning(CAttack):
                  solver_params=None,
                  init_type='random',
                  random_seed=None):
-        """
-        Initialization method.
-
-        It requires classifier, surrogate_classifier, and surrogate_data.
-        Note that surrogate_classifier is assumed to be trained (before
-        passing it to this class) on surrogate_data.
-
-        TODO: complete list of parameters
-
-        Parameters
-        ----------
-        discrete: True/False (default: false).
-                  If True, input space is considered discrete (integer-valued),
-                  otherwise continuous.
-        attack_classes: (not supported) list of classes that
-                  can be manipulated by the attacker
-                  -1 means all classes can be manipulated.
-        y_target: could be None, if attack is indiscriminate. For targeted
-                  attacks, one can specify one target class towards to which
-                  classifying all samples, all specify one label per validation
-                  point.
-        init_type: String 'random' | 'loss_based', default 'random'
-                  Strategy used to chose the initial random samples
-        random_seed: seed used to randomly chose the poisoning points
-        """
 
         CAttack.__init__(self, classifier=classifier,
                          surrogate_classifier=surrogate_classifier,
@@ -433,17 +450,11 @@ class CAttackPoisoning(CAttack):
     ###########################################################################
 
     def _run(self, xc, yc, idx=0):
-        """
-        Single point poisoning
-        Here xc can be a *set* of points, in which case idx specifies which
-        point should be manipulated by the poisoning attack
+        """Single point poisoning.
 
-        :param xc: init poisoning points
-        :param yc: poisoning point labels
-        :param val: validation dataset
-        :param n_iter: maximum number of solver iterations
-        :param idx: index of point in xc to be manipulated to poison clf
-        :return:
+        Here xc can be a *set* of points, in which case idx specifies which
+        point should be manipulated by the poisoning attack.
+
         """
         xc = CArray(xc.deepcopy()).atleast_2d()
 

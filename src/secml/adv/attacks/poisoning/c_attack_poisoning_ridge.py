@@ -11,6 +11,49 @@ from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
 class CAttackPoisoningRidge(CAttackPoisoning):
+    """Poisoning attacks against ridge.
+
+    Parameters
+    ----------
+    classifier : CClassifierRidge
+        Target classifier.
+    training_data : CDataset
+        Dataset on which the the classifier has been trained on.
+    surrogate_classifier : CClassifier
+        Surrogate classifier, assumed to be already trained.
+    val : CDataset
+        Validation set.
+    surrogate_data : CDataset or None, optional
+        Dataset on which the the surrogate classifier has been trained on.
+        Is only required if the classifier is nonlinear.
+    distance : {'l1' or 'l2'}, optional
+        Norm to use for computing the distance of the adversarial example
+        from the original sample. Default 'l2'.
+    dmax : scalar, optional
+        Maximum value of the perturbation. Default 1.
+    lb, ub : int or CArray, optional
+        Lower/Upper bounds. If int, the same bound will be applied to all
+        the features. If CArray, a different bound can be specified for each
+        feature. Default `lb = 0`, `ub = 1`.
+    y_target : int or None, optional
+        If None an error-generic attack will be performed, else a
+        error-specific attack to have the samples misclassified as
+        belonging to the `y_target` class.
+    attack_classes : 'all' or CArray, optional
+        Array with the classes that can be manipulated by the attacker or
+         'all' (default) if all classes can be manipulated.
+    solver_type : str or None, optional
+        Identifier of the solver to be used. Default 'pgd-ls'.
+    solver_params : dict or None, optional
+        Parameters for the solver. Default None, meaning that default
+        parameters will be used.
+    init_type : {'random', 'loss_based'}, optional
+        Strategy used to chose the initial random samples. Default 'random'.
+    random_seed : int or None, optional
+        If int, random_state is the seed used by the random number generator.
+        If None, no fixed seed will be set.
+
+    """
     __class_type = 'p-ridge'
 
     def __init__(self, classifier,
@@ -29,24 +72,6 @@ class CAttackPoisoningRidge(CAttackPoisoning):
                  solver_params=None,
                  init_type=None,
                  random_seed=None):
-        """
-        Initialization method.
-
-        It requires classifier, surrogate_classifier, and surrogate_data.
-        Note that surrogate_classifier is assumed to be trained (before
-        passing it to this class) on surrogate_data.
-
-        TODO: complete list of parameters
-
-        Parameters
-        ----------
-        discrete: True/False (default: false).
-                  If True, input space is considered discrete (integer-valued),
-                  otherwise continuous.
-        attack_classes: list of classes that can be manipulated by the attacker
-                 -1 means all classes can be manipulated.
-
-        """
 
         CAttackPoisoning.__init__(self, classifier=classifier,
                                   training_data=training_data,
@@ -70,10 +95,7 @@ class CAttackPoisoningRidge(CAttackPoisoning):
     ###########################################################################
 
     def _g(self, d):
-        """
-        :param d: number of features
-        :return:
-        """
+
         return CArray.eye(d)
 
     # the differences with the general attack class for quadratic losses are
