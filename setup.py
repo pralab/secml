@@ -162,7 +162,7 @@ setup(
     description='A library for Secure and Explainable Machine Learning',
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
-    license='GNU GPLv3',
+    license='Apache License 2.0',
     classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
     platforms=["Linux", "Mac OS-X", "Unix"],
     url='https://secml.gitlab.io',

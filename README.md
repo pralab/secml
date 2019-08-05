@@ -30,7 +30,7 @@ If you encounter any bug, please report them using the
 [![Status Alpha](https://img.shields.io/badge/status-alpha-yellow.svg)](.)
 [![Python 2.7 | 3.5 | 3.6 | 3.7](https://img.shields.io/badge/python-2.7%20%7C%203.5%20%7C%203.6%20%7C%203.7-brightgreen.svg)](.)
 [![Platform Linux | MacOS ](https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey.svg)](.)
-[![GNU GPLv3](https://img.shields.io/badge/license-GPL%20>%3D%203-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![Apache License 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 
 ## Installation Guide
@@ -224,5 +224,5 @@ List of contributors:
 
 ## Copyright
 SecML has been developed by [PRALab](https://pralab.diee.unica.it) - 
-Pattern Recognition and Applications lab under [GNU GPLv3](
-https://www.gnu.org/licenses/gpl-3.0.en.html) license. Copyright 2019.
+Pattern Recognition and Applications lab under [Apache License 2.0](
+https://www.apache.org/licenses/LICENSE-2.0). Copyright 2019.
