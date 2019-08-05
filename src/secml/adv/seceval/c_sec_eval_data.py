@@ -23,9 +23,6 @@ class CSecEvalData(CCreator):
     __class_type = 'generic'
 
     def __init__(self):
-        """
-        Sec Eval Data initilization.
-        """
 
         # initialize read-write attribute
         self._param_name = None
@@ -99,25 +96,29 @@ class CSecEvalData(CCreator):
     @property
     def scores(self):
         """
+
         Returns
         -------
         scores: list of CArray
             Contain one element for each attack power value.
             Each element contain score assigned by the classifier to all the
-            dataset samples."""
+            dataset samples.
+
+        """
         return self._scores
 
     @scores.setter
     def scores(self, value):
-        """
-        Set the score values.
+        """Set the score values.
 
-        Paramters:
-        ----------
+        Paramters
+        ---------
         value: list of CArray
             Contain one element for each attack power value.
             Each element contain score assigned by the classifier to all the
-            dataset samples."""
+            dataset samples.
+
+        """
         self._scores = value
 
     @property
@@ -128,77 +129,89 @@ class CSecEvalData(CCreator):
         Y_pred : list of CArray
             Contain one element for each attack power value.
             Each element contain label assigned to all the dataset
-            samples from the attack."""
+            samples from the attack.
+
+        """
         return self._Y_pred
 
     @Y_pred.setter
     def Y_pred(self, value):
         """
-        Parameters:
+
+        Parameters
         ----------
         value : list of CArray
             Contain one element for each attack power value.
             Each element contain label assigned to all the dataset
-            samples from the attack."""
+            samples from the attack.
+
+        """
         self._Y_pred = value
 
     @property
     def adv_ds(self):
         """
+
         Returns
         -------
-         adv_ds : list of CDataset.
+        adv_ds : list of CDataset.
             containing one dataset for each different parameter value.
+
         """
         return self._adv_ds
 
     @adv_ds.setter
     def adv_ds(self, value):
         """
-        Parameters:
+
+        Parameters
         ----------
          adv_ds : list of CDataset.
             containing one dataset for each different parameter value.
-            """
+
+        """
         self._adv_ds = value
 
     @property
     def time(self):
         """
+
         Returns
         -------
-        time: CArray (n_patterns, num parameter values)
+        time : CArray (n_patterns, num parameter values)
             Each array row contain the times of the attack for one samples.
-            Each row element represent a different attack power."""
+            Each row element represent a different attack power.
+
+        """
         return self._time
 
     @time.setter
     def time(self, value):
         """
-        Parameters:
+        Parameters
         ----------
         time: CArray (n_patterns, num parameter values)
             Each array row contain the times of the attack for one samples.
-            Each row element represent a different attack power."""
+            Each row element represent a different attack power.
+
+        """
         self._time = CArray(value)
 
     def save(self, path):
-        """
-        Load Security evaluation data from file.
+        """Load Security evaluation data from file.
+
         Save a python dict containing all the results.
-        :param path:
-        :return:
+
         """
         results = {p: getattr(self, p) for p in self.get_params()}
         pk.save(path, results)
 
     @classmethod
     def load(cls, path):
-        """
-        Load Security evaluation data from file.
+        """Load Security evaluation data from file.
+
         Save a python dict containing all the results.
-        :param path:
-        :return:
+
         """
         data = cls()
         data.set_params(pk.load(path))
