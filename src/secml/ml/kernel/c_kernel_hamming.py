@@ -18,7 +18,11 @@ class CKernelHamming(CKernel):
     Attributes
     ----------
     class_type : 'hamming'
-    cache_size : int, size of the cache used for kernel computation. Default 100.
+
+    Parameters
+    ----------
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     Examples
     --------
@@ -35,10 +39,6 @@ class CKernelHamming(CKernel):
 
     """
     __class_type = 'hamming'
-
-    def __init__(self, cache_size=100):
-
-        super(CKernelHamming, self).__init__(cache_size=cache_size)
 
     def _k(self, x, y):
         """Compute the hamming distances kernel between x and y.

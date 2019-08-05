@@ -24,18 +24,18 @@ class CKernelPoly(CKernel):
     Attributes
     ----------
     class_type : 'poly'
-    cache_size : int
-        Size of the cache used for kernel computation. Default 100.
 
     Parameters
     ----------
-    degree : int
-        Default is 2. Integer degree of the kernel.
-    gamma : float
-        Default is 1.0. This is a free parameter to be used for balancing.
-    coef0 : float
-        Default is 1.0. Free parameter used for trading off the influence
-        of higher-order versus lower-order terms in the kernel.
+    degree : int, optional
+        Kernel degree. Default 2.
+    gamma : float, optional
+        Free parameter to be used for balancing. Default 1.0.
+    coef0 : float, optional
+        Free parameter used for trading off the influence of higher-order
+        versus lower-order terms in the kernel. Default 1.0.
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     Examples
     --------
@@ -53,9 +53,10 @@ class CKernelPoly(CKernel):
     """
     __class_type = 'poly'
     
-    def __init__(self, degree=2, gamma=1.0, coef0=1.0, **kwargs):
-        # Calling CKernel constructor
-        super(CKernelPoly, self).__init__(**kwargs)
+    def __init__(self, degree=2, gamma=1.0, coef0=1.0, batch_size=None):
+
+        super(CKernelPoly, self).__init__(batch_size=batch_size)
+
         # kernel parameters
         self.degree = degree
         self.gamma = gamma

@@ -98,7 +98,7 @@ class TestCClassifierSVM(CClassifierTestCases):
 
         for svm in self.svms:
             self.logger.info(
-                "SVM \w similarity function: %s", svm.kernel.__class__)
+                "SVM \\w similarity function: %s", svm.kernel.__class__)
 
             # Training and predicting using our SVM
             svm.fit(self.dataset)
@@ -110,7 +110,12 @@ class TestCClassifierSVM(CClassifierTestCases):
             sklearn_svm = SVC(kernel=svm.kernel.class_type)
 
             # Setting similarity function parameters into SVC too
-            sklearn_svm.set_params(**svm.kernel.get_params())
+            # Exclude params not settable in sklearn_svm
+            p_dict = {}
+            for p in svm.kernel.get_params():
+                if p in sklearn_svm.get_params():
+                    p_dict[p] = svm.kernel.get_params()[p]
+            sklearn_svm.set_params(**p_dict)
 
             sklearn_svm.fit(self.dataset.X.get_data(),
                             np.ravel(self.dataset.Y.get_data()))
@@ -138,11 +143,12 @@ class TestCClassifierSVM(CClassifierTestCases):
         self.logger.info("Testing SVM related vector shape")
 
         def _check_flattness(array):
-            self.assertEqual(len(array.shape) == 1, True, "shape is not correct")
+            self.assertEqual(len(array.shape) == 1, True)
 
         for svm in self.svms:
 
-            self.logger.info("SVM \w similarity function: %s", svm.kernel.__class__)
+            self.logger.info(
+                "SVM \\w similarity function: %s", svm.kernel.__class__)
 
             # Training and predicting using our SVM
             svm.fit(self.dataset)
@@ -176,7 +182,8 @@ class TestCClassifierSVM(CClassifierTestCases):
                              "Predicted Scores on sparse data are different.")
 
         for svm in self.svms:
-            self.logger.info("SVM \w similarity function: %s", svm.kernel.__class__)
+            self.logger.info(
+                "SVM \\w similarity function: %s", svm.kernel.__class__)
 
             # Training and predicting on dense data for reference
             svm.fit(self.dataset)

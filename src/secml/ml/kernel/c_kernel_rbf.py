@@ -24,8 +24,6 @@ class CKernelRBF(CKernel):
     Attributes
     ----------
     class_type : 'rbf'
-    cache_size : int
-        Size of the cache used for kernel computation. Default 100.
 
     Parameters
     ----------
@@ -33,6 +31,8 @@ class CKernelRBF(CKernel):
         Default is 1.0. Equals to `-0.5 * sigma^-2` in the standard
         formulation of rbf kernel, it is a free parameter to be used
         for balancing.
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     Examples
     --------
@@ -50,9 +50,10 @@ class CKernelRBF(CKernel):
     """
     __class_type = 'rbf'
 
-    def __init__(self, gamma=1.0, **kwargs):
-        # Calling CKernel constructor
-        super(CKernelRBF, self).__init__(**kwargs)
+    def __init__(self, gamma=1.0, batch_size=None):
+
+        super(CKernelRBF, self).__init__(batch_size=batch_size)
+
         # Using a float gamma to avoid dtype casting problems
         self.gamma = gamma
 
