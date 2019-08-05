@@ -25,7 +25,7 @@ It comes with a set of powerful features:
 
 ### SecML is currently in development.
 If you encounter any bug, please report them using the 
-[GitLab bug tracker](https://gitlab.com/secml/secml/issues).  
+[GitLab issue tracker](https://gitlab.com/secml/secml/issues).  
 Please see our [ROADMAP](https://secml.gitlab.io/roadmap.html) for an overview 
 of the future development directions.
 
@@ -173,6 +173,9 @@ by the following means:
     A specific branch to install can be specified using `[@branch]` parameter.
     If omitted, the default branch will be installed.
     
+Contributions can be sent in the form of a merge request via our 
+[GitLab issue tracker](https://gitlab.com/secml/secml/issues).
+    
 SecML can also be added as a dependency for other libraries/project.
 Just add `secml` or the full repository path command 
 `git+ssh://git@{repourl}.git[@branch]#egg=secml` to the `requirements.txt` file.
@@ -199,8 +202,8 @@ Two common scenarios are listed below:
     - The new repository can then be updated using standard `git` commands
 
 Editable installs are also available while using SecML as a
-dependency of other libraries/projects (see "Installation Guide"
-section for more information).
+dependency of other libraries/projects
+(see [Installation Guide](#installation-guide) for more information).
 
 
 ## Authors
