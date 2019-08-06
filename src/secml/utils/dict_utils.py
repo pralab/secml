@@ -41,10 +41,10 @@ def load_dict(file_path, values_dtype=str, encoding='ascii'):
     with open(file_path, mode='rt', encoding=encoding) as df:
         for key_line in df:
             # a line is 'key: value'
-            key_line_splitted = key_line.split(':')
+            key_line_split = key_line.split(':')
             try:
                 # Removing any space from key value before setting
-                new_dict[key_line_splitted[0]] = values_dtype(key_line_splitted[1].strip())
+                new_dict[key_line_split[0]] = values_dtype(key_line_split[1].strip())
             except IndexError:
                 raise ValueError("line '{:}' is not valid.".format(key_line))
     return new_dict

@@ -19,8 +19,8 @@ import sys
 
 project = 'SecML'
 import datetime
-copyright = '{:}, PRALab - Pattern Recognition and Applications Lab'.format(
-    datetime.datetime.now().year)
+copyright = '{:}, PRALab - Pattern Recognition and Applications Lab & ' \
+            'Pluribus One s.r.l.'.format(datetime.datetime.now().year)
 author = 'PRALab'
 
 # The full version, including alpha/beta/rc tags
