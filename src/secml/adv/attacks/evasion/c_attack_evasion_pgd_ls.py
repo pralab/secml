@@ -20,7 +20,25 @@ from secml.ml.classifiers.reject import CClassifierReject
 
 
 class CAttackEvasionPGDLS(CAttackEvasion):
-    """Evasion attacks using Projected Gradient Descent with Bisect Line Search.
+    """Evasion attacks using Projected Gradient Descent with Line Search.
+
+    This class implements the maximum-confidence evasion attacks proposed in:
+     - https://arxiv.org/abs/1708.06939, ICCV W. ViPAR, 2017.
+
+    This is the multi-class extension of our original work in:
+     - https://arxiv.org/abs/1708.06131, ECML 2013,
+
+    implemented using a custom projected gradient solver that uses line search
+    in each iteration to save gradient computations and speed up the attack.
+
+    It can also be used on sparse, high-dimensional feature spaces, using an
+    L1 constraint on the manipulation of samples to preserve sparsity,
+    as we did for crafting adversarial Android malware in:
+     - https://arxiv.org/abs/1704.08996, IEEE TDSC 2017.
+
+    For more on evasion attacks, see also:
+     - https://arxiv.org/abs/1809.02861, USENIX Sec. 2019
+     - https://arxiv.org/abs/1712.03141, Patt. Rec. 2018
 
     Parameters
     ----------
