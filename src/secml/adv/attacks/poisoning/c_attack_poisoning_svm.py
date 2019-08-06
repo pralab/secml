@@ -2,6 +2,7 @@
 .. module:: CAttackPoisoningSVM
    :synopsis: Poisoning attacks against Support Vector Machine
 
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
@@ -10,7 +11,26 @@ from secml.array import CArray
 
 
 class CAttackPoisoningSVM(CAttackPoisoning):
-    """Poisoning attacks against Support Vector Machine (SVM).
+    """Poisoning attacks against Support Vector Machines (SVMs).
+
+    This is an implementation of the attack in https://arxiv.org/pdf/1206.6389:
+     - B. Biggio, B. Nelson, and P. Laskov. Poisoning attacks against
+       support vector machines. In J. Langford and J. Pineau, editors,
+       29th Int'l Conf. on Machine Learning, pages 1807-1814. Omnipress, 2012.
+
+    where the gradient is computed as described in Eq. (10) in
+    https://www.usenix.org/conference/usenixsecurity19/presentation/demontis:
+     - A. Demontis, M. Melis, M. Pintor, M. Jagielski, B. Biggio, A. Oprea,
+       C. Nita-Rotaru, and F. Roli. Why do adversarial attacks transfer?
+       Explaining transferability of evasion and poisoning attacks.
+       In 28th USENIX Security Symposium. USENIX Association, 2019.
+
+    For more details on poisoning attacks, see also:
+     - https://arxiv.org/abs/1804.00308, IEEE Symp. SP 2018
+     - https://arxiv.org/abs/1712.03141, Patt. Rec. 2018
+     - https://arxiv.org/abs/1708.08689, AISec 2017
+     - https://arxiv.org/abs/1804.07933, ICML 2015
+
 
     Parameters
     ----------
@@ -161,10 +181,9 @@ class CAttackPoisoningSVM(CAttackPoisoning):
             raise TypeError("xc is not a single sample!")
 
         self._xc[idx, :] = xc
-        # FIXME: UNUSED OUTPUT
-        svm, tr = self._update_poisoned_clf()
+        self._update_poisoned_clf()
 
-        # FIXME: PARAMETER CLF UNFILLED
+        # PARAMETER CLF UNFILLED
         return self._alpha_c()
 
     ###########################################################################
@@ -194,14 +213,10 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         dKkc = alpha_c * clf.kernel.gradient(xk, xc)
         return dKkc.T  # d * k
 
-    # FIXME: SIGNATURE DOES NOT MATCH WITH PARENT
-    def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr):
+    def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr, k=None):
         """
         Derivative of the classifier's discriminant function f(xk)
         computed on a set of points xk w.r.t. a single poisoning point xc
-
-        This is a classifier-specific implementation, so we delegate its
-        implementation to inherited classes.
         """
 
         svm = clf  # classifier is an SVM
@@ -241,7 +256,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # derivative of the loss computed on a validation set w.r.t. the
         # classifier params
         fd_params = svm.grad_f_params(xk)
-        #grad_loss_params = fd_params.dot(-grad_loss_fk)
+        # grad_loss_params = fd_params.dot(-grad_loss_fk)
         grad_loss_params = fd_params.dot(grad_loss_fk)
 
         H = clf.hessian_tr_params()
@@ -266,8 +281,8 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # solve with standard linear solver
         # v = - self._compute_grad_solve(G, H, grad_loss_params, sym_pos=False)
 
-        # solve using inverse/pseudoinverse of H
-        #v = - self._compute_grad_inv(G, H, grad_loss_params)
+        # solve using inverse/pseudo-inverse of H
+        # v = - self._compute_grad_inv(G, H, grad_loss_params)
         v = self._compute_grad_inv(G, H, grad_loss_params)
 
         gt += v

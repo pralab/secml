@@ -3,6 +3,7 @@
    :synopsis: Interface for poisoning attacks
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 import warnings
@@ -101,8 +102,7 @@ class CAttackPoisoning(CAttack):
             raise ValueError(
                 "Poisoning in discrete space is not implemented yet!")
 
-        # fixme: use the cross-entropy for all the classifier poisoning
-        # fixme: Bat - WHY!? I don't think we should use a single loss
+        # fixme: validation loss should be optional and passed from outside
         if classifier.class_type == 'svm':
             loss_name = 'hinge'
         elif classifier.class_type == 'logistic':
@@ -124,7 +124,7 @@ class CAttackPoisoning(CAttack):
         self._yc = None
         self._idx = None  # index of the current point to be optimized
         self._training_data = None  # training set used to learn classifier
-        self._n_points = None  # FIXME: WHY THIS HAS A SETTER IF NOT AN INIT PARAM?
+        self._n_points = None  # FIXME: INIT PARAM?
 
         # READ/WRITE
         self.val = val  # this is for validation set
@@ -133,8 +133,8 @@ class CAttackPoisoning(CAttack):
 
         self.init_type = init_type
 
-        # fixme: change this (we needs eta to compute the perturbation if the
-        #  attack is performed in a discrete space )
+        # this should be modified (we need eta to compute the perturbation
+        # if the attack is performed in a discrete space)
         self.eta = solver_params['eta']
 
         # this is used to speed up some poisoning algorithms by re-using
@@ -224,8 +224,9 @@ class CAttackPoisoning(CAttack):
 
         bounds, constr = self._constraint_creation()
 
-        # FIXME: FEW SOLVERS DO NOT SUPPORT DISCRETE. THE FOLLOWING IS A
-        #  WORKAROUND TO TRIGGER A PROPER ERROR
+        # FIXME: many solvers do now work in discrete spaces.
+        #  this is a workaround to raise a proper error, but we should better
+        #  handle these problems
         solver_params = self.solver_params
         if self.discrete is True:
             solver_params['discrete'] = True
@@ -581,7 +582,7 @@ class CAttackPoisoning(CAttack):
 
     def add_discrete_perturbation(self, xc):
 
-        # FIXME: ETA WAS A SOLVER PARAM BUT NOW IS A C_ATTACK_POISONING PARAM
+        # fixme: this should be a solver param
         eta = self.eta
 
         # for each poisoning point

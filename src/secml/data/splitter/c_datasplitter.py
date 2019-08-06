@@ -72,7 +72,7 @@ class CDataSplitter(CCreator):
                                   "a `compute_indices` method.")
 
     def split(self, dataset):
-        """Returns a list of splitted datasets.
+        """Returns a list of split datasets.
 
         Parameters
         ----------
@@ -81,7 +81,7 @@ class CDataSplitter(CCreator):
 
         Returns
         -------
-        splitted_ds : list of tuple
+        split_ds : list of tuple
             List of tuples (training set, test set), one for each fold.
 
         """

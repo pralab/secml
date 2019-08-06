@@ -277,7 +277,7 @@ SECML_STORE_LOGS = _parse_env_config(
     dtype=bool, default=False
 )
 
-"""Directory where logs will be stores.
+"""Directory where logs will be stored.
 
 This is set by default to: 'SECML_HOME_DIR/logs'
 
