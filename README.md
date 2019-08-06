@@ -207,12 +207,13 @@ dependency of other libraries/projects
 
 
 ## Authors
-This library is managed and maintained by [PRALab](https://pralab.diee.unica.it).
+This library is maintained by 
+[PRALab - Pattern Recognition and Applications Lab](https://pralab.diee.unica.it).
 
 List of contributors:
  - Marco Melis (maintainer) [1]_
  - Ambra Demontis [1]_
- - Maura Pintor [1]_
+ - Maura Pintor [1]_ , [2]_
  - Battista Biggio [1]_ , [2]_
 
 .. [1] Department of Electrical and Electronic Engineering, University of Cagliari, Italy  
@@ -232,5 +233,5 @@ List of contributors:
 
 ## Copyright
 SecML has been developed by [PRALab - Pattern Recognition and Applications lab](
-https://pralab.diee.unica.it) under [Apache License 2.0](
-https://www.apache.org/licenses/LICENSE-2.0). Copyright 2019.
+https://pralab.diee.unica.it) and [Pluribus One s.r.l.](https://www.pluribus-one.it/) 
+under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). Copyright 2019.

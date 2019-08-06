@@ -3,6 +3,7 @@
    :synopsis: Poisoning attacks against logistic regression
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from secml.adv.attacks.poisoning import CAttackPoisoning
@@ -12,6 +13,21 @@ from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 class CAttackPoisoningLogisticRegression(CAttackPoisoning):
     """Poisoning attacks against logistic regression.
+
+    This is an implementation of the attack developed in Sect. 3.3 in
+    https://www.usenix.org/conference/usenixsecurity19/presentation/demontis:
+     - A. Demontis, M. Melis, M. Pintor, M. Jagielski, B. Biggio, A. Oprea,
+       C. Nita-Rotaru, and F. Roli. Why do adversarial attacks transfer?
+       Explaining transferability of evasion and poisoning attacks.
+       In 28th USENIX Security Symposium. USENIX Association, 2019.
+
+    For more details on poisoning attacks, see also:
+     - https://arxiv.org/abs/1804.00308, IEEE Symp. SP 2018
+     - https://arxiv.org/abs/1712.03141, Patt. Rec. 2018
+     - https://arxiv.org/abs/1708.08689, AISec 2017
+     - https://arxiv.org/abs/1804.07933, ICML 2015
+     - https://arxiv.org/pdf/1206.6389, ICML 2012
+
 
     Parameters
     ----------
@@ -104,7 +120,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         s = CArray(s)
         return 1.0 / (1.0 + (-y * s).exp())
 
-    def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr):
+    def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr, k=None):
         """
         Derivative of the classifier's discriminant function f(xk)
         computed on a set of points xk w.r.t. a single poisoning point xc
@@ -128,7 +144,6 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         H = clf.hessian_tr_params(tr.X, tr.Y)
 
         # change vector dimensions to match the mathematical formulation...
-
         yc = convert_binary_labels(yc)
         xc = CArray(xc.ravel()).atleast_2d()  # xc is a row vector
 
@@ -138,6 +153,7 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
 
         # validation points
         xk = self.val.X.atleast_2d()
+
         # handle normalizer, if present
         xc = xc if clf.preprocess is None else clf.preprocess.transform(xc)
 

@@ -95,7 +95,7 @@ package:docs:
     name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}_DOCS"
     paths:
       - public
-    expire_in: 1 hour
+    expire_in: 1 day
   cache:
     key: "test-cache-py35"
     paths:
