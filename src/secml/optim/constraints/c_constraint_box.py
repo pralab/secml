@@ -2,8 +2,8 @@
 .. module:: CConstraintBox
    :synopsis: Box constraint.
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 import numpy as np

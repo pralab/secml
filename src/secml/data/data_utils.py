@@ -2,7 +2,7 @@
 .. module:: DataUilts
    :synopsis: Collection of mixed utilities for data processing
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from sklearn.preprocessing import label_binarize as sk_binarizer

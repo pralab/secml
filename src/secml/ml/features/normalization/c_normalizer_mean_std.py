@@ -2,7 +2,7 @@
 .. module:: CNormalizerMeanSTD
    :synopsis: Scales input array features using specific mean and variance.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from __future__ import division
@@ -150,9 +150,9 @@ class CNormalizerMeanSTD(CNormalizerLinear):
 
         >>> normalizer = CNormalizerMeanSTD(0.5, 0.2).fit(array)
         >>> print(normalizer.mean)
-        CArray([ 0.5  0.5  0.5])
+        CArray([0.5 0.5 0.5])
         >>> print(normalizer.std)
-        CArray([ 0.2  0.2  0.2])
+        CArray([0.2 0.2 0.2])
 
         >>> print(normalizer.transform(array))
         CArray([[ 2.5 -7.5  7.5]
@@ -169,9 +169,9 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         >>> out = CNormalizerMeanSTD().fit_transform(array)
         >>> # Expected zero mean and unit variance
         >>> print(out.mean(axis=0, keepdims=False))
-        CArray([ 0.  0.  0.])
+        CArray([0. 0. 0.])
         >>> print(out.std(axis=0, keepdims=False))
-        CArray([ 1.  1.  1.])
+        CArray([1. 1. 1.])
 
         """
         n_feats = x.shape[1]

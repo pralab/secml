@@ -1,9 +1,9 @@
 """
-.. module:: RegularizerL2
+.. module:: CRegularizerL2
    :synopsis: L2-Norm Regularizer Function
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from secml.ml.classifiers.regularizer import CRegularizer
@@ -15,9 +15,9 @@ class CRegularizerL2(CRegularizer):
 
     L2 Regularizer is given by:
 
-    ..math:
+    .. math::
 
-        R(w) := \frac{1}{2} \sum_{i=1}^{n} w_i^2
+       R(w) := \\frac {1}{2} \sum_{i=1}^{n} w_i^2
 
     Attributes
     ----------

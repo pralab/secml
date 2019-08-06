@@ -2,7 +2,7 @@
 .. module:: CClassifierMulticlassOVA
    :synopsis: One-Vs-All multiclass classifier
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.ml.classifiers.multiclass import CClassifierMulticlass

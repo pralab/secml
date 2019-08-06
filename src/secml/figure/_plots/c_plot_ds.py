@@ -2,8 +2,8 @@
 .. module:: CPlotDataset
    :synopsis: Dataset plots.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from six.moves import range
@@ -18,6 +18,7 @@ class CPlotDataset(CPlot):
     """Plots a Dataset.
 
     Custom plotting parameters can be specified.
+
     Currently parameters default:
      - show_legend: True
      - grid: True

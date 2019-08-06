@@ -1,9 +1,9 @@
 """
-.. module:: DatasetSplitter
+.. module:: CDataSplitter
    :synopsis: Common interface for dataset splitting
 
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod
@@ -72,7 +72,7 @@ class CDataSplitter(CCreator):
                                   "a `compute_indices` method.")
 
     def split(self, dataset):
-        """Returns a list of splitted datasets.
+        """Returns a list of split datasets.
 
         Parameters
         ----------
@@ -81,7 +81,7 @@ class CDataSplitter(CCreator):
 
         Returns
         -------
-        splitted_ds : list of tuple
+        split_ds : list of tuple
             List of tuples (training set, test set), one for each fold.
 
         """

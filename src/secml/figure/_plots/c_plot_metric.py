@@ -2,8 +2,8 @@
 .. module:: CPlotMetric
    :synopsis: Performance evaluation metrics plots.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from __future__ import division
@@ -274,6 +274,7 @@ class CPlotMetric(CPlot):
             self.xticks(self._xticks)
             self.xticklabels(self._xticklabels)
 
+    # FIXME: accept a CMetricConfusionMatrix object instead
     def plot_confusion_matrix(self, y_true, y_pred,
                               normalize=False, labels=None,
                               title=None, cmap='Blues', colorbar=False):

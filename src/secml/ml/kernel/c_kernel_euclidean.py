@@ -1,8 +1,8 @@
 """
-.. module:: KernelEuclidean
+.. module:: CKernelEuclidean
    :synopsis: Euclidean distances kernel.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from sklearn import metrics
@@ -24,8 +24,11 @@ class CKernelEuclidean(CKernel):
     Attributes
     ----------
     class_type : 'euclidean'
-    cache_size : int
-        Size of the cache used for kernel computation. Default 100.
+
+    Parameters
+    ----------
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     Examples
     --------
@@ -33,19 +36,15 @@ class CKernelEuclidean(CKernel):
     >>> from secml.ml.kernel.c_kernel_euclidean import CKernelEuclidean
 
     >>> print(CKernelEuclidean().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
-    CArray([[ 20.124612  47.801674]
-     [ 17.464249  45.      ]])
+    CArray([[20.124612 47.801674]
+     [17.464249 45.      ]])
 
     >>> print(CKernelEuclidean().k(CArray([[1,2],[3,4]])))
-    CArray([[ 0.        2.828427]
-     [ 2.828427  0.      ]])
+    CArray([[0.       2.828427]
+     [2.828427 0.      ]])
 
     """
     __class_type = 'euclidean'
-
-    def __init__(self, cache_size=100):
-
-        super(CKernelEuclidean, self).__init__(cache_size=cache_size)
 
     def _k(self, x, y, squared=False,
            x_norm_squared=None, y_norm_squared=None):
@@ -118,7 +117,7 @@ class CKernelEuclidean(CKernel):
          [ -86 -100]])
 
         >>> print(CKernelEuclidean().gradient(vector, vector))
-        CArray([ 0.  0.])
+        CArray([0. 0.])
 
         """
         # Checking if second array is a vector

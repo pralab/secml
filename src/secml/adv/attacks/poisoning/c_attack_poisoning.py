@@ -1,8 +1,9 @@
 """
 .. module:: CAttackPoisoning
-   :synopsis: TODO
+   :synopsis: Interface for poisoning attacks
 
-    @author: Battista Biggio
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 import warnings
@@ -22,7 +23,49 @@ from secml.optim.function import CFunction
 
 @six.add_metaclass(ABCMeta)
 class CAttackPoisoning(CAttack):
-    """Class for implementing poisoning attacks."""
+    """Interface for poisoning attacks.
+
+    Parameters
+    ----------
+    classifier : CClassifier
+        Target classifier.
+    training_data : CDataset
+        Dataset on which the the classifier has been trained on.
+    surrogate_classifier : CClassifier
+        Surrogate classifier, assumed to be already trained.
+    val : CDataset
+        Validation set.
+    surrogate_data : CDataset or None, optional
+        Dataset on which the the surrogate classifier has been trained on.
+        Is only required if the classifier is nonlinear.
+    distance : {'l1' or 'l2'}, optional
+        Norm to use for computing the distance of the adversarial example
+        from the original sample. Default 'l2'.
+    dmax : scalar, optional
+        Maximum value of the perturbation. Default 1.
+    lb, ub : int or CArray, optional
+        Lower/Upper bounds. If int, the same bound will be applied to all
+        the features. If CArray, a different bound can be specified for each
+        feature. Default `lb = 0`, `ub = 1`.
+    y_target : int or None, optional
+        If None an error-generic attack will be performed, else a
+        error-specific attack to have the samples misclassified as
+        belonging to the `y_target` class.
+    attack_classes : 'all' or CArray, optional
+        Array with the classes that can be manipulated by the attacker or
+         'all' (default) if all classes can be manipulated.
+    solver_type : str or None, optional
+        Identifier of the solver to be used. Default 'pgd-ls'.
+    solver_params : dict or None, optional
+        Parameters for the solver. Default None, meaning that default
+        parameters will be used.
+    init_type : {'random', 'loss_based'}, optional
+        Strategy used to chose the initial random samples. Default 'random'.
+    random_seed : int or None, optional
+        If int, random_state is the seed used by the random number generator.
+        If None, no fixed seed will be set.
+
+    """
     __super__ = 'CAttackPoisoning'
 
     def __init__(self, classifier,
@@ -41,31 +84,6 @@ class CAttackPoisoning(CAttack):
                  solver_params=None,
                  init_type='random',
                  random_seed=None):
-        """
-        Initialization method.
-
-        It requires classifier, surrogate_classifier, and surrogate_data.
-        Note that surrogate_classifier is assumed to be trained (before
-        passing it to this class) on surrogate_data.
-
-        TODO: complete list of parameters
-
-        Parameters
-        ------
-        discrete: True/False (default: false).
-                  If True, input space is considered discrete (integer-valued),
-                  otherwise continuous.
-        attack_classes: (not supported) list of classes that
-                  can be manipulated by the attacker
-                  -1 means all classes can be manipulated.
-        y_target: could be None, if attack is indiscriminate. For targeted
-                  attacks, one can specify one target class towards to which
-                  classifying all samples, all specify one label per validation
-                  point.
-        init_type: String 'random' | 'loss_based', default 'random'
-                  Strategy used to chose the initial random samples
-        random_seed: seed used to randomly chose the poisoning points
-        """
 
         CAttack.__init__(self, classifier=classifier,
                          surrogate_classifier=surrogate_classifier,
@@ -84,8 +102,7 @@ class CAttackPoisoning(CAttack):
             raise ValueError(
                 "Poisoning in discrete space is not implemented yet!")
 
-        # fixme: use the cross-entropy for all the classifier poisoning
-        # fixme: Bat - WHY!? I don't think we should use a single loss
+        # fixme: validation loss should be optional and passed from outside
         if classifier.class_type == 'svm':
             loss_name = 'hinge'
         elif classifier.class_type == 'logistic':
@@ -107,7 +124,7 @@ class CAttackPoisoning(CAttack):
         self._yc = None
         self._idx = None  # index of the current point to be optimized
         self._training_data = None  # training set used to learn classifier
-        self._n_points = None  # FIXME: WHY THIS HAS A SETTER IF NOT AN INIT PARAM?
+        self._n_points = None  # FIXME: INIT PARAM?
 
         # READ/WRITE
         self.val = val  # this is for validation set
@@ -116,8 +133,8 @@ class CAttackPoisoning(CAttack):
 
         self.init_type = init_type
 
-        # fixme: change this (we needs eta to compute the perturbation if the
-        #  attack is performed in a discrete space )
+        # this should be modified (we need eta to compute the perturbation
+        # if the attack is performed in a discrete space)
         self.eta = solver_params['eta']
 
         # this is used to speed up some poisoning algorithms by re-using
@@ -183,7 +200,7 @@ class CAttackPoisoning(CAttack):
     #                              PRIVATE METHODS
     ###########################################################################
 
-    def _constraint_cretion(self):
+    def _constraint_creation(self):
 
         # only feature increments or decrements are allowed
         lb = self._x0 if self.lb == 'x0' else self.lb
@@ -205,10 +222,11 @@ class CAttackPoisoning(CAttack):
                         gradient=self._objective_function_gradient,
                         n_dim=self._classifier.n_features)
 
-        bounds, constr = self._constraint_cretion()
+        bounds, constr = self._constraint_creation()
 
-        # FIXME: FEW SOLVERS DO NOT SUPPORT DISCRETE. THE FOLLOWING IS A
-        #  WORKAROUND TO TRIGGER A PROPER ERROR
+        # FIXME: many solvers do now work in discrete spaces.
+        #  this is a workaround to raise a proper error, but we should better
+        #  handle these problems
         solver_params = self.solver_params
         if self.discrete is True:
             solver_params['discrete'] = True
@@ -433,17 +451,11 @@ class CAttackPoisoning(CAttack):
     ###########################################################################
 
     def _run(self, xc, yc, idx=0):
-        """
-        Single point poisoning
-        Here xc can be a *set* of points, in which case idx specifies which
-        point should be manipulated by the poisoning attack
+        """Single point poisoning.
 
-        :param xc: init poisoning points
-        :param yc: poisoning point labels
-        :param val: validation dataset
-        :param n_iter: maximum number of solver iterations
-        :param idx: index of point in xc to be manipulated to poison clf
-        :return:
+        Here xc can be a *set* of points, in which case idx specifies which
+        point should be manipulated by the poisoning attack.
+
         """
         xc = CArray(xc.deepcopy()).atleast_2d()
 
@@ -468,7 +480,7 @@ class CAttackPoisoning(CAttack):
     #                              PUBLIC METHODS
     ###########################################################################
 
-    def run(self, x, y, ds_init=None, max_iter=5):
+    def run(self, x, y, ds_init=None, max_iter=1):
         """Runs poisoning on multiple points.
 
         It reads n_points (previously set), initializes xc, yc at random,
@@ -476,17 +488,23 @@ class CAttackPoisoning(CAttack):
 
         Parameters
         ----------
-        x: val set for evaluating classifier performance
-            (this is not the validation data used by the attacker!)
-        y: true labels of testing points
-        ds_init: for warm starts
-        max_iter: number of iterations to re-optimize poisoning data
+        x : CArray
+            Validation set for evaluating classifier performance.
+            Note that this is not the validation data used by the attacker,
+            which should be passed instead to `CAttackPoisoning` init.
+        y : CArray
+            Corresponding true labels for samples in `x`.
+        ds_init : CDataset or None, optional.
+            Dataset for warm start.
+        max_iter : int, optional
+            Number of iterations to re-optimize poisoning data. Default 1.
 
         Returns
         -------
-        y_pred: predicted labels for all val samples by targeted classifier
-        scores: scores for all val samples by targeted classifier
-        adv_xc: manipulated poisoning points xc (for subsequents warm starts)
+        y_pred : predicted labels for all val samples by targeted classifier
+        scores : scores for all val samples by targeted classifier
+        adv_xc : manipulated poisoning points xc (for subsequents warm starts)
+        f_opt : final value of the objective function
 
         """
         if self._n_points is None or self._n_points == 0:
@@ -564,7 +582,7 @@ class CAttackPoisoning(CAttack):
 
     def add_discrete_perturbation(self, xc):
 
-        # FIXME: ETA WAS A SOLVER PARAM BUT NOW IS A C_ATTACK_POISONING PARAM
+        # fixme: this should be a solver param
         eta = self.eta
 
         # for each poisoning point
@@ -587,7 +605,7 @@ class CAttackPoisoning(CAttack):
                 c_xc[idx] += eta
 
                 self._x0 = c_xc
-                bounds, constr = self._constraint_cretion()
+                bounds, constr = self._constraint_creation()
                 if bounds.is_violated(c_xc) or \
                         bounds.is_violated(c_xc):
                     c_xc = orig_xc.deepcopy()
@@ -597,7 +615,7 @@ class CAttackPoisoning(CAttack):
                     # update a randomly chosen feature of xc if does not
                     # violates any constraint
                     self._x0 = c_xc
-                    bounds, constr = self._constraint_cretion()
+                    bounds, constr = self._constraint_creation()
                     if bounds.is_violated(c_xc) or \
                             bounds.is_violated(c_xc):
                         c_xc = orig_xc.deepcopy()

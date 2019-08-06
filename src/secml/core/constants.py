@@ -2,7 +2,7 @@
 .. module:: Constants
    :synopsis: Collection of mathematical constants
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 import numpy as np

@@ -1,10 +1,9 @@
 """
-.. module:: SparseArray
-   :synopsis: Class for wrapping scipy.sparse.csr_matrix sparse matrix format
+.. module:: CSparse
+   :synopsis: Wrapper of `scipy.sparse` sparse matrices
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from __future__ import division
@@ -1014,9 +1013,9 @@ class CSparse(_CArrayInterface):
         order : {'C', 'F'}, optional
             Read the elements using this index order.
             'C' means to read and write the elements using C-like index order;
-             e.g. read entire first row, then second row, etc.
+            e.g. read entire first row, then second row, etc.
             'F' means to read and write the elements using Fortran-like index
-             order; e.g. read entire first column, then second column, etc.
+            order; e.g. read entire first column, then second column, etc.
         copy : bool, optional
             Indicates whether or not attributes of self should be copied
             whenever possible. The degree to which attributes are copied
@@ -1199,14 +1198,14 @@ class CSparse(_CArrayInterface):
 
         >>> CSparse([[-1,0],[2,0]]).logical_and(CSparse([[2,-1],[2,-1]])).todense()
         CDense([[ True, False],
-               [ True, False]], dtype=bool)
+               [ True, False]])
 
         >>> CSparse([-1]).logical_and(CSparse([2])).todense()
-        CDense([[ True]], dtype=bool)
+        CDense([[ True]])
 
         >>> array = CSparse([1,0,2,-1])
         >>> (array > 0).logical_and(array < 2).todense()
-        CDense([[ True, False, False, False]], dtype=bool)
+        CDense([[ True, False, False, False]])
 
         """
         if self.shape != array.shape:
@@ -1261,14 +1260,14 @@ class CSparse(_CArrayInterface):
 
         >>> CSparse([[-1,0],[2,0]]).logical_or(CSparse([[2,0],[2,-1]])).todense()
         CDense([[ True, False],
-               [ True,  True]], dtype=bool)
+               [ True,  True]])
 
         >>> CSparse([False]).logical_and(CSparse([False])).todense()
-        CDense([[False]], dtype=bool)
+        CDense([[False]])
 
         >>> array = CSparse([1,0,2,-1])
         >>> (array > 0).logical_or(array < 2).todense()
-        CDense([[ True,  True,  True,  True]], dtype=bool)
+        CDense([[ True,  True,  True,  True]])
 
         """
         if self.shape != array.shape:
@@ -1572,14 +1571,14 @@ class CSparse(_CArrayInterface):
         >>> from secml.array.c_sparse import CSparse
 
         >>> CSparse([-1, 0, 3]).argmax()
-        CDense([2])
+        CDense([2], dtype=int64)
 
         >>> CSparse([[-1, 0],[4, 3]]).argmax(axis=0)  # We return the index of minimum for each row
-        CDense([[1, 1]])
+        CDense([[1, 1]], dtype=int64)
 
         >>> CSparse([[-1, 0],[4, 3]]).argmax(axis=1)  # We return the index of maximum for each column
         CDense([[1],
-               [0]])
+               [0]], dtype=int64)
 
         """
         if self.size == 0:
@@ -1664,14 +1663,14 @@ class CSparse(_CArrayInterface):
         >>> from secml.array.c_sparse import CSparse
 
         >>> CSparse([-1, 0, 3]).argmin()
-        CDense([0])
+        CDense([0], dtype=int64)
 
         >>> CSparse([[-1, 0],[4, 3]]).argmin(axis=0)  # We return the index of minimum for each row
-        CDense([[0, 0]])
+        CDense([[0, 0]], dtype=int64)
 
         >>> CSparse([[-1, 0],[4, 3]]).argmin(axis=1)  # We return the index of maximum for each column
         CDense([[0],
-               [1]])
+               [1]], dtype=int64)
 
         """
         if self.size == 0:
@@ -1756,7 +1755,7 @@ class CSparse(_CArrayInterface):
 
     def std(self, axis=None, ddof=0, keepdims=True):
         """Standard deviation of matrix over the given axis."""
-        array_mean = self.mean(axis=axis).atleast_2d()
+        array_mean = CDense(self.mean(axis=axis)).atleast_2d()
 
         centered_array = self - array_mean.repmat(
             [1 if array_mean.shape[0] == self.shape[0] else self.shape[0]][0],

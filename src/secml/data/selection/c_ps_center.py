@@ -2,7 +2,7 @@
 .. module:: PrototypesSelectorCenter
    :synopsis: Selector of prototypes using border strategy.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from six.moves import range

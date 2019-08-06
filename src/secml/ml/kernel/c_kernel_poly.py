@@ -1,9 +1,9 @@
 """
-.. module:: KernelPolynomial
+.. module:: CKernelPoly
    :synopsis: Polynomial kernel
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from sklearn import metrics
@@ -24,18 +24,18 @@ class CKernelPoly(CKernel):
     Attributes
     ----------
     class_type : 'poly'
-    cache_size : int
-        Size of the cache used for kernel computation. Default 100.
 
     Parameters
     ----------
-    degree : int
-        Default is 2. Integer degree of the kernel.
-    gamma : float
-        Default is 1.0. This is a free parameter to be used for balancing.
-    coef0 : float
-        Default is 1.0. Free parameter used for trading off the influence
-        of higher-order versus lower-order terms in the kernel.
+    degree : int, optional
+        Kernel degree. Default 2.
+    gamma : float, optional
+        Free parameter to be used for balancing. Default 1.0.
+    coef0 : float, optional
+        Free parameter used for trading off the influence of higher-order
+        versus lower-order terms in the kernel. Default 1.0.
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     Examples
     --------
@@ -43,19 +43,20 @@ class CKernelPoly(CKernel):
     >>> from secml.ml.kernel.c_kernel_poly import CKernelPoly
 
     >>> print(CKernelPoly(degree=3, gamma=0.001, coef0=2).k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
-    CArray([[  8.615125   9.393931]
-     [  9.393931  11.390625]])
+    CArray([[ 8.615125  9.393931]
+     [ 9.393931 11.390625]])
 
     >>> print(CKernelPoly().k(CArray([[1,2],[3,4]])))
-    CArray([[  36.  144.]
-     [ 144.  676.]])
+    CArray([[ 36. 144.]
+     [144. 676.]])
 
     """
     __class_type = 'poly'
     
-    def __init__(self, degree=2, gamma=1.0, coef0=1.0, **kwargs):
-        # Calling CKernel constructor
-        super(CKernelPoly, self).__init__(**kwargs)
+    def __init__(self, degree=2, gamma=1.0, coef0=1.0, batch_size=None):
+
+        super(CKernelPoly, self).__init__(batch_size=batch_size)
+
         # kernel parameters
         self.degree = degree
         self.gamma = gamma
@@ -171,11 +172,11 @@ class CKernelPoly(CKernel):
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])
         >>> print(CKernelPoly(degree=3, gamma=1e-4, coef0=2).gradient(array, vector))
-        CArray([[ 0.01828008  0.0304668 ]
-         [ 0.05598899  0.06843098]])
+        CArray([[0.01828  0.030467]
+         [0.055989 0.068431]])
 
         >>> print(CKernelPoly().gradient(vector, vector))
-        CArray([ 240.  600.])
+        CArray([240. 600.])
 
         """
         u_carray = CArray(u)

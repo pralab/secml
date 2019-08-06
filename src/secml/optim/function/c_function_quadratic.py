@@ -1,9 +1,8 @@
 """
-.. module:: QuadraticFunction
-   :synopsis: Manager for quadratic function
+.. module:: CFunctionQuadratic
+   :synopsis: Quadratic function
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from secml.optim.function import CFunction

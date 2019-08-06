@@ -1,8 +1,8 @@
 """
-.. module:: MetricAUC
+.. module:: CMetricAUC
    :synopsis: Performance Metric: Area Under (ROC) Curve
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 import sklearn.metrics as skm

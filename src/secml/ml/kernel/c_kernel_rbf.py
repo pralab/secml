@@ -1,9 +1,9 @@
 """
-.. module:: KernelRBF
+.. py:module:: CKernelRBF
    :synopsis: Radial basis function (RBF) kernel
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from sklearn import metrics
@@ -24,8 +24,6 @@ class CKernelRBF(CKernel):
     Attributes
     ----------
     class_type : 'rbf'
-    cache_size : int
-        Size of the cache used for kernel computation. Default 100.
 
     Parameters
     ----------
@@ -33,6 +31,8 @@ class CKernelRBF(CKernel):
         Default is 1.0. Equals to `-0.5 * sigma^-2` in the standard
         formulation of rbf kernel, it is a free parameter to be used
         for balancing.
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     Examples
     --------
@@ -40,19 +40,20 @@ class CKernelRBF(CKernel):
     >>> from secml.ml.kernel.c_kernel_rbf import CKernelRBF
 
     >>> print(CKernelRBF(gamma=0.001).k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
-    CArray([[ 0.66697681  0.10177406]
-     [ 0.73712337  0.13199384]])
+    CArray([[0.666977 0.101774]
+     [0.737123 0.131994]])
 
     >>> print(CKernelRBF().k(CArray([[1,2],[3,4]])))
-    CArray([[  1.00000000e+00   3.35462628e-04]
-     [  3.35462628e-04   1.00000000e+00]])
+    CArray([[1.000000e+00 3.354626e-04]
+     [3.354626e-04 1.000000e+00]])
 
     """
     __class_type = 'rbf'
 
-    def __init__(self, gamma=1.0, **kwargs):
-        # Calling CKernel constructor
-        super(CKernelRBF, self).__init__(**kwargs)
+    def __init__(self, gamma=1.0, batch_size=None):
+
+        super(CKernelRBF, self).__init__(batch_size=batch_size)
+
         # Using a float gamma to avoid dtype casting problems
         self.gamma = gamma
 
@@ -92,7 +93,7 @@ class CKernelRBF(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.k` : Main computation interface for kernels.
+        :meth:`CKernel.k` : Main computation interface for kernels.
 
         """
         return CArray(metrics.pairwise.rbf_kernel(
@@ -127,11 +128,11 @@ class CKernelRBF(CKernel):
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])
         >>> print(CKernelRBF(gamma=1e-4).gradient(array, vector))
-        CArray([[ 0.00245619  0.00377875]
-         [ 0.00556703  0.00647329]])
+        CArray([[0.002456 0.003779]
+         [0.005567 0.006473]])
 
         >>> print(CKernelRBF().gradient(vector, vector))
-        CArray([ 0.  0.])
+        CArray([0. 0.])
 
         """
         x_carray = CArray(x).atleast_2d()
@@ -167,7 +168,7 @@ class CKernelRBF(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.gradient` : Gradient computation interface for kernels.
+        :meth:`CKernel.gradient` : Gradient computation interface for kernels.
 
         """
         u_carray = CArray(u)

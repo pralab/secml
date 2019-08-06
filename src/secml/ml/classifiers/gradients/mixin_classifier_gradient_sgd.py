@@ -2,8 +2,8 @@
 .. module:: CClassifierGradientSGDMixin
    :synopsis: Mixin for SGD classifier gradients.
 
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.array import CArray

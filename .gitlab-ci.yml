@@ -14,34 +14,6 @@ stages:
   - triage
 
 
-package:
-  stage: package
-  image: ${CI_REGISTRY}/pralab/docker-helper-images/python35-setuptools:latest
-  before_script:
-    - echo $CI_PROJECT_DIR
-  script:
-    - python setup.py sdist --formats=zip
-    - python setup.py bdist_wheel --universal
-  only:
-    changes:
-      - src/secml/**/*
-      - .gitlab-ci.yml
-      - CHANGELOG.md
-      - MANIFEST.in
-      - README.md
-      - requirements.txt
-      - setup.py
-      - tox.ini
-  except:
-    - schedules
-  artifacts:
-    name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
-    paths:
-      - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
-      - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
-    expire_in: 1 week
-
-
 .test-cache-py2: &test-cache-py2
   cache:
     key: "test-cache-py2"
@@ -69,6 +41,68 @@ package:
     paths:
       - "$CI_PROJECT_DIR/.cache/pip"
       - "$CI_PROJECT_DIR/secml-data"
+
+
+package:
+  stage: package
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/python35-setuptools:latest
+  before_script:
+    - echo $CI_PROJECT_DIR
+  script:
+    - python setup.py sdist --formats=zip
+    - python setup.py bdist_wheel --universal
+  only:
+    changes:
+      - src/secml/**/*
+      - .gitlab-ci.yml
+      - CHANGELOG.md
+      - MANIFEST.in
+      - README.md
+      - requirements.txt
+      - setup.py
+      - tox.ini
+  except:
+    - schedules
+  artifacts:
+    name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
+    paths:
+      - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
+      - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
+    expire_in: 1 week
+
+package:docs:
+  stage: package
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/python35-sphinx:latest
+  script:
+    - echo $CI_PROJECT_DIR
+    - python -V
+    - pip install tox
+    - tox -e docs
+    - mv docs/build/html/ public/
+  only:
+    changes:
+      - docs/**/*
+      - src/secml/**/*
+      - .gitlab-ci.yml
+      - CHANGELOG.md
+      - README.md
+      - requirements.txt
+      - setup.py
+      - tox.ini
+  except:
+    - schedules
+  artifacts:
+    name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}_DOCS"
+    paths:
+      - public
+    expire_in: 1 day
+  cache:
+    key: "test-cache-py35"
+    paths:
+      - "$CI_PROJECT_DIR/.cache/pip"
+      - "$CI_PROJECT_DIR/secml-data"
+    policy: pull
+
 
 .test:
   stage: test
@@ -206,6 +240,20 @@ release:
       - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
   only:
     - tags
+
+
+#pages:
+#  stage: release
+#  script:
+#    - ls public
+#  dependencies:
+#    - package:docs
+#  artifacts:
+#    paths:
+#      - public
+#    expire_in: 1 hour
+#  only:
+#    - tags
 
 
 #deploy:

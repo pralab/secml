@@ -2,7 +2,7 @@
 .. module:: CClassifierGradientTestLinear
    :synopsis: Debugging class for the classifier gradient class
 
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 

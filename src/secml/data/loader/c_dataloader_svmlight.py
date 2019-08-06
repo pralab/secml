@@ -2,9 +2,8 @@
 .. module:: CDataLoaderSvmLight
    :synopsis: Load and save a dataset to/from disk.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3

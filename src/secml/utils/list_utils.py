@@ -2,7 +2,7 @@
 .. module:: ListUtils
    :synopsis: Collection of mixed utilities for lists
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 

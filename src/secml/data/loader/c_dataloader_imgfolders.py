@@ -2,7 +2,7 @@
 .. module:: DataLoaderImages-w-Folder
    :synopsis: Loader of an image dataset where clients are specified as different folders.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.data.loader import CDataLoader
@@ -34,11 +34,11 @@ class CDataLoaderImgFolders(CDataLoader):
         """Load all images of specified format inside given path.
 
         The following custom CDataset attributes are available:
-        - 'id': last `ds_path` folder.
-        - 'img_w', 'img_h': size of the images in pixels.
-        - 'img_c': images number of channels.
-        - Any other custom attribute is retrieved from 'attributes.txt' file.
-          Only attributes of `str` type are currently supported.
+         - 'id': last `ds_path` folder.
+         - 'img_w', 'img_h': size of the images in pixels.
+         - 'img_c': images number of channels.
+         - Any other custom attribute is retrieved from 'attributes.txt' file.
+           Only attributes of `str` type are currently supported.
 
         Any other custom attribute is retrieved from 'attributes.txt' file.
 

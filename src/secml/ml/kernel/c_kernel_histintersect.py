@@ -1,8 +1,8 @@
 """
-.. module:: KernelHistIntersect
+.. module:: CKernelHistIntersect
    :synopsis: Histogram Intersection kernel
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from sklearn import metrics
@@ -24,8 +24,11 @@ class CKernelHistIntersect(CKernel):
     Attributes
     ----------
     class_type : 'hist-intersect'
-    cache_size : int
-        Size of the cache used for kernel computation. Default 100.
+
+    Parameters
+    ----------
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     Examples
     --------
@@ -33,12 +36,12 @@ class CKernelHistIntersect(CKernel):
     >>> from secml.ml.kernel.c_kernel_histintersect import CKernelHistIntersect
 
     >>> print(CKernelHistIntersect().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
-    CArray([[ 3.  3.]
-     [ 7.  7.]])
+    CArray([[3. 3.]
+     [7. 7.]])
 
     >>> print(CKernelHistIntersect().k(CArray([[1,2],[3,4]])))
-    CArray([[ 3.  3.]
-     [ 3.  7.]])
+    CArray([[3. 3.]
+     [3. 7.]])
 
     """
     __class_type = 'hist-intersect'

@@ -2,8 +2,8 @@
 .. module:: CPCA
    :synopsis: Principal Component Analysis (PCA)
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from secml.array import CArray
@@ -16,7 +16,7 @@ __all__ = ['CPCA']
 class CPCA(CReducer):
     """Principal Component Analysis (PCA).
 
-    Properties
+    Parameters
     ----------
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.
@@ -65,9 +65,8 @@ class CPCA(CReducer):
 
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
         >>> CPCA().fit_transform(array)
-        CArray([[ -4.07872199e+00   2.47826647e+00   0.00000000e+00]
-         [ -2.72723183e+00  -2.82960262e+00   5.55111512e-17]
-         [  6.80595382e+00   3.51336152e-01  -2.22044605e-16]])
+        CArray(3, 3)(dense: [[-4.078722e+00 -2.478266e+00  1.855417e-17] [-2.727232e+00  2.829603e+00  6.708859e-17] [ 6.805954e+00 -3.513362e-01 -1.757349e-16]])
+
 
         """
         self.n_components = n_components
@@ -152,15 +151,13 @@ class CPCA(CReducer):
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
         >>> pca = CPCA().fit(array)
         >>> pca.eigenval
-        CArray([  8.39015935e+00   3.77781588e+00   1.90957046e-17])
+        CArray(3,)(dense: [8.390159e+00 3.777816e+00 1.909570e-17])
         >>> pca.eigenvec
-        CArray([[-0.48613165  0.6560051   0.57735027]
-         [-0.32505126 -0.74900491  0.57735027]
-         [ 0.8111829   0.09299981  0.57735027]])
+        CArray(3, 3)(dense: [[-0.486132 -0.656005  0.57735 ] [-0.325051  0.749005  0.57735 ] [ 0.811183 -0.093     0.57735 ]])
         >>> pca.explained_variance
-        CArray([  2.34649246e+01   4.75729760e+00   1.21548644e-34])
+        CArray(3,)(dense: [3.519739e+01 7.135946e+00 1.823230e-34])
         >>> pca.explained_variance_ratio
-        CArray([  8.31434337e-01   1.68565663e-01   4.30684173e-36])
+        CArray(3,)(dense: [8.314343e-01 1.685657e-01 4.306842e-36])
 
         """
         data_carray = CArray(x).todense().atleast_2d()
@@ -245,10 +242,8 @@ class CPCA(CReducer):
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
         >>> pca = CPCA().fit(array)
         >>> pca.transform(CArray.concatenate(array, [4., 2., -6.], axis=0))
-        CArray([[ -4.07872199e+00   2.47826647e+00   0.00000000e+00]
-         [ -2.72723183e+00  -2.82960262e+00   5.55111512e-17]
-         [  6.80595382e+00   3.51336152e-01  -2.22044605e-16]
-         [  3.20915225e+00  -1.12968039e+00   3.29690893e+00]])
+        CArray(4, 3)(dense: [[-4.078722e+00 -2.478266e+00  1.855417e-17] [-2.727232e+00  2.829603e+00  6.708859e-17] [ 6.805954e+00 -3.513362e-01 -1.757349e-16] [ 3.209152e+00  1.129680e+00  3.296909e+00]])
+
 
         >>> pca.transform([4., 2.])
         Traceback (most recent call last):
@@ -286,9 +281,7 @@ class CPCA(CReducer):
         >>> pca = CPCA().fit(array)
         >>> array_pca = pca.transform(array)
         >>> pca.revert(array_pca).round(6)
-        CArray([[ 1. -0.  2.]
-         [ 2.  5. -0.]
-         [-0.  1. -9.]])
+        CArray(3, 3)(dense: [[ 1. -0.  2.] [ 2.  5. -0.] [-0.  1. -9.]])
 
         """
         data_carray = CArray(x).atleast_2d()

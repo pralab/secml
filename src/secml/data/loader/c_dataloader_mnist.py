@@ -2,7 +2,7 @@
 .. module:: DataLoaderMNIST
    :synopsis: Loader the MNIST Handwritten digits dataset
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from __future__ import division
@@ -94,7 +94,7 @@ class CDataLoaderMNIST(CDataLoader):
         num_samples : int or None, optional
             Number of expected samples in resulting ds.
             If int, an equal number of samples will be taken
-             from each class until num_samples have been loaded.
+            from each class until `num_samples` have been loaded.
             If None, all samples will be loaded.
 
         """

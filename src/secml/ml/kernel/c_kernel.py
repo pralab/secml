@@ -1,9 +1,9 @@
 """
 .. module:: KernelInterface
-   :synopsis: Common interface for Kernel metrics
+   :synopsis: Interface for Kernel metrics
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod
@@ -26,18 +26,17 @@ class CKernel(CCreator):
     "more similar" than objects a and c.
     A kernel must also be positive semi-definite.
 
-    Attributes
+    Parameters
     ----------
-    cache_size : int, size of the cache used for kernel computation. Default 100.
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     """
     __super__ = 'CKernel'
 
-    cache_size = 100
+    def __init__(self, batch_size=None):
 
-    def __init__(self, cache_size=100):
-        # cache_size is a class attribute
-        self.cache_size = cache_size
+        self.batch_size = batch_size
 
     @abstractmethod
     def _k(self, x, y):
@@ -79,10 +78,10 @@ class CKernel(CCreator):
             Kernel between x and y. Array of shape (n_x, n_y) or scalar
             if both x and y are vector-like.
 
-        Note
-        ----
-        We use a caching strategy to optimize memory consumption during
-        kernel computation. However, the parameter cache_size should be
+        Notes
+        -----
+        We use a batching strategy to optimize memory consumption during
+        kernel computation. However, the parameter `batch_size` should be
         chosen wisely: a small cache can highly improve memory consumption
         but can significantly slow down the computation process.
 
@@ -94,19 +93,19 @@ class CKernel(CCreator):
         >>> array1 = CArray([[15,25],[45,55]])
         >>> array2 = CArray([[10,20],[40,50]])
         >>> print(CKernelRBF().k(array1, array2))
-        CArray([[  1.92874985e-22   0.00000000e+00]
-         [  0.00000000e+00   1.92874985e-22]])
+        CArray([[1.92875e-22 0.00000e+00]
+         [0.00000e+00 1.92875e-22]])
 
         >>> print(CKernelRBF().k(array1))
-        CArray([[ 1.  0.]
-         [ 0.  1.]])
+        CArray([[1. 0.]
+         [0. 1.]])
 
         >>> vector = CArray([15,25])
         >>> print(CKernelRBF().k(vector, array1))
-        CArray([[ 1.  0.]])
+        CArray([[1. 0.]])
         >>> print(CKernelRBF().k(array1, vector))
-        CArray([[ 1.]
-         [ 0.]])
+        CArray([[1.]
+         [0.]])
         >>> print(CKernelRBF().k(vector, vector))
         1.0
 
@@ -121,12 +120,16 @@ class CKernel(CCreator):
         kernel = CArray.empty(
             shape=(x_carray_2d.shape[0], y_carray_2d.shape[0]))
 
-        # cache_size is the range step
-        for patterns_done in range(0, x_carray_2d.shape[0], self.cache_size):
+        batch_size = self.batch_size
+        if self.batch_size is None:
+            batch_size = x_carray_2d.shape[0]
+
+        # batch_size is the range step
+        for patterns_done in range(0, x_carray_2d.shape[0], batch_size):
 
             # This avoids indexing errors during computation of the last fold
             nxt_pattern_idx = min(
-                patterns_done + self.cache_size, x_carray_2d.shape[0])
+                patterns_done + batch_size, x_carray_2d.shape[0])
 
             # Subsampling patterns to improve memory usage
             x_sel = x_carray_2d[patterns_done:nxt_pattern_idx, :].atleast_2d()
@@ -202,11 +205,11 @@ class CKernel(CCreator):
         >>> array = CArray([[15,25],[45,55]])
         >>> vector = CArray([2,5])
         >>> print(CKernelRBF(gamma=1e-4).gradient(array, vector))
-        CArray([[ 0.00245619  0.00377875]
-         [ 0.00556703  0.00647329]])
+        CArray([[0.002456 0.003779]
+         [0.005567 0.006473]])
 
         >>> print(CKernelRBF().gradient(vector, vector))
-        CArray([ 0.  0.])
+        CArray([0. 0.])
 
         """
         # Recasting data for safety... cost-free for any CArray

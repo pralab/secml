@@ -1,9 +1,9 @@
 """
-.. module:: CLossSquare & CLossQuadratic
+.. module:: CLossSquare
    :synopsis: Squared Loss Functions
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from secml.ml.classifiers.loss import CLossRegression, CLossClassification
@@ -18,7 +18,7 @@ class CLossSquare(CLossClassification):
 
     .. math::
 
-        L_\text{Square}(y, s) = \left\(1 - sy\right\)
+       L_\\text{Square}(y, s) = \\left( 1 - sy \\right)
 
     Attributes
     ----------
@@ -38,8 +38,8 @@ class CLossSquare(CLossClassification):
         score : CArray
             Outputs (predicted), targets.
             2-D array of shape (n_samples, n_classes) or 1-D flat array
-             of shape (n_samples,). If 1-D array, the probabilities
-             provided are assumed to be that of the positive class.
+            of shape (n_samples,). If 1-D array, the probabilities
+            provided are assumed to be that of the positive class.
         pos_label : {0, 1}, optional
             The class wrt compute the loss function. Default 1.
             If `score` is a 1-D flat array, this parameter is ignored.
@@ -68,8 +68,8 @@ class CLossSquare(CLossClassification):
         score : CArray
             Outputs (predicted), targets.
             2-D array of shape (n_samples, n_classes) or 1-D flat array
-             of shape (n_samples,). If 1-D array, the probabilities
-             provided are assumed to be that of the positive class.
+            of shape (n_samples,). If 1-D array, the probabilities
+            provided are assumed to be that of the positive class.
         pos_label : {0, 1}, optional
             The class wrt compute the loss function derivative. Default 1.
             If `score` is a 1-D flat array, this parameter is ignored.
@@ -96,7 +96,7 @@ class CLossQuadratic(CLossRegression):
 
     .. math::
 
-        L_\text{Quadratic}(y, s) = \frac{1}{2}\left\(s - y\right\)^2
+        L_\\text{Quadratic} (y, s) = \\frac{1}{2} {\\left( s - y \\right)}^2
 
     Attributes
     ----------

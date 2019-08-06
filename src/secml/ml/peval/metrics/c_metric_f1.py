@@ -1,8 +1,8 @@
 """
-.. module:: MetricF1
+.. module:: CMetricF1
    :synopsis: Performance Metric: F1
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 import sklearn.metrics as skm
@@ -38,7 +38,7 @@ class CMetricF1(CMetric):
 
     >>> peval = CMetricF1()
     >>> print(peval.performance_score(CArray([0, 1, 2, 3]), CArray([0, 1, 1, 3])))
-    0.666666666667
+    0.6666666666666666
 
     """
     __class_type = 'f1'

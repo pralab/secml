@@ -1,8 +1,8 @@
 """
-.. module:: KFoldStratified
+.. module:: CDataSplitterStratifiedKFold
    :synopsis: Stratified K-Fold
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from sklearn.model_selection import StratifiedKFold

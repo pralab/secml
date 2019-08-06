@@ -2,8 +2,8 @@
 .. module:: COptimizerScipy
    :synopsis: Interface for function optimization and minimization
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from scipy import optimize as sc_opt
@@ -66,10 +66,11 @@ class COptimizerScipy(COptimizer):
 
         method : str or callable, optional
             Type of solver.  Should be one of
-                - 'BFGS'        :ref:`(see here) <optimize.minimize-bfgs>`
-                - 'L-BFGS-B'    :ref:`(see here) <optimize.minimize-lbfgsb>`
+              - 'BFGS'        :ref:`(see here) <optimize.minimize-bfgs>`
+              - 'L-BFGS-B'    :ref:`(see here) <optimize.minimize-lbfgsb>`
+
             If not given, chosen to be one of ``BFGS`` or ``L-BFGS-B``
-             depending if the problem has constraints or bounds.
+            depending if the problem has constraints or bounds.
             See `c_optimizer_scipy.SUPPORTED_METHODS` for the full list.
         jac : {'2-point', '3-point', 'cs', bool}, optional
             Method for computing the gradient vector.
@@ -89,22 +90,18 @@ class COptimizerScipy(COptimizer):
         options : dict, optional
             A dictionary of solver options. All methods accept the following
             generic options:
-                maxiter : int
-                    Maximum number of iterations to perform.
-                disp : bool
-                    Set to True to print convergence messages.
-                    Equivalent of setting `COptimizerScipy.verbose = 2`.
+             - maxiter : int
+               Maximum number of iterations to perform.
+             - disp : bool
+               Set to True to print convergence messages.
+               Equivalent of setting `COptimizerScipy.verbose = 2`.
+
             For method-specific options, see :func:`show_options()`.
 
         Returns
         -------
         x : CArray
             The solution of the optimization.
-
-        Warnings
-        --------
-        Due to limitations of the current wrappers,
-        not all solver methods listed above are supported.
 
         Examples
         --------
@@ -124,7 +121,7 @@ class COptimizerScipy(COptimizer):
         >>> print(x_opt)
         CArray([1. 1.])
         >>> print(opt.f_opt)
-        9.29438398164e-19
+        9.294383981640425e-19
 
         """
         if x_init.issparse is True or x_init.is_vector_like is False:

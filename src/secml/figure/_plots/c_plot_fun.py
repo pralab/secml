@@ -2,8 +2,8 @@
 .. module:: CPlotFunction
    :synopsis: Function plots.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from six.moves import range
@@ -19,6 +19,7 @@ class CPlotFunction(CPlot):
     """Plots a Function.
 
     Custom plotting parameters can be specified.
+
     Currently parameters default:
      - show_legend: True
      - grid: True

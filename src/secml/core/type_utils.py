@@ -2,7 +2,7 @@
 .. module:: TypeUtils
    :synopsis: Collection of utility functions for types management
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 import six
@@ -302,11 +302,11 @@ def to_builtin(x):
     """Convert input to the corresponding built-in type.
 
     Works with the following types:
-     - bool, np.bool_ -> bool
-     - int, np.integer -> int
-     - float, np.floating -> float
-     - str, np.str_, np.unicode_ -> str
-     - bytes, np.bytes_ -> bytes
+     - `bool`, `np.bool_` -> `bool`
+     - `int`, `np.integer` -> `int`
+     - `float, `np.floating` -> `float`
+     - `str`, `np.str_`, `np.unicode_` -> `str`
+     - `bytes`, `np.bytes_` -> `bytes`
 
     """
     if is_bool(x):

@@ -2,7 +2,7 @@
 .. module:: DownloadUtils
    :synopsis: Collection of mixed utilities for downloading files
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from __future__ import division
@@ -31,7 +31,7 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
     md5_digest : str or None, optional
         Expected MD5 digest of the downloaded file.
         If a different digest is computed, the downloaded file will be
-         removed and ValueError is raised.
+        removed and ValueError is raised.
 
     """
     # Parsing user string

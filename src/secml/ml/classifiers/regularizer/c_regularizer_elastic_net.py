@@ -1,9 +1,9 @@
 """
-.. module:: RegularizerElasticNet
+.. module:: CRegularizerElasticNet
    :synopsis: ElasticNet Regularizer Function
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from secml.ml.classifiers.regularizer import CRegularizer
@@ -13,14 +13,14 @@ class CRegularizerElasticNet(CRegularizer):
     """ElasticNet Regularizer.
 
     A convex combination of L2 and L1,
-    where :math:`\rho` is given by ``1 - l1_ratio``.
+    where :math:`\\rho` is given by `1 - l1_ratio`.
 
     ElasticNet Regularizer is given by:
 
-    ..math:
+    .. math::
 
-        R(w) := \frac{\rho}{2} \sum_{i=1}^{n} w_i^2
-            + (1-\rho) \sum_{i=1}^{n} |w_i|
+        R(w) := \\frac{\\rho}{2} \\sum_{i=1}^{n} w_i^2 + (1-\\rho)
+                                 \\sum_{i=1}^{n} |w_i|
 
     Attributes
     ----------

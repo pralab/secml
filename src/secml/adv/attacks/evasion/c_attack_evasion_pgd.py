@@ -2,9 +2,9 @@
 .. module:: CAttackEvasionPGD
    :synopsis: Evasion attack using Projected Gradient Descent.
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml import _NoValue
@@ -18,24 +18,50 @@ from secml.optim.optimizers import COptimizer
 class CAttackEvasionPGD(CAttackEvasionPGDLS):
     """Evasion attacks using Projected Gradient Descent.
 
-    It requires classifier, surrogate_classifier, and surrogate_data.
-    Note that surrogate_classifier is assumed to be trained (before
-    passing it to this class) on surrogate_data.
+    This class implements the maximum-confidence evasion attacks proposed in:
+     - https://arxiv.org/abs/1708.06939, ICCV W. ViPAR, 2017.
+
+    This is the multi-class extension of our original work in:
+     - https://arxiv.org/abs/1708.06131, ECML 2013,
+       implemented using a standard projected gradient solver.
+
+    It can also be used on sparse, high-dimensional feature spaces, using an
+    L1 constraint on the manipulation of samples to preserve sparsity,
+    as we did for crafting adversarial Android malware in:
+     - https://arxiv.org/abs/1704.08996, IEEE TDSC 2017.
+
+    For more on evasion attacks, see also:
+     - https://arxiv.org/abs/1809.02861, USENIX Sec. 2019
+     - https://arxiv.org/abs/1712.03141, Patt. Rec. 2018
 
     Parameters
     ----------
-    discrete: True/False (default: false).
-        If True, input space is considered discrete (integer-valued),
-        otherwise continuous.
-    attack_classes : 'all' or CArray, optional
-        List of classes that can be manipulated by the attacker or
-         'all' (default) if all classes can be manipulated.
+    classifier : CClassifier
+        Target classifier.
+    surrogate_classifier : CClassifier
+        Surrogate classifier, assumed to be already trained.
+    surrogate_data : CDataset or None, optional
+        Dataset on which the the surrogate classifier has been trained on.
+        Is only required if the classifier is nonlinear.
+    distance : {'l1' or 'l2'}, optional
+        Norm to use for computing the distance of the adversarial example
+        from the original sample. Default 'l2'.
+    dmax : scalar, optional
+        Maximum value of the perturbation. Default 1.
+    lb, ub : int or CArray, optional
+        Lower/Upper bounds. If int, the same bound will be applied to all
+        the features. If CArray, a different bound can be specified for each
+        feature. Default `lb = 0`, `ub = 1`.
     y_target : int or None, optional
-        If None an indiscriminate attack will be performed, else a
-        targeted attack to have the samples misclassified as
-        belonging to the y_target class.
-
-    TODO: complete list of parameters
+        If None an error-generic attack will be performed, else a
+        error-specific attack to have the samples misclassified as
+        belonging to the `y_target` class.
+    attack_classes : 'all' or CArray, optional
+        Array with the classes that can be manipulated by the attacker or
+         'all' (default) if all classes can be manipulated.
+    solver_params : dict or None, optional
+        Parameters for the solver. Default None, meaning that default
+        parameters will be used.
 
     Attributes
     ----------

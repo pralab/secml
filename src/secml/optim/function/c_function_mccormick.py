@@ -1,8 +1,8 @@
 """
-.. module:: McCormickFunction
+.. module:: CFunctionMcCormick
    :synopsis: McCormick function
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.optim.function import CFunction

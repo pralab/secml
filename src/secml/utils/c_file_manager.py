@@ -2,7 +2,7 @@
 .. module:: FileManager
    :synopsis: A collection of useful methods for directories and files managing.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 import os
@@ -299,8 +299,8 @@ def split(path):
     or more slashes only). In all cases, join(head, tail) returns a path
     to the same location as path (but the strings may differ).
 
-    Return
-    ------
+    Returns
+    -------
     out_split : tuple of str
         A tuple of strings consisting of (head, tail), where tail
         is the last pathname component and head is everything leading

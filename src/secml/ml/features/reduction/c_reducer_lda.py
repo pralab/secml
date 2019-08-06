@@ -2,8 +2,8 @@
 .. module:: CLDA
    :synopsis: Linear Discriminant Analysis (LDA)
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
@@ -16,7 +16,7 @@ from secml.utils.mixed_utils import check_is_fitted
 class CLDA(CReducer):
     """Linear Discriminant Analysis (LDA).
 
-    Properties
+    Parameters
     ----------
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.
@@ -58,9 +58,7 @@ class CLDA(CReducer):
 
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
         >>> CLDA().fit_transform(ds.X, ds.Y)
-        CArray([[-4.07872199]
-         [-2.72723183]
-         [ 6.80595382]])
+        CArray(3, 1)(dense: [[-1.209938] [ 0.204275] [ 1.005663]])
 
         """
         self.n_components = n_components
@@ -125,9 +123,7 @@ class CLDA(CReducer):
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
         >>> lda = CLDA().fit(ds.X, ds.Y)
         >>> lda.eigenvec
-        CArray([[ 0.47140452]
-        [ 0.0942809 ]
-         [-0.23570226]])
+        CArray(3, 1)(dense: [[ 0.471405] [ 0.094281] [-0.235702]])
 
         """
         data_carray = CArray(x).todense().atleast_2d()
@@ -173,10 +169,7 @@ class CLDA(CReducer):
         >>> ds = CDataset([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]], [1,1,2])
         >>> lda = CLDA().fit(ds.X, ds.Y)
         >>> lda.transform(CArray.concatenate(ds.X, [4., 2., -6.], axis=0))
-        CArray([[-1.20993827]
-        [ 0.20427529]
-        [ 1.00566298]
-        [ 2.27845518]])
+        CArray(4, 1)(dense: [[-1.209938] [ 0.204275] [ 1.005663] [ 2.278455]])
 
         >>> lda.transform([4., 2.])
         Traceback (most recent call last):

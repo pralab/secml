@@ -2,8 +2,8 @@
 .. module:: CPlotStats
    :synopsis: Statistical functions plots.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from secml.figure._plots import CPlot
@@ -14,14 +14,15 @@ class CPlotStats(CPlot):
     """Plots for statistical functions.
 
     Custom plotting parameters can be specified.
+
     Currently parameters default:
-     - show_legend: True.
+     - `show_legend`: True.
      - grid: True.
 
     See Also
     --------
-    .CPlot : basic subplot functions.
-    .CFigure : creates and handle figures.
+    CPlot : basic subplot functions.
+    CFigure : creates and handle figures.
 
     """
 

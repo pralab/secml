@@ -71,22 +71,35 @@ def git_version():
     return GIT_REVISION
 
 
+# Check if we want to building a release package
+is_release = False
+try:
+    is_release = bool(os.environ['SECML_ISRELEASE'])
+except KeyError:
+    pass
+
 # For version string format see: https://packaging.pypa.io/en/latest/version/
 try:
     _v_f = _read('VERSION')  # Read main version file
-    _v_git = git_version()
-    if _v_git == 'Unknown':
-        try:  # Try to read rev from file. May not exists
-            _v_git = _read('VERSION_REV')
-        except:
-            pass  # _v_git will stay "Unknown"
+    if not is_release:  # Override for is_release checks
+        _v_git = git_version()
+        if _v_git == 'Unknown':
+            try:  # Try to read rev from file. May not exists
+                _v_git = _read('VERSION_REV')
+            except:
+                pass  # _v_git will stay "Unknown"
+        else:
+            _write_rev(_v_git, 'VERSION_REV')
+        # Append rev number only if available
+        _v = _v_f if _v_git == 'Unknown' else _v_f + '+' + _v_git
     else:
-        _write_rev(_v_git, 'VERSION_REV')
-    # Append rev number only if available
-    _v = _v_f if _v_git == 'Unknown' else _v_f + '+' + _v_git
+        _v = _v_f  # release package
     _v = parse_version(_v)  # Integrity checks
-    # Display rev number (if available) for prereleases only
-    __version__ = str(_v) if _v.is_prerelease else _v.public
+    # Display rev number (if available) for dev releases only
+    if _v._version.dev is not None:
+        __version__ = str(_v)
+    else:  # alpha/beta/rc/final only display public
+        __version__ = _v.public
 except:
     raise RuntimeError("Unable to find version string.")
 

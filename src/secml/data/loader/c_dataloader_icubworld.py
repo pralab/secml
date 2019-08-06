@@ -2,7 +2,7 @@
 .. module:: CDataLoaderICubWorld28
    :synopsis: Loader of the ICubWorld dataset
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 .. moduleauthor:: Angelo Sotgiu
 
 """

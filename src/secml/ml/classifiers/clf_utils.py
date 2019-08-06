@@ -2,7 +2,7 @@
 .. module:: ClassifierUtils
    :synopsis: Collection of mixed utilities for Classifiers
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.core.type_utils import is_int
@@ -49,7 +49,7 @@ def convert_binary_labels(labels):
     >>> from secml.ml.classifiers.clf_utils import convert_binary_labels
     >>> from secml.array import CArray
 
-    >>> print(convert_binary_labels(2))
+    >>> print(convert_binary_labels(0))
     -1
 
     >>> print(convert_binary_labels(CArray([0,1,1,1,0,0])))

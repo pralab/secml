@@ -1,8 +1,8 @@
 """
-.. module:: Confusion Matrix
-   :synopsis:  Confusion Matrix
+.. module:: CMetricConfusionMatrix
+   :synopsis: Confusion Matrix
 
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from sklearn.metrics import confusion_matrix

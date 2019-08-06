@@ -1,8 +1,8 @@
 """
-.. module:: FeatureNormalizer
-   :synopsis: Common interface for feature normalizers.
+.. module:: CNormalizer
+   :synopsis: Interface for feature normalizers.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from abc import ABCMeta

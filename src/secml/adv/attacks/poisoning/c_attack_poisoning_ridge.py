@@ -1,9 +1,9 @@
 """
-.. module:: CAttackPoisoning
-   :synopsis: TODO
+.. module:: CAttackPoisoningRidge
+   :synopsis: Poisoning attacks against ridge
 
-    @author: Ambra Demontis
-    @author: Battista Biggio
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from secml.adv.attacks.poisoning import CAttackPoisoning
@@ -12,6 +12,63 @@ from secml.ml.classifiers.clf_utils import convert_binary_labels
 
 
 class CAttackPoisoningRidge(CAttackPoisoning):
+    """Poisoning attacks against ridge regression.
+
+    This is an implementation of the attack developed in
+    https://arxiv.org/abs/1804.07933:
+     - H. Xiao, B. Biggio, G. Brown, G. Fumera, C. Eckert, and F. Roli.
+       Is feature selection secure against training data poisoning?
+       In F. Bach and D. Blei, editors, JMLR W&CP, Proc. 32nd
+       Int'l Conf. Mach. Learning (ICML), volume 37, pp. 1689-1698, 2015.
+
+    For more details on poisoning attacks, see also:
+     - https://arxiv.org/abs/1809.02861, USENIX Sec. 2019
+     - https://arxiv.org/abs/1804.00308, IEEE Symp. SP 2018
+     - https://arxiv.org/abs/1712.03141, Patt. Rec. 2018
+     - https://arxiv.org/abs/1708.08689, AISec 2017
+     - https://arxiv.org/pdf/1206.6389, ICML 2012
+
+    Parameters
+    ----------
+    classifier : CClassifierRidge
+        Target classifier.
+    training_data : CDataset
+        Dataset on which the the classifier has been trained on.
+    surrogate_classifier : CClassifier
+        Surrogate classifier, assumed to be already trained.
+    val : CDataset
+        Validation set.
+    surrogate_data : CDataset or None, optional
+        Dataset on which the the surrogate classifier has been trained on.
+        Is only required if the classifier is nonlinear.
+    distance : {'l1' or 'l2'}, optional
+        Norm to use for computing the distance of the adversarial example
+        from the original sample. Default 'l2'.
+    dmax : scalar, optional
+        Maximum value of the perturbation. Default 1.
+    lb, ub : int or CArray, optional
+        Lower/Upper bounds. If int, the same bound will be applied to all
+        the features. If CArray, a different bound can be specified for each
+        feature. Default `lb = 0`, `ub = 1`.
+    y_target : int or None, optional
+        If None an error-generic attack will be performed, else a
+        error-specific attack to have the samples misclassified as
+        belonging to the `y_target` class.
+    attack_classes : 'all' or CArray, optional
+        Array with the classes that can be manipulated by the attacker or
+         'all' (default) if all classes can be manipulated.
+    solver_type : str or None, optional
+        Identifier of the solver to be used. Default 'pgd-ls'.
+    solver_params : dict or None, optional
+        Parameters for the solver. Default None, meaning that default
+        parameters will be used.
+    init_type : {'random', 'loss_based'}, optional
+        Strategy used to chose the initial random samples. Default 'random'.
+    random_seed : int or None, optional
+        If int, random_state is the seed used by the random number generator.
+        If None, no fixed seed will be set.
+
+    """
     __class_type = 'p-ridge'
 
     def __init__(self, classifier,
@@ -30,24 +87,6 @@ class CAttackPoisoningRidge(CAttackPoisoning):
                  solver_params=None,
                  init_type=None,
                  random_seed=None):
-        """
-        Initialization method.
-
-        It requires classifier, surrogate_classifier, and surrogate_data.
-        Note that surrogate_classifier is assumed to be trained (before
-        passing it to this class) on surrogate_data.
-
-        TODO: complete list of parameters
-
-        Parameters
-        ------
-        discrete: True/False (default: false).
-                  If True, input space is considered discrete (integer-valued),
-                  otherwise continuous.
-        attack_classes: list of classes that can be manipulated by the attacker
-                 -1 means all classes can be manipulated.
-
-        """
 
         CAttackPoisoning.__init__(self, classifier=classifier,
                                   training_data=training_data,
@@ -71,17 +110,13 @@ class CAttackPoisoningRidge(CAttackPoisoning):
     ###########################################################################
 
     def _g(self, d):
-        """
-        :param d: number of features
-        :return:
-        """
+
         return CArray.eye(d)
 
     # the differences with the general attack class for quadratic losses are
     # the computing of _g and the fact that here the bias is regularized
     # (only M should be the other difference)
-    # FIXME: SIGNATURE DOES NOT MATCH PARENT
-    def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr):
+    def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr, k=None):
         """
         Derivative of the classifier's discriminant function f(xk)
         computed on a set of points xk w.r.t. a single poisoning point xc
@@ -90,8 +125,8 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         implementation to inherited classes.
         """
 
-        # fixme: add a paramer for this as if we are attacking a regressor
-        #  we shoudn't do this.
+        # we should add a control here. convert_binary_labels should not be
+        #  called when y is continuous (regression problems)
         yc = convert_binary_labels(yc)
 
         xc0 = xc.deepcopy()
@@ -126,16 +161,10 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         fd_params = self.classifier.grad_f_params(xk)
         grad_loss_params = fd_params.dot(grad_loss_fk)
 
-        # import time
-        # start = time.time()
-
         # gt is the gradient in feature space
         gt = self._compute_grad_inv(G, H, grad_loss_params)
         # gt = self._compute_grad_solve(G, H, grad_loss_params)
         # gt = self._compute_grad_solve_iterative(G, H, grad_loss_params) #*
-
-        # end = time.time()
-        # print "time: ", end - start
 
         # propagating gradient back to input space
         if clf.preprocess is not None:

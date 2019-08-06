@@ -2,7 +2,7 @@
 .. module:: CDatasetHeader
    :synopsis: Header with extra dataset attributes.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.core import CCreator

@@ -1,11 +1,8 @@
 """
 .. module:: COptimizerPGDLS
    :synopsis: Optimizer using Projected Gradient Descent with Bisect Line Search.
-   Differently from standard line searches, it explores a subset of
-   n_dimensions at a time. In this sense, it is an extension of the
-   classical line-search approach.
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from six.moves import range
@@ -19,9 +16,9 @@ from secml.optim.optimizers.line_search import CLineSearchBisect
 class COptimizerPGDLS(COptimizer):
     """Solves the following problem:
 
-        min  f(x)
-        s.t. d(x,x0) <= dmax
-             x_lb <= x <= x_ub
+    min  f(x)
+    s.t. d(x,x0) <= dmax
+        x_lb <= x <= x_ub
 
     f(x) is the objective function (either linear or nonlinear),
     d(x,x0) <= dmax is a distance constraint in feature space (l1 or l2),
@@ -32,6 +29,10 @@ class COptimizerPGDLS(COptimizer):
     (for l2-constrained problems). This solver also works for discrete
     problems, where x is integer valued. In this case, exploration works
     by manipulating one feature at a time.
+
+    Differently from standard line searches, it explores a subset of
+    `n_dimensions` at a time. In this sense, it is an extension of the
+    classical line-search approach.
 
     Attributes
     ----------

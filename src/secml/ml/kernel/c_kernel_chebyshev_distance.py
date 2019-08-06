@@ -1,9 +1,9 @@
 """
-.. module:: KernelChebyshevDistance
+.. module:: CKernelChebyshevDistance
    :synopsis: Chebyshev distances kernel
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 
 """
@@ -25,8 +25,11 @@ class CKernelChebyshevDistance(CKernel):
     Attributes
     ----------
     class_type : 'chebyshev-dist'
-    cache_size : int
-        Size of the cache used for kernel computation. Default 100.
+
+    Parameters
+    ----------
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     Examples
     --------
@@ -34,19 +37,20 @@ class CKernelChebyshevDistance(CKernel):
     >>> from secml.ml.kernel.c_kernel_chebyshev_distance import CKernelChebyshevDistance
 
     >>> print(CKernelChebyshevDistance().k(CArray([[1,2],[3,4]]), CArray([[5,6],[7,8]])))
-    CArray([[ 4.  6.]
-     [ 2.  4.]])
+    CArray([[4. 6.]
+     [2. 4.]])
 
     >>> print(CKernelChebyshevDistance().k(CArray([[1,2],[3,4]])))
-    CArray([[ 0.  2.]
-     [ 2.  0.]])
+    CArray([[0. 2.]
+     [2. 0.]])
 
     """
     __class_type = 'chebyshev-dist'
 
-    def __init__(self, gamma=1.0, cache_size=100):
-        # Calling CKernel constructor
-        super(CKernelChebyshevDistance, self).__init__(cache_size=cache_size)
+    def __init__(self, gamma=1.0, batch_size=None):
+
+        super(CKernelChebyshevDistance, self).__init__(batch_size=batch_size)
+
         # Using a float gamma to avoid dtype casting problems
         self.gamma = gamma
 
@@ -86,7 +90,7 @@ class CKernelChebyshevDistance(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.k` : Main computation interface for kernels.
+        :meth:`CKernel.k` : Main computation interface for kernels.
 
         """
         return CArray(metrics.pairwise.pairwise_distances(
@@ -114,7 +118,7 @@ class CKernelChebyshevDistance(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.gradient` : Gradient computation interface for kernels.
+        :meth:`CKernel.gradient` : Gradient computation interface for kernels.
 
         """
         u_carray = CArray(u)

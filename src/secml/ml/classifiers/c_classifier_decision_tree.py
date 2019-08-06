@@ -3,7 +3,7 @@
    :synopsis: Decision Tree classifier
 
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from sklearn import tree

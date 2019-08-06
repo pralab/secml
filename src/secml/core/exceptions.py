@@ -2,7 +2,7 @@
 .. module:: Exceptions
    :synopsis: Custom errors and warnings
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 
@@ -20,11 +20,11 @@ class NotFittedError(ValueError, AttributeError):
     >>> from secml.array import CArray
     >>> from secml.core.exceptions import NotFittedError
     >>> try:
-    ...     CClassifierSVM().predict(CArray([[1, 2]))
+    ...     CClassifierSVM().predict(CArray([[1, 2]]))
     ... except NotFittedError as e:
     ...     print(repr(e))
     ...                        # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
-    NotFittedError('train the `CClassifierSVM` first by calling `.fit()`')
+    NotFittedError('this `CClassifierSVM` is not trained. Call `.fit()` first.',)
 
     """
     pass

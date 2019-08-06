@@ -1,9 +1,9 @@
 """
 .. module:: CLossCrossEntropy
-   :synopsis: Cross Entropy Loss and SoftMax function
+   :synopsis: Cross Entropy Loss with SoftMax function
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from six.moves import range
@@ -17,12 +17,15 @@ class CLossCrossEntropy(CLossClassification):
     """Cross Entropy Loss Function (Log Loss).
 
     Cross entropy indicates the distance between what the model
-     believes the output distribution should be, and what the
-     original distribution really is.
+    believes the output distribution should be, and what the
+    original distribution really is.
 
     The cross entropy loss is defined as (for sample i):
 
-      L_\text{cross-entropy}(y, s) = - log(\frac{e^{s_i}}{\sum_{k=1}^N e^s_k})
+    .. math::
+
+       L_\\text{cross-entropy} (y, s) =
+                -\\log \\left( \\frac{e^{s_i}}{\\sum_{k=1}^N e^s_k} \\right)
 
     Attributes
     ----------
@@ -84,7 +87,7 @@ class CLossCrossEntropy(CLossClassification):
         pos_label : int or None, optional
             The class wrt compute the loss function.
             Default None, meaning that the function is computed
-             for each sample wrt the corresponding true label.
+            for each sample wrt the corresponding true label.
 
         Returns
         -------

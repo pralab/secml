@@ -2,7 +2,7 @@
 .. module:: CConstraintL2
    :synopsis: L2 Constraint
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from secml.optim.constraints import CConstraint

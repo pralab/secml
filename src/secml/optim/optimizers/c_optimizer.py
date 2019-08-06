@@ -2,8 +2,8 @@
 .. module:: COptimizer
    :synopsis: Interface for function optimization and minimization.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod
@@ -17,12 +17,12 @@ from secml.optim.constraints import CConstraint, CConstraintBox
 
 @six.add_metaclass(ABCMeta)
 class COptimizer(CCreator):
-    """
-    Class serving as interface to define optimization problems in the form:
+    """Interface for optimizers.
 
-    minimize f(x)
-    s.t. gi(x) <= 0, i=1,...,m  (inequality constraints)
-         hj(x) = 0, j = 1,..., n (equality constraints)
+    Implements:
+        minimize f(x)
+        s.t. gi(x) <= 0, i=1,...,m  (inequality constraints)
+            hj(x) = 0, j = 1,..., n (equality constraints)
 
     Parameters
     ----------
@@ -138,8 +138,9 @@ class COptimizer(CCreator):
 
     @abstractmethod
     def minimize(self, x_init, args=(), **kwargs):
-        """
-        Interface to minimizers:
+        """Interface for minimizers.
+
+        Implementing:
             min fun(x)
             s.t. constraint
 
@@ -156,8 +157,9 @@ class COptimizer(CCreator):
         raise NotImplementedError('Function `minimize` is not implemented.')
 
     def maximize(self, x_init, args=(), **kwargs):
-        """
-        Interface to maximizers:
+        """Interface for maximizers.
+
+        Implementing:
             max fun(x)
             s.t. constraint
 

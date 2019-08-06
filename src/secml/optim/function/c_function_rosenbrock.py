@@ -1,8 +1,8 @@
 """
-.. module:: RosenbrockFunction
+.. module:: CFunctionRosenbrock
    :synopsis: Rosenbrock function
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from six.moves import range
@@ -22,7 +22,7 @@ class CFunctionRosenbrock(CFunction):
     Given by:
     .. math::
 
-        f(x) = \sum^{n-1}_{i=1} [100 * {(x_{i+1} - x_i^2)}^2 + (x_i - 1)^2]
+       f(x) = \\sum^{n-1}_{i=1} [100 * {(x_{i+1} - x_i^2)}^2 + (x_i - 1)^2]
 
     Attributes
     ----------

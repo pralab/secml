@@ -2,9 +2,9 @@
 .. module:: CAttackEvasionPGDLS
    :synopsis: Evasion attack using Projected Gradient Descent with Bisect Line Search.
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from six.moves import range
@@ -20,26 +20,57 @@ from secml.ml.classifiers.reject import CClassifierReject
 
 
 class CAttackEvasionPGDLS(CAttackEvasion):
-    """Evasion attacks using Projected Gradient Descent with Bisect Line Search.
+    """Evasion attacks using Projected Gradient Descent with Line Search.
 
-    It requires classifier, surrogate_classifier, and surrogate_data.
-    Note that surrogate_classifier is assumed to be trained (before
-    passing it to this class) on surrogate_data.
+    This class implements the maximum-confidence evasion attacks proposed in:
+     - https://arxiv.org/abs/1708.06939, ICCV W. ViPAR, 2017.
+
+    This is the multi-class extension of our original work in:
+     - https://arxiv.org/abs/1708.06131, ECML 2013,
+
+    implemented using a custom projected gradient solver that uses line search
+    in each iteration to save gradient computations and speed up the attack.
+
+    It can also be used on sparse, high-dimensional feature spaces, using an
+    L1 constraint on the manipulation of samples to preserve sparsity,
+    as we did for crafting adversarial Android malware in:
+     - https://arxiv.org/abs/1704.08996, IEEE TDSC 2017.
+
+    For more on evasion attacks, see also:
+     - https://arxiv.org/abs/1809.02861, USENIX Sec. 2019
+     - https://arxiv.org/abs/1712.03141, Patt. Rec. 2018
 
     Parameters
     ----------
+    classifier : CClassifier
+        Target classifier.
+    surrogate_classifier : CClassifier
+        Surrogate classifier, assumed to be already trained.
+    surrogate_data : CDataset or None, optional
+        Dataset on which the the surrogate classifier has been trained on.
+        Is only required if the classifier is nonlinear.
+    distance : {'l1' or 'l2'}, optional
+        Norm to use for computing the distance of the adversarial example
+        from the original sample. Default 'l2'.
+    dmax : scalar, optional
+        Maximum value of the perturbation. Default 1.
+    lb, ub : int or CArray, optional
+        Lower/Upper bounds. If int, the same bound will be applied to all
+        the features. If CArray, a different bound can be specified for each
+        feature. Default `lb = 0`, `ub = 1`.
     discrete: True/False (default: false).
         If True, input space is considered discrete (integer-valued),
         otherwise continuous.
-    attack_classes : 'all' or CArray, optional
-        List of classes that can be manipulated by the attacker or
-         'all' (default) if all classes can be manipulated.
     y_target : int or None, optional
-        If None an indiscriminate attack will be performed, else a
-        targeted attack to have the samples misclassified as
-        belonging to the y_target class.
-
-    TODO: complete list of parameters
+        If None an error-generic attack will be performed, else a
+        error-specific attack to have the samples misclassified as
+        belonging to the `y_target` class.
+    attack_classes : 'all' or CArray, optional
+        Array with the classes that can be manipulated by the attacker or
+         'all' (default) if all classes can be manipulated.
+    solver_params : dict or None, optional
+        Parameters for the solver. Default None, meaning that default
+        parameters will be used.
 
     Attributes
     ----------
@@ -150,18 +181,18 @@ class CAttackEvasionPGDLS(CAttackEvasion):
         return k, c
 
     def _objective_function(self, x):
-        """
-        Compute the objective function of the evasion attack.
+        """Compute the objective function of the evasion attack.
+
         The objective function is:
 
-        - for indiscriminate evasion:
+        - for error-generic attack:
             min f_obj(x) = f_{k|o (if the sample is rejected) }(x)
             argmax_{(c != k) and (c != o)} f_c(x),
             where k is the true class, o is the reject class and c is the
             competing class, which is the class with the maximum score, and
             can be neither k nor c
 
-        -for targeted evasion:
+        -for error-specific attack:
             min -f_obj(x) =  -f_k(x) + argmax_{c != k} f_c(x),
             where k is the target class and c is the competing class,
             which is the class with the maximum score except for the
@@ -169,11 +200,13 @@ class CAttackEvasionPGDLS(CAttackEvasion):
 
         Parameters
         ----------
-        x: CArray containing the data points (one or more than one)
+        x : CArray
+            Array containing the data points (one or more than one).
 
         Returns
         -------
-        f_obj: values of objective function at x
+        f_obj : CArray
+            Values of objective function at x.
 
         """
         # Make classification in the sparse domain if possible
@@ -191,7 +224,6 @@ class CAttackEvasionPGDLS(CAttackEvasion):
         Given the predicted labels and the scores, compute the objective
         function. (This function allows to use already computed prediction
         labels and scores)
-
         """
         n_samples = y_pred.size
 
@@ -227,7 +259,6 @@ class CAttackEvasionPGDLS(CAttackEvasion):
 
     def _init_solver(self):
         """Create solver instance."""
-
         if self._solver_clf is None or self.distance is None \
                 or self.discrete is None:
             raise ValueError('Solver not set properly!')

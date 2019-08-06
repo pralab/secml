@@ -1,11 +1,10 @@
 """
 .. module:: CAttackEvasion
-   :synopsis: Class performs evasion attacks against a classifier,
-                under different constraints.
+   :synopsis: Interface for evasion attacks
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod
@@ -19,20 +18,21 @@ from secml.data import CDataset
 
 @six.add_metaclass(ABCMeta)
 class CAttackEvasion(CAttack):
-    """Class that implements evasion attacks.
-
-    It requires classifier, surrogate_classifier, and surrogate_data.
-    Note that surrogate_classifier is assumed to be trained (before
-    passing it to this class) on surrogate_data.
+    """Interface for Evasion attacks.
 
     Parameters
     ----------
+    classifier : CClassifier
+        Target classifier.
+    surrogate_classifier : CClassifier
+        Surrogate classifier, assumed to be already trained.
+    surrogate_data : CDataset or None, optional
+        Dataset on which the the surrogate classifier has been trained on.
+        Is only required if the classifier is nonlinear.
     y_target : int or None, optional
-            If None an indiscriminate attack will be performed, else a
-            targeted attack to have the samples misclassified as
-            belonging to the y_target class.
-
-    TODO: complete list of parameters
+            If None an error-generic attack will be performed, else a
+            error-specific attack to have the samples misclassified as
+            belonging to the `y_target` class.
 
     """
     __super__ = 'CAttackEvasion'
@@ -140,11 +140,16 @@ class CAttackEvasion(CAttack):
 
     @abstractmethod
     def _run(self, x0, y0, x_init=None):
-        """
-        Move one single point for improve attacker objective function score
-        :param x:
-        :param y:
-        :param x_init:
-        :return:
+        """Perform evasion on a single pattern.
+
+        Parameters
+        ----------
+        x0 : CArray
+            Initial sample.
+        y0 : int or CArray
+            The true label of x0.
+        x_init : CArray or None, optional
+            Initialization point. If None, it is set to x0.
+
         """
         raise NotImplementedError

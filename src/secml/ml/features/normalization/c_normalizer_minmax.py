@@ -2,7 +2,7 @@
 .. module:: CNormalizerMinMax
    :synopsis: Scales input array features to a given range.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml.array import CArray
@@ -56,9 +56,9 @@ class CNormalizerMinMax(CNormalizerLinear):
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
     >>> print(CNormalizerMinMax().fit_transform(array))
-    CArray([[ 0.5       0.        1.      ]
-     [ 1.        0.5       0.333333]
-     [ 0.        1.        0.      ]])
+    CArray([[0.5      0.       1.      ]
+     [1.       0.5      0.333333]
+     [0.       1.       0.      ]])
 
     >>> print(CNormalizerMinMax(feature_range=(-1,1)).fit_transform(array))
     CArray([[ 0.       -1.        1.      ]
@@ -179,7 +179,7 @@ class CNormalizerMinMax(CNormalizerLinear):
         >>> print(normalizer.min)
         CArray([ 0. -1. -1.])
         >>> print(normalizer.max)
-        CArray([ 2.  1.  2.])
+        CArray([2. 1. 2.])
 
         """
         self._data_min = x.min(axis=0, keepdims=False)

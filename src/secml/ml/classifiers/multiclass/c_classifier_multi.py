@@ -2,7 +2,7 @@
 .. module:: CClassifierMulticlass
    :synopsis: Interface for multiclass classifiers
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod
@@ -127,9 +127,9 @@ class CClassifierMulticlass(CClassifier):
         """Creates num_classes copies of the binary classifier.
 
         Creates enough deepcopies of the binary classifier until
-         `num_classes` binary classifiers are instanced.
+        `num_classes` binary classifiers are instanced.
         If `num_classes < self.num_classifiers`,
-         classifiers in excess are deleted.
+        classifiers in excess are deleted.
 
         Parameters
         ----------
@@ -170,8 +170,8 @@ class CClassifierMulticlass(CClassifier):
             Dataset to be used for evaluating parameters.
         parameters : dict
             Dictionary with each entry as {parameter: list of values to test}.
-            Example: {'C': [1, 10, 100],
-                      'gamma': list(10.0 ** CArray.arange(-4, 4))}
+            Example:
+            `{'C': [1, 10, 100], 'gamma': list(10.0 ** CArray.arange(-4, 4))}`
         splitter : CDataSplitter or str
             Object to use for splitting the dataset into train and validation.
             A splitter type can be passed as string, in this case all

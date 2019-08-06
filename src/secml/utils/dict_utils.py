@@ -2,7 +2,7 @@
 .. module:: DictionaryUtils
    :synopsis: Collection of mixed utilities for Dictionaries
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 try:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
@@ -41,10 +41,10 @@ def load_dict(file_path, values_dtype=str, encoding='ascii'):
     with open(file_path, mode='rt', encoding=encoding) as df:
         for key_line in df:
             # a line is 'key: value'
-            key_line_splitted = key_line.split(':')
+            key_line_split = key_line.split(':')
             try:
                 # Removing any space from key value before setting
-                new_dict[key_line_splitted[0]] = values_dtype(key_line_splitted[1].strip())
+                new_dict[key_line_split[0]] = values_dtype(key_line_split[1].strip())
             except IndexError:
                 raise ValueError("line '{:}' is not valid.".format(key_line))
     return new_dict
@@ -68,7 +68,7 @@ def merge_dicts(*dicts):
     >>> d2 = {'attr3': 300, 'attr1': 999}  # Redefining `attr1`
 
     >>> merge_dicts(d1, d2)  # Value of `attr1` will be set according to `d2` dictionary
-    {'attr2': 200, 'attr3': 300, 'attr1': 999}
+    {'attr3': 300, 'attr2': 200, 'attr1': 999}
 
     """
     result = {}
@@ -114,7 +114,7 @@ def invert_dict(d):
             if v in new_d:
                 # If the key has already been set create a list for the values
                 i = tolist(i)
-                i += tolist(new_d[v])
+                i = tolist(new_d[v]) + i
             new_d[v] = i
     return new_d
 

@@ -2,8 +2,8 @@
 .. module:: PickleWrapper
    :synopsis: Wrapper for cPickle object saving package
 
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from six.moves import cPickle
@@ -19,7 +19,7 @@ def save(file_path, obj):
     """Save object to file using cPickle.
 
     This functions stores a generic python object into
-    a compressed gzip file (*.gz).
+    a compressed gzip file (`*.gz`).
 
     Saved objects can be loaded using `.load`.
 

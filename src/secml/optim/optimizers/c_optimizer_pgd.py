@@ -2,8 +2,8 @@
 .. module:: COptimizerPGD
    :synopsis: Optimizer using Projected Gradient Descent
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from six.moves import range
@@ -15,9 +15,9 @@ from secml.optim.optimizers import COptimizer
 class COptimizerPGD(COptimizer):
     """Solves the following problem:
 
-        min  f(x)
-        s.t. d(x,x0) <= dmax
-             x_lb <= x <= x_ub
+    min  f(x)
+    s.t. d(x,x0) <= dmax
+         x_lb <= x <= x_ub
 
     f(x) is the objective function (either linear or nonlinear),
     d(x,x0) <= dmax is a distance constraint in feature space (l1 or l2),
@@ -86,13 +86,14 @@ class COptimizerPGD(COptimizer):
     #############################################
 
     def minimize(self, x_init, args=(), **kwargs):
-        """
-        Interface to minimizers implementing
+        """Interface to minimizers.
+
+        Implements:
             min fun(x)
             s.t. constraint
 
-        Parameters:
-        ------
+        Parameters
+        ----------
         x_init : CArray
             The initial input point.
         args : tuple, optional

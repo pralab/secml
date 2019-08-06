@@ -1,8 +1,9 @@
 """
-.. module:: CAttackPoisoning
-   :synopsis: TODO
+.. module:: CAttackPoisoningSVM
+   :synopsis: Poisoning attacks against Support Vector Machine
 
-    @author: Battista Biggio
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from secml.adv.attacks.poisoning import CAttackPoisoning
@@ -10,6 +11,68 @@ from secml.array import CArray
 
 
 class CAttackPoisoningSVM(CAttackPoisoning):
+    """Poisoning attacks against Support Vector Machines (SVMs).
+
+    This is an implementation of the attack in https://arxiv.org/pdf/1206.6389:
+     - B. Biggio, B. Nelson, and P. Laskov. Poisoning attacks against
+       support vector machines. In J. Langford and J. Pineau, editors,
+       29th Int'l Conf. on Machine Learning, pages 1807-1814. Omnipress, 2012.
+
+    where the gradient is computed as described in Eq. (10) in
+    https://www.usenix.org/conference/usenixsecurity19/presentation/demontis:
+     - A. Demontis, M. Melis, M. Pintor, M. Jagielski, B. Biggio, A. Oprea,
+       C. Nita-Rotaru, and F. Roli. Why do adversarial attacks transfer?
+       Explaining transferability of evasion and poisoning attacks.
+       In 28th USENIX Security Symposium. USENIX Association, 2019.
+
+    For more details on poisoning attacks, see also:
+     - https://arxiv.org/abs/1804.00308, IEEE Symp. SP 2018
+     - https://arxiv.org/abs/1712.03141, Patt. Rec. 2018
+     - https://arxiv.org/abs/1708.08689, AISec 2017
+     - https://arxiv.org/abs/1804.07933, ICML 2015
+
+
+    Parameters
+    ----------
+    classifier : CClassifierSVM
+        Target classifier. If linear, requires `store_dual_vars = True`.
+    training_data : CDataset
+        Dataset on which the the classifier has been trained on.
+    surrogate_classifier : CClassifier
+        Surrogate classifier, assumed to be already trained.
+    val : CDataset
+        Validation set.
+    surrogate_data : CDataset or None, optional
+        Dataset on which the the surrogate classifier has been trained on.
+        Is only required if the classifier is nonlinear.
+    distance : {'l1' or 'l2'}, optional
+        Norm to use for computing the distance of the adversarial example
+        from the original sample. Default 'l2'.
+    dmax : scalar, optional
+        Maximum value of the perturbation. Default 1.
+    lb, ub : int or CArray, optional
+        Lower/Upper bounds. If int, the same bound will be applied to all
+        the features. If CArray, a different bound can be specified for each
+        feature. Default `lb = 0`, `ub = 1`.
+    y_target : int or None, optional
+        If None an error-generic attack will be performed, else a
+        error-specific attack to have the samples misclassified as
+        belonging to the `y_target` class.
+    attack_classes : 'all' or CArray, optional
+        Array with the classes that can be manipulated by the attacker or
+         'all' (default) if all classes can be manipulated.
+    solver_type : str or None, optional
+        Identifier of the solver to be used. Default 'pgd-ls'.
+    solver_params : dict or None, optional
+        Parameters for the solver. Default None, meaning that default
+        parameters will be used.
+    init_type : {'random', 'loss_based'}, optional
+        Strategy used to chose the initial random samples. Default 'random'.
+    random_seed : int or None, optional
+        If int, random_state is the seed used by the random number generator.
+        If None, no fixed seed will be set.
+
+    """
     __class_type = 'p-svm'
 
     def __init__(self, classifier,
@@ -28,24 +91,6 @@ class CAttackPoisoningSVM(CAttackPoisoning):
                  solver_params=None,
                  init_type='random',
                  random_seed=None):
-        """
-        Initialization method.
-
-        It requires classifier, surrogate_classifier, and surrogate_data.
-        Note that surrogate_classifier is assumed to be trained (before
-        passing it to this class) on surrogate_data.
-
-        TODO: complete list of parameters
-
-        Parameters
-        ------
-        discrete: True/False (default: false).
-                  If True, input space is considered discrete (integer-valued),
-                  otherwise continuous.
-        attack_classes: list of classes that can be manipulated by the attacker
-                 -1 means all classes can be manipulated.
-
-        """
 
         CAttackPoisoning.__init__(self, classifier=classifier,
                                   training_data=training_data,
@@ -136,10 +181,9 @@ class CAttackPoisoningSVM(CAttackPoisoning):
             raise TypeError("xc is not a single sample!")
 
         self._xc[idx, :] = xc
-        # FIXME: UNUSED OUTPUT
-        svm, tr = self._update_poisoned_clf()
+        self._update_poisoned_clf()
 
-        # FIXME: PARAMETER CLF UNFILLED
+        # PARAMETER CLF UNFILLED
         return self._alpha_c()
 
     ###########################################################################
@@ -169,14 +213,10 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         dKkc = alpha_c * clf.kernel.gradient(xk, xc)
         return dKkc.T  # d * k
 
-    # FIXME: SIGNATURE DOES NOT MATCH WITH PARENT
-    def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr):
+    def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr, k=None):
         """
         Derivative of the classifier's discriminant function f(xk)
         computed on a set of points xk w.r.t. a single poisoning point xc
-
-        This is a classifier-specific implementation, so we delegate its
-        implementation to inherited classes.
         """
 
         svm = clf  # classifier is an SVM
@@ -216,7 +256,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # derivative of the loss computed on a validation set w.r.t. the
         # classifier params
         fd_params = svm.grad_f_params(xk)
-        #grad_loss_params = fd_params.dot(-grad_loss_fk)
+        # grad_loss_params = fd_params.dot(-grad_loss_fk)
         grad_loss_params = fd_params.dot(grad_loss_fk)
 
         H = clf.hessian_tr_params()
@@ -241,8 +281,8 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # solve with standard linear solver
         # v = - self._compute_grad_solve(G, H, grad_loss_params, sym_pos=False)
 
-        # solve using inverse/pseudoinverse of H
-        #v = - self._compute_grad_inv(G, H, grad_loss_params)
+        # solve using inverse/pseudo-inverse of H
+        # v = - self._compute_grad_inv(G, H, grad_loss_params)
         v = self._compute_grad_inv(G, H, grad_loss_params)
 
         gt += v

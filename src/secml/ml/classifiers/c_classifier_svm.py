@@ -2,8 +2,8 @@
 .. module:: CClassifierSVM
    :synopsis: Support Vector Machine (SVM) classifier
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from sklearn.svm import SVC
@@ -53,8 +53,8 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
 
     See Also
     --------
-    .CKernel : Pairwise kernels and metrics.
-    .CClassifierLinear : Common interface for linear classifiers.
+    CKernel : Pairwise kernels and metrics.
+    CClassifierLinear : Common interface for linear classifiers.
 
     """
     __class_type = 'svm'

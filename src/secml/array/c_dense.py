@@ -1,10 +1,8 @@
 """
-.. module:: DenseArray
-   :synopsis: Class for wrapping numpy.ndarray (ndarray subclassing)
+.. module:: CDense
+   :synopsis: Wrapper of `numpy.ndarray`
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from __future__ import print_function, division
@@ -1021,17 +1019,17 @@ class CDense(_CArrayInterface):
             Read the elements of a using this index order, and place
             the elements into the reshaped array using this index order.
             'C' means to read / write the elements using C-like index order,
-             with the last axis index changing fastest, back to the first axis
-             index changing slowest.
+            with the last axis index changing fastest, back to the first axis
+            index changing slowest.
             'F' means to read / write the elements using Fortran-like
-             index order, with the first index changing fastest,
-             and the last index changing slowest.
+            index order, with the first index changing fastest,
+            and the last index changing slowest.
             Note that the 'C' and 'F' options take no account of the
-             memory layout of the underlying array, and only refer to
-             the order of indexing.
+            memory layout of the underlying array, and only refer to
+            the order of indexing.
             'A' means to read / write the elements in Fortran-like
-             index order if a is Fortran contiguous in memory,
-             C-like order otherwise.
+            index order if a is Fortran contiguous in memory,
+            C-like order otherwise.
 
         """
         return self.__class__(self.tondarray().reshape(newshape, order=order))
@@ -1787,7 +1785,7 @@ class CDense(_CArrayInterface):
         >>> from secml.array.c_dense import CDense
         >>> array = CDense.zeros(2)
         >>> print(array)
-        [ 0.  0.]
+        [0. 0.]
         >>> print(array.shape)
         (2,)
 
@@ -1820,7 +1818,7 @@ class CDense(_CArrayInterface):
         >>> from secml.array.c_dense import CDense
         >>> array = CDense.ones(2)
         >>> print(array)
-        [ 1.  1.]
+        [1. 1.]
         >>> print(array.shape)
         (2,)
 
@@ -1856,8 +1854,8 @@ class CDense(_CArrayInterface):
         >>> from secml.array.c_dense import CDense
         >>> array = CDense.eye(2)
         >>> print(array)
-        [[ 1.  0.]
-         [ 0.  1.]]
+        [[1. 0.]
+         [0. 1.]]
         >>> print(array.shape)
         (2, 2)
 

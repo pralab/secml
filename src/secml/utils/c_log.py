@@ -2,8 +2,7 @@
 .. module:: Logger
    :synopsis: Log and store code informations on disk.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Davide Maiorca <davide.maiorca@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from __future__ import print_function
@@ -323,9 +322,7 @@ class CLog(object):
         ...     print("Hello world!")
 
         >>> abc()  # doctest: +ELLIPSIS
-        2... - root - DEBUG - Entering timed block `abc`...
         Hello world!
-        2... - root - DEBUG - Elapsed time: ... ms
 
         """
         return CTimer.timed(log=self, msg=msg)

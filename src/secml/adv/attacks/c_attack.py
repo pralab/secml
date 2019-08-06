@@ -2,8 +2,8 @@
 .. module:: CAttack
    :synopsis: Interface class for evasion and poisoning attacks.
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod
@@ -22,22 +22,39 @@ from secml.data import CDataset
 class CAttack(CCreator):
     """Interface class for evasion and poisoning attacks.
 
-    It requires classifier, surrogate_classifier,
-    and surrogate_data (if surrogate classifier is nonlinear).
-
-    The surrogate classifier must be differentiable
-    and already trained on surrogate data.
-
-    TODO: complete list of parameters
-
     Parameters
-    ------
+    ----------
+    classifier : CClassifier
+        Target classifier.
+    surrogate_classifier : CClassifier
+        Surrogate classifier, assumed to be already trained.
+    surrogate_data : CDataset or None, optional
+        Dataset on which the the surrogate classifier has been trained on.
+        Is only required if the classifier is nonlinear.
+    distance : {'l1' or 'l2'}, optional
+        Norm to use for computing the distance of the adversarial example
+        from the original sample. Default 'l2'.
+    dmax : scalar, optional
+        Maximum value of the perturbation. Default 1.
+    lb, ub : int or CArray, optional
+        Lower/Upper bounds. If int, the same bound will be applied to all
+        the features. If CArray, a different bound can be specified for each
+        feature. Default `lb = 0`, `ub = 1`.
     discrete: True/False (default: false).
-              If True, input space is considered discrete (integer-valued),
-              otherwise continuous.
+        If True, input space is considered discrete (integer-valued),
+        otherwise continuous.
+    y_target : int or None, optional
+        If None an error-generic attack will be performed, else a
+        error-specific attack to have the samples misclassified as
+        belonging to the `y_target` class.
     attack_classes : 'all' or CArray, optional
-        List of classes that can be manipulated by the attacker or
+        Array with the classes that can be manipulated by the attacker or
          'all' (default) if all classes can be manipulated.
+    solver_type : str or None, optional
+        Identifier of the solver to be used.
+    solver_params : dict or None, optional
+        Parameters for the solver. Default None, meaning that default
+        parameters will be used.
 
     """
     __super__ = 'CAttack'
@@ -332,22 +349,31 @@ class CAttack(CCreator):
 
     @abstractmethod
     def run(self, x, y, ds_init=None):
-        """
-        Perform attack for the i-th param name attack power
-        :param x:
-        :param y:
-        :param ds_init:
-        :return:
+        """Perform attack for the i-th param name attack power.
+
+        Parameters
+        ----------
+        x : CArray
+            Initial sample.
+        y : int or CArray
+            The true label of x.
+        ds_init : CDataset or None, optional.
+            Dataset for warm start.
+
         """
         raise NotImplementedError
 
     @abstractmethod
     def _run(self, x, y):
-        """
-        Move one single point for improve attacker objective function score
-        :param x:
-        :param y:
-        :return:
+        """Move one single point for improve attacker objective function score.
+
+        Parameters
+        ----------
+        x : CArray
+            Sample.
+        y : int or CArray
+            The true label of x.
+
         """
         raise NotImplementedError
 
@@ -399,9 +425,7 @@ class CAttack(CCreator):
         self._surrogate_scores = None
 
     def _solution_from_solver(self):
-        """
-        Retrieve solution from solver and set internal class parameters.
-        """
+        """Retrieve solution from solver and set internal class parameters."""
         # retrieve sequence of evasion points, and final point
         self._x_seq = self._solver.x_seq
         self._x_opt = self._solver.x_opt

@@ -1,9 +1,9 @@
 """
-.. module:: KernelLinear
+.. module:: CKernelLinear
    :synopsis: Linear kernel
 
-.. moduleauthor:: Battista Biggio <battista.biggio@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from sklearn import metrics
@@ -24,8 +24,11 @@ class CKernelLinear(CKernel):
     Attributes
     ----------
     class_type : 'linear'
-    cache_size : int
-        Size of the cache used for kernel computation. Default 100.
+
+    Parameters
+    ----------
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     Examples
     --------
@@ -33,12 +36,12 @@ class CKernelLinear(CKernel):
     >>> from secml.ml.kernel.c_kernel_linear import CKernelLinear
 
     >>> print(CKernelLinear().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
-    CArray([[  50.  110.]
-     [ 110.  250.]])
+    CArray([[ 50. 110.]
+     [110. 250.]])
 
     >>> print(CKernelLinear().k(CArray([[1,2],[3,4]])))
-    CArray([[  5.  11.]
-     [ 11.  25.]])
+    CArray([[ 5. 11.]
+     [11. 25.]])
 
     """
     __class_type = 'linear'
@@ -60,7 +63,7 @@ class CKernelLinear(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.k` : Main computation interface for kernels.
+        :meth:`CKernel.k` : Main computation interface for kernels.
 
         """
         return CArray(metrics.pairwise.linear_kernel(
@@ -89,7 +92,7 @@ class CKernelLinear(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.gradient` : Gradient computation interface for kernels.
+        :meth:`CKernel.gradient` : Gradient computation interface for kernels.
 
         Examples
         --------

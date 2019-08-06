@@ -2,7 +2,7 @@
 .. module:: PerformanceEvaluationXValMulticlass
    :synopsis: Best parameters estimation with Cross-Validation for multiclass
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from six.moves import range

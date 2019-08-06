@@ -1,9 +1,9 @@
 """
-.. module:: KernelHamming
+.. module:: CKernelHamming
    :synopsis: Hamming distances kernel
 
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from sklearn import metrics
@@ -18,7 +18,11 @@ class CKernelHamming(CKernel):
     Attributes
     ----------
     class_type : 'hamming'
-    cache_size : int, size of the cache used for kernel computation. Default 100.
+
+    Parameters
+    ----------
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     Examples
     --------
@@ -26,19 +30,15 @@ class CKernelHamming(CKernel):
     >>> from secml.ml.kernel.c_kernel_hamming import CKernelHamming
 
     >>> print(CKernelHamming().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
-    CArray([[ 1.  1.]
-     [ 1.  1.]])
+    CArray([[1. 1.]
+     [1. 1.]])
 
     >>> print(CKernelHamming().k(CArray([[1,2],[3,4]])))
-    CArray([[ 0.  1.]
-     [ 1.  0.]])
+    CArray([[0. 1.]
+     [1. 0.]])
 
     """
     __class_type = 'hamming'
-
-    def __init__(self, cache_size=100):
-
-        super(CKernelHamming, self).__init__(cache_size=cache_size)
 
     def _k(self, x, y):
         """Compute the hamming distances kernel between x and y.

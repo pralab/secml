@@ -1,9 +1,9 @@
 """
 .. module:: CSecEval
-   :synopsis: Security evaluation for attack classes
+   :synopsis: Security evaluation of classifiers.
 
-.. moduleauthor:: Battista Biggio <davide.maiorca@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 import time
@@ -26,11 +26,13 @@ class CSecEval(CCreator):
     attack : CAttack
         Class that implements an attack (e.g evasion or poisoning)
     param_name : str
-        name of the parameter that represents the increasingly attacker power
-    param_values: CArray
-        array that contains values that param_name will assumes during the
-        attack (This define how the attacker power increases).
-        nb: If the first value is not zero, zero will be added as first value
+        Name of the parameter that represents the increasingly attacker power.
+    param_values : CArray
+        Array that contains values that `param_name` will assumes during the
+        attack (this define how the attacker power increases).
+        If the first value is not zero, zero will be added as first value
+    save_adv_ds : bool, optional
+        If True, the samples at each parameter will be stored. Default False.
 
     See Also
     --------
@@ -124,28 +126,10 @@ class CSecEval(CCreator):
 
         Parameters
         ----------
-        dataset: CDataset
-            dataset that contain samples that will be manipulated
+        dataset : CDataset
+            Dataset that contain samples that will be manipulated
             from the attacker while his attack power increase
-        random_seed: int or None
-            random seed for initial poisoning point sampling
 
-        Returns
-        ----------
-        scores: list of CArray
-            Contain one element for each attack power value.
-            Each element contain score assigned by the classifier to all the
-            dataset samples
-        Y_pred: list of CArray
-            Contain one element for each attack power value.
-            Each element contain label assigned to all the dataset
-            samples from the attack
-        adv_ds : list of CDataset
-            Contain one dataset for each different parameter value
-            the i-th dataset is modified with the i-th param_value attack power
-        time : CArray (n_patterns, num parameter values)
-            Each array row contain the times of the attack for one samples.
-            Each row element represent a different attack power
         """
         # store true labels within class
         self._sec_eval_data.Y = CArray(dataset.Y).deepcopy()

@@ -1,8 +1,8 @@
 """
-.. module:: KernelLaplacian
+.. module:: CKernelLaplacian
    :synopsis: Laplacian kernel
 
-.. moduleauthor:: Paolo Russu <paolo.russu@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 
 """
@@ -10,7 +10,6 @@ from sklearn import metrics
 
 from secml.array import CArray
 from secml.ml.kernel import CKernel
-import numpy as np
 
 
 class CKernelLaplacian(CKernel):
@@ -25,13 +24,13 @@ class CKernelLaplacian(CKernel):
     Attributes
     ----------
     class_type : 'laplacian'
-    cache_size : int
-        Size of the cache used for kernel computation. Default 100.
 
     Parameters
     ----------
     gamma : float
         Default is 1.0.
+    batch_size : int or None, optional
+        Size of the batch used for kernel computation. Default None.
 
     Examples
     --------
@@ -39,19 +38,20 @@ class CKernelLaplacian(CKernel):
     >>> from secml.ml.kernel.c_kernel_laplacian import CKernelLaplacian
 
     >>> print(CKernelLaplacian(gamma=0.01).k(CArray([[1,2],[3,4]]), CArray([[10,0],[0,40]])))
-    CArray([[ 0.895834  0.677057]
-     [ 0.895834  0.677057]])
+    CArray([[0.895834 0.677057]
+     [0.895834 0.677057]])
 
     >>> print(CKernelLaplacian().k(CArray([[1,2],[3,4]])))
-    CArray([[ 1.        0.018316]
-     [ 0.018316  1.      ]])
+    CArray([[1.       0.018316]
+     [0.018316 1.      ]])
 
     """
     __class_type = 'laplacian'
 
-    def __init__(self, gamma=1.0, cache_size=100):
-        # Calling CKernel constructor
-        super(CKernelLaplacian, self).__init__(cache_size=cache_size)
+    def __init__(self, gamma=1.0, batch_size=None):
+
+        super(CKernelLaplacian, self).__init__(batch_size=batch_size)
+
         # Using a float gamma to avoid dtype casting problems
         self.gamma = gamma
 
@@ -95,7 +95,7 @@ class CKernelLaplacian(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.k` : Main computation interface for kernels.
+        :meth:`CKernel.k` : Main computation interface for kernels.
 
         """
         return CArray(metrics.pairwise.laplacian_kernel(
@@ -134,7 +134,7 @@ class CKernelLaplacian(CKernel):
          [-0.005945  0.005945]])
 
         >>> print(CKernelLaplacian().gradient(vector, vector))
-        CArray([ 0.  0.])
+        CArray([0. 0.])
 
         """
         # Checking if second array is a vector
@@ -170,7 +170,7 @@ class CKernelLaplacian(CKernel):
 
         See Also
         --------
-        :meth:`.CKernel.gradient` : Gradient computation interface for kernels.
+        :meth:`CKernel.gradient` : Gradient computation interface for kernels.
 
         """
         if v.shape[0] > 1:

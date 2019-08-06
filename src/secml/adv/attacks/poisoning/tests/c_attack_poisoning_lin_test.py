@@ -2,7 +2,7 @@
 .. module:: CAttackPoisoningLinTest
    :synopsis: Debugging class for poisoning against linear classifiers
 
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
 from secml.core import CCreator

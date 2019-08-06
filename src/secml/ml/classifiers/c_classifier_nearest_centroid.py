@@ -2,9 +2,9 @@
 .. module:: CClassifierNearestCentroid
    :synopsis: Nearest Centroid Classifier
 
-.. moduleauthor:: Biggio Battista <battista.biggio@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Biggio Battista <battista.biggio@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from sklearn.neighbors import NearestCentroid

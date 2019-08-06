@@ -1,8 +1,8 @@
 """
-.. module:: MetricPrecision
+.. module:: CMetricPrecision
    :synopsis: Performance Metric: Precision
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 import sklearn.metrics as skm
