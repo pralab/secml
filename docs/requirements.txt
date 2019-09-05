@@ -1,4 +1,4 @@
-sphinx >= 2.1.2
+sphinx >= 2.1.2, < 3
 sphinx_rtd_theme
 m2r
 numpydoc
