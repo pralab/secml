@@ -81,6 +81,7 @@ package:docs:
   only:
     changes:
       - docs/**/*
+      - tutorials/**/*
       - src/secml/**/*
       - .gitlab-ci.yml
       - CHANGELOG.md
