@@ -220,7 +220,7 @@ test:install:py37:whl:
 
 release:
   stage: release
-  image: ${CI_REGISTRY}/pralab/docker-helper-images/alpine-curl:latest
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/alpine-release:latest
   before_script:
     - apk add unzip
     - echo $CI_PROJECT_ID
