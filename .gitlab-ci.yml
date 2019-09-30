@@ -106,6 +106,7 @@ package:docs:
 
 .test:
   stage: test
+  needs: ["package"]
   before_script:
     - echo $CI_PROJECT_DIR
     - python -V
