@@ -53,12 +53,12 @@ class CPreProcessTestCases(CUnitTest):
 
         # Reverting array (if available)
         try:
-            x_chain_revert = chain.revert(x_chain)
+            x_chain_revert = chain.inverse_transform(x_chain)
             self.logger.info("Reverted X (chain):\n{:}".format(x_chain_revert))
             self.logger.info("Original X:\n{:}".format(x))
             self.assert_array_almost_equal(x_chain_revert, x)
         except NotImplementedError:
-            self.logger.info("revert not available")
+            self.logger.info("inverse_transform not available")
 
         return x_chain
 
