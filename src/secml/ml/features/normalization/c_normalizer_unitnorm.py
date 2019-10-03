@@ -170,7 +170,7 @@ class CNormalizerUnitNorm(CNormalizer):
 
         return x
 
-    def _revert(self, x):
+    def _inverse_transform(self, x):
         """Undo the normalization of data according to training data.
 
         Parameters
@@ -188,9 +188,9 @@ class CNormalizerUnitNorm(CNormalizer):
 
         Notes
         -----
-        Due to machine precision errors array returned by revert() is not
-        guaranteed to have exactly the same values of original array. To
-        solve the problem just use round() function with an arbitrary
+        Due to machine precision errors array returned by inverse_trasnform()
+        is not guaranteed to have exactly the same values of original array.
+        To solve the problem just use round() function with an arbitrary
         number of decimals.
 
         Examples
@@ -201,7 +201,7 @@ class CNormalizerUnitNorm(CNormalizer):
 
         >>> normalizer = CNormalizerUnitNorm().fit(array)
         >>> array_normalized = normalizer.transform(array)
-        >>> print(normalizer.revert(array_normalized))  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(normalizer.inverse_transform(array_normalized))  # doctest: +NORMALIZE_WHITESPACE
         CArray(  (0, 0)	1.0
           (0, 1)	-1.0
           (0, 2)	2.0
@@ -213,8 +213,8 @@ class CNormalizerUnitNorm(CNormalizer):
         x = x.atleast_2d()
 
         if self.norm is None:  # special case of "check_is_fitted"
-            raise ValueError(
-                "call `.transform` at least one time before using `.revert`.")
+            raise ValueError("call `.transform` at least one time "
+                             "before using `.inverse_transform`.")
 
         if x.shape[0] != self.norm.size:
             raise ValueError("array to revert must have {:} patterns (rows)."

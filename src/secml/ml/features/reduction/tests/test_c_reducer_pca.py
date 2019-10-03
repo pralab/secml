@@ -39,7 +39,7 @@ class TestCPca(CPreProcessTestCases):
 
             self.assert_array_almost_equal(result, target)
 
-            original = pca.revert(result)
+            original = pca.inverse_transform(result)
 
             self.assert_array_almost_equal(original, array)
 
