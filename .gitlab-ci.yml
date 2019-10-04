@@ -13,33 +13,31 @@ stages:
   - triage
 
 
-.test-cache-py2: &test-cache-py2
-  cache:
+.test-cache:
+  cache: &test-cache
+    paths:
+      - "$CI_PROJECT_DIR/.cache/pip"
+      - "$CI_PROJECT_DIR/secml-data"
+
+.test-cache-py2:
+  cache: &test-cache-py2
     key: "test-cache-py2"
-    paths:
-      - "$CI_PROJECT_DIR/.cache/pip"
-      - "$CI_PROJECT_DIR/secml-data"
+    <<: *test-cache
 
-.test-cache-py35: &test-cache-py35
-  cache:
+.test-cache-py35:
+  cache: &test-cache-py35
     key: "test-cache-py35"
-    paths:
-      - "$CI_PROJECT_DIR/.cache/pip"
-      - "$CI_PROJECT_DIR/secml-data"
+    <<: *test-cache
 
-.test-cache-py36: &test-cache-py36
-  cache:
+.test-cache-py36:
+  cache: &test-cache-py36
     key: "test-cache-py36"
-    paths:
-      - "$CI_PROJECT_DIR/.cache/pip"
-      - "$CI_PROJECT_DIR/secml-data"
+    <<: *test-cache
 
-.test-cache-py37: &test-cache-py37
-  cache:
+.test-cache-py37:
+  cache: &test-cache-py37
     key: "test-cache-py37"
-    paths:
-      - "$CI_PROJECT_DIR/.cache/pip"
-      - "$CI_PROJECT_DIR/secml-data"
+    <<: *test-cache
 
 
 package:
@@ -126,35 +124,36 @@ test:py2:min:
   extends: .test
   image: python:2
   script: tox -e py2-min
-  <<: *test-cache-py2
+  cache: *test-cache-py2
 
 test:py35:latest:
   extends: .test
   image: python:3.5
   script: tox -e py35
-  <<: *test-cache-py35
+  cache: *test-cache-py35
 
 test:py35:min:
   extends: .test
   image: python:3.5
   script: tox -e py35-min
-  <<: *test-cache-py35
+  cache: *test-cache-py35
 
 test:py36:min:
   extends: .test
   image: python:3.6
   script: tox -e py36-min
-  <<: *test-cache-py36
+  cache: *test-cache-py36
 
 test:py37:min:
   extends: .test
   image: python:3.7
   script: tox -e py37-min
-  <<: *test-cache-py37
+  cache: *test-cache-py37
 
 
 .test:install:
   stage: test
+  needs: ["package"]
   before_script:
     - echo $CI_PROJECT_DIR
     - python -V
@@ -179,46 +178,78 @@ test:py37:min:
   except:
     - schedules
 
-#test:install:pypi:
-#  extends: .test:install
-#  script:
-#    - pip install secml
-
-#test:install:pypi-extras:
-#  extends: .test:install
-#  script:
-#    - pip install secml[pytorch]
-#  after_script:
-#    - python -c "import secml"
-#    - python -c "import secml.pytorch"
-
-test:install:py2:whl:
+.test:install:whl:
   extends: .test:install
+  script:
+    - DIST_WHL=$(find $CI_PROJECT_DIR/dist -iname \*.whl -exec basename {} \;)
+    - echo $DIST_WHL
+    - pip install ${CI_PROJECT_DIR}/dist/${DIST_WHL}
+
+.test:install:whl:extras:
+  extends: .test:install:whl
+  script:
+    - DIST_WHL=$(find $CI_PROJECT_DIR/dist -iname \*.whl -exec basename {} \;)
+    - echo $DIST_WHL
+    - pip install ${CI_PROJECT_DIR}/dist/${DIST_WHL}[pytorch]
+  after_script:
+    - python -c "import secml"
+    - python -c "from secml.ml.classifiers import CClassifierPyTorch"
+
+test:install:whl:py2:
+  extends: .test:install:whl
   image: python:2
-  script:
-    - pip install ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
-  <<: *test-cache-py2
+  cache:
+    <<: *test-cache-py2
+    policy: pull
 
-test:install:py35:whl:
-  extends: .test:install
+test:install:whl:py35:
+  extends: .test:install:whl
   image: python:3.5
-  script:
-    - pip install ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
-  <<: *test-cache-py35
+  cache:
+    <<: *test-cache-py35
+    policy: pull
 
-test:install:py36:whl:
-  extends: .test:install
+test:install:whl:py36:
+  extends: .test:install:whl
   image: python:3.6
-  script:
-    - pip install ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
-  <<: *test-cache-py36
+  cache:
+    <<: *test-cache-py36
+    policy: pull
 
-test:install:py37:whl:
-  extends: .test:install
+test:install:whl:py37:
+  extends: .test:install:whl
   image: python:3.7
-  script:
-    - pip install ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
-  <<: *test-cache-py37
+  cache:
+    <<: *test-cache-py37
+    policy: pull
+
+test:install:whl:extras:py2:
+  extends: .test:install:whl:extras
+  image: python:2
+  cache:
+    <<: *test-cache-py2
+    policy: pull
+
+test:install:whl:extras:py35:
+  extends: .test:install:whl:extras
+  image: python:3.5
+  cache:
+    <<: *test-cache-py35
+    policy: pull
+
+test:install:whl:extras:py36:
+  extends: .test:install:whl:extras
+  image: python:3.6
+  cache:
+    <<: *test-cache-py36
+    policy: pull
+
+test:install:whl:extras:py37:
+  extends: .test:install:whl:extras
+  image: python:3.7
+  cache:
+    <<: *test-cache-py37
+    policy: pull
 
 
 release:

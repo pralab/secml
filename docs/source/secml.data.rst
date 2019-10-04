@@ -23,9 +23,17 @@ CDataset
    :show-inheritance:
 
 CDatasetHeader
-------------------------------------
+--------------
 
 .. automodule:: secml.data.c_dataset_header
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+CDatasetPyTorch
+---------------
+
+.. automodule:: secml.data.c_dataset_pytorch
    :members:
    :undoc-members:
    :show-inheritance:

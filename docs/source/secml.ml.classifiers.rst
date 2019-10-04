@@ -85,6 +85,14 @@ CClassifierNearestCentroid
    :undoc-members:
    :show-inheritance:
 
+CClassifierPyTorch
+------------------
+
+.. automodule:: secml.ml.classifiers.c_classifier_pytorch
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 CClassifierRandomForest
 -----------------------
 

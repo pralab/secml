@@ -63,6 +63,14 @@ CDataLoaderMNIST
    :undoc-members:
    :show-inheritance:
 
+CDataLoaderPyTorch
+------------------
+
+.. automodule:: secml.data.loader.c_dataloader_pytorch
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 CDataLoaderSkLearn
 ------------------
 
