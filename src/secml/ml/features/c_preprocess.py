@@ -219,7 +219,7 @@ class CPreProcess(CCreator):
 
     _inverse_transform.__doc__ = inverse_transform.__doc__  # Same doc for the protected method
 
-    @deprecated("will be removed in a future version.")
+    @deprecated('0.9', extra="use `inverse_transform` instead.")
     def revert(self, x):
         return self.inverse_transform(x)
 

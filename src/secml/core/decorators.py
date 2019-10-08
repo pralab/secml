@@ -24,8 +24,10 @@ class deprecated(object):
 
     Parameters
     ----------
-    extra : str
-      Extra text to be added to the deprecation messages.
+    version : str
+        Version since which the function or class is deprecated.
+    extra : str, optional
+        Extra text to be added to the deprecation messages.
 
     Notes
     -----
@@ -34,8 +36,9 @@ class deprecated(object):
      - https://wiki.python.org/moin/PythonDecoratorLibrary
 
     """
-    def __init__(self, extra=''):
+    def __init__(self, version, extra=''):
         self.extra = extra
+        self.version = version
 
     def __call__(self, obj):
         """Call method.
@@ -53,7 +56,8 @@ class deprecated(object):
 
     def _decorate_class(self, cls):
         """Decorate class clf."""
-        msg = "class `%s` is deprecated" % cls.__name__
+        msg = "class `{:}` is deprecated since version {:}".format(
+            cls.__name__, self.version)
         if self.extra:
             msg += "; %s" % self.extra
 
@@ -76,7 +80,8 @@ class deprecated(object):
 
     def _decorate_fun(self, fun):
         """Decorate function fun."""
-        msg = "function `%s` is deprecated" % fun.__name__
+        msg = "function `{:}` is deprecated since version {:}".format(
+            fun.__name__, self.version)
         if self.extra:
             msg += "; %s" % self.extra
 
@@ -97,10 +102,12 @@ class deprecated(object):
 
     def _update_doc(self, olddoc):
         """Update the docstring of the class/function adding
-        'DEPRECATED' + the extra optional text."""
-        newdoc = "DEPRECATED"
+        'Deprecated since version XX' + the extra optional text."""
+        newdoc = ".. deprecated:: {:}".format(self.version)
         if self.extra:
-            newdoc = "%s: %s" % (newdoc, self.extra)
+            newdoc = "%s\n   %s" % (newdoc, self.extra)
         if olddoc:
             newdoc = "%s\n\n%s" % (newdoc, olddoc)
+        else:  # A docstring, even empty, is required for correct visualization
+            newdoc = "%s\n%s" % (newdoc, '""""""')
         return newdoc
