@@ -13,8 +13,11 @@ from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.gradients import CClassifierGradientLinearMixin
+from secml.core.decorators import deprecated
 
 
+@deprecated('0.9', "use `CClassifierSkLearn` with "
+                   "`sklearn.ensemble.BaggingClassifier` instead.")
 class CClassifierMCSLinear(CClassifierLinear, CClassifierGradientLinearMixin):
     """MCS averaging a set of LINEAR classifiers.
 
