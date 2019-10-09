@@ -9,7 +9,6 @@ stages:
   - package
   - test
   - release
-  - deploy
   - triage
 
 
@@ -118,7 +117,10 @@ package:docs:
       - setup.py
       - tox.ini
   except:
-    - schedules
+    refs:
+      - schedules
+    variables:
+      - $SKIP_TESTS
 
 test:py2:min:
   extends: .test
@@ -176,7 +178,10 @@ test:py37:min:
       - setup.py
       - tox.ini
   except:
-    - schedules
+    refs:
+      - schedules
+    variables:
+      - $SKIP_TESTS
 
 .test:install:whl:
   extends: .test:install
@@ -252,9 +257,15 @@ test:install:whl:extras:py37:
     policy: pull
 
 
-release:
+.release:
   stage: release
   image: ${CI_REGISTRY}/pralab/docker-helper-images/alpine-release:latest
+  only:
+    - tags
+  when: manual
+
+release:gitlab-releases:
+  extends: .release
   before_script:
     - apk add unzip
     - echo $CI_PROJECT_ID
@@ -271,29 +282,26 @@ release:
     paths:
       - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
       - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
+
+release:pypi:
+  extends: .release
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/python35-setuptools:latest
+  variables:
+    TWINE_REPOSITORY_URL: "https://upload.pypi.org/legacy/"
+    TWINE_USERNAME: __token__
+  script:
+    - twine upload $CI_PROJECT_DIR/dist/*
+
+release:pypi:dry:
+  extends: release:pypi
+  variables:
+    TWINE_REPOSITORY_URL: "https://test.pypi.org/legacy/"
+    TWINE_USERNAME: __token__
+  script:
+    - twine upload -p $TWINE_PASSWORD_TEST $CI_PROJECT_DIR/dist/*
   only:
     - tags
-
-
-#pages:
-#  stage: release
-#  script:
-#    - ls public
-#  dependencies:
-#    - package:docs
-#  artifacts:
-#    paths:
-#      - public
-#    expire_in: 1 hour
-#  only:
-#    - tags
-
-
-#deploy:
-#  stage: deploy
-#  when:manual
-#  script:
-#    - echo "DEPLOY"
+    - web
 
 
 .triage:
