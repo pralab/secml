@@ -14,7 +14,7 @@ else:
 
 from secml.data.loader import CDLRandom, CDataLoaderMNIST
 from secml.data.splitter import CTrainTestSplit
-from secml.ml.classifiers.c_classifier_pytorch import CClassifierPyTorch
+from secml.ml.classifiers import CClassifierPyTorch
 from secml.ml.features import CNormalizerMinMax
 from secml.ml.peval.metrics import CMetric
 
