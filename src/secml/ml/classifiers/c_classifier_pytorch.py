@@ -136,6 +136,8 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
 
         # hooks for getting intermediate outputs
         self._handlers = []
+        # will store intermediate outputs from the hooks
+        self._intermediate_outputs = None
 
     @property
     def loss(self):
@@ -203,17 +205,27 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
             raise TypeError("The input model must be an instance of `nn.Module`.")
 
     def _clean_hooks(self):
-        """Todo"""
+        """Removes previously defined hooks."""
         for handler in self._handlers:
             handler.remove()
 
     def _hook_forward(self, module_name, input, output):
-        """Todo"""
+        """Hooks the module's `forward` method so that it stores
+        the intermediate outputs as tensors."""
 
         self._intermediate_outputs[module_name] = output
 
     def hook_layer_output(self, layer_names=None):
-        """Todo"""
+        """
+        Creates handlers for the hooks that store the layer outputs.
+
+        Parameters
+        ----------
+        layer_names : list
+            List of layer names to hook. Cleans previously
+            defined hooks to prevent multiple hook creations.
+
+        """
 
         self._clean_hooks()
         self._handlers = []
@@ -473,13 +485,13 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
 
     def get_layer_output(self, x, layer_names=None):
         """Returns the output of the desired net layer as `CArray`.
-        todo
+
         Parameters
         ----------
         x : CArray
             Input data.
-        layer : str, list or None, optional
-            Name of the layer or list of layer names.
+        layer_names : str, list or None, optional
+            Name of the layer(s) to hook for getting the outputs.
             If None, the output of the last layer will be returned.
 
         Returns
@@ -516,14 +528,13 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
 
     def _get_layer_output(self, s, layer_names=None):
         """Returns the output of the desired net layer as `Torch.Tensor`.
-        todo
 
         Parameters
         ----------
         s : torch.Tensor
             Input tensor to forward propagate.
-        layer : str or None, optional
-            Name of the layer.
+        layer_names : list, str or None, optional
+            Name of the layer(s) to hook for getting the output.
             If None, the output of the last layer will be returned.
 
         Returns
