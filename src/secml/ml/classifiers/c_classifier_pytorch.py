@@ -181,10 +181,24 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
     @property
     def layers(self):
         """Returns the layers of the model, if possible. """
-        if isinstance(self._model, nn.Sequential) or isinstance(self._model, nn.Module):
-            return list(self._model._modules.keys())
+
+        def get_layers(net):
+            for name, layer in net._modules.items():
+                # If it is a sequential, don't return its name
+                # but recursively register all it's module children
+                if isinstance(layer, nn.Sequential):
+                    get_layers(layer)
+                else:
+                    # it's a non sequential. Register a hook
+                    yield name
+
+        if isinstance(self._model, nn.Module):
+            return get_layers(self._model)
         else:
-            raise TypeError("The input model must inherit from `nn.Module`.")
+            raise TypeError("The input model must be an instance of `nn.Module`.")
+
+    def hook_layer(self):
+        pass
 
     def n_jobs(self):
         """Returns the number of workers being used for loading

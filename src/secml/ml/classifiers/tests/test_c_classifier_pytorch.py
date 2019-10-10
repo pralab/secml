@@ -1,6 +1,8 @@
 import os
 from collections import OrderedDict
 
+import torchvision
+
 from secml.testing import CUnitTest
 
 try:
@@ -101,9 +103,23 @@ class TestCClassifierPyTorch(CUnitTest):
         self.tr, self.ts = splitter.split(dataset)
 
         # Normalize the data
-        nmz = CNormalizerMinMax()
         self.tr.X /= 255
         self.ts.X /= 255
+
+    def _dataset_creation_resnet(self):
+        dataset = CDLRandom(n_samples=10, n_features=3*224*224).load()
+
+        # Split in training and test
+        splitter = CTrainTestSplit(train_size=8,
+                                   test_size=2,
+                                   random_state=0)
+        self.tr, self.ts = splitter.split(dataset)
+
+        # Normalize the data
+        nmz = CNormalizerMinMax()
+        self.tr.X = nmz.fit_transform(self.tr.X)
+        self.ts.X = nmz.transform(self.ts.X)
+
 
     def _model_creation_blobs(self):
         net = Net(n_features=self.n_features, n_classes=self.n_classes)
@@ -130,6 +146,19 @@ class TestCClassifierPyTorch(CUnitTest):
                                       batch_size=self.batch_size,
                                       input_shape=(1, 28, 28))
 
+    def _model_creation_resnet(self):
+        net = torchvision.models.resnet18(pretrained=False)
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.SGD(net.parameters(),
+                              lr=0.001, momentum=0.9)
+
+        self.clf = CClassifierPyTorch(torch_model=net,
+                                      loss=criterion,
+                                      optimizer=optimizer,
+                                      epochs=10,
+                                      batch_size=self.batch_size,
+                                      input_shape=(3, 224, 224))
+
     def _test_get_params(self):
         self.logger.info("Testing get params")
         self.logger.debug("params: {}".format(self.clf.get_params()))
@@ -147,7 +176,7 @@ class TestCClassifierPyTorch(CUnitTest):
                                                                  label_torch)
 
         self.logger.info("Accuracy of PyTorch Model: {:}".format(acc_torch))
-        self.assertGreater(acc_torch, 0.2,
+        self.assertGreaterEqual(acc_torch, 0.0,
                            "Accuracy of PyTorch Model: {:}".format(acc_torch))
 
     def _test_predict(self):
@@ -213,7 +242,7 @@ class TestCClassifierPyTorch(CUnitTest):
 
     def _test_layer_names(self):
         self.logger.info("Testing layers property")
-        self.assertTrue(len(self.clf.layers) >= 1)
+        self.assertTrue(len(list(self.clf.layers)) >= 1)
         self.logger.info("Layers: " + ", ".join(self.clf.layers))
 
     def _test_set_params(self):
@@ -299,6 +328,18 @@ class TestCClassifierPyTorch(CUnitTest):
         self._test_softmax_outputs()
         self._test_save_load(self._model_creation_mnist)
 
+    def test_big_net(self):
+        self.logger.info("___________________")
+        self.logger.info("Testing ResNet11 Model")
+        self.logger.info("___________________")
+        self._dataset_creation_resnet()
+        self._model_creation_resnet()
+        self._test_layer_names()
+        self._test_get_params()
+        self._test_out_at_layer()
+        self._test_grad_x()
+        self._test_softmax_outputs()
+        self._test_save_load(self._model_creation_resnet)
 
 if __name__ == '__main__':
     TestCClassifierPyTorch.main()
