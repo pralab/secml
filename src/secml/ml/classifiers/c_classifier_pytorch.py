@@ -188,10 +188,10 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
                 # If it is a sequential, don't return its name
                 # but recursively register all it's module children
                 if isinstance(layer, nn.Sequential) or isinstance(layer, BasicBlock):
-                    yield from get_layers(layer)
+                    yield from [".".join([name, l]) for l in get_layers(layer)]
                 else:
                     # it's a non sequential.
-                    yield layer
+                    yield name
 
         if isinstance(self._model, nn.Module):
             return get_layers(self._model)
