@@ -6,6 +6,7 @@
 
 """
 from functools import reduce
+from collections import OrderedDict
 
 import torch
 from torch import nn
@@ -20,7 +21,18 @@ from secml.ml.classifiers.gradients import CClassifierGradientPyTorchMixin
 from secml.utils import SubLevelsDict, merge_dicts
 
 from secml.settings import SECML_PYTORCH_USE_CUDA
+
 use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
+
+
+def get_layers(net):
+    for name, layer in net._modules.items():
+        # If it is a sequential, don't return its name
+        # but recursively register all it's module children
+        if isinstance(layer, nn.Sequential) or isinstance(layer, BasicBlock):
+                yield from [(":".join([name, l]), m) for (l, m) in get_layers(layer)]
+        else:
+            yield (name, layer)
 
 
 class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
@@ -122,6 +134,9 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
             self._classes = CArray.arange(list(self._model.modules())[-1].out_features)
             self._n_features = reduce(lambda a, b: a * b, self._input_shape)
 
+        # hooks for getting intermediate outputs
+        self._handlers = []
+
     @property
     def loss(self):
         """Returns the loss function used by classifier."""
@@ -182,24 +197,33 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
     @property
     def layers(self):
         """Returns the layers of the model, if possible. """
-
-        def get_layers(net):
-            for name, layer in net._modules.items():
-                # If it is a sequential, don't return its name
-                # but recursively register all it's module children
-                if isinstance(layer, nn.Sequential) or isinstance(layer, BasicBlock):
-                    yield from [".".join([name, l]) for l in get_layers(layer)]
-                else:
-                    # it's a non sequential.
-                    yield name
-
         if isinstance(self._model, nn.Module):
             return get_layers(self._model)
         else:
             raise TypeError("The input model must be an instance of `nn.Module`.")
 
-    def hook_layer(self):
-        pass
+    def _clean_hooks(self):
+        """Todo"""
+        for handler in self._handlers:
+            handler.remove()
+
+    def _hook_forward(self, module_name, input, output):
+        """Todo"""
+
+        self._intermediate_outputs[module_name] = output
+
+    def hook_layer_output(self, layer_names=None):
+        """Todo"""
+
+        self._clean_hooks()
+        self._handlers = []
+        self._intermediate_outputs = {}
+
+        for name, layer in get_layers(self._model):
+            if name in layer_names:
+                self._handlers.append(layer.register_forward_hook(self._hook_forward))
+            else:
+                pass
 
     def n_jobs(self):
         """Returns the number of workers being used for loading
@@ -447,21 +471,22 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         scores = self._from_tensor(scores)
         return scores
 
-    def get_layer_output(self, x, layer=None):
-        """Returns the output of the desired net layer.
-
+    def get_layer_output(self, x, layer_names=None):
+        """Returns the output of the desired net layer as `CArray`.
+        todo
         Parameters
         ----------
         x : CArray
             Input data.
-        layer : str, int or None, optional
-            Name or index of the layer.
+        layer : str, list or None, optional
+            Name of the layer or list of layer names.
             If None, the output of the last layer will be returned.
 
         Returns
         -------
-        CArray
-            Output of the desired layer.
+        CArray or dict
+            Output of the desired layers, dictionary if more than one layer is
+            requested.
 
         """
         self._check_is_fitted()
@@ -475,13 +500,23 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         x = x.to(self._device)
 
         with torch.no_grad():
+            # handle single layer name passed
+            if isinstance(layer_names, str):
+                layer_names = [layer_names]
+
             # Get the model output at specific layer
-            out = self._get_layer_output(x, layer=layer)
+            out = self._get_layer_output(x, layer_names=layer_names)
 
-        return self._from_tensor(out)
+            if isinstance(out, dict):
+                out = {k: self._from_tensor(v.view(-1)) for (k, v) in out.items()}
+            else:
+                out = self._from_tensor(out)
 
-    def _get_layer_output(self, s, layer=None):
-        """Returns the output of the desired net layer.
+        return out
+
+    def _get_layer_output(self, s, layer_names=None):
+        """Returns the output of the desired net layer as `Torch.Tensor`.
+        todo
 
         Parameters
         ----------
@@ -500,35 +535,13 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         # Switch to evaluation mode
         self._model.eval()
 
-        if layer is None:  # Directly use the last layer
-            s = self._model(s)  # Forward pass
-
-        elif isinstance(self._model, nn.Sequential):
-            # Manual iterate the network and stop at desired layer
-            # Use _model to iterate over first level modules only
-            for m_k, m in self._model._modules.items():
-                s = m(s)  # Forward input trough module
-                if m_k == layer:
-                    # We found the desired layer
-                    break
-            else:
-                if layer is not None:
-                    raise ValueError(
-                        "No layer `{:}` found!".format(layer))
-
-        elif isinstance(self._model, nn.Module):
-            # FIXME: THIS DOES NOT WORK IF THE FORWARD METHOD
-            #   HAS ANY SPECIAL OPERATION INSIDE (LIKE DENSENET)
-            self.logger.warning("Getting layer output of `nn.Module` "
-                                "can only get the output at last layer. "
-                                "Please use a `nn.Sequential` model for "
-                                "getting the output at the desired layer.")
-            s = self._model(s)
+        if layer_names is None:  # Directly use the last layer
+            return self._model(s)  # Forward pass
 
         else:
-            raise TypeError("The model must inherit from `nn.Module`.")
-
-        return s
+            self.hook_layer_output(layer_names)
+            self._model(s)
+            return {layer_names[i]: v for i, (k, v) in enumerate(self._intermediate_outputs.items())}
 
     def save_checkpoint(self):
         pass

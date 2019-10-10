@@ -88,6 +88,8 @@ class CClassifierGradientPyTorchMixin(CClassifierGradientMixin):
         """
         if x.is_vector_like is False:
             raise ValueError("gradient can be computed on one sample only.")
+        if isinstance(layer, list):
+            raise ValueError("gradient can be computed on one layer at a time.")
 
         # Transform data if a preprocess is defined
         s, _ = next(iter(self._data_loader(x)))
@@ -99,43 +101,34 @@ class CClassifierGradientPyTorchMixin(CClassifierGradientMixin):
         s.requires_grad = True
 
         # Get the model output at specific layer
-        out = self._get_layer_output(s, layer=layer)
+        layer_outputs = self._get_layer_output(s, layer_names=layer)
 
-        # unsqueeze if net output does not take into account the batch size
-        if len(out.shape) < len(s.shape):
-            out = out.unsqueeze(0)
+        if isinstance(layer_outputs, dict):
+            for layer_name, out in layer_outputs.items():
 
-        if w is None:
-            if layer is not None:
-                raise ValueError(
-                    "grad can be implicitly created only for the last layer. "
-                    "`w` is needed when `layer` is not None.")
-            if y is None:  # if layer is None -> y is required
-                raise ValueError("The class label wrt compute the gradient "
-                                 "at the last layer is required.")
+                # unsqueeze if net output does not take into account the batch size
+                if len(out.shape) < len(s.shape):
+                    out = out.unsqueeze(0)
 
-            w_in = torch.FloatTensor(1, out.shape[-1])
-            if use_cuda is True:
-                w_in = w_in.cuda()
-            w_in.zero_()
-            w_in[0, y] = 1  # create a mask to get the gradient wrt y
+                w = self._to_tensor(w).reshape(out.shape)
+                if s.grad is not None:
+                    s.grad = None
+                out.backward(w)
+
         else:
-            w_in = self._to_tensor(w.atleast_2d())
+            w = torch.zeros(layer_outputs.shape)
+            w[y] = 1
+            # Apply softmax-scaling if needed
+            if self.softmax_outputs is True:
+                out_carray = self._from_tensor(layer_outputs.squeeze(0).data)
+                softmax_grad = CSoftmax().gradient(out_carray, y=y)
+                layer_outputs *= self._to_tensor(softmax_grad.atleast_2d()).unsqueeze(0)
 
-        w_in = w_in.unsqueeze(0)  # unsqueeze to simulate a single point batch
 
-        # Apply softmax-scaling if needed
-        if layer is None and self.softmax_outputs is True:
-            out_carray = self._from_tensor(out.squeeze(0).data)
-            softmax_grad = CSoftmax().gradient(out_carray, y=y)
-            w_in *= self._to_tensor(softmax_grad.atleast_2d()).unsqueeze(0)
-        elif w is not None and y is not None:
-            # Inform the user y has not been used
-            self.logger.warning("`y` will be ignored!")
+            if s.grad is not None:
+                s.grad = None
 
-        if s.grad is not None:
-            s.grad.data._zero()
+            layer_outputs.backward(w)
 
-        out.backward(w_in)  # Backward on `out` (grad will appear on `s`
 
         return self._from_tensor(s.grad.data.view(-1))

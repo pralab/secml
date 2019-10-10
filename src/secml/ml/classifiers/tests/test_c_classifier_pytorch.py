@@ -188,7 +188,7 @@ class TestCClassifierPyTorch(CUnitTest):
 
         self.assertTrue(sum(y_torch - pred) < 1e-12)
 
-    def _test_grad_x(self):
+    def _test_grad_x(self, layer_names):
         """Test for extracting gradient."""
         # TODO add test numerical gradient
         self.logger.info("Testing gradients")
@@ -199,8 +199,10 @@ class TestCClassifierPyTorch(CUnitTest):
         x, y = x_ds.X, x_ds.Y
 
         # Test gradient at specific layers
-        for layer in ['fc1', 'fc2', None]:
-            out = self.clf.get_layer_output(x, layer=layer)
+        for layer in layer_names:
+            out = self.clf.get_layer_output(x, layer_names=layer)
+            if layer is not None:
+                out = out[layer]
             self.logger.info("Returning gradient for layer: {:}".format(layer))
             grad = self.clf.grad_f_x(x, w=out, layer=layer)
 
@@ -209,7 +211,7 @@ class TestCClassifierPyTorch(CUnitTest):
             self.assertTrue(grad.is_vector_like)
             self.assertEqual(x.size, grad.size)
 
-    def _test_out_at_layer(self):
+    def _test_out_at_layer(self, layer_name):
         """Test for extracting output at specific layer."""
         self.logger.info("Testing layer outputs")
         self.assertTrue(self.clf.is_fitted())
@@ -224,17 +226,17 @@ class TestCClassifierPyTorch(CUnitTest):
         layer = None
         self.logger.info("Returning output for layer: {:}".format(layer))
         out_predict = self.clf.predict(x, return_decision_function=True)[1]
-        out = self.clf.get_layer_output(x, layer=layer)
+        out = self.clf.get_layer_output(x, layer_names=layer)
 
         self.logger.debug("Output of predict: {:}".format(out_predict))
         self.logger.debug("Output of get_layer_output: {:}".format(str(out)))
 
         self.assert_allclose(out_predict, out)
 
-        layer = 'fc1'
+        layer = layer_name
         self.logger.info("Returning output for layer: {:}".format(layer))
-        out = self.clf.get_layer_output(x, layer=layer)
-
+        out = self.clf.get_layer_output(x, layer_names=layer)
+        out = {k: v.shape for (k, v) in out.items()}
         self.logger.debug("Output of get_layer_output: {:}".format(out))
 
     def _test_layer_names(self):
@@ -293,38 +295,39 @@ class TestCClassifierPyTorch(CUnitTest):
         self._test_performance()
         os.remove(fname)
 
-    # def test_blobs(self):
-    #     self.logger.info("___________________")
-    #     self.logger.info("Testing Blobs Model")
-    #     self.logger.info("___________________")
-    #     self._dataset_creation_blobs()
-    #     self._model_creation_blobs()
-    #     self._test_layer_names()
-    #     self._test_get_params()
-    #     self.clf.fit(self.tr)
-    #     self._test_set_params()
-    #     self._test_performance()
-    #     self._test_predict()
-    #     self._test_out_at_layer()
-    #     self._test_grad_x()
-    #     self._test_softmax_outputs()
-    #     self._test_save_load(self._model_creation_blobs)
-    #
-    # def test_mnist(self):
-    #     self.logger.info("___________________")
-    #     self.logger.info("Testing MNIST Model")
-    #     self.logger.info("___________________")
-    #     self._dataset_creation_mnist()
-    #     self._model_creation_mnist()
-    #     self._test_layer_names()
-    #     self._test_get_params()
-    #     self.clf.fit(self.tr)
-    #     self._test_performance()
-    #     self._test_predict()
-    #     self._test_out_at_layer()
-    #     self._test_grad_x()
-    #     self._test_softmax_outputs()
-    #     self._test_save_load(self._model_creation_mnist)
+    def test_blobs(self):
+        self.logger.info("___________________")
+        self.logger.info("Testing Blobs Model")
+        self.logger.info("___________________")
+        self._dataset_creation_blobs()
+        self._model_creation_blobs()
+        self._test_layer_names()
+        self._test_get_params()
+        self.clf.fit(self.tr)
+        self._test_set_params()
+        self._test_performance()
+        self._test_predict()
+        self._test_out_at_layer(layer_name="fc1")
+        self._test_grad_x(layer_names=["fc1"])
+        self._test_softmax_outputs()
+        self._test_save_load(self._model_creation_blobs)
+
+
+    def test_mnist(self):
+        self.logger.info("___________________")
+        self.logger.info("Testing MNIST Model")
+        self.logger.info("___________________")
+        self._dataset_creation_mnist()
+        self._model_creation_mnist()
+        self._test_layer_names()
+        self._test_get_params()
+        self.clf.fit(self.tr)
+        self._test_performance()
+        self._test_predict()
+        self._test_out_at_layer(layer_name="fc1")
+        self._test_grad_x(layer_names=['conv1', 'fc1', None])
+        self._test_softmax_outputs()
+        self._test_save_load(self._model_creation_mnist)
 
     def test_big_net(self):
         self.logger.info("___________________")
@@ -332,13 +335,13 @@ class TestCClassifierPyTorch(CUnitTest):
         self.logger.info("___________________")
         self._dataset_creation_resnet()
         self._model_creation_resnet()
-        print(self.clf._model)
         self._test_layer_names()
-        # self._test_get_params()
-        # self._test_out_at_layer()
-        # self._test_grad_x()
-        # self._test_softmax_outputs()
-        # self._test_save_load(self._model_creation_resnet)
+        self._test_get_params()
+        self._test_out_at_layer("layer4.1.relu")
+        self._test_out_at_layer(['bn1','fc'])
+        self._test_grad_x(['bn1'])
+        self._test_softmax_outputs()
+        self._test_save_load(self._model_creation_resnet)
 
 if __name__ == '__main__':
     TestCClassifierPyTorch.main()
