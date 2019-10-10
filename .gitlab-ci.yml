@@ -264,6 +264,29 @@ test:install:whl:extras:py37:
     - tags
   when: manual
 
+.release-ssh:
+  before_script: &release-ssh
+    # Activate the ssh agent
+    - eval $(ssh-agent -s)
+
+    ## We're using tr to fix line endings which makes ed25519 keys work
+    ## without extra base64 encoding.
+    ## https://gitlab.com/gitlab-examples/ssh-private-key/issues/1#note_48526556
+    ##
+    - echo "$SSH_RELEASE_KEY" | tr -d '\r' | ssh-add -
+
+    # Create .ssh folder and set correct permissions
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+
+    # Set user/email to use git commands
+    - git config --global user.email "$GITLAB_USER_EMAIL"
+    - git config --global user.name "$GITLAB_USER_NAME"
+
+    # Add known hosts validation keys
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+
 release:gitlab-releases:
   extends: .release
   before_script:
@@ -282,6 +305,28 @@ release:gitlab-releases:
     paths:
       - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
       - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
+
+release:gitlab-pages:
+  extends: .release
+  before_script: *release-ssh
+  variables:
+    CI_PAGES_REPO: secml/secml.gitlab.io.git
+    CI_PAGES_URL: secml.gitlab.io
+    CI_PAGES_REPO_BRANCH: master
+  script:
+    # Validate access to ssh
+    - ssh -T git@gitlab.com
+    # Clone gitlab-pages repository
+    - git clone -b $CI_PAGES_REPO_BRANCH git@gitlab.com:$CI_PAGES_REPO
+    - cd $CI_PAGES_URL
+    # Remove current release
+    - rm -r src/*
+    # Copy generated release (from `package:docs`)
+    - cp -r ../public/* src/
+    # Commit and push
+    - git add src/*
+    - git commit -m "Release $CI_COMMIT_TAG"
+    - git push
 
 release:pypi:
   extends: .release
