@@ -10,6 +10,7 @@ from functools import reduce
 import torch
 from torch import nn
 import torchvision
+from torchvision.models.resnet import BasicBlock
 from torchvision.transforms import transforms
 
 from secml.array import CArray
@@ -186,11 +187,11 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
             for name, layer in net._modules.items():
                 # If it is a sequential, don't return its name
                 # but recursively register all it's module children
-                if isinstance(layer, nn.Sequential):
-                    get_layers(layer)
+                if isinstance(layer, nn.Sequential) or isinstance(layer, BasicBlock):
+                    yield from get_layers(layer)
                 else:
-                    # it's a non sequential. Register a hook
-                    yield name
+                    # it's a non sequential.
+                    yield layer
 
         if isinstance(self._model, nn.Module):
             return get_layers(self._model)
