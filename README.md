@@ -87,6 +87,8 @@ SecML should now be importable in python via: `import secml`.
 
 To update a current installation using any of the previous methods, 
 add the `-U` parameter after the `pip install` directive.
+Please see our [Update Guides](https://secml.gitlab.io/update.html) for specific
+upgrade intructions depending on the source and target version.
 
 
 ## Extra Components
