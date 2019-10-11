@@ -306,6 +306,30 @@ release:gitlab-releases:
       - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
       - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
 
+release:gitlab-repo:
+  extends: .release
+  before_script: *release-ssh
+  variables:
+    CI_REPO: secml/secml.git
+    CI_REPO_BRANCH: release-$CI_COMMIT_TAG
+  dependencies: []  # We do not need artifacts in this job
+  script:
+    # Validate access to ssh
+    - ssh -T git@gitlab.com
+    # Clone gitlab.com repository
+    - git clone -b $CI_REPO_BRANCH git@gitlab.com:$CI_REPO gitlab-secml
+    # Remove all files in target repository (excluding .git folder)
+    - find gitlab-secml -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rv {} +
+    # Copy al files in target repository (excluding .git folder and target repo folder)
+    - find . -mindepth 1 -maxdepth 1 -not -name .git -not -name .gitlab -not -name gitlab-secml -exec cp -r {} gitlab-secml/ \;
+    # Remove unittests
+    - find gitlab-secml -mindepth 1 -type d -name tests -exec rm -rv {} +
+    # Commit and push
+    - cd gitlab-secml
+    - git add .  # .gitignore will properly exclude what should be excluded
+    - git commit -m "Release $CI_COMMIT_TAG"
+    - git push
+
 release:gitlab-pages:
   extends: .release
   before_script: *release-ssh
@@ -316,7 +340,7 @@ release:gitlab-pages:
   script:
     # Validate access to ssh
     - ssh -T git@gitlab.com
-    # Clone gitlab-pages repository
+    # Clone gitlab.com-pages repository
     - git clone -b $CI_PAGES_REPO_BRANCH git@gitlab.com:$CI_PAGES_REPO
     - cd $CI_PAGES_URL
     # Remove current release
