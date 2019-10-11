@@ -204,6 +204,10 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         else:
             raise TypeError("The input model must be an instance of `nn.Module`.")
 
+    @property
+    def layer_names(self):
+        return list(zip(*self.layers))[0]
+
     def get_layer_shape(self, layer_name):
         layer = next(filter(lambda x: x[0] == layer_name, get_layers(self._model)))[1]
         if isinstance(layer, nn.Linear):

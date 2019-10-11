@@ -238,9 +238,8 @@ class TestCClassifierPyTorch(CUnitTest):
 
     def _test_layer_names(self):
         self.logger.info("Testing layers property")
-        self.assertTrue(len(list(self.clf.layers)) >= 1)
-        print(list(self.clf.layers))
-        #self.logger.info("Layers: " + ", ".join(self.clf.layers))
+        self.assertTrue(len(list(self.clf.layer_names)) >= 1)
+        self.logger.info("Layers: " + ", ".join(self.clf.layer_names))
 
     def _test_set_params(self):
         self.logger.info("Testing set params")
