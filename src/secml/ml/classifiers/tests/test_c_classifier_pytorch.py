@@ -204,7 +204,7 @@ class TestCClassifierPyTorch(CUnitTest):
             self.logger.info("Returning gradient for layer: {:}".format(layer))
             print(layer)
             if layer is not None:
-                shape = self.clf.get_layer_shape(layer)
+                shape = self.clf.get_layer_output(x, layer)[layer].shape
                 w_in = CArray.zeros(shape=(shape))
                 w_in[1] = 1
                 grad = self.clf.grad_f_x(x, w=w_in, layer=layer)
@@ -321,7 +321,7 @@ class TestCClassifierPyTorch(CUnitTest):
         self._test_performance()
         self._test_predict()
         self._test_out_at_layer(layer_name="fc1")
-        self._test_grad_x(layer_names=['fc1', 'fc2', None])
+        self._test_grad_x(layer_names=['conv1', 'fc1', 'fc2', None])
         self._test_softmax_outputs()
         self._test_save_load(self._model_creation_mnist)
 

@@ -213,7 +213,10 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         if isinstance(layer, nn.Linear):
             return (1, layer.out_features)
         else:
-            raise ValueError("Layer output shape can be requested only for linear layers.")
+            self.hook_layer_output([layer_name])
+            self._model(torch.randn(size=self.input_shape).unsqueeze(0))
+            self._clean_hooks()
+            return tuple(self._intermediate_outputs[layer].shape)
 
     def _clean_hooks(self):
         """Removes previously defined hooks."""

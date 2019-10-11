@@ -111,7 +111,7 @@ class CClassifierGradientPyTorchMixin(CClassifierGradientMixin):
             layer_output = layer_output[layer]
 
         if w is not None and y is None:
-            w = self._to_tensor(w.atleast_2d())
+            w = self._to_tensor(w.atleast_2d()).reshape(self.get_layer_shape(layer))
         elif y is not None and w is None:
             w = torch.zeros(layer_output.shape)
             w[:, y] = 1
