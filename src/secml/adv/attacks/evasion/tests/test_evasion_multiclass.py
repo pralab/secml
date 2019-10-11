@@ -263,8 +263,8 @@ class TestEvasionMulticlass(CUnitTest):
     def _rescaled_distance(self, x, c, r):
         """Rescale distance for plot."""
         if self.normalizer is not None:
-            c = self.normalizer.revert(c)
-            x = self.normalizer.revert(x)
+            c = self.normalizer.inverse_transform(c)
+            x = self.normalizer.inverse_transform(x)
         constr = CConstraintL2(center=c, radius=r)
         return x.apply_along_axis(constr.constraint, axis=1)
 

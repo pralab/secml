@@ -259,7 +259,7 @@ class CPCA(CReducer):
         out = CArray((data_carray - self.mean).dot(self._components.T))
         return out.atleast_2d() if x.ndim >= 2 else out
 
-    def _revert(self, x):
+    def _inverse_transform(self, x):
         """Map data back to its original space.
 
         Parameters
@@ -280,7 +280,7 @@ class CPCA(CReducer):
         >>> array = CArray([[1., 0., 2.], [2., 5., 0.], [0., 1., -9.]])
         >>> pca = CPCA().fit(array)
         >>> array_pca = pca.transform(array)
-        >>> pca.revert(array_pca).round(6)
+        >>> pca.inverse_transform(array_pca).round(6)
         CArray(3, 3)(dense: [[ 1. -0.  2.] [ 2.  5. -0.] [-0.  1. -9.]])
 
         """

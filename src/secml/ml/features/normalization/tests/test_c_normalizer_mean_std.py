@@ -70,7 +70,7 @@ class TestCNormalizerMeanStd(CPreProcessTestCases):
                 self.logger.info("Result mean is:\n{:}".format(out_mean))
                 self.logger.info("Result std is:\n{:}".format(out_std))
 
-                rev = n.revert(out)
+                rev = n.inverse_transform(out)
 
                 self.assert_array_almost_equal(array, rev)
 
