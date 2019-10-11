@@ -10,6 +10,7 @@ from abc import ABCMeta, abstractmethod
 import six
 
 from secml.core import CCreator
+from secml.core.decorators import deprecated
 
 
 @six.add_metaclass(ABCMeta)
@@ -182,11 +183,11 @@ class CPreProcess(CCreator):
 
     _transform.__doc__ = transform.__doc__  # Same doc for the protected method
 
-    def _revert(self, x):
+    def _inverse_transform(self, x):
         raise NotImplementedError(
             "reverting this transformation is not supported.")
 
-    def revert(self, x):
+    def inverse_transform(self, x):
         """Revert data to original form.
 
         Parameters
@@ -208,15 +209,19 @@ class CPreProcess(CCreator):
         """
         self._check_is_fitted()
 
-        v = self._revert(x)
+        v = self._inverse_transform(x)
 
         # Revert data using the inner preprocess, if defined
         if self.preprocess is not None:
-            return self.preprocess.revert(v)
+            return self.preprocess.inverse_transform(v)
 
         return v
 
-    _revert.__doc__ = revert.__doc__  # Same doc for the protected method
+    _inverse_transform.__doc__ = inverse_transform.__doc__  # Same doc for the protected method
+
+    @deprecated('0.9', extra="use `inverse_transform` instead.")
+    def revert(self, x):
+        return self.inverse_transform(x)
 
     def _gradient(self, x, w=None):
         raise NotImplementedError("gradient is not implemented for {:}"

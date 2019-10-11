@@ -9,37 +9,34 @@ stages:
   - package
   - test
   - release
-  - deploy
   - triage
 
 
-.test-cache-py2: &test-cache-py2
-  cache:
+.test-cache:
+  cache: &test-cache
+    paths:
+      - "$CI_PROJECT_DIR/.cache/pip"
+      - "$CI_PROJECT_DIR/secml-data"
+
+.test-cache-py2:
+  cache: &test-cache-py2
     key: "test-cache-py2"
-    paths:
-      - "$CI_PROJECT_DIR/.cache/pip"
-      - "$CI_PROJECT_DIR/secml-data"
+    <<: *test-cache
 
-.test-cache-py35: &test-cache-py35
-  cache:
+.test-cache-py35:
+  cache: &test-cache-py35
     key: "test-cache-py35"
-    paths:
-      - "$CI_PROJECT_DIR/.cache/pip"
-      - "$CI_PROJECT_DIR/secml-data"
+    <<: *test-cache
 
-.test-cache-py36: &test-cache-py36
-  cache:
+.test-cache-py36:
+  cache: &test-cache-py36
     key: "test-cache-py36"
-    paths:
-      - "$CI_PROJECT_DIR/.cache/pip"
-      - "$CI_PROJECT_DIR/secml-data"
+    <<: *test-cache
 
-.test-cache-py37: &test-cache-py37
-  cache:
+.test-cache-py37:
+  cache: &test-cache-py37
     key: "test-cache-py37"
-    paths:
-      - "$CI_PROJECT_DIR/.cache/pip"
-      - "$CI_PROJECT_DIR/secml-data"
+    <<: *test-cache
 
 
 package:
@@ -50,6 +47,7 @@ package:
   script:
     - python setup.py sdist --formats=zip
     - python setup.py bdist_wheel --universal
+    - twine check dist/*
   only:
     changes:
       - src/secml/**/*
@@ -81,6 +79,7 @@ package:docs:
   only:
     changes:
       - docs/**/*
+      - tutorials/**/*
       - src/secml/**/*
       - .gitlab-ci.yml
       - CHANGELOG.md
@@ -105,6 +104,7 @@ package:docs:
 
 .test:
   stage: test
+  needs: ["package"]
   before_script:
     - echo $CI_PROJECT_DIR
     - python -V
@@ -117,41 +117,45 @@ package:docs:
       - setup.py
       - tox.ini
   except:
-    - schedules
+    refs:
+      - schedules
+    variables:
+      - $SKIP_TESTS
 
 test:py2:min:
   extends: .test
   image: python:2
   script: tox -e py2-min
-  <<: *test-cache-py2
+  cache: *test-cache-py2
 
 test:py35:latest:
   extends: .test
   image: python:3.5
   script: tox -e py35
-  <<: *test-cache-py35
+  cache: *test-cache-py35
 
 test:py35:min:
   extends: .test
   image: python:3.5
   script: tox -e py35-min
-  <<: *test-cache-py35
+  cache: *test-cache-py35
 
 test:py36:min:
   extends: .test
   image: python:3.6
   script: tox -e py36-min
-  <<: *test-cache-py36
+  cache: *test-cache-py36
 
 test:py37:min:
   extends: .test
   image: python:3.7
   script: tox -e py37-min
-  <<: *test-cache-py37
+  cache: *test-cache-py37
 
 
 .test:install:
   stage: test
+  needs: ["package"]
   before_script:
     - echo $CI_PROJECT_DIR
     - python -V
@@ -174,53 +178,117 @@ test:py37:min:
       - setup.py
       - tox.ini
   except:
-    - schedules
+    refs:
+      - schedules
+    variables:
+      - $SKIP_TESTS
 
-#test:install:pypi:
-#  extends: .test:install
-#  script:
-#    - pip install secml
-
-#test:install:pypi-extras:
-#  extends: .test:install
-#  script:
-#    - pip install secml[pytorch]
-#  after_script:
-#    - python -c "import secml"
-#    - python -c "import secml.pytorch"
-
-test:install:py2:whl:
+.test:install:whl:
   extends: .test:install
+  script:
+    - DIST_WHL=$(find $CI_PROJECT_DIR/dist -iname \*.whl -exec basename {} \;)
+    - echo $DIST_WHL
+    - pip install ${CI_PROJECT_DIR}/dist/${DIST_WHL}
+
+.test:install:whl:extras:
+  extends: .test:install:whl
+  script:
+    - DIST_WHL=$(find $CI_PROJECT_DIR/dist -iname \*.whl -exec basename {} \;)
+    - echo $DIST_WHL
+    - pip install ${CI_PROJECT_DIR}/dist/${DIST_WHL}[pytorch]
+  after_script:
+    - python -c "import secml"
+    - python -c "from secml.ml.classifiers import CClassifierPyTorch"
+
+test:install:whl:py2:
+  extends: .test:install:whl
   image: python:2
-  script:
-    - pip install ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
-  <<: *test-cache-py2
+  cache:
+    <<: *test-cache-py2
+    policy: pull
 
-test:install:py35:whl:
-  extends: .test:install
+test:install:whl:py35:
+  extends: .test:install:whl
   image: python:3.5
-  script:
-    - pip install ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
-  <<: *test-cache-py35
+  cache:
+    <<: *test-cache-py35
+    policy: pull
 
-test:install:py36:whl:
-  extends: .test:install
+test:install:whl:py36:
+  extends: .test:install:whl
   image: python:3.6
-  script:
-    - pip install ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
-  <<: *test-cache-py36
+  cache:
+    <<: *test-cache-py36
+    policy: pull
 
-test:install:py37:whl:
-  extends: .test:install
+test:install:whl:py37:
+  extends: .test:install:whl
   image: python:3.7
-  script:
-    - pip install ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
-  <<: *test-cache-py37
+  cache:
+    <<: *test-cache-py37
+    policy: pull
+
+test:install:whl:extras:py2:
+  extends: .test:install:whl:extras
+  image: python:2
+  cache:
+    <<: *test-cache-py2
+    policy: pull
+
+test:install:whl:extras:py35:
+  extends: .test:install:whl:extras
+  image: python:3.5
+  cache:
+    <<: *test-cache-py35
+    policy: pull
+
+test:install:whl:extras:py36:
+  extends: .test:install:whl:extras
+  image: python:3.6
+  cache:
+    <<: *test-cache-py36
+    policy: pull
+
+test:install:whl:extras:py37:
+  extends: .test:install:whl:extras
+  image: python:3.7
+  cache:
+    <<: *test-cache-py37
+    policy: pull
 
 
-release:
+.release:
   stage: release
-  image: ${CI_REGISTRY}/pralab/docker-helper-images/alpine-curl:latest
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/alpine-release:latest
+  only:
+    - tags
+  when: manual
+
+.release-ssh:
+  before_script: &release-ssh
+    # Activate the ssh agent
+    - eval $(ssh-agent -s)
+
+    ## We're using tr to fix line endings which makes ed25519 keys work
+    ## without extra base64 encoding.
+    ## https://gitlab.com/gitlab-examples/ssh-private-key/issues/1#note_48526556
+    ##
+    - echo "$SSH_RELEASE_KEY" | tr -d '\r' | ssh-add -
+
+    # Create .ssh folder and set correct permissions
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+
+    # Set user/email to use git commands
+    - git config --global user.email "$GITLAB_USER_EMAIL"
+    - git config --global user.name "$GITLAB_USER_NAME"
+
+    # Add known hosts validation keys
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+
+release:gitlab-releases:
+  extends: .release
   before_script:
     - apk add unzip
     - echo $CI_PROJECT_ID
@@ -228,38 +296,81 @@ release:
   script:
     - DIST_ZIP=$(find $CI_PROJECT_DIR/dist -iname \*.zip -exec basename {} \;)
     - echo $DIST_ZIP
-    - 'curl -s --request POST --header "PRIVATE-TOKEN: $PRAGIT_BOT_TOKEN" --data name="$DIST_ZIP" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_ZIP?job=release" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
+    - 'curl -s --request POST --header "PRIVATE-TOKEN: $API_ACCESS_TOKEN" --data name="$DIST_ZIP" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_ZIP?job=release" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
     - DIST_WHL=$(find $CI_PROJECT_DIR/dist -iname \*.whl -exec basename {} \;)
     - echo $DIST_WHL
-    - 'curl -s --request POST --header "PRIVATE-TOKEN: $PRAGIT_BOT_TOKEN" --data name="$DIST_WHL" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_WHL?job=release" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
+    - 'curl -s --request POST --header "PRIVATE-TOKEN: $API_ACCESS_TOKEN" --data name="$DIST_WHL" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_WHL?job=release" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
   artifacts:  # Keep the distribution package (default expire 0)
     name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
     paths:
       - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
       - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
+
+release:gitlab-repo:
+  extends: .release
+  before_script: *release-ssh
+  variables:
+    CI_REPO: secml/secml.git
+    CI_REPO_BRANCH: release-$CI_COMMIT_TAG
+  dependencies: []  # We do not need artifacts in this job
+  script:
+    # Validate access to ssh
+    - ssh -T git@gitlab.com
+    # Clone gitlab.com repository
+    - git clone -b $CI_REPO_BRANCH git@gitlab.com:$CI_REPO gitlab-secml
+    # Remove all files in target repository (excluding .git folder)
+    - find gitlab-secml -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rv {} +
+    # Copy al files in target repository (excluding .git folder and target repo folder)
+    - find . -mindepth 1 -maxdepth 1 -not -name .git -not -name .gitlab -not -name gitlab-secml -exec cp -r {} gitlab-secml/ \;
+    # Remove unittests
+    - find gitlab-secml -mindepth 1 -type d -name tests -exec rm -rv {} +
+    # Commit and push
+    - cd gitlab-secml
+    - git add .  # .gitignore will properly exclude what should be excluded
+    - git commit -m "Release $CI_COMMIT_TAG"
+    - git push
+
+release:gitlab-pages:
+  extends: .release
+  before_script: *release-ssh
+  variables:
+    CI_PAGES_REPO: secml/secml.gitlab.io.git
+    CI_PAGES_URL: secml.gitlab.io
+    CI_PAGES_REPO_BRANCH: master
+  script:
+    # Validate access to ssh
+    - ssh -T git@gitlab.com
+    # Clone gitlab.com-pages repository
+    - git clone -b $CI_PAGES_REPO_BRANCH git@gitlab.com:$CI_PAGES_REPO
+    - cd $CI_PAGES_URL
+    # Remove current release
+    - rm -r src/*
+    # Copy generated release (from `package:docs`)
+    - cp -r ../public/* src/
+    # Commit and push
+    - git add src/*
+    - git commit -m "Release $CI_COMMIT_TAG"
+    - git push
+
+release:pypi:
+  extends: .release
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/python35-setuptools:latest
+  variables:
+    TWINE_REPOSITORY_URL: "https://upload.pypi.org/legacy/"
+    TWINE_USERNAME: __token__
+  script:
+    - twine upload $CI_PROJECT_DIR/dist/*
+
+release:pypi:dry:
+  extends: release:pypi
+  variables:
+    TWINE_REPOSITORY_URL: "https://test.pypi.org/legacy/"
+    TWINE_USERNAME: __token__
+  script:
+    - twine upload -p $TWINE_PASSWORD_TEST $CI_PROJECT_DIR/dist/*
   only:
     - tags
-
-
-#pages:
-#  stage: release
-#  script:
-#    - ls public
-#  dependencies:
-#    - package:docs
-#  artifacts:
-#    paths:
-#      - public
-#    expire_in: 1 hour
-#  only:
-#    - tags
-
-
-#deploy:
-#  stage: deploy
-#  when:manual
-#  script:
-#    - echo "DEPLOY"
+    - web
 
 
 .triage:
@@ -273,7 +384,7 @@ triage:run:
   stage: triage
   extends: .triage
   script:
-    - gitlab-triage --debug --host-url $CI_PROJECT_DOMAIN --token $TRIAGE_API_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
+    - gitlab-triage --debug --host-url $CI_PROJECT_DOMAIN --token $API_ACCESS_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
   only:
     - schedules
 
@@ -281,7 +392,7 @@ triage:run:dry:
   stage: triage
   extends: .triage
   script:
-    - gitlab-triage --dry-run --debug --host-url $CI_PROJECT_DOMAIN --token $TRIAGE_API_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
+    - gitlab-triage --dry-run --debug --host-url $CI_PROJECT_DOMAIN --token $API_ACCESS_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
   only:
     - schedules
     - web

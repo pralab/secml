@@ -87,7 +87,7 @@ class CNormalizerLinear(CNormalizer):
 
         return (x * self.w).todense() + self.b
 
-    def _revert(self, x):
+    def _inverse_transform(self, x):
         """Undo the linear normalization of input data.
 
         Parameters
