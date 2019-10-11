@@ -3,6 +3,7 @@ from secml.ml.classifiers.tests import CClassifierTestCases
 from secml.data.loader import CDLIris, CDLRandom
 from secml.ml.classifiers import CClassifierSkLearn
 from secml.array import CArray
+from secml.data import CDataset
 
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
@@ -108,6 +109,33 @@ class TestCClassifierSkLearn(CClassifierTestCases):
             # Mixed linear/nonlinear transformations
             self._test_preprocess(self.dataset, clf,
                                   ['pca', 'unit-norm'], [{}, {}])
+
+    def test_pretrained(self):
+        """Test wrapping of pretrained models."""
+        from sklearn import datasets, svm
+
+        iris = datasets.load_iris()
+        X = iris.data
+        y = iris.target
+
+        clf = svm.SVC(kernel='linear')
+        clf.fit(X, y)
+        secmlclf = CClassifierSkLearn(clf)
+
+        y_pred = secmlclf.predict(CArray(X))
+
+        clf = svm.SVC(kernel='linear')
+        secmlclf = CClassifierSkLearn(clf)
+        secmlclf.fit(CDataset(X, y))
+
+        y_pred_secml = secmlclf.predict(CArray(X))
+
+        self.logger.info(
+            "Predicted labels by pretrained model:\n{:}".format(y_pred))
+        self.logger.info(
+            "Predicted labels by our fit:\n{:}".format(y_pred_secml))
+
+        self.assert_array_almost_equal(y_pred, y_pred_secml)
 
 
 if __name__ == '__main__':
