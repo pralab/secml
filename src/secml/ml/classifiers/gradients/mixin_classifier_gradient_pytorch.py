@@ -124,7 +124,6 @@ class CClassifierGradientPyTorchMixin(CClassifierGradientMixin):
             # both `w` and `y` are passed or none of them
             raise ValueError("Either `w` or `y` must be passed.")
 
-        print(layer_output.shape)
         layer_output.backward(w)
 
         return self._from_tensor(s.grad.data.view(-1))
