@@ -1840,26 +1840,29 @@ class CPlot(CCreator):
                   markeredgewidth=final_edgewidth)
 
     def imshow(self, img, *args, **kwargs):
-            """Plot image.
+        """Plot image.
 
-            Parameters
-            ----------
-            img : CArray
-                image that we want plot
+        Parameters
+        ----------
+        img : CArray or PIL.Image.Image
+            Image to plot.
 
-            """
-            return self._sp.imshow(img.tondarray(), *args, **kwargs)
+        """
+        if isinstance(img, CArray):
+            img = img.tondarray()
+
+        return self._sp.imshow(img, *args, **kwargs)
 
     def matshow(self, array, *args, **kwargs):
-            """Plot an array as a matrix.
+        """Plot an array as a matrix.
 
-            Parameters
-            ----------
-            array : CArray
-                Array that we want plot as a matrix.
+        Parameters
+        ----------
+        array : CArray
+            Array that we want plot as a matrix.
 
-            """
-            return self._sp.matshow(array.tondarray(), *args, **kwargs)
+        """
+        return self._sp.matshow(array.tondarray(), *args, **kwargs)
 
     def quiver(self, U, V, X=None, Y=None,
                color='k', linestyle='-', linewidth=1.0, alpha=1.0):

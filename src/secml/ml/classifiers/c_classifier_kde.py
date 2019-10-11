@@ -13,9 +13,11 @@ from secml.ml.classifiers.clf_utils import \
 from secml.ml.kernel import CKernel
 from secml.utils.mixed_utils import check_is_fitted
 from secml.ml.classifiers.gradients import CClassifierGradientKDEMixin
+from secml.core.decorators import deprecated
 
 
-# TODO: extend to multiclass, use SkLearn!
+@deprecated('0.9', "use `CClassifierSkLearn` with "
+                   "`sklearn.neighbors.KernelDensity` instead.")
 class CClassifierKDE(CClassifier, CClassifierGradientKDEMixin):
     """Kernel Density Estimator
     
