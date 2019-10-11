@@ -24,7 +24,8 @@ _logger.addHandler(_logger_handle)
 __all__ = ['SECML_HOME_DIR', 'SECML_CONFIG',
            'SECML_EXP_DIR', 'SECML_DS_DIR',
            'SECML_STORE_LOGS', 'SECML_LOGS_DIR',
-           'SECML_LOGS_FILENAME', 'SECML_LOGS_PATH']
+           'SECML_LOGS_FILENAME', 'SECML_LOGS_PATH',
+           'SECML_PYTORCH_DIR', 'SECML_PYTORCH_USE_CUDA']
 
 
 def parse_config(conf_files, section, parameter, default=None, dtype=None):
@@ -298,3 +299,17 @@ SECML_LOGS_FILENAME = _parse_env_config(
 
 # Full path to the logs file
 SECML_LOGS_PATH = os.path.join(SECML_LOGS_DIR, SECML_LOGS_FILENAME)
+
+"""PyTorch settings"""
+
+SECML_PYTORCH_USE_CUDA = _parse_env_config(
+    'SECML_PYTORCH_USE_CUDA', SECML_CONFIG, 'secml:pytorch', 'use_cuda',
+    dtype=bool, default=True
+)
+
+SECML_PYTORCH_DIR =_parse_env(
+    'SECML_PYTORCH_DIR',
+    default=os.path.join(os.path.expanduser('~'), 'secml-data/pytorch-data'))
+if not os.path.isdir(SECML_PYTORCH_DIR):
+    os.makedirs(os.path.abspath(SECML_PYTORCH_DIR))
+    _logger.info('New `SECML_PYTORCH_DIR` created: {:}'.format(SECML_PYTORCH_DIR))

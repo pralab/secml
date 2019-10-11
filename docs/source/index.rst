@@ -48,5 +48,6 @@
    :hidden:
 
    modindex
+   update
    changelog
    roadmap
