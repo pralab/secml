@@ -15,8 +15,14 @@ class CClassifierSkLearn(CClassifier):
     __class_type = 'sklearn-clf'
 
     def __init__(self, sklearn_model, preprocess=None):
+
         CClassifier.__init__(self, preprocess=preprocess)
         self._sklearn_model = sklearn_model
+
+        if hasattr(sklearn_model, 'classes_'):  # Model is pretrained
+            self._classes = CArray(sklearn_model.classes_)
+            # FIXME: how to obtain this from pretrained models?
+            self._n_features = 0
 
     def get_params(self):
         """Returns the dictionary of class and SkLearn model parameters.

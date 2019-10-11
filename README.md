@@ -9,7 +9,7 @@ It comes with a set of powerful features:
   in a single data structure.
 - **Wide range of supported ML algorithms.** All supervised learning algorithms
   supported by `scikit-learn` are available, as well as Neural Networks (NNs)
-  through [PyTorch](https://pytorch.org/) deep learning platform _(coming soon)_.
+  through [PyTorch](https://pytorch.org/) deep learning platform.
 - **Built-in attack algorithms.** Evasion and poisoning attacks based on a
   custom-developed fast solver.
 - **Visualize your results.** We provide visualization and plotting framework
@@ -87,6 +87,8 @@ SecML should now be importable in python via: `import secml`.
 
 To update a current installation using any of the previous methods, 
 add the `-U` parameter after the `pip install` directive.
+Please see our [Update Guides](https://secml.gitlab.io/update.html) for specific
+upgrade intructions depending on the source and target version.
 
 
 ## Extra Components
@@ -102,11 +104,10 @@ All the installation procedures via `pip` described above allow definition
 of the `[extras]` section.
 
 ### Available extra components
- - None at the moment.
+ - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
+   Will install: `torch >= 1.1, < 1.3`, `torchvision >= 0.2.2`
 
 ### _Coming soon_
- - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
-   Will install: `torch >= 0.4.*`, `torchvision >= 0.1.8`
  - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
    a Python library to benchmark vulnerability of machine learning systems
    to adversarial examples. Will install: `tensorflow >= 1.14.*, < 2`, `cleverhans`
@@ -144,10 +145,6 @@ _(coming soon)_ The `secml.explanation` package contains few different
 explainable Machine Learning methods that allow interpreting classifiers
 decisions by analyzing the relevant components such as features or training
 prototypes.
-
-_(coming soon)_ The `secml.pytorch` package contains support classes for the
-[PyTorch](https://pytorch.org/) deep learning platform. This package will be
-available only if the extra component `pytorch` has been specified during installation.
 
 _(coming soon)_ The `secml.tf.clvhs` package contains support classes for the
 [CleverHans](https://github.com/tensorflow/cleverhans) library for benchmarking
@@ -229,6 +226,7 @@ List of contributors:
 - `matplotlib` [J. D. Hunter, "Matplotlib: A 2D Graphics Environment", 
   Computing in Science & Engineering, vol. 9, no. 3, pp. 90-95, 2007.](
   https://doi.org/10.1109/MCSE.2007.55)
+- `pytorch` Paszke, Adam, et al. "Automatic differentiation in pytorch.", NIPS-W, 2017.
 
 
 ## Copyright
