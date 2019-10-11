@@ -29,42 +29,10 @@ CClassifierLinear
    :undoc-members:
    :show-inheritance:
 
-CClassifierSkLearn
-------------------
-
-.. automodule:: secml.ml.classifiers.c_classifier_sklearn
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-CClassifierDecisionTree
------------------------
-
-.. automodule:: secml.ml.classifiers.c_classifier_decision_tree
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 CClassifierKDE
 --------------
 
 .. automodule:: secml.ml.classifiers.c_classifier_kde
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-CClassifierKNN
---------------
-
-.. automodule:: secml.ml.classifiers.c_classifier_knn
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-CClassifierLogistic
--------------------
-
-.. automodule:: secml.ml.classifiers.c_classifier_logistic
    :members:
    :undoc-members:
    :show-inheritance:
@@ -77,18 +45,42 @@ CClassifierMCSLinear
    :undoc-members:
    :show-inheritance:
 
-CClassifierNearestCentroid
---------------------------
+CClassifierSkLearn
+------------------
 
-.. automodule:: secml.ml.classifiers.c_classifier_nearest_centroid
+.. automodule:: secml.ml.classifiers.sklearn.c_classifier_sklearn
    :members:
    :undoc-members:
    :show-inheritance:
 
-CClassifierPyTorch
-------------------
+CClassifierDecisionTree
+-----------------------
 
-.. automodule:: secml.ml.classifiers.c_classifier_pytorch
+.. automodule:: secml.ml.classifiers.sklearn.c_classifier_decision_tree
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+CClassifierKNN
+--------------
+
+.. automodule:: secml.ml.classifiers.sklearn.c_classifier_knn
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+CClassifierLogistic
+-------------------
+
+.. automodule:: secml.ml.classifiers.sklearn.c_classifier_logistic
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+CClassifierNearestCentroid
+--------------------------
+
+.. automodule:: secml.ml.classifiers.sklearn.c_classifier_nearest_centroid
    :members:
    :undoc-members:
    :show-inheritance:
@@ -96,7 +88,7 @@ CClassifierPyTorch
 CClassifierRandomForest
 -----------------------
 
-.. automodule:: secml.ml.classifiers.c_classifier_random_forest
+.. automodule:: secml.ml.classifiers.sklearn.c_classifier_random_forest
    :members:
    :undoc-members:
    :show-inheritance:
@@ -104,7 +96,7 @@ CClassifierRandomForest
 CClassifierRidge
 ----------------
 
-.. automodule:: secml.ml.classifiers.c_classifier_ridge
+.. automodule:: secml.ml.classifiers.sklearn.c_classifier_ridge
    :members:
    :undoc-members:
    :show-inheritance:
@@ -112,7 +104,7 @@ CClassifierRidge
 CClassifierSGD
 --------------
 
-.. automodule:: secml.ml.classifiers.c_classifier_sgd
+.. automodule:: secml.ml.classifiers.sklearn.c_classifier_sgd
    :members:
    :undoc-members:
    :show-inheritance:
@@ -120,7 +112,15 @@ CClassifierSGD
 CClassifierSVM
 ----------------------------------------------
 
-.. automodule:: secml.ml.classifiers.c_classifier_svm
+.. automodule:: secml.ml.classifiers.sklearn.c_classifier_svm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+CClassifierPyTorch
+------------------
+
+.. automodule:: secml.ml.classifiers.pytorch.c_classifier_pytorch
    :members:
    :undoc-members:
    :show-inheritance:
