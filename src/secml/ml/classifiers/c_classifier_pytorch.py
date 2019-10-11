@@ -204,6 +204,13 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         else:
             raise TypeError("The input model must be an instance of `nn.Module`.")
 
+    def get_layer_shape(self, layer_name):
+        layer = next(filter(lambda x: x[0] == layer_name, get_layers(self._model)))[1]
+        if isinstance(layer, nn.Linear):
+            return (1, layer.out_features)
+        else:
+            raise ValueError("Layer output shape can be requested only for linear layers.")
+
     def _clean_hooks(self):
         """Removes previously defined hooks."""
         for handler in self._handlers:
@@ -533,7 +540,7 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         ----------
         s : torch.Tensor
             Input tensor to forward propagate.
-        layer_names : list, str or None, optional
+        layer_names : list or None, optional
             Name of the layer(s) to hook for getting the output.
             If None, the output of the last layer will be returned.
 
@@ -545,14 +552,18 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         """
         # Switch to evaluation mode
         self._model.eval()
-
         if layer_names is None:  # Directly use the last layer
             return self._model(s)  # Forward pass
 
-        else:
+        elif isinstance(layer_names, list) or isinstance(layer_names, str):
+            if isinstance(layer_names, str):
+                layer_names = [layer_names]
+
             self.hook_layer_output(layer_names)
             self._model(s)
             return {layer_names[i]: v for i, (k, v) in enumerate(self._intermediate_outputs.items())}
+        else:
+            raise ValueError("Pass layer names as a list or just None for last layer output.")
 
     def save_checkpoint(self):
         pass
@@ -570,7 +581,6 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         state = {
             'model_state': self._model.state_dict(),
             'optimizer_state': self._optimizer.state_dict(),
-            'loss': self._loss,
             'n_features': self.n_features,
             'classes': self.classes,
         }
@@ -593,6 +603,5 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
 
         self._model.load_state_dict(state['model_state'])
         self._optimizer.load_state_dict(state['optimizer_state'])
-        self._loss = state['loss']
         self._n_features = state['n_features']
         self._classes = state['classes']

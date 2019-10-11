@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 import torchvision
 
+from secml.array import CArray
 from secml.testing import CUnitTest
 
 try:
@@ -200,16 +201,19 @@ class TestCClassifierPyTorch(CUnitTest):
 
         # Test gradient at specific layers
         for layer in layer_names:
-            out = self.clf.get_layer_output(x, layer_names=layer)
-            if layer is not None:
-                out = out[layer]
             self.logger.info("Returning gradient for layer: {:}".format(layer))
-            grad = self.clf.grad_f_x(x, w=out, layer=layer)
+            print(layer)
+            if layer is not None:
+                shape = self.clf.get_layer_shape(layer)
+                w_in = CArray.zeros(shape=(shape))
+                w_in[1] = 1
+                grad = self.clf.grad_f_x(x, w=w_in, layer=layer)
+            else:
+                grad = self.clf.grad_f_x(x, y=1, layer=layer)
 
             self.logger.debug("Output of grad_f_x: {:}".format(grad))
 
             self.assertTrue(grad.is_vector_like)
-            self.assertEqual(x.size, grad.size)
 
     def _test_out_at_layer(self, layer_name):
         """Test for extracting output at specific layer."""
@@ -223,20 +227,13 @@ class TestCClassifierPyTorch(CUnitTest):
             self.logger.info("Deactivate softmax-scaling to easily compare outputs")
             self.clf.softmax_outputs = False
 
-        layer = None
-        self.logger.info("Returning output for layer: {:}".format(layer))
-        out_predict = self.clf.predict(x, return_decision_function=True)[1]
-        out = self.clf.get_layer_output(x, layer_names=layer)
-
-        self.logger.debug("Output of predict: {:}".format(out_predict))
-        self.logger.debug("Output of get_layer_output: {:}".format(str(out)))
-
-        self.assert_allclose(out_predict, out)
-
         layer = layer_name
         self.logger.info("Returning output for layer: {:}".format(layer))
         out = self.clf.get_layer_output(x, layer_names=layer)
-        out = {k: v.shape for (k, v) in out.items()}
+        if isinstance(out, dict):
+            out = {k: v[:10] for (k, v) in out.items()}
+        else:
+            out = out[:10]
         self.logger.debug("Output of get_layer_output: {:}".format(out))
 
     def _test_layer_names(self):
@@ -308,7 +305,7 @@ class TestCClassifierPyTorch(CUnitTest):
         self._test_performance()
         self._test_predict()
         self._test_out_at_layer(layer_name="fc1")
-        self._test_grad_x(layer_names=["fc1"])
+        self._test_grad_x(layer_names=["fc1", 'fc2', None])
         self._test_softmax_outputs()
         self._test_save_load(self._model_creation_blobs)
 
@@ -325,7 +322,7 @@ class TestCClassifierPyTorch(CUnitTest):
         self._test_performance()
         self._test_predict()
         self._test_out_at_layer(layer_name="fc1")
-        self._test_grad_x(layer_names=['conv1', 'fc1', None])
+        self._test_grad_x(layer_names=['fc1', 'fc2', None])
         self._test_softmax_outputs()
         self._test_save_load(self._model_creation_mnist)
 
@@ -338,8 +335,9 @@ class TestCClassifierPyTorch(CUnitTest):
         self._test_layer_names()
         self._test_get_params()
         self._test_out_at_layer("layer4.1.relu")
-        self._test_out_at_layer(['bn1','fc'])
-        self._test_grad_x(['bn1'])
+        self._test_out_at_layer(['bn1', 'fc'])
+        self._test_out_at_layer(None)
+        self._test_grad_x(['fc', None])
         self._test_softmax_outputs()
         self._test_save_load(self._model_creation_resnet)
 
