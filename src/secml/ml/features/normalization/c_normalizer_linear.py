@@ -112,14 +112,11 @@ class CNormalizerLinear(CNormalizer):
 
         return v.ravel() if x.ndim <= 1 else v
 
-    def _gradient(self, x, w=None):
-        """Returns the gradient wrt data.
+    def _backward(self, w=None):
+        """Compute the gradient wrt the cached inputs during the forward pass.
 
         Parameters
         ----------
-        x : CArray
-            Pattern with respect to which the gradient will be computed.
-            Shape (1, n_features) or (n_features, ).
         w : CArray or None, optional
             If CArray, will be left-multiplied to the gradient
             of the preprocessor.
@@ -133,10 +130,6 @@ class CNormalizerLinear(CNormalizer):
               or (x.shape[1], ) if `w` is a flat array.
 
         """
-        if x.atleast_2d().shape[1] != self.w.size:
-            raise ValueError("input data must have {:} features (columns)."
-                             "".format(self.w.size))
-
         grad = self.w  # Should be I * self.w . We keep a vector for simplicity
 
         # Left multiply input `w` with normalizer gradient
