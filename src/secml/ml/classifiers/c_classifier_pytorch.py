@@ -223,7 +223,11 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         return list(zip(*self.layers))[0]
 
     def get_layer_shape(self, layer_name):
-        layer = next(filter(lambda x: x[0] == layer_name, get_layers(self._model)))[1]
+        try:
+            layer = next(filter(lambda x: x[0] == layer_name, get_layers(self._model)))[1]
+        except:
+            # TODO remove when dropping support for python2
+            layer = list(filter(lambda x: x[0] == layer_name, get_layers(self._model)))[0][1]
         if isinstance(layer, nn.Linear):
             return (1, layer.out_features)
         else:
