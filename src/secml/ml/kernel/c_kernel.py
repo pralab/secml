@@ -215,6 +215,7 @@ class CKernel(CCreator):
         # Recasting data for safety... cost-free for any CArray
         x_carray = x.atleast_2d()
         v_carray = v.atleast_2d()
+
         # Checking if second array is a vector
         if v_carray.ndim > 1 and v_carray.shape[0] > 1:
             raise ValueError(
@@ -226,5 +227,7 @@ class CKernel(CCreator):
         for i in range(x_carray.shape[0]):
             grad_i = self._gradient(x_carray[i, :], v_carray)
             grad = grad_i if i == 0 else grad.append(grad_i, axis=0)
+
+        # grad = self._gradient(x_carray, v_carray)
 
         return grad.ravel() if x_carray.shape[0] == 1 else grad
