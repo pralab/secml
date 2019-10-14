@@ -119,6 +119,6 @@ class CKernelLinear(CKernel):
         k_grad = k_grad.tosparse() if v_carray.issparse else k_grad.todense()
 
         if (k_grad - v_carray).norm() < 1e-8:
-            return 2 * k_grad
+            return 2 * k_grad  # this is the derivative of x'x = ||x||^2
         else:
             return k_grad.deepcopy()

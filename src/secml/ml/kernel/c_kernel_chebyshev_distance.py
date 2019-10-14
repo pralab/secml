@@ -14,7 +14,7 @@ from secml.ml.kernel import CKernel
 
 
 class CKernelChebyshevDistance(CKernel):
-    """Chebyshev distances kernel.
+    """Chebyshev distance kernel.
 
     Given matrices X and Y, this is computed as::
 
@@ -101,12 +101,12 @@ class CKernelChebyshevDistance(CKernel):
 
         The gradient of Chebyshev distances kernel is given by::
 
-            dK(u,v)/dv =  k(u,v) * sign(u - v)
+            dK(u,v)/dv =  sign(v-u)
 
         Parameters
         ----------
         u : CArray
-            First array of shape (1, n_features).
+            First array of shape (nx, n_features).
         v : CArray
             Second array of shape (1, n_features).
 
@@ -114,7 +114,7 @@ class CKernelChebyshevDistance(CKernel):
         -------
         kernel_gradient : CArray
             Kernel gradient of u with respect to vector v,
-            shape (1, n_features).
+            shape (nx, n_features).
 
         See Also
         --------
@@ -127,10 +127,10 @@ class CKernelChebyshevDistance(CKernel):
             raise ValueError(
                 "Both input arrays must be 2-Dim of shape (1, n_features).")
 
-        g = u - v
+        g = v-u
         m = abs(g).max()
-        g[abs(g) != m] = 0
-        g[g == m] = 1
-        g[g == -m] = -1
+        grad = CArray.zeros(shape=g.shape, sparse=v.issparse)
+        grad[g >= m] = 1
+        grad[g <= -m] = -1
 
-        return self._k(u_carray, v_carray) * g
+        return grad
