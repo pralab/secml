@@ -26,13 +26,30 @@ use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
 
 
 def get_layers(net):
-    for name, layer in net._modules.items():
-        # If it is a sequential, don't return its name
-        # but recursively register all it's module children
-        if isinstance(layer, nn.Sequential) or isinstance(layer, BasicBlock):
-                yield from [(":".join([name, l]), m) for (l, m) in get_layers(layer)]
-        else:
-            yield (name, layer)
+    try:
+        for name, layer in net._modules.items():
+            # If it is a sequential, don't return its name
+            # but recursively register all it's module children
+            if isinstance(layer, nn.Sequential) or isinstance(layer, BasicBlock):
+                    yield from [(":".join([name, l]), m) for (l, m) in get_layers(layer)]
+            else:
+                yield (name, layer)
+    except:
+        # TODO remove when dropping support for python 2
+        def inspect_layers(net):
+            layers = list()
+            for name, layer in net._modules.items():
+                # If it is a sequential, don't return its name
+                # but recursively register all it's module children
+                if isinstance(layer, nn.Sequential) or isinstance(layer, BasicBlock):
+                    layers += [(":".join([name, l]), m) for (l, m) in inspect_layers(layer)]
+                else:
+                    layers.append([name, layer])
+            else:
+                return layers
+
+        return [item for sublist in inspect_layers(net) for item in sublist]
+
 
 
 class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
