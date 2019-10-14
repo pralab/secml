@@ -37,6 +37,8 @@ class CKernelPoly(CKernel):
     batch_size : int or None, optional
         Size of the batch used for kernel computation. Default None.
 
+        .. deprecated:: 0.10
+
     Examples
     --------
     >>> from secml.array import CArray
