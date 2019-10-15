@@ -113,7 +113,6 @@ class CClassifierGradientPyTorchMixin(CClassifierGradientDNNMixin):
             w[0, y] = 1
             # Apply softmax-scaling if needed
             if self.softmax_outputs is True:
-                print("SOFTMAXXXXXXXXXXX")
                 out_carray = self._from_tensor(layer_output.squeeze(0).data)
                 softmax_grad = CSoftmax().gradient(out_carray, y=y)
                 layer_output *= self._to_tensor(softmax_grad.atleast_2d()).unsqueeze(0)
