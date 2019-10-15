@@ -17,21 +17,13 @@ class CClassifierDNN(CClassifier, CClassifierGradientDNNMixin):
     def __init__(self, model, input_shape=None, preprocess=None,
                  softmax_outputs=False, **kwargs):
         """
-        TODO update docs
         CClassifierDNN
         Wrapper for DNN models.
 
         Parameters
         ----------
         model:
-            model to use
-        loss:
-            loss
-        optimizer:
-
-        random_state: int or None, optional
-            random state to use for initializing the model weights.
-            Default value is None.
+            backend-supported model
         preprocess:
             preprocessing module.
         softmax_outputs: bool, optional
@@ -42,16 +34,10 @@ class CClassifierDNN(CClassifier, CClassifierGradientDNNMixin):
             loss function (see torch.nn.CrossEntropyLoss). Be aware that the
             softmax may have already been applied.
             Default value is False.
-        epochs: int
-            number of epochs for training the neural network. Default value is 10.
-        batch_size: int
-            size of the batches to use for loading the data. Default value is 1.
-        n_jobs: int
-            number of workers to use for data loading and processing. Default value is 1.
 
         Attributes
         ----------
-        class_type : 'pytorch-clf'
+        class_type : 'dnn-clf'
 
         """
 
