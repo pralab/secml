@@ -10,14 +10,15 @@
 import torch
 
 from secml.array import CArray
-from secml.ml.classifiers.gradients import CClassifierGradientMixin
+from secml.ml.classifiers.gradients import CClassifierGradientDNNMixin
 from secml.ml.classifiers.loss import CSoftmax
 
 from secml.settings import SECML_PYTORCH_USE_CUDA
+
 use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
 
 
-class CClassifierGradientPyTorchMixin(CClassifierGradientMixin):
+class CClassifierGradientPyTorchMixin(CClassifierGradientDNNMixin):
     """Mixin class for CClassifierPyTorch gradients."""
 
     def grad_f_x(self, x, y=None, w=None, layer=None):
@@ -53,8 +54,8 @@ class CClassifierGradientPyTorchMixin(CClassifierGradientMixin):
             Gradient of the classifier's output wrt input. Vector-like array.
 
         """
-        return CClassifierGradientMixin.grad_f_x(
-            self, x=x, y=y, w=w, layer=layer)
+        return CClassifierGradientDNNMixin.grad_f_x(self, x=x, y=y, w=w,
+                                                    layer=layer)
 
     def _grad_f_x(self, x, y=None, w=None, layer=None):
         """Computes the gradient of the classifier's decision function
