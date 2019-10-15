@@ -185,12 +185,11 @@ class CNormalizerMeanSTD(CNormalizerLinear):
             if not n_feats % n_channels == 0:
                 raise ValueError("input number of features must be "
                                  "divisible by {:}".format(n_channels))
-            mean_list = []
+            channel_size = int(n_feats / n_channels)
+            self._x_mean = CArray.ones(shape=(n_feats,))
             for i in range(n_channels):
-                mean_list.append(
-                    CArray.ones(
-                        shape=(int(n_feats / n_channels), )) * self._mean[i])
-            self._x_mean = CArray.from_iterables(mean_list)
+                self._x_mean[i * channel_size:
+                             i * channel_size + channel_size] *= self._mean[i]
 
         # Setting the variance
         if self.with_std is False:
@@ -204,12 +203,11 @@ class CNormalizerMeanSTD(CNormalizerLinear):
             if not n_feats % n_channels == 0:
                 raise ValueError("input number of features must be "
                                  "divisible by {:}".format(n_channels))
-            std_list = []
+            channel_size = int(n_feats / n_channels)
+            self._x_std = CArray.ones(shape=(n_feats,))
             for i in range(n_channels):
-                std_list.append(
-                    CArray.ones(
-                        shape=(int(n_feats / n_channels), )) * self._std[i])
-            self._x_std = CArray.from_iterables(std_list)
+                self._x_std[i * channel_size:
+                            i * channel_size + channel_size] *= self._std[i]
 
         # Updating linear normalizer parameters
         self._w = CArray.ones(n_feats)
