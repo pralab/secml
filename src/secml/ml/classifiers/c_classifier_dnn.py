@@ -8,9 +8,9 @@
 
 from secml.array import CArray
 from secml.ml.classifiers import CClassifier
-from secml.ml.classifiers.gradients import CClassifierGradientDNNMixin
 
-class CClassifierDNN(CClassifier, CClassifierGradientDNNMixin):
+
+class CClassifierDNN(CClassifier):
     """Generic wrapper for DNN model."""
     __class_type = ' dnn-clf'
 

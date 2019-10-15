@@ -14,7 +14,7 @@ from torchvision.transforms import transforms
 
 from secml.array import CArray
 from secml.data.loader import CDataLoaderPyTorch
-from secml.ml.classifiers import CClassifier
+from secml.ml.classifiers import CClassifierDNN
 from secml.ml.classifiers.gradients import CClassifierGradientPyTorchMixin
 from secml.utils import SubLevelsDict, merge_dicts
 
@@ -22,11 +22,11 @@ from secml.settings import SECML_PYTORCH_USE_CUDA
 use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
 
 
-class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
+class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
     """Generic wrapper for PyTorch model."""
     __class_type = 'pytorch-clf'
 
-    def __init__(self, torch_model, loss=None, optimizer=None,
+    def __init__(self, model, loss=None, optimizer=None,
                  input_shape=None,
                  random_state=None, preprocess=None,
                  softmax_outputs=False,
@@ -37,7 +37,7 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
 
         Parameters
         ----------
-        torch_model:
+        model:
             model to use
         loss:
             loss
@@ -69,15 +69,11 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
 
         """
 
-        super(CClassifierPyTorch, self).__init__(preprocess=preprocess)
+        super(CClassifierPyTorch, self).__init__(model=model, preprocess=preprocess)
 
-        self._device = torch.device("cuda" if use_cuda else "cpu")
-        self._model = torch_model
         self._random_state = random_state
         self._init_model()
-        self._trained = False
 
-        self._input_shape = input_shape
         if self._input_shape is None:
             # try to infer from first layer
             first_layer = list(self._model._modules.values())[0]
@@ -92,6 +88,7 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
             raise ValueError("Please remove softmax redundancy. Either "
                              "use `torch.nn.NLLLoss` or remove softmax "
                              "layer from the network.")
+
         self._loss = loss
         self._optimizer = optimizer
 
@@ -138,46 +135,9 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         return self._epochs
 
     @property
-    def device(self):
-        """Returns the device that is being used for model and data."""
-        return self._device
-
-    @property
     def batch_size(self):
         """Returns the batch size used for the dataset loader."""
         return self._batch_size
-
-    @property
-    def input_shape(self):
-        """Returns the input shape of the first layer of the neural network."""
-        return self._input_shape
-
-    @input_shape.setter
-    def input_shape(self, input_shape):
-        self._input_shape = input_shape
-
-    @property
-    def softmax_outputs(self):
-        return self._softmax_outputs
-
-    @softmax_outputs.setter
-    def softmax_outputs(self, active):
-        """
-        TODO fix docs
-
-        Parameters
-        ----------
-        active : bool
-            whether apply softmax to the final scores
-
-        Notes
-        ----------
-        If the loss is an instance of `nn.CrossEntropyLoss` or
-        the network already has a softmax operation in the end
-        this parameter will be disabled.
-        """
-        self.check_softmax()
-        self._softmax_outputs = active
 
     @property
     def layers(self):
@@ -186,6 +146,9 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
             return list(self._model._modules.keys())
         else:
             raise TypeError("The input model must inherit from `nn.Module`.")
+
+    def _set_device(self):
+        return torch.device("cuda" if use_cuda else "cpu")
 
     def n_jobs(self):
         """Returns the number of workers being used for loading
@@ -361,39 +324,6 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         self._trained = True
         return self._model
 
-    def predict(self, x, return_decision_function=False):
-        """
-
-        Parameters
-        ----------
-        x : CArray
-            Array with samples to classify, of shape (n_patterns, n_features).
-        return_decision_function : bool, optional
-            if True, returns the decision_function value along
-            with the predictions. Default is False.
-
-        Returns
-        -------
-        labels : CArray
-            Flat dense array of shape (n_patterns,) with the label assigned
-             to each test pattern. The classification label is the label of
-             the class associated with the highest score.
-        scores : CArray, optional
-            Array of shape (n_patterns, n_classes) with classification
-             score of each test pattern with respect to each training class.
-            Will be returned only if `return_decision_function` is True.
-
-        """
-        self._check_is_fitted()
-
-        scores = self._decision_function(x)
-
-        # The classification label is the label of the class
-        # associated with the highest score
-        labels = scores.argmax(axis=1)
-
-        return (labels, scores) if return_decision_function is True else labels
-
     def _decision_function(self, x, y=None):
         """Implementation of the decision function."""
 
@@ -510,9 +440,6 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
             raise TypeError("The model must inherit from `nn.Module`.")
 
         return s
-
-    def save_checkpoint(self):
-        pass
 
     def save_model(self, filename):
         """
