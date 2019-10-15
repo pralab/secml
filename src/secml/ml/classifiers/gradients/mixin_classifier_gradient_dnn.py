@@ -1,14 +1,10 @@
 """
-.. module:: CClassifierGradientPytorchMixin
-   :synopsis: Mixin for Pytorch classifier gradients.
+.. module:: CClassifierGradientDNN
+   :synopsis: Mixin for DNN classifier gradients.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
 .. moduleauthor:: Maura Pintor <maura.pintor@unica.it>
 
 """
-import torch
-
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientMixin
 
