@@ -97,7 +97,10 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
 
         self._device = self._set_device()
         self._random_state = random_state
-        super(CClassifierPyTorch, self).__init__(model=model, preprocess=preprocess)
+        super(CClassifierPyTorch, self).__init__(model=model,
+                                                 preprocess=preprocess,
+                                                 input_shape=input_shape,
+                                                 softmax_outputs=softmax_outputs)
         self._init_model()
 
         if self._input_shape is None:
