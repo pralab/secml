@@ -6,6 +6,7 @@ from .mixin_classifier_gradient_ridge import CClassifierGradientRidgeMixin
 from .mixin_classifier_gradient_svm import CClassifierGradientSVMMixin
 from .mixin_classifier_gradient_sgd import CClassifierGradientSGDMixin
 from .mixin_classifier_gradient_kde import CClassifierGradientKDEMixin
+from .mixin_classifier_gradient_dnn import CClassifierGradientDNNMixin
 
 try:
     import torch
