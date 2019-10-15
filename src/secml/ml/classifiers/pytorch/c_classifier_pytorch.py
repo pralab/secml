@@ -64,10 +64,11 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
         Parameters
         ----------
         model:
-            model to use
+            `torch.nn.Module` object to use as classifier
         loss:
-            loss
+            loss object from `torch.nn`
         optimizer:
+            optimizer object from `torch.optim`
 
         random_state: int or None, optional
             random state to use for initializing the model weights.
@@ -411,6 +412,11 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
 
     def _decision_function(self, x, y=None):
         """Implementation of the decision function."""
+
+        x_carray = CArray(x).atleast_2d()
+
+        # Transform data if a preprocess is defined
+        x_carray = self._preprocess_data(x_carray)
 
         data_loader = self._data_loader(x, num_workers=self._n_jobs,
                                         batch_size=self._batch_size)
