@@ -101,10 +101,6 @@ class CClassifierGradientPyTorchMixin(CClassifierGradientDNNMixin):
         # keep track of the gradient in s tensor
         s.requires_grad = True
 
-        # make sure the gradient is empty
-        if s.grad is not None:
-            s.grad = None
-
         # Get the model output at specific layer
         layer_output = self._get_layer_output(s, layer_names=layer)
         if isinstance(layer_output, dict):
@@ -112,17 +108,23 @@ class CClassifierGradientPyTorchMixin(CClassifierGradientDNNMixin):
 
         if w is not None and y is None:
             w = self._to_tensor(w.atleast_2d()).reshape(self.get_layer_shape(layer))
-        elif y is not None and w is None:
+        elif y is not None and w is None and layer is None:
             w = torch.zeros(layer_output.shape)
-            w[:, y] = 1
+            w[0, y] = 1
             # Apply softmax-scaling if needed
             if self.softmax_outputs is True:
+                print("SOFTMAXXXXXXXXXXX")
                 out_carray = self._from_tensor(layer_output.squeeze(0).data)
                 softmax_grad = CSoftmax().gradient(out_carray, y=y)
                 layer_output *= self._to_tensor(softmax_grad.atleast_2d()).unsqueeze(0)
         else:
             # both `w` and `y` are passed or none of them
             raise ValueError("Either `w` or `y` must be passed.")
+
+        w = w.to(self._device)
+
+        if s.grad is not None:
+            s.grad.data._zero()
 
         layer_output.backward(w)
 
