@@ -5,11 +5,15 @@
 .. moduleauthor:: Maura Pintor <maura.pintor@unica.it>
 
 """
+from abc import ABCMeta, abstractmethod
+
+import six
 
 from secml.array import CArray
 from secml.ml.classifiers import CClassifier
 
 
+@six.add_metaclass(ABCMeta)
 class CClassifierDNN(CClassifier):
     """Generic wrapper for DNN model."""
     __class_type = ' dnn-clf'
@@ -43,16 +47,10 @@ class CClassifierDNN(CClassifier):
 
         super(CClassifierDNN, self).__init__(preprocess=preprocess)
 
-        self._device = self._set_device()
         self._model = model
         self._trained = False
         self._input_shape = input_shape
         self._softmax_outputs = softmax_outputs
-
-    @property
-    def device(self):
-        """Returns the device that is being used for model and data."""
-        return self._device
 
     @property
     def input_shape(self):
@@ -87,6 +85,7 @@ class CClassifierDNN(CClassifier):
         self._softmax_outputs = active
 
     @property
+    @abstractmethod
     def layers(self):
         """Returns the layers of the model. """
         raise NotImplementedError
@@ -98,12 +97,9 @@ class CClassifierDNN(CClassifier):
         -------
 
         """
-        raise NotImplementedError
+        return super(CClassifierDNN, self).get_params()
 
-    def _set_device(self):
-        """Defines the device to use (default should be cpu)"""
-        raise NotImplementedError
-
+    @abstractmethod
     def check_softmax(self):
         """
         Checks if a softmax layer has been defined in the
@@ -116,29 +112,19 @@ class CClassifierDNN(CClassifier):
         """
         raise NotImplementedError
 
-    def __getattribute__(self, key):
-        """Gets the attribute of the class and of the internal
-        elements (e.g. model, loss etc.)."""
-        raise NotImplementedError
-
-    def __setattr__(self, key, value):
-        """Set an attribute.
-
-        This allow setting also the attributes of the internal elements (e.g. model, loss etc.).
-
-        """
-        raise NotImplementedError
-
     @staticmethod
+    @abstractmethod
     def _to_tensor(x):
         """Convert input CArray to backend-supported tensor."""
         raise NotImplementedError
 
     @staticmethod
+    @abstractmethod
     def _from_tensor(x):
         """Convert input backend-supported tensor to CArray"""
         raise NotImplementedError
 
+    @abstractmethod
     def _fit(self, dataset):
         """Fit the model."""
 
@@ -177,6 +163,7 @@ class CClassifierDNN(CClassifier):
 
         return (labels, scores) if return_decision_function is True else labels
 
+    @abstractmethod
     def _decision_function(self, x, y=None):
         """
         Computes the output scores of the last layer.
@@ -199,27 +186,29 @@ class CClassifierDNN(CClassifier):
         """
         raise NotImplementedError
 
-    def get_layer_output(self, x, layer=None):
-        """Returns the output of the desired net layer as CArray.
+    @abstractmethod
+    def get_layer_output(self, x, layer_names=None):
+        """Returns the output of the desired net layer(s).
 
         Parameters
         ----------
         x : CArray
             Input data.
-        layer : str, int or None, optional
-            Name of the layer.
+        layer_names : str, list or None, optional
+            Name of the layer(s) to get the output from.
             If None, the output of the last layer will be returned.
 
         Returns
         -------
-        CArray
-            Output of the desired layer.
-
+        CArray or dict
+            Output of the desired layers, dictionary if more than one layer is
+            requested.
         """
         raise NotImplementedError
 
-    def _get_layer_output(self, s, layer=None):
-        """Returns the output of the desired net layer as backend-supported
+    @abstractmethod
+    def _get_layer_output(self, s, layer_names=None):
+        """Returns the output of the desired net layer(s) as backend-supported
         tensor.
 
         Parameters
@@ -232,12 +221,15 @@ class CClassifierDNN(CClassifier):
 
         Returns
         -------
-        backend-supported tensor
-            Output of the desired layer.
+        dict
+            Output of the desired layers (as backend-supported
+            tensors), dictionary if more than one layer is
+            requested.
 
         """
         raise NotImplementedError
 
+    @abstractmethod
     def save_model(self, filename):
         """
         Stores the model and optimization parameters.
@@ -250,6 +242,7 @@ class CClassifierDNN(CClassifier):
         """
         raise NotImplementedError
 
+    @abstractmethod
     def load_model(self, filename):
         """
         Restores the model and optimization parameters.

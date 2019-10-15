@@ -48,7 +48,6 @@ def get_layers(net):
     #         yield (name, layer)
 
 
-
 class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
     """Generic wrapper for PyTorch model."""
     __class_type = 'pytorch-clf'
@@ -96,9 +95,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
 
         """
 
-        super(CClassifierPyTorch, self).__init__(model=model, preprocess=preprocess)
-
+        self._device = self._set_device()
         self._random_state = random_state
+        super(CClassifierPyTorch, self).__init__(model=model, preprocess=preprocess)
         self._init_model()
 
         if self._input_shape is None:
@@ -498,7 +497,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
         Returns
         -------
         torch.Tensor
-            Output of the desired layer.
+            Output of the desired layer(s).
 
         """
         # Switch to evaluation mode

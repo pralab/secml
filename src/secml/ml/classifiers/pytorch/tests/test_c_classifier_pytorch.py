@@ -125,7 +125,7 @@ class TestCClassifierPyTorch(CUnitTest):
         optimizer = optim.SGD(net.parameters(),
                               lr=0.1, momentum=0.9)
 
-        self.clf = CClassifierPyTorch(torch_model=net,
+        self.clf = CClassifierPyTorch(model=net,
                                       loss=criterion,
                                       optimizer=optimizer,
                                       epochs=10,
@@ -137,7 +137,7 @@ class TestCClassifierPyTorch(CUnitTest):
         optimizer = optim.SGD(net.parameters(),
                               lr=0.001, momentum=0.9)
 
-        self.clf = CClassifierPyTorch(torch_model=net,
+        self.clf = CClassifierPyTorch(model=net,
                                       loss=criterion,
                                       optimizer=optimizer,
                                       epochs=10,
@@ -150,7 +150,7 @@ class TestCClassifierPyTorch(CUnitTest):
         optimizer = optim.SGD(net.parameters(),
                               lr=0.001, momentum=0.9)
 
-        self.clf = CClassifierPyTorch(torch_model=net,
+        self.clf = CClassifierPyTorch(model=net,
                                       loss=criterion,
                                       optimizer=optimizer,
                                       epochs=10,
