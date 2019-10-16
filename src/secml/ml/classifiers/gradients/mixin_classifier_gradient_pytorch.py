@@ -21,42 +21,6 @@ use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
 class CClassifierGradientPyTorchMixin(CClassifierGradientDNNMixin):
     """Mixin class for CClassifierPyTorch gradients."""
 
-    def grad_f_x(self, x, y=None, w=None, layer=None):
-        """Computes the gradient of the classifier's output wrt input.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-        y : int or None, optional
-            Index of the class wrt the gradient must be computed.
-            This is not required if:
-             - `w` is passed and the last layer is used but
-              softmax_outputs is False
-             - an intermediate layer is used
-        w : CArray or None, optional
-            If CArray, will be passed to backward and must have a proper shape
-            depending on the chosen output layer (the last one if `layer`
-            is None). This is required if `layer` is not None.
-        layer : str or None, optional
-            Name of the layer.
-            If None, the gradient at the last layer will be returned
-             and `y` is required if `w` is None or softmax_outputs is True.
-            If not None, `w` of proper shape is required.
-        **kwargs
-            Optional parameters for the function that computes the
-            gradient of the decision function. See the description of
-            each classifier for a complete list of optional parameters.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the classifier's output wrt input. Vector-like array.
-
-        """
-        return CClassifierGradientDNNMixin.grad_f_x(self, x=x, y=y, w=w,
-                                                    layer=layer)
-
     def _grad_f_x(self, x, y=None, w=None, layer=None):
         """Computes the gradient of the classifier's decision function
          wrt input.
@@ -107,7 +71,7 @@ class CClassifierGradientPyTorchMixin(CClassifierGradientDNNMixin):
             layer_output = layer_output[layer]
 
         if w is not None and y is None:
-            w = self._to_tensor(w.atleast_2d()).reshape(self.get_layer_shape(layer))
+            w = self._to_tensor(w.atleast_2d()).reshape(layer_output.shape)
         elif y is not None and w is None and layer is None:
             w = torch.zeros(layer_output.shape)
             w[0, y] = 1
