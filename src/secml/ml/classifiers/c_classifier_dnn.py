@@ -51,6 +51,8 @@ class CClassifierDNN(CClassifier):
         self._trained = False
         self._input_shape = input_shape
         self._softmax_outputs = softmax_outputs
+        self._layers = None
+        self._layer_shapes = None
 
     @property
     def input_shape(self):
@@ -87,7 +89,20 @@ class CClassifierDNN(CClassifier):
     @property
     @abstractmethod
     def layers(self):
-        """Returns the layers of the model. """
+        """Returns list of tuples containing the layers of the model.
+        Each tuple is structured as (layer_name, layer)."""
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def layer_names(self):
+        """Returns the names of the layers of the model."""
+        return list(zip(*self.layers))[0]
+
+    @property
+    def layer_shapes(self):
+        """Returns a dictionary containing the shapes of the output
+        of each layer of the model."""
         raise NotImplementedError
 
     def get_params(self):
