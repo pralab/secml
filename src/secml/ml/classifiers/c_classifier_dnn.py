@@ -170,7 +170,7 @@ class CClassifierDNN(CClassifier):
         """
         self._check_is_fitted()
 
-        scores = self._decision_function(x)
+        scores = self.decision_function(x)
 
         # The classification label is the label of the class
         # associated with the highest score
