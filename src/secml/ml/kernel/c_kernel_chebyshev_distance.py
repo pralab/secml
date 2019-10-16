@@ -1,6 +1,6 @@
 """
 .. module:: CKernelChebyshevDistance
-   :synopsis: Chebyshev distances kernel
+   :synopsis: Chebyshev distance kernel
 
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
@@ -39,44 +39,21 @@ class CKernelChebyshevDistance(CKernel):
     >>> from secml.ml.kernel.c_kernel_chebyshev_distance import CKernelChebyshevDistance
 
     >>> print(CKernelChebyshevDistance().k(CArray([[1,2],[3,4]]), CArray([[5,6],[7,8]])))
-    CArray([[4. 6.]
-     [2. 4.]])
+    CArray([[-4. -6.]
+     [-2. -4.]])
 
     >>> print(CKernelChebyshevDistance().k(CArray([[1,2],[3,4]])))
-    CArray([[0. 2.]
-     [2. 0.]])
+    CArray([[0. -2.]
+     [-2. 0.]])
 
     """
     __class_type = 'chebyshev-dist'
 
-    def __init__(self, gamma=1.0, batch_size=None):
-
+    def __init__(self, batch_size=None):
         super(CKernelChebyshevDistance, self).__init__(batch_size=batch_size)
 
-        # Using a float gamma to avoid dtype casting problems
-        self.gamma = gamma
-
-    @property
-    def gamma(self):
-        """Gamma parameter."""
-        return self._gamma
-
-    @gamma.setter
-    def gamma(self, gamma):
-        """Sets gamma parameter.
-
-        Parameters
-        ----------
-        gamma : float
-            Equals to `sigma^-1` in the standard formulation of
-            laplacian kernel, is a free parameter to be used
-            to balance the computed metric.
-
-        """
-        self._gamma = float(gamma)
-
     def _k(self, x, y):
-        """Compute the Chebyshev distances kernel between x and y.
+        """Compute (negative) Chebyshev distances between x and y.
 
         Parameters
         ----------
@@ -95,15 +72,20 @@ class CKernelChebyshevDistance(CKernel):
         :meth:`CKernel.k` : Main computation interface for kernels.
 
         """
-        return CArray(metrics.pairwise.pairwise_distances(
+        if x.issparse is True or y.issparse is True:
+            raise TypeError(
+                "Chebyshev Kernel not available for sparse data."
+                "See `sklearn.metrics.pairwise_distances`.")
+
+        return -CArray(metrics.pairwise.pairwise_distances(
             x.get_data(), y.get_data(), metric='chebyshev'))
 
     def _gradient(self, u, v):
-        """Calculate Chebyshev distances kernel gradient wrt vector 'v'.
+        """Calculate gradients of Chebyshev kernel wrt vector 'v'.
 
-        The gradient of Chebyshev distances kernel is given by::
+        The gradient of the negative Chebyshev distance is given by::
 
-            dK(u,v)/dv =  sign(v-u)
+            dK(u,v)/dv =  -sign(u-v)
 
         Parameters
         ----------
@@ -123,16 +105,15 @@ class CKernelChebyshevDistance(CKernel):
         :meth:`CKernel.gradient` : Gradient computation interface for kernels.
 
         """
-        u_carray = CArray(u)
-        v_carray = CArray(v)
-        if u_carray.shape[0] + v_carray.shape[0] > 2:
-            raise ValueError(
-                "Both input arrays must be 2-Dim of shape (1, n_features).")
+        if v.issparse is True:
+            # Broadcasting not supported for sparse arrays
+            v_broadcast = v.repmat(u.shape[0], 1)
+        else:  # Broadcasting is supported by design for dense arrays
+            v_broadcast = v
 
-        g = v-u
-        m = abs(g).max()
-        grad = CArray.zeros(shape=g.shape, sparse=v.issparse)
-        grad[g >= m] = 1
-        grad[g <= -m] = -1
-
+        diff = u - v_broadcast
+        m = abs(diff).max(axis=1)  # extract m from each row
+        grad = CArray.zeros(shape=diff.shape, sparse=v.issparse)
+        grad[diff >= m] = 1  # this correctly broadcasts per-row comparisons
+        grad[diff <= -m] = -1
         return grad
