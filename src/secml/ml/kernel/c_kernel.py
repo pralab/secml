@@ -1,6 +1,6 @@
 """
-.. module:: KernelInterface
-   :synopsis: Interface for Kernel metrics
+.. module:: Kernel
+   :synopsis: Interface for kernel functions
 
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
@@ -26,7 +26,8 @@ class CKernel(CCreator):
     Kernels can be considered similarity measures,
     i.e. s(a, b) > s(a, c) if objects a and b are considered
     "more similar" than objects a and c.
-    A kernel must also be positive semi-definite.
+    A kernel must be positive semi-definite (PSD), even though non-PSD kernels
+    can also be used to train classifiers (e.g., SVMs, but losing convexity).
 
     Parameters
     ----------
@@ -146,7 +147,7 @@ class CKernel(CCreator):
         Parameters
         ----------
         u : CArray or array_like
-            First array of shape (1, n_features).
+            First array of shape (nx, n_features).
         v : CArray or array_like
             Second array of shape (1, n_features).
 
@@ -154,7 +155,7 @@ class CKernel(CCreator):
         -------
         kernel_gradient : CArray
             Kernel gradient of u with respect to vector v. Array of
-            shape (1, n_features)
+            shape (nx, n_features)
 
         """
         raise NotImplementedError()
@@ -200,13 +201,6 @@ class CKernel(CCreator):
             raise ValueError(
                 "kernel gradient can be computed only wrt vector-like arrays.")
 
-        # Instancing an empty array to avoid return errors
-        grad = CArray([], tosparse=x_carray.issparse)
-        # Kernel gradient can be dense or sparse depending on `x_carray`
-        for i in range(x_carray.shape[0]):
-            grad_i = self._gradient(x_carray[i, :], v_carray)
-            grad = grad_i if i == 0 else grad.append(grad_i, axis=0)
-
-        # grad = self._gradient(x_carray, v_carray)
-
+        # Compute gradient and return
+        grad = self._gradient(x_carray, v_carray)
         return grad.ravel() if x_carray.shape[0] == 1 else grad
