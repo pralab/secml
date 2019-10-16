@@ -94,12 +94,12 @@ class CClassifierDNN(CClassifier):
         raise NotImplementedError
 
     @property
-    @abstractmethod
     def layer_names(self):
         """Returns the names of the layers of the model."""
         return list(zip(*self.layers))[0]
 
     @property
+    @abstractmethod
     def layer_shapes(self):
         """Returns a dictionary containing the shapes of the output
         of each layer of the model."""
