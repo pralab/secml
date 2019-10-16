@@ -6,7 +6,6 @@
 
 """
 from functools import reduce
-from collections import OrderedDict
 
 import torch
 from torch import nn
@@ -177,10 +176,12 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
     @property
     def layers(self):
         """Returns the layers of the model, if possible. """
-        if isinstance(self._model, nn.Module):
-            return get_layers(self._model)
-        else:
-            raise TypeError("The input model must be an instance of `nn.Module`.")
+        if self._layers is None:
+            if isinstance(self._model, nn.Module):
+                self._layers = get_layers(self._model)
+            else:
+                raise TypeError("The input model must be an instance of `nn.Module`.")
+        return self._layers
 
     @property
     def layer_names(self):
