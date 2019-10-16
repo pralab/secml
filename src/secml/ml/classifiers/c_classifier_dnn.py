@@ -140,68 +140,6 @@ class CClassifierDNN(CClassifier):
         raise NotImplementedError
 
     @abstractmethod
-    def _fit(self, dataset):
-        """Fit the model."""
-
-        raise NotImplementedError
-
-    def predict(self, x, return_decision_function=False):
-        """
-
-        Parameters
-        ----------
-        x : CArray
-            Array with samples to classify, of shape (n_patterns, n_features).
-        return_decision_function : bool, optional
-            if True, returns the decision_function value along
-            with the predictions. Default is False.
-
-        Returns
-        -------
-        labels : CArray
-            Flat dense array of shape (n_patterns,) with the label assigned
-             to each test pattern. The classification label is the label of
-             the class associated with the highest score.
-        scores : CArray, optional
-            Array of shape (n_patterns, n_classes) with classification
-             score of each test pattern with respect to each training class.
-            Will be returned only if `return_decision_function` is True.
-
-        """
-        self._check_is_fitted()
-
-        scores = self.decision_function(x)
-
-        # The classification label is the label of the class
-        # associated with the highest score
-        labels = scores.argmax(axis=1)
-
-        return (labels, scores) if return_decision_function is True else labels
-
-    @abstractmethod
-    def _decision_function(self, x, y=None):
-        """
-        Computes the output scores of the last layer.
-        If `self.softmax_outputs` is True, applies softmax scaling to the
-        outputs.
-
-        Parameters
-        ----------
-        x : CArray
-            Array of input samples
-        y : CArray, optional
-
-        Returns
-        -------
-
-        scores: CArray
-            Array of shape (n_patterns, n_classes) with classification
-            score of each test pattern with respect to each training class.
-
-        """
-        raise NotImplementedError
-
-    @abstractmethod
     def get_layer_output(self, x, layer_names=None):
         """Returns the output of the desired net layer(s).
 
