@@ -232,7 +232,9 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
             return (1, layer.out_features)
         else:
             self.hook_layer_output([layer_name])
-            self._model(torch.randn(size=self.input_shape).unsqueeze(0))
+            x = torch.randn(size=self.input_shape).unsqueeze(0)
+            x = x.to(self._device)
+            self._model(x)
             self._clean_hooks()
             return tuple(self._intermediate_outputs[layer].shape)
 

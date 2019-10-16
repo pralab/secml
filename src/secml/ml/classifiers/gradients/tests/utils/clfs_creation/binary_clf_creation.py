@@ -1,8 +1,8 @@
 from secml.ml.features.normalization import CNormalizerMinMax
 from secml.ml.classifiers.loss import CLossHinge
 from secml.ml.classifiers.regularizer import CRegularizerL2
-from secml.ml.classifiers import CClassifierSVM, CClassifierKDE, \
-    CClassifierSGD, CClassifierMCSLinear, CClassifierLogistic, CClassifierRidge
+from secml.ml.classifiers import \
+    CClassifierSVM, CClassifierSGD, CClassifierLogistic, CClassifierRidge
 
 
 def binary_clf_creation(clf_idx, normalizer=False, dataset = None):
@@ -15,18 +15,10 @@ def binary_clf_creation(clf_idx, normalizer=False, dataset = None):
         clf = CClassifierLogistic()
     elif clf_idx == 'ridge':
         clf = CClassifierRidge()
-    elif clf_idx == 'lin-mcs':
-        clf = CClassifierMCSLinear(CClassifierSVM(),
-                                          num_classifiers=3,
-                                          max_features=0.5,
-                                          max_samples=0.5,
-                                          random_state=0)
-    elif clf_idx == 'kde':
-        clf = CClassifierKDE()
     elif clf_idx == 'sgd-lin':
         clf = CClassifierSGD(CLossHinge(),CRegularizerL2())
     elif clf_idx == 'sgd-rbf':
-        clf = CClassifierSGD(CLossHinge(), CRegularizerL2(),kernel='rbf')
+        clf = CClassifierSGD(CLossHinge(), CRegularizerL2(), kernel='rbf')
     else:
         raise ValueError("classifier idx not managed!")
 
