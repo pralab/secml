@@ -184,22 +184,17 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
         return self._layers
 
     @property
-    def layer_names(self):
-        return list(zip(*self.layers))[0]
+    def layer_shapes(self):
+        if self._layer_shapes is None:
+            for layer_name, layer in self.layers:
+                self.hook_layer_output([layer_name])
+                self._model(torch.randn(size=self.input_shape).unsqueeze(0))
+                self._layer_shapes[layer_name] = tuple(self._intermediate_outputs[layer].shape)
+                self._clean_hooks()
+        return self._layer_shapes
 
     def get_layer_shape(self, layer_name):
-        try:
-            layer = next(filter(lambda x: x[0] == layer_name, get_layers(self._model)))[1]
-        except:
-            # TODO remove when dropping support for python2
-            layer = list(filter(lambda x: x[0] == layer_name, get_layers(self._model)))[0][1]
-        if isinstance(layer, nn.Linear):
-            return (1, layer.out_features)
-        else:
-            self.hook_layer_output([layer_name])
-            self._model(torch.randn(size=self.input_shape).unsqueeze(0))
-            self._clean_hooks()
-            return tuple(self._intermediate_outputs[layer].shape)
+        return self._layer_shapes[layer_name]
 
     def _clean_hooks(self):
         """Removes previously defined hooks."""
