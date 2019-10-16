@@ -114,6 +114,7 @@ class CClassifierGradientPyTorchMixin(CClassifierGradientMixin):
             w = self._to_tensor(w.atleast_2d()).reshape(self.get_layer_shape(layer))
         elif y is not None and w is None:
             w = torch.zeros(layer_output.shape)
+            w = w.to(self._device)
             w[:, y] = 1
             # Apply softmax-scaling if needed
             if self.softmax_outputs is True:
