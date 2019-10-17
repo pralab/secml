@@ -186,6 +186,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
     @property
     def layer_shapes(self):
         if self._layer_shapes is None:
+            self._layer_shapes = dict()
             for layer_name, layer in self.layers:
                 self.hook_layer_output([layer_name])
                 self._model(torch.randn(size=self.input_shape).unsqueeze(0))
