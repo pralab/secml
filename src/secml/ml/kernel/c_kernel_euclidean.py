@@ -1,8 +1,9 @@
 """
 .. module:: CKernelEuclidean
-   :synopsis: Euclidean distances kernel.
+   :synopsis: Euclidean distance kernel.
 
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from sklearn import metrics
@@ -12,11 +13,11 @@ from secml.ml.kernel import CKernel
 
 
 class CKernelEuclidean(CKernel):
-    """Euclidean distances kernel.
+    """Euclidean distance kernel.
 
-    Given matrices X and Y, this is computed by::
+    Given matrices X and Y, this is computed as the negative Euclidean dist.::
 
-        K(x, y) = sqrt(dot(x, x) - 2 * dot(x, y) + dot(y, y))
+        K(x, y) = -sqrt(dot(x, x) - 2 * dot(x, y) + dot(y, y))
 
     for each pair of rows in X and in Y.
     If parameter squared is True (default False), sqrt() operation is avoided.
@@ -38,19 +39,19 @@ class CKernelEuclidean(CKernel):
     >>> from secml.ml.kernel.c_kernel_euclidean import CKernelEuclidean
 
     >>> print(CKernelEuclidean().k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
-    CArray([[20.124612 47.801674]
-     [17.464249 45.      ]])
+    CArray([[-20.124612 -47.801674]
+     [-17.464249 -45.      ]])
 
     >>> print(CKernelEuclidean().k(CArray([[1,2],[3,4]])))
-    CArray([[0.       2.828427]
-     [2.828427 0.      ]])
+    CArray([[0.       -2.828427]
+     [-2.828427 0.      ]])
 
     """
     __class_type = 'euclidean'
 
     def _k(self, x, y, squared=False,
            x_norm_squared=None, y_norm_squared=None):
-        """Compute the euclidean kernel between x and y.
+        """Compute this kernel as the negative Euclidean dist. between x and y.
 
         Parameters
         ----------
@@ -75,17 +76,17 @@ class CKernelEuclidean(CKernel):
         :meth:`.CKernel.k` : Main computation interface for kernels.
 
         """
-        return CArray(metrics.pairwise.euclidean_distances(
+        return -CArray(metrics.pairwise.euclidean_distances(
             x.get_data(), y.get_data(), squared=squared,
             X_norm_squared=x_norm_squared, Y_norm_squared=y_norm_squared))
 
     def gradient(self, x, v, squared=False):
-        """Calculates Euclidean distances kernel gradient wrt vector 'v'.
+        """Compute the kernel gradient wrt vector 'v'.
 
-        The gradient of Euclidean distances kernel is given by::
+        The gradient of Euclidean distance kernel is given by::
 
             dK(x,v)/dv = - (x - v) / k(x,v)   if squared = False (default)
-            dK(x,v)/dv = - 2 * (x - v)        if squared = True
+            dK(x,v)/dv = 2 * (x - v)        if squared = True
 
         Parameters
         ----------
@@ -134,12 +135,12 @@ class CKernelEuclidean(CKernel):
         return grad.ravel() if x_2d.shape[0] == 1 else grad
 
     def _gradient(self, x, v, squared=False):
-        """Calculates Euclidean distances kernel gradient wrt vector 'v'.
+        """Compute the kernel gradient wrt vector 'v'.
 
         The gradient of Euclidean distances kernel is given by::
 
             dK(x,v)/dv = - (x - v) / k(x,v)   if squared = False (default)
-            dK(x,v)/dv = - 2 * (x - v)        if squared = True
+            dK(x,v)/dv = 2 * (x - v)        if squared = True
 
         Parameters
         ----------
@@ -176,8 +177,8 @@ class CKernelEuclidean(CKernel):
 
         diff = (x - v_broadcast)
 
-        if squared is True:  # - 2 * (x - y)
-            return - 2 * diff
+        if squared is True:  # 2 * (x - v)
+            return 2 * diff
 
         k_grad = self._k(x, v)
         k_grad[k_grad == 0] = 1.0  # To avoid nans later
@@ -186,7 +187,7 @@ class CKernelEuclidean(CKernel):
         if diff.issparse is True:
             k_grad = k_grad.tosparse()
 
-        # - (x - y) / k(x - y)
-        grad = - diff / k_grad
+        # - (x - v) / k(x,y)
+        grad = -diff / k_grad
         # Casting to sparse if necessary
         return grad.tosparse() if diff.issparse else grad

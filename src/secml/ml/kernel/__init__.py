@@ -4,6 +4,5 @@ from .c_kernel_rbf import CKernelRBF
 from .c_kernel_poly import CKernelPoly
 from .c_kernel_histintersect import CKernelHistIntersect
 from .c_kernel_laplacian import CKernelLaplacian
-from .c_kernel_hamming import CKernelHamming
 from .c_kernel_euclidean import CKernelEuclidean
 from .c_kernel_chebyshev_distance import CKernelChebyshevDistance

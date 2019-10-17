@@ -3,7 +3,7 @@
    :synopsis: Laplacian kernel
 
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
-
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from sklearn import metrics
@@ -70,16 +70,16 @@ class CKernelLaplacian(CKernel):
         ----------
         gamma : float
             Equals to `sigma^-1` in the standard formulation of
-            laplacian kernel, is a free parameter to be used
+            Laplacian kernel, is a free parameter to be used
             to balance the computed metric.
 
         """
         self._gamma = float(gamma)
 
     def _k(self, x, y):
-        """Compute the laplacian kernel between x and y.
+        """Compute the Laplacian kernel between x and y.
 
-        The gradient of laplacian kernel is given by::
+        The gradient of Laplacian kernel is given by::
 
             dK(x,v)/dv = gamma * k(x,v) * sign(x - v)
 
@@ -103,64 +103,17 @@ class CKernelLaplacian(CKernel):
         return CArray(metrics.pairwise.laplacian_kernel(
             CArray(x).get_data(), CArray(y).get_data(), gamma=self.gamma))
 
-    def gradient(self, x, v):
-        """Calculates laplacian kernel gradient wrt vector 'v'.
-
-        The gradient of laplacian kernel is given by::
-
-            dK(x,v)/dv =  gamma * k(x,v) * sign(x - v)
-
-        Parameters
-        ----------
-        x : CArray
-            First array of shape (n_x, n_features).
-        v : CArray
-            Second array of shape (n_features, ) or (1, n_features).
-
-        Returns
-        -------
-        kernel_gradient : CArray
-            Kernel gradient of x with respect to vector v. Array of
-            shape (n_x, n_features) if n_x > 1, else a flattened
-            array of shape (n_features, ).
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-        >>> from secml.ml.kernel.c_kernel_laplacian import CKernelLaplacian
-
-        >>> array = CArray([[15,0], [0,55]])
-        >>> vector = CArray([2,5])
-        >>> print(CKernelLaplacian(gamma=0.01).gradient(array, vector))
-        CArray([[ 0.008353 -0.008353]
-         [-0.005945  0.005945]])
-
-        >>> print(CKernelLaplacian().gradient(vector, vector))
-        CArray([0. 0.])
-
-        """
-        # Checking if second array is a vector
-        if v.is_vector_like is False:
-            raise ValueError(
-                "kernel gradient can be computed only wrt vector-like arrays.")
-
-        x_2d = x.atleast_2d()
-        v_2d = v.atleast_2d()
-
-        grad = self._gradient(x_2d, v_2d)
-        return grad.ravel() if x_2d.shape[0] == 1 else grad
-
     def _gradient(self, x, v):
-        """Calculate laplacian kernel gradient wrt vector 'v'.
+        """Calculate Laplacian kernel gradient wrt vector 'v'.
 
-        The gradient of laplacian kernel is given by::
+        The gradient of Laplacian kernel is given by::
 
             dK(x,v)/dv =  gamma * k(x,v) * sign(x - v)
 
         Parameters
         ----------
         x : CArray
-            First array of shape (n_x, n_features).
+            First array of shape (nx, n_features).
         v : CArray
             Second array of shape (1, n_features).
 
@@ -168,7 +121,7 @@ class CKernelLaplacian(CKernel):
         -------
         kernel_gradient : CArray
             Kernel gradient of u with respect to vector v,
-            shape (1, n_features).
+            shape (nx, n_features).
 
         See Also
         --------
