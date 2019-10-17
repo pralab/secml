@@ -250,6 +250,12 @@ class TestCClassifierPyTorch(CUnitTest):
         self.assertTrue(len(list(self.clf.layer_names)) >= 1)
         self.logger.info("Layers: " + ", ".join(self.clf.layer_names))
 
+    def _test_layer_shapes(self):
+        self.logger.info("Testing layer shapes property")
+        layer_shapes = self.clf.layer_shapes
+        for i in layer_shapes:
+            self.logger.info("Layer {}: shape {}".format(i, layer_shapes[i]))
+
     def _test_set_params(self):
         self.logger.info("Testing set params")
 
@@ -307,6 +313,7 @@ class TestCClassifierPyTorch(CUnitTest):
         self._dataset_creation_blobs()
         self._model_creation_blobs()
         self._test_layer_names()
+        self._test_layer_shapes()
         self._test_get_params()
         self.clf.fit(self.tr)
         self._test_set_params()
@@ -324,6 +331,7 @@ class TestCClassifierPyTorch(CUnitTest):
         self._dataset_creation_mnist()
         self._model_creation_mnist()
         self._test_layer_names()
+        self._test_layer_shapes()
         self._test_get_params()
         self.clf.fit(self.tr)
         self._test_performance()
@@ -340,6 +348,7 @@ class TestCClassifierPyTorch(CUnitTest):
         self._dataset_creation_resnet()
         self._model_creation_resnet()
         self._test_layer_names()
+        self._test_layer_shapes()
         self._test_get_params()
         self._test_out_at_layer("layer4.1.relu")
         self._test_out_at_layer(['bn1', 'fc'])
