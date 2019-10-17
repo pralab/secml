@@ -75,6 +75,8 @@ class CClassifierGradientPyTorchMixin(CClassifierGradientDNNMixin):
         elif y is not None and w is None and layer is None:
             w = torch.zeros(layer_output.shape)
             w[0, y] = 1
+            w = w.to(self._device)
+
             # Apply softmax-scaling if needed
             if self.softmax_outputs is True:
                 out_carray = self._from_tensor(layer_output.squeeze(0).data)

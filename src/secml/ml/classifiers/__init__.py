@@ -1,7 +1,5 @@
 from .c_classifier import CClassifier
 from .c_classifier_linear import CClassifierLinear
-from .c_classifier_kde import CClassifierKDE
-from .c_classifier_mcs_linear import CClassifierMCSLinear
 from .c_classifier_dnn import CClassifierDNN
 
 from .sklearn.c_classifier_sklearn import CClassifierSkLearn
