@@ -106,12 +106,6 @@ class CClassifierDNN(CClassifier):
         raise NotImplementedError
 
     def get_params(self):
-        """
-
-        Returns
-        -------
-
-        """
         return super(CClassifierDNN, self).get_params()
 
     @abstractmethod
@@ -209,3 +203,4 @@ class CClassifierDNN(CClassifier):
 
         """
         raise NotImplementedError
+

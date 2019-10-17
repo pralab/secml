@@ -186,12 +186,13 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
     @property
     def layer_shapes(self):
         if self._layer_shapes is None:
-            self._layer_shapes = dict()
+            self._layer_shapes = {}
+            layer_names = self.layer_names
+            self.hook_layer_output(layer_names)
+            self._model(torch.randn(size=self.input_shape).unsqueeze(0))
             for layer_name, layer in self.layers:
-                self.hook_layer_output([layer_name])
-                self._model(torch.randn(size=self.input_shape).unsqueeze(0))
                 self._layer_shapes[layer_name] = tuple(self._intermediate_outputs[layer].shape)
-                self._clean_hooks()
+            self._clean_hooks()
         return self._layer_shapes
 
     def get_layer_shape(self, layer_name):
@@ -201,6 +202,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
         """Removes previously defined hooks."""
         for handler in self._handlers:
             handler.remove()
+        self._intermediate_outputs = None
 
     def _hook_forward(self, module_name, input, output):
         """Hooks the module's `forward` method so that it stores
