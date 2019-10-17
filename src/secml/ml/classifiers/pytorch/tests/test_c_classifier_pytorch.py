@@ -44,6 +44,7 @@ class Flatten(nn.Module):
     def forward(self, input):
         return input.view(input.size(0), -1)
 
+
 od = OrderedDict([
     ('conv1', nn.Conv2d(1, 10, kernel_size=5)),
     ('pool1', nn.MaxPool2d(2)),
@@ -105,7 +106,7 @@ class TestCClassifierPyTorch(CUnitTest):
         self.ts.X /= 255
 
     def _dataset_creation_resnet(self):
-        dataset = CDLRandom(n_samples=10, n_features=3*224*224).load()
+        dataset = CDLRandom(n_samples=10, n_features=3 * 224 * 224).load()
 
         # Split in training and test
         splitter = CTrainTestSplit(train_size=8,
@@ -118,14 +119,13 @@ class TestCClassifierPyTorch(CUnitTest):
         self.tr.X = nmz.fit_transform(self.tr.X)
         self.ts.X = nmz.transform(self.ts.X)
 
-
     def _model_creation_blobs(self):
         net = Net(n_features=self.n_features, n_classes=self.n_classes)
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(net.parameters(),
                               lr=0.1, momentum=0.9)
 
-        self.clf = CClassifierPyTorch(torch_model=net,
+        self.clf = CClassifierPyTorch(model=net,
                                       loss=criterion,
                                       optimizer=optimizer,
                                       epochs=10,
@@ -137,7 +137,7 @@ class TestCClassifierPyTorch(CUnitTest):
         optimizer = optim.SGD(net.parameters(),
                               lr=0.001, momentum=0.9)
 
-        self.clf = CClassifierPyTorch(torch_model=net,
+        self.clf = CClassifierPyTorch(model=net,
                                       loss=criterion,
                                       optimizer=optimizer,
                                       epochs=10,
@@ -150,7 +150,7 @@ class TestCClassifierPyTorch(CUnitTest):
         optimizer = optim.SGD(net.parameters(),
                               lr=0.001, momentum=0.9)
 
-        self.clf = CClassifierPyTorch(torch_model=net,
+        self.clf = CClassifierPyTorch(model=net,
                                       loss=criterion,
                                       optimizer=optimizer,
                                       epochs=10,
@@ -175,7 +175,7 @@ class TestCClassifierPyTorch(CUnitTest):
 
         self.logger.info("Accuracy of PyTorch Model: {:}".format(acc_torch))
         self.assertGreaterEqual(acc_torch, 0.0,
-                           "Accuracy of PyTorch Model: {:}".format(acc_torch))
+                                "Accuracy of PyTorch Model: {:}".format(acc_torch))
 
     def _test_predict(self):
         """Confirm that the decision function works."""
@@ -236,10 +236,25 @@ class TestCClassifierPyTorch(CUnitTest):
             out = out[:10]
         self.logger.debug("Output of get_layer_output: {:}".format(out))
 
+        if layer is None:
+            self.assertTrue(
+                (self.clf.get_layer_output(x, layer_names=layer) -
+                 self.clf.decision_function(x)).sum() == 0)
+            last_layer_name = self.clf.layer_names[-1]
+            self.assertTrue(
+                (self.clf.get_layer_output(x, layer_names=last_layer_name)[last_layer_name] -
+                 self.clf.decision_function(x)).sum() == 0)
+
     def _test_layer_names(self):
         self.logger.info("Testing layers property")
         self.assertTrue(len(list(self.clf.layer_names)) >= 1)
         self.logger.info("Layers: " + ", ".join(self.clf.layer_names))
+
+    def _test_layer_shapes(self):
+        self.logger.info("Testing layer shapes property")
+        layer_shapes = self.clf.layer_shapes
+        for i in layer_shapes:
+            self.logger.info("Layer {}: shape {}".format(i, layer_shapes[i]))
 
     def _test_set_params(self):
         self.logger.info("Testing set params")
@@ -298,6 +313,7 @@ class TestCClassifierPyTorch(CUnitTest):
         self._dataset_creation_blobs()
         self._model_creation_blobs()
         self._test_layer_names()
+        self._test_layer_shapes()
         self._test_get_params()
         self.clf.fit(self.tr)
         self._test_set_params()
@@ -308,7 +324,6 @@ class TestCClassifierPyTorch(CUnitTest):
         self._test_softmax_outputs()
         self._test_save_load(self._model_creation_blobs)
 
-
     def test_mnist(self):
         self.logger.info("___________________")
         self.logger.info("Testing MNIST Model")
@@ -316,6 +331,7 @@ class TestCClassifierPyTorch(CUnitTest):
         self._dataset_creation_mnist()
         self._model_creation_mnist()
         self._test_layer_names()
+        self._test_layer_shapes()
         self._test_get_params()
         self.clf.fit(self.tr)
         self._test_performance()
@@ -332,6 +348,7 @@ class TestCClassifierPyTorch(CUnitTest):
         self._dataset_creation_resnet()
         self._model_creation_resnet()
         self._test_layer_names()
+        self._test_layer_shapes()
         self._test_get_params()
         self._test_out_at_layer("layer4.1.relu")
         self._test_out_at_layer(['bn1', 'fc'])
@@ -339,6 +356,7 @@ class TestCClassifierPyTorch(CUnitTest):
         self._test_grad_x(['fc', None])
         self._test_softmax_outputs()
         self._test_save_load(self._model_creation_resnet)
+
 
 if __name__ == '__main__':
     TestCClassifierPyTorch.main()

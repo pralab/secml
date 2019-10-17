@@ -1,5 +1,6 @@
 from .c_classifier import CClassifier
 from .c_classifier_linear import CClassifierLinear
+from .c_classifier_dnn import CClassifierDNN
 
 from .sklearn.c_classifier_sklearn import CClassifierSkLearn
 from .sklearn.c_classifier_decision_tree import CClassifierDecisionTree

@@ -6,7 +6,6 @@
 
 """
 from functools import reduce
-from collections import OrderedDict
 
 import torch
 from torch import nn
@@ -16,7 +15,7 @@ from torchvision.transforms import transforms
 
 from secml.array import CArray
 from secml.data.loader import CDataLoaderPyTorch
-from secml.ml.classifiers import CClassifier
+from secml.ml.classifiers import CClassifierDNN
 from secml.ml.classifiers.gradients import CClassifierGradientPyTorchMixin
 from secml.utils import SubLevelsDict, merge_dicts
 
@@ -48,12 +47,11 @@ def get_layers(net):
     #         yield (name, layer)
 
 
-
-class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
+class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
     """Generic wrapper for PyTorch model."""
     __class_type = 'pytorch-clf'
 
-    def __init__(self, torch_model, loss=None, optimizer=None,
+    def __init__(self, model, loss=None, optimizer=None,
                  input_shape=None,
                  random_state=None, preprocess=None,
                  softmax_outputs=False,
@@ -64,11 +62,12 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
 
         Parameters
         ----------
-        torch_model:
-            model to use
+        model:
+            `torch.nn.Module` object to use as classifier
         loss:
-            loss
+            loss object from `torch.nn`
         optimizer:
+            optimizer object from `torch.optim`
 
         random_state: int or None, optional
             random state to use for initializing the model weights.
@@ -96,15 +95,14 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
 
         """
 
-        super(CClassifierPyTorch, self).__init__(preprocess=preprocess)
-
-        self._device = torch.device("cuda" if use_cuda else "cpu")
-        self._model = torch_model
+        self._device = self._set_device()
         self._random_state = random_state
+        super(CClassifierPyTorch, self).__init__(model=model,
+                                                 preprocess=preprocess,
+                                                 input_shape=input_shape,
+                                                 softmax_outputs=softmax_outputs)
         self._init_model()
-        self._trained = False
 
-        self._input_shape = input_shape
         if self._input_shape is None:
             # try to infer from first layer
             first_layer = list(self._model._modules.values())[0]
@@ -119,6 +117,7 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
             raise ValueError("Please remove softmax redundancy. Either "
                              "use `torch.nn.NLLLoss` or remove softmax "
                              "layer from the network.")
+
         self._loss = loss
         self._optimizer = optimizer
 
@@ -170,78 +169,40 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         return self._epochs
 
     @property
-    def device(self):
-        """Returns the device that is being used for model and data."""
-        return self._device
-
-    @property
     def batch_size(self):
         """Returns the batch size used for the dataset loader."""
         return self._batch_size
 
     @property
-    def input_shape(self):
-        """Returns the input shape of the first layer of the neural network."""
-        return self._input_shape
-
-    @input_shape.setter
-    def input_shape(self, input_shape):
-        self._input_shape = input_shape
-
-    @property
-    def softmax_outputs(self):
-        return self._softmax_outputs
-
-    @softmax_outputs.setter
-    def softmax_outputs(self, active):
-        """
-
-        Parameters
-        ----------
-        active : bool
-            whether apply softmax to the final scores
-
-        Notes
-        ----------
-        If the loss is an instance of `nn.CrossEntropyLoss` or
-        the network already has a softmax operation in the end
-        this parameter will be disabled.
-        """
-        self.check_softmax()
-        self._softmax_outputs = active
-
-    @property
     def layers(self):
         """Returns the layers of the model, if possible. """
-        if isinstance(self._model, nn.Module):
-            return get_layers(self._model)
-        else:
-            raise TypeError("The input model must be an instance of `nn.Module`.")
+        if self._layers is None:
+            if isinstance(self._model, nn.Module):
+                self._layers = get_layers(self._model)
+            else:
+                raise TypeError("The input model must be an instance of `nn.Module`.")
+        return self._layers
 
     @property
-    def layer_names(self):
-        return list(zip(*self.layers))[0]
+    def layer_shapes(self):
+        if self._layer_shapes is None:
+            self._layer_shapes = {}
+            layer_names = self.layer_names
+            self.hook_layer_output(layer_names)
+            self._model(torch.randn(size=self.input_shape).unsqueeze(0))
+            for layer_name, layer in self.layers:
+                self._layer_shapes[layer_name] = tuple(self._intermediate_outputs[layer].shape)
+            self._clean_hooks()
+        return self._layer_shapes
 
     def get_layer_shape(self, layer_name):
-        try:
-            layer = next(filter(lambda x: x[0] == layer_name, get_layers(self._model)))[1]
-        except:
-            # TODO remove when dropping support for python2
-            layer = list(filter(lambda x: x[0] == layer_name, get_layers(self._model)))[0][1]
-        if isinstance(layer, nn.Linear):
-            return (1, layer.out_features)
-        else:
-            self.hook_layer_output([layer_name])
-            x = torch.randn(size=self.input_shape).unsqueeze(0)
-            x = x.to(self._device)
-            self._model(x)
-            self._clean_hooks()
-            return tuple(self._intermediate_outputs[layer].shape)
+        return self._layer_shapes[layer_name]
 
     def _clean_hooks(self):
         """Removes previously defined hooks."""
         for handler in self._handlers:
             handler.remove()
+        self._intermediate_outputs = None
 
     def _hook_forward(self, module_name, input, output):
         """Hooks the module's `forward` method so that it stores
@@ -270,6 +231,9 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
                 self._handlers.append(layer.register_forward_hook(self._hook_forward))
             else:
                 pass
+
+    def _set_device(self):
+        return torch.device("cuda" if use_cuda else "cpu")
 
     def n_jobs(self):
         """Returns the number of workers being used for loading
@@ -445,48 +409,10 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         self._trained = True
         return self._model
 
-    def predict(self, x, return_decision_function=False):
-        """
-
-        Parameters
-        ----------
-        x : CArray
-            Array with samples to classify, of shape (n_patterns, n_features).
-        return_decision_function : bool, optional
-            if True, returns the decision_function value along
-            with the predictions. Default is False.
-
-        Returns
-        -------
-        labels : CArray
-            Flat dense array of shape (n_patterns,) with the label assigned
-             to each test pattern. The classification label is the label of
-             the class associated with the highest score.
-        scores : CArray, optional
-            Array of shape (n_patterns, n_classes) with classification
-             score of each test pattern with respect to each training class.
-            Will be returned only if `return_decision_function` is True.
-
-        """
-        self._check_is_fitted()
-
-        scores = self._decision_function(x)
-
-        # The classification label is the label of the class
-        # associated with the highest score
-        labels = scores.argmax(axis=1)
-
-        return (labels, scores) if return_decision_function is True else labels
-
     def _decision_function(self, x, y=None):
         """Implementation of the decision function."""
 
-        x_carray = CArray(x).atleast_2d()
-
-        # Transform data if a preprocess is defined
-        x_carray = self._preprocess_data(x_carray)
-
-        data_loader = self._data_loader(x_carray, num_workers=self._n_jobs,
+        data_loader = self._data_loader(x, num_workers=self._n_jobs,
                                         batch_size=self._batch_size)
 
         # Switch to evaluation mode
@@ -574,7 +500,7 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         Returns
         -------
         torch.Tensor
-            Output of the desired layer.
+            Output of the desired layer(s).
 
         """
         # Switch to evaluation mode
@@ -591,9 +517,6 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
             return {layer_names[i]: v for i, (k, v) in enumerate(self._intermediate_outputs.items())}
         else:
             raise ValueError("Pass layer names as a list or just None for last layer output.")
-
-    def save_checkpoint(self):
-        pass
 
     def save_model(self, filename):
         """
