@@ -3,7 +3,7 @@ from secml.ml.features.tests import CPreProcessTestCases
 from sklearn.preprocessing import StandardScaler
 
 from secml.array import CArray
-from secml.ml.features.normalization import CNormalizerMeanSTD
+from secml.ml.features.normalization import CNormalizerMeanStd
 
 
 class TestCNormalizerMeanStd(CPreProcessTestCases):
@@ -20,7 +20,7 @@ class TestCNormalizerMeanStd(CPreProcessTestCases):
             target = CArray(StandardScaler().fit_transform(
                 array.astype(float).tondarray()))
             # Our normalizer
-            n = CNormalizerMeanSTD().fit(array)
+            n = CNormalizerMeanStd().fit(array)
             result = n.transform(array)
 
             self.logger.info("Correct result is:\n{:}".format(target))
@@ -33,7 +33,7 @@ class TestCNormalizerMeanStd(CPreProcessTestCases):
             target = CArray(StandardScaler(with_std=False).fit_transform(
                 array.astype(float).tondarray()))
             # Our normalizer
-            n = CNormalizerMeanSTD(with_std=False).fit(array)
+            n = CNormalizerMeanStd(with_std=False).fit(array)
             result = n.transform(array)
 
             self.logger.info("Correct result is:\n{:}".format(target))
@@ -59,7 +59,7 @@ class TestCNormalizerMeanStd(CPreProcessTestCases):
                 self.logger.info(
                     "Normalizing using mean: {:} std: {:}".format(mean, std))
 
-                n = CNormalizerMeanSTD(mean=mean, std=std).fit(array)
+                n = CNormalizerMeanStd(mean=mean, std=std).fit(array)
                 out = n.transform(array)
 
                 self.logger.info("Result is:\n{:}".format(out))
