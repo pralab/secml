@@ -29,22 +29,6 @@ CClassifierLinear
    :undoc-members:
    :show-inheritance:
 
-CClassifierKDE
---------------
-
-.. automodule:: secml.ml.classifiers.c_classifier_kde
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-CClassifierMCSLinear
---------------------
-
-.. automodule:: secml.ml.classifiers.c_classifier_mcs_linear
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 CClassifierSkLearn
 ------------------
 
