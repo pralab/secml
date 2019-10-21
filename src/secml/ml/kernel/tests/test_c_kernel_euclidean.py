@@ -1,5 +1,4 @@
 from secml.ml.kernel.tests import CCKernelTestCases
-from secml.ml.kernel import CKernelEuclidean
 
 
 class TestCKernelEuclidean(CCKernelTestCases):

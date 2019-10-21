@@ -11,6 +11,7 @@ from six.moves import range
 
 from secml.array import CArray
 from secml.core.type_utils import is_scalar
+from secml.core.decorators import deprecated
 from secml.ml.features.normalization import CNormalizerLinear
 
 
@@ -183,7 +184,7 @@ class CNormalizerMeanStd(CNormalizerLinear):
 
         Returns
         -------
-        CNormalizerMeanSTD
+        CNormalizerMeanStd
             Instance of the trained normalizer.
 
         Examples
@@ -270,3 +271,11 @@ class CNormalizerMeanStd(CNormalizerLinear):
             self._compute_w_and_b()
 
         return super(CNormalizerMeanStd, self).transform(x, caching)
+
+
+@deprecated('0.10', "use `CNormalizerMeanStd` instead.")
+class CNormalizerMeanSTD(CNormalizerMeanStd):
+
+    def __init__(self, *args, **kwargs):
+
+        super(CNormalizerMeanSTD, self).__init__(*args, **kwargs)

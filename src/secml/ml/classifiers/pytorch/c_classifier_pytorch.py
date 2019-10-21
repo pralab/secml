@@ -189,7 +189,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
             self._layer_shapes = {}
             layer_names = self.layer_names
             self.hook_layer_output(layer_names)
-            self._model(torch.randn(size=self.input_shape).unsqueeze(0))
+            x = torch.randn(size=self.input_shape).unsqueeze(0)
+            x = x.to(self._device)
+            self._model(x)
             for layer_name, layer in self.layers:
                 self._layer_shapes[layer_name] = tuple(self._intermediate_outputs[layer].shape)
             self._clean_hooks()

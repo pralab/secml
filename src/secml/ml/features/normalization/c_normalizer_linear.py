@@ -25,14 +25,8 @@ class CNormalizerLinear(CNormalizer):
 
     where m, q are specific constants for each normalization.
 
-    .. warning::
-
-        Currently only few linear normalizers work with sparse arrays.
-
     Notes
     -----
-    Only arrays of dense form are supported.
-
     Differently from numpy, we manage flat vectors as 2-Dimensional of
     shape (1, array.size). This means that normalizing a flat vector is
     equivalent to transform array.atleast_2d(). To obtain a numpy-style
