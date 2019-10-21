@@ -14,14 +14,6 @@ secml.ml.classifiers.gradients.mixin\_classifier\_gradient module
    :undoc-members:
    :show-inheritance:
 
-secml.ml.classifiers.gradients.mixin\_classifier\_gradient\_kde module
-----------------------------------------------------------------------
-
-.. automodule:: secml.ml.classifiers.gradients.mixin_classifier_gradient_kde
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 secml.ml.classifiers.gradients.mixin\_classifier\_gradient\_linear module
 -------------------------------------------------------------------------
 
