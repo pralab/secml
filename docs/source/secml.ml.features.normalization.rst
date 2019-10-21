@@ -23,7 +23,7 @@ CNormalizerLinear
    :undoc-members:
    :show-inheritance:
 
-CNormalizerMeanSTD
+CNormalizerMeanStd
 ------------------
 
 .. automodule:: secml.ml.features.normalization.c_normalizer_mean_std
