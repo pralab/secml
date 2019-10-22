@@ -5,6 +5,7 @@
 .. moduleauthor:: Maura Pintor <maura.pintor@unica.it>
 
 """
+import logging
 from functools import reduce
 
 import torch
@@ -537,7 +538,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
 
         torch.save(state, filename)
 
-    def load_model(self, filename):
+    def load_model(self, filename, classes=None):
         """
         Restores the model and optimizer's parameters.
         Notes: the model class and optimizer should be
@@ -547,11 +548,36 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
         ----------
         filename : str
             path where to find the stored model
+        classes : list, tuple or None, optional
+            This parameter is used only if the model was stored
+            with native PyTorch.
+            Class labels (sorted) for matching classes to indexes
+            in the loaded model. If classes is None, the classes
+            will be assigned new indexes from 0 to n_classes.
 
         """
         state = torch.load(filename, map_location=self._device)
-
-        self._model.load_state_dict(state['model_state'])
-        self._optimizer.load_state_dict(state['optimizer_state'])
-        self._n_features = state['n_features']
-        self._classes = state['classes']
+        keys = ['model_state', 'optimizer_state', 'n_features', 'classes']
+        if all(key in state for key in keys):
+            if classes is not None:
+                logging.warning("Model was saved within `secml` framework. "
+                                "The parameter `classes` will be ignored.")
+            # model was stored with save_model method
+            self._model.load_state_dict(state['model_state'])
+            self._optimizer.load_state_dict(state['optimizer_state'])
+            self._n_features = state['n_features']
+            self._classes = state['classes']
+        else:
+            # model was stored outside secml framework
+            try:
+                self._model.load_state_dict(state)
+                # This part is important to prevent not fitted
+                if classes is None:
+                    self._classes = CArray.arange(self.layer_shapes[self.layer_names[-1]][1])
+                else:
+                    self._classes = CArray(classes)
+                self._n_features = reduce(lambda x, y: x * y, self.input_shape)
+                self._trained = True
+            except Exception as e:
+                logging.error("Model's state dict should be stored according to "
+                              "PyTorch docs. Use ```torch.save(model.state_dict())```.")
