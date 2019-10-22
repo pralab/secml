@@ -20,7 +20,7 @@ class TestCDataLoaderTinyImageNet(CUnitTest):
 
     def _create_ds(self):
         torchvision_dataset = datasets.MNIST
-        ds = CDataLoaderTorchDataset(torchvision_dataset, train=True).load()
+        ds = CDataLoaderTorchDataset(torchvision_dataset, train=True, download=True).load()
         splitter = CTrainTestSplit(train_size=self.n_samples_tr,
                                    test_size=self.n_samples_ts,
                                    random_state=0)
