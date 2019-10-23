@@ -11,8 +11,8 @@ from torchvision import datasets
 from torch import nn
 from torch import optim
 
-class TestCDataLoaderTinyImageNet(CUnitTest):
-    """Unittest for CDataLoaderPyTorch"""
+class TestCDataLoaderTorchDataset(CUnitTest):
+    """Unittest for CDataLoaderTorchDataset"""
 
     def setUp(self):
         self.n_samples_tr = 100  # number of training set samples
