@@ -122,6 +122,9 @@ package:docs:
   except:
     refs:
       - schedules
+      - tags
+    changes:
+      - src/secml/VERSION
     variables:
       - $SKIP_TESTS
 
