@@ -18,3 +18,10 @@ except ImportError:
     pass  # pytorch is an extra component
 else:
     from .pytorch.c_classifier_pytorch import CClassifierPyTorch
+
+try:
+    import cleverhans
+except ImportError:
+    pass  # cleverhans is an extra component
+else:
+    from .tf.c_model_cleverhans import CModelCleverhans

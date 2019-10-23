@@ -30,3 +30,11 @@ CAttackEvasionPGDLS
    :undoc-members:
    :show-inheritance:
 
+CAttackEvasionCleverhans
+------------------------
+
+.. automodule:: secml.adv.attacks.evasion.c_attack_evasion_cleverhans
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
