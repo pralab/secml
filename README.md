@@ -53,7 +53,7 @@ macOS versions and Linux distributions.
 However, to support additional advanced features more packages can be necessary
 depending on the Operating System used:
 
- - Linux (Ubuntu >= 16.04 or equivalent dist):
+ - Linux (Ubuntu >= 16.04 or equivalent dist)
    - `python-tk` (Python 2.7), `python3-tk` (Python >= 3.5), for running
      MatplotLib Tk-based backends;
    - NVIDIA<sup>®</sup> CUDA<sup>®</sup> Toolkit for running `tf-gpu`
@@ -61,6 +61,7 @@ depending on the Operating System used:
      See the [TensorFlow Guide](https://www.tensorflow.org/install/gpu).
       
  - macOS (macOS >= 10.12 Sierra)
+   - Nothing to note.
 
 
 ### Installation process
@@ -106,8 +107,6 @@ of the `[extras]` section.
 ### Available extra components
  - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
    Will install: `torch >= 1.1`, `torchvision >= 0.2.2`
-
-### _Coming soon_
  - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
    a Python library to benchmark vulnerability of machine learning systems
    to adversarial examples. Will install: `tensorflow >= 1.14.*, < 2`, `cleverhans`
@@ -145,12 +144,6 @@ _(coming soon)_ The `secml.explanation` package contains few different
 explainable Machine Learning methods that allow interpreting classifiers
 decisions by analyzing the relevant components such as features or training
 prototypes.
-
-_(coming soon)_ The `secml.tf.clvhs` package contains support classes for the
-[CleverHans](https://github.com/tensorflow/cleverhans) library for benchmarking
-machine learning systems' vulnerability to adversarial examples. 
-This package will be available only if the extra component `cleverhans`
-has been specified during installation.
 
 
 ## Contributors
@@ -227,6 +220,9 @@ List of contributors:
   Computing in Science & Engineering, vol. 9, no. 3, pp. 90-95, 2007.](
   https://doi.org/10.1109/MCSE.2007.55)
 - `pytorch` Paszke, Adam, et al. "Automatic differentiation in pytorch.", NIPS-W, 2017.
+- `cleverhans` [Papernot, Nicolas, et al. "Technical Report on the CleverHans v2.1.0 
+  Adversarial Examples Library." arXiv preprint arXiv:1610.00768 (2018).](
+  https://arxiv.org/abs/1610.00768)
 
 
 ## Copyright
