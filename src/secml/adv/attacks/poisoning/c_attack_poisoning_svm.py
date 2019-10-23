@@ -14,23 +14,25 @@ class CAttackPoisoningSVM(CAttackPoisoning):
     """Poisoning attacks against Support Vector Machines (SVMs).
 
     This is an implementation of the attack in https://arxiv.org/pdf/1206.6389:
+
      - B. Biggio, B. Nelson, and P. Laskov. Poisoning attacks against
        support vector machines. In J. Langford and J. Pineau, editors,
        29th Int'l Conf. on Machine Learning, pages 1807-1814. Omnipress, 2012.
 
     where the gradient is computed as described in Eq. (10) in
     https://www.usenix.org/conference/usenixsecurity19/presentation/demontis:
+
      - A. Demontis, M. Melis, M. Pintor, M. Jagielski, B. Biggio, A. Oprea,
        C. Nita-Rotaru, and F. Roli. Why do adversarial attacks transfer?
        Explaining transferability of evasion and poisoning attacks.
        In 28th USENIX Security Symposium. USENIX Association, 2019.
 
     For more details on poisoning attacks, see also:
+
      - https://arxiv.org/abs/1804.00308, IEEE Symp. SP 2018
      - https://arxiv.org/abs/1712.03141, Patt. Rec. 2018
      - https://arxiv.org/abs/1708.08689, AISec 2017
      - https://arxiv.org/abs/1804.07933, ICML 2015
-
 
     Parameters
     ----------

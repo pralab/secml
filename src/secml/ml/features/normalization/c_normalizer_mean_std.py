@@ -275,6 +275,7 @@ class CNormalizerMeanStd(CNormalizerLinear):
 
 @deprecated('0.10', "use `CNormalizerMeanStd` instead.")
 class CNormalizerMeanSTD(CNormalizerMeanStd):
+    """Normalize with given mean and standard deviation."""
 
     def __init__(self, *args, **kwargs):
 
