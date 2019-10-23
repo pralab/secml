@@ -409,9 +409,8 @@ class CAttackEvasionPGDLS(CAttackEvasion):
         self._solver.minimize(x_init)
         self._solution_from_solver()
 
-        # if classifier is linear, or dmax is 0, return
-        if self._classifier.is_linear() or self.dmax == 0 or \
-                double_init is False:
+        # if dmax is 0 or no double init should be performed, return
+        if self.dmax == 0 or double_init is False:
             return self._x_opt, self._f_opt
 
         # value of objective function at x_opt
