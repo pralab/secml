@@ -87,6 +87,7 @@ intersphinx_mapping = {
     'sklearn': ("https://scikit-learn.org/stable/", None),
     'matplotlib': ('https://matplotlib.org/', None),
     'pytorch': ('https://pytorch.org/docs/stable/', None),
+    'cleverhans': ('https://cleverhans.readthedocs.io/en/latest/', None),
 }
 
 # -- Options for HTML output -------------------------------------------------

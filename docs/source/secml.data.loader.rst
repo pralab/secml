@@ -87,6 +87,14 @@ CDataLoaderSvmLight
    :undoc-members:
    :show-inheritance:
 
+CDataLoaderTorchDataset
+-----------------------
+
+.. automodule:: secml.data.loader.c_dataloader_torchvision
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 loader\_utils
 -------------
 

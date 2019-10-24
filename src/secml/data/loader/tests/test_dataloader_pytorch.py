@@ -3,9 +3,9 @@ from math import ceil
 from secml.testing import CUnitTest
 
 try:
-    import torch
+    import torchvision
 except ImportError:
-    CUnitTest.importskip("torch")
+    CUnitTest.importskip("torchvision")
 else:
     from torchvision import transforms
 
