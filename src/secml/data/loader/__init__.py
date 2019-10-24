@@ -10,13 +10,9 @@ from .c_dataloader_icubworld import CDataLoaderICubWorld28
 
 try:
     import torch
+    import torchvision
 except ImportError:
     pass  # pytorch is an extra component
 else:
     from .c_dataloader_pytorch import CDataLoaderPyTorch
-try:
-    import torchvision
-except ImportError:
-    pass  # torchvision is an extra component
-else:
     from .c_dataloader_torchvision import CDataLoaderTorchDataset

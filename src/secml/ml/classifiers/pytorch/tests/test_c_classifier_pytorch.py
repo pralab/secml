@@ -1,17 +1,16 @@
 import os
 from collections import OrderedDict
 
-import torchvision
-
 from secml.array import CArray
 from secml.testing import CUnitTest
 
 try:
     import torch
+    import torchvision
 except ImportError:
     CUnitTest.importskip("torch")
+    CUnitTest.importskip("torchvision")
 else:
-    import torch
     from torch import nn, optim
     from torchvision import transforms
 

@@ -1,15 +1,24 @@
 import logging
 from collections import OrderedDict
 
-from secml.data.loader.c_dataloader_torchvision import CDataLoaderTorchDataset
+from secml.testing import CUnitTest
+
+try:
+    import torch
+    import torchvision
+except ImportError:
+    CUnitTest.importskip("torch")
+    CUnitTest.importskip("torchvision")
+else:
+    from torch import nn, optim
+    from torchvision import datasets
+
+from secml.data.loader import CDataLoaderTorchDataset
 from secml.data.splitter import CTrainTestSplit
 from secml.ml.classifiers import CClassifierPyTorch
 from secml.ml.features import CNormalizerMeanStd
 from secml.ml.peval.metrics import CMetric
-from secml.testing import CUnitTest
-from torchvision import datasets
-from torch import nn
-from torch import optim
+
 
 class TestCDataLoaderTorchDataset(CUnitTest):
     """Unittest for CDataLoaderTorchDataset"""
