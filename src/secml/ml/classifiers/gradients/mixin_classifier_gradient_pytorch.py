@@ -2,8 +2,8 @@
 .. module:: CClassifierGradientPytorchMixin
    :synopsis: Mixin for Pytorch classifier gradients.
 
-.. moduleauthor:: Marco Melis <marco.melis@diee.unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@diee.unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 .. moduleauthor:: Maura Pintor <maura.pintor@unica.it>
 
 """

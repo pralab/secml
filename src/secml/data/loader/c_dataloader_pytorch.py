@@ -11,6 +11,7 @@ from secml.data.c_dataset_pytorch import CDatasetPyTorch
 
 
 class CDataLoaderPyTorch:
+
     def __init__(self, data, labels=None, batch_size=4, shuffle=False,
                  transform=None, num_workers=1):
         self._dataset = CDatasetPyTorch(data,
