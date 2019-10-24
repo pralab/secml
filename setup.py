@@ -174,7 +174,7 @@ setup(
     maintainer='Marco Melis',
     maintainer_email='marco.melis@unica.it',
     packages=find_packages('src', exclude=[
-        "*.tests", "*.tests.*", "tests.*", "tests", "*.testing"]),
+        "*.tests", "*.tests.*", "tests.*", "tests"]),
     package_dir={'': 'src'},
     include_package_data=True,
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',

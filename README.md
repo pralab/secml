@@ -201,13 +201,13 @@ This library is maintained by
 [PRALab - Pattern Recognition and Applications Lab](https://pralab.diee.unica.it).
 
 List of contributors:
- - Marco Melis (maintainer) [1]_
- - Ambra Demontis [1]_
- - Maura Pintor [1]_ , [2]_
- - Battista Biggio [1]_ , [2]_
+ - Marco Melis (maintainer) [1]
+ - Ambra Demontis [1]
+ - Maura Pintor [1], [2]
+ - Battista Biggio [1], [2]
 
-.. [1] Department of Electrical and Electronic Engineering, University of Cagliari, Italy  
-.. [2] Pluribus One, Italy
+[1] Department of Electrical and Electronic Engineering, University of Cagliari, Italy  
+[2] Pluribus One, Italy
 
 
 ## Credits

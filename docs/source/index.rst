@@ -42,12 +42,12 @@
    secml.parallel
    secml.utils
    secml.settings
+   secml.testing
 
 .. toctree::
    :caption: References
    :hidden:
 
-   modindex
    update
    changelog
    roadmap
