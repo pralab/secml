@@ -15,35 +15,32 @@ from secml.ml.classifiers import CClassifier
 
 @six.add_metaclass(ABCMeta)
 class CClassifierDNN(CClassifier):
-    """Generic wrapper for DNN model."""
+    """CClassifierDNN, wrapper for DNN models.
+
+    Parameters
+    ----------
+    model:
+        backend-supported model
+    preprocess:
+        preprocessing module.
+    softmax_outputs: bool, optional
+        if set to True, a softmax function will be applied to
+        the return value of the decision function. Note: some
+        implementation adds the softmax function to the network
+        class as last layer or last forward function, or even in the
+        loss function (see torch.nn.CrossEntropyLoss). Be aware that the
+        softmax may have already been applied.
+        Default value is False.
+
+    Attributes
+    ----------
+    class_type : 'dnn-clf'
+
+    """
     __class_type = ' dnn-clf'
 
     def __init__(self, model, input_shape=None, preprocess=None,
                  softmax_outputs=False, **kwargs):
-        """
-        CClassifierDNN
-        Wrapper for DNN models.
-
-        Parameters
-        ----------
-        model:
-            backend-supported model
-        preprocess:
-            preprocessing module.
-        softmax_outputs: bool, optional
-            if set to True, a softmax function will be applied to
-            the return value of the decision function. Note: some
-            implementation adds the softmax function to the network
-            class as last layer or last forward function, or even in the
-            loss function (see torch.nn.CrossEntropyLoss). Be aware that the
-            softmax may have already been applied.
-            Default value is False.
-
-        Attributes
-        ----------
-        class_type : 'dnn-clf'
-
-        """
 
         super(CClassifierDNN, self).__init__(preprocess=preprocess)
 

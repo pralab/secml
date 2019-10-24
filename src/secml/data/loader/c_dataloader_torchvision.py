@@ -13,15 +13,16 @@ from secml.settings import SECML_DS_DIR
 
 
 class CDataLoaderTorchDataset(CDataLoader):
-    def __init__(self, tv_dataset_class, **kwargs):
-        """
-        Wrapper for loading Torchvision datasets as CDatasets.
+    """Wrapper for loading Torchvision datasets as CDatasets.
 
-        Parameters
-        ----------
-        tv_dataset_class : torch.Dataset
-            torchvision dataset class to load
-        """
+    Parameters
+    ----------
+    tv_dataset_class : torch.Dataset
+        torchvision dataset class to load
+
+    """
+
+    def __init__(self, tv_dataset_class, **kwargs):
         root = kwargs.pop('root', SECML_DS_DIR)
         self._tv_dataset = tv_dataset_class(root=root, **kwargs)
         self._class_to_idx = self._tv_dataset.class_to_idx

@@ -48,7 +48,42 @@ def get_layers(net):
 
 
 class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
-    """Generic wrapper for PyTorch model."""
+    """CClassifierPyTorch, wrapper for PyTorch models.
+
+    Parameters
+    ----------
+    model:
+        `torch.nn.Module` object to use as classifier
+    loss:
+        loss object from `torch.nn`
+    optimizer:
+        optimizer object from `torch.optim`
+
+    random_state: int or None, optional
+        random state to use for initializing the model weights.
+        Default value is None.
+    preprocess:
+        preprocessing module.
+    softmax_outputs: bool, optional
+        if set to True, a softmax function will be applied to
+        the return value of the decision function. Note: some
+        implementation adds the softmax function to the network
+        class as last layer or last forward function, or even in the
+        loss function (see torch.nn.CrossEntropyLoss). Be aware that the
+        softmax may have already been applied.
+        Default value is False.
+    epochs: int
+        number of epochs for training the neural network. Default value is 10.
+    batch_size: int
+        size of the batches to use for loading the data. Default value is 1.
+    n_jobs: int
+        number of workers to use for data loading and processing. Default value is 1.
+
+    Attributes
+    ----------
+    class_type : 'pytorch-clf'
+
+    """
     __class_type = 'pytorch-clf'
 
     def __init__(self, model, loss=None, optimizer=None,
@@ -56,44 +91,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
                  random_state=None, preprocess=None,
                  softmax_outputs=False,
                  epochs=10, batch_size=1, n_jobs=1):
-        """
-        CClassifierPyTorch
-        Wrapper for PyTorch models.
-
-        Parameters
-        ----------
-        model:
-            `torch.nn.Module` object to use as classifier
-        loss:
-            loss object from `torch.nn`
-        optimizer:
-            optimizer object from `torch.optim`
-
-        random_state: int or None, optional
-            random state to use for initializing the model weights.
-            Default value is None.
-        preprocess:
-            preprocessing module.
-        softmax_outputs: bool, optional
-            if set to True, a softmax function will be applied to
-            the return value of the decision function. Note: some
-            implementation adds the softmax function to the network
-            class as last layer or last forward function, or even in the
-            loss function (see torch.nn.CrossEntropyLoss). Be aware that the
-            softmax may have already been applied.
-            Default value is False.
-        epochs: int
-            number of epochs for training the neural network. Default value is 10.
-        batch_size: int
-            size of the batches to use for loading the data. Default value is 1.
-        n_jobs: int
-            number of workers to use for data loading and processing. Default value is 1.
-
-        Attributes
-        ----------
-        class_type : 'pytorch-clf'
-
-        """
 
         self._device = self._set_device()
         self._random_state = random_state
