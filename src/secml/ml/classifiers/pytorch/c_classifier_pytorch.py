@@ -5,7 +5,6 @@
 .. moduleauthor:: Maura Pintor <maura.pintor@unica.it>
 
 """
-import logging
 from functools import reduce
 
 import torch
@@ -560,8 +559,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
         keys = ['model_state', 'optimizer_state', 'n_features', 'classes']
         if all(key in state for key in keys):
             if classes is not None:
-                logging.warning("Model was saved within `secml` framework. "
-                                "The parameter `classes` will be ignored.")
+                self.logger.warning(
+                    "Model was saved within `secml` framework. "
+                    "The parameter `classes` will be ignored.")
             # model was stored with save_model method
             self._model.load_state_dict(state['model_state'])
             self._optimizer.load_state_dict(state['optimizer_state'])
@@ -578,6 +578,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
                     self._classes = CArray(classes)
                 self._n_features = reduce(lambda x, y: x * y, self.input_shape)
                 self._trained = True
-            except Exception as e:
-                logging.error("Model's state dict should be stored according to "
-                              "PyTorch docs. Use ```torch.save(model.state_dict())```.")
+            except Exception:
+                self.logger.error(
+                    "Model's state dict should be stored according to "
+                    "PyTorch docs. Use `torch.save(model.state_dict())`.")
