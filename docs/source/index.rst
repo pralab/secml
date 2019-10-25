@@ -29,6 +29,13 @@
 
 .. toctree::
    :hidden:
+   :caption: Explanation
+   :maxdepth: 2
+
+   secml.explanation
+
+.. toctree::
+   :hidden:
    :caption: Visualization
    :maxdepth: 2
 
