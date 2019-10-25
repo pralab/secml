@@ -203,7 +203,7 @@ class TestCClassifierPyTorch(CUnitTest):
             self.logger.info("Returning gradient for layer: {:}".format(layer))
             print(layer)
             if layer is not None:
-                shape = self.clf.get_layer_output(x, layer)[layer].shape
+                shape = self.clf.get_layer_output(x, layer).shape
                 w_in = CArray.zeros(shape=(shape))
                 w_in[1] = 1
                 grad = self.clf.grad_f_x(x, w=w_in, layer=layer)
@@ -241,7 +241,7 @@ class TestCClassifierPyTorch(CUnitTest):
                  self.clf.decision_function(x)).sum() == 0)
             last_layer_name = self.clf.layer_names[-1]
             self.assertTrue(
-                (self.clf.get_layer_output(x, layer_names=last_layer_name)[last_layer_name] -
+                (self.clf.get_layer_output(x, layer_names=last_layer_name) -
                  self.clf.decision_function(x)).sum() == 0)
 
     def _test_layer_names(self):
@@ -349,7 +349,7 @@ class TestCClassifierPyTorch(CUnitTest):
         self._test_layer_names()
         self._test_layer_shapes()
         self._test_get_params()
-        self._test_out_at_layer("layer4.1.relu")
+        self._test_out_at_layer("layer4:1:relu")
         self._test_out_at_layer(['bn1', 'fc'])
         self._test_out_at_layer(None)
         self._test_grad_x(['fc', None])

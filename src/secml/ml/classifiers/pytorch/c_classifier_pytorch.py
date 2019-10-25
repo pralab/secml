@@ -215,11 +215,13 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
 
         Parameters
         ----------
-        layer_names : list
+        layer_names : list or str, optional
             List of layer names to hook. Cleans previously
             defined hooks to prevent multiple hook creations.
 
         """
+        if isinstance(layer_names, str):
+            layer_names = [layer_names]
 
         self._clean_hooks()
         self._handlers = []
@@ -467,21 +469,18 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
         # Transform data if a preprocess is defined
         x = self._preprocess_data(x)
 
-        x, _ = next(iter(self._data_loader(x, None)))
+        x, _ = next(iter(self._data_loader(x, None, x.shape[0])))
         x = x.to(self._device)
 
         with torch.no_grad():
-            # handle single layer name passed
-            if isinstance(layer_names, str):
-                layer_names = [layer_names]
 
             # Get the model output at specific layer
             out = self._get_layer_output(x, layer_names=layer_names)
 
             if isinstance(out, dict):
-                out = {k: self._from_tensor(v.view(-1)) for (k, v) in out.items()}
+                out = {k: self._from_tensor(v.view(v.size(0), -1)) for (k, v) in out.items()}
             else:
-                out = self._from_tensor(out)
+                out = self._from_tensor(out.view(out.size(0), -1))
 
         return out
 
@@ -508,12 +507,17 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
             return self._model(s)  # Forward pass
 
         elif isinstance(layer_names, list) or isinstance(layer_names, str):
-            if isinstance(layer_names, str):
-                layer_names = [layer_names]
 
             self.hook_layer_output(layer_names)
             self._model(s)
-            return {layer_names[i]: v for i, (k, v) in enumerate(self._intermediate_outputs.items())}
+
+            if not self._intermediate_outputs:
+                raise ValueError("None of requested layers were found")
+
+            if isinstance(layer_names, str):
+                return list(self._intermediate_outputs.values())[0]
+            else:
+                return {layer_names[i]: v for i, (k, v) in enumerate(self._intermediate_outputs.items())}
         else:
             raise ValueError("Pass layer names as a list or just None for last layer output.")
 

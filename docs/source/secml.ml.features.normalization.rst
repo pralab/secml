@@ -47,3 +47,10 @@ CNormalizerUnitNorm
    :undoc-members:
    :show-inheritance:
 
+CNormalizerDNN
+--------------
+
+.. automodule:: secml.ml.features.normalization.c_normalizer_dnn
+   :members:
+   :undoc-members:
+   :show-inheritance:
