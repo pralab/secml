@@ -15,6 +15,58 @@ from secml.array.c_sparse import CSparse
 class TestCArraySystemOverloads(CArrayTestCases):
     """Unit test for CArray SYSTEM OVERLOADS methods."""
 
+    def test_operators_array_vs_array_broadcast(self):
+        """Test for mathematical operators array vs array with broadcast."""
+        operators = [op.add, op.sub]
+        expected_result = [CSparse, CDense, CDense, CDense]
+        items = [(self.array_sparse_sym, self.row_sparse),
+                 (self.array_sparse_sym, self.row_dense),
+                 (self.array_dense_sym, self.row_sparse),
+                 (self.array_dense_sym, self.row_dense)]
+        self._test_operator_cycle(operators, items, expected_result)
+
+        operators = [op.mul]
+        expected_result = [CSparse, CSparse, CSparse, CDense]
+        items = [(self.array_sparse_sym, self.row_sparse),
+                 (self.array_sparse_sym, self.row_dense),
+                 (self.array_dense_sym, self.row_sparse),
+                 (self.array_dense_sym, self.row_dense)]
+        self._test_operator_cycle(operators, items, expected_result)
+
+        try:
+            operators = [op.div, op.truediv, op.floordiv]
+        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+            operators = [op.truediv, op.floordiv]
+        expected_result = [CDense, CDense, CDense, CDense]
+        items = [(self.array_sparse_sym, self.row_sparse),
+                 (self.array_sparse_sym, self.row_dense),
+                 (self.array_dense_sym, self.row_sparse),
+                 (self.array_dense_sym, self.row_dense)]
+
+        with self.logger.catch_warnings():
+            # For 0 / 0 divisions
+            self.logger.filterwarnings(
+                action='ignore',
+                message="divide by zero encountered in true_divide",
+                category=RuntimeWarning)
+            self._test_operator_cycle(operators, items, expected_result)
+
+        operators = [op.pow, CArray.pow]
+        expected_result = [CDense, CDense]
+        items = [(self.array_dense_sym, self.row_sparse),
+                 (self.array_dense_sym, self.row_dense)]
+        self._test_operator_cycle(operators, items, expected_result)
+
+        # Sparse array ** array is not supported
+        with self.assertRaises(TypeError):
+            self.array_sparse ** self.row_sparse
+        with self.assertRaises(TypeError):
+            self.array_sparse ** self.row_dense
+        with self.assertRaises(TypeError):
+            self.array_sparse.pow(self.row_sparse)
+        with self.assertRaises(TypeError):
+            self.array_sparse.pow(self.row_dense)
+
     def test_operators_array_vs_array(self):
         """Test for mathematical operators array vs array."""
         operators = [op.add, op.sub]
@@ -365,6 +417,23 @@ class TestCArraySystemOverloads(CArrayTestCases):
                  (self.array_sparse, self.array_dense),
                  (self.array_dense, self.array_sparse),
                  (self.array_dense, self.array_dense)]
+
+        with self.logger.catch_warnings():
+            # Comparing sparse arrays using ==, <= and >= is inefficient
+            self.logger.filterwarnings(
+                action='ignore',
+                message="Comparing sparse matrices using*",
+                category=scs.SparseEfficiencyWarning)
+            self._test_operator_cycle(operators, items, expected_result)
+
+    def test_comparison_array_vs_array_broadcast(self):
+        """Test for comparison operators array vs array with broadcast."""
+        operators = [op.eq, op.lt, op.le, op.gt, op.ge, op.ne]
+        expected_result = [CSparse, CDense, CDense, CDense]
+        items = [(self.array_sparse_sym, self.row_sparse),
+                 (self.array_sparse_sym, self.row_dense),
+                 (self.array_dense_sym, self.row_sparse),
+                 (self.array_dense_sym, self.row_dense)]
 
         with self.logger.catch_warnings():
             # Comparing sparse arrays using ==, <= and >= is inefficient
