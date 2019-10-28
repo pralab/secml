@@ -229,6 +229,12 @@ List of contributors:
 - `pytorch` Paszke, Adam, et al. "Automatic differentiation in pytorch.", NIPS-W, 2017.
 
 
+## Acknowledgements
+SecML has been partially developed with the support of European Union’s 
+[ALOHA project](https://www.aloha-h2020.eu/) Horizon 2020 Research and 
+Innovation programme, grant agreement No. 780788.
+
+
 ## Copyright
 SecML has been developed by [PRALab - Pattern Recognition and Applications lab](
 https://pralab.diee.unica.it) and [Pluribus One s.r.l.](https://www.pluribus-one.it/) 
