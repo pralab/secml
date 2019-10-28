@@ -11,11 +11,12 @@ It comes with a set of powerful features:
   supported by `scikit-learn` are available, as well as Neural Networks (NNs)
   through [PyTorch](https://pytorch.org/) deep learning platform.
 - **Built-in attack algorithms.** Evasion and poisoning attacks based on a
-  custom-developed fast solver.
+  custom-developed fast solver. In addition, we provide connectors to other 
+  third-party Adversarial Machine Learning libraries.
 - **Visualize your results.** We provide visualization and plotting framework
   based on the widely-known library [matplotlib](https://matplotlib.org/).
 - **Explain your results.** Explainable ML methods to interpret model decisions
-  via influential features and prototypes. _(coming soon)_  
+  via influential features and prototypes.
 - **Extensible.** Easily create new wrappers for ML models or attack algorithms
   extending our abstract interfaces.
 - **Multi-processing.** Do you want to save time further? We provide full
@@ -137,13 +138,12 @@ The `secml.adv` package contains evasion and poisoning attacks based on a
 custom-developed solver, along with classes to easily perform security
 evaluation of Machine Learning algorithms.
 
+The `secml.explanation` package contains different explainable 
+Machine Learning methods that allow interpreting classifiers decisions 
+by analyzing the relevant components such as features or training prototypes.
+
 The `secml.figure` package contains a visualization and plotting framework
 based on [matplotlib](https://matplotlib.org/).
-
-_(coming soon)_ The `secml.explanation` package contains few different
-explainable Machine Learning methods that allow interpreting classifiers
-decisions by analyzing the relevant components such as features or training
-prototypes.
 
 
 ## Contributors
@@ -223,6 +223,12 @@ List of contributors:
 - `cleverhans` [Papernot, Nicolas, et al. "Technical Report on the CleverHans v2.1.0 
   Adversarial Examples Library." arXiv preprint arXiv:1610.00768 (2018).](
   https://arxiv.org/abs/1610.00768)
+
+
+## Acknowledgements
+SecML has been partially developed with the support of European Union’s 
+[ALOHA project](https://www.aloha-h2020.eu/) Horizon 2020 Research and 
+Innovation programme, grant agreement No. 780788.
 
 
 ## Copyright
