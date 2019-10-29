@@ -1,6 +1,6 @@
 """
-.. module:: KernelInterface
-   :synopsis: Interface for Kernel metrics
+.. module:: Kernel
+   :synopsis: Interface for kernel functions
 
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
@@ -9,6 +9,8 @@
 from abc import ABCMeta, abstractmethod
 import six
 from six.moves import range
+
+import warnings
 
 from secml.core import CCreator
 from secml.array import CArray
@@ -24,18 +26,25 @@ class CKernel(CCreator):
     Kernels can be considered similarity measures,
     i.e. s(a, b) > s(a, c) if objects a and b are considered
     "more similar" than objects a and c.
-    A kernel must also be positive semi-definite.
+    A kernel must be positive semi-definite (PSD), even though non-PSD kernels
+    can also be used to train classifiers (e.g., SVMs, but losing convexity).
 
     Parameters
     ----------
     batch_size : int or None, optional
         Size of the batch used for kernel computation. Default None.
 
+        .. deprecated:: 0.10
+
     """
     __super__ = 'CKernel'
 
     def __init__(self, batch_size=None):
 
+        if batch_size is not None:
+            warnings.warn(
+                "`batch_size`'` is deprecated since version 0.10.",
+                DeprecationWarning)
         self.batch_size = batch_size
 
     @abstractmethod
@@ -78,13 +87,6 @@ class CKernel(CCreator):
             Kernel between x and y. Array of shape (n_x, n_y) or scalar
             if both x and y are vector-like.
 
-        Notes
-        -----
-        We use a batching strategy to optimize memory consumption during
-        kernel computation. However, the parameter `batch_size` should be
-        chosen wisely: a small cache can highly improve memory consumption
-        but can significantly slow down the computation process.
-
         Examples
         --------
         >>> from secml.array import CArray
@@ -116,29 +118,7 @@ class CKernel(CCreator):
         x_carray_2d = x.atleast_2d()
         y_carray_2d = y.atleast_2d()
 
-        # Preallocating output array (without assigning values)
-        kernel = CArray.empty(
-            shape=(x_carray_2d.shape[0], y_carray_2d.shape[0]))
-
-        batch_size = self.batch_size
-        if self.batch_size is None:
-            batch_size = x_carray_2d.shape[0]
-
-        # batch_size is the range step
-        for patterns_done in range(0, x_carray_2d.shape[0], batch_size):
-
-            # This avoids indexing errors during computation of the last fold
-            nxt_pattern_idx = min(
-                patterns_done + batch_size, x_carray_2d.shape[0])
-
-            # Subsampling patterns to improve memory usage
-            x_sel = x_carray_2d[patterns_done:nxt_pattern_idx, :].atleast_2d()
-
-            # Result of kernel MUST be dense
-            k_tmp = CArray(self._k(x_sel, y_carray_2d)).todense()
-
-            # Caching the kernel fold
-            kernel[patterns_done:nxt_pattern_idx, :] = k_tmp
+        kernel = CArray(self._k(x_carray_2d, y_carray_2d)).todense()
 
         # If both x and y are vectors, return scalar
         if x.is_vector_like and y.is_vector_like:
@@ -167,7 +147,7 @@ class CKernel(CCreator):
         Parameters
         ----------
         u : CArray or array_like
-            First array of shape (1, n_features).
+            First array of shape (nx, n_features).
         v : CArray or array_like
             Second array of shape (1, n_features).
 
@@ -175,11 +155,11 @@ class CKernel(CCreator):
         -------
         kernel_gradient : CArray
             Kernel gradient of u with respect to vector v. Array of
-            shape (1, n_features)
+            shape (nx, n_features)
 
         """
         raise NotImplementedError()
-    
+
     def gradient(self, x, v):
         """Calculates kernel gradient wrt vector 'v'.
 
@@ -215,16 +195,12 @@ class CKernel(CCreator):
         # Recasting data for safety... cost-free for any CArray
         x_carray = x.atleast_2d()
         v_carray = v.atleast_2d()
+
         # Checking if second array is a vector
         if v_carray.ndim > 1 and v_carray.shape[0] > 1:
             raise ValueError(
                 "kernel gradient can be computed only wrt vector-like arrays.")
 
-        # Instancing an empty array to avoid return errors
-        grad = CArray([], tosparse=x_carray.issparse)
-        # Kernel gradient can be dense or sparse depending on `x_carray`
-        for i in range(x_carray.shape[0]):
-            grad_i = self._gradient(x_carray[i, :], v_carray)
-            grad = grad_i if i == 0 else grad.append(grad_i, axis=0)
-
+        # Compute gradient and return
+        grad = self._gradient(x_carray, v_carray)
         return grad.ravel() if x_carray.shape[0] == 1 else grad

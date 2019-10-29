@@ -11,11 +11,12 @@ It comes with a set of powerful features:
   supported by `scikit-learn` are available, as well as Neural Networks (NNs)
   through [PyTorch](https://pytorch.org/) deep learning platform.
 - **Built-in attack algorithms.** Evasion and poisoning attacks based on a
-  custom-developed fast solver.
+  custom-developed fast solver. In addition, we provide connectors to other 
+  third-party Adversarial Machine Learning libraries.
 - **Visualize your results.** We provide visualization and plotting framework
   based on the widely-known library [matplotlib](https://matplotlib.org/).
 - **Explain your results.** Explainable ML methods to interpret model decisions
-  via influential features and prototypes. _(coming soon)_  
+  via influential features and prototypes.
 - **Extensible.** Easily create new wrappers for ML models or attack algorithms
   extending our abstract interfaces.
 - **Multi-processing.** Do you want to save time further? We provide full
@@ -53,7 +54,7 @@ macOS versions and Linux distributions.
 However, to support additional advanced features more packages can be necessary
 depending on the Operating System used:
 
- - Linux (Ubuntu >= 16.04 or equivalent dist):
+ - Linux (Ubuntu >= 16.04 or equivalent dist)
    - `python-tk` (Python 2.7), `python3-tk` (Python >= 3.5), for running
      MatplotLib Tk-based backends;
    - NVIDIA<sup>®</sup> CUDA<sup>®</sup> Toolkit for running `tf-gpu`
@@ -61,6 +62,7 @@ depending on the Operating System used:
      See the [TensorFlow Guide](https://www.tensorflow.org/install/gpu).
       
  - macOS (macOS >= 10.12 Sierra)
+   - Nothing to note.
 
 
 ### Installation process
@@ -105,9 +107,7 @@ of the `[extras]` section.
 
 ### Available extra components
  - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
-   Will install: `torch >= 1.1, < 1.3`, `torchvision >= 0.2.2`
-
-### _Coming soon_
+   Will install: `torch >= 1.1`, `torchvision >= 0.2.2`
  - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
    a Python library to benchmark vulnerability of machine learning systems
    to adversarial examples. Will install: `tensorflow >= 1.14.*, < 2`, `cleverhans`
@@ -138,19 +138,12 @@ The `secml.adv` package contains evasion and poisoning attacks based on a
 custom-developed solver, along with classes to easily perform security
 evaluation of Machine Learning algorithms.
 
+The `secml.explanation` package contains different explainable 
+Machine Learning methods that allow interpreting classifiers decisions 
+by analyzing the relevant components such as features or training prototypes.
+
 The `secml.figure` package contains a visualization and plotting framework
 based on [matplotlib](https://matplotlib.org/).
-
-_(coming soon)_ The `secml.explanation` package contains few different
-explainable Machine Learning methods that allow interpreting classifiers
-decisions by analyzing the relevant components such as features or training
-prototypes.
-
-_(coming soon)_ The `secml.tf.clvhs` package contains support classes for the
-[CleverHans](https://github.com/tensorflow/cleverhans) library for benchmarking
-machine learning systems' vulnerability to adversarial examples. 
-This package will be available only if the extra component `cleverhans`
-has been specified during installation.
 
 
 ## Contributors
@@ -208,13 +201,13 @@ This library is maintained by
 [PRALab - Pattern Recognition and Applications Lab](https://pralab.diee.unica.it).
 
 List of contributors:
- - Marco Melis (maintainer) [1]_
- - Ambra Demontis [1]_
- - Maura Pintor [1]_ , [2]_
- - Battista Biggio [1]_ , [2]_
+ - Marco Melis (maintainer) [1]
+ - Ambra Demontis [1]
+ - Maura Pintor [1], [2]
+ - Battista Biggio [1], [2]
 
-.. [1] Department of Electrical and Electronic Engineering, University of Cagliari, Italy  
-.. [2] Pluribus One, Italy
+[1] Department of Electrical and Electronic Engineering, University of Cagliari, Italy  
+[2] Pluribus One, Italy
 
 
 ## Credits
@@ -227,6 +220,15 @@ List of contributors:
   Computing in Science & Engineering, vol. 9, no. 3, pp. 90-95, 2007.](
   https://doi.org/10.1109/MCSE.2007.55)
 - `pytorch` Paszke, Adam, et al. "Automatic differentiation in pytorch.", NIPS-W, 2017.
+- `cleverhans` [Papernot, Nicolas, et al. "Technical Report on the CleverHans v2.1.0 
+  Adversarial Examples Library." arXiv preprint arXiv:1610.00768 (2018).](
+  https://arxiv.org/abs/1610.00768)
+
+
+## Acknowledgements
+SecML has been partially developed with the support of European Union’s 
+[ALOHA project](https://www.aloha-h2020.eu/) Horizon 2020 Research and 
+Innovation programme, grant agreement No. 780788.
 
 
 ## Copyright

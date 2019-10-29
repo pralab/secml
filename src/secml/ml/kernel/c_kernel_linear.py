@@ -30,6 +30,8 @@ class CKernelLinear(CKernel):
     batch_size : int or None, optional
         Size of the batch used for kernel computation. Default None.
 
+        .. deprecated:: 0.10
+
     Examples
     --------
     >>> from secml.array import CArray
@@ -74,13 +76,12 @@ class CKernelLinear(CKernel):
 
         The gradient of Linear kernel is given by::
 
-            dK(u,v)/dv =     u  if u != v
-                       = 2 * u  if u == v
+            dK(u,v)/dv = u
 
         Parameters
         ----------
         u : CArray or array_like
-            First array of shape (1, n_features).
+            First array of shape (nx, n_features).
         v : CArray or array_like
             Second array of shape (1, n_features).
 
@@ -109,16 +110,7 @@ class CKernelLinear(CKernel):
         CArray([ 4 10])
 
         """
-        k_grad = CArray(u)
-        v_carray = CArray(v)
-        if k_grad.shape[0] + v_carray.shape[0] > 2:
-            raise ValueError(
-                "Both input arrays must be 2-Dim of shape (1, n_features).")
-
         # Format of output array should be the same as v
-        k_grad = k_grad.tosparse() if v_carray.issparse else k_grad.todense()
-
-        if (k_grad - v_carray).norm() < 1e-8:
-            return 2 * k_grad
-        else:
-            return k_grad.deepcopy()
+        grad = u.deepcopy()
+        grad = grad.tosparse() if v.issparse else grad.todense()
+        return grad
