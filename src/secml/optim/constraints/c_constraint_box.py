@@ -147,7 +147,7 @@ class CConstraintBox(CConstraint):
 
         return super(CConstraintBox, self).is_active(x, tol=tol)
 
-    def is_violated(self, x, precision=4):
+    def is_violated(self, x):
         """Returns the violated status of the constraint for the sample x.
 
         We assume the constraint violated if c(x) <= 0.
@@ -156,8 +156,6 @@ class CConstraintBox(CConstraint):
         ----------
         x : CArray
             Input sample.
-        precision : int, optional
-            Number of digits to check. Default 4.
 
         Returns
         -------
@@ -167,8 +165,7 @@ class CConstraintBox(CConstraint):
         """
         if not x.is_vector_like:
             raise ValueError("only a vector-like array is accepted")
-        x_prec = x.round(precision)  # Only consider the desired decimals
-        return (x_prec < self.lb).logical_or(x_prec > self.ub).any()
+        return (x < self.lb).logical_or(x > self.ub).any()
 
     def _constraint(self, x):
         """Returns the value of the constraint for the sample x.

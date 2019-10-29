@@ -16,12 +16,14 @@ class CAttackPoisoningRidge(CAttackPoisoning):
 
     This is an implementation of the attack developed in
     https://arxiv.org/abs/1804.07933:
+
      - H. Xiao, B. Biggio, G. Brown, G. Fumera, C. Eckert, and F. Roli.
        Is feature selection secure against training data poisoning?
        In F. Bach and D. Blei, editors, JMLR W&CP, Proc. 32nd
        Int'l Conf. Mach. Learning (ICML), volume 37, pp. 1689-1698, 2015.
 
     For more details on poisoning attacks, see also:
+
      - https://arxiv.org/abs/1809.02861, USENIX Sec. 2019
      - https://arxiv.org/abs/1804.00308, IEEE Symp. SP 2018
      - https://arxiv.org/abs/1712.03141, Patt. Rec. 2018

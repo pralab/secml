@@ -31,14 +31,6 @@ CKernelEuclidean
    :undoc-members:
    :show-inheritance:
 
-CKernelHamming
---------------
-
-.. automodule:: secml.ml.kernel.c_kernel_hamming
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 CKernelHistIntersect
 --------------------
 

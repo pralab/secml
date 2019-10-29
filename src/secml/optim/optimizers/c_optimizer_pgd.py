@@ -17,7 +17,7 @@ class COptimizerPGD(COptimizer):
 
     min  f(x)
     s.t. d(x,x0) <= dmax
-         x_lb <= x <= x_ub
+    x_lb <= x <= x_ub
 
     f(x) is the objective function (either linear or nonlinear),
     d(x,x0) <= dmax is a distance constraint in feature space (l1 or l2),

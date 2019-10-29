@@ -23,7 +23,7 @@ CNormalizerLinear
    :undoc-members:
    :show-inheritance:
 
-CNormalizerMeanSTD
+CNormalizerMeanStd
 ------------------
 
 .. automodule:: secml.ml.features.normalization.c_normalizer_mean_std
@@ -47,3 +47,10 @@ CNormalizerUnitNorm
    :undoc-members:
    :show-inheritance:
 
+CNormalizerDNN
+--------------
+
+.. automodule:: secml.ml.features.normalization.c_normalizer_dnn
+   :members:
+   :undoc-members:
+   :show-inheritance:
