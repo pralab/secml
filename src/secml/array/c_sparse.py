@@ -418,6 +418,33 @@ class CSparse(_CArrayInterface):
     # # # # # # SYSTEM OVERLOADS # # # # # #
     # -------------------------------------#
 
+    def _broadcast_other(self, other):
+        """Broadcast `other` to have the same shape of self.
+
+        This only performs left side single row/column broadcast.
+
+        Parameters
+        ----------
+        other : CSparse
+            Array to be broadcasted.
+
+        Returns
+        -------
+        CSparse
+            Broadcasted array.
+
+        """
+        if self.shape != other.shape:
+            if self.shape[0] == other.shape[0]:  # Equal number of rows
+                if other.shape[1] == 1:
+                    other = other.repmat(1, self.shape[1])
+
+            elif self.shape[1] == other.shape[1]:  # Equal number of cols
+                if other.shape[0] == 1:
+                    other = other.repmat(self.shape[0], 1)
+
+        return other
+
     def __add__(self, other):
         """Element-wise addition.
 
@@ -440,6 +467,8 @@ class CSparse(_CArrayInterface):
                 "adding a nonzero scalar or a boolean True to a "
                 "sparse array is not supported. Convert to dense if needed.")
         elif isinstance(other, CSparse):  # Sparse + Sparse = Sparse
+            # Scipy does not support broadcast natively
+            other = self._broadcast_other(other)
             return self.__class__(self._data.__add__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse + Dense = Dense
             if other.size == 1:  # scalar-like
@@ -477,6 +506,8 @@ class CSparse(_CArrayInterface):
                 "subtracting a nonzero scalar or a boolean True from a "
                 "sparse array is not supported. Convert to dense if needed.")
         elif isinstance(other, CSparse):  # Sparse - Sparse = Sparse
+            # Scipy does not support broadcast natively
+            other = self._broadcast_other(other)
             return self.__class__(self._data.__sub__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse - Dense = Dense
             if other.size == 1:  # scalar-like
@@ -558,30 +589,13 @@ class CSparse(_CArrayInterface):
         """
         if is_scalar(other) or is_bool(other):
             return self.__class__(self._data.__div__(other))
-        elif isinstance(other, (CSparse, CDense)):
-            this = self
-            other = other.atleast_2d()
-            if this.shape != other.shape:  # Broadcast not supported by scipy
-                if this.shape[0] == other.shape[0]:  # Equal number of rows
-                    if this.shape[1] == 1:
-                        this = this.repmat(1, other.shape[1])
-                    elif other.shape[1] == 1:
-                        other = other.repmat(1, this.shape[1])
-                    else:
-                        raise ValueError("inconsistent shapes")
-
-                elif this.shape[1] == other.shape[1]:  # Equal number of cols
-                    if this.shape[0] == 1:
-                        this = this.repmat(other.shape[0], 1)
-                    elif other.shape[0] == 1:
-                        other = other.repmat(this.shape[0], 1)
-                    else:
-                        raise ValueError("inconsistent shapes")
-
-                else:
-                    raise ValueError("inconsistent shapes")
+        elif isinstance(other, CSparse):  # Sparse / Sparse = Dense
+            # Scipy does not support broadcast natively
+            other = self._broadcast_other(other)
+            return CDense(self._data.__div__(other.tocsr()))
+        elif isinstance(other, CDense):  # Sparse / Dense = Dense
             # Compatible shapes, call built-in div
-            return CDense(this._data.__div__(this._buffer_to_builtin(other)))
+            return CDense(self._data.__div__(other.tondarray()))
         else:
             return NotImplemented
 
@@ -708,6 +722,8 @@ class CSparse(_CArrayInterface):
         if is_scalar(other) or is_bool(other):
             return self.__class__(self._data.__eq__(other))
         elif isinstance(other, CSparse):  # Sparse == Sparse = Sparse
+            # Scipy does not support broadcast natively
+            other = self._broadcast_other(other)
             return self.__class__(self._data.__eq__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse == Dense = Dense
             return CDense(self._data.__eq__(other.tondarray()))
@@ -735,6 +751,8 @@ class CSparse(_CArrayInterface):
         if is_scalar(other) or is_bool(other):
             return self.__class__(self._data.__lt__(other))
         elif isinstance(other, CSparse):  # Sparse < Sparse = Sparse
+            # Scipy does not support broadcast natively
+            other = self._broadcast_other(other)
             return self.__class__(self._data.__lt__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse < Dense = Dense
             return CDense(self._data.__lt__(other.tondarray()))
@@ -762,6 +780,8 @@ class CSparse(_CArrayInterface):
         if is_scalar(other) or is_bool(other):
             return self.__class__(self._data.__le__(other))
         elif isinstance(other, CSparse):  # Sparse <= Sparse = Sparse
+            # Scipy does not support broadcast natively
+            other = self._broadcast_other(other)
             return self.__class__(self._data.__le__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse <= Dense = Dense
             return CDense(self._data.__le__(other.tondarray()))
@@ -789,6 +809,8 @@ class CSparse(_CArrayInterface):
         if is_scalar(other) or is_bool(other):
             return self.__class__(self._data.__gt__(other))
         elif isinstance(other, CSparse):  # Sparse > Sparse = Sparse
+            # Scipy does not support broadcast natively
+            other = self._broadcast_other(other)
             return self.__class__(self._data.__gt__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse > Dense = Dense
             return CDense(self._data.__gt__(other.tondarray()))
@@ -816,6 +838,8 @@ class CSparse(_CArrayInterface):
         if is_scalar(other) or is_bool(other):
             return self.__class__(self._data.__ge__(other))
         elif isinstance(other, CSparse):  # Sparse >= Sparse = Sparse
+            # Scipy does not support broadcast natively
+            other = self._broadcast_other(other)
             return self.__class__(self._data.__ge__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse >= Dense = Dense
             return CDense(self._data.__ge__(other.tondarray()))
@@ -843,6 +867,8 @@ class CSparse(_CArrayInterface):
         if is_scalar(other) or is_bool(other):
             return self.__class__(self._data.__ne__(other))
         elif isinstance(other, CSparse):  # Sparse != Sparse = Sparse
+            # Scipy does not support broadcast natively
+            other = self._broadcast_other(other)
             return self.__class__(self._data.__ne__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse != Dense = Dense
             return CDense(self._data.__ne__(other.tondarray()))

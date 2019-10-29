@@ -10,74 +10,96 @@ from functools import reduce
 import torch
 from torch import nn
 import torchvision
+from torchvision.models.resnet import BasicBlock
 from torchvision.transforms import transforms
 
 from secml.array import CArray
 from secml.data.loader import CDataLoaderPyTorch
-from secml.ml.classifiers import CClassifier
+from secml.ml.classifiers import CClassifierDNN
 from secml.ml.classifiers.gradients import CClassifierGradientPyTorchMixin
 from secml.utils import SubLevelsDict, merge_dicts
 
 from secml.settings import SECML_PYTORCH_USE_CUDA
+
 use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
 
 
-class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
-    """Generic wrapper for PyTorch model."""
+def get_layers(net):
+    # TODO remove when dropping support for python 2
+    layers = list()
+    for name, layer in net._modules.items():
+        # If it is a sequential, don't return its name
+        # but recursively register all it's module children
+        if isinstance(layer, nn.Sequential) or isinstance(layer, BasicBlock):
+            layers += [(":".join([name, l]), m) for (l, m) in get_layers(layer)]
+        else:
+            layers.append((name, layer))
+    else:
+        return layers
+
+    # TODO and uncomment this
+    # for name, layer in net._modules.items():
+    #     # If it is a sequential, don't return its name
+    #     # but recursively register all it's module children
+    #     if isinstance(layer, nn.Sequential) or isinstance(layer, BasicBlock):
+    #         yield from [(":".join([name, l]), m) for (l, m) in get_layers(layer)]
+    #     else:
+    #         yield (name, layer)
+
+
+class CClassifierPyTorch(CClassifierDNN, CClassifierGradientPyTorchMixin):
+    """CClassifierPyTorch, wrapper for PyTorch models.
+
+    Parameters
+    ----------
+    model:
+        `torch.nn.Module` object to use as classifier
+    loss:
+        loss object from `torch.nn`
+    optimizer:
+        optimizer object from `torch.optim`
+
+    random_state: int or None, optional
+        random state to use for initializing the model weights.
+        Default value is None.
+    preprocess:
+        preprocessing module.
+    softmax_outputs: bool, optional
+        if set to True, a softmax function will be applied to
+        the return value of the decision function. Note: some
+        implementation adds the softmax function to the network
+        class as last layer or last forward function, or even in the
+        loss function (see torch.nn.CrossEntropyLoss). Be aware that the
+        softmax may have already been applied.
+        Default value is False.
+    epochs: int
+        number of epochs for training the neural network. Default value is 10.
+    batch_size: int
+        size of the batches to use for loading the data. Default value is 1.
+    n_jobs: int
+        number of workers to use for data loading and processing. Default value is 1.
+
+    Attributes
+    ----------
+    class_type : 'pytorch-clf'
+
+    """
     __class_type = 'pytorch-clf'
 
-    def __init__(self, torch_model, loss=None, optimizer=None,
+    def __init__(self, model, loss=None, optimizer=None,
                  input_shape=None,
                  random_state=None, preprocess=None,
                  softmax_outputs=False,
                  epochs=10, batch_size=1, n_jobs=1):
-        """
-        CClassifierPyTorch
-        Wrapper for PyTorch models.
 
-        Parameters
-        ----------
-        torch_model:
-            model to use
-        loss:
-            loss
-        optimizer:
-
-        random_state: int or None, optional
-            random state to use for initializing the model weights.
-            Default value is None.
-        preprocess:
-            preprocessing module.
-        softmax_outputs: bool, optional
-            if set to True, a softmax function will be applied to
-            the return value of the decision function. Note: some
-            implementation adds the softmax function to the network
-            class as last layer or last forward function, or even in the
-            loss function (see torch.nn.CrossEntropyLoss). Be aware that the
-            softmax may have already been applied.
-            Default value is False.
-        epochs: int
-            number of epochs for training the neural network. Default value is 10.
-        batch_size: int
-            size of the batches to use for loading the data. Default value is 1.
-        n_jobs: int
-            number of workers to use for data loading and processing. Default value is 1.
-
-        Attributes
-        ----------
-        class_type : 'pytorch-clf'
-
-        """
-
-        super(CClassifierPyTorch, self).__init__(preprocess=preprocess)
-
-        self._device = torch.device("cuda" if use_cuda else "cpu")
-        self._model = torch_model
+        self._device = self._set_device()
         self._random_state = random_state
+        super(CClassifierPyTorch, self).__init__(model=model,
+                                                 preprocess=preprocess,
+                                                 input_shape=input_shape,
+                                                 softmax_outputs=softmax_outputs)
         self._init_model()
-        self._trained = False
 
-        self._input_shape = input_shape
         if self._input_shape is None:
             # try to infer from first layer
             first_layer = list(self._model._modules.values())[0]
@@ -92,6 +114,7 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
             raise ValueError("Please remove softmax redundancy. Either "
                              "use `torch.nn.NLLLoss` or remove softmax "
                              "layer from the network.")
+
         self._loss = loss
         self._optimizer = optimizer
 
@@ -121,6 +144,11 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
             self._classes = CArray.arange(list(self._model.modules())[-1].out_features)
             self._n_features = reduce(lambda a, b: a * b, self._input_shape)
 
+        # hooks for getting intermediate outputs
+        self._handlers = []
+        # will store intermediate outputs from the hooks
+        self._intermediate_outputs = None
+
     @property
     def loss(self):
         """Returns the loss function used by classifier."""
@@ -138,53 +166,75 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         return self._epochs
 
     @property
-    def device(self):
-        """Returns the device that is being used for model and data."""
-        return self._device
-
-    @property
     def batch_size(self):
         """Returns the batch size used for the dataset loader."""
         return self._batch_size
 
     @property
-    def input_shape(self):
-        """Returns the input shape of the first layer of the neural network."""
-        return self._input_shape
-
-    @input_shape.setter
-    def input_shape(self, input_shape):
-        self._input_shape = input_shape
+    def layers(self):
+        """Returns the layers of the model, if possible. """
+        if self._layers is None:
+            if isinstance(self._model, nn.Module):
+                self._layers = get_layers(self._model)
+            else:
+                raise TypeError("The input model must be an instance of `nn.Module`.")
+        return self._layers
 
     @property
-    def softmax_outputs(self):
-        return self._softmax_outputs
+    def layer_shapes(self):
+        if self._layer_shapes is None:
+            self._layer_shapes = {}
+            layer_names = self.layer_names
+            self.hook_layer_output(layer_names)
+            x = torch.randn(size=self.input_shape).unsqueeze(0)
+            x = x.to(self._device)
+            self._model(x)
+            for layer_name, layer in self.layers:
+                self._layer_shapes[layer_name] = tuple(self._intermediate_outputs[layer].shape)
+            self._clean_hooks()
+        return self._layer_shapes
 
-    @softmax_outputs.setter
-    def softmax_outputs(self, active):
+    def get_layer_shape(self, layer_name):
+        return self._layer_shapes[layer_name]
+
+    def _clean_hooks(self):
+        """Removes previously defined hooks."""
+        for handler in self._handlers:
+            handler.remove()
+        self._intermediate_outputs = None
+
+    def _hook_forward(self, module_name, input, output):
+        """Hooks the module's `forward` method so that it stores
+        the intermediate outputs as tensors."""
+
+        self._intermediate_outputs[module_name] = output
+
+    def hook_layer_output(self, layer_names=None):
         """
+        Creates handlers for the hooks that store the layer outputs.
 
         Parameters
         ----------
-        active : bool
-            whether apply softmax to the final scores
+        layer_names : list or str, optional
+            List of layer names to hook. Cleans previously
+            defined hooks to prevent multiple hook creations.
 
-        Notes
-        ----------
-        If the loss is an instance of `nn.CrossEntropyLoss` or
-        the network already has a softmax operation in the end
-        this parameter will be disabled.
         """
-        self.check_softmax()
-        self._softmax_outputs = active
+        if isinstance(layer_names, str):
+            layer_names = [layer_names]
 
-    @property
-    def layers(self):
-        """Returns the layers of the model, if possible. """
-        if isinstance(self._model, nn.Sequential) or isinstance(self._model, nn.Module):
-            return list(self._model._modules.keys())
-        else:
-            raise TypeError("The input model must inherit from `nn.Module`.")
+        self._clean_hooks()
+        self._handlers = []
+        self._intermediate_outputs = {}
+
+        for name, layer in get_layers(self._model):
+            if name in layer_names:
+                self._handlers.append(layer.register_forward_hook(self._hook_forward))
+            else:
+                pass
+
+    def _set_device(self):
+        return torch.device("cuda" if use_cuda else "cpu")
 
     def n_jobs(self):
         """Returns the number of workers being used for loading
@@ -360,48 +410,10 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         self._trained = True
         return self._model
 
-    def predict(self, x, return_decision_function=False):
-        """
-
-        Parameters
-        ----------
-        x : CArray
-            Array with samples to classify, of shape (n_patterns, n_features).
-        return_decision_function : bool, optional
-            if True, returns the decision_function value along
-            with the predictions. Default is False.
-
-        Returns
-        -------
-        labels : CArray
-            Flat dense array of shape (n_patterns,) with the label assigned
-             to each test pattern. The classification label is the label of
-             the class associated with the highest score.
-        scores : CArray, optional
-            Array of shape (n_patterns, n_classes) with classification
-             score of each test pattern with respect to each training class.
-            Will be returned only if `return_decision_function` is True.
-
-        """
-        self._check_is_fitted()
-
-        scores = self._decision_function(x)
-
-        # The classification label is the label of the class
-        # associated with the highest score
-        labels = scores.argmax(axis=1)
-
-        return (labels, scores) if return_decision_function is True else labels
-
     def _decision_function(self, x, y=None):
         """Implementation of the decision function."""
 
-        x_carray = CArray(x).atleast_2d()
-
-        # Transform data if a preprocess is defined
-        x_carray = self._preprocess_data(x_carray)
-
-        data_loader = self._data_loader(x_carray, num_workers=self._n_jobs,
+        data_loader = self._data_loader(x, num_workers=self._n_jobs,
                                         batch_size=self._batch_size)
 
         # Switch to evaluation mode
@@ -432,21 +444,22 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         scores = self._from_tensor(scores)
         return scores
 
-    def get_layer_output(self, x, layer=None):
-        """Returns the output of the desired net layer.
+    def get_layer_output(self, x, layer_names=None):
+        """Returns the output of the desired net layer as `CArray`.
 
         Parameters
         ----------
         x : CArray
             Input data.
-        layer : str, int or None, optional
-            Name or index of the layer.
+        layer_names : str, list or None, optional
+            Name of the layer(s) to hook for getting the outputs.
             If None, the output of the last layer will be returned.
 
         Returns
         -------
-        CArray
-            Output of the desired layer.
+        CArray or dict
+            Output of the desired layers, dictionary if more than one layer is
+            requested.
 
         """
         self._check_is_fitted()
@@ -456,67 +469,57 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         # Transform data if a preprocess is defined
         x = self._preprocess_data(x)
 
-        x, _ = next(iter(self._data_loader(x, None)))
+        x, _ = next(iter(self._data_loader(x, None, x.shape[0])))
         x = x.to(self._device)
 
         with torch.no_grad():
+
             # Get the model output at specific layer
-            out = self._get_layer_output(x, layer=layer)
+            out = self._get_layer_output(x, layer_names=layer_names)
 
-        return self._from_tensor(out)
+            if isinstance(out, dict):
+                out = {k: self._from_tensor(v.view(v.size(0), -1)) for (k, v) in out.items()}
+            else:
+                out = self._from_tensor(out.view(out.size(0), -1))
 
-    def _get_layer_output(self, s, layer=None):
-        """Returns the output of the desired net layer.
+        return out
+
+    def _get_layer_output(self, s, layer_names=None):
+        """Returns the output of the desired net layer as `Torch.Tensor`.
 
         Parameters
         ----------
         s : torch.Tensor
             Input tensor to forward propagate.
-        layer : str or None, optional
-            Name of the layer.
+        layer_names : list or None, optional
+            Name of the layer(s) to hook for getting the output.
             If None, the output of the last layer will be returned.
 
         Returns
         -------
         torch.Tensor
-            Output of the desired layer.
+            Output of the desired layer(s).
 
         """
         # Switch to evaluation mode
         self._model.eval()
+        if layer_names is None:  # Directly use the last layer
+            return self._model(s)  # Forward pass
 
-        if layer is None:  # Directly use the last layer
-            s = self._model(s)  # Forward pass
+        elif isinstance(layer_names, list) or isinstance(layer_names, str):
 
-        elif isinstance(self._model, nn.Sequential):
-            # Manual iterate the network and stop at desired layer
-            # Use _model to iterate over first level modules only
-            for m_k, m in self._model._modules.items():
-                s = m(s)  # Forward input trough module
-                if m_k == layer:
-                    # We found the desired layer
-                    break
+            self.hook_layer_output(layer_names)
+            self._model(s)
+
+            if not self._intermediate_outputs:
+                raise ValueError("None of requested layers were found")
+
+            if isinstance(layer_names, str):
+                return list(self._intermediate_outputs.values())[0]
             else:
-                if layer is not None:
-                    raise ValueError(
-                        "No layer `{:}` found!".format(layer))
-
-        elif isinstance(self._model, nn.Module):
-            # FIXME: THIS DOES NOT WORK IF THE FORWARD METHOD
-            #   HAS ANY SPECIAL OPERATION INSIDE (LIKE DENSENET)
-            self.logger.warning("Getting layer output of `nn.Module` "
-                                "can only get the output at last layer. "
-                                "Please use a `nn.Sequential` model for "
-                                "getting the output at the desired layer.")
-            s = self._model(s)
-
+                return {layer_names[i]: v for i, (k, v) in enumerate(self._intermediate_outputs.items())}
         else:
-            raise TypeError("The model must inherit from `nn.Module`.")
-
-        return s
-
-    def save_checkpoint(self):
-        pass
+            raise ValueError("Pass layer names as a list or just None for last layer output.")
 
     def save_model(self, filename):
         """
@@ -531,14 +534,13 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         state = {
             'model_state': self._model.state_dict(),
             'optimizer_state': self._optimizer.state_dict(),
-            'loss': self._loss,
             'n_features': self.n_features,
             'classes': self.classes,
         }
 
         torch.save(state, filename)
 
-    def load_model(self, filename):
+    def load_model(self, filename, classes=None):
         """
         Restores the model and optimizer's parameters.
         Notes: the model class and optimizer should be
@@ -548,12 +550,38 @@ class CClassifierPyTorch(CClassifier, CClassifierGradientPyTorchMixin):
         ----------
         filename : str
             path where to find the stored model
+        classes : list, tuple or None, optional
+            This parameter is used only if the model was stored
+            with native PyTorch.
+            Class labels (sorted) for matching classes to indexes
+            in the loaded model. If classes is None, the classes
+            will be assigned new indexes from 0 to n_classes.
 
         """
         state = torch.load(filename, map_location=self._device)
-
-        self._model.load_state_dict(state['model_state'])
-        self._optimizer.load_state_dict(state['optimizer_state'])
-        self._loss = state['loss']
-        self._n_features = state['n_features']
-        self._classes = state['classes']
+        keys = ['model_state', 'optimizer_state', 'n_features', 'classes']
+        if all(key in state for key in keys):
+            if classes is not None:
+                self.logger.warning(
+                    "Model was saved within `secml` framework. "
+                    "The parameter `classes` will be ignored.")
+            # model was stored with save_model method
+            self._model.load_state_dict(state['model_state'])
+            self._optimizer.load_state_dict(state['optimizer_state'])
+            self._n_features = state['n_features']
+            self._classes = state['classes']
+        else:
+            # model was stored outside secml framework
+            try:
+                self._model.load_state_dict(state)
+                # This part is important to prevent not fitted
+                if classes is None:
+                    self._classes = CArray.arange(self.layer_shapes[self.layer_names[-1]][1])
+                else:
+                    self._classes = CArray(classes)
+                self._n_features = reduce(lambda x, y: x * y, self.input_shape)
+                self._trained = True
+            except Exception:
+                self.logger.error(
+                    "Model's state dict should be stored according to "
+                    "PyTorch docs. Use `torch.save(model.state_dict())`.")

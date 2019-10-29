@@ -45,7 +45,7 @@ class CConstraint(CCreator):
             return True
         return False
 
-    def is_violated(self, x, precision=4):
+    def is_violated(self, x):
         """Returns the violated status of the constraint for the sample x.
 
         We assume the constraint violated if c(x) <= 0.
@@ -54,8 +54,6 @@ class CConstraint(CCreator):
         ----------
         x : CArray
             Input sample.
-        precision : int, optional
-            Number of digits to check. Default 4.
 
         Returns
         -------
@@ -65,7 +63,7 @@ class CConstraint(CCreator):
         """
         if not x.is_vector_like:
             raise ValueError("only a vector-like array is accepted")
-        if round(self._constraint(x), precision) > 0:
+        if self._constraint(x) > 0:
             return True
         return False
 

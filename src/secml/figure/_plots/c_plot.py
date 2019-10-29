@@ -1266,6 +1266,7 @@ class CPlot(CCreator):
             Define step if the filling should be a step function,
             i.e. constant in between x.
             The value determines where the step will occur:
+
              - 'pre': The y value is continued constantly to the left from
                every x position, i.e. the interval (x[i-1], x[i]] has the
                value y[i].

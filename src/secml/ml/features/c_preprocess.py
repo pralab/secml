@@ -10,11 +10,12 @@ from abc import ABCMeta, abstractmethod
 import six
 
 from secml.core import CCreator
+from secml.ml import CModule
 from secml.core.decorators import deprecated
 
 
 @six.add_metaclass(ABCMeta)
-class CPreProcess(CCreator):
+class CPreProcess(CCreator, CModule):
     """Common interface for feature preprocessing algorithms.
 
     Parameters
@@ -28,13 +29,10 @@ class CPreProcess(CCreator):
     __super__ = 'CPreProcess'
 
     def __init__(self, preprocess=None):
-        self._preprocess = None if preprocess is None \
+        preprocess = None if preprocess is None \
             else CPreProcess.create(preprocess)
 
-    @property
-    def preprocess(self):
-        """Inner preprocessor (if any)."""
-        return self._preprocess
+        CModule.__init__(self, preprocess=preprocess)
 
     @staticmethod
     def create_chain(class_items, kwargs_list):
@@ -76,25 +74,6 @@ class CPreProcess(CCreator):
         """
         raise NotImplementedError
 
-    def _preprocess_data(self, x):
-        """Apply the inner preprocess to input, if defined.
-
-        Parameters
-        ----------
-        x : CArray
-            Data to be transformed using inner preprocess, if defined.
-
-        Returns
-        -------
-        CArray
-            If an inner preprocess is defined, will be the transformed data.
-            Otherwise input data is returned as is.
-
-        """
-        if self.preprocess is not None:
-            return self.preprocess.transform(x)
-        return x
-
     @abstractmethod
     def _fit(self, x, y=None):
         raise NotImplementedError("training of preprocessor not implemented.")
@@ -124,7 +103,7 @@ class CPreProcess(CCreator):
 
     _fit.__doc__ = fit.__doc__  # Same doc for the protected method
 
-    def fit_transform(self, x, y=None):
+    def fit_transform(self, x, y=None, caching=False):
         """Fit preprocessor using data and then transform data.
 
         This method is equivalent to call fit(data) and transform(data)
@@ -140,6 +119,8 @@ class CPreProcess(CCreator):
         y : CArray or None, optional
             Flat array with the label of each pattern.
             Can be None if not required by the preprocessing algorithm.
+        caching: bool
+                 True if preprocessed x should be cached for backward pass
 
         Returns
         -------
@@ -153,13 +134,13 @@ class CPreProcess(CCreator):
 
         """
         self.fit(x, y)  # train preprocessor first
-        return self.transform(x)
+        return self.transform(x, caching=caching)
 
     @abstractmethod
     def _transform(self, x):
         raise NotImplementedError("`transform` not implemented.")
 
-    def transform(self, x):
+    def transform(self, x, caching=False):
         """Apply the transformation algorithm on data.
 
         Parameters
@@ -167,6 +148,8 @@ class CPreProcess(CCreator):
         x : CArray
             Array to be transformed.
             Shape of input array depends on the algorithm itself.
+        caching: bool
+                 True if preprocessed input should be cached for backward pass.
 
         Returns
         -------
@@ -177,15 +160,20 @@ class CPreProcess(CCreator):
         self._check_is_fitted()
 
         # Transform data using inner preprocess, if defined
-        x = self._preprocess_data(x)
+        x = self._preprocess_data(x, caching=caching)
 
         return self._transform(x)
 
     _transform.__doc__ = transform.__doc__  # Same doc for the protected method
 
+    def forward(self, x, caching=True):
+        return self.transform(x, caching=caching)
+
+    forward.__doc__ = transform.__doc__  # forward is an alias for transform
+
     def _inverse_transform(self, x):
         raise NotImplementedError(
-            "reverting this transformation is not supported.")
+            "inverting this transformation is not supported.")
 
     def inverse_transform(self, x):
         """Revert data to original form.
@@ -217,48 +205,5 @@ class CPreProcess(CCreator):
 
         return v
 
-    _inverse_transform.__doc__ = inverse_transform.__doc__  # Same doc for the protected method
-
-    @deprecated('0.9', extra="use `inverse_transform` instead.")
-    def revert(self, x):
-        return self.inverse_transform(x)
-
-    def _gradient(self, x, w=None):
-        raise NotImplementedError("gradient is not implemented for {:}"
-                                  "".format(self.__class__.__name__))
-
-    def gradient(self, x, w=None):
-        """Returns the preprocessor gradient wrt data.
-
-        Parameters
-        ----------
-        x : CArray
-            Data array, 2-Dimensional or ravel.
-        w : CArray or None, optional
-            If CArray, will be left-multiplied to the gradient
-            of the preprocessor.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the preprocessor wrt input data.
-            Array of shape (x.shape[1], x.shape[1]) if `w` is None,
-            otherwise an array of shape (w.shape[0], x.shape[1]).
-            If `w.shape[0]` is 1, result will be raveled.
-
-        """
-        self._check_is_fitted()
-
-        x_in = x  # Original input data (not transformed by inner preprocess)
-
-        # Input should be transformed using the inner preprocessor, if defined
-        x = self._preprocess_data(x)
-
-        grad = self._gradient(x, w=w)
-
-        if self.preprocess is not None:  # Use original input data
-            grad = self.preprocess.gradient(x_in, w=grad)
-
-        return grad.ravel() if grad.is_vector_like else grad
-
-    _gradient.__doc__ = gradient.__doc__  # Same doc for the protected method
+    # Same doc for the protected method
+    _inverse_transform.__doc__ = inverse_transform.__doc__

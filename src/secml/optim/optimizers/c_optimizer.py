@@ -20,9 +20,9 @@ class COptimizer(CCreator):
     """Interface for optimizers.
 
     Implements:
-        minimize f(x)
-        s.t. gi(x) <= 0, i=1,...,m  (inequality constraints)
-            hj(x) = 0, j = 1,..., n (equality constraints)
+     minimize f(x)
+     s.t. gi(x) <= 0, i=1,...,m  (inequality constraints)
+     hj(x) = 0, j = 1,..., n (equality constraints)
 
     Parameters
     ----------

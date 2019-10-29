@@ -66,6 +66,7 @@ class COptimizerScipy(COptimizer):
 
         method : str or callable, optional
             Type of solver.  Should be one of
+
               - 'BFGS'        :ref:`(see here) <optimize.minimize-bfgs>`
               - 'L-BFGS-B'    :ref:`(see here) <optimize.minimize-lbfgsb>`
 
@@ -90,6 +91,7 @@ class COptimizerScipy(COptimizer):
         options : dict, optional
             A dictionary of solver options. All methods accept the following
             generic options:
+            
              - maxiter : int
                Maximum number of iterations to perform.
              - disp : bool

@@ -1,8 +1,9 @@
 """
-.. module:: CNormalizerMeanSTD
+.. module:: CNormalizerMeanStd
    :synopsis: Scales input array features using specific mean and variance.
 
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from __future__ import division
@@ -10,10 +11,11 @@ from six.moves import range
 
 from secml.array import CArray
 from secml.core.type_utils import is_scalar
+from secml.core.decorators import deprecated
 from secml.ml.features.normalization import CNormalizerLinear
 
 
-class CNormalizerMeanSTD(CNormalizerLinear):
+class CNormalizerMeanStd(CNormalizerLinear):
     """Normalize with given mean and standard deviation.
 
     If mean/std are tuples of multiple values, input is expected to be
@@ -27,7 +29,7 @@ class CNormalizerMeanSTD(CNormalizerLinear):
     (if with_std parameter is True, default). In this case, the standard
     deviation calculated by numpy is the maximum likelihood estimate,
     i.e. the second moment of the set of values about their mean.
-    See also :meth:`.CArray.std` for more informations.
+    See also :meth:`.CArray.std` for more information.
 
     Parameters
     ----------
@@ -63,11 +65,11 @@ class CNormalizerMeanSTD(CNormalizerLinear):
     def __init__(self, mean=None, std=None, with_std=True, preprocess=None):
 
         if mean is not None:
-            self._mean = (mean, ) if is_scalar(mean) else tuple(mean)
+            self._mean = (mean,) if is_scalar(mean) else tuple(mean)
         else:  # mean is None
             self._mean = None
         if std is not None:
-            self._std = (std, ) if is_scalar(std) else tuple(std)
+            self._std = (std,) if is_scalar(std) else tuple(std)
         else:  # std is None
             self._std = None
 
@@ -90,7 +92,7 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         self._w = None
         self._b = None
 
-        super(CNormalizerMeanSTD, self).__init__(preprocess=preprocess)
+        super(CNormalizerMeanStd, self).__init__(preprocess=preprocess)
 
     @property
     def w(self):
@@ -125,6 +127,49 @@ class CNormalizerMeanSTD(CNormalizerLinear):
         """True if normalizer should transform array using variance too."""
         return self._with_std
 
+    def _expand_mean(self, n_feats):
+        """Expand mean value to all dimensions."""
+        n_channels = len(self._mean)
+        if not n_feats % n_channels == 0:
+            raise ValueError("input number of features must be "
+                             "divisible by {:}".format(n_channels))
+        channel_size = int(n_feats / n_channels)
+        self._x_mean = CArray.ones(shape=(n_feats,))
+        for i in range(n_channels):
+            self._x_mean[i * channel_size:
+                         i * channel_size + channel_size] *= self._mean[i]
+        return self._x_mean
+
+    def _expand_std(self, n_feats):
+        """Expand std value to all dimensions."""
+        if self.with_std is False:
+            # set std to 1.
+            self._x_std = CArray(1.0)  # we just need a scalar value.
+        else:
+            n_channels = len(self._std)
+            if not n_feats % n_channels == 0:
+                raise ValueError("input number of features must be "
+                                 "divisible by {:}".format(n_channels))
+            channel_size = int(n_feats / n_channels)
+            self._x_std = CArray.ones(shape=(n_feats,))
+            for i in range(n_channels):
+                self._x_std[i * channel_size:
+                            i * channel_size + channel_size] *= self._std[i]
+        return self._x_std
+
+    def _compute_w_and_b(self):
+        # Updating linear normalizer parameters
+        self._w = CArray.ones(self._x_mean.size)  # TODO: this can be scalar!
+        self._b = -self._x_mean
+
+        # Makes sure that whenever scale is zero, we handle it correctly
+        scale = self.std.deepcopy()
+        scale[scale == 0.0] = 1.0
+
+        # Updating linear normalizer parameters
+        self._w /= scale
+        self._b /= scale
+
     def _fit(self, x, y=None):
         """Compute the mean and standard deviation to be used for scaling.
 
@@ -139,16 +184,16 @@ class CNormalizerMeanSTD(CNormalizerLinear):
 
         Returns
         -------
-        CNormalizerMeanSTD
+        CNormalizerMeanStd
             Instance of the trained normalizer.
 
         Examples
         --------
         >>> from secml.array import CArray
-        >>> from secml.ml.features.normalization import CNormalizerMeanSTD
+        >>> from secml.ml.features.normalization import CNormalizerMeanStd
         >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]],tosparse=True)
 
-        >>> normalizer = CNormalizerMeanSTD(0.5, 0.2).fit(array)
+        >>> normalizer = CNormalizerMeanStd(0.5, 0.2).fit(array)
         >>> print(normalizer.mean)
         CArray([0.5 0.5 0.5])
         >>> print(normalizer.std)
@@ -159,14 +204,14 @@ class CNormalizerMeanSTD(CNormalizerLinear):
          [ 7.5 -2.5 -2.5]
          [-2.5  2.5 -7.5]])
 
-        >>> normalizer = CNormalizerMeanSTD((0.5, 0.5, 0.2), (0.2, 0.1, 0.1)).fit(array)
+        >>> normalizer = CNormalizerMeanStd((0.5, 0.5, 0.2), (0.2, 0.1, 0.1)).fit(array)
 
         >>> print(normalizer.transform(array))
         CArray([[  2.5 -15.   18. ]
          [  7.5  -5.   -2. ]
          [ -2.5   5.  -12. ]])
 
-        >>> out = CNormalizerMeanSTD().fit_transform(array)
+        >>> out = CNormalizerMeanStd().fit_transform(array)
         >>> # Expected zero mean and unit variance
         >>> print(out.mean(axis=0, keepdims=False))
         CArray([0. 0. 0.])
@@ -181,46 +226,57 @@ class CNormalizerMeanSTD(CNormalizerLinear):
             # Compute values from training data
             self._x_mean = x.mean(axis=0, keepdims=False)
         else:  # Expand _mean tuple and build _x_mean
-            n_channels = len(self._mean)
-            if not n_feats % n_channels == 0:
-                raise ValueError("input number of features must be "
-                                 "divisible by {:}".format(n_channels))
-            mean_list = []
-            for i in range(n_channels):
-                mean_list.append(
-                    CArray.ones(
-                        shape=(int(n_feats / n_channels), )) * self._mean[i])
-            self._x_mean = CArray.from_iterables(mean_list)
+            self._x_mean = self._expand_mean(n_feats)
 
         # Setting the variance
         if self.with_std is False:
             # Use a "neutral" value
-            self._x_std = CArray.ones(x.shape[1])
+            self._x_std = CArray(1.0)  # we just need a scalar value.
         elif self._std is None:
             # Compute values from training data
             self._x_std = x.std(axis=0, keepdims=False)
         else:  # Expand _std tuple and build _x_std
-            n_channels = len(self._std)
-            if not n_feats % n_channels == 0:
-                raise ValueError("input number of features must be "
-                                 "divisible by {:}".format(n_channels))
-            std_list = []
-            for i in range(n_channels):
-                std_list.append(
-                    CArray.ones(
-                        shape=(int(n_feats / n_channels), )) * self._std[i])
-            self._x_std = CArray.from_iterables(std_list)
+            self._x_std = self._expand_std(n_feats)
 
-        # Updating linear normalizer parameters
-        self._w = CArray.ones(n_feats)
-        self._b = -self.mean
-
-        # Makes sure that whenever scale is zero, we handle it correctly
-        scale = self.std.deepcopy()
-        scale[scale == 0.0] = 1.0
-
-        # Updating linear normalizer parameters
-        self._w /= scale
-        self._b /= scale
+        self._compute_w_and_b()
 
         return self
+
+    def transform(self, x, caching=False):
+        """Apply the transformation algorithm on data.
+
+        Parameters
+        ----------
+        x : CArray
+            Array to be transformed.
+            Shape of input array depends on the algorithm itself.
+        caching: bool
+                 True if preprocessed input should be cached for backward pass.
+
+        Returns
+        -------
+        CArray
+            Transformed input data.
+
+        """
+
+        # this avoids calling fit before transform,
+        # when default params are set
+        n_feats = x.atleast_2d().shape[1]
+        if self.w is None:
+            if self._mean is not None:
+                self._expand_mean(n_feats)
+            if self._std is not None:
+                self._expand_std(n_feats)
+            self._compute_w_and_b()
+
+        return super(CNormalizerMeanStd, self).transform(x, caching)
+
+
+@deprecated('0.10', "use `CNormalizerMeanStd` instead.")
+class CNormalizerMeanSTD(CNormalizerMeanStd):
+    """Normalize with given mean and standard deviation."""
+
+    def __init__(self, *args, **kwargs):
+
+        super(CNormalizerMeanSTD, self).__init__(*args, **kwargs)
