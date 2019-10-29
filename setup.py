@@ -174,13 +174,15 @@ setup(
     maintainer='Marco Melis',
     maintainer_email='marco.melis@unica.it',
     packages=find_packages('src', exclude=[
-        "*.tests", "*.tests.*", "tests.*", "tests", "*.testing"]),
+        "*.tests", "*.tests.*", "tests.*", "tests"]),
     package_dir={'': 'src'},
     include_package_data=True,
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
     install_requires=REQ_PKGS,
     extras_require={
-        'pytorch': ["torch>=1.1,<1.3", "torchvision>=0.2.2"],
+        'pytorch': ["torch>=1.1", "torchvision>=0.2.2"],
+        'cleverhans': ["tensorflow>=1.14,<2", "cleverhans"],
+        'tf-gpu': ["tensorflow-gpu>=1.14,<2"],
         'unittests': ['pytest>=4.2,<5.1', 'pytest-cov>=2.6.1']
     },
     zip_safe=False

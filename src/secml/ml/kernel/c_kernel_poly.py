@@ -37,6 +37,8 @@ class CKernelPoly(CKernel):
     batch_size : int or None, optional
         Size of the batch used for kernel computation. Default None.
 
+        .. deprecated:: 0.10
+
     Examples
     --------
     >>> from secml.array import CArray
@@ -52,7 +54,7 @@ class CKernelPoly(CKernel):
 
     """
     __class_type = 'poly'
-    
+
     def __init__(self, degree=2, gamma=1.0, coef0=1.0, batch_size=None):
 
         super(CKernelPoly, self).__init__(batch_size=batch_size)
@@ -61,12 +63,12 @@ class CKernelPoly(CKernel):
         self.degree = degree
         self.gamma = gamma
         self.coef0 = coef0
-        
+
     @property
     def degree(self):
         """Degree parameter."""
         return self._degree
-    
+
     @degree.setter
     def degree(self, degree):
         """Sets degree parameter.
@@ -78,12 +80,12 @@ class CKernelPoly(CKernel):
 
         """
         self._degree = int(degree)
-    
+
     @property
     def gamma(self):
         """Gamma parameter."""
         return self._gamma
-    
+
     @gamma.setter
     def gamma(self, gamma):
         """Sets gamma parameter.
@@ -95,12 +97,12 @@ class CKernelPoly(CKernel):
 
         """
         self._gamma = float(gamma)
-        
+
     @property
     def coef0(self):
         """Coef0 parameter."""
         return self._coef0
-    
+
     @coef0.setter
     def coef0(self, coef0):
         """Sets coef0 parameter.
@@ -138,14 +140,14 @@ class CKernelPoly(CKernel):
             CArray(x).get_data(), CArray(y).get_data(),
             self.degree, self.gamma, self.coef0))
 
-    # TODO: check for high gamma, we may have uncontrolled behavior (too high values)
+    # TODO: check for high gamma,
+    #  we may have uncontrolled behavior (too high values)
     def _gradient(self, u, v):
         """Calculate Polynomial kernel gradient wrt vector 'v'.
 
         The gradient of Polynomial kernel is given by::
 
-            dK(u,v)/dv =     u * gamma * degree * k(u,v, degree-1)  if u != v
-                       = 2 * u * gamma * degree * k(u,v, degree-1)  if u == v
+            dK(u,v)/dv =     u * gamma * degree * k(u,v, degree-1)
 
         Parameters
         ----------
@@ -179,23 +181,17 @@ class CKernelPoly(CKernel):
         CArray([240. 600.])
 
         """
-        u_carray = CArray(u)
-        v_carray = CArray(v)
-        if u_carray.shape[0] + v_carray.shape[0] > 2:
-            raise ValueError(
-                "Both input arrays must be 2-Dim of shape (1, n_features).")
-
         k = CArray(metrics.pairwise.polynomial_kernel(
-            u_carray.get_data(), v_carray.get_data(),
-            self.degree-1, self.gamma, self.coef0))
+            u.get_data(), v.get_data(),
+            self.degree - 1, self.gamma, self.coef0))
 
         # Format of output array should be the same as v
-        if v_carray.issparse:
-            u_carray = u_carray.tosparse()
+        if v.issparse:
+            u = u.tosparse()
             # Casting the kernel to sparse for efficient broadcasting
             k = k.tosparse()
         else:
-            u_carray = u_carray.todense()
+            u = u.todense()
 
-        k_grad = u_carray * k.ravel() * self.gamma * self.degree
-        return k_grad * 2 if (u_carray - v_carray).norm() < 1e-8 else k_grad
+        grad = u * k * self.gamma * self.degree
+        return grad

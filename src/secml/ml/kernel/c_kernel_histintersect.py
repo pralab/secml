@@ -2,6 +2,7 @@
 .. module:: CKernelHistIntersect
    :synopsis: Histogram Intersection kernel
 
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
@@ -17,7 +18,7 @@ class CKernelHistIntersect(CKernel):
 
     Given matrices X and Y, this is computed by::
 
-        K(x, y) = sum^n_i ( min(x[i], y[i]) )
+        K(x, y) = sum_i ( min(x[i], y[i]) )
 
     for each pair of rows in X and in Y.
 
@@ -29,6 +30,8 @@ class CKernelHistIntersect(CKernel):
     ----------
     batch_size : int or None, optional
         Size of the batch used for kernel computation. Default None.
+
+        .. deprecated:: 0.10
 
     Examples
     --------
@@ -67,33 +70,61 @@ class CKernelHistIntersect(CKernel):
         :meth:`.CKernel.k` : Common computation interface for kernels.
 
         """
-        x_carray = CArray(x)
-        y_carray = CArray(y)
-        if x_carray.issparse is True or y_carray.issparse is True:
+        x = CArray(x).atleast_2d()
+        y = x if y is None else CArray(y).atleast_2d()
+
+        if x.issparse is True or y.issparse is True:
             raise TypeError(
-                "Histogram Intersection Kernel not available for sparse data.")
+                "Histogram-Intersection Kernel not available for sparse data.")
 
-        # Defining kernel value for each pair
-        def hint(s1, s2):
-            # Working with ndarrays as will be called by pairwise_kernels
-            return np.minimum(s1, s2).sum()
+        k = CArray.zeros(shape=(x.shape[0], y.shape[0]))
 
-        # Calling sklearn pairwise_kernel to compute pairwise fast and clean :)
-        return CArray(metrics.pairwise.pairwise_kernels(
-            x_carray.get_data(), y_carray.get_data(), metric=hint))
+        x_nd, y_nd = x.tondarray(), y.tondarray()
+
+        if x.shape[0] <= y.shape[0]:  # loop on the matrix with less samples
+            # loop over samples in x, and compute x_i vs y
+            for i in range(k.shape[0]):
+                k[i, :] = CArray(np.minimum(x_nd[i, :], y_nd).sum(axis=1))
+        else:
+            # loop over samples in y, and compute y_j vs x
+            for j in range(k.shape[1]):
+                k[:, j] = CArray(np.minimum(x_nd, y_nd[j, :]).sum(axis=1)).T
+
+        return k
 
     def _gradient(self, u, v):
         """Calculate Histogram Intersection kernel gradient wrt vector 'v'.
 
-        .. warning::
+        The kernel is computed between each row of u
+        (denoted with uk) and v, as::
+            sum_i ( min(uk[i], v[i]) )
 
-           Gradient for Histogram Intersection kernel is not analytically
-           computable so is currently not available.
+        The gradient computed w.r.t. v is thus
+        1 if v[i] < uk[i], and 0 elsewhere.
+
+        Parameters
+        ----------
+        u : CArray or array_like
+            First array of shape (n_x, n_features).
+        v : CArray or array_like
+            Second array of shape (1, n_features).
+
+        Returns
+        -------
+        gradient : CArray
+            dK(u,v)/dv. Array of shape (n_x, n_features).
 
         See Also
         --------
         :meth:`.CKernel.gradient` : Gradient computation interface for kernels.
 
         """
-        raise NotImplementedError(
-            "Gradient of Histogram Intersection Kernel is not available.")
+        if v.issparse is True:
+            # Broadcasting not supported for sparse arrays
+            v_broadcast = v.repmat(u.shape[0], 1)
+        else:  # Broadcasting is supported by design for dense arrays
+            v_broadcast = v
+
+        grad = CArray.zeros(shape=u.shape, sparse=v.issparse)
+        grad[v_broadcast < u] = 1
+        return grad

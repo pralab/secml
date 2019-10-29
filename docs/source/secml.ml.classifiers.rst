@@ -29,22 +29,6 @@ CClassifierLinear
    :undoc-members:
    :show-inheritance:
 
-CClassifierKDE
---------------
-
-.. automodule:: secml.ml.classifiers.c_classifier_kde
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-CClassifierMCSLinear
---------------------
-
-.. automodule:: secml.ml.classifiers.c_classifier_mcs_linear
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 CClassifierSkLearn
 ------------------
 
@@ -121,6 +105,15 @@ CClassifierPyTorch
 ------------------
 
 .. automodule:: secml.ml.classifiers.pytorch.c_classifier_pytorch
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+CModelCleverhans
+----------------
+
+.. automodule:: secml.ml.classifiers.tf.c_model_cleverhans
    :members:
    :undoc-members:
    :show-inheritance:

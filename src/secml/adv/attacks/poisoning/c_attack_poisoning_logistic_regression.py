@@ -16,18 +16,19 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
 
     This is an implementation of the attack developed in Sect. 3.3 in
     https://www.usenix.org/conference/usenixsecurity19/presentation/demontis:
+
      - A. Demontis, M. Melis, M. Pintor, M. Jagielski, B. Biggio, A. Oprea,
        C. Nita-Rotaru, and F. Roli. Why do adversarial attacks transfer?
        Explaining transferability of evasion and poisoning attacks.
        In 28th USENIX Security Symposium. USENIX Association, 2019.
 
     For more details on poisoning attacks, see also:
+
      - https://arxiv.org/abs/1804.00308, IEEE Symp. SP 2018
      - https://arxiv.org/abs/1712.03141, Patt. Rec. 2018
      - https://arxiv.org/abs/1708.08689, AISec 2017
      - https://arxiv.org/abs/1804.07933, ICML 2015
      - https://arxiv.org/pdf/1206.6389, ICML 2012
-
 
     Parameters
     ----------

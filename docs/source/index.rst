@@ -29,6 +29,13 @@
 
 .. toctree::
    :hidden:
+   :caption: Explanation
+   :maxdepth: 2
+
+   secml.explanation
+
+.. toctree::
+   :hidden:
    :caption: Visualization
    :maxdepth: 2
 
@@ -42,12 +49,12 @@
    secml.parallel
    secml.utils
    secml.settings
+   secml.testing
 
 .. toctree::
    :caption: References
    :hidden:
 
-   modindex
    update
    changelog
    roadmap
