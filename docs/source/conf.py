@@ -125,3 +125,13 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# Temporary work-around for spacing problem between parameter and parameter
+# type in the doc, see https://github.com/numpy/numpydoc/issues/215. The bug
+# has been fixed in sphinx (https://github.com/sphinx-doc/sphinx/pull/5976) but
+# through a change in sphinx basic.css except rtd_theme does not use basic.css.
+# In an ideal world, this would get fixed in this PR:
+# https://github.com/readthedocs/sphinx_rtd_theme/pull/747/files
+# Thanks to: https://github.com/dask/dask-jobqueue
+def setup(app):
+    app.add_stylesheet("basic.css")
