@@ -29,23 +29,8 @@ class CKernel(CCreator):
     A kernel must be positive semi-definite (PSD), even though non-PSD kernels
     can also be used to train classifiers (e.g., SVMs, but losing convexity).
 
-    Parameters
-    ----------
-    batch_size : int or None, optional
-        Size of the batch used for kernel computation. Default None.
-
-        .. deprecated:: 0.10
-
     """
     __super__ = 'CKernel'
-
-    def __init__(self, batch_size=None):
-
-        if batch_size is not None:
-            warnings.warn(
-                "`batch_size`'` is deprecated since version 0.10.",
-                DeprecationWarning)
-        self.batch_size = batch_size
 
     @abstractmethod
     def _k(self, x, y):

@@ -26,13 +26,6 @@ class CKernelChebyshevDistance(CKernel):
     ----------
     class_type : 'chebyshev-dist'
 
-    Parameters
-    ----------
-    batch_size : int or None, optional
-        Size of the batch used for kernel computation. Default None.
-
-        .. deprecated:: 0.10
-
     Examples
     --------
     >>> from secml.array import CArray
@@ -48,9 +41,6 @@ class CKernelChebyshevDistance(CKernel):
 
     """
     __class_type = 'chebyshev-dist'
-
-    def __init__(self, batch_size=None):
-        super(CKernelChebyshevDistance, self).__init__(batch_size=batch_size)
 
     def _k(self, x, y):
         """Compute (negative) Chebyshev distances between x and y.

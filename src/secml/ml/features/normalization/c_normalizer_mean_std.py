@@ -271,12 +271,3 @@ class CNormalizerMeanStd(CNormalizerLinear):
             self._compute_w_and_b()
 
         return super(CNormalizerMeanStd, self).transform(x, caching)
-
-
-@deprecated('0.10', "use `CNormalizerMeanStd` instead.")
-class CNormalizerMeanSTD(CNormalizerMeanStd):
-    """Normalize with given mean and standard deviation."""
-
-    def __init__(self, *args, **kwargs):
-
-        super(CNormalizerMeanSTD, self).__init__(*args, **kwargs)
