@@ -29,10 +29,6 @@ class CKernelLaplacian(CKernel):
     ----------
     gamma : float
         Default is 1.0.
-    batch_size : int or None, optional
-        Size of the batch used for kernel computation. Default None.
-
-        .. deprecated:: 0.10
 
     Examples
     --------
@@ -50,9 +46,7 @@ class CKernelLaplacian(CKernel):
     """
     __class_type = 'laplacian'
 
-    def __init__(self, gamma=1.0, batch_size=None):
-
-        super(CKernelLaplacian, self).__init__(batch_size=batch_size)
+    def __init__(self, gamma=1.0):
 
         # Using a float gamma to avoid dtype casting problems
         self.gamma = gamma
