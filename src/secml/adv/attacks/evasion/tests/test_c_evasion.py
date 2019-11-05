@@ -19,7 +19,7 @@ from secml.optim.constraints import \
     CConstraintBox, CConstraintL1, CConstraintL2
 
 
-class CEvasionTestCases(object):
+class CEvasionTestCases:
     """Wrapper for TestCEvasion to make unittest.main() work correctly."""
 
     @six.add_metaclass(ABCMeta)

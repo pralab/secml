@@ -13,7 +13,7 @@ from secml.core.type_utils import to_builtin
 
 
 @six.add_metaclass(ABCMeta)
-class _CArrayInterface(object):
+class _CArrayInterface:
     """Interface for array classes.
 
     For extensive definition of each method, see `secml.array.CArray`.

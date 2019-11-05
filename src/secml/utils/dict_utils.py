@@ -190,7 +190,7 @@ class SubLevelsDict(MutableMapping):
     --------
     >>> from secml.utils import SubLevelsDict
 
-    >>> class Foo(object):
+    >>> class Foo:
     ...     attr2 = 5
 
     >>> li = SubLevelsDict({'attr1': Foo()})

@@ -16,7 +16,7 @@ from secml.optim.constraints import CConstraintBox
 from secml.optim.function import CFunction
 
 
-class CPoisoningTestCases(object):
+class CPoisoningTestCases:
 
     @six.add_metaclass(ABCMeta)
     class TestCPoisoning(CUnitTest):

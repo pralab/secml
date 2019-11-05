@@ -8,7 +8,7 @@ class TestAttributeUtilities(CUnitTest):
 
     def test_extract_attr(self):
         # Toy class for testing
-        class Foo(object):
+        class Foo:
             def __init__(self):
                 self.a = 5
                 self._b = 5

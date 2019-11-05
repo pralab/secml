@@ -14,7 +14,7 @@ from secml.optim.constraints import CConstraintL2
 from secml.utils import fm
 
 
-class CEvasionRejectTestCases(object):
+class CEvasionRejectTestCases:
     """Wrapper for TestCEvasion to make unittest.main() work correctly."""
 
     @six.add_metaclass(ABCMeta)

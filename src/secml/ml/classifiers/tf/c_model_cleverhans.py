@@ -99,7 +99,7 @@ class CModelCleverhans(Model):
         return {self._output_layer: self._callable_fn(x, **kwargs)}
 
 
-class _CClassifierToTF(object):
+class _CClassifierToTF:
     """
     Creates a Tensorflow operation whose result are the scores produced by
     the discriminant function of a CClassifier subclass.

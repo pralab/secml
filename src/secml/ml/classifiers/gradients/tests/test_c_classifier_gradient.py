@@ -8,7 +8,7 @@ from secml.ml.classifiers.gradients.tests.utils.gradient_test_classes import \
     CClassifierGradientTest
 
 
-class CClassifierGradientTestCases(object):
+class CClassifierGradientTestCases:
     """Wrapper for TestCClassifierGradient to make unittest.main() work correctly."""
 
     @six.add_metaclass(ABCMeta)

@@ -4,7 +4,7 @@ import six
 
 # TODO: use this class as a superclass for CPreProcess, CKernel, CClassifier
 @six.add_metaclass(ABCMeta)
-class CModule(object):
+class CModule:
     """Common interface for implementing autodiff with forward/backward passes.
 
     Parameters
