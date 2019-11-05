@@ -221,8 +221,6 @@ class _CArrayInterface:
         """Manage 'and' and 'or' operators."""
         raise NotImplementedError
 
-    __nonzero__ = __bool__  # Compatibility with python < 3
-
     @abstractmethod
     def __iter__(self):
         """Yields array elements in raster-scan order."""
