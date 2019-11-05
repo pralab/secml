@@ -18,11 +18,6 @@ stages:
       - "$CI_PROJECT_DIR/.cache/pip"
       - "$CI_PROJECT_DIR/secml-data"
 
-.test-cache-py2:
-  cache: &test-cache-py2
-    key: "test-cache-py2"
-    <<: *test-cache
-
 .test-cache-py35:
   cache: &test-cache-py35
     key: "test-cache-py35"
@@ -128,12 +123,6 @@ package:docs:
     variables:
       - $SKIP_TESTS
 
-test:py2:min:
-  extends: .test
-  image: python:2
-  script: tox -e py2-min
-  cache: *test-cache-py2
-
 test:py35:latest:
   extends: .test
   image: python:3.5
@@ -208,13 +197,6 @@ test:py37:min:
     - python -c "from secml.ml.classifiers import CClassifierPyTorch"
     - python -c "from secml.ml.classifiers import CModelCleverhans"
 
-test:install:whl:py2:
-  extends: .test:install:whl
-  image: python:2
-  cache:
-    <<: *test-cache-py2
-    policy: pull
-
 test:install:whl:py35:
   extends: .test:install:whl
   image: python:3.5
@@ -234,13 +216,6 @@ test:install:whl:py37:
   image: python:3.7
   cache:
     <<: *test-cache-py37
-    policy: pull
-
-test:install:whl:extras:py2:
-  extends: .test:install:whl:extras
-  image: python:2
-  cache:
-    <<: *test-cache-py2
     policy: pull
 
 test:install:whl:extras:py35:

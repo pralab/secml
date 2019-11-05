@@ -142,8 +142,6 @@ Intended Audience :: Science/Research
 Intended Audience :: Developers
 License :: OSI Approved
 Programming Language :: Python
-Programming Language :: Python :: 2
-Programming Language :: Python :: 2.7
 Programming Language :: Python :: 3
 Programming Language :: Python :: 3.5
 Programming Language :: Python :: 3.6
@@ -177,7 +175,7 @@ setup(
         "*.tests", "*.tests.*", "tests.*", "tests"]),
     package_dir={'': 'src'},
     include_package_data=True,
-    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
+    python_requires='>=3.5.*, <4',
     install_requires=REQ_PKGS,
     extras_require={
         'pytorch': ["torch>=1.1", "torchvision>=0.2.2"],
