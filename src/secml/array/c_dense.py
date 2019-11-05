@@ -5,7 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from __future__ import print_function, division
+from __future__ import print_function
 from six.moves import range, map
 import numpy as np
 import numpy.matlib
@@ -594,22 +594,6 @@ class CDense(_CArrayInterface):
             return self.__class__(np.true_divide(other, self.tondarray()))
         else:
             return NotImplemented
-
-    def __div__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-        """Element-wise division.
-
-        See .__truediv__() for more informations.
-
-        """
-        return self.__truediv__(other)
-
-    def __rdiv__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-        """Element-wise (inverse) division.
-
-        See .__rtruediv__() for more informations.
-
-        """
-        return self.__rtruediv__(other)
 
     def __floordiv__(self, other):
         """Element-wise floor division.

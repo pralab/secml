@@ -1,6 +1,5 @@
-from __future__ import division
-
 from secml.testing import CUnitTest
+
 from abc import ABCMeta, abstractmethod
 import six
 from six.moves import range

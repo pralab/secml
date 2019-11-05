@@ -157,16 +157,6 @@ class _CArrayInterface:
         raise NotImplementedError
 
     @abstractmethod
-    def __div__(self, other):
-        """Element-wise division. True division will be performed."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def __rdiv__(self, other):
-        """Element-wise (inverse) division. True division will be performed."""
-        raise NotImplementedError
-
-    @abstractmethod
     def __floordiv__(self, other):
         """Element-wise floor division (// operator)."""
         raise NotImplementedError

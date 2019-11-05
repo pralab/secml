@@ -6,7 +6,6 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from __future__ import division
 import six
 from six.moves import range, map
 from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
@@ -588,14 +587,14 @@ class CSparse(_CArrayInterface):
 
         """
         if is_scalar(other) or is_bool(other):
-            return self.__class__(self._data.__div__(other))
+            return self.__class__(self._data.__truediv__(other))
         elif isinstance(other, CSparse):  # Sparse / Sparse = Dense
             # Scipy does not support broadcast natively
             other = self._broadcast_other(other)
-            return CDense(self._data.__div__(other.tocsr()))
+            return CDense(self._data.__truediv__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse / Dense = Dense
             # Compatible shapes, call built-in div
-            return CDense(self._data.__div__(other.tondarray()))
+            return CDense(self._data.__truediv__(other.tondarray()))
         else:
             return NotImplemented
 
@@ -603,22 +602,6 @@ class CSparse(_CArrayInterface):
         """Element-wise (inverse) true division."""
         raise NotImplementedError(
             "dividing a scalar by a sparse array is not supported")
-
-    def __div__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-        """Element-wise division.
-
-        See .__truediv__() for more informations.
-
-        """
-        return self.__truediv__(other)
-
-    def __rdiv__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-        """Element-wise (inverse) division.
-
-        See .__rtruediv__() for more informations.
-
-        """
-        return self.__rtruediv__(other)
 
     def __floordiv__(self, other):
         """Element-wise floor division (integral part of the quotient).
