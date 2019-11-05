@@ -5,7 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 import six
 from copy import deepcopy
 
@@ -24,42 +24,50 @@ class _CArrayInterface:
     # # # # # # PROPERTIES # # # # # #
     # -------------------------------#
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def shape(self):
         """Shape of stored data, tuple of ints."""
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def size(self):
         """Size (number of elements) of array."""
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def ndim(self):
         """Number of array dimensions."""
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def dtype(self):
         """Data-type of stored data."""
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def nnz(self):
         """Number of non-zero values in the array."""
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def nnz_indices(self):
         """Index of non-zero array elements."""
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def nnz_data(self):
         """Return non-zero array elements."""
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def T(self):
         """Transposed array data."""
         raise NotImplementedError

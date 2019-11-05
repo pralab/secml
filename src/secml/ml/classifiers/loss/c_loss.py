@@ -6,7 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 import six
 
 from secml.core import CCreator
@@ -18,7 +18,8 @@ class CLoss(CCreator):
     """Interface for loss functions."""
     __super__ = 'CLoss'
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def suitable_for(self):
         """Defines which problem the loss is suitable for.
 

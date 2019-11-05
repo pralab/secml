@@ -9,7 +9,7 @@
 from multiprocessing import Lock
 from six.moves import range
 import six
-from abc import ABCMeta, abstractproperty
+from abc import ABCMeta, abstractmethod
 
 from secml.data.loader import CDataLoader
 from secml.data import CDataset
@@ -582,7 +582,8 @@ class CDLRandomToy(CDataLoader):
         self.class_list = class_list
         self.zero_one = zero_one
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def toy(self):
         """Identifier of the toy dataset."""
         raise NotImplementedError

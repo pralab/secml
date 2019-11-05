@@ -5,7 +5,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 import six
 
 from secml.core import CCreator
@@ -19,7 +19,8 @@ class CClassifierGradientTest(CCreator):
     """
     __super__ = 'CClassifierGradientTest'
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def params(self):
         """
         Classifier parameters

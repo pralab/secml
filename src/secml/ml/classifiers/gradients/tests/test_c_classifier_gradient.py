@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 import six
 
 from secml.testing import CUnitTest
@@ -19,11 +19,13 @@ class CClassifierGradientTestCases:
         def _dataset_creation(self):
             raise NotImplementedError()
 
-        @abstractproperty
+        @property
+        @abstractmethod
         def clf_list(self):
             raise NotImplementedError()
 
-        @abstractproperty
+        @property
+        @abstractmethod
         def clf_creation_function(self):
             raise NotImplementedError()
 
