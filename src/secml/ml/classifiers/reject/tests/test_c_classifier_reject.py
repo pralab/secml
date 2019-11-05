@@ -5,11 +5,10 @@ from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml import _NoValue
 from secml.array import CArray
-from secml.figure import CFigure
 from secml.ml.peval.metrics import CMetric
 
 
-class CClassifierRejectTestCases(object):
+class CClassifierRejectTestCases:
 
     @six.add_metaclass(ABCMeta)
     class TestCClassifierReject(CClassifierTestCases):

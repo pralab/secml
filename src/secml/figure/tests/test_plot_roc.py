@@ -1,4 +1,3 @@
-from __future__ import division
 from secml.testing import CUnitTest
 
 from secml.array import CArray

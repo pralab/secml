@@ -5,7 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from abc import abstractproperty
+from abc import abstractmethod
 
 from secml.array import CArray
 from secml.ml.features.normalization import CNormalizer
@@ -37,13 +37,15 @@ class CNormalizerLinear(CNormalizer):
         """Returns True for linear normalizers."""
         return True
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def w(self):
         """Returns the step of the linear normalizer."""
         # w must be a CArray
         raise NotImplementedError("Linear normalizer should define the slope.")
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def b(self):
         """Returns the bias of the linear normalizer."""
         # b must be a CArray

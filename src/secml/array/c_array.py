@@ -916,12 +916,12 @@ class CArray(_CArrayInterface):
 
         """
         if is_scalar(other) or is_bool(other):
-            return self.__class__(self._data.__div__(other))
+            return self.__class__(self._data.__truediv__(other))
         elif isinstance(other, CArray):
             # dense vs sparse not supported (sparse vs dense IS supported)
             if self.isdense is True and other.issparse is True:
                 other = other.todense()
-            return self.__class__(self._data.__div__(other._data))
+            return self.__class__(self._data.__truediv__(other._data))
         elif is_ndarray(other) or is_scsarray(other):
             raise TypeError("unsupported operand type(s) for /: "
                             "'{:}' and '{:}'".format(type(self).__name__,
@@ -948,22 +948,6 @@ class CArray(_CArrayInterface):
             return self.__class__(self._data.__rtruediv__(other))
         else:
             return NotImplemented
-
-    def __div__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-        """Element-wise division. True division will be performed.
-
-        See .__truediv__() for more informations.
-
-        """
-        return self.__truediv__(other)
-
-    def __rdiv__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-        """Element-wise (inverse) division. True division will be performed.
-
-        See .__rtruediv__() for more informations.
-
-        """
-        return self.__rtruediv__(other)
 
     def __floordiv__(self, other):
         """Element-wise floor division (// operator).
@@ -1315,8 +1299,6 @@ class CArray(_CArrayInterface):
     def __bool__(self):
         """Manage 'and' and 'or' operators."""
         return bool(self._data)
-
-    __nonzero__ = __bool__  # Compatibility with python < 3
 
     def __iter__(self):
         """Yields array elements in raster-scan order.

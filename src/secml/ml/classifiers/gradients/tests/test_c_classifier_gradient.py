@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 import six
 
 from secml.testing import CUnitTest
@@ -8,7 +8,7 @@ from secml.ml.classifiers.gradients.tests.utils.gradient_test_classes import \
     CClassifierGradientTest
 
 
-class CClassifierGradientTestCases(object):
+class CClassifierGradientTestCases:
     """Wrapper for TestCClassifierGradient to make unittest.main() work correctly."""
 
     @six.add_metaclass(ABCMeta)
@@ -19,11 +19,13 @@ class CClassifierGradientTestCases(object):
         def _dataset_creation(self):
             raise NotImplementedError()
 
-        @abstractproperty
+        @property
+        @abstractmethod
         def clf_list(self):
             raise NotImplementedError()
 
-        @abstractproperty
+        @property
+        @abstractmethod
         def clf_creation_function(self):
             raise NotImplementedError()
 

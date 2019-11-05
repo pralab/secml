@@ -5,7 +5,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from __future__ import division
 from sklearn.model_selection import train_test_split
 
 from secml.core import CCreator

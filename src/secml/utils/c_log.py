@@ -33,7 +33,7 @@ formatter = logging.Formatter(
     "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 
-class CLog(object):
+class CLog:
     """Manager for logging and logfiles.
 
     Logger can be used to save important runtime code informations
@@ -365,7 +365,7 @@ class CLog(object):
             module=module, lineno=lineno, append=append)
 
 
-class CTimer(object):
+class CTimer:
     """Context manager for performance logging
 
     The code inside the specific context will be timed and

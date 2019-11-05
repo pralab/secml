@@ -12,7 +12,7 @@ import six
 
 
 @six.add_metaclass(ABCMeta)
-class CClassifierGradientMixin(object):
+class CClassifierGradientMixin:
     """Abstract Mixin class that defines basic methods
      for classifier gradients."""
 

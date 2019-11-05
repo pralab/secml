@@ -33,10 +33,7 @@ class TestCArraySystemOverloads(CArrayTestCases):
                  (self.array_dense_sym, self.row_dense)]
         self._test_operator_cycle(operators, items, expected_result)
 
-        try:
-            operators = [op.div, op.truediv, op.floordiv]
-        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-            operators = [op.truediv, op.floordiv]
+        operators = [op.truediv, op.floordiv]
         expected_result = [CDense, CDense, CDense, CDense]
         items = [(self.array_sparse_sym, self.row_sparse),
                  (self.array_sparse_sym, self.row_dense),
@@ -85,10 +82,7 @@ class TestCArraySystemOverloads(CArrayTestCases):
                  (self.array_dense, self.array_dense)]
         self._test_operator_cycle(operators, items, expected_result)
 
-        try:
-            operators = [op.div, op.truediv, op.floordiv]
-        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-            operators = [op.truediv, op.floordiv]
+        operators = [op.truediv, op.floordiv]
         expected_result = [CDense, CDense, CDense, CDense]
         items = [(self.array_sparse, self.array_sparse),
                  (self.array_sparse, self.array_dense),
@@ -222,10 +216,7 @@ class TestCArraySystemOverloads(CArrayTestCases):
         self._test_operator_cycle(operators, items, expected_result)
 
         # ARRAY / NONZERO SCALAR
-        try:
-            operators = [op.div, op.truediv, op.floordiv]
-        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-            operators = [op.truediv, op.floordiv]
+        operators = [op.truediv, op.floordiv]
         expected_result = [CDense] * 5 + [CSparse] * 5
         items = list(product([self.array_dense], test_scalars)) + \
             list(product([self.array_sparse], test_scalars))
@@ -233,10 +224,7 @@ class TestCArraySystemOverloads(CArrayTestCases):
 
         # NONZERO SCALAR / DENSE ARRAY
         # nonzero scalar / sparse array is not supported
-        try:
-            operators = [op.div, op.truediv, op.floordiv]
-        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-            operators = [op.truediv, op.floordiv]
+        operators = [op.truediv, op.floordiv]
         expected_result = [CDense] * 5
         items = list(product(test_scalars, [self.array_dense]))
         with self.logger.catch_warnings():
@@ -253,10 +241,7 @@ class TestCArraySystemOverloads(CArrayTestCases):
 
         # ZERO SCALAR / DENSE ARRAY
         # zero scalar / sparse array is not supported
-        try:
-            operators = [op.div, op.truediv, op.floordiv]
-        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-            operators = [op.truediv, op.floordiv]
+        operators = [op.truediv, op.floordiv]
         expected_result = [CDense] * 5
         items = list(product(test_z_scalars, [self.array_dense]))
         with self.logger.catch_warnings():
@@ -314,10 +299,7 @@ class TestCArraySystemOverloads(CArrayTestCases):
         # NONZERO SCALAR / SPARSE ARRAY NOT SUPPORTED
         items = list(product(test_scalars, [self.array_sparse])) + \
             list(product(test_z_scalars, [self.array_sparse]))
-        try:
-            operators = [op.div, op.truediv, op.floordiv]
-        except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-            operators = [op.truediv, op.floordiv]
+        operators = [op.truediv, op.floordiv]
         self._test_operator_notimplemented(operators, items)
 
         # NONZERO SCALAR ** SPARSE ARRAY NOT SUPPORTED
@@ -339,8 +321,8 @@ class TestCArraySystemOverloads(CArrayTestCases):
 
         def test_unsupported(x):
             try:
-                operators = [op.add, op.sub, op.mul, op.truediv,
-                             op.div, op.floordiv, op.pow]
+                operators = [op.add, op.sub, op.mul,
+                             op.truediv, op.floordiv, op.pow]
             except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
                 operators = [op.add, op.sub, op.mul,
                              op.truediv, op.floordiv, op.pow]
@@ -375,8 +357,8 @@ class TestCArraySystemOverloads(CArrayTestCases):
 
         def test_unsupported(x):
             try:
-                operators = [op.add, op.sub, op.mul, op.truediv,
-                             op.div, op.floordiv, op.pow]
+                operators = [op.add, op.sub, op.mul,
+                             op.truediv, op.floordiv, op.pow]
             except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
                 operators = [op.add, op.sub, op.mul,
                              op.truediv, op.floordiv, op.pow]

@@ -18,7 +18,7 @@ from secml.utils.list_utils import find_duplicates
 from secml.utils import CLog, SubLevelsDict
 
 
-class CCreator(object):
+class CCreator:
     """The magnificent global superclass.
 
     Attributes

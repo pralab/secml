@@ -10,7 +10,7 @@ from six.moves import cPickle
 from six.moves import range
 from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 from multiprocessing import Lock
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 import six
 import numpy as np
 
@@ -57,7 +57,8 @@ class CDataLoaderCIFAR(CDataLoader):
                 # Downloaded datafile seems valid, extract only
                 self._get_data(self.data_url, CIFAR_PATH, extract_only=True)
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def data_url(self):
         """URL of the datafile. Specific for each dataset type.
 
@@ -69,7 +70,8 @@ class CDataLoaderCIFAR(CDataLoader):
         """
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def data_md5(self):
         """MD5 digest of the datafile. Specific for each dataset type.
 
@@ -81,7 +83,8 @@ class CDataLoaderCIFAR(CDataLoader):
         """
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def data_path(self):
         """URL of the data directory. Specific for each dataset type.
 
