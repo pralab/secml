@@ -7,15 +7,12 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
 
 from secml.core import CCreator
 from secml.ml import CModule
-from secml.core.decorators import deprecated
 
 
-@six.add_metaclass(ABCMeta)
-class CPreProcess(CCreator, CModule):
+class CPreProcess(CCreator, CModule, metaclass=ABCMeta):
     """Common interface for feature preprocessing algorithms.
 
     Parameters

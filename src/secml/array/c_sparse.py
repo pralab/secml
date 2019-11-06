@@ -6,8 +6,6 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-import six
-from six.moves import range, map
 from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 
 import scipy.sparse as scs
@@ -947,8 +945,7 @@ class CSparse(_CArrayInterface):
             data_cndarray.save(fhandle)
             indices_cndarray.save(fhandle)
             indptr_cndarray.save(fhandle)
-            fhandle.write(six.text_type(self.shape[0]) + " " +
-                          six.text_type(self.shape[1]))
+            fhandle.write(str(self.shape[0]) + " " + str(self.shape[1]))
 
     @classmethod
     def load(cls, datafile, dtype=float):

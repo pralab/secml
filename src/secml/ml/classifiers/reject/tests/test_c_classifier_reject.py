@@ -1,5 +1,4 @@
 from abc import ABCMeta
-import six
 
 from secml.ml.classifiers.tests import CClassifierTestCases
 
@@ -10,8 +9,7 @@ from secml.ml.peval.metrics import CMetric
 
 class CClassifierRejectTestCases:
 
-    @six.add_metaclass(ABCMeta)
-    class TestCClassifierReject(CClassifierTestCases):
+    class TestCClassifierReject(CClassifierTestCases, metaclass=ABCMeta):
         """Unit test for CClassifierReject"""
 
         def _check_classify_scores(self, l, s, n_samples, n_classes):

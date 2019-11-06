@@ -7,8 +7,7 @@
 
 """
 from multiprocessing import Lock
-from six.moves import range
-import six
+
 from abc import ABCMeta, abstractmethod
 
 from secml.data.loader import CDataLoader
@@ -555,8 +554,7 @@ class CDLRandomBinary(CDataLoader):
         return CDataset(patterns, labels)
 
 
-@six.add_metaclass(ABCMeta)
-class CDLRandomToy(CDataLoader):
+class CDLRandomToy(CDataLoader, metaclass=ABCMeta):
     """Loads a random toy dataset (abstract interface).
 
     Available toy datasets:

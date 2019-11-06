@@ -7,8 +7,6 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
-from six.moves import range
 
 from secml.core import CCreator
 from secml.core.type_utils import is_int
@@ -18,8 +16,7 @@ from secml.ml.classifiers import CClassifier
 from secml.data import CDataset
 
 
-@six.add_metaclass(ABCMeta)
-class CAttack(CCreator):
+class CAttack(CCreator, metaclass=ABCMeta):
     """Interface class for evasion and poisoning attacks.
 
     Parameters

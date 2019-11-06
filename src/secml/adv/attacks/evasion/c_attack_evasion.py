@@ -8,16 +8,13 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
-from six.moves import range
 
 from secml.adv.attacks import CAttack
 from secml.array import CArray
 from secml.data import CDataset
 
 
-@six.add_metaclass(ABCMeta)
-class CAttackEvasion(CAttack):
+class CAttackEvasion(CAttack, metaclass=ABCMeta):
     """Interface for Evasion attacks.
 
     Parameters

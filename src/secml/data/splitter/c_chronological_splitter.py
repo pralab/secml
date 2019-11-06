@@ -5,7 +5,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from six.moves import map
 from dateutil import parser
 from datetime import datetime
 

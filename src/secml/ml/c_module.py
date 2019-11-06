@@ -1,10 +1,8 @@
 from abc import ABCMeta, abstractmethod
-import six
 
 
 # TODO: use this class as a superclass for CPreProcess, CKernel, CClassifier
-@six.add_metaclass(ABCMeta)
-class CModule:
+class CModule(metaclass=ABCMeta):
     """Common interface for implementing autodiff with forward/backward passes.
 
     Parameters

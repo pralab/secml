@@ -6,13 +6,11 @@
 
 """
 from abc import ABCMeta
-import six
 
 from secml.ml.features import CPreProcess
 
 
-@six.add_metaclass(ABCMeta)
-class CNormalizer(CPreProcess):
+class CNormalizer(CPreProcess, metaclass=ABCMeta):
     """Common interface for normalization preprocessing algorithms."""
     __super__ = 'CNormalizer'
 

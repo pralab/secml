@@ -8,8 +8,6 @@
 """
 import warnings
 from abc import ABCMeta, abstractmethod
-import six
-from six.moves import range
 
 from secml.adv.attacks import CAttack
 from secml.optim.optimizers import COptimizer
@@ -21,8 +19,7 @@ from secml.optim.constraints import CConstraint
 from secml.optim.function import CFunction
 
 
-@six.add_metaclass(ABCMeta)
-class CAttackPoisoning(CAttack):
+class CAttackPoisoning(CAttack, metaclass=ABCMeta):
     """Interface for poisoning attacks.
 
     Parameters

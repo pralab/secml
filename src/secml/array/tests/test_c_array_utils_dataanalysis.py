@@ -1,7 +1,6 @@
 from secml.array.tests import CArrayTestCases
 
 import numpy as np
-from six.moves import range
 
 from secml.array import CArray
 from secml.core.type_utils import is_scalar, is_int, is_list_of_lists

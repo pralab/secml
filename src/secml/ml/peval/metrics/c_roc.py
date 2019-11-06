@@ -6,8 +6,6 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from six.moves import range, zip, map
-
 from secml.array import CArray
 
 

@@ -7,7 +7,6 @@
 
 """
 import time
-from six.moves import range
 
 from secml.core import CCreator
 from secml.array import CArray

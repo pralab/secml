@@ -1,5 +1,4 @@
 from abc import ABCMeta
-import six
 
 from secml.testing import CUnitTest
 from secml.data.loader import CDLRandomBlobs
@@ -18,8 +17,7 @@ from secml.optim.function import CFunction
 
 class CPoisoningTestCases:
 
-    @six.add_metaclass(ABCMeta)
-    class TestCPoisoning(CUnitTest):
+    class TestCPoisoning(CUnitTest, metaclass=ABCMeta):
         """Unit test for CAttackPoisoning."""
 
         def _dataset_creation(self):

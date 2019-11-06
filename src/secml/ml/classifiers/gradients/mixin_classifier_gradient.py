@@ -8,11 +8,9 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
 
 
-@six.add_metaclass(ABCMeta)
-class CClassifierGradientMixin:
+class CClassifierGradientMixin(metaclass=ABCMeta):
     """Abstract Mixin class that defines basic methods
      for classifier gradients."""
 

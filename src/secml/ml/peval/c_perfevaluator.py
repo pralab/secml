@@ -7,8 +7,6 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
-from six.moves import range
 from collections import OrderedDict
 from copy import deepcopy
 
@@ -64,8 +62,7 @@ def _evaluate_one(
     return eval_score
 
 
-@six.add_metaclass(ABCMeta)
-class CPerfEvaluator(CCreator):
+class CPerfEvaluator(CCreator, metaclass=ABCMeta):
     """Evaluate the best parameters for input estimator.
 
     Parameters

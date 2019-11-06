@@ -6,7 +6,7 @@
 
 """
 from copy import deepcopy
-from six.moves import range
+
 import numpy as np
 import scipy.sparse as scs
 

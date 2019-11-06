@@ -8,7 +8,6 @@
 
 """
 from random import getrandbits
-from six.moves import range
 
 import numpy as np
 

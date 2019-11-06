@@ -6,14 +6,12 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
 from copy import deepcopy
 
 from secml.core.type_utils import to_builtin
 
 
-@six.add_metaclass(ABCMeta)
-class _CArrayInterface:
+class _CArrayInterface(metaclass=ABCMeta):
     """Interface for array classes.
 
     For extensive definition of each method, see `secml.array.CArray`.

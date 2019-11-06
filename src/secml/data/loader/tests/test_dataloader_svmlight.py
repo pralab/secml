@@ -1,5 +1,3 @@
-from six.moves import range
-
 from secml.testing import CUnitTest
 
 from secml.data import CDataset

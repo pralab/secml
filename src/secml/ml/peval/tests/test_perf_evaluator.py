@@ -1,6 +1,5 @@
 from secml.testing import CUnitTest
 
-from six.moves import range
 import sklearn.metrics as skm
 import numpy as np
 

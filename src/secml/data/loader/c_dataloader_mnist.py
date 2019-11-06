@@ -5,7 +5,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from six.moves import range
 from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 import gzip
 import struct

@@ -6,15 +6,11 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
-from six.moves import range
 
 from secml.ml.classifiers import CClassifier
-from secml.array import CArray
 
 
-@six.add_metaclass(ABCMeta)
-class CClassifierMulticlass(CClassifier):
+class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
     """Generic interface for Multiclass Classifiers.
 
     Parameters

@@ -124,13 +124,6 @@ def global_filterwarnings():
         "ignore", category=RuntimeWarning, message="numpy.ufunc size changed*"
     )
 
-    # TODO: REMOVE AFTER SWITCHING TO PYTHON 3
-    warnings.filterwarnings(
-        "ignore", category=DeprecationWarning,
-        message="The SafeConfigParser class has been renamed to "
-                "ConfigParser in Python 3.2.*"
-    )
-
     # TODO: fixed in scipy 1.3.1
     warnings.filterwarnings(
         "ignore", category=FutureWarning,

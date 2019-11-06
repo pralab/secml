@@ -7,20 +7,16 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
-from six.moves import range
 
 from secml.core import CCreator
 from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.features import CPreProcess
-from secml.parallel import parfor2
 from secml.utils.mixed_utils import check_is_fitted
 from secml.core.exceptions import NotFittedError
 
 
-@six.add_metaclass(ABCMeta)
-class CClassifier(CCreator):
+class CClassifier(CCreator, metaclass=ABCMeta):
     """Abstract class that defines basic methods for Classifiers.
 
     A classifier assign a label (class) to new patterns using the
