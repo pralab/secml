@@ -1,6 +1,5 @@
 from secml.testing import CUnitTest
 
-from six.moves import range
 import matplotlib
 
 from secml.array import CArray

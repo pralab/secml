@@ -7,7 +7,6 @@
 
 """
 from abc import ABCMeta
-import six
 
 from secml.ml.classifiers import CClassifier
 from secml.array import CArray
@@ -15,8 +14,7 @@ from secml.data import CDataset
 from secml.utils.mixed_utils import check_is_fitted
 
 
-@six.add_metaclass(ABCMeta)
-class CClassifierLinear(CClassifier):
+class CClassifierLinear(CClassifier, metaclass=ABCMeta):
     """Abstract class that defines basic methods for linear classifiers.
 
     A linear classifier assign a label (class) to new patterns

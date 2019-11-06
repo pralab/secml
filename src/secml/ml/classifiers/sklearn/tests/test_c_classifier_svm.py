@@ -1,6 +1,5 @@
 from secml.ml.classifiers.tests import CClassifierTestCases
 
-from six.moves import range
 import numpy as np
 from sklearn.svm import SVC
 import sklearn.metrics as skm

@@ -1,9 +1,10 @@
 from secml.testing import CUnitTest
+
+import numpy as np
+
 from secml.utils import fm
 from secml.array.c_dense import CDense
 
-import numpy as np
-from six.moves import range
 from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 
 

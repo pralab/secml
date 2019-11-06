@@ -6,7 +6,7 @@
 
 """
 from __future__ import print_function
-from six.moves import range, map
+
 import numpy as np
 import numpy.matlib
 from numpy.linalg import inv, pinv

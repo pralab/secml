@@ -6,14 +6,12 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
 import inspect
 
 from secml.core import CCreator
 
 
-@six.add_metaclass(ABCMeta)
-class CMetric(CCreator):
+class CMetric(CCreator, metaclass=ABCMeta):
     """Performance evaluation metrics.
 
     Utility functions to measure classification performance.

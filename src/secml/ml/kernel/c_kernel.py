@@ -7,17 +7,12 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
-from six.moves import range
-
-import warnings
 
 from secml.core import CCreator
 from secml.array import CArray
 
 
-@six.add_metaclass(ABCMeta)
-class CKernel(CCreator):
+class CKernel(CCreator, metaclass=ABCMeta):
     """Abstract class that defines basic methods for kernels.
 
     A kernel is a pairwise metric that compute the distance

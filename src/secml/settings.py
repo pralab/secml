@@ -8,8 +8,7 @@
 import os
 import sys
 import shutil
-from six.moves.configparser import \
-    SafeConfigParser, NoSectionError, NoOptionError
+from configparser import ConfigParser, NoSectionError, NoOptionError
 
 # Logger for this module only. Use `secml.utils.CLog` elsewhere
 import logging
@@ -63,7 +62,7 @@ def parse_config(conf_files, section, parameter, default=None, dtype=None):
 
     """
     # Parsing parameters
-    _config = SafeConfigParser()
+    _config = ConfigParser()
 
     # Parse configuration files (even if not exists)
     # The first item of the list has LOWER priority (so we reverse)

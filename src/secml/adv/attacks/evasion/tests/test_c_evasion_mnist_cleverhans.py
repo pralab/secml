@@ -1,7 +1,5 @@
 from secml.testing import CUnitTest
 
-from six.moves import range
-
 try:
     import cleverhans
 except ImportError:

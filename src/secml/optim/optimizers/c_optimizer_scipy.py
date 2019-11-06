@@ -7,7 +7,6 @@
 
 """
 from scipy import optimize as sc_opt
-import six
 
 from secml.array import CArray
 from secml.optim.optimizers import COptimizer
@@ -172,7 +171,7 @@ class COptimizerScipy(COptimizer):
 
         if self.verbose >= 1:
             # Workaround for scipy message randomly being a str or bytes
-            if isinstance(sc_opt_out.message, six.string_types):
+            if isinstance(sc_opt_out.message, str):
                 self.logger.info(sc_opt_out.message + "\n")
             else:
                 self.logger.info(str(sc_opt_out.message, 'ascii') + "\n")

@@ -6,8 +6,6 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from six.moves import range
-
 from secml.figure._plots import CPlot
 from secml.figure._plots.plot_utils import create_points_grid
 from secml.array import CArray

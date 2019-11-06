@@ -1,5 +1,3 @@
-from six.moves import range
-
 from secml.ml.classifiers.tests import CClassifierTestCases
 
 from sklearn.multiclass import OneVsRestClassifier

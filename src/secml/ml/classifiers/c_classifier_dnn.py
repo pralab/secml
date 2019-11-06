@@ -7,14 +7,11 @@
 """
 from abc import ABCMeta, abstractmethod
 
-import six
-
 from secml.array import CArray
 from secml.ml.classifiers import CClassifier
 
 
-@six.add_metaclass(ABCMeta)
-class CClassifierDNN(CClassifier):
+class CClassifierDNN(CClassifier, metaclass=ABCMeta):
     """CClassifierDNN, wrapper for DNN models.
 
     Parameters

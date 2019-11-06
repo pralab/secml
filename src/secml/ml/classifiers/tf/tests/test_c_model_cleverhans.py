@@ -7,7 +7,6 @@ except ImportError:
 else:
     import tensorflow as tf
 
-from six.moves import range
 from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM

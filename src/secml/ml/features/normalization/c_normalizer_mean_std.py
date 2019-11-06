@@ -6,8 +6,6 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
-from six.moves import range
-
 from secml.array import CArray
 from secml.core.type_utils import is_scalar
 from secml.core.decorators import deprecated

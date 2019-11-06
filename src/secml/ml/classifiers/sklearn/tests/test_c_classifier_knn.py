@@ -1,7 +1,5 @@
 from secml.ml.classifiers.tests import CClassifierTestCases
 
-from six.moves import range
-
 from secml.ml.classifiers import CClassifierKNN
 from secml.data.loader import CDLRandom, CDLRandomBlobs
 from secml.ml.peval.metrics import CMetricAccuracy

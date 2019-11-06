@@ -5,8 +5,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from six.moves import range
-
 from secml.core import CCreator
 from secml.array import CArray
 from secml.data import CDatasetHeader

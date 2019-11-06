@@ -6,12 +6,12 @@
 
 """
 import tarfile
-from six.moves import cPickle
-from six.moves import range
 from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 from multiprocessing import Lock
+import pickle
+
 from abc import ABCMeta, abstractmethod
-import six
+
 import numpy as np
 
 from secml.data.loader import CDataLoader
@@ -31,8 +31,7 @@ CIFAR10_PATH = fm.join(CIFAR_PATH, 'cifar-10-batches-py')
 CIFAR100_PATH = fm.join(CIFAR_PATH, 'cifar-100-python')
 
 
-@six.add_metaclass(ABCMeta)
-class CDataLoaderCIFAR(CDataLoader):
+class CDataLoaderCIFAR(CDataLoader, metaclass=ABCMeta):
     """Loads the CIFAR tiny images datasets.
 
     Available at: https://www.cs.toronto.edu/~kriz/cifar.html
@@ -171,9 +170,9 @@ class CDataLoaderCIFAR(CDataLoader):
             for batch in batches_list:
                 with open(batch, 'rb') as bf:
                     try:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-                        mydict = cPickle.load(bf, encoding='bytes')
+                        mydict = pickle.load(bf, encoding='bytes')
                     except TypeError:
-                        mydict = cPickle.load(bf)
+                        mydict = pickle.load(bf)
 
                 # The labels have different names in the two datasets
                 new_data = np.array(mydict[b'data'], dtype='uint8')
@@ -241,9 +240,9 @@ class CDataLoaderCIFAR(CDataLoader):
         # Load the class-names from the pickled file.
         with open(meta_file_url, 'rb') as mf:
             try:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-                raw = cPickle.load(mf, encoding='bytes')[class_names_key]
+                raw = pickle.load(mf, encoding='bytes')[class_names_key]
             except TypeError:
-                raw = cPickle.load(mf)[class_names_key]
+                raw = pickle.load(mf)[class_names_key]
 
         # Convert from binary strings.
         names = {i: x.decode('utf-8') for i, x in enumerate(raw)}
