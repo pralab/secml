@@ -195,8 +195,10 @@ class CPlotMetric(CPlot):
             Label to assign to the roc.
             Repetition number will be appended using the
             following convention:
+
              - If label is None -> "rep 'i'"
              - If label is not None -> "`label` (rep `i`)"
+
         invert_tpr : bool
             True if 1 - tpr (False Negative Rates) should be plotted
             on y axis. Default False.
