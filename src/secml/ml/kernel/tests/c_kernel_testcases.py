@@ -31,6 +31,16 @@ class CCKernelTestCases(CUnitTest):
         except NotImplementedError:
             return False
 
+    def _cmp_kernel(self, k_fun, a1, a2):
+        k = k_fun(a1, a2)
+        if isinstance(k, CArray):
+            self.logger.info("k shape with inputs {:} {:} is: {:}"
+                             "".format(a1.shape, a2.shape, k.shape))
+            self.assertEqual(k.shape, (CArray(a1).atleast_2d().shape[0],
+                                       CArray(a2).atleast_2d().shape[0]))
+        else:
+            self.assertTrue(is_scalar(k))
+
     def _test_similarity_shape(self):
         """Test shape of kernel."""
         self.logger.info(
@@ -41,24 +51,14 @@ class CCKernelTestCases(CUnitTest):
         x_col = CArray.rand(shape=(10, 1))
         x_single = CArray.rand(shape=(1, 1))
 
-        def cmp_kernel(k_fun, a1, a2):
-            k = k_fun(a1, a2)
-            if isinstance(k, CArray):
-                self.logger.info("k shape with inputs {:} {:} is: {:}"
-                                 "".format(a1.shape, a2.shape, k.shape))
-                self.assertEqual(k.shape, (CArray(a1).atleast_2d().shape[0],
-                                           CArray(a2).atleast_2d().shape[0]))
-            else:
-                self.assertTrue(is_scalar(k))
-
-        cmp_kernel(self.kernel.k, x_vect, x_vect)
-        cmp_kernel(self.kernel.k, x_mat, x_vect)
-        cmp_kernel(self.kernel.k, x_vect, x_mat)
-        cmp_kernel(self.kernel.k, x_mat, x_mat)
-        cmp_kernel(self.kernel.k, x_col, x_col)
-        cmp_kernel(self.kernel.k, x_col, x_single)
-        cmp_kernel(self.kernel.k, x_single, x_col)
-        cmp_kernel(self.kernel.k, x_single, x_single)
+        self._cmp_kernel(self.kernel.k, x_vect, x_vect)
+        self._cmp_kernel(self.kernel.k, x_mat, x_vect)
+        self._cmp_kernel(self.kernel.k, x_vect, x_mat)
+        self._cmp_kernel(self.kernel.k, x_mat, x_mat)
+        self._cmp_kernel(self.kernel.k, x_col, x_col)
+        self._cmp_kernel(self.kernel.k, x_col, x_single)
+        self._cmp_kernel(self.kernel.k, x_single, x_col)
+        self._cmp_kernel(self.kernel.k, x_single, x_single)
 
     def _test_similarity_shape_sparse(self):
         """Test shape of kernel."""
@@ -70,24 +70,14 @@ class CCKernelTestCases(CUnitTest):
         x_col = CArray.rand(shape=(10, 1)).tosparse()
         x_single = CArray.rand(shape=(1, 1)).tosparse()
 
-        def cmp_kernel(k_fun, a1, a2):
-            k = k_fun(a1, a2)
-            if isinstance(k, CArray):
-                self.logger.info("k shape with inputs {:} {:} is: {:}"
-                                 "".format(a1.shape, a2.shape, k.shape))
-                self.assertEqual(k.shape, (CArray(a1).atleast_2d().shape[0],
-                                           CArray(a2).atleast_2d().shape[0]))
-            else:
-                self.assertTrue(is_scalar(k))
-
-        cmp_kernel(self.kernel.k, x_vect, x_vect)
-        cmp_kernel(self.kernel.k, x_mat, x_vect)
-        cmp_kernel(self.kernel.k, x_vect, x_mat)
-        cmp_kernel(self.kernel.k, x_mat, x_mat)
-        cmp_kernel(self.kernel.k, x_col, x_col)
-        cmp_kernel(self.kernel.k, x_col, x_single)
-        cmp_kernel(self.kernel.k, x_single, x_col)
-        cmp_kernel(self.kernel.k, x_single, x_single)
+        self._cmp_kernel(self.kernel.k, x_vect, x_vect)
+        self._cmp_kernel(self.kernel.k, x_mat, x_vect)
+        self._cmp_kernel(self.kernel.k, x_vect, x_mat)
+        self._cmp_kernel(self.kernel.k, x_mat, x_mat)
+        self._cmp_kernel(self.kernel.k, x_col, x_col)
+        self._cmp_kernel(self.kernel.k, x_col, x_single)
+        self._cmp_kernel(self.kernel.k, x_single, x_col)
+        self._cmp_kernel(self.kernel.k, x_single, x_single)
 
     def _test_gradient(self):
         """Test for kernel gradients with dense points."""
@@ -172,6 +162,31 @@ class CCKernelTestCases(CUnitTest):
         self.assertTrue((k1 - k2).ravel().norm() < 1e-4)
 
         data = self.d_dense.X  # using different no. of points/features
+        k1 = self.kernel.gradient(data, self.p2_dense)
+        k2 = CArray.zeros(shape=k1.shape)
+        for i in range(k2.shape[0]):
+            k2[i, :] = self.kernel.gradient(data[i, :], self.p2_dense)
+        self.assertTrue((k1 - k2).ravel().norm() < 1e-4)
+
+    def _test_gradient_multiple_points_sparse(self):
+        """Test for kernel gradients with multiple points vs single point."""
+
+        if not self._has_gradient():
+            self.logger.info(
+                "Gradient is not implemented for %s. "
+                "Skipping multiple-point tests.", self.kernel.class_type)
+            return
+
+        # check if gradient computed on multiple points is the same as
+        # the gradients computed on one point at a time.
+        data = self.d_sparse.X[0:5, :]  # using same no. of points and features
+        k1 = self.kernel.gradient(data, self.p2_dense)
+        k2 = CArray.zeros(shape=k1.shape)
+        for i in range(k2.shape[0]):
+            k2[i, :] = self.kernel.gradient(data[i, :], self.p2_dense)
+        self.assertTrue((k1 - k2).ravel().norm() < 1e-4)
+
+        data = self.d_sparse.X  # using different no. of points/features
         k1 = self.kernel.gradient(data, self.p2_dense)
         k2 = CArray.zeros(shape=k1.shape)
         for i in range(k2.shape[0]):

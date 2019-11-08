@@ -120,16 +120,11 @@ class CKernelRBF(CKernel):
         :meth:`CKernel.gradient` : Gradient computation interface for kernels.
 
         """
-        if v.issparse is True:
-            # Broadcasting not supported for sparse arrays
-            v_broadcast = v.repmat(u.shape[0], 1)
-        else:  # Broadcasting is supported by design for dense arrays
-            v_broadcast = v
 
         # Format of output array should be the same as v
         u = u.tosparse() if v.issparse else u.todense()
 
-        diff = (u - v_broadcast)
+        diff = (u - v)
 
         k_grad = self._k(u, v)
         # Casting the kernel to sparse if needed for efficient broadcasting

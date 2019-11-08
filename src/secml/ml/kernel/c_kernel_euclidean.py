@@ -159,16 +159,10 @@ class CKernelEuclidean(CKernel):
             raise ValueError(
                 "2nd array must have shape shape (1, n_features).")
 
-        if v.issparse is True:
-            # Broadcasting not supported for sparse arrays
-            v_broadcast = v.repmat(x.shape[0], 1)
-        else:  # Broadcasting is supported by design for dense arrays
-            v_broadcast = v
-
-        # Format of output array should be the same as v
+           # Format of output array should be the same as v
         x = x.tosparse() if v.issparse else x.todense()
 
-        diff = (x - v_broadcast)
+        diff = (x - v)
 
         if squared is True:  # 2 * (x - v)
             return 2 * diff
