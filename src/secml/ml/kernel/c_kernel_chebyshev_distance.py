@@ -95,13 +95,7 @@ class CKernelChebyshevDistance(CKernel):
         :meth:`CKernel.gradient` : Gradient computation interface for kernels.
 
         """
-        if v.issparse is True:
-            # Broadcasting not supported for sparse arrays
-            v_broadcast = v.repmat(u.shape[0], 1)
-        else:  # Broadcasting is supported by design for dense arrays
-            v_broadcast = v
-
-        diff = u - v_broadcast
+        diff = u - v
         m = abs(diff).max(axis=1)  # extract m from each row
         grad = CArray.zeros(shape=diff.shape, sparse=v.issparse)
         grad[diff >= m] = 1  # this correctly broadcasts per-row comparisons

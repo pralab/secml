@@ -16,6 +16,7 @@ class TestCKernelEuclidean(CCKernelTestCases):
         self._test_gradient()
         self._test_gradient_sparse()
         self._test_gradient_multiple_points()
+        self._test_gradient_multiple_points()
 
     # TODO test when squared=True. but this needs to be passed to __init__
 
