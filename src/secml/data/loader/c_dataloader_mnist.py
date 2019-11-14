@@ -129,9 +129,15 @@ class CDataLoaderMNIST(CDataLoader):
         digits = tuple(digits)
 
         # Number of samples per class
-        num_samples_class = size
         if num_samples is not None:
-            num_samples_class = int(num_samples / len(digits))
+            div = len(digits)
+            n_samples_class = [
+                int(num_samples / div) + (1 if x < num_samples % div else 0)
+                for x in range(div)]
+            n_samples_class = {
+                e: n_samples_class[e_i] for e_i, e in enumerate(digits)}
+        else:  # No constraint on the number of samples
+            n_samples_class = {e: size for e in digits}
 
         # Counter of already taken sample for a class
         count_samples_class = {e: 0 for e in digits}
@@ -139,18 +145,21 @@ class CDataLoaderMNIST(CDataLoader):
         # Extract the indices of samples to load
         ind = []
         for k in range(size):
-            if lbl[k] in digits and \
-                    count_samples_class[lbl[k]] < num_samples_class:
-                ind += [k]
-                count_samples_class[lbl[k]] += 1
+            if lbl[k] in digits:
+                # Check the maximum number of samples for current digits
+                if count_samples_class[lbl[k]] < n_samples_class[lbl[k]]:
+                    ind += [k]
+                    count_samples_class[lbl[k]] += 1
 
         # Number of loaded samples
         num_loaded = sum(count_samples_class.values())
 
         # Check if dataset has enough samples
         if num_samples is not None and num_loaded < num_samples:
-            raise ValueError("not enough samples in dataset for "
-                             "desired classes ({:})".format(num_loaded))
+            min_val = min(count_samples_class.values())
+            raise ValueError(
+                "not enough samples in dataset for one ore more of the "
+                "desired classes ({:} available)".format(min_val))
 
         images = CArray.zeros((len(ind), rows * cols), dtype=np.uint8)
         labels = CArray.zeros(len(ind), dtype=int)
