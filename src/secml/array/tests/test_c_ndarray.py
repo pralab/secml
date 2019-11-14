@@ -5,8 +5,6 @@ import numpy as np
 from secml.utils import fm
 from secml.array.c_dense import CDense
 
-from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-
 
 class TestCDense(CUnitTest):
     """Unit test for CDense."""

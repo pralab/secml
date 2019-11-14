@@ -6,8 +6,6 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-
 import scipy.sparse as scs
 from scipy.sparse.linalg import inv, norm
 import numpy as np
@@ -19,7 +17,6 @@ from secml.array.c_dense import CDense
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_intlike, is_int, is_bool
 from secml.core.constants import inf
-import copy
 
 
 def _expand_nnz_bool(array, nnz_val):

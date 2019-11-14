@@ -10,8 +10,6 @@ try:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 except ImportError:
     from collections import MutableMapping
 
-from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-
 __all__ = ['load_dict', 'merge_dicts', 'invert_dict',
            'LastInDict', 'SubLevelsDict']
 

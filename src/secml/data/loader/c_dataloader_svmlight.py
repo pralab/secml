@@ -6,9 +6,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-
 from sklearn.datasets import load_svmlight_file, dump_svmlight_file
+
 from secml.data.loader import CDataLoader
 from secml.array import CArray
 from secml.data import CDataset, CDatasetHeader

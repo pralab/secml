@@ -6,7 +6,6 @@
 
 """
 import tarfile
-from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 from multiprocessing import Lock
 import pickle
 
@@ -169,10 +168,7 @@ class CDataLoaderCIFAR(CDataLoader, metaclass=ABCMeta):
             labels = None
             for batch in batches_list:
                 with open(batch, 'rb') as bf:
-                    try:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-                        mydict = pickle.load(bf, encoding='bytes')
-                    except TypeError:
-                        mydict = pickle.load(bf)
+                    mydict = pickle.load(bf, encoding='bytes')
 
                 # The labels have different names in the two datasets
                 new_data = np.array(mydict[b'data'], dtype='uint8')
@@ -239,10 +235,7 @@ class CDataLoaderCIFAR(CDataLoader, metaclass=ABCMeta):
 
         # Load the class-names from the pickled file.
         with open(meta_file_url, 'rb') as mf:
-            try:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-                raw = pickle.load(mf, encoding='bytes')[class_names_key]
-            except TypeError:
-                raw = pickle.load(mf)[class_names_key]
+            raw = pickle.load(mf, encoding='bytes')[class_names_key]
 
         # Convert from binary strings.
         names = {i: x.decode('utf-8') for i, x in enumerate(raw)}

@@ -68,7 +68,4 @@ def load(file_path, encoding='bytes'):
     """
     with gzip.open(file_path, 'rb') as f_ref:
         # Loading and returning the object
-        try:  # TODO: REMOVE encoding AFTER TRANSITION TO PYTHON 3
-            return pickle.load(f_ref, encoding=encoding)
-        except TypeError:
-            return pickle.load(f_ref)
+        return pickle.load(f_ref, encoding=encoding)
