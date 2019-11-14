@@ -64,11 +64,7 @@ class CMetric(CCreator, metaclass=ABCMeta):
         kwargs.update(y_true=y_true, y_pred=y_pred, score=score)
 
         # Getting specifications of _performance_score method of the metric
-        # TODO: REPLACE WITH inspect.signature
-        try:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-            getargspec = inspect.getfullargspec
-        except AttributeError:
-            getargspec = inspect.getargspec
+        getargspec = inspect.getfullargspec
         metric_argspec = getargspec(self._performance_score)
         metric_params = metric_argspec.args[1:]  # Excluding `self`
         metric_defaults = metric_argspec.defaults
