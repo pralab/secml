@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 from secml.array.tests import CArrayTestCases
 
 import numpy as np
