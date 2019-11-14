@@ -318,12 +318,8 @@ class TestCArraySystemOverloads(CArrayTestCases):
         """Test for mathematical operators array vs unsupported types."""
 
         def test_unsupported(x):
-            try:
-                operators = [op.add, op.sub, op.mul,
-                             op.truediv, op.floordiv, op.pow]
-            except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-                operators = [op.add, op.sub, op.mul,
-                             op.truediv, op.floordiv, op.pow]
+            operators = [op.add, op.sub, op.mul,
+                         op.truediv, op.floordiv, op.pow]
             for operator in operators:
                 with self.assertRaises(TypeError):
                     self.logger.info("Testing {:} dense vs '{:}'".format(
@@ -354,12 +350,8 @@ class TestCArraySystemOverloads(CArrayTestCases):
         """Test for mathematical operators unsupported types vs array."""
 
         def test_unsupported(x):
-            try:
-                operators = [op.add, op.sub, op.mul,
-                             op.truediv, op.floordiv, op.pow]
-            except AttributeError:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-                operators = [op.add, op.sub, op.mul,
-                             op.truediv, op.floordiv, op.pow]
+            operators = [op.add, op.sub, op.mul,
+                         op.truediv, op.floordiv, op.pow]
             for operator in operators:
                 with self.assertRaises(TypeError):
                     self.logger.info("Testing {:} '{:}' vs dense".format(
