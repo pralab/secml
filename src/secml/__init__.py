@@ -19,12 +19,6 @@ __all__ = ['_NoValue', '__version__', 'global_filterwarnings']
 _here = os.path.abspath(os.path.dirname(__file__))
 
 
-if sys.version_info < (3, 0):
-    _logger.warn("DEPRECATION: Python 2.7 is deprecated, please use "
-                 "Python >= 3.5. Support for Python 2.7 will be dropped "
-                 "in a future release without advanced notice.")
-
-
 def _read(*path_parts):
     with open(os.path.join(_here, *path_parts), 'r', encoding='ascii') as fp:
         return fp.read().strip()
