@@ -1,5 +1,4 @@
 import os
-from io import open  # TODO: REMOVE AFTER TRANSITIONING TO PYTHON 3
 import sys
 import subprocess
 from pkg_resources import parse_version
@@ -18,12 +17,6 @@ _logger.addHandler(_logger_handle)
 __all__ = ['_NoValue', '__version__', 'global_filterwarnings']
 
 _here = os.path.abspath(os.path.dirname(__file__))
-
-
-if sys.version_info < (3, 0):
-    _logger.warn("DEPRECATION: Python 2.7 is deprecated, please use "
-                 "Python >= 3.5. Support for Python 2.7 will be dropped "
-                 "in a future release without advanced notice.")
 
 
 def _read(*path_parts):

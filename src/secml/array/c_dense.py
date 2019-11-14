@@ -5,8 +5,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from __future__ import print_function
-
 import numpy as np
 import numpy.matlib
 from numpy.linalg import inv, pinv

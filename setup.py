@@ -1,7 +1,6 @@
 from setuptools import setup, find_packages
 from pkg_resources import parse_version
 import os
-from io import open  # TODO: REMOVE AFTER TRANSITIONING TO PYTHON 3
 import subprocess
 
 here = os.path.abspath(os.path.dirname(__file__))
