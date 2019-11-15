@@ -134,6 +134,10 @@ def global_filterwarnings():
         message="Using or importing the ABCs from 'collections' instead of "
                 "from 'collections.abc' is deprecated*")
 
+    # TODO: check after upgrading to tensorflow 2
+    warnings.filterwarnings(
+        "ignore", category=FutureWarning, message="Passing (type, 1)*")
+
 
 # Call the filterwarnings method to make it active project-wide
 global_filterwarnings()
