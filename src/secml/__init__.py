@@ -120,6 +120,9 @@ def global_filterwarnings():
     warnings.filterwarnings(
         "ignore", category=PendingDeprecationWarning,
         message="the imp module is deprecated in favour of importlib*")
+    warnings.filterwarnings(
+        "ignore", category=DeprecationWarning,
+        message="the imp module is deprecated in favour of importlib*")
 
     # TODO: check after upgrading to tensorflow 2
     warnings.filterwarnings(
