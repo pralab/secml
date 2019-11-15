@@ -120,6 +120,13 @@ def global_filterwarnings():
     warnings.filterwarnings(
         "ignore", category=FutureWarning, message="Passing (type, 1)*")
 
+    # TODO: check after cleverhans fix this (post 3.0.1)
+    try:  # For some reason we are not able to filter tf warnings
+        import tensorflow as tf
+        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+    except ImportError:
+        pass
+
 
 # Call the filterwarnings method to make it active project-wide
 global_filterwarnings()
