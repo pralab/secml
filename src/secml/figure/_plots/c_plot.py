@@ -671,7 +671,6 @@ class CPlot(CCreator):
         """
         if 'fontsize' not in kwargs:
             kwargs['fontsize'] = self._params['font.size']
-        kwargs = self._set_lines_params(kwargs)
         return self._sp.clabel(contour, *args, **kwargs)
 
     def colorbar(self, mappable, ticks=None, *args, **kwargs):
