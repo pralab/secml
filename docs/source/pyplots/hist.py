@@ -9,7 +9,7 @@ sigma = 15  # standard deviation of distribution
 x = mu + sigma * CArray.randn((10000,))
 num_bins = 50
 # the histogram of the data
-n, bins, patches = fig.sp.hist(x, num_bins, normed=1, facecolor='green', alpha=0.5)
+n, bins, patches = fig.sp.hist(x, num_bins, density=1, facecolor='green', alpha=0.5)
 # add a 'best fit' line
 y = bins.normpdf(mu, sigma)
 fig.sp.plot(bins, y, 'r--')
