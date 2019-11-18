@@ -30,6 +30,9 @@ class CClassifierRejectThreshold(CClassifierReject,
     ----------
     clf : CClassifier
         Classifier to which we would like to apply a reject threshold.
+        The classifier can also be already fitted. In this case, if a
+        preprocessor was used during fitting, the same preprocessor must be
+        passed to the outer classifier.
     threshold : float
         Rejection threshold.
     preprocess : CPreProcess or str or None, optional
@@ -50,6 +53,9 @@ class CClassifierRejectThreshold(CClassifierReject,
                 "the preprocessor should be passed to the outer classifier.")
 
         super(CClassifierRejectThreshold, self).__init__(preprocess=preprocess)
+
+        if self.clf.is_fitted():
+            self._n_features = self._clf.n_features
 
     @property
     def clf(self):
