@@ -102,14 +102,7 @@ def global_filterwarnings():
 
     import warnings
 
-    # TODO: REMOVE WHEN SCIPY MIN VERSION WILL BE 1.3
-    warnings.filterwarnings(
-        "ignore", category=PendingDeprecationWarning,
-        message="the matrix subclass is not the recommended way to represent "
-                "matrices or deal with linear algebra*"
-    )
-
-    # Warnings related to data-type size changed. # TODO: fixed in numpy 1.16.1
+    # Warnings related to data-type size changed. # TODO: fixed in numpy ??
     warnings.filterwarnings(
         "ignore", category=RuntimeWarning, message="numpy.dtype size changed*"
     )
@@ -117,22 +110,30 @@ def global_filterwarnings():
         "ignore", category=RuntimeWarning, message="numpy.ufunc size changed*"
     )
 
-    # TODO: fixed in scipy 1.3.1
-    warnings.filterwarnings(
-        "ignore", category=FutureWarning,
-        message="future versions will not create a writeable array "
-                "from broadcast_array*"
-    )
-    # TODO: fixed in scipy 1.3.1
-    warnings.filterwarnings(
-        "ignore", category=DeprecationWarning,
-        message="Numpy has detected that you (may be)*")  # same as before
-
-    # TODO: check after upgrading to matplotlib 3
+    # TODO: check after upgrading to tensorflow 2
     warnings.filterwarnings(
         "ignore", category=DeprecationWarning,
         message="Using or importing the ABCs from 'collections' instead of "
                 "from 'collections.abc' is deprecated*")
+
+    # TODO: check after upgrading to tensorflow 2
+    warnings.filterwarnings(
+        "ignore", category=PendingDeprecationWarning,
+        message="the imp module is deprecated in favour of importlib*")
+    warnings.filterwarnings(
+        "ignore", category=DeprecationWarning,
+        message="the imp module is deprecated in favour of importlib*")
+
+    # TODO: check after upgrading to tensorflow 2
+    warnings.filterwarnings(
+        "ignore", category=FutureWarning, message="Passing (type, 1)*")
+
+    # TODO: check after cleverhans fix this (post 3.0.1)
+    try:  # For some reason we are not able to filter tf warnings
+        import tensorflow as tf
+        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+    except ImportError:
+        pass
 
 
 # Call the filterwarnings method to make it active project-wide
