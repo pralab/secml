@@ -148,6 +148,24 @@ test:py37:min:
   cache: *test-cache-py37
 
 
+.test:notebooks:
+  extends: .test
+  only:
+    changes:
+      - src/secml/**/*
+      - tutorials/**/*
+      - .gitlab-ci.yml
+      - requirements.txt
+      - setup.py
+      - tox.ini
+
+test:notebooks:py35:latest:
+  extends: .test:notebooks
+  image: python:3.5
+  script: tox -e latest-notebooks
+  cache: *test-cache-py35
+
+
 .test:install:
   stage: test
   needs: ["package"]
