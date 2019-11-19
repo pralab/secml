@@ -10,7 +10,7 @@ class TestCClassifierDecisionTree(CClassifierTestCases):
 
     def setUp(self):
         self.dataset = CDLIris().load()
-        self.dec_tree = CClassifierDecisionTree()
+        self.dec_tree = CClassifierDecisionTree(random_state=0)
 
     def test_classify(self):
         """Test for predict method. """
