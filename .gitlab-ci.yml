@@ -150,7 +150,7 @@ test:py37:min:
 
 .test:notebooks:
   extends: .test
-  needs: []
+  needs: ["package:docs"]  # Use [] after gitlab 12.6
   only:
     changes:
       - src/secml/**/*
