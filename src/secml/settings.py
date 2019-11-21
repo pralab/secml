@@ -21,10 +21,11 @@ _logger.addHandler(_logger_handle)
 
 
 __all__ = ['SECML_HOME_DIR', 'SECML_CONFIG',
-           'SECML_EXP_DIR', 'SECML_DS_DIR',
+           'SECML_DS_DIR', 'SECML_EXP_DIR',
            'SECML_STORE_LOGS', 'SECML_LOGS_DIR',
            'SECML_LOGS_FILENAME', 'SECML_LOGS_PATH',
-           'SECML_PYTORCH_DIR', 'SECML_PYTORCH_USE_CUDA']
+           'SECML_PYTORCH_DIR', 'SECML_PYTORCH_USE_CUDA',
+           'parse_config']
 
 
 def parse_config(conf_files, section, parameter, default=None, dtype=None):
@@ -32,13 +33,15 @@ def parse_config(conf_files, section, parameter, default=None, dtype=None):
 
     Parameters file must have the following structure:
 
-        [section1]
-        param1=xxx
-        param2=xxx
+    .. code-block::
 
-        [section2]
-        param1=xxx
-        param2=xxx
+       [section1]
+       param1=xxx
+       param2=xxx
+
+       [section2]
+       param1=xxx
+       param2=xxx
 
     Parameters
     ----------
@@ -48,7 +51,7 @@ def parse_config(conf_files, section, parameter, default=None, dtype=None):
         Section under which look for specified parameter.
     parameter : str
         Name of the parameter. This is not case-sensitive.
-    default : any
+    default : any, optional
         Set default value of parameter.
         If None (default), parameter is considered required and
         so must be defined in the input configuration file.
@@ -107,7 +110,7 @@ def _parse_env(name, default=None, dtype=None):
     ----------
     name : str
         Name of the variable to parse from env.
-    default : any
+    default : any, optional
         Set default value of variable.
         If None (default), parameter is considered required and
         so must be defined in environment.
@@ -162,23 +165,23 @@ def _parse_env_config(name, conf_files, section, parameter,
         return parse_config(conf_files, section, parameter, default, dtype)
 
 
-"""Main directory for storing datasets, experiments, temporary files.
-
-This is set by default to:
-    * Unix -> '$HOME/secml-data'
-    * Windows -> ($HOME, $USERPROFILE, $HOMEPATH, $HOMEDRIVE)/secml-data'
-
-"""
 SECML_HOME_DIR = _parse_env(
     'SECML_HOME_DIR',
     default=os.path.join(os.path.expanduser('~'), 'secml-data'))
+"""Main directory for storing datasets, experiments, temporary files.
+
+This is set by default to:
+    * Unix -> ``${HOME}/secml-data``
+    * Windows -> ``(${HOME}, ${USERPROFILE}, ${HOMEPATH}, ${HOMEDRIVE})/secml-data``
+
+"""
 if not os.path.isdir(SECML_HOME_DIR):
     os.makedirs(os.path.abspath(SECML_HOME_DIR))
     _logger.info('New `SECML_HOME_DIR` created: {:}'.format(SECML_HOME_DIR))
 
 
-"""Name of the configuration file (default `secml.conf`)."""
 SECML_CONFIG_FNAME = 'secml.conf'
+"""Name of the configuration file (default `secml.conf`)."""
 if not os.path.isfile(os.path.join(SECML_HOME_DIR, SECML_CONFIG_FNAME)):
     def_config = os.path.normpath(os.path.join(os.path.dirname(
         os.path.abspath(__file__)), SECML_CONFIG_FNAME))
@@ -194,16 +197,16 @@ def _config_fpath():
 
     The list of active configuration files is sorted from the highest
     to the lowest priority, as follows:
-     - `$PWD/secml.conf`
-     - `$SECML_CONFIG` if it is not a directory
-     - `$SECML_CONFIG/secml.conf`
-     - `$SECML_HOME_DIR/secml.conf`
-        - On Unix, `$HOME/secml-data/secml.conf`
-        - On Windows, `($HOME, $USERPROFILE, $HOMEPATH, $HOMEDRIVE)/secml-data/secml.conf`
+     - `${PWD}/secml.conf`
+     - `{SECML_CONFIG}` if it is not a directory
+     - `{SECML_CONFIG}/secml.conf`
+     - `{SECML_HOME_DIR}/secml.conf`
+        - On Unix, `${HOME}/secml-data/secml.conf`
+        - On Windows, `(${HOME}, ${USERPROFILE}, ${HOMEPATH}, ${HOMEDRIVE})/secml-data/secml.conf`
      - Lastly, it looks in `INSTALL/secml/secml.conf` for a
        system-defined copy.
-       INSTALL is something like `/usr/lib/python3.5/site-packages` on Linux,
-       and maybe `C:\\Python35\\Lib\\site-packages` on Windows.
+       INSTALL should be `/usr/lib/python3.5/site-packages` on Linux,
+       and `C:\\Python35\\Lib\\site-packages` on Windows.
 
     Returns
     -------
@@ -233,36 +236,36 @@ def _config_fpath():
     return candidates
 
 
-"""Active configuration files `secml.conf`."""
 SECML_CONFIG = _config_fpath()
+"""Active `secml.conf` configuration files."""
 
 
 # ------- #
 # [SECML] #
 # ------- #
 
-"""Main directory for storing datasets.
-
-This is set by default to: 'SECML_HOME_DIR/datasets'
-
-"""
 SECML_DS_DIR = _parse_env_config(
     'SECML_DS_DIR', SECML_CONFIG, 'secml', 'ds_dir',
     dtype=str, default=os.path.join(SECML_HOME_DIR, 'datasets')
 )
+"""Main directory for storing datasets.
+
+This is set by default to: ``{SECML_HOME_DIR}/datasets``
+
+"""
 if not os.path.isdir(SECML_DS_DIR):
     os.makedirs(os.path.abspath(SECML_DS_DIR))
     _logger.info('New `SECML_DS_DIR` created: {:}'.format(SECML_DS_DIR))
 
-"""Main directory of experiments data.
-
-This is set by default to: 'SECML_HOME_DIR/experiments'
-
-"""
 SECML_EXP_DIR = _parse_env_config(
     'SECML_EXP_DIR', SECML_CONFIG, 'secml', 'exp_dir',
     dtype=str, default=os.path.join(SECML_HOME_DIR, 'experiments')
 )
+"""Main directory of experiments data.
+
+This is set by default to: ``{SECML_HOME_DIR}/experiments``
+
+"""
 if not os.path.isdir(SECML_EXP_DIR):
     os.makedirs(os.path.abspath(SECML_EXP_DIR))
     _logger.info('New `SECML_EXP_DIR` created: {:}'.format(SECML_EXP_DIR))
@@ -271,40 +274,44 @@ if not os.path.isdir(SECML_EXP_DIR):
 # [SECML:LOGS] #
 # ------------ #
 
-"""Whether to store logs to file. Default False."""
 SECML_STORE_LOGS = _parse_env_config(
     'SECML_STORE_LOGS', SECML_CONFIG, 'secml:logs', 'store_logs',
     dtype=bool, default=False
 )
+"""Whether to store logs to file. Default False."""
 
-"""Directory where logs will be stored.
-
-This is set by default to: 'SECML_HOME_DIR/logs'
-
-"""
 SECML_LOGS_DIR = _parse_env_config(
     'SECML_LOGS_DIR', SECML_CONFIG, 'secml:logs', 'logs_dir',
     dtype=str, default=os.path.join(SECML_HOME_DIR, 'logs')
 )
+"""Directory where logs will be stored.
+
+This is set by default to: ``{SECML_HOME_DIR}/logs``
+
+"""
 if not os.path.isdir(SECML_LOGS_DIR):
     os.makedirs(os.path.abspath(SECML_LOGS_DIR))
     _logger.info('New `SECML_LOGS_DIR` created: {:}'.format(SECML_LOGS_DIR))
 
-"""Name of the logs file on disk. Default: 'logs.log'."""
 SECML_LOGS_FILENAME = _parse_env_config(
     'SECML_LOGS_FILENAME', SECML_CONFIG, 'secml:logs', 'logs_filename',
     dtype=str, default='logs.log'
 )
+"""Name of the logs file on disk. Default: `logs.log`."""
 
-# Full path to the logs file
 SECML_LOGS_PATH = os.path.join(SECML_LOGS_DIR, SECML_LOGS_FILENAME)
+"""Full path to the logs file: ``{SECML_LOGS_DIR}/{SECML_LOGS_FILENAME}``."""
 
-"""PyTorch settings"""
+
+# --------------- #
+# [SECML:PYTORCH] #
+# --------------- #
 
 SECML_PYTORCH_USE_CUDA = _parse_env_config(
     'SECML_PYTORCH_USE_CUDA', SECML_CONFIG, 'secml:pytorch', 'use_cuda',
     dtype=bool, default=True
 )
+"""Controls if CUDA should be used by the PyTorch wrapper when available."""
 
 SECML_PYTORCH_DIR =_parse_env(
     'SECML_PYTORCH_DIR',
@@ -312,3 +319,8 @@ SECML_PYTORCH_DIR =_parse_env(
 if not os.path.isdir(SECML_PYTORCH_DIR):
     os.makedirs(os.path.abspath(SECML_PYTORCH_DIR))
     _logger.info('New `SECML_PYTORCH_DIR` created: {:}'.format(SECML_PYTORCH_DIR))
+"""Directory for storing PyTorch data.
+ 
+This is set by default to: `{SECML_HOME_DIR}`/pytorch-data`
+
+"""
