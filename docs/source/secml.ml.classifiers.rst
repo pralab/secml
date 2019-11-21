@@ -109,15 +109,6 @@ CClassifierPyTorch
    :undoc-members:
    :show-inheritance:
 
-
-CModelCleverhans
-----------------
-
-.. automodule:: secml.ml.classifiers.tf.c_model_cleverhans
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 clf\_utils
 ----------
 

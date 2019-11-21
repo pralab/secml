@@ -3,7 +3,7 @@ from secml.testing import CUnitTest
 try:
     import cleverhans
 except ImportError:
-    CUnitTest.importskip("tensorflow")
+    CUnitTest.importskip("cleverhans")
 
 from cleverhans.attacks import FastGradientMethod, CarliniWagnerL2, \
     ElasticNetMethod, SPSA, LBFGS, \
