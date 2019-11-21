@@ -99,7 +99,6 @@ except:
 
 # The following are global filters for warnings
 def global_filterwarnings():
-
     import warnings
 
     # Warnings related to data-type size changed. # TODO: fixed in numpy ??
