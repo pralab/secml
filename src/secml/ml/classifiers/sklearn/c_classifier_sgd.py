@@ -35,7 +35,7 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
     __class_type = 'sgd'
 
     def __init__(self, loss, regularizer, kernel=None, alpha=0.01,
-                 fit_intercept=True, max_iter=1000, tol=-inf,
+                 fit_intercept=True, max_iter=1000, tol=None,
                  shuffle=True, learning_rate='optimal',
                  eta0=10.0, power_t=0.5, class_weight=None,
                  warm_start=False, average=False, random_state=None,
@@ -53,7 +53,7 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
         self.alpha = alpha
         self.fit_intercept = fit_intercept
         self.max_iter = max_iter
-        self.tol = tol  # TODO: from sklearn 0.21 default for tol will change
+        self.tol = tol
         self.shuffle = shuffle
         self.learning_rate = learning_rate
         self.eta0 = eta0
