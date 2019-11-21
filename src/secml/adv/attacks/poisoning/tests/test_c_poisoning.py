@@ -65,7 +65,7 @@ class CPoisoningTestCases:
 
                 self.classifier = CClassifierLogistic(C=100,
                                                       preprocess=None,
-                                                      random_seed=self.seed)
+                                                      random_state=self.seed)
 
                 self.pois_class = CAttackPoisoningLogisticRegression
 
