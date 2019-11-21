@@ -150,6 +150,7 @@ test:py37:min:
 
 .test:notebooks:
   extends: .test
+  needs: []
   only:
     changes:
       - src/secml/**/*
