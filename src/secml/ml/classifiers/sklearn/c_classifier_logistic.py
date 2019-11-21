@@ -8,6 +8,7 @@
 """
 from sklearn.linear_model import LogisticRegression
 
+from secml import _NoValue
 from secml.array import CArray
 from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.loss import CLossLogistic
@@ -33,29 +34,37 @@ class CClassifierLogistic(CClassifierLinear, CClassifierGradientLogisticMixin):
     _loss = CLossLogistic()
     _reg = CRegularizerL2()
 
-    def __init__(self, C=1.0, max_iter=100, random_seed=None, preprocess=None):
+    def __init__(self, C=1.0, max_iter=100, random_state=None,
+                 random_seed=_NoValue, preprocess=None):
 
         CClassifierLinear.__init__(self, preprocess=preprocess)
 
         self.C = C
         self.max_iter = max_iter
-        self.random_seed = random_seed
+        self.random_state = random_state
+
+        if random_seed != _NoValue:
+            import warnings
+            warnings.warn(
+                "`random_seed` is deprecated since version 0.11. "
+                "Use `random_state` instead.", DeprecationWarning)
+            self.random_state = random_seed
 
     @property
     def max_iter(self):
         return self._max_iter
 
     @property
-    def random_seed(self):
-        return self._random_seed
+    def random_state(self):
+        return self._random_state
 
     @max_iter.setter
     def max_iter(self, value):
         self._max_iter = int(value)
 
-    @random_seed.setter
-    def random_seed(self, value):
-        self._random_seed = value
+    @random_state.setter
+    def random_state(self, value):
+        self._random_state = value
 
     @property
     def C(self):
@@ -84,7 +93,7 @@ class CClassifierLogistic(CClassifierLinear, CClassifierGradientLogisticMixin):
             intercept_scaling=1.0,
             class_weight=None,
             solver='liblinear',
-            random_state=self._random_seed,
+            random_state=self._random_state,
             max_iter=self._max_iter,
             multi_class='ovr',
             verbose=0,
