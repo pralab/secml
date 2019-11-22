@@ -77,8 +77,8 @@ class CClassifierGradientMixin(metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    # test derivatives:
-
+    # TODO: this is going to be removed and replaced to a call to gradient(x,w)
+    #  as soon as all classifiers will have _backward implemented properly
     def grad_f_x(self, x, y, **kwargs):
         """
         Derivative of the classifier decision function w.r.t. an input sample
@@ -130,24 +130,3 @@ class CClassifierGradientMixin(metaclass=ABCMeta):
             return grad_p.ravel()
 
         return grad_f  # No preprocess defined... return the clf grad
-
-    @abstractmethod
-    def _grad_f_x(self, x, y):
-        """Computes the gradient of the classifier's decision function
-         wrt decision function input.
-
-        Parameters
-        ----------
-        x : CArray
-            The gradient is computed in the neighborhood of x.
-        y :  CArray
-            The label of the class wrt the function should be calculated.
-
-        Returns
-        -------
-        gradient : CArray
-            The gradient of the classifier's decision function
-            wrt decision function input. Vector-like array.
-
-        """
-        raise NotImplementedError

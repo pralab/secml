@@ -71,13 +71,14 @@ class TestCClassifierPyTorch(CUnitTest):
         for layer in layer_names:
             self.logger.info("Returning gradient for layer: {:}".format(layer))
             print(layer)
-            if layer is not None:
-                shape = self.clf.get_layer_output(x, layer).shape
-                w_in = CArray.zeros(shape=(shape))
-                w_in[1] = 1
-                grad = self.clf.grad_f_x(x, w=w_in, layer=layer)
-            else:
-                grad = self.clf.grad_f_x(x, y=1, layer=layer)
+
+            # construct w
+            shape = self.clf.get_layer_output(x, layer).shape
+            w_in = CArray.zeros(shape=(shape))
+            w_in[1] = 1
+
+            # call grad
+            grad = self.clf.get_layer_gradient(x, w=w_in, layer=layer)
 
             self.logger.debug("Output of grad_f_x: {:}".format(grad))
 
@@ -97,20 +98,17 @@ class TestCClassifierPyTorch(CUnitTest):
 
         layer = layer_name
         self.logger.info("Returning output for layer: {:}".format(layer))
-        out = self.clf.get_layer_output(x, layer_names=layer)
-        if isinstance(out, dict):
-            out = {k: v[:10] for (k, v) in out.items()}
-        else:
-            out = out[:10]
+        out = self.clf.get_layer_output(x, layer=layer)
+        out = out[:10]
         self.logger.debug("Output of get_layer_output: {:}".format(out))
 
         if layer is None:
             self.assertTrue(
-                (self.clf.get_layer_output(x, layer_names=layer) -
+                (self.clf.get_layer_output(x, layer=layer) -
                  self.clf.decision_function(x)).sum() == 0)
             last_layer_name = self.clf.layer_names[-1]
             self.assertTrue(
-                (self.clf.get_layer_output(x, layer_names=last_layer_name) -
+                (self.clf.get_layer_output(x, layer=last_layer_name) -
                  self.clf.decision_function(x)).sum() == 0)
 
     def _test_layer_names(self):

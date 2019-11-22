@@ -62,7 +62,7 @@ class CNormalizerLinear(CNormalizer):
         """
         check_is_fitted(self, ['w', 'b'])
 
-    def _transform(self, x):
+    def _forward(self, x):
         """Linearly scales features.
 
         Parameters

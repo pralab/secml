@@ -259,6 +259,32 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         with self.assertRaises(ValueError):
             multiclass.grad_f_x(pattern, y=100)
 
+    def test_multiclass_gradient(self):
+        """Test if gradient is correct when requesting for all classes with w"""
+
+        multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,
+                                              class_weight='balanced')
+        multiclass.fit(self.dataset)
+        div = CArray.rand(shape=multiclass.n_classes, random_state=0)
+
+        def f_x(x):
+            x = multiclass.predict(x, return_decision_function=True)[1]
+            return CArray((x / div).mean())
+
+        def grad_f_x(x):
+            w = CArray.ones(shape=multiclass.n_classes) / \
+                (div * multiclass.n_classes)
+            return multiclass.gradient(x, w=w)
+
+        i = 5  # Sample to test
+        x = self.dataset.X[i, :]
+
+        from secml.optim.function import CFunction
+        check_grad_val = CFunction(f_x, grad_f_x).check_grad(x, epsilon=1e-1)
+        self.logger.info(
+            "norm(grad - num_grad): %s", str(check_grad_val))
+        self.assertLess(check_grad_val, 1e-3)
+
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""
         multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,

@@ -63,3 +63,16 @@ class CClassifierReject(CClassifier, metaclass=ABCMeta):
 
         """
         raise NotImplementedError
+
+    def _check_clf_index(self, y):
+        """Raise error if index y is outside [-1, n_classes) range.
+
+        Parameters
+        ----------
+        y : int
+            class label index.
+
+        """
+        if y < -1 or y >= self.n_classes:
+            raise ValueError(
+                "class label {:} is out of range".format(y))

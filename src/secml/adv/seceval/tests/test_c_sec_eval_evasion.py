@@ -23,10 +23,10 @@ class TestCSecEval(CUnitTest):
         ub = +2
 
         n_tr = 20
-        n_ts = 30
+        n_ts = 10
         n_features = 2
         
-        n_reps = 2
+        n_reps = 1
 
         self.sec_eval = []
         self.attack_ds = []

@@ -117,7 +117,7 @@ class CNormalizerUnitNorm(CNormalizer):
         """
         return self
 
-    def _transform(self, x):
+    def _forward(self, x):
         """Transform array patterns to have unit norm.
 
         Parameters
@@ -151,8 +151,6 @@ class CNormalizerUnitNorm(CNormalizer):
          [1.]])
 
         """
-        x = x.atleast_2d()
-
         # Computing and storing norm (can be used for revert)
         self._norm = x.norm_2d(order=self.order, axis=1)
 

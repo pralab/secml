@@ -145,7 +145,7 @@ class CLDA(CReducer):
 
         return self
 
-    def _transform(self, x):
+    def _forward(self, x):
         """Apply the reduction algorithm on data.
 
         Parameters

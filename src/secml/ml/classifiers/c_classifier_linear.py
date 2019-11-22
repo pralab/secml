@@ -103,7 +103,7 @@ class CClassifierLinear(CClassifier, metaclass=ABCMeta):
 
         return super(CClassifierLinear, self).fit(dataset, n_jobs=n_jobs)
 
-    def _decision_function(self, x, y=None):
+    def _forward(self, x):
         """Computes the distance of each pattern in x to the hyperplane.
 
         Parameters
@@ -111,9 +111,6 @@ class CClassifierLinear(CClassifier, metaclass=ABCMeta):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : {0, 1, None}
-            The label of the class wrt the function should be calculated.
-            If None, return the output for all classes.
 
         Returns
         -------
@@ -123,10 +120,6 @@ class CClassifierLinear(CClassifier, metaclass=ABCMeta):
             otherwise a (n_samples, n_classes) array.
 
         """
-        if y not in (0, 1, None):
-            raise ValueError("decision function cannot be computed "
-                             "against class {:}.".format(y))
-
         # Computing: `x * w^T`
         score = CArray(x.dot(self.w.T)).todense().ravel() + self.b
 
@@ -134,4 +127,52 @@ class CClassifierLinear(CClassifier, metaclass=ABCMeta):
         scores[:, 0] = -score.ravel().T
         scores[:, 1] = score.ravel().T
 
-        return scores[:, y].ravel() if y is not None else scores
+        return scores
+
+    def _backward(self, w):
+        """Computes the gradient of the linear classifier's decision function
+         wrt decision function input.
+
+        For linear classifiers, the gradient wrt input is equal
+        to the weights vector w. The point x can be in fact ignored.
+
+        Parameters
+        ----------
+        x : CArray or None, optional
+            The gradient is computed in the neighborhood of x.
+        y : int, optional
+            Binary index of the class wrt the gradient must be computed.
+            Default is 1, corresponding to the positive class.
+
+        Returns
+        -------
+        gradient : CArray
+            The gradient of the linear classifier's decision function
+            wrt decision function input. Vector-like array.
+
+        """
+        # Gradient sign depends on input label (0/1)
+        if w is not None:
+            return w[0] * -self.w + w[1] * self.w
+        else:
+            raise ValueError("w cannot be set as None.")
+
+    def grad_f_x(self, x, y=1):
+        """Computes the gradient of the classifier's decision function wrt x.
+
+        Parameters
+        ----------
+        x : CArray or None, optional
+            The input point. The gradient will be computed at x.
+        y : int
+            Binary index of the class wrt the gradient must be computed.
+            Default is y=1 to return gradient wrt the positive class.
+
+        Returns
+        -------
+        gradient : CArray
+            The gradient of the linear classifier's decision function
+            wrt decision function input. Vector-like array.
+
+        """
+        return CClassifier.grad_f_x(self, x=x, y=y)

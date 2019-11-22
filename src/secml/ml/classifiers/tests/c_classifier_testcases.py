@@ -68,7 +68,7 @@ class CClassifierTestCases(CUnitTest):
         df, df_priv = [], []
         for y in range(ds.num_classes):
             df.append(clf.decision_function(x, y=y))
-            df_priv.append(clf._decision_function(x_norm, y=y))
+            df_priv.append(clf._forward(x_norm)[:, y].ravel())
             self.logger.info(
                 "decision_function(x, y={:}): {:}".format(y, df[y]))
             self.logger.info(
@@ -93,7 +93,7 @@ class CClassifierTestCases(CUnitTest):
         df, df_priv = [], []
         for y in range(ds.num_classes):
             df.append(clf.decision_function(p, y=y))
-            df_priv.append(clf._decision_function(p_norm, y=y))
+            df_priv.append(clf._forward(p_norm)[:, y].ravel())
             self.logger.info(
                 "decision_function(p, y={:}): {:}".format(y, df[y]))
             self._check_df_scores(df[y], 1)
@@ -170,7 +170,6 @@ class CClassifierTestCases(CUnitTest):
 
         grads = []
         for c in classes:
-
             grad_kwargs['y'] = c  # Appending class to test_f_x
 
             # Analytical gradient
@@ -334,7 +333,6 @@ class CClassifierTestCases(CUnitTest):
             classes = clf.classes
 
         for c in classes:
-
             self.logger.info(
                 "Testing grad wrt. class {:}".format(c))
 

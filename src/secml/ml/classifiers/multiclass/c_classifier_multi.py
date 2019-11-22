@@ -143,19 +143,6 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
         # Delete binary classifiers in excess
         del self._binary_classifiers[num_classes:]
 
-    def _check_clf_index(self, y):
-        """Raise error if index y is outside [0, num_classifiers) range.
-
-        Parameters
-        ----------
-        y : int
-            Index of the binary classifier.
-
-        """
-        if y < 0 or y >= self.num_classifiers:
-            raise ValueError(
-                "binary classifier index {:} is out of range".format(y))
-
     def estimate_parameters(self, dataset, parameters, splitter, metric,
                             pick='first', perf_evaluator='xval', n_jobs=1):
         """Estimate parameter that give better result respect a chose metric.
