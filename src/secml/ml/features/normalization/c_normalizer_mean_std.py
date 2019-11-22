@@ -236,29 +236,12 @@ class CNormalizerMeanStd(CNormalizerLinear):
             self._x_std = self._expand_std(n_feats)
 
         self._compute_w_and_b()
-
         return self
 
-    def transform(self, x, caching=False):
-        """Apply the transformation algorithm on data.
-
-        Parameters
-        ----------
-        x : CArray
-            Array to be transformed.
-            Shape of input array depends on the algorithm itself.
-        caching: bool
-                 True if preprocessed input should be cached for backward pass.
-
-        Returns
-        -------
-        CArray
-            Transformed input data.
-
+    def _check_input(self, x):
+        """This function is redefined here to avoid calling fit
+        before transform, for this normalizer, when default params are set.
         """
-
-        # this avoids calling fit before transform,
-        # when default params are set
         n_feats = x.atleast_2d().shape[1]
         if self.w is None:
             if self._mean is not None:
@@ -266,5 +249,3 @@ class CNormalizerMeanStd(CNormalizerLinear):
             if self._std is not None:
                 self._expand_std(n_feats)
             self._compute_w_and_b()
-
-        return super(CNormalizerMeanStd, self).transform(x, caching)

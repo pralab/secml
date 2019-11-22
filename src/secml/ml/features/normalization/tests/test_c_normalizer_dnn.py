@@ -12,7 +12,9 @@ else:
     import torch
     from torch import nn, optim
     from torchvision import transforms
+    torch.manual_seed(0)
 
+from secml.array import CArray
 from secml.ml.features.normalization import CNormalizerDNN
 from secml.ml.classifiers import CClassifierPyTorch
 from secml.data.loader import CDLRandom
@@ -75,7 +77,7 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         self.norm.out_layer = None
 
         out_norm = self.norm.transform(x)
-        out_net = self.net.get_layer_output(x, layer_names=None)
+        out_net = self.net.get_layer_output(x, layer=None)
 
         self.logger.info("Output of normalize:\n{:}".format(out_norm))
         self.logger.info("Output of net:\n{:}".format(out_net))
@@ -88,7 +90,7 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
             "Testing normalization at layer {:}".format(self.norm.out_layer))
 
         out_norm = self.norm.transform(x)
-        out_net = self.net.get_layer_output(x, layer_names=self.norm.out_layer)
+        out_net = self.net.get_layer_output(x, layer=self.norm.out_layer)
 
         self.logger.info("Output of normalize:\n{:}".format(out_norm))
         self.logger.info("Output of net:\n{:}".format(out_net))
@@ -108,7 +110,10 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         layer = None
         self.norm.out_layer = layer
         self.logger.info("Returning gradient for layer: {:}".format(layer))
-        grad = self.norm.gradient(x, y=0)
+        shape = self.norm.transform(x).shape
+        w = CArray.zeros(shape=shape)
+        w[0] = 1
+        grad = self.norm.gradient(x, w=w)
 
         self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
 
@@ -118,7 +123,7 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         layer = 'linear1'
         self.norm.out_layer = layer
         self.logger.info("Returning output for layer: {:}".format(layer))
-        out = self.net.get_layer_output(x, layer_names=layer)
+        out = self.net.get_layer_output(x, layer=layer)
         self.logger.info("Returning gradient for layer: {:}".format(layer))
         grad = self.norm.gradient(x, w=out)
 
