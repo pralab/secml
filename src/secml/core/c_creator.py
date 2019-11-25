@@ -513,7 +513,7 @@ class CCreator:
             The full path of the stored object.
 
         """
-        raise NotImplementedError
+        return pck.save(path, self.get_state())
 
     def load_state(self, path):
         """Sets the object state from file.
@@ -524,7 +524,8 @@ class CCreator:
             The full path of the file from which to load the object state.
 
         """
-        raise NotImplementedError
+        # Copy not needed for objects loaded from disk
+        self.set_state(pck.load(path), copy=False)
 
     def __repr__(self):
         """Defines print behaviour."""
