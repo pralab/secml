@@ -379,6 +379,32 @@ class CCreator:
                              "parameter '{:}'".format(
                                  self.__class__.__name__, param_name))
 
+    def get_state(self):
+        """Returns the object state dictionary.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the state of the object.
+
+        """
+        raise NotImplementedError
+
+    def set_state(self, state_dict, copy=False):
+        """Sets the object state using input dictionary.
+
+        Parameters
+        ----------
+        state_dict : dict
+            Dictionary containing the state of the object.
+        copy : bool, optional
+            By default (False) a reference to the parameter to
+            assign is set. If True or a reference cannot be
+            extracted, a deepcopy of the parameter is done first.
+
+        """
+        raise NotImplementedError
+
     def copy(self):
         """Returns a shallow copy of current class.
 
@@ -422,12 +448,11 @@ class CCreator:
         return new_obj
 
     def save(self, path):
-        """Save class object using pickle.
+        """Save class object to file.
 
-        Store the current class instance to disk, preserving
-        the state of each attribute.
+        This function stores an object to file (with pickle).
 
-        `.load()` can be used to restore the instance later.
+        `.load()` can be used to restore the object later.
 
         Parameters
         ----------
@@ -444,10 +469,9 @@ class CCreator:
 
     @classmethod
     def load(cls, path):
-        """Loads class from pickle object.
+        """Loads object from file.
 
-        This function loads any object stored with pickle
-        or cPickle and any output of `.save()`.
+        This function loads an object from file (with pickle).
 
         The object can be correctly loaded in the following cases:
          - loaded and calling class have the same type.
@@ -470,6 +494,33 @@ class CCreator:
             if has_super(loaded_obj):
                 err_str += ", '{:}'".format(loaded_obj.__super__)
             raise TypeError(err_str + " or 'CCreator'.")
+
+    def save_state(self, path):
+        """Store the object state to file.
+
+        Parameters
+        ----------
+        path : str
+            Path of the file where to store object state.
+
+        Returns
+        -------
+        str
+            The full path of the stored object.
+
+        """
+        raise NotImplementedError
+
+    def load_state(self, path):
+        """Sets the object state from file.
+
+        Parameters
+        ----------
+        path : str
+            The full path of the file from which to load the object state.
+
+        """
+        raise NotImplementedError
 
     def __repr__(self):
         """Defines print behaviour."""
