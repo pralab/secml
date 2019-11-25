@@ -388,7 +388,11 @@ class CCreator:
             Dictionary containing the state of the object.
 
         """
-        raise NotImplementedError
+        # We extract the PUBLIC (pub), READ/WRITE (rw) and READ ONLY (r)
+        # attributes from the class dictionary, than we build a new dictionary
+        # using as keys the attributes names without the accessibility prefix
+        return SubLevelsDict((as_public(k), getattr(self, as_public(k)))
+                             for k in extract_attr(self, 'pub+rw+r'))
 
     def set_state(self, state_dict, copy=False):
         """Sets the object state using input dictionary.
