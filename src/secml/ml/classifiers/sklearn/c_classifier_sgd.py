@@ -35,7 +35,7 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
     __class_type = 'sgd'
 
     def __init__(self, loss, regularizer, kernel=None, alpha=0.01,
-                 fit_intercept=True, max_iter=1000, tol=-inf,
+                 fit_intercept=True, max_iter=1000, tol=None,
                  shuffle=True, learning_rate='optimal',
                  eta0=10.0, power_t=0.5, class_weight=None,
                  warm_start=False, average=False, random_state=None,
@@ -53,7 +53,7 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
         self.alpha = alpha
         self.fit_intercept = fit_intercept
         self.max_iter = max_iter
-        self.tol = tol  # TODO: from sklearn 0.21 default for tol will change
+        self.tol = tol
         self.shuffle = shuffle
         self.learning_rate = learning_rate
         self.eta0 = eta0
@@ -152,7 +152,8 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
     @property
     def eta0(self):
         """The initial learning rate for the `invscaling` learning rate.
-        Default is 10.0 (corresponding to sqrt(1.0/sqrt(alpha)), with alpha=0.0001).
+        Default is 10.0 (corresponding to sqrt(1.0/sqrt(alpha)),
+        with alpha=0.0001).
         """
         return self._eta0
 
@@ -260,8 +261,9 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
         return sgd
 
     # TODO: this function can be removed when removing kernel support
-    def _decision_function(self, x, y=None):
-        """Computes the distance from the separating hyperplane for each pattern in x.
+    def _forward(self, x):
+        """Computes the distance from the separating hyperplane
+        for each pattern in x.
 
         The scores are computed in kernel space if kernel is defined.
 
@@ -270,9 +272,6 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : {0, 1, None}
-            The label of the class wrt the function should be calculated.
-            If None, return the output for all classes.
 
         Returns
         -------
@@ -286,6 +285,53 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
         k = x if self.is_kernel_linear() else \
             CArray(self.kernel.k(x, self._tr))
         # Scores are given by the linear model
-        return CClassifierLinear._decision_function(self, k, y=y)
+        return CClassifierLinear._forward(self, k)
 
+    def _backward(self, w=None):
+        """Computes the gradient of the linear classifier's decision function
+         wrt decision function input.
 
+        For linear classifiers, the gradient wrt the input x is equal
+        to the weight vector w, regardless of x.
+
+        Parameters
+        ----------
+        x : CArray or None, optional
+            The gradient is computed in the neighborhood of x.
+        y : int, optional
+            Binary index of the class wrt the gradient must be computed.
+            Default is 1, corresponding to the positive class.
+
+        Returns
+        -------
+        gradient : CArray
+            The gradient of the linear classifier's decision function
+            wrt decision function input. Vector-like array.
+
+        """
+        if self.is_kernel_linear():  # Simply return w for a linear Ridge
+            gradient = self.w.ravel()
+        else:
+            gradient = self.kernel.gradient(
+                self._tr, self._cached_x).atleast_2d()
+
+            # Few shape check to ensure broadcasting works correctly
+            if gradient.shape != (self._tr.shape[0], self.n_features):
+                raise ValueError("Gradient shape must be ({:}, {:})".format(
+                    self._cached_x.shape[0], self.n_features))
+
+            w_2d = self.w.atleast_2d()
+            if gradient.issparse is True:  # To ensure the sparse dot is used
+                w_2d = w_2d.tosparse()
+            if w_2d.shape != (1, self._tr.shape[0]):
+                raise ValueError(
+                    "Weight vector shape must be ({:}, {:}) "
+                    "or ravel equivalent".format(1, self._tr.shape[0]))
+
+            gradient = w_2d.dot(gradient)
+
+        # Gradient sign depends on input label (0/1)
+        if w is not None:
+            return w[0] * -gradient + w[1] * gradient
+        else:
+            raise ValueError("w cannot be set as None.")

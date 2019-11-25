@@ -7,4 +7,4 @@ try:
 except ImportError:
     pass  # cleverhans is an extra component
 else:
-    from .c_attack_evasion_cleverhans import CAttackEvasionCleverhans
+    from .cleverhans.c_attack_evasion_cleverhans import CAttackEvasionCleverhans

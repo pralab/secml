@@ -166,6 +166,7 @@ class TestCClassifierSVM(CClassifierTestCases):
             _check_flattness(pred_y)
             _check_flattness(gradient)
 
+
     def test_sparse(self):
         """Performs tests on sparse dataset."""
         self.logger.info("Testing SVM on sparse data")

@@ -214,7 +214,7 @@ test:notebooks:py35:latest:
   after_script:
     - python -c "import secml"
     - python -c "from secml.ml.classifiers import CClassifierPyTorch"
-    - python -c "from secml.ml.classifiers import CModelCleverhans"
+    - python -c "from secml.adv.attacks.evasion import CAttackEvasionCleverhans"
 
 test:install:whl:py35:
   extends: .test:install:whl

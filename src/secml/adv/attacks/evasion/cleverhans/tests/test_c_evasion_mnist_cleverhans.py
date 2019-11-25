@@ -3,7 +3,7 @@ from secml.testing import CUnitTest
 try:
     import cleverhans
 except ImportError:
-    CUnitTest.importskip("tensorflow")
+    CUnitTest.importskip("cleverhans")
 
 from cleverhans.attacks import FastGradientMethod, CarliniWagnerL2, \
     ElasticNetMethod, SPSA, LBFGS, \
@@ -68,9 +68,9 @@ class TestEvasionMNISTCleverhansAttack(CUnitTest):
             self.tr = self.tr.tosparse()
             self.ts = self.ts.tosparse()
 
-        self.logger.info("training classifier ...")
+        self.logger.info("Training classifier ...")
         self.classifier.fit(self.tr)
-        self.logger.info("training classifier ... Done.")
+        self.logger.info("Training classifier ... Done.")
         self._chose_x0()
 
         # dictionary that contain the parameters of the cleverhans attack
@@ -326,7 +326,7 @@ class TestEvasionMNISTCleverhansAttack(CUnitTest):
                     s_ytrue_xopt = self.classifier.decision_function(
                         adv_x, y0)
 
-                    self.logger.info("Discriminat function w.r.t the "
+                    self.logger.info("Discriminant function w.r.t the "
                                      "true class first: {:} and after "
                                      "evasion: {:}".format(s_ytrue_x0,
                                                            s_ytrue_xopt))

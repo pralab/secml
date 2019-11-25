@@ -19,7 +19,7 @@ class TestCClassifierLogistic(CClassifierTestCases):
 
         self.logger.info("Testing classifier creation ")
         
-        self.log = CClassifierLogistic(random_seed=99)
+        self.log = CClassifierLogistic(random_state=99)
 
     def test_plot(self):
         """ Compare the classifiers graphically"""

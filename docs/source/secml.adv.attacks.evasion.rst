@@ -33,7 +33,7 @@ CAttackEvasionPGDLS
 CAttackEvasionCleverhans
 ------------------------
 
-.. automodule:: secml.adv.attacks.evasion.c_attack_evasion_cleverhans
+.. automodule:: secml.adv.attacks.evasion.cleverhans.c_attack_evasion_cleverhans
    :members:
    :undoc-members:
    :show-inheritance:
