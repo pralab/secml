@@ -7,6 +7,7 @@
 """
 from abc import abstractmethod
 
+from secml.core.decorators import deprecated
 from secml.array import CArray
 from secml.ml.features.normalization import CNormalizer
 from secml.utils.mixed_utils import check_is_fitted
@@ -33,6 +34,8 @@ class CNormalizerLinear(CNormalizer):
     normalization of flat vectors, transpose array first.
 
     """
+
+    @deprecated('0.11')
     def is_linear(self):
         """Returns True for linear normalizers."""
         return True
