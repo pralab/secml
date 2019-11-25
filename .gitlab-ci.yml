@@ -1,5 +1,6 @@
 variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    PYTORCH_CACHE_DIR: "$CI_PROJECT_DIR/.cache/torch"
     SECML_HOME_DIR: "$CI_PROJECT_DIR/secml-data"
     TOX_WORKDIR: "$CI_PROJECT_DIR/.tox"
     TOX_TESTENV_PASSENV: "PIP_CACHE_DIR SECML_HOME_DIR"
@@ -15,8 +16,9 @@ stages:
 .test-cache:
   cache: &test-cache
     paths:
-      - "$CI_PROJECT_DIR/.cache/pip"
-      - "$CI_PROJECT_DIR/secml-data"
+      - $PIP_CACHE_DIR
+      - $PYTORCH_CACHE_DIR
+      - $SECML_HOME_DIR
 
 .test-cache-py35:
   cache: &test-cache-py35
