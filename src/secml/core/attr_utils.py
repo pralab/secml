@@ -8,7 +8,8 @@
 from secml import _NoValue
 from secml.core.type_utils import is_str
 
-__all__ = ['as_public', 'as_protected', 'has_protected',
+__all__ = ['as_public',
+           'as_protected', 'has_protected', 'get_protected',
            'as_private', 'has_private', 'get_private',
            'has_property', 'get_property', 'has_getter', 'has_setter',
            'add_readonly', 'add_readwrite',
@@ -78,6 +79,25 @@ def has_protected(obj, attr):
 
     """
     return hasattr(obj, as_protected(attr))
+
+
+def get_protected(obj_class, attr, default=_NoValue):
+    """Return the protected attribute of class.
+
+    Parameters
+    ----------
+    obj_class : class
+        Target class (usually extracted using obj.__class__).
+    attr : str
+        Name of the attribute to return.
+    default : any, optional
+        Value that is returned when the named attribute is not found.
+
+    """
+    if default is not _NoValue:  # Pass default to getattr
+        return getattr(obj_class, as_protected(attr), default)
+    else:  # Standard getattr (error will be raise if attr is not found)
+        return getattr(obj_class, as_protected(attr))
 
 
 def as_private(obj_class, attr):
