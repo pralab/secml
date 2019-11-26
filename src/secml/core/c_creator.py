@@ -10,8 +10,8 @@ from inspect import isclass, getmembers
 from functools import wraps
 
 from secml.settings import SECML_STORE_LOGS, SECML_LOGS_PATH
-from secml.core.attr_utils import is_writable, extract_attr, \
-    as_public, get_private
+from secml.core.attr_utils import is_writable, is_readable, \
+    extract_attr, as_public, has_protected, as_protected, get_private
 from secml.core.type_utils import is_str
 import secml.utils.pickle_utils as pck
 from secml.utils.list_utils import find_duplicates
@@ -309,18 +309,19 @@ class CCreator:
             self.set(param_name, params_dict[param_name], copy)
 
     def set(self, param_name, param_value, copy=False):
-        """Set a parameter that has a specific name to a specific value.
+        """Set a parameter of the class.
 
-        Only parameters, i.e. PUBLIC or READ/WRITE attributes, can be set.
+        Only writable attributes of the class,
+        i.e. PUBLIC or READ/WRITE, can be set.
 
         The following checks are performed before setting:
-         - if parameter is an attribute of current class, set directly;
+         - if `param_name` is an attribute of current class, set directly;
          - else, iterate over __dict__ and look for a class attribute
             having the desired parameter as an attribute;
          - else, if attribute is not found on the 2nd level,
             raise AttributeError.
 
-        If possible, a reference to the parameter to set is assigned.
+        If possible, a reference to the attribute to set is assigned.
         Use `copy=True` to always make a deepcopy before set.
 
         Parameters
@@ -332,7 +333,7 @@ class CCreator:
         copy : bool
             By default (False) a reference to the parameter to
             assign is set. If True or a reference cannot be
-            extracted, a deepcopy of the parameter is done first.
+            extracted, a deepcopy of the parameter value is done first.
 
         """
         def copy_attr(attr_tocopy):
@@ -342,42 +343,42 @@ class CCreator:
         # Support for recursive setting, e.g. -> kernel.gamma
         param_name = param_name.split('.')
 
-        # Parameters settable in this function must be writable.
+        # Attributes to set in this function must be writable
         # PUBLIC and READ/WRITE accessibility is checked
         if not is_writable(self, param_name[0]):
             raise AttributeError(
                 "can't set `{:}`, must be writable.".format(param_name[0]))
 
-        if hasattr(self, param_name[0]):
+        attr0 = param_name[0]
+        if hasattr(self, attr0):
             # 1 level set or multiple sublevels set?
-            if len(param_name) == 1:  # Set parameter directly
-                setattr(self, param_name[0], copy_attr(
-                    param_value) if copy is True else param_value)
+            if len(param_name) == 1:  # Set attribute directly
+                setattr(self, attr0, copy_attr(param_value)
+                        if copy is True else param_value)
                 return
             else:  # Start recursion on sublevels
                 sub_param_name = '.'.join(param_name[1:])
                 # Calling `.set` method of the next sublevel
-                getattr(self, param_name[0]).set(
-                    sub_param_name, param_value, copy)
+                getattr(self, attr0).set(sub_param_name, param_value, copy)
                 return
 
         # OLD STYLE SET: recursion on 2 levels only to set a subattribute
         # The first subattribute found is set...
         else:
-            # Look for parameter inside all class attributes
+            # Look for the attribute inside all class attributes
             for attr_name in self.__dict__:
                 # Extract the current attribute
                 attr = getattr(self, attr_name)
                 # If parameter is an attribute of current attribute set it
-                if hasattr(attr, param_name[0]):
-                    setattr(attr, param_name[0], copy_attr(
-                        param_value) if copy is True else param_value)
+                if hasattr(attr, attr0):
+                    setattr(attr, attr0, copy_attr(param_value)
+                            if copy is True else param_value)
                     return
 
-        # If we haven't found desired parameter anywhere, raise AttributeError
-        raise AttributeError("'{:}', or any of its attributes, has "
-                             "parameter '{:}'".format(
-                                 self.__class__.__name__, param_name))
+        # Attribute not found, raise AttributeError
+        raise AttributeError(
+            "'{:}', or any of its attributes, has attribute '{:}'"
+            "".format(self.__class__.__name__, attr0))
 
     def get_state(self):
         """Returns the object state dictionary.
@@ -397,17 +398,63 @@ class CCreator:
     def set_state(self, state_dict, copy=False):
         """Sets the object state using input dictionary.
 
+        Only readable attributes of the class,
+        i.e. PUBLIC or READ/WRITE or READ ONLY, can be set.
+
+        If possible, a reference to the attribute to set is assigned.
+        Use `copy=True` to always make a deepcopy before set.
+
         Parameters
         ----------
         state_dict : dict
             Dictionary containing the state of the object.
         copy : bool, optional
-            By default (False) a reference to the parameter to
+            By default (False) a reference to the attribute to
             assign is set. If True or a reference cannot be
-            extracted, a deepcopy of the parameter is done first.
+            extracted, a deepcopy of the attribute is done first.
 
         """
-        raise NotImplementedError
+        def copy_attr(attr_tocopy):
+            from copy import deepcopy
+            return deepcopy(attr_tocopy)
+
+        for param_name in state_dict:
+
+            # Extract the value of the attribute to set
+            param_value = state_dict[param_name]
+
+            # Support for recursive setting, e.g. -> kernel.gamma  # TODO: NEEDED?
+            param_name = param_name.split('.')
+
+            # Attributes to set in this function must be readable
+            # PUBLIC, READ/WRITE and READ ONLY accessibility is checked
+            if not is_readable(self, param_name[0]):
+                raise AttributeError(
+                    "can't set `{:}`, must be readable.".format(param_name[0]))
+
+            attr0 = param_name[0]
+            if hasattr(self, attr0):
+                # 1 level set or multiple sublevels set?
+                if len(param_name) == 1:  # Set attribute directly
+                    # If writable (public or property with setter)
+                    # Use set directly
+                    if is_writable(self, attr0):
+                        self.set(attr0, param_value, copy=copy)
+                        continue  # Attribute set, go to next one
+                    else:  # Property with only getter
+                        # If exists, set the protected attribute
+                        if has_protected(self, attr0):
+                            attr0 = as_protected(attr0)
+                        setattr(self, attr0, copy_attr(param_value)
+                                if copy is True else param_value)
+                        continue  # Attribute set, go to next one
+                else:  # Start recursion on sublevels
+                    pass  # TODO: SUBLEVELS ARE NEEDED?
+
+            # Attribute not found, raise AttributeError
+            raise AttributeError(
+                "'{:}', or any of its attributes, has attribute '{:}'"
+                "".format(self.__class__.__name__, attr0))
 
     def copy(self):
         """Returns a shallow copy of current class.
