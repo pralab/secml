@@ -156,7 +156,11 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
         # create the cleverhans attack object
         self._tfsess.close()
-        self._tfsess = tf.compat.v1.Session()
+        session_conf = tf.compat.v1.ConfigProto(
+            inter_op_parallelism_threads=-1,  # Negative means all operations are performed in caller's thread.
+            use_per_session_threads=False    # If false, use the per-session thread pools configured by session_inter_op_thread_pool.
+        )
+        self._tfsess = tf.compat.v1.Session(config=session_conf)
 
         # wrap the surrogate classifier into a cleverhans classifier
         self._clvrh_clf = _CModelCleverhans(
@@ -172,7 +176,8 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
         # placeholder used to feed the true or the target label (it is a
         # one-hot encoded vector)
-        self._y_P = tf.compat.v1.placeholder(tf.float32, shape=(1, self._n_classes))
+        self._y_P = tf.compat.v1.placeholder(
+            tf.float32, shape=(1, self._n_classes))
 
         # create the tf operations to generate the attack
         if self.y_target is None:
@@ -309,13 +314,10 @@ class _CModelCleverhans(Model):
         because the output of the CFunction should be either a scalar or a
         CArray whereas the predict function returns a tuple.
         """
-        if hasattr(self, '_x_seq') \
-                and self._x_seq is not None:
-            if self._is_init is True:
-                # avoid storing twice the initial value
+        if hasattr(self, '_x_seq') and self._x_seq is not None:
+            if self._is_init is True:  # avoid storing twice the initial value
                 self._is_init = False
-            else:
-                # Cache intermediate values
+            else:  # Cache intermediate values
                 self._x_seq = self._x_seq.append(x, axis=0)
         return self._clf.predict(x, return_decision_function=True)[1]
 
@@ -339,8 +341,7 @@ class _CModelCleverhans(Model):
         # network output and one for its gradient
         self._fun = CFunction(fun=self._discriminant_function,
                               gradient=clf.grad_f_x)
-        self._callable_fn = _CClassifierToTF(
-            self._fun, self._out_dims)
+        self._callable_fn = _CClassifierToTF(self._fun, self._out_dims)
 
         super(_CModelCleverhans, self).__init__(nb_classes=clf.n_classes)
 
@@ -483,10 +484,8 @@ class _CClassifierToTF:
         else:
             # otherwise we have to compute the gradient w.r.t all the classes
             for c in range(n_classes):
-                cgrad = grad_f_x(
-                    x_carray[0, :], y=c)
-                grads[0, :] += (
-                        cgrad * CArray(grads_in_np)[0, c])
+                cgrad = grad_f_x(x_carray[0, :], y=c)
+                grads[0, :] += (cgrad * CArray(grads_in_np)[0, c])
 
         return grads.tondarray().astype(np.float32)
 

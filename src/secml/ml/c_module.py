@@ -170,5 +170,7 @@ class CModule(CCreator, metaclass=ABCMeta):
         """Compute gradient at x by doing a forward and a backward pass.
         The gradient is pre-multiplied by w.
         """
+        print("FOR")  # TODO: REMOVE
         self.forward(x, caching=True)
+        print("BACK")  # TODO: REMOVE
         return self.backward(w)
