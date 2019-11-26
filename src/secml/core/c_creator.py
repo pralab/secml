@@ -10,7 +10,7 @@ from inspect import isclass, getmembers
 from functools import wraps
 
 from secml.settings import SECML_STORE_LOGS, SECML_LOGS_PATH
-from secml.core.attr_utils import is_public, extract_attr, \
+from secml.core.attr_utils import is_writable, extract_attr, \
     as_public, get_private
 from secml.core.type_utils import is_str
 import secml.utils.pickle_utils as pck
@@ -342,11 +342,11 @@ class CCreator:
         # Support for recursive setting, e.g. -> kernel.gamma
         param_name = param_name.split('.')
 
-        # Parameters settable in this function must be public.
-        # READ/WRITE accessibility is then checked by the setter...
-        if not is_public(self, param_name[0]):
+        # Parameters settable in this function must be writable.
+        # PUBLIC and READ/WRITE accessibility is checked
+        if not is_writable(self, param_name[0]):
             raise AttributeError(
-                "can't set `{:}`, must be public.".format(param_name[0]))
+                "can't set `{:}`, must be writable.".format(param_name[0]))
 
         if hasattr(self, param_name[0]):
             # 1 level set or multiple sublevels set?
