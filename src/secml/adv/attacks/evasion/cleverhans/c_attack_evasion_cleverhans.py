@@ -157,8 +157,8 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         # create the cleverhans attack object
         self._tfsess.close()
         session_conf = tf.compat.v1.ConfigProto(
-            inter_op_parallelism_threads=-1,  # Negative means all operations are performed in caller's thread.
-            use_per_session_threads=False    # If false, use the per-session thread pools configured by session_inter_op_thread_pool.
+            inter_op_parallelism_threads=-1,  # Perform in caller's thread
+            use_per_session_threads=False    # Per-session thread pools
         )
         self._tfsess = tf.compat.v1.Session(config=session_conf)
 
