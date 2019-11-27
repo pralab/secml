@@ -423,8 +423,8 @@ class CCreator:
             # Extract the value of the attribute to set
             param_value = state_dict[param_name]
 
-            # Support for recursive setting, e.g. -> kernel.gamma  # TODO: NEEDED?
-            param_name = param_name.split('.')
+            # Support for recursive setting, e.g. -> kernel.gamma
+            param_name = param_name.split('.', 1)
 
             # Attributes to set in this function must be readable
             # PUBLIC, READ/WRITE and READ ONLY accessibility is checked
@@ -449,7 +449,10 @@ class CCreator:
                                 if copy is True else param_value)
                         continue  # Attribute set, go to next one
                 else:  # Start recursion on sublevels
-                    pass  # TODO: SUBLEVELS ARE NEEDED?
+                    # Call `.set_state` for the next level of current attribute
+                    getattr(self, attr0).set_state(
+                        {param_name[1]: param_value}, copy)
+                    continue  # Attribute set, go to next one
 
             # Attribute not found, raise AttributeError
             raise AttributeError(
