@@ -392,8 +392,21 @@ class CCreator:
         # We extract the PUBLIC (pub), READ/WRITE (rw) and READ ONLY (r)
         # attributes from the class dictionary, than we build a new dictionary
         # using as keys the attributes names without the accessibility prefix
-        return SubLevelsDict((as_public(k), getattr(self, as_public(k)))
-                             for k in extract_attr(self, 'pub+rw+r'))
+        state = dict((as_public(k), getattr(self, as_public(k)))
+                     for k in extract_attr(self, 'pub+rw+r'))
+
+        # Get the state of the deeper objects
+        # Use list(state) as state size will change during iteration
+        for attr in list(state):
+            if isinstance(state[attr], CCreator):
+                state_deep = state[attr].get_state()
+                # Replace `attr` with its attributes's state
+                for attr_deep in state_deep:
+                    attr_full_key = attr + '.' + attr_deep
+                    state[attr_full_key] = state_deep[attr_deep]
+                del state[attr]
+
+        return dict(state)
 
     def set_state(self, state_dict, copy=False):
         """Sets the object state using input dictionary.
