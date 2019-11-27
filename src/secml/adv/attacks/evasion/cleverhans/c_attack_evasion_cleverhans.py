@@ -302,7 +302,7 @@ class _CModelCleverhans(Model):
 
     @property
     def f_eval(self):
-        return self._fun.n_grad_eval  # TODO: is this right?!
+        return self._fun.n_fun_eval
 
     @property
     def grad_eval(self):
@@ -327,7 +327,7 @@ class _CModelCleverhans(Model):
 
         if isinstance(clf, CClassifierReject):
             raise ValueError("classifier with reject cannot be "
-                             "converted as tensoflow model")
+                             "converted to a tensorflow model")
 
         if not clf.is_fitted():
             raise NotFittedError("The classifier should be already trained!")
