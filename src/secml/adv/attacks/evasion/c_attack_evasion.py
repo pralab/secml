@@ -70,7 +70,7 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
         adv_ds : CDataset
             Dataset of manipulated samples.
         f_obj : float
-            Average value of the objective function computed on each data point.
+            Mean value of the objective function computed on each data point.
 
         """
         x = CArray(x).atleast_2d()
