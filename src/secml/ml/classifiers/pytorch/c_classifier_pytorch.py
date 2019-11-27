@@ -163,6 +163,11 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         return self._loss
 
     @property
+    def model(self):
+        """Returns the model used by classifier."""
+        return self._model
+
+    @property
     def optimizer(self):
         """Returns the optimizer used by classifier."""
         return self._optimizer
@@ -253,13 +258,29 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         return self._n_jobs
 
     def get_params(self):
+        """Returns the dictionary of class parameters."""
         loss_params = {'loss': self._loss}
         optim_params = {
-            'optimizer': self._optimizer.state_dict()['param_groups'][
-                0] if self._optimizer is not None else None}
+            'optimizer': self._optimizer.state_dict()['param_groups'][0]
+            if self._optimizer is not None else None
+        }
         return SubLevelsDict(
             merge_dicts(super(CClassifierPyTorch, self).get_params(),
                         loss_params, optim_params))
+
+    def get_state(self):
+        """Returns the object state dictionary."""
+        state = super(CClassifierPyTorch, self).get_state()
+        state['model'] = self._model.state_dict()
+        state['optimizer'] = self._optimizer.state_dict()
+        return state
+
+    def set_state(self, state_dict, copy=False):
+        """Sets the object state using input dictionary."""
+        # TODO: DEEPCOPY FOR torch.load_state_dict?
+        self._model.load_state_dict(state_dict.pop('model'))
+        self._optimizer.load_state_dict(state_dict.pop('optimizer'))
+        super(CClassifierPyTorch, self).set_state(state_dict, copy=copy)
 
     def check_softmax(self):
         """
@@ -604,8 +625,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             self._optimizer.load_state_dict(state['optimizer_state'])
             self._n_features = state['n_features']
             self._classes = state['classes']
-        else:
-            # model was stored outside secml framework
+        else:  # model was stored outside secml framework
             try:
                 self._model.load_state_dict(state)
                 # This part is important to prevent not fitted

@@ -99,9 +99,6 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         of each layer of the model."""
         raise NotImplementedError
 
-    def get_params(self):
-        return super(CClassifierDNN, self).get_params()
-
     @abstractmethod
     def check_softmax(self):
         """
