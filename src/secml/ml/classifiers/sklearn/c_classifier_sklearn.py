@@ -24,6 +24,11 @@ class CClassifierSkLearn(CClassifier):
             # FIXME: how to obtain this from pretrained models?
             self._n_features = 0
 
+    @property
+    def sklearn_model(self):
+        """Wrapped SkLearn classifier."""
+        return self._sklearn_model
+
     def get_params(self):
         """Returns the dictionary of class and SkLearn model parameters.
 

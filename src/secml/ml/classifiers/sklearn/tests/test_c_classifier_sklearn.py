@@ -120,9 +120,8 @@ class TestCClassifierSkLearn(CClassifierTestCases):
 
         clf = svm.SVC(kernel='linear')
         clf.fit(X, y)
-        secmlclf = CClassifierSkLearn(clf)
 
-        y_pred = secmlclf.predict(CArray(X))
+        y_pred = clf.predict(X)
 
         clf = svm.SVC(kernel='linear')
         secmlclf = CClassifierSkLearn(clf)
@@ -135,7 +134,7 @@ class TestCClassifierSkLearn(CClassifierTestCases):
         self.logger.info(
             "Predicted labels by our fit:\n{:}".format(y_pred_secml))
 
-        self.assert_array_almost_equal(y_pred, y_pred_secml)
+        self.assert_array_equal(y_pred, y_pred_secml)
 
 
 if __name__ == '__main__':
