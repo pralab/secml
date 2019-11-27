@@ -302,13 +302,13 @@ class _CModelCleverhans(Model):
 
     @property
     def f_eval(self):
-        return self._fun.n_grad_eval
+        return self._fun.n_grad_eval  # TODO: is this right?!
 
     @property
     def grad_eval(self):
         return self._fun.n_grad_eval
 
-    def _discriminant_function(self, x):
+    def _decision_function(self, x):
         """
         Wrapper of the classifier discriminant function. This is needed
         because the output of the CFunction should be either a scalar or a
@@ -319,7 +319,7 @@ class _CModelCleverhans(Model):
                 self._is_init = False
             else:  # Cache intermediate values
                 self._x_seq = self._x_seq.append(x, axis=0)
-        return self._clf.predict(x, return_decision_function=True)[1]
+        return self._clf.forward(x, caching=True)  # TODO: caching required?
 
     def __init__(self, clf, out_dims=None):
 
@@ -339,7 +339,7 @@ class _CModelCleverhans(Model):
 
         # Given a trained CClassifier, creates a tensorflow node for the
         # network output and one for its gradient
-        self._fun = CFunction(fun=self._discriminant_function,
+        self._fun = CFunction(fun=self._decision_function,
                               gradient=clf.grad_f_x)
         self._callable_fn = _CClassifierToTF(self._fun, self._out_dims)
 
