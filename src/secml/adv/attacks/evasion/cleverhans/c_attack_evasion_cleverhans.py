@@ -132,8 +132,8 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         if self._clvrh_attack_class == CarliniWagnerL2:
             return self._objective_function_cw(x)
         elif self._clvrh_attack_class in [
-                FastGradientMethod, ProjectedGradientDescent, LBFGS,
-                MomentumIterativeMethod, MadryEtAl, BasicIterativeMethod]:
+            FastGradientMethod, ProjectedGradientDescent, LBFGS,
+            MomentumIterativeMethod, MadryEtAl, BasicIterativeMethod]:
             return self._objective_function_cross_entropy(x)
         else:
             raise NotImplementedError
@@ -158,7 +158,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         self._tfsess.close()
         session_conf = tf.compat.v1.ConfigProto(
             inter_op_parallelism_threads=-1,  # Perform in caller's thread
-            use_per_session_threads=False    # Per-session thread pools
+            use_per_session_threads=False  # Per-session thread pools
         )
         self._tfsess = tf.compat.v1.Session(config=session_conf)
 
@@ -280,7 +280,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
             # some attack returns at the initial point if
             # condition is not met (e.g. CWL2)
             self._x_opt = self._x_seq[-1, :]
-        return self._x_opt, nan
+        return self._x_opt, nan  # TODO: return value of objective_fun(x_opt)
 
 
 class _CModelCleverhans(Model):
@@ -295,8 +295,7 @@ class _CModelCleverhans(Model):
 
     Notes
     -----
-    The Tesorflow model will be created in the current
-    Tensorflow default graph.
+    The Tensorflow model will be added to the current Tensorflow default graph.
 
     """
 
@@ -476,6 +475,8 @@ class _CClassifierToTF:
 
         # if grads_in_np we can speed up the computation computing just one
         # gradient
+        # TODO: we can improve this by using clf.gradient rather than grad_f_x,
+        #  and remove useless code that checks if one/more classes are involved
         grad_f_x = self.fun.gradient
         if grads_in_np.sum(axis=None) == 1:
             y = grads_in_np.find(grads_in_np == 1)[0]
@@ -512,9 +513,9 @@ class _CClassifierToTF:
 def _py_func_with_gradient(
         func, inp, Tout, stateful=True, pyfun_name=None, grad_func=None):
     """
-    Given a function that returns as output a numpy array, and eventually a
-    function that computes his gradient, this function returns a pyfunction.
-    A pyfunction wrap a function that works with numpy array as an operation
+    Given a function that returns as output a numpy array, and optionally a
+    function that computes its gradient, this function returns a pyfunction.
+    A pyfunction wraps a function that works with numpy arrays as an operation
     in a TensorFlow graph.
 
     credits: https://gist.github.com/kingspp/3ec7d9958c13b94310c1a365759aa3f4
