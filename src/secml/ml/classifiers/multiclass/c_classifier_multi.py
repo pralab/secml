@@ -119,6 +119,14 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
         raise ValueError(
             "cannot set unknown parameter '{:}'".format('.'.join(param_name)))
 
+    def get_state(self):  # TODO
+        """Returns the object state dictionary."""
+        raise NotImplementedError
+
+    def set_state(self, state_dict, copy=False):  # TODO
+        """Sets the object state using input dictionary."""
+        raise NotImplementedError
+
     def prepare(self, num_classes):
         """Creates num_classes copies of the binary classifier.
 
