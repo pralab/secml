@@ -15,6 +15,7 @@ from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSkLearn
 from secml.array import CArray
 from secml.data import CDataset
+from secml.ml.features import CPreProcess
 
 
 class TestCClassifierSkLearn(CClassifierTestCases):
@@ -141,6 +142,37 @@ class TestCClassifierSkLearn(CClassifierTestCases):
             "Predicted labels by our fit:\n{:}".format(y_pred_secml))
 
         self.assert_array_equal(y_pred, y_pred_secml)
+
+    def test_set_get_state(self):
+        """Test for set_state and get_state."""
+
+        pre = CPreProcess.create_chain(['pca', 'mean-std'], [{}, {}])
+        clf = CClassifierSkLearn(
+            sklearn_model=SVC(kernel="rbf", gamma=2, C=1, random_state=0),
+            preprocess=pre)
+
+        clf.fit(self.dataset)
+        pred_y = clf.predict(self.dataset.X)
+        self.logger.info(
+            "Predictions before restoring state:\n{:}".format(pred_y))
+
+        state = clf.get_state()
+        self.logger.info("State of multiclass:\n{:}".format(state))
+
+        # Create an entirely new clf
+        pre_post = CPreProcess.create_chain(['pca', 'mean-std'], [{}, {}])
+        clf_post = CClassifierSkLearn(
+            sklearn_model=SVC(kernel="rbf", gamma=2, C=1, random_state=0),
+            preprocess=pre_post)
+
+        # Restore state
+        clf_post.set_state(state)
+
+        pred_y_post = clf_post.predict(self.dataset.X)
+        self.logger.info(
+            "Predictions after restoring state:\n{:}".format(pred_y_post))
+
+        self.assert_array_equal(pred_y, pred_y_post)
 
 
 if __name__ == '__main__':
