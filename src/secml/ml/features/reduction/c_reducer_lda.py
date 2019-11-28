@@ -86,6 +86,11 @@ class CLDA(CReducer):
         """Unique targets used for training."""
         return self._classes
 
+    @property
+    def lda(self):
+        """Trained sklearn LDA transformer."""
+        return self._lda
+
     def _check_is_fitted(self):
         """Check if the preprocessor is trained (fitted).
 
