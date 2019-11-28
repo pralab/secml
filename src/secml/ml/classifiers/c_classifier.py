@@ -14,6 +14,7 @@ from secml.data import CDataset
 from secml.ml.features import CPreProcess
 from secml.utils.mixed_utils import check_is_fitted
 from secml.core.exceptions import NotFittedError
+from secml.core.decorators import deprecated
 
 
 class CClassifier(CModule, metaclass=ABCMeta):
@@ -62,6 +63,7 @@ class CClassifier(CModule, metaclass=ABCMeta):
         """Number of features (before preprocessing)."""
         return self._n_features
 
+    @deprecated('0.11')
     def is_linear(self):
         """True for linear classifiers, False otherwise."""
         return False

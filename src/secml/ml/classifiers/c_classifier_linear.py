@@ -12,6 +12,7 @@ from secml.ml.classifiers import CClassifier
 from secml.array import CArray
 from secml.data import CDataset
 from secml.utils.mixed_utils import check_is_fitted
+from secml.core.decorators import deprecated
 
 
 class CClassifierLinear(CClassifier, metaclass=ABCMeta):
@@ -51,6 +52,7 @@ class CClassifierLinear(CClassifier, metaclass=ABCMeta):
         """Bias calculated from training data."""
         return self._b
 
+    @deprecated('0.11')
     def is_linear(self):
         """Return True as the classifier is linear."""
         if self.preprocess is None or \

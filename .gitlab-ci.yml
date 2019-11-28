@@ -1,8 +1,9 @@
 variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    TORCH_HOME: "$CI_PROJECT_DIR/.cache/torch"
     SECML_HOME_DIR: "$CI_PROJECT_DIR/secml-data"
     TOX_WORKDIR: "$CI_PROJECT_DIR/.tox"
-    TOX_TESTENV_PASSENV: "PIP_CACHE_DIR SECML_HOME_DIR"
+    TOX_TESTENV_PASSENV: "PIP_CACHE_DIR TORCH_HOME SECML_HOME_DIR"
     TOX_USEDEVELOP: "False"
 
 stages:
@@ -15,8 +16,9 @@ stages:
 .test-cache:
   cache: &test-cache
     paths:
-      - "$CI_PROJECT_DIR/.cache/pip"
-      - "$CI_PROJECT_DIR/secml-data"
+      - $PIP_CACHE_DIR
+      - $TORCH_HOME
+      - $SECML_HOME_DIR
 
 .test-cache-py35:
   cache: &test-cache-py35
@@ -146,6 +148,25 @@ test:py37:min:
   image: python:3.7
   script: tox -e py37-min
   cache: *test-cache-py37
+
+
+.test:notebooks:
+  extends: .test
+  needs: ["package:docs"]  # Use [] after gitlab 12.6
+  only:
+    changes:
+      - src/secml/**/*
+      - tutorials/**/*
+      - .gitlab-ci.yml
+      - requirements.txt
+      - setup.py
+      - tox.ini
+
+test:notebooks:py35:latest:
+  extends: .test:notebooks
+  image: python:3.5
+  script: tox -e latest-notebooks
+  cache: *test-cache-py35
 
 
 .test:install:

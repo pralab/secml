@@ -1,10 +1,5 @@
 from secml.ml.classifiers.tests import CClassifierTestCases
 
-from secml.data.loader import CDLIris, CDLRandom
-from secml.ml.classifiers import CClassifierSkLearn
-from secml.array import CArray
-from secml.data import CDataset
-
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
@@ -15,6 +10,11 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+
+from secml.data.loader import CDLRandom
+from secml.ml.classifiers import CClassifierSkLearn
+from secml.array import CArray
+from secml.data import CDataset
 
 
 class TestCClassifierSkLearn(CClassifierTestCases):
@@ -119,8 +119,14 @@ class TestCClassifierSkLearn(CClassifierTestCases):
         y = iris.target
 
         clf = svm.SVC(kernel='linear')
-        clf.fit(X, y)
 
+        from secml.core.exceptions import NotFittedError
+        with self.assertRaises(NotFittedError):
+            secmlclf = CClassifierSkLearn(clf)
+            secmlclf.predict(CArray(X))
+
+        clf.fit(X, y)
+        
         y_pred = clf.predict(X)
 
         clf = svm.SVC(kernel='linear')
