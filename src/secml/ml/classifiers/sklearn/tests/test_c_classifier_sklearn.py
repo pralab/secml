@@ -159,14 +159,23 @@ class TestCClassifierSkLearn(CClassifierTestCases):
         state = clf.get_state()
         self.logger.info("State of multiclass:\n{:}".format(state))
 
+        # Generate a temp file to test
+        import tempfile
+        from secml.utils import fm
+        tempdir = tempfile.gettempdir()
+        tempfile = fm.join(tempdir, 'secml_testgetsetstate')
+
+        # Test save state to disk
+        tempfile = clf.save_state(tempfile)
+
         # Create an entirely new clf
         pre_post = CPreProcess.create_chain(['pca', 'mean-std'], [{}, {}])
         clf_post = CClassifierSkLearn(
             sklearn_model=SVC(kernel="rbf", gamma=2, C=1, random_state=0),
             preprocess=pre_post)
 
-        # Restore state
-        clf_post.set_state(state)
+        # Restore state from disk
+        clf_post.load_state(tempfile)
 
         pred_y_post = clf_post.predict(self.dataset.X)
         self.logger.info(
