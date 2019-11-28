@@ -36,7 +36,7 @@
 - #575 Parameter `batch_size` of `CKernel` is now deprecated.
 - #597 Removed unused parameter `gamma` from `CKernelChebyshevDistance`.
 - #596 Removed `CKernelHamming`.
-- #602 Renamed `CNormalizerMeanSTD` to `CNormalizerMeanStd`. The old class has been deprecated and will be removed in a future vearsion.
+- #602 Renamed `CNormalizerMeanSTD` to `CNormalizerMeanStd`. The old class has been deprecated and will be removed in a future version.
 
 ### Documentation (5 changes)
 - #538 Added a notebook tutorial on the use of Explainable ML methods provided by the `secml.explanation` package.
