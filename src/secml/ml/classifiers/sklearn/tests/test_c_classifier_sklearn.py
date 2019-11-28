@@ -15,6 +15,7 @@ from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSkLearn
 from secml.array import CArray
 from secml.data import CDataset
+from secml.ml.features import CPreProcess
 
 
 class TestCClassifierSkLearn(CClassifierTestCases):
@@ -126,9 +127,8 @@ class TestCClassifierSkLearn(CClassifierTestCases):
             secmlclf.predict(CArray(X))
 
         clf.fit(X, y)
-        secmlclf = CClassifierSkLearn(clf)
         
-        y_pred = secmlclf.predict(CArray(X))
+        y_pred = clf.predict(X)
 
         clf = svm.SVC(kernel='linear')
         secmlclf = CClassifierSkLearn(clf)
@@ -141,7 +141,47 @@ class TestCClassifierSkLearn(CClassifierTestCases):
         self.logger.info(
             "Predicted labels by our fit:\n{:}".format(y_pred_secml))
 
-        self.assert_array_almost_equal(y_pred, y_pred_secml)
+        self.assert_array_equal(y_pred, y_pred_secml)
+
+    def test_set_get_state(self):
+        """Test for set_state and get_state."""
+
+        pre = CPreProcess.create_chain(['pca', 'mean-std'], [{}, {}])
+        clf = CClassifierSkLearn(
+            sklearn_model=SVC(kernel="rbf", gamma=2, C=1, random_state=0),
+            preprocess=pre)
+
+        clf.fit(self.dataset)
+        pred_y = clf.predict(self.dataset.X)
+        self.logger.info(
+            "Predictions before restoring state:\n{:}".format(pred_y))
+
+        state = clf.get_state()
+        self.logger.info("State of multiclass:\n{:}".format(state))
+
+        # Generate a temp file to test
+        import tempfile
+        from secml.utils import fm
+        tempdir = tempfile.gettempdir()
+        tempfile = fm.join(tempdir, 'secml_testgetsetstate')
+
+        # Test save state to disk
+        tempfile = clf.save_state(tempfile)
+
+        # Create an entirely new clf
+        pre_post = CPreProcess.create_chain(['pca', 'mean-std'], [{}, {}])
+        clf_post = CClassifierSkLearn(
+            sklearn_model=SVC(kernel="rbf", gamma=2, C=1, random_state=0),
+            preprocess=pre_post)
+
+        # Restore state from disk
+        clf_post.load_state(tempfile)
+
+        pred_y_post = clf_post.predict(self.dataset.X)
+        self.logger.info(
+            "Predictions after restoring state:\n{:}".format(pred_y_post))
+
+        self.assert_array_equal(pred_y, pred_y_post)
 
 
 if __name__ == '__main__':

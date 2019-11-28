@@ -103,12 +103,22 @@ class CPlot(CCreator):
         return kwargs
 
     def set(self, param_name, param_value, copy=False):
-        raise NotImplementedError("set cannot be used to define plot "
-                                  "parameters. Use specific methods instead.")
+        raise NotImplementedError
 
-    def set_params(self, params_dict, copy=False):
-        raise NotImplementedError("set_params cannot be used to define plot "
-                                  "parameters. Use specific methods instead.")
+    def get_params(self):
+        raise NotImplementedError
+
+    def get_state(self):
+        raise NotImplementedError
+
+    def set_state(self, state_dict, copy=False):
+        raise NotImplementedError
+
+    def load_state(self, path):
+        raise NotImplementedError
+
+    def save_state(self, path):
+        raise NotImplementedError
 
     def get_lines(self):
         """Return a list of lines contained by the subplot."""

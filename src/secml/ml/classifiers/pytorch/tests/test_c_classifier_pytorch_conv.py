@@ -56,6 +56,7 @@ class TestCClassifierPyTorchMNIST(TestCClassifierPyTorch):
             ('fc2', nn.Linear(50, 3)),
         ])
 
+        torch.manual_seed(0)
         net = nn.Sequential(OrderedDict(od))
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(net.parameters(),

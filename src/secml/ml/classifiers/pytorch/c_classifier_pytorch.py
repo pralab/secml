@@ -163,6 +163,11 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         return self._loss
 
     @property
+    def model(self):
+        """Returns the model used by classifier."""
+        return self._model
+
+    @property
     def optimizer(self):
         """Returns the optimizer used by classifier."""
         return self._optimizer
@@ -181,28 +186,33 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     @property
     def layers(self):
         """Returns the layers of the model, if possible. """
-        if self._layers is None:
+        if self._model_layers is None:
             if isinstance(self._model, nn.Module):
-                self._layers = get_layers(self._model)
+                self._model_layers = get_layers(self._model)
             else:
                 raise TypeError(
                     "The input model must be an instance of `nn.Module`.")
-        return self._layers
+        return self._model_layers
 
     @property
     def layer_shapes(self):
-        if self._layer_shapes is None:
-            self._layer_shapes = {}
+        if self._model_layer_shapes is None:
+            self._model_layer_shapes = {}
             layer_names = self.layer_names
             self.hook_layer_output(layer_names)
             x = torch.randn(size=self.input_shape).unsqueeze(0)
             x = x.to(self._device)
             self._model(x)
             for layer_name, layer in self.layers:
-                self._layer_shapes[layer_name] = tuple(
+                self._model_layer_shapes[layer_name] = tuple(
                     self._intermediate_outputs[layer].shape)
             self._clean_hooks()
-        return self._layer_shapes
+        return self._model_layer_shapes
+
+    @property
+    def trained(self):
+        """True if the model has been trained."""
+        return self._trained
 
     def get_layer_shape(self, layer_name):
         return self.layer_shapes[layer_name]
@@ -253,13 +263,29 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         return self._n_jobs
 
     def get_params(self):
+        """Returns the dictionary of class parameters."""
         loss_params = {'loss': self._loss}
         optim_params = {
-            'optimizer': self._optimizer.state_dict()['param_groups'][
-                0] if self._optimizer is not None else None}
+            'optimizer': self._optimizer.state_dict()['param_groups'][0]
+            if self._optimizer is not None else None
+        }
         return SubLevelsDict(
             merge_dicts(super(CClassifierPyTorch, self).get_params(),
                         loss_params, optim_params))
+
+    def get_state(self):
+        """Returns the object state dictionary."""
+        state = super(CClassifierPyTorch, self).get_state()
+        state['model'] = self._model.state_dict()
+        state['optimizer'] = self._optimizer.state_dict()
+        return state
+
+    def set_state(self, state_dict, copy=False):
+        """Sets the object state using input dictionary."""
+        # TODO: DEEPCOPY FOR torch.load_state_dict?
+        self._model.load_state_dict(state_dict.pop('model'))
+        self._optimizer.load_state_dict(state_dict.pop('optimizer'))
+        super(CClassifierPyTorch, self).set_state(state_dict, copy=copy)
 
     def check_softmax(self):
         """
@@ -512,8 +538,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
             return list(self._intermediate_outputs.values())[0]
         else:
-            raise ValueError(
-                "Pass layer names as a list or just None for last layer output.")
+            raise ValueError("Pass layer names as a list or just None "
+                             "for last layer output.")
 
     def _backward(self, w):
         """Returns the gradient of the DNN - considering the output layer set
@@ -604,8 +630,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             self._optimizer.load_state_dict(state['optimizer_state'])
             self._n_features = state['n_features']
             self._classes = state['classes']
-        else:
-            # model was stored outside secml framework
+        else:  # model was stored outside secml framework
             try:
                 self._model.load_state_dict(state)
                 # This part is important to prevent not fitted

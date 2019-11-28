@@ -45,8 +45,8 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         self._trained = False
         self._input_shape = input_shape
         self._softmax_outputs = softmax_outputs
-        self._layers = None
-        self._layer_shapes = None
+        self._model_layers = None
+        self._model_layer_shapes = None
 
     @property
     def input_shape(self):
@@ -98,9 +98,6 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         """Returns a dictionary containing the shapes of the output
         of each layer of the model."""
         raise NotImplementedError
-
-    def get_params(self):
-        return super(CClassifierDNN, self).get_params()
 
     @abstractmethod
     def check_softmax(self):

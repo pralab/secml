@@ -62,26 +62,26 @@ class CNormalizerMeanStd(CNormalizerLinear):
     def __init__(self, mean=None, std=None, with_std=True, preprocess=None):
 
         if mean is not None:
-            self._mean = (mean,) if is_scalar(mean) else tuple(mean)
+            self._in_mean = (mean,) if is_scalar(mean) else tuple(mean)
         else:  # mean is None
-            self._mean = None
+            self._in_mean = None
         if std is not None:
-            self._std = (std,) if is_scalar(std) else tuple(std)
+            self._in_std = (std,) if is_scalar(std) else tuple(std)
         else:  # std is None
-            self._std = None
+            self._in_std = None
 
         # Input validation
         if with_std is True:
             if (mean is None and std is not None) or \
                     (mean is not None and std is None) or \
                     (mean is not None and std is not None and
-                     len(self._mean) != len(self._std)):
+                     len(self._in_mean) != len(self._in_std)):
                 raise ValueError("if `with_std` is True, `mean` and `std` "
                                  "should be both None or both scalar or "
                                  "both tuple of the same length")
 
-        self._x_mean = None
-        self._x_std = None
+        self._mean = None
+        self._std = None
 
         self._with_std = with_std
 
@@ -108,7 +108,7 @@ class CNormalizerMeanStd(CNormalizerLinear):
         One value for each training array feature.
 
         """
-        return self._x_mean
+        return self._mean
 
     @property
     def std(self):
@@ -117,7 +117,7 @@ class CNormalizerMeanStd(CNormalizerLinear):
         One value for each training array feature.
 
         """
-        return self._x_std
+        return self._std
 
     @property
     def with_std(self):
@@ -126,38 +126,38 @@ class CNormalizerMeanStd(CNormalizerLinear):
 
     def _expand_mean(self, n_feats):
         """Expand mean value to all dimensions."""
-        n_channels = len(self._mean)
+        n_channels = len(self._in_mean)
         if not n_feats % n_channels == 0:
             raise ValueError("input number of features must be "
                              "divisible by {:}".format(n_channels))
         channel_size = int(n_feats / n_channels)
-        self._x_mean = CArray.ones(shape=(n_feats,))
+        self._mean = CArray.ones(shape=(n_feats,))
         for i in range(n_channels):
-            self._x_mean[i * channel_size:
-                         i * channel_size + channel_size] *= self._mean[i]
-        return self._x_mean
+            self._mean[i * channel_size:
+                       i * channel_size + channel_size] *= self._in_mean[i]
+        return self._mean
 
     def _expand_std(self, n_feats):
         """Expand std value to all dimensions."""
         if self.with_std is False:
             # set std to 1.
-            self._x_std = CArray(1.0)  # we just need a scalar value.
+            self._std = CArray(1.0)  # we just need a scalar value.
         else:
-            n_channels = len(self._std)
+            n_channels = len(self._in_std)
             if not n_feats % n_channels == 0:
                 raise ValueError("input number of features must be "
                                  "divisible by {:}".format(n_channels))
             channel_size = int(n_feats / n_channels)
-            self._x_std = CArray.ones(shape=(n_feats,))
+            self._std = CArray.ones(shape=(n_feats,))
             for i in range(n_channels):
-                self._x_std[i * channel_size:
-                            i * channel_size + channel_size] *= self._std[i]
-        return self._x_std
+                self._std[i * channel_size:
+                          i * channel_size + channel_size] *= self._in_std[i]
+        return self._std
 
     def _compute_w_and_b(self):
         # Updating linear normalizer parameters
-        self._w = CArray.ones(self._x_mean.size)  # TODO: this can be scalar!
-        self._b = -self._x_mean
+        self._w = CArray.ones(self._mean.size)  # TODO: this can be scalar!
+        self._b = -self._mean
 
         # Makes sure that whenever scale is zero, we handle it correctly
         scale = self.std.deepcopy()
@@ -219,21 +219,21 @@ class CNormalizerMeanStd(CNormalizerLinear):
         n_feats = x.shape[1]
 
         # Setting the mean
-        if self._mean is None:
+        if self._in_mean is None:
             # Compute values from training data
-            self._x_mean = x.mean(axis=0, keepdims=False)
-        else:  # Expand _mean tuple and build _x_mean
-            self._x_mean = self._expand_mean(n_feats)
+            self._mean = x.mean(axis=0, keepdims=False)
+        else:  # Expand _in_mean tuple and build _mean
+            self._mean = self._expand_mean(n_feats)
 
         # Setting the variance
         if self.with_std is False:
             # Use a "neutral" value
-            self._x_std = CArray(1.0)  # we just need a scalar value.
-        elif self._std is None:
+            self._std = CArray(1.0)  # we just need a scalar value.
+        elif self._in_std is None:
             # Compute values from training data
-            self._x_std = x.std(axis=0, keepdims=False)
-        else:  # Expand _std tuple and build _x_std
-            self._x_std = self._expand_std(n_feats)
+            self._std = x.std(axis=0, keepdims=False)
+        else:  # Expand _in_std tuple and build _std
+            self._std = self._expand_std(n_feats)
 
         self._compute_w_and_b()
         return self
@@ -244,8 +244,8 @@ class CNormalizerMeanStd(CNormalizerLinear):
         """
         n_feats = x.atleast_2d().shape[1]
         if self.w is None:
-            if self._mean is not None:
+            if self._in_mean is not None:
                 self._expand_mean(n_feats)
-            if self._std is not None:
+            if self._in_std is not None:
                 self._expand_std(n_feats)
             self._compute_w_and_b()

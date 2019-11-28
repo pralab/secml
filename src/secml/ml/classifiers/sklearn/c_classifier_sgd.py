@@ -183,6 +183,11 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
         self._kernel = kernel
 
     @property
+    def tr(self):
+        """Training set."""
+        return self._tr
+
+    @property
     def n_tr_samples(self):
         """Returns the number of training samples."""
         return self._tr.shape[0] if self._tr is not None else None

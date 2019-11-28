@@ -8,7 +8,8 @@
 from secml import _NoValue
 from secml.core.type_utils import is_str
 
-__all__ = ['as_public', 'as_protected', 'has_protected',
+__all__ = ['as_public',
+           'as_protected', 'has_protected', 'get_protected',
            'as_private', 'has_private', 'get_private',
            'has_property', 'get_property', 'has_getter', 'has_setter',
            'add_readonly', 'add_readwrite',
@@ -78,6 +79,25 @@ def has_protected(obj, attr):
 
     """
     return hasattr(obj, as_protected(attr))
+
+
+def get_protected(obj_class, attr, default=_NoValue):
+    """Return the protected attribute of class.
+
+    Parameters
+    ----------
+    obj_class : class
+        Target class (usually extracted using obj.__class__).
+    attr : str
+        Name of the attribute to return.
+    default : any, optional
+        Value that is returned when the named attribute is not found.
+
+    """
+    if default is not _NoValue:  # Pass default to getattr
+        return getattr(obj_class, as_protected(attr), default)
+    else:  # Standard getattr (error will be raise if attr is not found)
+        return getattr(obj_class, as_protected(attr))
 
 
 def as_private(obj_class, attr):
@@ -259,13 +279,15 @@ def is_public(obj, attr):
     Parameters
     ----------
     obj : object
-        Any class instance. --> NOT USED
+        Any class instance.
     attr : str
         Name of the attribute to check.
 
     """
     _check_is_attr_name(attr)
-    return True if not attr.startswith('_') else False
+    # Exclude properties to only return actual public attributes
+    return True if not attr.startswith('_') and \
+                   not has_property(obj, attr) else False
 
 
 def is_readonly(obj, attr):
@@ -282,7 +304,8 @@ def is_readonly(obj, attr):
 
     """
     _check_is_attr_name(attr)
-    return True if not is_public(obj, attr) and has_getter(obj, attr) and \
+    return True if not is_public(obj, attr) and \
+                   has_getter(obj, attr) and \
                    not has_setter(obj, attr) else False
 
 
@@ -341,7 +364,8 @@ def is_readable(obj, attr):
 
     """
     _check_is_attr_name(attr)
-    return True if is_public(obj, attr) or is_readwrite(obj, attr) or \
+    return True if is_public(obj, attr) or \
+                   is_readwrite(obj, attr) or \
                    is_readonly(obj, attr) else False
 
 
@@ -354,6 +378,8 @@ def is_writable(obj, attr):
 
     Parameters
     ----------
+    obj : object
+        Any class instance.
     attr : str
         Name of the attribute to check.
 
@@ -369,7 +395,7 @@ def extract_attr(obj, mode):
     keys having a name compatible with specified mode.
 
     The following modalities are available:
-     * 'pub' -> PUBLIC (no '_' in the prefix)
+     * 'pub' -> PUBLIC (standard attribute, no '_' in the prefix)
      * 'rw' -> READ/WRITE (a getter/setter is associated with it)
      * 'r' -> READ ONLY (a getter is associated with it)
      * 'pro' -> PROTECTED ('_' as the prefix and no getter/setter associated)
@@ -409,7 +435,7 @@ def extract_attr(obj, mode):
 
     # Parsing the modes string
     check_list = parse_modes(mode)
-    # Yelding only the required attributes
+    # Yielding only the required attributes
     for attr in obj.__dict__:
         if any(e(obj, attr) for e in check_list):
             yield attr

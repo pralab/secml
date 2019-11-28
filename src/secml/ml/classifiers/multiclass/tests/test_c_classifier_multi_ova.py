@@ -7,6 +7,7 @@ from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
+from secml.ml.features import CPreProcess
 from secml.ml.peval.metrics import CMetric
 from secml.figure import CFigure
 
@@ -301,6 +302,57 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         # Mixed linear/nonlinear transformations without gradient
         self._test_preprocess(
             self.dataset, multiclass, ['pca', 'unit-norm'], [{}, {}])
+
+    def test_set_get_state(self):
+        """Test for set_state and get_state."""
+
+        pre = CPreProcess.create_chain(['pca', 'mean-std'], [{}, {}])
+        multi = CClassifierMulticlassOVA(
+            classifier=CClassifierSVM,
+            kernel='rbf',
+            class_weight='balanced',
+            preprocess=pre)
+
+        # Setting different parameter in single trained_classifiers
+        multi.prepare(num_classes=4)
+        different_c = (10, 20, 30, 40)
+        multi.set('C', different_c)
+        different_gamma = (50, 60, 70, 80)
+        multi.set('kernel.gamma', different_gamma)
+
+        multi.fit(self.dataset)
+        pred_y = multi.predict(self.dataset.X)
+        self.logger.info(
+            "Predictions before restoring state:\n{:}".format(pred_y))
+
+        state = multi.get_state()
+        self.logger.info("State of multiclass:\n{:}".format(state))
+
+        # Create an entirely new clf
+        pre_post = CPreProcess.create_chain(['pca', 'mean-std'], [{}, {}])
+        multi_post = CClassifierMulticlassOVA(
+            classifier=CClassifierSVM,
+            kernel='rbf',
+            class_weight='balanced',
+            preprocess=pre_post)
+
+        # Restore state but not enough binary classifiers
+        with self.assertRaises(ValueError):
+            multi_post.set_state(state)
+
+        # Restore state
+        multi_post.prepare(num_classes=4)
+        multi_post.set_state(state)
+
+        for clf_idx, clf in enumerate(multi_post._binary_classifiers):
+            self.assertEqual(clf.C, different_c[clf_idx])
+            self.assertEqual(clf.kernel.gamma, different_gamma[clf_idx])
+
+        pred_y_post = multi_post.predict(self.dataset.X)
+        self.logger.info(
+            "Predictions after restoring state:\n{:}".format(pred_y_post))
+
+        self.assert_array_equal(pred_y, pred_y_post)
 
 
 if __name__ == '__main__':
