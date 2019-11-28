@@ -450,11 +450,10 @@ class CCreator:
                 # 1 level set or multiple sublevels set?
                 if len(param_name) == 1:  # Set attribute directly
                     # If writable (public or property with setter)
-                    # Use set directly
-                    if is_writable(self, attr0):
+                    if is_writable(self, attr0):  # Use main `.set`
                         self.set(attr0, param_value, copy=copy)
                         continue  # Attribute set, go to next one
-                    else:  # Property with only getter
+                    else:  # Maybe is read-only (property with only getter)?
                         # If exists, set the protected attribute
                         if has_protected(self, attr0):
                             attr0 = as_protected(attr0)
