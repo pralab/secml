@@ -37,6 +37,8 @@ class TestCClassifierPyTorchDNN(TestCClassifierPyTorch):
         self.ts.X = nmz.transform(self.ts.X)
 
     def _model_creation_resnet(self):
+
+        torch.manual_seed(0)
         net = torchvision.models.resnet18(pretrained=False)
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(net.parameters(),

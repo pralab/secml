@@ -18,6 +18,7 @@ from secml.ml.features import CNormalizerMinMax
 
 
 class TestCClassifierPyTorchBlobs(TestCClassifierPyTorch):
+
     def setUp(self):
         super(TestCClassifierPyTorchBlobs, self).setUp()
         self._dataset_creation_blobs()
@@ -26,7 +27,7 @@ class TestCClassifierPyTorchBlobs(TestCClassifierPyTorch):
 
     def _dataset_creation_blobs(self):
         # generate synthetic data
-        dataset = CDLRandom(n_samples=self.n_samples_tr + self.n_samples_ts,
+        self.ds = CDLRandom(n_samples=self.n_samples_tr + self.n_samples_ts,
                             n_classes=self.n_classes,
                             n_features=self.n_features, n_redundant=0,
                             n_clusters_per_class=1,
@@ -36,7 +37,7 @@ class TestCClassifierPyTorchBlobs(TestCClassifierPyTorch):
         splitter = CTrainTestSplit(train_size=self.n_samples_tr,
                                    test_size=self.n_samples_ts,
                                    random_state=0)
-        self.tr, self.ts = splitter.split(dataset)
+        self.tr, self.ts = splitter.split(self.ds)
 
         # Normalize the data
         nmz = CNormalizerMinMax()
@@ -45,23 +46,7 @@ class TestCClassifierPyTorchBlobs(TestCClassifierPyTorch):
 
     def _model_creation_blobs(self):
 
-        class Net(nn.Module):
-            """
-            Model with input size (-1, 5) for blobs dataset
-            with 5 features
-            """
-
-            def __init__(self, n_features, n_classes):
-                """Example network."""
-                super(Net, self).__init__()
-                self.fc1 = nn.Linear(n_features, 10)
-                self.fc2 = nn.Linear(10, n_classes)
-
-            def forward(self, x):
-                x = torch.relu(self.fc1(x))
-                x = self.fc2(x)
-                return x
-
+        torch.manual_seed(0)
         net = Net(n_features=self.n_features, n_classes=self.n_classes)
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(net.parameters(),

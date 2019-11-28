@@ -21,8 +21,8 @@ class TestCClassifierPyTorch(CUnitTest):
     def setUp(self):
         self.n_classes = 3
         self.n_features = 5
-        self.n_samples_tr = 1000  # number of training set samples
-        self.n_samples_ts = 500  # number of testing set samples
+        self.n_samples_tr = 500  # number of training set samples
+        self.n_samples_ts = 100  # number of testing set samples
         self.batch_size = 20
 
     def _test_get_params(self):
@@ -167,9 +167,13 @@ class TestCClassifierPyTorch(CUnitTest):
         self.clf.load_model(fname)
         self.logger.info("Testing restored model")
         # test that predict works even if no loss and optimizer have been defined
+        loss_backup = self.clf._loss
+        optimizer_backup = self.clf._optimizer
         self.clf._loss = None
         self.clf._optimizer = None
         self._test_performance()
+        self.clf._loss = loss_backup
+        self.clf._optimizer = optimizer_backup
         os.remove(fname)
 
 
