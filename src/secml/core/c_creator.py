@@ -574,6 +574,10 @@ class CCreator:
         str
             The full path of the stored object.
 
+        See Also
+        --------
+        get_state : Returns the object state dictionary.
+
         """
         return pck.save(path, self.get_state())
 
@@ -584,6 +588,10 @@ class CCreator:
         ----------
         path : str
             The full path of the file from which to load the object state.
+
+        See Also
+        --------
+        set_state : Sets the object state using input dictionary.
 
         """
         # Copy not needed for objects loaded from disk
