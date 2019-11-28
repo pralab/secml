@@ -65,8 +65,6 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
         """Set a parameter that has a specific name to a specific value.
 
         Only parameters, i.e. PUBLIC or READ/WRITE attributes, can be set.
-        RW parameters must be set using their real name, e.g. use
-        `attr` instead of `_rw_attr`.
 
         If setting is performed before training, the parameter to set must
         be a known `.classifier` attribute or a known attribute of any
