@@ -209,6 +209,11 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             self._clean_hooks()
         return self._layer_shapes
 
+    @property
+    def trained(self):
+        """True if the model has been trained."""
+        return self._trained
+
     def get_layer_shape(self, layer_name):
         return self.layer_shapes[layer_name]
 
