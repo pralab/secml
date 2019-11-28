@@ -17,6 +17,24 @@ from secml.ml.classifiers import CClassifierPyTorch
 from secml.ml.features import CNormalizerMinMax
 
 
+class Net(nn.Module):
+    """
+    Model with input size (-1, 5) for blobs dataset
+    with 5 features
+    """
+
+    def __init__(self, n_features, n_classes):
+        """Example network."""
+        super(Net, self).__init__()
+        self.fc1 = nn.Linear(n_features, 10)
+        self.fc2 = nn.Linear(10, n_classes)
+
+    def forward(self, x):
+        x = torch.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+
 class TestCClassifierPyTorchBlobs(TestCClassifierPyTorch):
 
     def setUp(self):
@@ -59,6 +77,7 @@ class TestCClassifierPyTorchBlobs(TestCClassifierPyTorch):
                                       batch_size=self.batch_size)
 
     def test_blobs(self):
+        # FIXME: ONE test_ METHOD FOR EACH TEST CASE
         self.logger.info("___________________")
         self.logger.info("Testing Blobs Model")
         self.logger.info("___________________")
@@ -72,3 +91,33 @@ class TestCClassifierPyTorchBlobs(TestCClassifierPyTorch):
         self._test_grad_x(layer_names=["fc1", 'fc2', None])
         self._test_softmax_outputs()
         self._test_save_load(self._model_creation_blobs)
+
+        # TODO: ISOLATE WHEN ABLE TO EXPAND THE UNITTESTS
+        # Test for set_state and get_state
+        pred_y = self.clf.predict(self.ts.X)
+        self.logger.info(
+            "Predictions before restoring state:\n{:}".format(pred_y))
+
+        state = self.clf.get_state()
+        self.logger.info("State of multiclass:\n{:}".format(state))
+
+        # Create an entirely new clf
+        net2 = Net(n_features=self.n_features, n_classes=self.n_classes)
+        criterion2 = nn.CrossEntropyLoss()
+        optimizer2 = optim.SGD(net2.parameters(),
+                               lr=0.1, momentum=0.9)
+
+        clf2 = CClassifierPyTorch(model=net2,
+                                  loss=criterion2,
+                                  optimizer=optimizer2,
+                                  epochs=10,
+                                  batch_size=self.batch_size)
+
+        # Restore state
+        clf2.set_state(state)
+
+        pred_y_post = clf2.predict(self.ts.X)
+        self.logger.info(
+            "Predictions after restoring state:\n{:}".format(pred_y_post))
+
+        self.assert_array_equal(pred_y, pred_y_post)
