@@ -45,8 +45,8 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         self._trained = False
         self._input_shape = input_shape
         self._softmax_outputs = softmax_outputs
-        self._layers = None
-        self._layer_shapes = None
+        self._model_layers = None
+        self._model_layer_shapes = None
 
     @property
     def input_shape(self):

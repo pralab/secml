@@ -186,28 +186,28 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     @property
     def layers(self):
         """Returns the layers of the model, if possible. """
-        if self._layers is None:
+        if self._model_layers is None:
             if isinstance(self._model, nn.Module):
-                self._layers = get_layers(self._model)
+                self._model_layers = get_layers(self._model)
             else:
                 raise TypeError(
                     "The input model must be an instance of `nn.Module`.")
-        return self._layers
+        return self._model_layers
 
     @property
     def layer_shapes(self):
-        if self._layer_shapes is None:
-            self._layer_shapes = {}
+        if self._model_layer_shapes is None:
+            self._model_layer_shapes = {}
             layer_names = self.layer_names
             self.hook_layer_output(layer_names)
             x = torch.randn(size=self.input_shape).unsqueeze(0)
             x = x.to(self._device)
             self._model(x)
             for layer_name, layer in self.layers:
-                self._layer_shapes[layer_name] = tuple(
+                self._model_layer_shapes[layer_name] = tuple(
                     self._intermediate_outputs[layer].shape)
             self._clean_hooks()
-        return self._layer_shapes
+        return self._model_layer_shapes
 
     @property
     def trained(self):
@@ -538,8 +538,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
             return list(self._intermediate_outputs.values())[0]
         else:
-            raise ValueError(
-                "Pass layer names as a list or just None for last layer output.")
+            raise ValueError("Pass layer names as a list or just None "
+                             "for last layer output.")
 
     def _backward(self, w):
         """Returns the gradient of the DNN - considering the output layer set
