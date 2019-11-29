@@ -15,14 +15,13 @@ from cleverhans.attacks import \
     MadryEtAl, BasicIterativeMethod, DeepFool
 from cleverhans.model import Model
 
-from secml.adv.attacks.evasion.cleverhans.c_attack_evasion_cleverhans_losses import \
-    CAttackEvasionCleverhansLossesMixin
-from secml.core.exceptions import NotFittedError
-
 from secml.adv.attacks import CAttack
 from secml.adv.attacks.evasion import CAttackEvasion
+from secml.adv.attacks.evasion.cleverhans.c_attack_evasion_cleverhans_losses import \
+    CAttackEvasionCleverhansLossesMixin
 from secml.array import CArray
 from secml.core.constants import nan
+from secml.core.exceptions import NotFittedError
 from secml.ml.classifiers.reject import CClassifierReject
 from secml.optim.function import CFunction
 
@@ -104,14 +103,14 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         if self._clvrh_clf:
             return self._clvrh_clf.f_eval
         else:
-            return 0
+            raise ValueError("Attack not performed yet!")
 
     @property
     def grad_eval(self):
         if self._clvrh_clf:
             return self._clvrh_clf.grad_eval
         else:
-            return 0
+            raise ValueError("Attack not performed yet!")
 
     ###########################################################################
     #                              PRIVATE METHODS
@@ -142,6 +141,26 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         """Gradient of the objective function."""
         raise NotImplementedError
 
+    def _create_tf_operations(self):
+        """
+        Calls the function of the cleverhans attack called `generate` that
+        constucts the Tensorflow operation needed to perform the attack
+        """
+        if self.y_target is None:
+            if 'y' in self._clvrh_attack.feedable_kwargs:
+                self._adv_x_T = self._clvrh_attack.generate(
+                    self._initial_x_P, y=self._y_P, **self._clvrh_params)
+            else:  # 'y' not required by attack
+                self._adv_x_T = self._clvrh_attack.generate(
+                    self._initial_x_P, **self._clvrh_params)
+        else:
+            if 'y_target' not in self._clvrh_attack.feedable_kwargs:
+                raise RuntimeError(
+                    "cannot perform a targeted {:} attack".format(
+                        self._clvrh_attack.__class__.__name__))
+            self._adv_x_T = self._clvrh_attack.generate(
+                self._initial_x_P, y_target=self._y_P, **self._clvrh_params)
+
     def _set_solver_classifier(self):
         """This function set the surrogate classifier,
         if differentiable; otherwise, it learns a smooth approximation for
@@ -165,6 +184,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         # wrap the surrogate classifier into a cleverhans classifier
         self._clvrh_clf = _CModelCleverhans(
             self._surrogate_classifier, out_dims=self._n_classes)
+
         # create an instance of the chosen cleverhans attack
         self._clvrh_attack = self._clvrh_attack_class(
             self._clvrh_clf, sess=self._tfsess)
@@ -179,21 +199,37 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         self._y_P = tf.compat.v1.placeholder(
             tf.float32, shape=(1, self._n_classes))
 
-        # create the tf operations to generate the attack
-        if self.y_target is None:
-            if 'y' in self._clvrh_attack.feedable_kwargs:
-                self._adv_x_T = self._clvrh_attack.generate(
-                    self._initial_x_P, y=self._y_P, **self._clvrh_params)
-            else:  # 'y' not required by attack
-                self._adv_x_T = self._clvrh_attack.generate(
-                    self._initial_x_P, **self._clvrh_params)
-        else:
-            if 'y_target' not in self._clvrh_attack.feedable_kwargs:
-                raise RuntimeError(
-                    "cannot perform a targeted {:} attack".format(
-                        self._clvrh_attack.__class__.__name__))
-            self._adv_x_T = self._clvrh_attack.generate(
-                self._initial_x_P, y_target=self._y_P, **self._clvrh_params)
+        # call the function of the cleverhans attack called `generate` that
+        # constucts the Tensorflow operation needed to perform the attack
+        self._create_tf_operations()
+
+    def _define_warning_filter(self):
+        # We filter few warnings raised by numpy, caused by cleverhans
+
+        self.logger.filterwarnings(
+            "ignore", category=RuntimeWarning,
+            message="invalid value encountered in double_scalars*"
+        )
+        self.logger.filterwarnings(
+            "ignore", category=RuntimeWarning,
+            message="Mean of empty slice*"
+        )
+
+    def _create_one_hot_y(self):
+        """
+        Cleverhans attacks need to receive y as a one hot vector.
+        y is equal to the y target if y_target is present, otherwhise is
+        equal to the true class of the attack sample.
+        """
+        one_hot_y = CArray.zeros(shape=(1, self._n_classes),
+                                 dtype=np.float32)
+
+        if self.y_target is not None:
+            one_hot_y[0, self.y_target] = 1
+        else:  # indiscriminate attack
+            one_hot_y[0, self._y0.item()] = 1
+
+        return one_hot_y
 
     def _run(self, x0, y0, x_init=None):
         """Perform evasion for a given dmax on a single pattern.
@@ -247,7 +283,6 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
         # create a one-hot-encoded vector to feed the true or
         # the y_target label
-
         one_hot_y = CArray.zeros(shape=(1, self._n_classes),
                                  dtype=np.float32)
 
@@ -257,16 +292,14 @@ class CAttackEvasionCleverhans(CAttackEvasion,
             one_hot_y[0, self._y0.item()] = 1
 
         with self.logger.catch_warnings():
-            # We filter few warnings raised by numpy, caused by cleverhans
 
-            self.logger.filterwarnings(
-                "ignore", category=RuntimeWarning,
-                message="invalid value encountered in double_scalars*"
-            )
-            self.logger.filterwarnings(
-                "ignore", category=RuntimeWarning,
-                message="Mean of empty slice*"
-            )
+            # We filter few warnings raised by numpy, caused by cleverhans
+            self._define_warning_filter()
+
+            # Cleverhans attacks need to receive y as a one hot vector.
+            # y is equal to the y target if y_target is present, otherwhise is
+            # equal to the true class of the attack sample.
+            one_hot_y = self._create_one_hot_y()
 
             self._x_opt = self._tfsess.run(
                 self._adv_x_T, feed_dict={self._initial_x_P: x,
@@ -339,7 +372,7 @@ class _CModelCleverhans(Model):
         # Given a trained CClassifier, creates a tensorflow node for the
         # network output and one for its gradient
         self._fun = CFunction(fun=self._decision_function,
-                              gradient=clf.grad_f_x)
+                              gradient=clf.gradient)
         self._callable_fn = _CClassifierToTF(self._fun, self._out_dims)
 
         super(_CModelCleverhans, self).__init__(nb_classes=clf.n_classes)
@@ -468,25 +501,8 @@ class _CClassifierToTF:
             raise ValueError("The gradient of CCleverhansAttack can be "
                              "computed only for one sample at time")
 
-        n_feats = x_carray.shape[1]
-        n_classes = grads_in_np.shape[1]
-
-        grads = CArray.zeros((n_samples, n_feats))
-
-        # if grads_in_np we can speed up the computation computing just one
-        # gradient
-        # TODO: we can improve this by using clf.gradient rather than grad_f_x,
-        #  and remove useless code that checks if one/more classes are involved
         grad_f_x = self.fun.gradient
-        if grads_in_np.sum(axis=None) == 1:
-            y = grads_in_np.find(grads_in_np == 1)[0]
-            if grads_in_np[y] == 1:
-                grads = grad_f_x(x_carray, y=y).atleast_2d()
-        else:
-            # otherwise we have to compute the gradient w.r.t all the classes
-            for c in range(n_classes):
-                cgrad = grad_f_x(x_carray[0, :], y=c)
-                grads[0, :] += (cgrad * CArray(grads_in_np)[0, c])
+        grads = grad_f_x(x_carray, w=grads_in_np).atleast_2d()
 
         return grads.tondarray().astype(np.float32)
 
