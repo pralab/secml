@@ -275,9 +275,33 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
     def get_state(self):
         """Returns the object state dictionary."""
+        from copy import deepcopy
+
+        # State of the wrapping classifier
         state = super(CClassifierPyTorch, self).get_state()
-        state['model'] = self._model.state_dict()
-        state['optimizer'] = self._optimizer.state_dict()
+
+        # Map model and optimizer to CPU before saving
+        self._model.to(torch.device('cpu'))
+
+        # Unfortunately optimizer does not have a 'to(device)' method
+        for opt_state in self._optimizer.state.values():
+            for k, v in opt_state.items():
+                if isinstance(v, torch.Tensor):
+                    opt_state[k] = v.to('cpu')
+
+        # Use deepcopy as restoring device later will change them
+        state['model'] = deepcopy(self._model.state_dict())
+        state['optimizer'] = deepcopy(self._optimizer.state_dict())
+
+        # Restore device and optimizer
+        self._model.to(self._device)
+
+        # Unfortunately optimizer does not have a 'to(device)' method
+        for opt_state in self._optimizer.state.values():
+            for k, v in opt_state.items():
+                if isinstance(v, torch.Tensor):
+                    opt_state[k] = v.to(self._device)
+
         return state
 
     def set_state(self, state_dict, copy=False):
