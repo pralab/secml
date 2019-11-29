@@ -99,7 +99,7 @@ class TestCClassifierPyTorchBlobs(TestCClassifierPyTorch):
             "Predictions before restoring state:\n{:}".format(pred_y))
 
         state = self.clf.get_state()
-        self.logger.info("State of multiclass:\n{:}".format(state))
+        self.logger.info("State of classifier:\n{:}".format(state))
 
         # Create an entirely new clf
         net2 = Net(n_features=self.n_features, n_classes=self.n_classes)

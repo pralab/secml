@@ -21,7 +21,7 @@ _logger.addHandler(_logger_handle)
 
 
 __all__ = ['SECML_HOME_DIR', 'SECML_CONFIG',
-           'SECML_DS_DIR', 'SECML_EXP_DIR',
+           'SECML_DS_DIR', 'SECML_MODELS_DIR', 'SECML_EXP_DIR',
            'SECML_STORE_LOGS', 'SECML_LOGS_DIR',
            'SECML_LOGS_FILENAME', 'SECML_LOGS_PATH',
            'SECML_PYTORCH_DIR', 'SECML_PYTORCH_USE_CUDA',
@@ -256,6 +256,19 @@ This is set by default to: ``{SECML_HOME_DIR}/datasets``
 if not os.path.isdir(SECML_DS_DIR):
     os.makedirs(os.path.abspath(SECML_DS_DIR))
     _logger.info('New `SECML_DS_DIR` created: {:}'.format(SECML_DS_DIR))
+
+SECML_MODELS_DIR = _parse_env_config(
+    'SECML_MODELS_DIR', SECML_CONFIG, 'secml', 'models_dir',
+    dtype=str, default=os.path.join(SECML_HOME_DIR, 'models')
+)
+"""Main directory where pre-trained models are stored.
+
+This is set by default to: ``{SECML_HOME_DIR}/models``
+
+"""
+if not os.path.isdir(SECML_MODELS_DIR):
+    os.makedirs(os.path.abspath(SECML_MODELS_DIR))
+    _logger.info('New `SECML_MODELS_DIR` created: {:}'.format(SECML_MODELS_DIR))
 
 SECML_EXP_DIR = _parse_env_config(
     'SECML_EXP_DIR', SECML_CONFIG, 'secml', 'exp_dir',
