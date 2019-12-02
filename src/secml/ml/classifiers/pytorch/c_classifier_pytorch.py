@@ -26,27 +26,13 @@ use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
 
 
 def get_layers(net):
-    # TODO remove when dropping support for python 2
-    layers = list()
     for name, layer in net._modules.items():
         # If it is a sequential, don't return its name
         # but recursively register all it's module children
         if isinstance(layer, nn.Sequential) or isinstance(layer, BasicBlock):
-            layers += [(":".join([name, l]), m) for (l, m) in
-                       get_layers(layer)]
+            yield from [(":".join([name, l]), m) for (l, m) in get_layers(layer)]
         else:
-            layers.append((name, layer))
-    else:
-        return layers
-
-    # TODO and uncomment this
-    # for name, layer in net._modules.items():
-    #     # If it is a sequential, don't return its name
-    #     # but recursively register all it's module children
-    #     if isinstance(layer, nn.Sequential) or isinstance(layer, BasicBlock):
-    #         yield from [(":".join([name, l]), m) for (l, m) in get_layers(layer)]
-    #     else:
-    #         yield (name, layer)
+            yield (name, layer)
 
 
 class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
@@ -103,6 +89,16 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                                                  softmax_outputs=softmax_outputs)
         self._init_model()
 
+        self._n_jobs = n_jobs
+        self._batch_size = batch_size
+
+        if self._batch_size is None:
+            self.logger.info(
+                "No batch size passed. Value will be set to the default "
+                "value of 1.")
+            self._batch_size = 1
+
+
         if self._input_shape is None:
             # try to infer from first layer
             first_layer = list(self._model._modules.values())[0]
@@ -121,15 +117,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         self._check_softmax_redundancy()
 
         self._epochs = epochs
-        self._batch_size = batch_size
-
-        if self._batch_size is None:
-            self.logger.info(
-                "No batch size passed. Value will be set to the default "
-                "value of 1.")
-            self._batch_size = 1
-
-        self._n_jobs = n_jobs
 
         if self._model.__class__.__name__ in dir(torchvision.models):
             self._trained = True
@@ -366,10 +353,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         Boolean value stating if a softmax layer has been
         defined.
         """
-        x = torch.ones(tuple([1] + list(self.input_shape)))
-        x = x.to(self._device)
-
-        outputs = self._model(x)
+        x = CArray.ones(reduce(lambda x, y: x*y, self.input_shape))
+        print(x)
+        outputs = self._forward(x)
 
         if outputs.sum() == 1:
             return True
