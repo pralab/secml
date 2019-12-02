@@ -7,15 +7,10 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
-
-from secml.core import CCreator
 from secml.ml import CModule
-from secml.core.decorators import deprecated
 
 
-@six.add_metaclass(ABCMeta)
-class CPreProcess(CCreator, CModule):
+class CPreProcess(CModule, metaclass=ABCMeta):
     """Common interface for feature preprocessing algorithms.
 
     Parameters
@@ -29,9 +24,9 @@ class CPreProcess(CCreator, CModule):
     __super__ = 'CPreProcess'
 
     def __init__(self, preprocess=None):
+        # TODO: CModule.__init__ should handle the call to create.
         preprocess = None if preprocess is None \
             else CPreProcess.create(preprocess)
-
         CModule.__init__(self, preprocess=preprocess)
 
     @staticmethod
@@ -61,18 +56,6 @@ class CPreProcess(CCreator, CModule):
                 pre_id, preprocess=chain, **kwargs_list[i])
 
         return chain
-
-    @abstractmethod
-    def _check_is_fitted(self):
-        """Check if the preprocessor is trained (fitted).
-
-        Raises
-        ------
-        NotFittedError
-            If the preprocessor is not fitted.
-
-        """
-        raise NotImplementedError
 
     @abstractmethod
     def _fit(self, x, y=None):
@@ -134,22 +117,17 @@ class CPreProcess(CCreator, CModule):
 
         """
         self.fit(x, y)  # train preprocessor first
-        return self.transform(x, caching=caching)
+        return self.forward(x, caching=caching)
 
     @abstractmethod
-    def _transform(self, x):
-        raise NotImplementedError("`transform` not implemented.")
-
-    def transform(self, x, caching=False):
-        """Apply the transformation algorithm on data.
+    def _forward(self, x):
+        """Apply the transformation algorithm on x.
 
         Parameters
         ----------
         x : CArray
-            Array to be transformed.
+            Preprocessed array to be transformed.
             Shape of input array depends on the algorithm itself.
-        caching: bool
-                 True if preprocessed input should be cached for backward pass.
 
         Returns
         -------
@@ -157,19 +135,24 @@ class CPreProcess(CCreator, CModule):
             Transformed input data.
 
         """
-        self._check_is_fitted()
+        raise NotImplementedError("`transform` not implemented.")
 
-        # Transform data using inner preprocess, if defined
-        x = self._preprocess_data(x, caching=caching)
+    def transform(self, x):
+        """Apply the transformation algorithm on data.
 
-        return self._transform(x)
+        Parameters
+        ----------
+        x : CArray
+            Array to be transformed.
+            Shape of input array depends on the algorithm itself.
 
-    _transform.__doc__ = transform.__doc__  # Same doc for the protected method
+        Returns
+        -------
+        CArray
+            Transformed input data.
 
-    def forward(self, x, caching=True):
-        return self.transform(x, caching=caching)
-
-    forward.__doc__ = transform.__doc__  # forward is an alias for transform
+        """
+        return self.forward(x, caching=False)
 
     def _inverse_transform(self, x):
         raise NotImplementedError(

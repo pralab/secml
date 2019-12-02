@@ -26,13 +26,6 @@ class CKernelHistIntersect(CKernel):
     ----------
     class_type : 'hist-intersect'
 
-    Parameters
-    ----------
-    batch_size : int or None, optional
-        Size of the batch used for kernel computation. Default None.
-
-        .. deprecated:: 0.10
-
     Examples
     --------
     >>> from secml.array import CArray
@@ -49,7 +42,6 @@ class CKernelHistIntersect(CKernel):
     """
     __class_type = 'hist-intersect'
 
-    # TODO: ADD SPARSE SUPPORT
     def _k(self, x, y):
         """Compute the histogram intersection kernel between x and y.
 
@@ -72,10 +64,6 @@ class CKernelHistIntersect(CKernel):
         """
         x = CArray(x).atleast_2d()
         y = x if y is None else CArray(y).atleast_2d()
-
-        if x.issparse is True or y.issparse is True:
-            raise TypeError(
-                "Histogram-Intersection Kernel not available for sparse data.")
 
         k = CArray.zeros(shape=(x.shape[0], y.shape[0]))
 
@@ -126,5 +114,5 @@ class CKernelHistIntersect(CKernel):
             v_broadcast = v
 
         grad = CArray.zeros(shape=u.shape, sparse=v.issparse)
-        grad[v_broadcast < u] = 1
+        grad[v_broadcast < u] = 1  # TODO support from CArray still missing
         return grad

@@ -7,20 +7,17 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
-from six.moves import range
 
-from secml.core import CCreator
+from secml.ml import CModule
 from secml.array import CArray
 from secml.data import CDataset
 from secml.ml.features import CPreProcess
-from secml.parallel import parfor2
 from secml.utils.mixed_utils import check_is_fitted
 from secml.core.exceptions import NotFittedError
+from secml.core.decorators import deprecated
 
 
-@six.add_metaclass(ABCMeta)
-class CClassifier(CCreator):
+class CClassifier(CModule, metaclass=ABCMeta):
     """Abstract class that defines basic methods for Classifiers.
 
     A classifier assign a label (class) to new patterns using the
@@ -45,9 +42,11 @@ class CClassifier(CCreator):
         self._classes = None
         # Number of features of the training dataset
         self._n_features = None
-        # Data preprocess
-        self.preprocess = preprocess if preprocess is None \
+
+        # TODO: CModule.__init__ should handle the call to create.
+        preprocess = preprocess if preprocess is None \
             else CPreProcess.create(preprocess)
+        CModule.__init__(self, preprocess=preprocess)
 
     @property
     def classes(self):
@@ -64,6 +63,7 @@ class CClassifier(CCreator):
         """Number of features (before preprocessing)."""
         return self._n_features
 
+    @deprecated('0.11')
     def is_linear(self):
         """True for linear classifiers, False otherwise."""
         return False
@@ -94,25 +94,6 @@ class CClassifier(CCreator):
 
         """
         check_is_fitted(self, ['classes', 'n_features'])
-
-    def _preprocess_data(self, x):
-        """Apply the preprocess to input, if defined.
-
-        Parameters
-        ----------
-        x : CArray
-            Data to be transformed using preprocess, if defined.
-
-        Returns
-        -------
-        CArray
-            If preprocess is defined, will be the transformed data.
-            Otherwise input data is returned as is.
-
-        """
-        if self.preprocess is not None:
-            return self.preprocess.transform(x)
-        return x
 
     @abstractmethod
     def _fit(self, dataset):
@@ -177,31 +158,6 @@ class CClassifier(CCreator):
 
         return self
 
-    @abstractmethod
-    def _decision_function(self, x, y=None):
-        """Computes the decision function for each pattern in x.
-
-        .. note::
-            preprocessing is already handled by decision_function, along with
-            ensuring that x is a 2D array.
-
-        Parameters
-        ----------
-        x : CArray
-            Array with new patterns to classify, 2-Dimensional of shape
-            (n_patterns, n_features).
-        y : int or None, optional
-            The label of the class wrt the function should be calculated.
-            If None, return the output for all classes.
-
-        Returns
-        -------
-        score : CArray
-            Value of the decision function for each test pattern.
-            Dense flat array of shape (n_patterns,).
-        """
-        raise NotImplementedError
-
     def decision_function(self, x, y=None):
         """Computes the decision function for each pattern in x.
 
@@ -230,12 +186,49 @@ class CClassifier(CCreator):
             otherwise a (n_samples, n_classes) array.
 
         """
-        self._check_is_fitted()
-        x = x.atleast_2d()  # Ensuring input is 2-D
-        x = self._preprocess_data(x)  # handle preprocessing
+        scores = self.forward(x, caching=False)
+        return scores if y is None else scores[:, y].ravel()
 
-        # TODO: we can try here to run with n_jobs, as done in fit
-        return self._decision_function(x, y)
+    def _check_clf_index(self, y):
+        """Raise error if index y is outside [-1, n_classes) range.
+
+        Parameters
+        ----------
+        y : int
+            class label index.
+
+        """
+        if y < 0 or y >= self.n_classes:
+            raise ValueError(
+                "class label {:} is out of range".format(y))
+
+    def grad_f_x(self, x, y):
+        """Computes the gradient of the classifier's decision function wrt x.
+
+        Parameters
+        ----------
+        x : CArray or None, optional
+            The input point. The gradient will be computed at x.
+        y : int
+            Binary index of the class wrt the gradient must be computed.
+
+        Returns
+        -------
+        gradient : CArray
+            The gradient of the linear classifier's decision function
+            wrt decision function input. Vector-like array.
+
+        """
+        self._check_clf_index(y)
+
+        # check that x is a single point
+        if CArray(x).is_vector_like is False:
+            raise ValueError("Classifier gradient can be computed only on"
+                             " a single input sample.")
+
+        w = CArray.zeros(self.n_classes)
+        w[y] = 1  # one-hot encoding of y
+        return self.gradient(x, w)
 
     def predict(self, x, return_decision_function=False):
         """Perform classification of each pattern in x.
@@ -264,7 +257,6 @@ class CClassifier(CCreator):
             Will be returned only if `return_decision_function` is True.
 
         """
-        # TODO: we can try here to run with n_jobs, as done in fit
         scores = self.decision_function(x, y=None)
 
         # The classification label is the label of the class
@@ -282,7 +274,7 @@ class CClassifier(CCreator):
         dataset : CDataset
             Dataset to be used for evaluating parameters.
         parameters : dict
-            Dictionary with each entry as `{parameter: list of values to test}`.
+            Dictionary with each item as `{parameter: list of values to test}`.
             Example:
             `{'C': [1, 10, 100], 'gamma': list(10.0 ** CArray.arange(-4, 4))}`
         splitter : CDataSplitter or str

@@ -6,11 +6,6 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from __future__ import division
-import six
-from six.moves import range, map
-from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-
 import scipy.sparse as scs
 from scipy.sparse.linalg import inv, norm
 import numpy as np
@@ -22,7 +17,6 @@ from secml.array.c_dense import CDense
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
     is_list, is_slice, is_scalar, is_intlike, is_int, is_bool
 from secml.core.constants import inf
-import copy
 
 
 def _expand_nnz_bool(array, nnz_val):
@@ -588,14 +582,14 @@ class CSparse(_CArrayInterface):
 
         """
         if is_scalar(other) or is_bool(other):
-            return self.__class__(self._data.__div__(other))
+            return self.__class__(self._data.__truediv__(other))
         elif isinstance(other, CSparse):  # Sparse / Sparse = Dense
             # Scipy does not support broadcast natively
             other = self._broadcast_other(other)
-            return CDense(self._data.__div__(other.tocsr()))
+            return CDense(self._data.__truediv__(other.tocsr()))
         elif isinstance(other, CDense):  # Sparse / Dense = Dense
             # Compatible shapes, call built-in div
-            return CDense(self._data.__div__(other.tondarray()))
+            return CDense(self._data.__truediv__(other.tondarray()))
         else:
             return NotImplemented
 
@@ -603,22 +597,6 @@ class CSparse(_CArrayInterface):
         """Element-wise (inverse) true division."""
         raise NotImplementedError(
             "dividing a scalar by a sparse array is not supported")
-
-    def __div__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-        """Element-wise division.
-
-        See .__truediv__() for more informations.
-
-        """
-        return self.__truediv__(other)
-
-    def __rdiv__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-        """Element-wise (inverse) division.
-
-        See .__rtruediv__() for more informations.
-
-        """
-        return self.__rtruediv__(other)
 
     def __floordiv__(self, other):
         """Element-wise floor division (integral part of the quotient).
@@ -879,8 +857,6 @@ class CSparse(_CArrayInterface):
         """Manage 'and' and 'or' operators."""
         return bool(self._data)
 
-    __nonzero__ = __bool__  # Compatibility with python < 3
-
     def __iter__(self):
         """Yields array elements in raster-scan order."""
         for row_id in range(self.shape[0]):
@@ -966,8 +942,7 @@ class CSparse(_CArrayInterface):
             data_cndarray.save(fhandle)
             indices_cndarray.save(fhandle)
             indptr_cndarray.save(fhandle)
-            fhandle.write(six.text_type(self.shape[0]) + " " +
-                          six.text_type(self.shape[1]))
+            fhandle.write(str(self.shape[0]) + " " + str(self.shape[1]))
 
     @classmethod
     def load(cls, datafile, dtype=float):

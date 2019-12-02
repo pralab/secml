@@ -1,5 +1,4 @@
 import os
-from io import open  # TODO: REMOVE AFTER TRANSITIONING TO PYTHON 3
 import sys
 import subprocess
 from pkg_resources import parse_version
@@ -18,12 +17,6 @@ _logger.addHandler(_logger_handle)
 __all__ = ['_NoValue', '__version__', 'global_filterwarnings']
 
 _here = os.path.abspath(os.path.dirname(__file__))
-
-
-if sys.version_info < (3, 0):
-    _logger.warn("DEPRECATION: Python 2.7 is deprecated, please use "
-                 "Python >= 3.5. Support for Python 2.7 will be dropped "
-                 "in a future release without advanced notice.")
 
 
 def _read(*path_parts):
@@ -106,17 +99,9 @@ except:
 
 # The following are global filters for warnings
 def global_filterwarnings():
-
     import warnings
 
-    # TODO: REMOVE WHEN SCIPY MIN VERSION WILL BE 1.3
-    warnings.filterwarnings(
-        "ignore", category=PendingDeprecationWarning,
-        message="the matrix subclass is not the recommended way to represent "
-                "matrices or deal with linear algebra*"
-    )
-
-    # Warnings related to data-type size changed. # TODO: fixed in numpy 1.16.1
+    # Warnings related to data-type size changed. # TODO: fixed in numpy ??
     warnings.filterwarnings(
         "ignore", category=RuntimeWarning, message="numpy.dtype size changed*"
     )
@@ -124,29 +109,30 @@ def global_filterwarnings():
         "ignore", category=RuntimeWarning, message="numpy.ufunc size changed*"
     )
 
-    # TODO: REMOVE AFTER SWITCHING TO PYTHON 3
-    warnings.filterwarnings(
-        "ignore", category=DeprecationWarning,
-        message="The SafeConfigParser class has been renamed to "
-                "ConfigParser in Python 3.2.*"
-    )
-
-    # TODO: fixed in scipy 1.3.1
-    warnings.filterwarnings(
-        "ignore", category=FutureWarning,
-        message="future versions will not create a writeable array "
-                "from broadcast_array*"
-    )
-    # TODO: fixed in scipy 1.3.1
-    warnings.filterwarnings(
-        "ignore", category=DeprecationWarning,
-        message="Numpy has detected that you (may be)*")  # same as before
-
-    # TODO: check after upgrading to matplotlib 3
+    # TODO: check after upgrading to tensorflow 2
     warnings.filterwarnings(
         "ignore", category=DeprecationWarning,
         message="Using or importing the ABCs from 'collections' instead of "
                 "from 'collections.abc' is deprecated*")
+
+    # TODO: check after upgrading to tensorflow 2
+    warnings.filterwarnings(
+        "ignore", category=PendingDeprecationWarning,
+        message="the imp module is deprecated in favour of importlib*")
+    warnings.filterwarnings(
+        "ignore", category=DeprecationWarning,
+        message="the imp module is deprecated in favour of importlib*")
+
+    # TODO: check after upgrading to tensorflow 2
+    warnings.filterwarnings(
+        "ignore", category=FutureWarning, message="Passing (type, 1)*")
+
+    # TODO: check after cleverhans fix this (post 3.0.1)
+    try:  # For some reason we are not able to filter tf warnings
+        import tensorflow as tf
+        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+    except ImportError:
+        pass
 
 
 # Call the filterwarnings method to make it active project-wide

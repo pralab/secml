@@ -6,13 +6,11 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
 
 from secml.core import CCreator
 
 
-@six.add_metaclass(ABCMeta)
-class CPrototypesSelector(CCreator):
+class CPrototypesSelector(CCreator, metaclass=ABCMeta):
     """Selection of Prototypes.
 
     Prototype selection methods help reducing the number of samples

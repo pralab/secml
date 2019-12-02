@@ -31,7 +31,7 @@ Please see our [ROADMAP](https://secml.gitlab.io/roadmap.html) for an overview
 of the future development directions.
 
 [![Status Alpha](https://img.shields.io/badge/status-alpha-yellow.svg)](.)
-[![Python 2.7 | 3.5 | 3.6 | 3.7](https://img.shields.io/badge/python-2.7%20%7C%203.5%20%7C%203.6%20%7C%203.7-brightgreen.svg)](.)
+[![Python 3.5 | 3.6 | 3.7](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7-brightgreen.svg)](.)
 [![Platform Linux | MacOS ](https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey.svg)](.)
 [![Apache License 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
@@ -47,16 +47,15 @@ procedure.
 
 ### Operating System requirements
 
-SecML can run under Python 2.7 and Python >= 3.5 with no configuration steps 
-required, as all its dependencies are available as wheel packages for the main 
-macOS versions and Linux distributions.
+SecML can run under Python >= 3.5 with no additional configuration steps 
+required, as all its dependencies are available as wheel packages for 
+the primary macOS versions and Linux distributions.
 
 However, to support additional advanced features more packages can be necessary
 depending on the Operating System used:
 
  - Linux (Ubuntu >= 16.04 or equivalent dist)
-   - `python-tk` (Python 2.7), `python3-tk` (Python >= 3.5), for running
-     MatplotLib Tk-based backends;
+   - `python3-tk`, for running MatplotLib Tk-based backends;
    - NVIDIA<sup>®</sup> CUDA<sup>®</sup> Toolkit for running `tf-gpu`
      [extra component](#extra-components).
      See the [TensorFlow Guide](https://www.tensorflow.org/install/gpu).

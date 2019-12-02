@@ -5,15 +5,13 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
-import six
+from abc import ABCMeta, abstractmethod
 from copy import deepcopy
 
 from secml.core.type_utils import to_builtin
 
 
-@six.add_metaclass(ABCMeta)
-class _CArrayInterface(object):
+class _CArrayInterface(metaclass=ABCMeta):
     """Interface for array classes.
 
     For extensive definition of each method, see `secml.array.CArray`.
@@ -24,42 +22,50 @@ class _CArrayInterface(object):
     # # # # # # PROPERTIES # # # # # #
     # -------------------------------#
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def shape(self):
         """Shape of stored data, tuple of ints."""
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def size(self):
         """Size (number of elements) of array."""
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def ndim(self):
         """Number of array dimensions."""
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def dtype(self):
         """Data-type of stored data."""
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def nnz(self):
         """Number of non-zero values in the array."""
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def nnz_indices(self):
         """Index of non-zero array elements."""
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def nnz_data(self):
         """Return non-zero array elements."""
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def T(self):
         """Transposed array data."""
         raise NotImplementedError
@@ -149,16 +155,6 @@ class _CArrayInterface(object):
         raise NotImplementedError
 
     @abstractmethod
-    def __div__(self, other):
-        """Element-wise division. True division will be performed."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def __rdiv__(self, other):
-        """Element-wise (inverse) division. True division will be performed."""
-        raise NotImplementedError
-
-    @abstractmethod
     def __floordiv__(self, other):
         """Element-wise floor division (// operator)."""
         raise NotImplementedError
@@ -222,8 +218,6 @@ class _CArrayInterface(object):
     def __bool__(self):
         """Manage 'and' and 'or' operators."""
         raise NotImplementedError
-
-    __nonzero__ = __bool__  # Compatibility with python < 3
 
     @abstractmethod
     def __iter__(self):

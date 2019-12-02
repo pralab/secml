@@ -398,8 +398,9 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
 
         return classifier
 
-    def _decision_function(self, x, y=None):
-        """Computes the distance from the separating hyperplane for each pattern in x.
+    def _forward(self, x):
+        """Compute decision function for SVMs, proportional to the distance of
+        x to the separating hyperplane.
 
         For non linear SVM, the kernel between input patterns and
          Support Vectors is computed and then the inner product of
@@ -410,9 +411,6 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : {0, 1, None}
-            The label of the class wrt the function should be calculated.
-            If None, return the output for all classes.
 
         Returns
         -------
@@ -422,12 +420,9 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
             otherwise a (n_samples, n_classes) array.
 
         """
-        if y not in (0, 1, None):
-            raise ValueError("decision function cannot be computed "
-                             "against class {:}.".format(y))
 
         if self.is_kernel_linear():  # Scores are given by the linear model
-            return CClassifierLinear._decision_function(self, x, y=y)
+            return CClassifierLinear._forward(self, x)
 
         k = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
         score = CArray(k).todense().ravel() + self.b
@@ -436,5 +431,39 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         scores[:, 0] = -score.ravel().T
         scores[:, 1] = score.ravel().T
 
-        return scores[:, y].ravel() if y is not None else scores
+        return scores
 
+    def _backward(self, w):
+        """Compute the decision function gradient wrt x, and accumulate w."""
+
+        if self.is_kernel_linear():  # Simply return w for a linear SVM
+            gradient = self.w.ravel()
+        else:
+            # TODO: ADD OPTION FOR RANDOM SUBSAMPLING OF SVs
+            # Gradient in dual representation:
+            # \sum_i y_i alpha_i \diff{K(x,xi)}{x}
+            m = int(self.grad_sampling * self.n_sv.sum())  # floor
+            idx = CArray.randsample(self.alpha.size, m)  # adding randomness
+
+            gradient = self.kernel.gradient(
+                self.sv[idx, :], self._cached_x).atleast_2d()
+
+            # Few shape check to ensure broadcasting works correctly
+            if gradient.shape != (idx.size, self.n_features):
+                raise ValueError("Gradient shape must be ({:}, {:})".format(
+                    idx.size, self.n_features))
+
+            alpha_2d = self.alpha[idx].atleast_2d()
+            if gradient.issparse is True:  # To ensure the sparse dot is used
+                alpha_2d = alpha_2d.tosparse()
+            if alpha_2d.shape != (1, idx.size):
+                raise ValueError(
+                    "Alpha vector shape must be "
+                    "({:}, {:}) or ravel equivalent".format(1, idx.size))
+            gradient = alpha_2d.dot(gradient).ravel()
+
+        # Gradient sign depends on input label (0/1)
+        if w is not None:
+            return w[0] * -gradient + w[1] * gradient
+        else:
+            raise ValueError("w cannot be set as None.")

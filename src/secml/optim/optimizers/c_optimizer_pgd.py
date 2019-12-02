@@ -6,8 +6,6 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from six.moves import range
-
 from secml.array import CArray
 from secml.optim.optimizers import COptimizer
 

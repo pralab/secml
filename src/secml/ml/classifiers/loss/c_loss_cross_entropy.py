@@ -6,8 +6,6 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from six.moves import range
-
 from secml.ml.classifiers.loss import CLossClassification, CSoftmax
 from secml.array import CArray
 from secml import _NoValue

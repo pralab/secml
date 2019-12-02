@@ -6,7 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from six.moves import cPickle
+import pickle
 import gzip
 
 from secml.utils import fm
@@ -35,6 +35,12 @@ def save(file_path, obj):
     obj_path : str
         Full path to the stored object.
 
+    Notes
+    -----
+    Objects are stored using **protocol 4** data stream format.
+    For more information see
+    https://docs.python.org/3/library/pickle.html#data-stream-format
+
     """
     # Adding extension to destination file if user forgot about it...
     file_ext = fm.splitext(file_path)[1]
@@ -42,9 +48,7 @@ def save(file_path, obj):
 
     # open the reference to target file
     with gzip.open(file_path, 'wb') as f_ref:
-        # storing the object with a protocol compatible with python >= 2.3
-        # TODO: USE PROTOCOL 3 AFTER TRANSITION TO PYTHON 3
-        cPickle.dump(obj, f_ref, protocol=2)
+        pickle.dump(obj, f_ref, protocol=4)
 
     return fm.join(fm.abspath(file_path), fm.split(file_path)[1])
 
@@ -64,7 +68,4 @@ def load(file_path, encoding='bytes'):
     """
     with gzip.open(file_path, 'rb') as f_ref:
         # Loading and returning the object
-        try:  # TODO: REMOVE encoding AFTER TRANSITION TO PYTHON 3
-            return cPickle.load(f_ref, encoding=encoding)
-        except TypeError:
-            return cPickle.load(f_ref)
+        return pickle.load(f_ref, encoding=encoding)
