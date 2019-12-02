@@ -518,7 +518,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                     running_loss = 0.0
 
             #  https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
-            print(epoch, self.optimizer.param_groups[0]['lr'])
             if self._optimizer_scheduler is not None:
                 self._optimizer_scheduler.step()
 
