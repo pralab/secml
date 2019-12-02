@@ -44,6 +44,10 @@ by calling the active subplot via :meth:`.CFigure.sp`
    :members:
    :undoc-members:
 
+.. autoclass:: secml.figure._plots.c_plot_metric.CPlotMetric
+   :members:
+   :undoc-members:
+
 .. autoclass:: secml.figure._plots.c_plot_sec_eval.CPlotSecEval
    :members:
    :undoc-members:

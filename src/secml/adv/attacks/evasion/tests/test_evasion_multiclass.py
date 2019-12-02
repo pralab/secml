@@ -1,6 +1,5 @@
 from secml.testing import CUnitTest
 
-from six.moves import range
 import matplotlib
 
 from secml.array import CArray
@@ -30,24 +29,17 @@ class TestEvasionMulticlass(CUnitTest):
         self.ds = CDLRandom(n_classes=3, n_features=2, n_redundant=0,
                             n_clusters_per_class=1, class_sep=1,
                             random_state=0).load()
-        # self.ds = CDLRandomBlobs(
-        #     n_samples=600, n_features=2, cluster_std=0.075, random_state=1,
-        #     centers=[(0.25, 0.25), (0.5, 0.75), (0.85, 0.25)]).load()
 
         # Add a new class modifying one of the existing clusters
         self.ds.Y[(self.ds.X[:, 0] > 0).logical_and(
             self.ds.X[:, 1] > 1).ravel()] = self.ds.num_classes
 
         # self.kernel = None
-        self.kernel = CKernelRBF(gamma=1)
-
-        # END SETUP
+        self.kernel = CKernelRBF(gamma=10)
 
         # Data normalization
         self.normalizer = CNormalizerMinMax()
-        self.normalizer = None
-        if self.normalizer is not None:
-            self.ds.X = self.normalizer.fit_transform(self.ds.X)
+        self.ds.X = self.normalizer.fit_transform(self.ds.X)
 
         self.multiclass = CClassifierMulticlassOVA(
             classifier=CClassifierSVM, class_weight='balanced',
@@ -86,9 +78,9 @@ class TestEvasionMulticlass(CUnitTest):
             lb = None
             ub = None
 
-        dmax = 4
+        dmax = 2
 
-        self.solver_params = {'eta': 1e-1, 'eta_min': 0.1}
+        self.solver_params = {'eta': 1e-1, 'eta_min': 1.0}
 
         eva = CAttackEvasionPGDLS(classifier=self.multiclass,
                                   surrogate_classifier=self.multiclass,
@@ -97,7 +89,7 @@ class TestEvasionMulticlass(CUnitTest):
                                   solver_params=self.solver_params,
                                   y_target=self.y_target)
 
-        eva.verbose = 2
+        eva.verbose = 1
 
         # Points from class 2 region
         # p_idx = 0
@@ -141,7 +133,7 @@ class TestEvasionMulticlass(CUnitTest):
 
             scores = scores.append(s)
 
-        self.logger.info("Predicted label after evasion: {:}".format(y_pred))
+        self.logger.info("Predicted label after evasion: " + str(y_pred))
         self.logger.info("Score after evasion: {:}".format(s))
         self.logger.info("Objective function after evasion: {:}".format(f_opt))
 
@@ -150,6 +142,8 @@ class TestEvasionMulticlass(CUnitTest):
             self._make_plots(x_seq, dmax, eva, x0, y0, scores, f_seq)
 
     def _make_plots(self, x_seq, dmax, eva, x0, y0, scores, f_seq):
+
+        n_grid_points = 20
 
         fig = CFigure(height=9, width=10, markersize=6, fontsize=12)
 
@@ -180,7 +174,7 @@ class TestEvasionMulticlass(CUnitTest):
         fig.sp.plot_fun(func=self._rescaled_distance,
                         multipoint=True,
                         plot_background=False,
-                        n_grid_points=100, levels_color='k',
+                        n_grid_points=n_grid_points, levels_color='k',
                         grid_limits=ds_bounds,
                         levels=[0], colorbar=False,
                         levels_linewidth=2.0, levels_style=':',
@@ -195,7 +189,7 @@ class TestEvasionMulticlass(CUnitTest):
         # # Use the actual target used in evasion
         # target = self.ds.Y[p_idx] if target_class is None else target_class
         fig.sp.plot_fgrads(eva._objective_function_gradient,
-                           grid_limits=ds_bounds, n_grid_points=50,
+                           grid_limits=ds_bounds, n_grid_points=n_grid_points,
                            color='k', alpha=.5)
 
         fig.sp.plot_path(x_seq, path_style='-', path_width=2.5,
@@ -209,7 +203,7 @@ class TestEvasionMulticlass(CUnitTest):
         fig.sp.plot_fun(func=self._rescaled_distance,
                         multipoint=True,
                         plot_background=False,
-                        n_grid_points=100, levels_color='w',
+                        n_grid_points=n_grid_points, levels_color='w',
                         grid_limits=ds_bounds,
                         levels=[0], colorbar=False,
                         levels_style=':', levels_linewidth=2.0,
@@ -218,7 +212,7 @@ class TestEvasionMulticlass(CUnitTest):
         fig.sp.plot_fun(lambda x: eva._objective_function(x),
                         multipoint=True,
                         grid_limits=ds_bounds,
-                        colorbar=False, n_grid_points=100,
+                        colorbar=False, n_grid_points=n_grid_points,
                         plot_levels=False)
 
         fig.sp.grid(grid_on=False)
@@ -231,7 +225,7 @@ class TestEvasionMulticlass(CUnitTest):
         fig.sp.plot(scores)
 
         fig.sp.grid()
-        fig.sp.xticks(CArray.arange(dmax+1))
+        fig.sp.xticks(CArray.arange(dmax + 1))
         fig.sp.xlim(0, dmax)
         fig.sp.xlabel("dmax")
 
@@ -240,7 +234,7 @@ class TestEvasionMulticlass(CUnitTest):
         fig.sp.plot(f_seq)
 
         fig.sp.grid()
-        fig.sp.xticks(CArray.arange(dmax+1))
+        fig.sp.xticks(CArray.arange(dmax + 1))
         fig.sp.xlim(0, dmax)
         fig.sp.xlabel("dmax")
 
@@ -278,11 +272,11 @@ class TestEvasionMulticlass(CUnitTest):
         if self.ds.num_classes == 3:
             styles = [('b', 'o', '-'), ('g', 'p', '--'), ('r', 's', '-.')]
         elif self.ds.num_classes == 4:
-            styles = [('b', 'o', '-','cornflowerblue'), ('r', 'p', '--',
-                                                     'lightcoral'),
+            styles = [('b', 'o', '-', 'cornflowerblue'), ('r', 'p', '--',
+                                                          'lightcoral'),
                       ('y', 's', '-.', 'lemonchiffon'), ('g', 'D',
-                                                                 '--',
-                                                     'lightgreen')]
+                                                         '--',
+                                                         'lightgreen')]
         else:
             styles = [('saddlebrown', 'o', '-'), ('g', 'p', '--'),
                       ('y', 's', '-.'), ('gray', 'D', '--'),
@@ -301,7 +295,6 @@ class TestEvasionMulticlass(CUnitTest):
         styles = self._get_style()
 
         for c_idx, c in enumerate(self.ds.classes):
-
             fig.sp.scatter(self.ds.X[self.ds.Y == c, 0],
                            self.ds.X[self.ds.Y == c, 1],
                            s=20, c=styles[c_idx][0], edgecolors='k',

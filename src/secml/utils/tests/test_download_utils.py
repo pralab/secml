@@ -1,7 +1,5 @@
 from secml.testing import CUnitTest
 
-import sys
-
 from secml.utils.download_utils import md5
 
 
@@ -14,12 +12,7 @@ class TestDownloadUtils(CUnitTest):
         x = b'abcd' * 10000
 
         # Expected digest of the file
-        # TODO: cause of py3 vs py2 encoding differences
-        #  the md5 changes. Workaround to be investigated
-        if sys.version_info < (3, 0):
-            md5_test = '934f48695f0286ccfa0dddc060e2f152'
-        else:
-            md5_test = '3f0f597c3c69ce42e554fdad3adcbeea'
+        md5_test = '3f0f597c3c69ce42e554fdad3adcbeea'
 
         # Generate a temp file to test
         import tempfile

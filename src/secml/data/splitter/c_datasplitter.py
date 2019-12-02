@@ -7,14 +7,11 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
-from six.moves import range
 
 from secml.core import CCreator
 
 
-@six.add_metaclass(ABCMeta)
-class CDataSplitter(CCreator):
+class CDataSplitter(CCreator, metaclass=ABCMeta):
     """Abstract class that defines basic methods for dataset splitting.
 
     Parameters

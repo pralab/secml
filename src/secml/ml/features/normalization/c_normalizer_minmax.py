@@ -70,16 +70,12 @@ class CNormalizerMinMax(CNormalizerLinear):
 
     def __init__(self, feature_range=None, preprocess=None):
 
-        # The following SHOULD NOT be reset:
-        # _n, _v and _feature_range does not depends on training
-        self._n = None
-        self._v = None
         self._feature_range = None
         # setting desired feature range... the property will check for correct type
         self.feature_range = (0., 1.) if feature_range is None else feature_range
 
-        self._data_min = None
-        self._data_max = None
+        self._min = None
+        self._max = None
         # Properties of the linear normalizer
         # we split them to easily manage feature_range
         self._m = None
@@ -90,12 +86,27 @@ class CNormalizerMinMax(CNormalizerLinear):
     @property
     def w(self):
         """Returns the slope of the linear normalizer."""
-        return self._n * self._m
+        n = self.feature_range[1] - self.feature_range[0]
+        return n * self._m
 
     @property
     def b(self):
         """Returns the bias of the linear normalizer."""
-        return self._n * self._q + self._v
+        n = self.feature_range[1] - self.feature_range[0]
+        v = self.feature_range[0]
+        return n * self._q + v
+
+    @property
+    def m(self):
+        """Returns the slope of the linear normalizer.
+        (excluding the feature range)."""
+        return self._m
+
+    @property
+    def q(self):
+        """Returns the bias of the linear normalizer
+        (excluding the feature range)."""
+        return self._q
 
     @property
     def min(self):
@@ -109,7 +120,7 @@ class CNormalizerMinMax(CNormalizerLinear):
             trained yet, returns None.
 
         """
-        return self._data_min
+        return self._min
 
     @property
     def max(self):
@@ -123,7 +134,7 @@ class CNormalizerMinMax(CNormalizerLinear):
             trained yet, returns None.
 
         """
-        return self._data_max
+        return self._max
 
     @property
     def feature_range(self):
@@ -146,9 +157,6 @@ class CNormalizerMinMax(CNormalizerLinear):
             raise TypeError("feature range must be a tuple of 2 scalars.")
         else:
             self._feature_range = feature_range
-            # Resetting parameters associated with feature range
-            self._n = self.feature_range[1] - self.feature_range[0]
-            self._v = self.feature_range[0]
 
     def _fit(self, x, y=None):
         """Compute the minimum and maximum to be used for scaling.
@@ -182,8 +190,8 @@ class CNormalizerMinMax(CNormalizerLinear):
         CArray([2. 1. 2.])
 
         """
-        self._data_min = x.min(axis=0, keepdims=False)
-        self._data_max = x.max(axis=0, keepdims=False)
+        self._min = x.min(axis=0, keepdims=False)
+        self._max = x.max(axis=0, keepdims=False)
 
         # Setting the linear normalization properties
         # y = m * x + q

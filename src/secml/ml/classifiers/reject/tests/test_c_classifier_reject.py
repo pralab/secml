@@ -1,18 +1,15 @@
 from abc import ABCMeta
-import six
 
 from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml import _NoValue
 from secml.array import CArray
-from secml.figure import CFigure
 from secml.ml.peval.metrics import CMetric
 
 
-class CClassifierRejectTestCases(object):
+class CClassifierRejectTestCases:
 
-    @six.add_metaclass(ABCMeta)
-    class TestCClassifierReject(CClassifierTestCases):
+    class TestCClassifierReject(CClassifierTestCases, metaclass=ABCMeta):
         """Unit test for CClassifierReject"""
 
         def _check_classify_scores(self, l, s, n_samples, n_classes):
@@ -24,7 +21,7 @@ class CClassifierRejectTestCases(object):
             self.assertEqual(1, l.ndim)
             self.assertEqual(2, s.ndim)
             self.assertEqual((n_samples,), l.shape)
-            self.assertEqual((n_samples, n_classes + 1), s.shape)
+            self.assertEqual((n_samples, n_classes), s.shape)
             self.assertEqual(int, l.dtype)
             self.assertEqual(float, s.dtype)
 
@@ -60,7 +57,7 @@ class CClassifierRejectTestCases(object):
             self.logger.info("Real: \n{:}".format(self.dataset.Y))
             self.logger.info("Predicted: \n{:}".format(y_pred))
             self.logger.info(
-                "Predicted \w Reject: \n{:}".format(y_pred_reject))
+                "Predicted with reject: \n{:}".format(y_pred_reject))
 
             acc = CMetric.create('accuracy').performance_score(
                 y_pred, self.dataset.Y)
@@ -69,7 +66,7 @@ class CClassifierRejectTestCases(object):
             rej_acc = CMetric.create('accuracy').performance_score(
                 y_pred_reject[y_pred_reject != -1],
                 self.dataset.Y[y_pred_reject != -1])
-            self.logger.info("Accuracy WITH rejection: {:}".format(rej_acc))
+            self.logger.info("Accuracy with rejection: {:}".format(rej_acc))
 
             # check that the accuracy using reject is higher that the one
             # without rejects

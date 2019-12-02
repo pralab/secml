@@ -6,13 +6,11 @@
 
 """
 from abc import abstractmethod, ABCMeta
-import six
 
 from secml.ml.classifiers import CClassifier
 
 
-@six.add_metaclass(ABCMeta)
-class CClassifierReject(CClassifier):
+class CClassifierReject(CClassifier, metaclass=ABCMeta):
     """Abstract class that defines basic methods for Classifiers with reject.
 
     A classifier assign a label (class) to new patterns using the
@@ -65,3 +63,16 @@ class CClassifierReject(CClassifier):
 
         """
         raise NotImplementedError
+
+    def _check_clf_index(self, y):
+        """Raise error if index y is outside [-1, n_classes) range.
+
+        Parameters
+        ----------
+        y : int
+            class label index.
+
+        """
+        if y < -1 or y >= self.n_classes:
+            raise ValueError(
+                "class label {:} is out of range".format(y))

@@ -5,8 +5,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from __future__ import division
-
 from secml.array import CArray
 from secml import _NoValue
 

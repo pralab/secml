@@ -1,7 +1,7 @@
+import os
+
 from secml.ml.features.normalization import CNormalizerMinMax
 from secml.ml.classifiers.reject import CClassifierRejectThreshold
-import os
-from six.moves import range
 from secml.ml.classifiers import CClassifierSVM
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.array import CArray

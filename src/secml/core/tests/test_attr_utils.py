@@ -8,7 +8,7 @@ class TestAttributeUtilities(CUnitTest):
 
     def test_extract_attr(self):
         # Toy class for testing
-        class Foo(object):
+        class Foo:
             def __init__(self):
                 self.a = 5
                 self._b = 5
@@ -32,20 +32,23 @@ class TestAttributeUtilities(CUnitTest):
         self.logger.info(
             "Testing attributes extraction based on accessibility...")
 
-        # All cases... ugly but works :D
-        self.assertTrue(set(attr for attr in extract_attr(f, 'pub')) == set(['a']))
-        self.assertTrue(set(attr for attr in extract_attr(f, 'r')) == set(['_b']))
-        self.assertTrue(set(attr for attr in extract_attr(f, 'rw')) == set(['_c']))
-        self.assertTrue(set(attr for attr in extract_attr(f, 'pub+r')) == set(['a', '_b']))
-        self.assertTrue(set(attr for attr in extract_attr(f, 'pub+rw')) == set(['a', '_c']))
-        self.assertTrue(set(attr for attr in extract_attr(f, 'pub+pro')) == set(['a', '_d']))
-        self.assertTrue(set(attr for attr in extract_attr(f, 'r+rw')) == set(['_b', '_c']))
-        self.assertTrue(set(attr for attr in extract_attr(f, 'r+pro')) == set(['_b', '_d']))
-        self.assertTrue(set(attr for attr in extract_attr(f, 'rw+pro')) == set(['_c', '_d']))
-        self.assertTrue(set(attr for attr in extract_attr(f, 'pub+r+rw')) == set(['a', '_b', '_c']))
-        self.assertTrue(set(attr for attr in extract_attr(f, 'pub+r+pro')) == set(['a', '_b', '_d']))
-        self.assertTrue(set(attr for attr in extract_attr(f, 'pub+rw+pro')) == set(['a', '_c', '_d']))
-        self.assertTrue(set(attr for attr in extract_attr(f, 'pub+r+rw+pro')) == set(['a', '_b', '_c', '_d']))
+        def check_attrs(code, expected):
+            self.assertTrue(
+                set(attr for attr in extract_attr(f, code)) == expected)
+
+        check_attrs('pub', {'a'})
+        check_attrs('r', {'_b'})
+        check_attrs('rw', {'_c'})
+        check_attrs('pub+r', {'a', '_b'})
+        check_attrs('pub+rw', {'a', '_c'})
+        check_attrs('pub+pro', {'a', '_d'})
+        check_attrs('r+rw', {'_b', '_c'})
+        check_attrs('r+pro', {'_b', '_d'})
+        check_attrs('rw+pro', {'_c', '_d'})
+        check_attrs('pub+r+rw', {'a', '_b', '_c'})
+        check_attrs('pub+r+pro', {'a', '_b', '_d'})
+        check_attrs('pub+rw+pro', {'a', '_c', '_d'})
+        check_attrs('pub+r+rw+pro', {'a', '_b', '_c', '_d'})
 
 
 if __name__ == '__main__':

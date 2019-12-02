@@ -1,6 +1,4 @@
 import os
-from collections import OrderedDict
-
 from secml.array import CArray
 from secml.testing import CUnitTest
 
@@ -14,51 +12,7 @@ else:
     from torch import nn, optim
     from torchvision import transforms
 
-from secml.data.loader import CDLRandom, CDataLoaderMNIST
-from secml.data.splitter import CTrainTestSplit
-from secml.ml.classifiers import CClassifierPyTorch
-from secml.ml.features import CNormalizerMinMax
 from secml.ml.peval.metrics import CMetric
-
-
-class Net(nn.Module):
-    """
-    Model with input size (-1, 5) for blobs dataset
-    with 5 features
-    """
-
-    def __init__(self, n_features, n_classes):
-        """Example network."""
-        super(Net, self).__init__()
-        self.fc1 = nn.Linear(n_features, 10)
-        self.fc2 = nn.Linear(10, n_classes)
-
-    def forward(self, x):
-        x = torch.relu(self.fc1(x))
-        x = self.fc2(x)
-        return x
-
-
-class Flatten(nn.Module):
-    def forward(self, input):
-        return input.view(input.size(0), -1)
-
-
-od = OrderedDict([
-    ('conv1', nn.Conv2d(1, 10, kernel_size=5)),
-    ('pool1', nn.MaxPool2d(2)),
-    ('conv2', nn.Conv2d(10, 20, kernel_size=5)),
-    ('drop', nn.Dropout2d()),
-    ('pool2', nn.MaxPool2d(2)),
-    ('flatten', Flatten()),
-    ('fc1', nn.Linear(320, 50)),
-    ('relu', nn.ReLU()),
-    ('fc2', nn.Linear(50, 3)),
-])
-
-mnist_net_od = nn.Sequential(OrderedDict(od))
-
-mnist_net = mnist_net_od
 
 
 class TestCClassifierPyTorch(CUnitTest):
@@ -67,94 +21,9 @@ class TestCClassifierPyTorch(CUnitTest):
     def setUp(self):
         self.n_classes = 3
         self.n_features = 5
-        self.n_samples_tr = 1000  # number of training set samples
-        self.n_samples_ts = 500  # number of testing set samples
+        self.n_samples_tr = 500  # number of training set samples
+        self.n_samples_ts = 100  # number of testing set samples
         self.batch_size = 20
-
-    def _dataset_creation_blobs(self):
-        # generate synthetic data
-        dataset = CDLRandom(n_samples=self.n_samples_tr + self.n_samples_ts,
-                            n_classes=self.n_classes,
-                            n_features=self.n_features, n_redundant=0,
-                            n_clusters_per_class=1,
-                            class_sep=1, random_state=0).load()
-
-        # Split in training and test
-        splitter = CTrainTestSplit(train_size=self.n_samples_tr,
-                                   test_size=self.n_samples_ts,
-                                   random_state=0)
-        self.tr, self.ts = splitter.split(dataset)
-
-        # Normalize the data
-        nmz = CNormalizerMinMax()
-        self.tr.X = nmz.fit_transform(self.tr.X)
-        self.ts.X = nmz.transform(self.ts.X)
-
-    def _dataset_creation_mnist(self):
-        digits = (1, 5, 9)
-        dataset = CDataLoaderMNIST().load('training', digits=digits)
-
-        # Split in training and test
-        splitter = CTrainTestSplit(train_size=self.n_samples_tr,
-                                   test_size=self.n_samples_ts,
-                                   random_state=0)
-        self.tr, self.ts = splitter.split(dataset)
-
-        # Normalize the data
-        self.tr.X /= 255
-        self.ts.X /= 255
-
-    def _dataset_creation_resnet(self):
-        dataset = CDLRandom(n_samples=10, n_features=3 * 224 * 224).load()
-
-        # Split in training and test
-        splitter = CTrainTestSplit(train_size=8,
-                                   test_size=2,
-                                   random_state=0)
-        self.tr, self.ts = splitter.split(dataset)
-
-        # Normalize the data
-        nmz = CNormalizerMinMax()
-        self.tr.X = nmz.fit_transform(self.tr.X)
-        self.ts.X = nmz.transform(self.ts.X)
-
-    def _model_creation_blobs(self):
-        net = Net(n_features=self.n_features, n_classes=self.n_classes)
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(net.parameters(),
-                              lr=0.1, momentum=0.9)
-
-        self.clf = CClassifierPyTorch(model=net,
-                                      loss=criterion,
-                                      optimizer=optimizer,
-                                      epochs=10,
-                                      batch_size=self.batch_size)
-
-    def _model_creation_mnist(self):
-        net = mnist_net
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(net.parameters(),
-                              lr=0.001, momentum=0.9)
-
-        self.clf = CClassifierPyTorch(model=net,
-                                      loss=criterion,
-                                      optimizer=optimizer,
-                                      epochs=10,
-                                      batch_size=self.batch_size,
-                                      input_shape=(1, 28, 28))
-
-    def _model_creation_resnet(self):
-        net = torchvision.models.resnet18(pretrained=False)
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(net.parameters(),
-                              lr=0.001, momentum=0.9)
-
-        self.clf = CClassifierPyTorch(model=net,
-                                      loss=criterion,
-                                      optimizer=optimizer,
-                                      epochs=10,
-                                      batch_size=self.batch_size,
-                                      input_shape=(3, 224, 224))
 
     def _test_get_params(self):
         self.logger.info("Testing get params")
@@ -202,13 +71,14 @@ class TestCClassifierPyTorch(CUnitTest):
         for layer in layer_names:
             self.logger.info("Returning gradient for layer: {:}".format(layer))
             print(layer)
-            if layer is not None:
-                shape = self.clf.get_layer_output(x, layer).shape
-                w_in = CArray.zeros(shape=(shape))
-                w_in[1] = 1
-                grad = self.clf.grad_f_x(x, w=w_in, layer=layer)
-            else:
-                grad = self.clf.grad_f_x(x, y=1, layer=layer)
+
+            # construct w
+            shape = self.clf.get_layer_output(x, layer).shape
+            w_in = CArray.zeros(shape=(shape))
+            w_in[1] = 1
+
+            # call grad
+            grad = self.clf.get_layer_gradient(x, w=w_in, layer=layer)
 
             self.logger.debug("Output of grad_f_x: {:}".format(grad))
 
@@ -228,20 +98,17 @@ class TestCClassifierPyTorch(CUnitTest):
 
         layer = layer_name
         self.logger.info("Returning output for layer: {:}".format(layer))
-        out = self.clf.get_layer_output(x, layer_names=layer)
-        if isinstance(out, dict):
-            out = {k: v[:10] for (k, v) in out.items()}
-        else:
-            out = out[:10]
+        out = self.clf.get_layer_output(x, layer=layer)
+        out = out[:10]
         self.logger.debug("Output of get_layer_output: {:}".format(out))
 
         if layer is None:
             self.assertTrue(
-                (self.clf.get_layer_output(x, layer_names=layer) -
+                (self.clf.get_layer_output(x, layer=layer) -
                  self.clf.decision_function(x)).sum() == 0)
             last_layer_name = self.clf.layer_names[-1]
             self.assertTrue(
-                (self.clf.get_layer_output(x, layer_names=last_layer_name) -
+                (self.clf.get_layer_output(x, layer=last_layer_name) -
                  self.clf.decision_function(x)).sum() == 0)
 
     def _test_layer_names(self):
@@ -300,61 +167,14 @@ class TestCClassifierPyTorch(CUnitTest):
         self.clf.load_model(fname)
         self.logger.info("Testing restored model")
         # test that predict works even if no loss and optimizer have been defined
+        loss_backup = self.clf._loss
+        optimizer_backup = self.clf._optimizer
         self.clf._loss = None
         self.clf._optimizer = None
         self._test_performance()
+        self.clf._loss = loss_backup
+        self.clf._optimizer = optimizer_backup
         os.remove(fname)
-
-    def test_blobs(self):
-        self.logger.info("___________________")
-        self.logger.info("Testing Blobs Model")
-        self.logger.info("___________________")
-        self._dataset_creation_blobs()
-        self._model_creation_blobs()
-        self._test_layer_names()
-        self._test_layer_shapes()
-        self._test_get_params()
-        self.clf.fit(self.tr)
-        self._test_set_params()
-        self._test_performance()
-        self._test_predict()
-        self._test_out_at_layer(layer_name="fc1")
-        self._test_grad_x(layer_names=["fc1", 'fc2', None])
-        self._test_softmax_outputs()
-        self._test_save_load(self._model_creation_blobs)
-
-    def test_mnist(self):
-        self.logger.info("___________________")
-        self.logger.info("Testing MNIST Model")
-        self.logger.info("___________________")
-        self._dataset_creation_mnist()
-        self._model_creation_mnist()
-        self._test_layer_names()
-        self._test_layer_shapes()
-        self._test_get_params()
-        self.clf.fit(self.tr)
-        self._test_performance()
-        self._test_predict()
-        self._test_out_at_layer(layer_name="fc1")
-        self._test_grad_x(layer_names=['conv1', 'fc1', 'fc2', None])
-        self._test_softmax_outputs()
-        self._test_save_load(self._model_creation_mnist)
-
-    def test_big_net(self):
-        self.logger.info("___________________")
-        self.logger.info("Testing ResNet11 Model")
-        self.logger.info("___________________")
-        self._dataset_creation_resnet()
-        self._model_creation_resnet()
-        self._test_layer_names()
-        self._test_layer_shapes()
-        self._test_get_params()
-        self._test_out_at_layer("layer4:1:relu")
-        self._test_out_at_layer(['bn1', 'fc'])
-        self._test_out_at_layer(None)
-        self._test_grad_x(['fc', None])
-        self._test_softmax_outputs()
-        self._test_save_load(self._model_creation_resnet)
 
 
 if __name__ == '__main__':

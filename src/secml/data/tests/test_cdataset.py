@@ -1,7 +1,5 @@
 from secml.testing import CUnitTest
 
-from six.moves import zip
-
 from secml.array import CArray
 from secml.data import CDataset, CDatasetHeader
 

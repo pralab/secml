@@ -38,6 +38,21 @@ resource_rules:
 
   merge_requests:
     rules:
+      - name: RemoveNeedReviewAfterClosingMerging
+        conditions:
+          date:
+            attribute: updated_at
+            condition: older_than
+            interval_type: days
+            interval: 1
+          ruby: milestone.state == "closed" || milestone.state == "merged"
+          labels:
+            - needs review
+        limits:
+          oldest: 50
+        actions:
+          remove_labels:
+            - needs review
       - name: RemovePriorityAfterClosing
         conditions:
           date:

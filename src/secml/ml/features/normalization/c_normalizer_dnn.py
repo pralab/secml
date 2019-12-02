@@ -8,7 +8,6 @@
 """
 from secml import _NoValue
 from secml.array import CArray
-from secml.ml.classifiers.gradients import CClassifierGradientDNNMixin
 from secml.ml.features.normalization import CNormalizer
 from secml.core.exceptions import NotFittedError
 
@@ -97,7 +96,7 @@ class CNormalizerDNN(CNormalizer):
 
     fit.__doc__ = _fit.__doc__  # Same doc of the protected method
 
-    def _transform(self, x):
+    def _forward(self, x):
         """Apply the transformation algorithm on data.
 
         This extracts the deepfeatures at the specified layer
@@ -115,53 +114,9 @@ class CNormalizerDNN(CNormalizer):
             Shape depends on the neural network layer shape.
 
         """
-        layer_out = self.net.get_layer_output(x, self.out_layer)
-        return layer_out
+        return self.net.get_layer_output(x, self.out_layer)
 
-    def transform(self, x, caching=False):
-        self._check_is_fitted()
-        # The inner preprocessor is managed by the inner DNN
-        return self._transform(x)
-
-    transform.__doc__ = _transform.__doc__  # Same doc of the protected method
-
-    def gradient(self, x, y=None, w=None):
-        """Returns the normalizer gradient wrt data.
-
-        Parameters
-        ----------
-        x : CArray
-            Data array, 2-Dimensional or ravel.
-        y : int or None, optional
-            Index of the class wrt the gradient must be computed.
-            This could be not required if w is passed.
-        w : CArray or None, optional
-            If CArray, will be passed to backward in the net and must have
-            a proper shape depending on the chosen output layer.
-
-        Returns
-        -------
-        gradient : CArray
-            Gradient of the normalizer wrt input data. Vector-like array.
-
-        """
-        if not issubclass(type(self.net), CClassifierGradientDNNMixin):
-            raise NotImplementedError("the DNN wrapper does not implement"
-                                      "gradient")
-        self._check_is_fitted()
-
-        if not x.is_vector_like:
-            raise ValueError('Gradient available only wrt a single point!')
-
-        # For this normalizer we take the net layer output directly
-        # So disable the softmax-scaling option
-        softmax_outputs = self.net.softmax_outputs
-        self.net.softmax_outputs = False
-
-        out_grad = self.net.grad_f_x(
-            x, y=y, w=w, layer=self.out_layer)
-
-        # Restore softmax-scaling option
-        self.net.softmax_outputs = softmax_outputs
-
-        return out_grad.ravel()
+    def _backward(self, w=None):
+        # return the gradient at desired layer
+        return self.net.get_layer_gradient(x=self._cached_x, w=w,
+                                           layer=self.out_layer)

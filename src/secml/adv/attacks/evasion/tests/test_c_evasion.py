@@ -1,9 +1,6 @@
-from __future__ import division
-
 from secml.testing import CUnitTest
+
 from abc import ABCMeta, abstractmethod
-import six
-from six.moves import range
 
 from numpy import *
 import time
@@ -19,11 +16,10 @@ from secml.optim.constraints import \
     CConstraintBox, CConstraintL1, CConstraintL2
 
 
-class CEvasionTestCases(object):
+class CEvasionTestCases:
     """Wrapper for TestCEvasion to make unittest.main() work correctly."""
 
-    @six.add_metaclass(ABCMeta)
-    class TestCEvasion(CUnitTest):
+    class TestCEvasion(CUnitTest, metaclass=ABCMeta):
         """Unit test for CEvasion."""
 
         @abstractmethod

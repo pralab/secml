@@ -5,7 +5,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-import six
 import numpy as np
 from scipy.sparse import issparse
 
@@ -21,8 +20,7 @@ def is_bool(x):
 
 
 def is_int(x):
-    # TODO: REMOVE integer_types AFTER TRANSITIONING TO PY3
-    if isinstance(x, six.integer_types) and not isinstance(x, bool):  # bool is a subclass of int
+    if isinstance(x, int) and not isinstance(x, bool):  # bool is a subclass of int
         return True
     elif isinstance(x, np.integer):
         return True
@@ -271,9 +269,8 @@ def is_slice(x):
     return isinstance(x, slice)
 
 
-def is_str(x):  # text unicode strings (unicode AND bytes in Py2)
-    # TODO: REMOVE string_types AFTER TRANSITIONING TO PY3
-    if isinstance(x, six.string_types):
+def is_str(x):  # text unicode strings
+    if isinstance(x, str):
         return True
     elif isinstance(x, (np.str_, np.unicode_)):
         return True

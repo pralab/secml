@@ -20,6 +20,7 @@ class TestCKernelChebyshevDistance(CCKernelTestCases):
         self._test_gradient()
         self._test_gradient_sparse()
         self._test_gradient_multiple_points()
+        self._test_gradient_multiple_points_sparse()
 
 
 if __name__ == '__main__':

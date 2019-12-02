@@ -7,7 +7,6 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
 from functools import partial
 
 from secml.core import CCreator
@@ -15,8 +14,7 @@ from secml.optim.function import CFunction
 from secml.optim.constraints import CConstraint, CConstraintBox
 
 
-@six.add_metaclass(ABCMeta)
-class COptimizer(CCreator):
+class COptimizer(CCreator, metaclass=ABCMeta):
     """Interface for optimizers.
 
     Implements:

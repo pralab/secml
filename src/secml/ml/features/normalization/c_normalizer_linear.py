@@ -5,8 +5,9 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from abc import abstractproperty
+from abc import abstractmethod
 
+from secml.core.decorators import deprecated
 from secml.array import CArray
 from secml.ml.features.normalization import CNormalizer
 from secml.utils.mixed_utils import check_is_fitted
@@ -33,17 +34,21 @@ class CNormalizerLinear(CNormalizer):
     normalization of flat vectors, transpose array first.
 
     """
+
+    @deprecated('0.11')
     def is_linear(self):
         """Returns True for linear normalizers."""
         return True
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def w(self):
         """Returns the step of the linear normalizer."""
         # w must be a CArray
         raise NotImplementedError("Linear normalizer should define the slope.")
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def b(self):
         """Returns the bias of the linear normalizer."""
         # b must be a CArray
@@ -60,7 +65,7 @@ class CNormalizerLinear(CNormalizer):
         """
         check_is_fitted(self, ['w', 'b'])
 
-    def _transform(self, x):
+    def _forward(self, x):
         """Linearly scales features.
 
         Parameters

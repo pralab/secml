@@ -7,13 +7,11 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
 
 from secml.core import CCreator
 
 
-@six.add_metaclass(ABCMeta)
-class CExplainer(CCreator):
+class CExplainer(CCreator, metaclass=ABCMeta):
     """Abstract interface for Explainable ML methods.
 
     Parameters

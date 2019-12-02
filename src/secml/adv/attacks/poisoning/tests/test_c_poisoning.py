@@ -1,5 +1,4 @@
 from abc import ABCMeta
-import six
 
 from secml.testing import CUnitTest
 from secml.data.loader import CDLRandomBlobs
@@ -16,10 +15,9 @@ from secml.optim.constraints import CConstraintBox
 from secml.optim.function import CFunction
 
 
-class CPoisoningTestCases(object):
+class CPoisoningTestCases:
 
-    @six.add_metaclass(ABCMeta)
-    class TestCPoisoning(CUnitTest):
+    class TestCPoisoning(CUnitTest, metaclass=ABCMeta):
         """Unit test for CAttackPoisoning."""
 
         def _dataset_creation(self):
@@ -67,7 +65,7 @@ class CPoisoningTestCases(object):
 
                 self.classifier = CClassifierLogistic(C=100,
                                                       preprocess=None,
-                                                      random_seed=self.seed)
+                                                      random_state=self.seed)
 
                 self.pois_class = CAttackPoisoningLogisticRegression
 

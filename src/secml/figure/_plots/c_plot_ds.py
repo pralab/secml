@@ -6,8 +6,6 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from six.moves import range
-
 from matplotlib import cm
 
 from secml.figure._plots import CPlot

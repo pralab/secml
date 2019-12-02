@@ -10,15 +10,15 @@ from inspect import isclass, getmembers
 from functools import wraps
 
 from secml.settings import SECML_STORE_LOGS, SECML_LOGS_PATH
-from secml.core.attr_utils import is_public, extract_attr, \
-    as_public, get_private
+from secml.core.attr_utils import is_writable, is_readable, \
+    extract_attr, as_public, has_protected, as_protected, get_private
 from secml.core.type_utils import is_str
 import secml.utils.pickle_utils as pck
 from secml.utils.list_utils import find_duplicates
 from secml.utils import CLog, SubLevelsDict
 
 
-class CCreator(object):
+class CCreator:
     """The magnificent global superclass.
 
     Attributes
@@ -309,18 +309,19 @@ class CCreator(object):
             self.set(param_name, params_dict[param_name], copy)
 
     def set(self, param_name, param_value, copy=False):
-        """Set a parameter that has a specific name to a specific value.
+        """Set a parameter of the class.
 
-        Only parameters, i.e. PUBLIC or READ/WRITE attributes, can be set.
+        Only writable attributes of the class,
+        i.e. PUBLIC or READ/WRITE, can be set.
 
         The following checks are performed before setting:
-         - if parameter is an attribute of current class, set directly;
+         - if `param_name` is an attribute of current class, set directly;
          - else, iterate over __dict__ and look for a class attribute
             having the desired parameter as an attribute;
          - else, if attribute is not found on the 2nd level,
             raise AttributeError.
 
-        If possible, a reference to the parameter to set is assigned.
+        If possible, a reference to the attribute to set is assigned.
         Use `copy=True` to always make a deepcopy before set.
 
         Parameters
@@ -332,7 +333,7 @@ class CCreator(object):
         copy : bool
             By default (False) a reference to the parameter to
             assign is set. If True or a reference cannot be
-            extracted, a deepcopy of the parameter is done first.
+            extracted, a deepcopy of the parameter value is done first.
 
         """
         def copy_attr(attr_tocopy):
@@ -342,42 +343,133 @@ class CCreator(object):
         # Support for recursive setting, e.g. -> kernel.gamma
         param_name = param_name.split('.')
 
-        # Parameters settable in this function must be public.
-        # READ/WRITE accessibility is then checked by the setter...
-        if not is_public(self, param_name[0]):
+        # Attributes to set in this function must be writable
+        # PUBLIC and READ/WRITE accessibility is checked
+        if not is_writable(self, param_name[0]):
             raise AttributeError(
-                "can't set `{:}`, must be public.".format(param_name[0]))
+                "can't set `{:}`, must be writable.".format(param_name[0]))
 
-        if hasattr(self, param_name[0]):
+        attr0 = param_name[0]
+        if hasattr(self, attr0):
             # 1 level set or multiple sublevels set?
-            if len(param_name) == 1:  # Set parameter directly
-                setattr(self, param_name[0], copy_attr(
-                    param_value) if copy is True else param_value)
+            if len(param_name) == 1:  # Set attribute directly
+                setattr(self, attr0, copy_attr(param_value)
+                        if copy is True else param_value)
                 return
             else:  # Start recursion on sublevels
                 sub_param_name = '.'.join(param_name[1:])
                 # Calling `.set` method of the next sublevel
-                getattr(self, param_name[0]).set(
-                    sub_param_name, param_value, copy)
+                getattr(self, attr0).set(sub_param_name, param_value, copy)
                 return
 
         # OLD STYLE SET: recursion on 2 levels only to set a subattribute
         # The first subattribute found is set...
         else:
-            # Look for parameter inside all class attributes
+            # Look for the attribute inside all class attributes
             for attr_name in self.__dict__:
                 # Extract the current attribute
                 attr = getattr(self, attr_name)
                 # If parameter is an attribute of current attribute set it
-                if hasattr(attr, param_name[0]):
-                    setattr(attr, param_name[0], copy_attr(
-                        param_value) if copy is True else param_value)
+                if hasattr(attr, attr0):
+                    setattr(attr, attr0, copy_attr(param_value)
+                            if copy is True else param_value)
                     return
 
-        # If we haven't found desired parameter anywhere, raise AttributeError
-        raise AttributeError("'{:}', or any of its attributes, has "
-                             "parameter '{:}'".format(
-                                 self.__class__.__name__, param_name))
+        # Attribute not found, raise AttributeError
+        raise AttributeError(
+            "'{:}', or any of its attributes, has attribute '{:}'"
+            "".format(self.__class__.__name__, attr0))
+
+    def get_state(self):
+        """Returns the object state dictionary.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the state of the object.
+
+        """
+        # We extract the PUBLIC (pub), READ/WRITE (rw) and READ ONLY (r)
+        # attributes from the class dictionary, than we build a new dictionary
+        # using as keys the attributes names without the accessibility prefix
+        state = dict((as_public(k), getattr(self, as_public(k)))
+                     for k in extract_attr(self, 'pub+rw+r'))
+
+        # Get the state of the deeper objects
+        # Use list(state) as state size will change during iteration
+        for attr in list(state):
+            if isinstance(state[attr], CCreator):
+                state_deep = state[attr].get_state()
+                # Replace `attr` with its attributes's state
+                for attr_deep in state_deep:
+                    attr_full_key = attr + '.' + attr_deep
+                    state[attr_full_key] = state_deep[attr_deep]
+                del state[attr]
+
+        return dict(state)
+
+    def set_state(self, state_dict, copy=False):
+        """Sets the object state using input dictionary.
+
+        Only readable attributes of the class,
+        i.e. PUBLIC or READ/WRITE or READ ONLY, can be set.
+
+        If possible, a reference to the attribute to set is assigned.
+        Use `copy=True` to always make a deepcopy before set.
+
+        Parameters
+        ----------
+        state_dict : dict
+            Dictionary containing the state of the object.
+        copy : bool, optional
+            By default (False) a reference to the attribute to
+            assign is set. If True or a reference cannot be
+            extracted, a deepcopy of the attribute is done first.
+
+        """
+        def copy_attr(attr_tocopy):
+            from copy import deepcopy
+            return deepcopy(attr_tocopy)
+
+        for param_name in state_dict:
+
+            # Extract the value of the attribute to set
+            param_value = state_dict[param_name]
+
+            # Support for recursive setting, e.g. -> kernel.gamma
+            param_name = param_name.split('.', 1)
+
+            # Attributes to set in this function must be readable
+            # PUBLIC, READ/WRITE and READ ONLY accessibility is checked
+            if not is_readable(self, param_name[0]):
+                raise AttributeError(
+                    "can't set `{:}`, must be readable.".format(param_name[0]))
+
+            attr0 = param_name[0]
+            if hasattr(self, attr0):
+                # 1 level set or multiple sublevels set?
+                if len(param_name) == 1:  # Set attribute directly
+                    # If writable (public or property with setter)
+                    if is_writable(self, attr0):  # Use main `.set`
+                        self.set(attr0, param_value, copy=copy)
+                        continue  # Attribute set, go to next one
+                    else:  # Maybe is read-only (property with only getter)?
+                        # If exists, set the protected attribute
+                        if has_protected(self, attr0):
+                            attr0 = as_protected(attr0)
+                        setattr(self, attr0, copy_attr(param_value)
+                                if copy is True else param_value)
+                        continue  # Attribute set, go to next one
+                else:  # Start recursion on sublevels
+                    # Call `.set_state` for the next level of current attribute
+                    getattr(self, attr0).set_state(
+                        {param_name[1]: param_value}, copy)
+                    continue  # Attribute set, go to next one
+
+            # Attribute not found, raise AttributeError
+            raise AttributeError(
+                "'{:}', or any of its attributes, has attribute '{:}'"
+                "".format(self.__class__.__name__, attr0))
 
     def copy(self):
         """Returns a shallow copy of current class.
@@ -422,12 +514,11 @@ class CCreator(object):
         return new_obj
 
     def save(self, path):
-        """Save class object using pickle.
+        """Save class object to file.
 
-        Store the current class instance to disk, preserving
-        the state of each attribute.
+        This function stores an object to file (with pickle).
 
-        `.load()` can be used to restore the instance later.
+        `.load()` can be used to restore the object later.
 
         Parameters
         ----------
@@ -444,10 +535,9 @@ class CCreator(object):
 
     @classmethod
     def load(cls, path):
-        """Loads class from pickle object.
+        """Loads object from file.
 
-        This function loads any object stored with pickle
-        or cPickle and any output of `.save()`.
+        This function loads an object from file (with pickle).
 
         The object can be correctly loaded in the following cases:
          - loaded and calling class have the same type.
@@ -470,6 +560,42 @@ class CCreator(object):
             if has_super(loaded_obj):
                 err_str += ", '{:}'".format(loaded_obj.__super__)
             raise TypeError(err_str + " or 'CCreator'.")
+
+    def save_state(self, path):
+        """Store the object state to file.
+
+        Parameters
+        ----------
+        path : str
+            Path of the file where to store object state.
+
+        Returns
+        -------
+        str
+            The full path of the stored object.
+
+        See Also
+        --------
+        get_state : Returns the object state dictionary.
+
+        """
+        return pck.save(path, self.get_state())
+
+    def load_state(self, path):
+        """Sets the object state from file.
+
+        Parameters
+        ----------
+        path : str
+            The full path of the file from which to load the object state.
+
+        See Also
+        --------
+        set_state : Sets the object state using input dictionary.
+
+        """
+        # Copy not needed for objects loaded from disk
+        self.set_state(pck.load(path), copy=False)
 
     def __repr__(self):
         """Defines print behaviour."""

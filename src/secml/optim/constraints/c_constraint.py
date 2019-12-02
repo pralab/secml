@@ -7,15 +7,12 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
-from six.moves import range
 
 from secml.core import CCreator
 from secml.array import CArray
 
 
-@six.add_metaclass(ABCMeta)
-class CConstraint(CCreator):
+class CConstraint(CCreator, metaclass=ABCMeta):
     """Interface for equality/inequality constraints."""
     __super__ = 'CConstraint'
 

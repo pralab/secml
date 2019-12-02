@@ -7,13 +7,11 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
 
 from secml.core import CCreator
 
 
-@six.add_metaclass(ABCMeta)
-class CRegularizer(CCreator):
+class CRegularizer(CCreator, metaclass=ABCMeta):
     """Abstract class that defines basic methods for regularizer functions."""
     __super__ = 'CRegularizer'
 

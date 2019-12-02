@@ -6,12 +6,10 @@
 
 """
 from abc import ABCMeta
-import six
 
 from secml.ml.features import CPreProcess
 
 
-@six.add_metaclass(ABCMeta)
-class CReducer(CPreProcess):
+class CReducer(CPreProcess, metaclass=ABCMeta):
     """Interface for feature dimensionality reduction algorithms."""
     __super__ = 'CReducer'

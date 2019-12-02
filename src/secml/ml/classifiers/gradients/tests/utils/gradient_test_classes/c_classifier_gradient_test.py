@@ -5,21 +5,20 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from abc import ABCMeta, abstractmethod, abstractproperty
-import six
+from abc import ABCMeta, abstractmethod
 
 from secml.core import CCreator
 
 
-@six.add_metaclass(ABCMeta)
-class CClassifierGradientTest(CCreator):
+class CClassifierGradientTest(CCreator, metaclass=ABCMeta):
     """
     This class implement different functionalities which are useful to test
     the CClassifierGradient class.
     """
     __super__ = 'CClassifierGradientTest'
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def params(self):
         """
         Classifier parameters
