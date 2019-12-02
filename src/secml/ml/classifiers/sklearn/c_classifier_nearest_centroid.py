@@ -49,7 +49,7 @@ class CClassifierNearestCentroid(CClassifierSkLearn):
     def centroids(self):
         return CArray(self._sklearn_model.centroids_)
 
-    def _decision_function(self, x, y=None):
+    def _forward(self, x):
         """ This sklearn classifier only supports predict.
         So we also implement a simple decision function
         based on pairwise distances.
@@ -58,9 +58,6 @@ class CClassifierNearestCentroid(CClassifierSkLearn):
         ----------
         x : CArray
             Input sample(s) after preprocessing
-        y : {0, 1, ..., K-1} or None
-            Class label of the output decision function.
-            None returns all outputs.
 
         Returns
         -------
@@ -73,4 +70,4 @@ class CClassifierNearestCentroid(CClassifierSkLearn):
             x.get_data(), self._sklearn_model.centroids_,
             metric=self._sklearn_model.metric)).atleast_2d()
 
-        return -dist if y is None else -dist[:, y].ravel()
+        return -dist

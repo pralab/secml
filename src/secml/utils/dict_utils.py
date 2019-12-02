@@ -5,12 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-try:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-    from collections.abc import MutableMapping
-except ImportError:
-    from collections import MutableMapping
-
-from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
+from collections.abc import MutableMapping
 
 __all__ = ['load_dict', 'merge_dicts', 'invert_dict',
            'LastInDict', 'SubLevelsDict']
@@ -190,7 +185,7 @@ class SubLevelsDict(MutableMapping):
     --------
     >>> from secml.utils import SubLevelsDict
 
-    >>> class Foo(object):
+    >>> class Foo:
     ...     attr2 = 5
 
     >>> li = SubLevelsDict({'attr1': Foo()})

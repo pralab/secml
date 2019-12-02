@@ -5,11 +5,9 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from __future__ import division
 import sys
 import requests
 import hashlib
-from io import open  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
 
 from secml.utils import fm
 

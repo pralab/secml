@@ -3,11 +3,12 @@
 .. toctree::
    :hidden:
    :caption: User Guide
-   :titlesonly:
+   :maxdepth: 2
    :numbered:
-   :glob:
 
-   tutorials/*
+   tutorials.ml
+   tutorials.adv
+   tutorials/10-Explanation
 
 .. toctree::
    :hidden:

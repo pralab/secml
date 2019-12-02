@@ -9,7 +9,7 @@
 __all__ = ['AverageMeter', 'OrderedFlexibleClass', 'check_is_fitted']
 
 
-class AverageMeter(object):
+class AverageMeter:
     """Computes and stores the average and current value.
 
     Attributes
@@ -53,7 +53,7 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-class OrderedFlexibleClass(object):
+class OrderedFlexibleClass:
     """A flexible class exposing its attributes in a specific order when iterated.
 
     Order of the attributes inside the class follows the inputs sequence.

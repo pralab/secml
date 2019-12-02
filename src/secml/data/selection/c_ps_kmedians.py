@@ -5,8 +5,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from six.moves import range
-
 from secml.data.selection import CPrototypesSelector
 from secml.array import CArray
 from secml.ml.kernel import CKernelEuclidean

@@ -24,6 +24,11 @@ class CClassifierSkLearn(CClassifier):
             # FIXME: how to obtain this from pretrained models?
             self._n_features = 0
 
+    @property
+    def sklearn_model(self):
+        """Wrapped SkLearn classifier."""
+        return self._sklearn_model
+
     def get_params(self):
         """Returns the dictionary of class and SkLearn model parameters.
 
@@ -69,7 +74,7 @@ class CClassifierSkLearn(CClassifier):
         """Fit sklearn model."""
         self._sklearn_model.fit(dataset.X.get_data(), dataset.Y.get_data())
 
-    def _decision_function(self, x, y=None):
+    def _forward(self, x):
         """Implementation of decision function."""
 
         if hasattr(self._sklearn_model, "decision_function"):
@@ -97,4 +102,4 @@ class CClassifierSkLearn(CClassifier):
 
         scores.atleast_2d()
 
-        return scores[:, y].ravel() if y is not None else scores
+        return scores

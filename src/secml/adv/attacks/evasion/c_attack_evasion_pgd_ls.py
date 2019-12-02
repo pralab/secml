@@ -7,8 +7,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from six.moves import range
-
 from secml.adv.attacks import CAttack
 from secml.adv.attacks.evasion import CAttackEvasion
 from secml.optim.optimizers import COptimizer

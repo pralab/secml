@@ -34,7 +34,7 @@ class CClassifierKNN(CClassifierSkLearn):
                  metric='minkowski', metric_params=None,
                  preprocess=None):
 
-        self._tr_dataset = None
+        self._tr = None
 
         knn = neighbors.KNeighborsClassifier(
             n_neighbors=n_neighbors, weights=weights, algorithm=algorithm, p=p,
@@ -43,13 +43,18 @@ class CClassifierKNN(CClassifierSkLearn):
         CClassifierSkLearn.__init__(self, sklearn_model=knn,
                                     preprocess=preprocess)
 
+    @property
+    def tr(self):
+        """Training set."""
+        return self._tr
+
     def _fit(self, dataset):
         """Trains the KNeighbors classifier.
 
         Training dataset is stored to use in kneighbors() method.
 
         """
-        self._tr_dataset = dataset  # TODO: do we need this?
+        self._tr = dataset
         return CClassifierSkLearn._fit(self, dataset)
 
     def kneighbors(self, x, num_samples=None):
@@ -80,4 +85,4 @@ class CClassifierKNN(CClassifierSkLearn):
 
         index_point = CArray(index_point, dtype=int).ravel()
 
-        return CArray(dist), index_point, self._tr_dataset.X[index_point, :]
+        return CArray(dist), index_point, self._tr.X[index_point, :]

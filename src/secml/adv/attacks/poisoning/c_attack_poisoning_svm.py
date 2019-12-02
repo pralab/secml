@@ -113,7 +113,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
 
         # enforce storing dual variables in SVM
         if not self._surrogate_classifier.store_dual_vars and \
-                self._surrogate_classifier.is_linear():
+                self._surrogate_classifier.is_kernel_linear():
             raise ValueError(
                 "please retrain the classifier with `store_dual_vars=True`")
 

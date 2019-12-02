@@ -7,9 +7,8 @@
 
 """
 from multiprocessing import Lock
-from six.moves import range
-import six
-from abc import ABCMeta, abstractproperty
+
+from abc import ABCMeta, abstractmethod
 
 from secml.data.loader import CDataLoader
 from secml.data import CDataset
@@ -555,8 +554,7 @@ class CDLRandomBinary(CDataLoader):
         return CDataset(patterns, labels)
 
 
-@six.add_metaclass(ABCMeta)
-class CDLRandomToy(CDataLoader):
+class CDLRandomToy(CDataLoader, metaclass=ABCMeta):
     """Loads a random toy dataset (abstract interface).
 
     Available toy datasets:
@@ -582,7 +580,8 @@ class CDLRandomToy(CDataLoader):
         self.class_list = class_list
         self.zero_one = zero_one
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def toy(self):
         """Identifier of the toy dataset."""
         raise NotImplementedError

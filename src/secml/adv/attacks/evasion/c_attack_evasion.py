@@ -8,16 +8,13 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
-from six.moves import range
 
 from secml.adv.attacks import CAttack
 from secml.array import CArray
 from secml.data import CDataset
 
 
-@six.add_metaclass(ABCMeta)
-class CAttackEvasion(CAttack):
+class CAttackEvasion(CAttack, metaclass=ABCMeta):
     """Interface for Evasion attacks.
 
     Parameters
@@ -73,7 +70,7 @@ class CAttackEvasion(CAttack):
         adv_ds : CDataset
             Dataset of manipulated samples.
         f_obj : float
-            Average value of the objective function computed on each data point.
+            Mean value of the objective function computed on each data point.
 
         """
         x = CArray(x).atleast_2d()

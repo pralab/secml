@@ -1,7 +1,6 @@
 from setuptools import setup, find_packages
 from pkg_resources import parse_version
 import os
-from io import open  # TODO: REMOVE AFTER TRANSITIONING TO PYTHON 3
 import subprocess
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -142,8 +141,6 @@ Intended Audience :: Science/Research
 Intended Audience :: Developers
 License :: OSI Approved
 Programming Language :: Python
-Programming Language :: Python :: 2
-Programming Language :: Python :: 2.7
 Programming Language :: Python :: 3
 Programming Language :: Python :: 3.5
 Programming Language :: Python :: 3.6
@@ -177,13 +174,13 @@ setup(
         "*.tests", "*.tests.*", "tests.*", "tests"]),
     package_dir={'': 'src'},
     include_package_data=True,
-    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
+    python_requires='>=3.5.*, <4',
     install_requires=REQ_PKGS,
     extras_require={
         'pytorch': ["torch>=1.1", "torchvision>=0.2.2"],
         'cleverhans': ["tensorflow>=1.14,<2", "cleverhans"],
         'tf-gpu': ["tensorflow-gpu>=1.14,<2"],
-        'unittests': ['pytest>=4.2,<5.1', 'pytest-cov>=2.6.1']
+        'unittests': ['pytest>=5,<5.1', 'pytest-cov>=2.8', 'jupyter', 'nbval']
     },
     zip_safe=False
 )

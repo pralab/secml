@@ -103,12 +103,22 @@ class CPlot(CCreator):
         return kwargs
 
     def set(self, param_name, param_value, copy=False):
-        raise NotImplementedError("set cannot be used to define plot "
-                                  "parameters. Use specific methods instead.")
+        raise NotImplementedError
 
-    def set_params(self, params_dict, copy=False):
-        raise NotImplementedError("set_params cannot be used to define plot "
-                                  "parameters. Use specific methods instead.")
+    def get_params(self):
+        raise NotImplementedError
+
+    def get_state(self):
+        raise NotImplementedError
+
+    def set_state(self, state_dict, copy=False):
+        raise NotImplementedError
+
+    def load_state(self, path):
+        raise NotImplementedError
+
+    def save_state(self, path):
+        raise NotImplementedError
 
     def get_lines(self):
         """Return a list of lines contained by the subplot."""
@@ -671,7 +681,6 @@ class CPlot(CCreator):
         """
         if 'fontsize' not in kwargs:
             kwargs['fontsize'] = self._params['font.size']
-        kwargs = self._set_lines_params(kwargs)
         return self._sp.clabel(contour, *args, **kwargs)
 
     def colorbar(self, mappable, ticks=None, *args, **kwargs):
@@ -980,7 +989,7 @@ class CPlot(CCreator):
             no effect if bins is a sequence.
             If bins is a sequence or range is specified, autoscaling
             is based on the specified bin range instead of the range of x.
-        normed : boolean, optional
+        density : boolean, optional
             If True, the first element of the return tuple will be
             the counts normalized to form a probability density,
             i.e., n/(len(x)`dbin), i.e., the integral of the histogram
@@ -989,7 +998,7 @@ class CPlot(CCreator):
         weights : (n, ) array_like or None, optional
             An array of weights, of the same shape as x. Each value
             in x only contributes its associated weight towards the
-            bin count (instead of 1). If normed is True, the weights
+            bin count (instead of 1). If density is True, the weights
             are normalized, so that the integral of the density over
             the range remains 1.
         cumulative : boolean, optional
@@ -997,10 +1006,10 @@ class CPlot(CCreator):
             where each bin gives the counts in that bin plus all bins
             for smaller values.
             The last bin gives the total number of datapoints.
-            If normed is also True then the histogram is normalized
+            If density is also True then the histogram is normalized
             such that the last bin equals 1.
             If cumulative evaluates to less than 0 (e.g., -1), the
-            direction of accumulation is reversed. In this case, if normed
+            direction of accumulation is reversed. In this case, if density
             is also True, then the histogram is normalized such that
             the first bin equals 1.
         bottom : array_like, scalar, or None
@@ -1049,7 +1058,7 @@ class CPlot(CCreator):
         Returns
         -------
         n : CArray or list of arrays
-            The values of the histogram bins. See normed and weights
+            The values of the histogram bins. See density and weights
             for a description of the possible semantics.
             If input x is an array, then this is an array of length nbins.
             If input is a sequence arrays [data1, data2,..], then this is
@@ -1499,11 +1508,10 @@ class CPlot(CCreator):
         colors : str
             Changes the tick color and the label color to the same
             value: mpl color spec.
-        bottom, top, left, right : [bool | 'on' | 'off']
-            controls whether to draw the respective ticks.
-        labelbottom, labeltop, labelleft, labelright : bool, str
-            Boolean or ['on' | 'off'], controls whether to draw
-            the respective tick labels.
+        bottom, top, left, right : bool, optional
+            Controls whether to draw the respective ticks.
+        labelbottom, labeltop, labelleft, labelright : bool, optional
+            Controls whether to draw the respective tick labels.
 
         Examples
         --------
