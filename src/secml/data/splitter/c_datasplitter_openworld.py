@@ -5,9 +5,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from __future__ import division
-from six.moves import range
-
 from secml.array import CArray
 from secml.data.splitter import CDataSplitter
 

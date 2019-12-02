@@ -13,12 +13,12 @@ fig.sp.bar(X, Y1, facecolor='#9999ff', edgecolor='white')
 fig.sp.bar(X, -Y2, facecolor='#ff9999', edgecolor='white')
 
 for x, y in zip(X, Y1):
-    fig.sp.text(x + 0.4, y + 0.05, '%.2f' % y, ha='center', va='bottom')
+    fig.sp.text(x, y, '%.2f' % y, ha='center', va='bottom')
 
 for x, y in zip(X, Y2):
-    fig.sp.text(x + 0.4, -y - 0.05, '%.2f' % y, ha='center', va='top')
+    fig.sp.text(x, -y - 0.02, '%.2f' % y, ha='center', va='top')
 
-fig.sp.xlim(-.5, n)
+fig.sp.xlim(-.5, n-.5)
 fig.sp.xticks(())
 fig.sp.ylim(-1.25, 1.25)
 fig.sp.yticks(())

@@ -6,16 +6,16 @@
 
 """
 from abc import ABCMeta
-import six
 
+from secml.core.decorators import deprecated
 from secml.ml.features import CPreProcess
 
 
-@six.add_metaclass(ABCMeta)
-class CNormalizer(CPreProcess):
+class CNormalizer(CPreProcess, metaclass=ABCMeta):
     """Common interface for normalization preprocessing algorithms."""
     __super__ = 'CNormalizer'
 
+    @deprecated('0.11')
     def is_linear(self):
         """Returns True for linear normalizers."""
         return False

@@ -126,6 +126,11 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
         self._class_weight = value
 
     @property
+    def tr(self):
+        """Training set."""
+        return self._tr
+
+    @property
     def n_tr_samples(self):
         """Returns the number of training samples."""
         return self._tr.shape[0] if self._tr is not None else None
@@ -180,8 +185,9 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
         self._b = CArray(ridge.intercept_)[0] if self.fit_intercept else 0
 
     # TODO: this function can be removed when removing kernel support
-    def _decision_function(self, x, y=None):
-        """Computes the distance from the separating hyperplane for each pattern in x.
+    def _forward(self, x):
+        """Computes the distance from the separating hyperplane
+        for each pattern in x.
 
         The scores are computed in kernel space if kernel is defined.
 
@@ -190,9 +196,6 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : {0, 1, None}
-            The label of the class wrt the function should be calculated.
-            If None, return the output for all classes.
 
         Returns
         -------
@@ -206,4 +209,53 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
         k = x if self.is_kernel_linear() else \
             CArray(self.kernel.k(x, self._tr))
         # Scores are given by the linear model
-        return CClassifierLinear._decision_function(self, k, y=y)
+        return CClassifierLinear._forward(self, k)
+
+    def _backward(self, w=None):
+        """Computes the gradient of the linear classifier's decision function
+         wrt decision function input.
+
+        For linear classifiers, the gradient wrt the input x is equal
+        to the weight vector w, regardless of x.
+
+        Parameters
+        ----------
+        x : CArray or None, optional
+            The gradient is computed in the neighborhood of x.
+        y : int, optional
+            Binary index of the class wrt the gradient must be computed.
+            Default is 1, corresponding to the positive class.
+
+        Returns
+        -------
+        gradient : CArray
+            The gradient of the linear classifier's decision function
+            wrt decision function input. Vector-like array.
+
+        """
+        if self.is_kernel_linear():  # Simply return w for a linear Ridge
+            gradient = self.w.ravel()
+        else:
+            gradient = self.kernel.gradient(
+                self._tr, self._cached_x).atleast_2d()
+
+            # Few shape check to ensure broadcasting works correctly
+            if gradient.shape != (self._tr.shape[0], self.n_features):
+                raise ValueError("Gradient shape must be ({:}, {:})".format(
+                    self._cached_x.shape[0], self.n_features))
+
+            w_2d = self.w.atleast_2d()
+            if gradient.issparse is True:  # To ensure the sparse dot is used
+                w_2d = w_2d.tosparse()
+            if w_2d.shape != (1, self._tr.shape[0]):
+                raise ValueError(
+                    "Weight vector shape must be ({:}, {:}) "
+                    "or ravel equivalent".format(1, self._tr.shape[0]))
+
+            gradient = w_2d.dot(gradient)
+
+        # Gradient sign depends on input label (0/1)
+        if w is not None:
+            return w[0] * -gradient + w[1] * gradient
+        else:
+            raise ValueError("w cannot be set as None.")

@@ -5,7 +5,6 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
-from six.moves import range
 import numpy as np
 
 from secml.array import CArray

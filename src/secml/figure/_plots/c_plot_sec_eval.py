@@ -6,8 +6,6 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from six.moves import range
-
 from secml.figure._plots import CPlot
 from secml.ml.peval.metrics import CMetric
 from secml.array import CArray

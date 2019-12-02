@@ -6,7 +6,7 @@
 
 """
 from secml.core import CCreator
-from secml.core.attr_utils import is_public
+from secml.core.attr_utils import is_writable
 from secml.core.type_utils import is_list
 from secml.array import CArray
 
@@ -87,8 +87,8 @@ class CDatasetHeader(CCreator):
 
         super(CDatasetHeader, self).__setattr__(key, value)
 
-        # Make sure that input public attributes are consistent
-        if is_public(self, key):
+        # Make sure that input writable attributes are consistent
+        if is_writable(self, key):
             self._validate_params()
 
     def _validate_params(self):
