@@ -89,6 +89,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     __class_type = 'pytorch-clf'
 
     def __init__(self, model, loss=None, optimizer=None,
+                 optimizer_scheduler = None,
                  input_shape=None,
                  random_state=None, preprocess=None,
                  softmax_outputs=False,
@@ -112,26 +113,12 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                     "Input shape should be specified if the first "
                     "layer is not a `nn.Linear` module.")
 
-        # check softmax redundancy
-        if isinstance(loss, nn.CrossEntropyLoss) and self.check_softmax():
-            raise ValueError("Please remove softmax redundancy. Either "
-                             "use `torch.nn.NLLLoss` or remove softmax "
-                             "layer from the network.")
-
         self._loss = loss
         self._optimizer = optimizer
+        self._optimizer_scheduler = optimizer_scheduler
+        self._softmax_outputs = softmax_outputs
 
-        if self._optimizer is not None:
-            # check softmax redundancy
-            if self.check_softmax() and softmax_outputs:
-                self.logger.warning(
-                    "Softmax layer has been defined in the network. Disabling "
-                    "parameter softmax_outputs.")
-                self._softmax_outputs = False
-            else:
-                self._softmax_outputs = softmax_outputs
-        else:
-            self._softmax_outputs = False
+        self._check_softmax_redundancy()
 
         self._epochs = epochs
         self._batch_size = batch_size
@@ -162,6 +149,12 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         """Returns the loss function used by classifier."""
         return self._loss
 
+    @loss.setter
+    def loss(self, loss):
+        """Sets the loss function to use for training."""
+        self._loss = loss
+        self._check_softmax_redundancy()
+
     @property
     def model(self):
         """Returns the model used by classifier."""
@@ -172,16 +165,55 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         """Returns the optimizer used by classifier."""
         return self._optimizer
 
+    @optimizer.setter
+    def optimizer(self, optimizer):
+        """Sets the optimizer for the DNN."""
+        self._optimizer = optimizer
+        self._check_softmax_redundancy()
+
+    @property
+    def optimizer_scheduler(self):
+        """Returns the optimizer used by classifier."""
+        return self._optimizer_scheduler
+
+    @optimizer_scheduler.setter
+    def optimizer_scheduler(self, optimizer_scheduler):
+        """Sets the scheduler for training the DNN"""
+        self._optimizer_scheduler = optimizer_scheduler
+
+    @property
+    def softmax_outputs(self):
+        """Returns True if the softmax layer in the output
+        is active."""
+        return self._softmax_outputs
+
+    @softmax_outputs.setter
+    def softmax_outputs(self, softmax_outputs):
+        """Sets the activation state of the softmax layer in
+        the network."""
+        self._softmax_outputs = softmax_outputs
+        self._check_softmax_redundancy()
+
     @property
     def epochs(self):
         """Returns the number of epochs for which the model
         will be trained."""
         return self._epochs
 
+    @epochs.setter
+    def epochs(self, epochs):
+        """Sets the number of epochs for training."""
+        self._epochs = epochs
+
     @property
     def batch_size(self):
         """Returns the batch size used for the dataset loader."""
         return self._batch_size
+
+    @batch_size.setter
+    def batch_size(self, batch_size):
+        """Sets the batch size for loading the batches."""
+        self._batch_size = batch_size
 
     @property
     def layers(self):
@@ -213,6 +245,19 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     def trained(self):
         """True if the model has been trained."""
         return self._trained
+
+    def _check_softmax_redundancy(self):
+        # check softmax redundancy
+        if isinstance(self.loss, nn.CrossEntropyLoss) and self.check_softmax():
+            raise ValueError("Please remove softmax redundancy. Either "
+                             "use `torch.nn.NLLLoss` or remove softmax "
+                             "layer from the network.")
+        if self._optimizer is not None:
+            if self.check_softmax() and self._softmax_outputs is True:
+                self.logger.warning(
+                    "Softmax layer has been defined in the network. Disabling "
+                    "parameter softmax_outputs.")
+                self._softmax_outputs = False
 
     def get_layer_shape(self, layer_name):
         return self.layer_shapes[layer_name]
@@ -462,7 +507,11 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 outputs = self._model(inputs)
                 loss = self._loss(outputs, labels)
                 loss.backward()
+                # TODO check pytorch version
+                #  https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
                 self._optimizer.step()
+                if self._optimizer_scheduler is not None:
+                    self._optimizer_scheduler.step()
 
                 # print statistics
                 running_loss += loss.item()
