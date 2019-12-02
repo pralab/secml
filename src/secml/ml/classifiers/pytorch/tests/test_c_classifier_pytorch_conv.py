@@ -61,13 +61,16 @@ class TestCClassifierPyTorchMNIST(TestCClassifierPyTorch):
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(net.parameters(),
                               lr=0.001, momentum=0.9)
+        scheduler = optim.lr_scheduler.MultiStepLR(optimizer=optimizer,
+                                                   milestones=[1, 5, 8], gamma=0.1)
 
         self.clf = CClassifierPyTorch(model=net,
                                       loss=criterion,
                                       optimizer=optimizer,
                                       epochs=10,
                                       batch_size=self.batch_size,
-                                      input_shape=(1, 28, 28))
+                                      input_shape=(1, 28, 28),
+                                      optimizer_scheduler=scheduler)
 
     def test_mnist(self):
         self.logger.info("___________________")

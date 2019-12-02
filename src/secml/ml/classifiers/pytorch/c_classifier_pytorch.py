@@ -507,11 +507,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 outputs = self._model(inputs)
                 loss = self._loss(outputs, labels)
                 loss.backward()
-                # TODO check pytorch version
-                #  https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
                 self._optimizer.step()
-                if self._optimizer_scheduler is not None:
-                    self._optimizer_scheduler.step()
+                # TODO check pytorch version
 
                 # print statistics
                 running_loss += loss.item()
@@ -519,6 +516,11 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                     self.logger.info('[%d, %5d] loss: %.3f' %
                                      (epoch + 1, i + 1, running_loss / 2000))
                     running_loss = 0.0
+
+            #  https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+            print(epoch, self.optimizer.param_groups[0]['lr'])
+            if self._optimizer_scheduler is not None:
+                self._optimizer_scheduler.step()
 
         self._trained = True
         return self._model
@@ -666,11 +668,15 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         """
         state = {
             'model_state': self._model.state_dict(),
-            'optimizer_state': self._optimizer.state_dict(),
-            'optimizer_scheduler_state': self._optimizer_scheduler.state_dict(),
             'n_features': self.n_features,
             'classes': self.classes,
         }
+
+        if self.optimizer is not None:
+            state['optimizer_state'] = self._optimizer.state_dict()
+
+        if self._optimizer_scheduler is not None:
+            state['optimizer_scheduler_state'] = self._optimizer_scheduler.state_dict()
 
         torch.save(state, filename)
 
@@ -693,7 +699,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
         """
         state = torch.load(filename, map_location=self._device)
-        keys = ['model_state', 'optimizer_state', 'n_features', 'classes']
+        keys = ['model_state', 'n_features', 'classes']
         if all(key in state for key in keys):
             if classes is not None:
                 self.logger.warning(
@@ -702,7 +708,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             # model was stored with save_model method
             self._model.load_state_dict(state['model_state'])
             self._optimizer.load_state_dict(state['optimizer_state'])
-            self._optimizer_scheduler.load_state_dict(state['optimizer_scheduler'])
+            if hasattr(state, 'optimizer_scheduler_state') \
+                    and self._optimizer_scheduler is not None:
+                self._optimizer_scheduler.load_state_dict(state['optimizer_scheduler_state'])
             self._n_features = state['n_features']
             self._classes = state['classes']
         else:  # model was stored outside secml framework
