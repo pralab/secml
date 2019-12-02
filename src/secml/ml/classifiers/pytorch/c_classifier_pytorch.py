@@ -667,6 +667,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         state = {
             'model_state': self._model.state_dict(),
             'optimizer_state': self._optimizer.state_dict(),
+            'optimizer_scheduler_state': self._optimizer_scheduler.state_dict(),
             'n_features': self.n_features,
             'classes': self.classes,
         }
@@ -701,6 +702,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             # model was stored with save_model method
             self._model.load_state_dict(state['model_state'])
             self._optimizer.load_state_dict(state['optimizer_state'])
+            self._optimizer_scheduler.load_state_dict(state['optimizer_scheduler'])
             self._n_features = state['n_features']
             self._classes = state['classes']
         else:  # model was stored outside secml framework
