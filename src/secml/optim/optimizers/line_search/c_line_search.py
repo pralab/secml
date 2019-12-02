@@ -6,14 +6,12 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
 
 from secml.core import CCreator
 from secml.array import CArray
 
 
-@six.add_metaclass(ABCMeta)
-class CLineSearch(CCreator):
+class CLineSearch(CCreator, metaclass=ABCMeta):
     """Abstract class that implements line-search optimization algorithms.
 
     Line-search algorithms optimize the objective function along a given

@@ -1,6 +1,6 @@
 ## v0.10 (29/10/2019)
 - #535 Added new package `secml.explanation`, which provides different methods for explaining machine learning models. See documentation and examples for more information.
-- #584 **[beta]** Added `CModelCleverhans` and `CAttackEvasionCleverhans` to support adversarial attacks from [CleverHans](https://github.com/tensorflow/cleverhans), a Python library to benchmark vulnerability of machine learning systems to adversarial examples.
+- #584 **[beta]** Added `CAttackEvasionCleverhans` to support adversarial attacks from [CleverHans](https://github.com/tensorflow/cleverhans), a Python library to benchmark vulnerability of machine learning systems to adversarial examples.
 
 ### Requirements (1 change)
 - #580 PyTorch version `1.3` is now supported.
@@ -36,7 +36,7 @@
 - #575 Parameter `batch_size` of `CKernel` is now deprecated.
 - #597 Removed unused parameter `gamma` from `CKernelChebyshevDistance`.
 - #596 Removed `CKernelHamming`.
-- #602 Renamed `CNormalizerMeanSTD` to `CNormalizerMeanStd`. The old class has been deprecated and will be removed in a future vearsion.
+- #602 Renamed `CNormalizerMeanSTD` to `CNormalizerMeanStd`. The old class has been deprecated and will be removed in a future version.
 
 ### Documentation (5 changes)
 - #538 Added a notebook tutorial on the use of Explainable ML methods provided by the `secml.explanation` package.

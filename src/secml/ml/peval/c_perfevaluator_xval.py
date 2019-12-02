@@ -6,8 +6,6 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from six.moves import range
-
 from secml.ml.peval import CPerfEvaluator
 from secml.array import CArray
 from secml.core.type_utils import is_scalar

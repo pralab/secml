@@ -5,7 +5,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from __future__ import division
 from secml.optim.function import CFunction
 from secml.array import CArray
 

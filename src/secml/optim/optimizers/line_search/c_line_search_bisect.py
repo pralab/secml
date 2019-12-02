@@ -5,8 +5,6 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
-from __future__ import division
-
 import numpy as np
 
 from secml.optim.optimizers.line_search import CLineSearch

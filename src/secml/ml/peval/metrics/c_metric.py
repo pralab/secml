@@ -6,14 +6,12 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
 import inspect
 
 from secml.core import CCreator
 
 
-@six.add_metaclass(ABCMeta)
-class CMetric(CCreator):
+class CMetric(CCreator, metaclass=ABCMeta):
     """Performance evaluation metrics.
 
     Utility functions to measure classification performance.
@@ -66,11 +64,7 @@ class CMetric(CCreator):
         kwargs.update(y_true=y_true, y_pred=y_pred, score=score)
 
         # Getting specifications of _performance_score method of the metric
-        # TODO: REPLACE WITH inspect.signature
-        try:  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-            getargspec = inspect.getfullargspec
-        except AttributeError:
-            getargspec = inspect.getargspec
+        getargspec = inspect.getfullargspec
         metric_argspec = getargspec(self._performance_score)
         metric_params = metric_argspec.args[1:]  # Excluding `self`
         metric_defaults = metric_argspec.defaults

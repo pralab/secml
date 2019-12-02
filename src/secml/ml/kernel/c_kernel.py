@@ -7,17 +7,12 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
-from six.moves import range
-
-import warnings
 
 from secml.core import CCreator
 from secml.array import CArray
 
 
-@six.add_metaclass(ABCMeta)
-class CKernel(CCreator):
+class CKernel(CCreator, metaclass=ABCMeta):
     """Abstract class that defines basic methods for kernels.
 
     A kernel is a pairwise metric that compute the distance
@@ -29,23 +24,8 @@ class CKernel(CCreator):
     A kernel must be positive semi-definite (PSD), even though non-PSD kernels
     can also be used to train classifiers (e.g., SVMs, but losing convexity).
 
-    Parameters
-    ----------
-    batch_size : int or None, optional
-        Size of the batch used for kernel computation. Default None.
-
-        .. deprecated:: 0.10
-
     """
     __super__ = 'CKernel'
-
-    def __init__(self, batch_size=None):
-
-        if batch_size is not None:
-            warnings.warn(
-                "`batch_size`'` is deprecated since version 0.10.",
-                DeprecationWarning)
-        self.batch_size = batch_size
 
     @abstractmethod
     def _k(self, x, y):

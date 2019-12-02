@@ -5,3 +5,4 @@ include requirements.txt
 include src/secml/VERSION
 include src/secml/VERSION_REV
 include src/secml/secml.conf
+include src/secml/ml/model_zoo/models_dict.json

@@ -12,7 +12,7 @@ fig.sp.plot(X, S)
 
 fig.sp.xticks(CArray([-pi, -pi / 2, 0, pi / 2, pi]))
 fig.sp.xticklabels(CArray(["- pi", "-pi/2", "0", "pi/2", "pi"]))
-fig.sp.tick_params(direction='out', length=6, width=2, colors='r', right='off')
+fig.sp.tick_params(direction='out', length=6, width=2, colors='r', right=False)
 fig.sp.yticks(CArray([-1, 0, +1]))
 
 fig.show()

@@ -8,9 +8,9 @@
 """
 from multiprocessing import Lock
 import zipfile
-import six
 import os
 from fnmatch import fnmatch
+
 from abc import ABCMeta, abstractmethod
 
 from PIL import Image
@@ -39,8 +39,7 @@ ICUBWORLD28_PATH = fm.join(ICUBWORLD_PATH, 'iCubWorld28')
 # TODO: iCubWorld Transformations
 
 
-@six.add_metaclass(ABCMeta)
-class CDataLoaderICubWorld(CDataLoader):
+class CDataLoaderICubWorld(CDataLoader, metaclass=ABCMeta):
     """Interface for loaders of iCubWorld datasets.
 
     iCubWorld is a set of computer vision datasets for robotic applications,
