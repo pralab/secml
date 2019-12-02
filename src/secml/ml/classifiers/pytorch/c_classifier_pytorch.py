@@ -98,7 +98,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 "value of 1.")
             self._batch_size = 1
 
-
         if self._input_shape is None:
             # try to infer from first layer
             first_layer = list(self._model._modules.values())[0]
@@ -114,8 +113,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         self._optimizer_scheduler = optimizer_scheduler
         self._softmax_outputs = softmax_outputs
 
-        self._check_softmax_redundancy()
-
         self._epochs = epochs
 
         if self._model.__class__.__name__ in dir(torchvision.models):
@@ -130,6 +127,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         self._intermediate_outputs = None
         self._cached_s = None
         self._cached_layer_output = None
+
+        self._check_softmax_redundancy()
+
 
     @property
     def loss(self):
@@ -207,7 +207,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         """Returns the layers of the model, if possible. """
         if self._model_layers is None:
             if isinstance(self._model, nn.Module):
-                self._model_layers = get_layers(self._model)
+                self._model_layers = list(get_layers(self._model))
             else:
                 raise TypeError(
                     "The input model must be an instance of `nn.Module`.")
@@ -342,24 +342,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         self._model.load_state_dict(state_dict.pop('model'))
         self._optimizer.load_state_dict(state_dict.pop('optimizer'))
         super(CClassifierPyTorch, self).set_state(state_dict, copy=copy)
-
-    def check_softmax(self):
-        """
-        Checks if a softmax layer has been defined in the
-        network.
-
-        Returns
-        -------
-        Boolean value stating if a softmax layer has been
-        defined.
-        """
-        x = CArray.ones(reduce(lambda x, y: x*y, self.input_shape))
-        print(x)
-        outputs = self._forward(x)
-
-        if outputs.sum() == 1:
-            return True
-        return False
 
     def __getattribute__(self, key):
         """Get an attribute.

@@ -6,6 +6,7 @@
 
 """
 from abc import ABCMeta, abstractmethod
+from functools import reduce
 
 from secml.array import CArray
 from secml.ml.classifiers import CClassifier
@@ -90,7 +91,7 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
     @property
     def layer_names(self):
         """Returns the names of the layers of the model."""
-        return list(zip(*self.layers))[0]
+        return list(zip(*(self.layers)))[0]
 
     @property
     @abstractmethod
@@ -99,7 +100,6 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         of each layer of the model."""
         raise NotImplementedError
 
-    @abstractmethod
     def check_softmax(self):
         """
         Checks if a softmax layer has been defined in the
@@ -110,7 +110,12 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         Boolean value stating if a softmax layer has been
         defined.
         """
-        raise NotImplementedError
+        x = CArray.ones(reduce(lambda x, y: x * y, self.input_shape))
+        outputs = self._forward(x)
+
+        if outputs.sum() == 1:
+            return True
+        return False
 
     @staticmethod
     @abstractmethod
