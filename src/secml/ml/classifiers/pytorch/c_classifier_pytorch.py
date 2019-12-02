@@ -508,7 +508,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 loss = self._loss(outputs, labels)
                 loss.backward()
                 self._optimizer.step()
-                # TODO check pytorch version
 
                 # print statistics
                 running_loss += loss.item()
@@ -517,7 +516,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                                      (epoch + 1, i + 1, running_loss / 2000))
                     running_loss = 0.0
 
-            #  https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
             if self._optimizer_scheduler is not None:
                 self._optimizer_scheduler.step()
 
