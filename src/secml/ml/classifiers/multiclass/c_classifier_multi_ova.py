@@ -6,8 +6,7 @@
 
 """
 from secml.ml.classifiers.multiclass import CClassifierMulticlass
-from secml.ml.classifiers.multiclass.mixin_classifier_gradient_multiclass_ova import \
-    CClassifierGradientMulticlassOVAMixin
+from secml.ml.classifiers.gradients import CClassifierGradientMixin
 from secml.array import CArray
 from secml.data import CDataset
 from secml.parallel import parfor2
@@ -52,7 +51,7 @@ def _fit_one_ova(
 
 
 class CClassifierMulticlassOVA(CClassifierMulticlass,
-                               CClassifierGradientMulticlassOVAMixin):
+                               CClassifierGradientMixin):
     """OVA (One-Vs-All) Multiclass Classifier.
 
     Parameters
@@ -130,7 +129,7 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
             dataset.X, dataset.get_labels_ovr(dataset.classes[class_idx]),
             header=dataset.header)
 
-    def _decision_function(self, x, y=None):
+    def _forward(self, x):
         """Computes the decision function for each pattern in x.
 
         For One-Vs-All (OVA) multiclass scheme,
@@ -154,13 +153,22 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
 
         """
         # Getting predicted scores for classifier associated with y
-        if y is not None:
-            self.logger.info(
-                "Getting decision function against class: {:}".format(y))
-            return self._binary_classifiers[y].decision_function(x, y=1)
-        else:
-            scores = CArray.ones(shape=(x.shape[0], self.n_classes))
-            for i in range(self.n_classes):  # TODO parfor
-                scores[:, i] = self._binary_classifiers[i].decision_function(
-                    x, y=1).ravel().T
-            return scores
+        scores = CArray.ones(shape=(x.shape[0], self.n_classes))
+        for i in range(self.n_classes):  # TODO parfor
+            scores[:, i] = self._binary_classifiers[i].forward(x)[:, 1]
+        return scores
+
+    def _backward(self, w):
+        """Implement gradient of decision function wrt x."""
+        if w is None:
+            w = CArray.ones(shape=(self.n_classes,))
+
+        # this is where we'll accumulate grads
+        grad = CArray.zeros(
+            shape=self._cached_x.shape, sparse=self._cached_x.issparse)
+
+        # loop only over non-zero elements in w, to save computations
+        for c in w.nnz_indices[1]:
+            grad_c = self._binary_classifiers[c].grad_f_x(self._cached_x, y=1)
+            grad += w[c] * grad_c
+        return grad

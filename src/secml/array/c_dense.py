@@ -5,8 +5,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from __future__ import print_function, division
-from six.moves import range, map
 import numpy as np
 import numpy.matlib
 from numpy.linalg import inv, pinv
@@ -595,22 +593,6 @@ class CDense(_CArrayInterface):
         else:
             return NotImplemented
 
-    def __div__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-        """Element-wise division.
-
-        See .__truediv__() for more informations.
-
-        """
-        return self.__truediv__(other)
-
-    def __rdiv__(self, other):  # TODO: REMOVE AFTER TRANSITION TO PYTHON 3
-        """Element-wise (inverse) division.
-
-        See .__rtruediv__() for more informations.
-
-        """
-        return self.__rtruediv__(other)
-
     def __floordiv__(self, other):
         """Element-wise floor division.
 
@@ -852,8 +834,6 @@ class CDense(_CArrayInterface):
     def __bool__(self):
         """Manage 'and' and 'or' operators."""
         return bool(self._data)
-
-    __nonzero__ = __bool__  # Compatibility with python < 3
 
     def __iter__(self):
         """Yields array elements in raster-scan order."""

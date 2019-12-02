@@ -6,8 +6,6 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from six.moves import range, zip, map
-
 from secml.array import CArray
 
 
@@ -102,7 +100,7 @@ def average(fpr, tpr, n_points=1000):
     return mean_fpr, mean_tpr, std_dev_tpr
 
 
-class CBaseRoc(object):
+class CBaseRoc:
     """Computes the receiver operating characteristic curve, or ROC curve.
 
     This base class manage a single classifier output (a single repetition).

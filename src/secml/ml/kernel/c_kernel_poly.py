@@ -34,10 +34,6 @@ class CKernelPoly(CKernel):
     coef0 : float, optional
         Free parameter used for trading off the influence of higher-order
         versus lower-order terms in the kernel. Default 1.0.
-    batch_size : int or None, optional
-        Size of the batch used for kernel computation. Default None.
-
-        .. deprecated:: 0.10
 
     Examples
     --------
@@ -55,9 +51,7 @@ class CKernelPoly(CKernel):
     """
     __class_type = 'poly'
 
-    def __init__(self, degree=2, gamma=1.0, coef0=1.0, batch_size=None):
-
-        super(CKernelPoly, self).__init__(batch_size=batch_size)
+    def __init__(self, degree=2, gamma=1.0, coef0=1.0):
 
         # kernel parameters
         self.degree = degree

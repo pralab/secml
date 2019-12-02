@@ -26,13 +26,6 @@ class CKernelChebyshevDistance(CKernel):
     ----------
     class_type : 'chebyshev-dist'
 
-    Parameters
-    ----------
-    batch_size : int or None, optional
-        Size of the batch used for kernel computation. Default None.
-
-        .. deprecated:: 0.10
-
     Examples
     --------
     >>> from secml.array import CArray
@@ -48,9 +41,6 @@ class CKernelChebyshevDistance(CKernel):
 
     """
     __class_type = 'chebyshev-dist'
-
-    def __init__(self, batch_size=None):
-        super(CKernelChebyshevDistance, self).__init__(batch_size=batch_size)
 
     def _k(self, x, y):
         """Compute (negative) Chebyshev distances between x and y.
@@ -105,13 +95,7 @@ class CKernelChebyshevDistance(CKernel):
         :meth:`CKernel.gradient` : Gradient computation interface for kernels.
 
         """
-        if v.issparse is True:
-            # Broadcasting not supported for sparse arrays
-            v_broadcast = v.repmat(u.shape[0], 1)
-        else:  # Broadcasting is supported by design for dense arrays
-            v_broadcast = v
-
-        diff = u - v_broadcast
+        diff = u - v
         m = abs(diff).max(axis=1)  # extract m from each row
         grad = CArray.zeros(shape=diff.shape, sparse=v.issparse)
         grad[diff >= m] = 1  # this correctly broadcasts per-row comparisons

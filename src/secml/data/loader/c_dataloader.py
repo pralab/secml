@@ -7,14 +7,12 @@
 
 """
 from abc import ABCMeta, abstractmethod
-import six
 
 from secml.array import CArray
 from secml.core import CCreator
 
 
-@six.add_metaclass(ABCMeta)
-class CDataLoader(CCreator):
+class CDataLoader(CCreator, metaclass=ABCMeta):
     """Interface for Dataset loaders."""
     __super__ = 'CDataLoader'
 

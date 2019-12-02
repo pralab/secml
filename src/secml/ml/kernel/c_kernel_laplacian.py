@@ -29,10 +29,6 @@ class CKernelLaplacian(CKernel):
     ----------
     gamma : float
         Default is 1.0.
-    batch_size : int or None, optional
-        Size of the batch used for kernel computation. Default None.
-
-        .. deprecated:: 0.10
 
     Examples
     --------
@@ -50,9 +46,7 @@ class CKernelLaplacian(CKernel):
     """
     __class_type = 'laplacian'
 
-    def __init__(self, gamma=1.0, batch_size=None):
-
-        super(CKernelLaplacian, self).__init__(batch_size=batch_size)
+    def __init__(self, gamma=1.0):
 
         # Using a float gamma to avoid dtype casting problems
         self.gamma = gamma
@@ -132,16 +126,10 @@ class CKernelLaplacian(CKernel):
             raise ValueError(
                 "2nd array must have shape shape (1, n_features).")
 
-        if v.issparse is True:
-            # Broadcasting not supported for sparse arrays
-            v_broadcast = v.repmat(x.shape[0], 1)
-        else:  # Broadcasting is supported by design for dense arrays
-            v_broadcast = v
-
         # Format of output array should be the same as v
         x = x.tosparse() if v.issparse else x.todense()
 
-        diff = (x - v_broadcast)
+        diff = (x - v)
 
         k_grad = self._k(x, v)
         # Casting the kernel to sparse if needed for efficient broadcasting

@@ -7,14 +7,11 @@
 """
 from abc import ABCMeta, abstractmethod
 
-import six
-
 from secml.array import CArray
 from secml.ml.classifiers import CClassifier
 
 
-@six.add_metaclass(ABCMeta)
-class CClassifierDNN(CClassifier):
+class CClassifierDNN(CClassifier, metaclass=ABCMeta):
     """CClassifierDNN, wrapper for DNN models.
 
     Parameters
@@ -41,15 +38,15 @@ class CClassifierDNN(CClassifier):
 
     def __init__(self, model, input_shape=None, preprocess=None,
                  softmax_outputs=False, **kwargs):
-
         super(CClassifierDNN, self).__init__(preprocess=preprocess)
 
         self._model = model
+        self._out_layer = None
         self._trained = False
         self._input_shape = input_shape
         self._softmax_outputs = softmax_outputs
-        self._layers = None
-        self._layer_shapes = None
+        self._model_layers = None
+        self._model_layer_shapes = None
 
     @property
     def input_shape(self):
@@ -102,9 +99,6 @@ class CClassifierDNN(CClassifier):
         of each layer of the model."""
         raise NotImplementedError
 
-    def get_params(self):
-        return super(CClassifierDNN, self).get_params()
-
     @abstractmethod
     def check_softmax(self):
         """
@@ -131,45 +125,39 @@ class CClassifierDNN(CClassifier):
         raise NotImplementedError
 
     @abstractmethod
-    def get_layer_output(self, x, layer_names=None):
-        """Returns the output of the desired net layer(s).
+    def _forward(self, x):
+        """Forward pass on input x.
+        Returns the output of the layer set in _out_layer.
+        If _out_layer is None, the last layer output is returned,
+        after applying softmax if softmax_outputs is True.
 
         Parameters
         ----------
         x : CArray
-            Input data.
-        layer_names : str, list or None, optional
-            Name of the layer(s) to get the output from.
-            If None, the output of the last layer will be returned.
+            preprocessed array, ready to be transformed by the current module.
 
         Returns
         -------
-        CArray or dict
-            Output of the desired layers, dictionary if more than one layer is
-            requested.
+        CArray
+            Transformed input data.
         """
         raise NotImplementedError
 
     @abstractmethod
-    def _get_layer_output(self, s, layer_names=None):
-        """Returns the output of the desired net layer(s) as backend-supported
-        tensor.
+    def _backward(self, w):
+        """Returns the gradient of the DNN - considering the output layer set
+        in _out_layer - wrt data.
 
         Parameters
         ----------
-        s : backend-supported tensor
-            Input tensor to forward propagate.
-        layer : str or None, optional
-            Name of the layer.
-            If None, the output of the last layer will be returned.
+        w : CArray
+            Weights that are pre-multiplied to the gradient
+            of the module, as in standard reverse-mode autodiff.
 
         Returns
         -------
-        dict
-            Output of the desired layers (as backend-supported
-            tensors), dictionary if more than one layer is
-            requested.
-
+        gradient : CArray
+            Accumulated gradient of the module wrt input data.
         """
         raise NotImplementedError
 
@@ -201,3 +189,52 @@ class CClassifierDNN(CClassifier):
         """
         raise NotImplementedError
 
+    def get_layer_output(self, x, layer=None):
+        """Returns the output of the desired net layer(s).
+
+        Parameters
+        ----------
+        x : CArray
+            Input data.
+        layer : str or None, optional
+            Name of the layer to get the output from.
+            If None, the output of the last layer will be returned.
+
+        Returns
+        -------
+        CArray
+            Output of the desired layer.
+        """
+        self._out_layer = layer
+        output = self.forward(x=x, caching=False)
+        self._out_layer = None
+        return output
+
+    def get_layer_gradient(self, x, w, layer=None):
+        """Computes the gradient of the classifier's decision function
+         wrt input.
+
+        Parameters
+        ----------
+        x : CArray
+            Input sample
+        w : CArray
+            Will be passed to backward and must have a proper shape
+            depending on the chosen output layer (the last one if `layer`
+            is None). This is required if `layer` is not None.
+        layer : str or None, optional
+            Name of the layer.
+            If None, the gradient at the last layer will be returned
+             and `y` is required if `w` is None or softmax_outputs is True.
+            If not None, `w` of proper shape is required.
+
+        Returns
+        -------
+        gradient : CArray
+            Gradient of the classifier's df wrt its input. Vector-like array.
+
+        """
+        self._out_layer = layer
+        grad = self.gradient(x=x, w=w)
+        self._out_layer = None
+        return grad
