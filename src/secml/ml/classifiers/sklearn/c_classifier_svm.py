@@ -90,12 +90,6 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         # DO NOT CLEAR
         self._k = None
 
-    def is_linear(self):
-        """Return True if the classifier is linear."""
-        if super(CClassifierSVM, self).is_linear() and self.is_kernel_linear():
-            return True
-        return False
-
     def is_kernel_linear(self):
         """Return True if the kernel is None or linear."""
         if self.kernel.class_type == 'linear':
