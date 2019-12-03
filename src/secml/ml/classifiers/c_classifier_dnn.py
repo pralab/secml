@@ -73,13 +73,14 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         self._model = model
         self._out_layer = None
         self._trained = False
-        self._input_shape = input_shape
-        self._softmax_outputs = softmax_outputs
-        self.check_softmax()
+
         self._model_layers = None
         self._model_layer_shapes = None
         self._pretrained = pretrained
         self._pretrained_classes = pretrained_classes
+        self._input_shape = input_shape
+        self._softmax_outputs = softmax_outputs
+
 
     @property
     def input_shape(self):
@@ -142,7 +143,7 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         Boolean value stating if a softmax layer has been
         defined.
         """
-        x = CArray.ones(reduce(lambda x, y: x * y, self.input_shape))
+        x = CArray.ones(reduce(lambda w, y: w * y, self.input_shape))
         outputs = self._forward(x)
 
         if outputs.sum() == 1:
