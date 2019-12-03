@@ -230,7 +230,8 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         return output
 
     def get_layer_gradient(self, x, w, layer=None):
-        """Computes the gradient of the classifier's decision function
+        """
+        Computes the gradient of the classifier's decision function
         wrt input.
 
         Parameters
