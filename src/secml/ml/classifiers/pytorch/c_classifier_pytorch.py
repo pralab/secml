@@ -143,7 +143,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     def loss(self, loss):
         """Sets the loss function to use for training."""
         self._loss = loss
-        self._check_softmax_redundancy()
 
     @property
     def model(self):
@@ -159,7 +158,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     def optimizer(self, optimizer):
         """Sets the optimizer for the DNN."""
         self._optimizer = optimizer
-        self._check_softmax_redundancy()
 
     @property
     def optimizer_scheduler(self):

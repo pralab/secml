@@ -75,6 +75,7 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         self._trained = False
         self._input_shape = input_shape
         self._softmax_outputs = softmax_outputs
+        self.check_softmax()
         self._model_layers = None
         self._model_layer_shapes = None
         self._pretrained = pretrained
