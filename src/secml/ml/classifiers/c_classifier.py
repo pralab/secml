@@ -63,11 +63,6 @@ class CClassifier(CModule, metaclass=ABCMeta):
         """Number of features (before preprocessing)."""
         return self._n_features
 
-    @deprecated('0.11')
-    def is_linear(self):
-        """True for linear classifiers, False otherwise."""
-        return False
-
     def is_fitted(self):
         """Return True if the classifier is trained (fitted).
 
