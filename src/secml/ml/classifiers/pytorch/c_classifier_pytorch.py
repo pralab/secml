@@ -438,7 +438,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                              "in order to fit the model.")
 
         train_loader = self._data_loader(dataset.X, dataset.Y,
-                                         batch_size=self._batch_size)
+                                         batch_size=self._batch_size,
+                                         num_workers=self._n_jobs-1)
 
         for epoch in range(self._epochs):
             running_loss = 0.0
@@ -482,7 +483,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             Transformed input data.
 
         """
-        data_loader = self._data_loader(x, num_workers=self._n_jobs,
+        data_loader = self._data_loader(x, num_workers=self._n_jobs-1,
                                         batch_size=self._batch_size)
 
         # Switch to evaluation mode
