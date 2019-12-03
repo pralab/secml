@@ -231,7 +231,7 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
 
     def get_layer_gradient(self, x, w, layer=None):
         """Computes the gradient of the classifier's decision function
-         wrt input.
+        wrt input.
 
         Parameters
         ----------
@@ -251,7 +251,6 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         -------
         gradient : CArray
             Gradient of the classifier's df wrt its input. Vector-like array.
-
         """
         self._out_layer = layer
         grad = self.gradient(x=x, w=w)
