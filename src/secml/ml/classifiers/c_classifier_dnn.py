@@ -38,7 +38,36 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
     __class_type = ' dnn-clf'
 
     def __init__(self, model, input_shape=None, preprocess=None,
-                 softmax_outputs=False, **kwargs):
+                 pretrained=False, pretrained_classes=None,
+                 softmax_outputs=False,
+                 **kwargs):
+        """
+        Wrapper for DNN classifiers. All implemented DNN backends must
+        inherit from this class and implement the abstract methods.
+
+        Parameters
+        ----------
+        model: model dtype of the specific backend
+            the model to wrap
+        input_shape: tuple
+            shape of the input for the DNN, it will
+            be used for reshaping the input data to
+            the expected shape
+        preprocess: CPreprocess
+            preprocessing module
+        pretrained: bool, default False
+            whether or not the model is pretrained. If the
+            model is pretrained, the user won't need to call
+            `fit` after loading the model.
+        pretrained_classes: None or CArray, default None
+            list of classes labels if the model is pretrained. If
+            set to None, the class labels for the pretrained model should
+            be inferred at the moment of initialization of the model
+            and set to CArray.arange(n_classes)
+        softmax_outputs: bool, default False
+            whether or not to add a softmax layer after the
+            logits.
+        """
         super(CClassifierDNN, self).__init__(preprocess=preprocess)
 
         self._model = model
@@ -48,6 +77,8 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         self._softmax_outputs = softmax_outputs
         self._model_layers = None
         self._model_layer_shapes = None
+        self._pretrained = pretrained
+        self._pretrained_classes = pretrained_classes
 
     @property
     def input_shape(self):
@@ -78,8 +109,8 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         the network already has a softmax operation in the end
         this parameter will be disabled.
         """
-        self.check_softmax()
         self._softmax_outputs = active
+        self.check_softmax()
 
     @property
     @abstractmethod

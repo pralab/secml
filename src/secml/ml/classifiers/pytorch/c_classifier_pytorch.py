@@ -74,8 +74,11 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     """
     __class_type = 'pytorch-clf'
 
-    def __init__(self, model, loss=None, optimizer=None,
-                 optimizer_scheduler = None,
+    def __init__(self, model, loss=None,
+                 optimizer=None,
+                 optimizer_scheduler=None,
+                 pretrained=False,
+                 pretrained_classes=None,
                  input_shape=None,
                  random_state=None, preprocess=None,
                  softmax_outputs=False,
@@ -85,6 +88,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         self._random_state = random_state
         super(CClassifierPyTorch, self).__init__(model=model,
                                                  preprocess=preprocess,
+                                                 pretrained=pretrained,
+                                                 pretrained_classes=pretrained_classes,
                                                  input_shape=input_shape,
                                                  softmax_outputs=softmax_outputs)
         self._init_model()
@@ -111,14 +116,16 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         self._loss = loss
         self._optimizer = optimizer
         self._optimizer_scheduler = optimizer_scheduler
-        self._softmax_outputs = softmax_outputs
 
         self._epochs = epochs
 
-        if self._model.__class__.__name__ in dir(torchvision.models):
+        if self._pretrained is True:
             self._trained = True
-            self._classes = CArray.arange(
-                list(self._model.modules())[-1].out_features)
+            if self._pretrained_classes is not None:
+                self._classes = self._pretrained_classes
+            else:
+                self._classes = CArray.arange(
+                    list(self._model.modules())[-1].out_features)
             self._n_features = reduce(lambda a, b: a * b, self._input_shape)
 
         # hooks for getting intermediate outputs
@@ -129,7 +136,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         self._cached_layer_output = None
 
         self._check_softmax_redundancy()
-
 
     @property
     def loss(self):
@@ -167,12 +173,10 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     def optimizer_scheduler(self, optimizer_scheduler):
         """Sets the scheduler for training the DNN"""
         self._optimizer_scheduler = optimizer_scheduler
-
+        
     @property
     def softmax_outputs(self):
-        """Returns True if the softmax layer in the output
-        is active."""
-        return self._softmax_outputs
+        return super(CClassifierPyTorch, self).softmax_outputs
 
     @softmax_outputs.setter
     def softmax_outputs(self, softmax_outputs):

@@ -49,7 +49,8 @@ class TestCClassifierPyTorchDNN(TestCClassifierPyTorch):
                                       optimizer=optimizer,
                                       epochs=10,
                                       batch_size=self.batch_size,
-                                      input_shape=(3, 224, 224))
+                                      input_shape=(3, 224, 224),
+                                      pretrained=True)
 
     def test_big_net(self):
         self.logger.info("___________________")
