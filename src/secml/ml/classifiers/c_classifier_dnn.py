@@ -82,7 +82,6 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         self._softmax_outputs = softmax_outputs
         self.check_softmax()
 
-
     @property
     def input_shape(self):
         """Returns the input shape of the first layer of the neural network."""
@@ -268,7 +267,7 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         layer : str or None, optional
             Name of the layer.
             If None, the gradient at the last layer will be returned
-             and `y` is required if `w` is None or softmax_outputs is True.
+            and `y` is required if `w` is None or softmax_outputs is True.
             If not None, `w` of proper shape is required.
 
         Returns
