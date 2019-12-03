@@ -9,7 +9,6 @@ from functools import reduce
 
 import torch
 from torch import nn
-import torchvision
 from torchvision.models.resnet import BasicBlock
 from torchvision.transforms import transforms
 
@@ -135,8 +134,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         self._cached_s = None
         self._cached_layer_output = None
 
-        self._check_softmax_redundancy()
-
     @property
     def loss(self):
         """Returns the loss function used by classifier."""
@@ -173,17 +170,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     def optimizer_scheduler(self, optimizer_scheduler):
         """Sets the scheduler for training the DNN"""
         self._optimizer_scheduler = optimizer_scheduler
-        
-    @property
-    def softmax_outputs(self):
-        return super(CClassifierPyTorch, self).softmax_outputs
-
-    @softmax_outputs.setter
-    def softmax_outputs(self, softmax_outputs):
-        """Sets the activation state of the softmax layer in
-        the network."""
-        self._softmax_outputs = softmax_outputs
-        self._check_softmax_redundancy()
 
     @property
     def epochs(self):
@@ -236,19 +222,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     def trained(self):
         """True if the model has been trained."""
         return self._trained
-
-    def _check_softmax_redundancy(self):
-        # check softmax redundancy
-        if isinstance(self.loss, nn.CrossEntropyLoss) and self.check_softmax():
-            raise ValueError("Please remove softmax redundancy. Either "
-                             "use `torch.nn.NLLLoss` or remove softmax "
-                             "layer from the network.")
-        if self._optimizer is not None:
-            if self.check_softmax() and self._softmax_outputs is True:
-                self.logger.warning(
-                    "Softmax layer has been defined in the network. Disabling "
-                    "parameter softmax_outputs.")
-                self._softmax_outputs = False
 
     def get_layer_shape(self, layer_name):
         return self.layer_shapes[layer_name]
