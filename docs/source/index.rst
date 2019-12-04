@@ -59,3 +59,9 @@
    update
    changelog
    roadmap
+
+.. toctree::
+   :caption: Developer's Guide
+   :hidden:
+
+   developers/index
