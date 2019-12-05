@@ -28,10 +28,10 @@ class TestCDataSplitter(CUnitTest):
             self.logger.info("{:} fold: \nTR {:} \nTS {:}"
                              "".format(fold_idx, kf.tr_idx[fold_idx],
                                        kf.ts_idx[fold_idx]))
-            self.assertFalse(
-                (tr_idx_expected[fold_idx] != kf.tr_idx[fold_idx]).any())
-            self.assertFalse(
-                (ts_idx_expected[fold_idx] != kf.ts_idx[fold_idx]).any())
+            self.assert_array_equal(
+                tr_idx_expected[fold_idx], kf.tr_idx[fold_idx])
+            self.assert_array_equal(
+                ts_idx_expected[fold_idx], kf.ts_idx[fold_idx])
 
     def test_labelkfold(self):
 
@@ -53,10 +53,10 @@ class TestCDataSplitter(CUnitTest):
                                        ds.Y[kf.tr_idx[fold_idx]],
                                        kf.ts_idx[fold_idx],
                                        ds.Y[kf.ts_idx[fold_idx]]))
-            self.assertFalse(
-                (tr_idx_expected[fold_idx] != kf.tr_idx[fold_idx]).any())
-            self.assertFalse(
-                (ts_idx_expected[fold_idx] != kf.ts_idx[fold_idx]).any())
+            self.assert_array_equal(
+                tr_idx_expected[fold_idx], kf.tr_idx[fold_idx])
+            self.assert_array_equal(
+                ts_idx_expected[fold_idx], kf.ts_idx[fold_idx])
 
     def test_openworldkfold(self):
 
@@ -84,10 +84,10 @@ class TestCDataSplitter(CUnitTest):
                     fold_idx, kf.tr_classes[fold_idx],
                     kf.tr_idx[fold_idx], ds.Y[kf.tr_idx[fold_idx]],
                     kf.ts_idx[fold_idx], ds.Y[kf.ts_idx[fold_idx]]))
-            self.assertFalse(
-                (tr_idx_expected[fold_idx] != kf.tr_idx[fold_idx]).any())
-            self.assertFalse(
-                (ts_idx_expected[fold_idx] != kf.ts_idx[fold_idx]).any())
+            self.assert_array_equal(
+                tr_idx_expected[fold_idx], kf.tr_idx[fold_idx])
+            self.assert_array_equal(
+                ts_idx_expected[fold_idx], kf.ts_idx[fold_idx])
 
     def test_openworldkfold_tr_class_skip(self):
 
@@ -129,10 +129,10 @@ class TestCDataSplitter(CUnitTest):
             self.logger.info("{:} fold: \nTR {:} \nTS {:}"
                              "".format(fold_idx, kf.tr_idx[fold_idx],
                                        kf.ts_idx[fold_idx]))
-            self.assertFalse(
-                (tr_idx_expected[fold_idx] != kf.tr_idx[fold_idx]).any())
-            self.assertFalse(
-                (ts_idx_expected[fold_idx] != kf.ts_idx[fold_idx]).any())
+            self.assert_array_equal(
+                tr_idx_expected[fold_idx], kf.tr_idx[fold_idx])
+            self.assert_array_equal(
+                ts_idx_expected[fold_idx], kf.ts_idx[fold_idx])
 
     def test_stratifiedkfold(self):
 
@@ -142,8 +142,15 @@ class TestCDataSplitter(CUnitTest):
         kf = CDataSplitterStratifiedKFold(
             num_folds=2, random_state=5000).compute_indices(ds)
 
-        tr_idx_expected = [CArray([4, 5, 6, 9]), CArray([0, 1, 2, 3, 7, 8])]
-        ts_idx_expected = [CArray([0, 1, 2, 3, 7, 8]), CArray([4, 5, 6, 9])]
+        import sklearn
+        if sklearn.__version__ < '0.22':  # TODO: REMOVE AFTER BUMPING DEPS
+        # v0.22 changed the model to fix an issue related test set size
+        # https://github.com/scikit-learn/scikit-learn/pull/14704
+            tr_idx_expected = [CArray([4, 5, 6, 9]), CArray([0, 1, 2, 3, 7, 8])]
+            ts_idx_expected = [CArray([0, 1, 2, 3, 7, 8]), CArray([4, 5, 6, 9])]
+        else:
+            tr_idx_expected = [CArray([1, 2, 7, 8, 9]), CArray([0, 3, 4, 5, 6])]
+            ts_idx_expected = [CArray([0, 3, 4, 5, 6]), CArray([1, 2, 7, 8, 9])]
 
         self.assertEqual(len(kf.tr_idx), 2)
         self.assertEqual(len(kf.ts_idx), 2)
@@ -154,10 +161,10 @@ class TestCDataSplitter(CUnitTest):
             self.logger.info("{:} fold: \nTR {:} \nTS {:}"
                              "".format(fold_idx, kf.tr_idx[fold_idx],
                                        kf.ts_idx[fold_idx]))
-            self.assertFalse(
-                (tr_idx_expected[fold_idx] != kf.tr_idx[fold_idx]).any())
-            self.assertFalse(
-                (ts_idx_expected[fold_idx] != kf.ts_idx[fold_idx]).any())
+            self.assert_array_equal(
+                tr_idx_expected[fold_idx], kf.tr_idx[fold_idx])
+            self.assert_array_equal(
+                ts_idx_expected[fold_idx], kf.ts_idx[fold_idx])
 
 
 if __name__ == '__main__':
