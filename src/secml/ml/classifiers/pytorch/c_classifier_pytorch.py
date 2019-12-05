@@ -85,12 +85,15 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
         self._device = self._set_device()
         self._random_state = random_state
-        super(CClassifierPyTorch, self).__init__(model=model,
-                                                 preprocess=preprocess,
-                                                 pretrained=pretrained,
-                                                 pretrained_classes=pretrained_classes,
-                                                 input_shape=input_shape,
-                                                 softmax_outputs=softmax_outputs)
+
+        super(CClassifierPyTorch, self).__init__(
+            model=model,
+            preprocess=preprocess,
+            pretrained=pretrained,
+            pretrained_classes=pretrained_classes,
+            input_shape=input_shape,
+            softmax_outputs=softmax_outputs)
+
         self._init_model()
 
         self._n_jobs = n_jobs

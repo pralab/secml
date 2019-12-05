@@ -6,7 +6,6 @@
 
 """
 from abc import ABCMeta, abstractmethod
-from functools import reduce
 
 from secml.array import CArray
 from secml.ml.classifiers import CClassifier
@@ -17,18 +16,26 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
 
     Parameters
     ----------
-    model:
-        backend-supported model
-    preprocess:
-        preprocessing module.
-    softmax_outputs: bool, optional
-        if set to True, a softmax function will be applied to
-        the return value of the decision function. Note: some
-        implementation adds the softmax function to the network
-        class as last layer or last forward function, or even in the
-        loss function (see torch.nn.CrossEntropyLoss). Be aware that the
-        softmax may have already been applied.
-        Default value is False.
+    model : model dtype of the specific backend
+        The model to wrap.
+    input_shape : tuple or None, optional
+        Shape of the input for the DNN, it will
+        be used for reshaping the input data to
+        the expected shape.
+    preprocess : CPreprocess or str or None, optional
+        Preprocessing module.
+    pretrained : bool, optional
+        Whether or not the model is pretrained. If the
+        model is pretrained, the user won't need to call
+        `fit` after loading the model. Default False.
+    pretrained_classes : None or CArray, optional
+        List of classes labels if the model is pretrained. If
+        set to None, the class labels for the pretrained model should
+        be inferred at the moment of initialization of the model
+        and set to CArray.arange(n_classes). Default None.
+    softmax_outputs : bool, optional
+        Whether or not to add a softmax layer after the
+        logits. Default False.
 
     Attributes
     ----------
@@ -39,35 +46,8 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
 
     def __init__(self, model, input_shape=None, preprocess=None,
                  pretrained=False, pretrained_classes=None,
-                 softmax_outputs=False,
-                 **kwargs):
-        """
-        Wrapper for DNN classifiers. All implemented DNN backends must
-        inherit from this class and implement the abstract methods.
+                 softmax_outputs=False):
 
-        Parameters
-        ----------
-        model: model dtype of the specific backend
-            the model to wrap
-        input_shape: tuple
-            shape of the input for the DNN, it will
-            be used for reshaping the input data to
-            the expected shape
-        preprocess: CPreprocess
-            preprocessing module
-        pretrained: bool, default False
-            whether or not the model is pretrained. If the
-            model is pretrained, the user won't need to call
-            `fit` after loading the model.
-        pretrained_classes: None or CArray, default None
-            list of classes labels if the model is pretrained. If
-            set to None, the class labels for the pretrained model should
-            be inferred at the moment of initialization of the model
-            and set to CArray.arange(n_classes)
-        softmax_outputs: bool, default False
-            whether or not to add a softmax layer after the
-            logits.
-        """
         super(CClassifierDNN, self).__init__(preprocess=preprocess)
 
         self._model = model
