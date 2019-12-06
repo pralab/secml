@@ -169,11 +169,15 @@ class TestCClassifierPyTorch(CUnitTest):
         # test that predict works even if no loss and optimizer have been defined
         loss_backup = self.clf._loss
         optimizer_backup = self.clf._optimizer
+        optimizer_scheduler_backup = self.clf._optimizer_scheduler
         self.clf._loss = None
         self.clf._optimizer = None
+        self.clf._optimizer_scheduler = None
         self._test_performance()
         self.clf._loss = loss_backup
         self.clf._optimizer = optimizer_backup
+        self.clf._optimizer_scheduler = optimizer_scheduler_backup
+
         os.remove(fname)
 
 

@@ -38,6 +38,7 @@ class Net(nn.Module):
 class TestCClassifierPyTorchBlobs(TestCClassifierPyTorch):
 
     def setUp(self):
+        self.logger.info("Testing Blobs Model")
         super(TestCClassifierPyTorchBlobs, self).setUp()
         self._dataset_creation_blobs()
         self._model_creation_blobs()
@@ -63,53 +64,68 @@ class TestCClassifierPyTorchBlobs(TestCClassifierPyTorch):
         self.ts.X = nmz.transform(self.ts.X)
 
     def _model_creation_blobs(self):
-
         torch.manual_seed(0)
         net = Net(n_features=self.n_features, n_classes=self.n_classes)
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(net.parameters(),
                               lr=0.1, momentum=0.9)
+        optimizer_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [5, 8], gamma=0.1)
 
         self.clf = CClassifierPyTorch(model=net,
                                       loss=criterion,
                                       optimizer=optimizer,
+                                      optimizer_scheduler=optimizer_scheduler,
                                       epochs=10,
                                       batch_size=self.batch_size)
 
-    def test_blobs(self):
-        # FIXME: ONE test_ METHOD FOR EACH TEST CASE
-        self.logger.info("___________________")
-        self.logger.info("Testing Blobs Model")
-        self.logger.info("___________________")
+    def test_layer_names(self):
         self._test_layer_names()
-        self._test_layer_shapes()
-        self._test_get_params()
-        self._test_set_params()
-        self._test_performance()
-        self._test_predict()
-        self._test_out_at_layer(layer_name="fc1")
-        self._test_grad_x(layer_names=["fc1", 'fc2', None])
-        self._test_softmax_outputs()
-        self._test_save_load(self._model_creation_blobs)
 
+    def test_layer_shapes(self):
+        self._test_layer_shapes()
+
+    def test_get_params(self):
+        self._test_get_params()
+
+    def test_set_params(self):
+        self._test_set_params()
+
+    def test_performance(self):
+        self._test_performance()
+
+    def test_predict(self):
+        self._test_predict()
+
+    def test_out_at_layer(self):
+        self._test_out_at_layer(layer_name="fc1")
+
+    def test_grad_x(self):
+        self._test_grad_x(layer_names=["fc1", 'fc2', None])
+
+    def test_softmax_outputs(self):
+        self._test_softmax_outputs()
+
+    def test_save_load(self):
+        self._test_save_load(self._model_creation_blobs)
         # TODO: ISOLATE WHEN ABLE TO EXPAND THE UNITTESTS
         # Test for set_state and get_state
         pred_y = self.clf.predict(self.ts.X)
         self.logger.info(
             "Predictions before restoring state:\n{:}".format(pred_y))
-
+        print(self.clf)
         state = self.clf.get_state()
         self.logger.info("State of classifier:\n{:}".format(state))
 
         # Create an entirely new clf
         net2 = Net(n_features=self.n_features, n_classes=self.n_classes)
         criterion2 = nn.CrossEntropyLoss()
-        optimizer2 = optim.SGD(net2.parameters(),
-                               lr=0.1, momentum=0.9)
+        optimizer2 = None
+        optimizer_scheduler = None
 
         clf2 = CClassifierPyTorch(model=net2,
                                   loss=criterion2,
                                   optimizer=optimizer2,
+                                  optimizer_scheduler=optimizer_scheduler,
                                   epochs=10,
                                   batch_size=self.batch_size)
 
