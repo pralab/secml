@@ -85,12 +85,17 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
         self._device = self._set_device()
         self._random_state = random_state
+        self._loss = loss
+        self._optimizer = optimizer
+        self._optimizer_scheduler = optimizer_scheduler
+
         super(CClassifierPyTorch, self).__init__(model=model,
                                                  preprocess=preprocess,
                                                  pretrained=pretrained,
                                                  pretrained_classes=pretrained_classes,
                                                  input_shape=input_shape,
                                                  softmax_outputs=softmax_outputs)
+
         self._init_model()
 
         self._n_jobs = n_jobs
@@ -111,10 +116,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 raise ValueError(
                     "Input shape should be specified if the first "
                     "layer is not a `nn.Linear` module.")
-
-        self._loss = loss
-        self._optimizer = optimizer
-        self._optimizer_scheduler = optimizer_scheduler
 
         self._epochs = epochs
 
@@ -277,7 +278,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 self._optimizer.state_dict()['param_groups'][0]
                 if self._optimizer is not None else None,
             'optimizer_scheduler':
-                self._optimizer_scheduler.state_dict()['param_groups'][0]
+                self._optimizer_scheduler.state_dict()
                 if self._optimizer_scheduler is not None else None
         }
         return SubLevelsDict(
@@ -295,23 +296,30 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         self._model.to(torch.device('cpu'))
 
         # Unfortunately optimizer does not have a 'to(device)' method
-        for opt_state in self._optimizer.state.values():
-            for k, v in opt_state.items():
-                if isinstance(v, torch.Tensor):
-                    opt_state[k] = v.to('cpu')
+        for opt_object in [self._optimizer, self._optimizer_scheduler]:
+            if opt_object is not None:
+                for opt_state in opt_object.state.values():
+                    for k, v in opt_state.items():
+                        if isinstance(v, torch.Tensor):
+                            opt_state[k] = v.to('cpu')
 
         # Use deepcopy as restoring device later will change them
         state['model'] = deepcopy(self._model.state_dict())
-        state['optimizer'] = deepcopy(self._optimizer.state_dict())
+        if self._optimizer is not None:
+            state['optimizer'] = deepcopy(self._optimizer.state_dict())
+        if self._optimizer_scheduler is not None:
+            state['optimizer_scheduler'] = deepcopy(self._optimizer_scheduler.state_dict())
 
         # Restore device and optimizer
         self._model.to(self._device)
 
         # Unfortunately optimizer does not have a 'to(device)' method
-        for opt_state in self._optimizer.state.values():
-            for k, v in opt_state.items():
-                if isinstance(v, torch.Tensor):
-                    opt_state[k] = v.to(self._device)
+        for opt_object in [self._optimizer, self._optimizer_scheduler]:
+            if opt_object is not None:
+                for opt_state in opt_object.state.values():
+                    for k, v in opt_state.items():
+                        if isinstance(v, torch.Tensor):
+                            opt_state[k] = v.to(self._device)
 
         return state
 
@@ -319,7 +327,14 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         """Sets the object state using input dictionary."""
         # TODO: DEEPCOPY FOR torch.load_state_dict?
         self._model.load_state_dict(state_dict.pop('model'))
-        self._optimizer.load_state_dict(state_dict.pop('optimizer'))
+        if hasattr(state_dict, 'optimizer'):
+            self._optimizer.load_state_dict(state_dict.pop('optimizer'))
+        else:
+            self._optimizer = None
+        if hasattr(state_dict, 'optimizer_scheduler'):
+            self._optimizer.load_state_dict(state_dict.pop('optimizer_scheduler'))
+        else:
+            self._optimizer_scheduler = None
         super(CClassifierPyTorch, self).set_state(state_dict, copy=copy)
 
     def __getattribute__(self, key):
@@ -329,7 +344,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         loss and optimizer."""
         try:
             # If we are not getting the model itself
-            if key not in ['_model', '_optimizer']:
+            if key not in ['_model', '_optimizer', '_optimizer_scheduler']:
                 if hasattr(self, '_model') and key in self._model._modules:
                     return self._model[key]
                 elif hasattr(self, '_optimizer') and \
@@ -343,6 +358,11 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                             "supported for optimizers with "
                             "more than one element in "
                             "param_groups.")
+                elif hasattr(self, '_optimizer_scheduler') and \
+                        self._optimizer_scheduler is not None and \
+                        key in self._optimizer_scheduler.state_dict():
+                    return self._optimizer_scheduler[key]
+
         except KeyError:
             pass  # Parameter not found in PyTorch model
             # Try to get the parameter from self
@@ -362,6 +382,10 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 self._optimizer is not None and \
                 key in self._optimizer.state_dict()['param_groups'][0]:
             self._optimizer.param_groups[0][key] = value
+        elif hasattr(self, '_optimizer_scheduler') and \
+            self._optimizer_scheduler is not None and \
+            key in self._optimizer_scheduler.state_dict():
+            self._optimizer_scheduler.state_dict[key] = value
         else:  # Otherwise, normal python set behavior
             super(CClassifierPyTorch, self).__setattr__(key, value)
 
