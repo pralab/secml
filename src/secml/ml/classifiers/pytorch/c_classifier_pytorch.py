@@ -64,7 +64,10 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     batch_size: int
         size of the batches to use for loading the data. Default value is 1.
     n_jobs: int
-        number of workers to use for data loading and processing. Default value is 1.
+        number of workers to use for data loading and processing. This parameter
+        follows the library expected behavior of having 1 worker as the main
+        process. The loader will spawn `n_jobs-1` workers. Default value for
+        n_jobs is 1 (zero additional workers spawned).
 
     Attributes
     ----------
@@ -425,7 +428,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         return CArray(x.cpu().numpy()).astype(float)
 
     def _data_loader(self, data, labels=None, batch_size=10, shuffle=False,
-                     num_workers=1):
+                     num_workers=0):
         """
         Returns `torch.DataLoader` generated from
         the input CDataset.
