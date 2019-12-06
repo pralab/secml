@@ -273,8 +273,12 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         """Returns the dictionary of class parameters."""
         loss_params = {'loss': self._loss}
         optim_params = {
-            'optimizer': self._optimizer.state_dict()['param_groups'][0]
-            if self._optimizer is not None else None
+            'optimizer':
+                self._optimizer.state_dict()['param_groups'][0]
+                if self._optimizer is not None else None,
+            'optimizer_scheduler':
+                self._optimizer_scheduler.state_dict()['param_groups'][0]
+                if self._optimizer_scheduler is not None else None
         }
         return SubLevelsDict(
             merge_dicts(super(CClassifierPyTorch, self).get_params(),
@@ -439,7 +443,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
         train_loader = self._data_loader(dataset.X, dataset.Y,
                                          batch_size=self._batch_size,
-                                         num_workers=self._n_jobs-1)
+                                         num_workers=self._n_jobs - 1)
 
         for epoch in range(self._epochs):
             running_loss = 0.0
@@ -483,7 +487,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             Transformed input data.
 
         """
-        data_loader = self._data_loader(x, num_workers=self._n_jobs-1,
+        data_loader = self._data_loader(x, num_workers=self._n_jobs - 1,
                                         batch_size=self._batch_size)
 
         # Switch to evaluation mode
@@ -648,10 +652,18 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                     "The parameter `classes` will be ignored.")
             # model was stored with save_model method
             self._model.load_state_dict(state['model_state'])
-            self._optimizer.load_state_dict(state['optimizer_state'])
+
+            if hasattr(state, 'optimizer_state'):
+                self._optimizer.load_state_dict(state['optimizer_state'])
+            else:
+                self._optimizer = None
+
             if hasattr(state, 'optimizer_scheduler_state') \
                     and self._optimizer_scheduler is not None:
                 self._optimizer_scheduler.load_state_dict(state['optimizer_scheduler_state'])
+            else:
+                self._optimizer_scheduler = None
+
             self._n_features = state['n_features']
             self._classes = state['classes']
         else:  # model was stored outside secml framework
