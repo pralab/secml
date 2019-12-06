@@ -85,16 +85,14 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
         self._device = self._set_device()
         self._random_state = random_state
-        self._loss = loss
-        self._optimizer = optimizer
-        self._optimizer_scheduler = optimizer_scheduler
 
-        super(CClassifierPyTorch, self).__init__(model=model,
-                                                 preprocess=preprocess,
-                                                 pretrained=pretrained,
-                                                 pretrained_classes=pretrained_classes,
-                                                 input_shape=input_shape,
-                                                 softmax_outputs=softmax_outputs)
+        super(CClassifierPyTorch, self).__init__(
+            model=model,
+            preprocess=preprocess,
+            pretrained=pretrained,
+            pretrained_classes=pretrained_classes,
+            input_shape=input_shape,
+            softmax_outputs=softmax_outputs)
 
         self._init_model()
 
@@ -116,6 +114,10 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 raise ValueError(
                     "Input shape should be specified if the first "
                     "layer is not a `nn.Linear` module.")
+
+        self._loss = loss
+        self._optimizer = optimizer
+        self._optimizer_scheduler = optimizer_scheduler
 
         self._epochs = epochs
 
