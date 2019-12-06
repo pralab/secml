@@ -290,41 +290,41 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             merge_dicts(super(CClassifierPyTorch, self).get_params(),
                         loss_params, optim_params))
 
-    def get_state(self):
+    def get_state(self, return_optimizer=True):
         """Returns the object state dictionary."""
         from copy import deepcopy
 
         # State of the wrapping classifier
         state = super(CClassifierPyTorch, self).get_state()
 
-        # Map model and optimizer and scheduler to CPU before saving
+        # Map model to CPU before saving
         self._model.to(torch.device('cpu'))
+        # Use deepcopy as restoring device later will change them
+        state['model'] = deepcopy(self._model.state_dict())
 
-        # Unfortunately optimizer and scheduler does not have a 'to(device)' method
-        for opt_object in [self._optimizer, self._optimizer_scheduler]:
-            if opt_object is not None:
-                for opt_state in opt_object.state.values():
+        if return_optimizer is False:
+            state.pop('optimizer')
+            state.pop('optimizer_scheduler')
+        else:
+            # Unfortunately optimizer does not have a 'to(device)' method
+            if self._optimizer is not None:
+                for opt_state in self._optimizer.state.values():
                     for k, v in opt_state.items():
                         if isinstance(v, torch.Tensor):
                             opt_state[k] = v.to('cpu')
-
-        # Use deepcopy as restoring device later will change them
-        state['model'] = deepcopy(self._model.state_dict())
-        if self._optimizer is not None:
-            state['optimizer'] = deepcopy(self._optimizer.state_dict())
-        if self._optimizer_scheduler is not None:
-            state['optimizer_scheduler'] = deepcopy(self._optimizer_scheduler.state_dict())
-
-        # Restore device and optimizer
-        self._model.to(self._device)
-
-        # Unfortunately optimizer does not have a 'to(device)' method
-        for opt_object in [self._optimizer, self._optimizer_scheduler]:
-            if opt_object is not None:
-                for opt_state in opt_object.state.values():
+                state['optimizer'] = deepcopy(self._optimizer.state_dict())
+                # Unfortunately optimizer does not have a 'to(device)' method
+                for opt_state in self._optimizer.state.values():
                     for k, v in opt_state.items():
                         if isinstance(v, torch.Tensor):
                             opt_state[k] = v.to(self._device)
+
+                if self._optimizer_scheduler is not None:
+                    # scheduler will be saved only if also optimizer is defined
+                    state['optimizer_scheduler'] = deepcopy(self._optimizer_scheduler.state_dict())
+
+        # Restore device and optimizer
+        self._model.to(self._device)
 
         return state
 
@@ -332,14 +332,29 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         """Sets the object state using input dictionary."""
         # TODO: DEEPCOPY FOR torch.load_state_dict?
         self._model.load_state_dict(state_dict.pop('model'))
-        if hasattr(state_dict, 'optimizer'):
+        if 'optimizer' in state_dict and \
+                self._optimizer is not None:
             self._optimizer.load_state_dict(state_dict.pop('optimizer'))
-        else:
-            self._optimizer = None
-        if hasattr(state_dict, 'optimizer_scheduler'):
-            self._optimizer.load_state_dict(state_dict.pop('optimizer_scheduler'))
-        else:
-            self._optimizer_scheduler = None
+
+        if 'optimizer_scheduler' in state_dict and \
+                self._optimizer_scheduler is not None:
+            self._optimizer_scheduler.load_state_dict(state_dict.pop('optimizer_scheduler'))
+
+
+        # strict set state
+        if 'optimizer' in state_dict and \
+                self._optimizer is None:
+            raise ValueError("optimizer was stored but set to `None` in the created class. "
+                             "Set `return_optimizer=False` in `get_state` or restore the "
+                             "model's optimizer.")
+
+        # strict set state
+        if 'optimizer_scheduler' in state_dict and \
+                self._optimizer_scheduler is None:
+            raise ValueError("optimizer_scheduler was stored but set to `None` in the created class. "
+                             "Set `return_optimizer=False` in `get_state` or restore the "
+                             "model's optimizer_scheduler.")
+
         super(CClassifierPyTorch, self).set_state(state_dict, copy=copy)
 
     def __getattribute__(self, key):
@@ -388,8 +403,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 key in self._optimizer.state_dict()['param_groups'][0]:
             self._optimizer.param_groups[0][key] = value
         elif hasattr(self, '_optimizer_scheduler') and \
-            self._optimizer_scheduler is not None and \
-            key in self._optimizer_scheduler.state_dict():
+                self._optimizer_scheduler is not None and \
+                key in self._optimizer_scheduler.state_dict():
             self._optimizer_scheduler.state_dict[key] = value
         else:  # Otherwise, normal python set behavior
             super(CClassifierPyTorch, self).__setattr__(key, value)
@@ -682,12 +697,13 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             # model was stored with save_model method
             self._model.load_state_dict(state['model_state'])
 
-            if hasattr(state, 'optimizer_state'):
+            if 'optimizer_state' in state \
+                    and self._optimizer is not None:
                 self._optimizer.load_state_dict(state['optimizer_state'])
             else:
                 self._optimizer = None
 
-            if hasattr(state, 'optimizer_scheduler_state') \
+            if 'optimizer_scheduler_state' in state \
                     and self._optimizer_scheduler is not None:
                 self._optimizer_scheduler.load_state_dict(state['optimizer_scheduler_state'])
             else:

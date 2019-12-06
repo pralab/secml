@@ -1,3 +1,4 @@
+import copy
 import os
 from secml.array import CArray
 from secml.testing import CUnitTest
@@ -161,7 +162,7 @@ class TestCClassifierPyTorch(CUnitTest):
         fname = "state.tar"
         self.clf.save_model(fname)
         self.assertTrue(os.path.exists(fname))
-        self.clf = None
+        del self.clf
         model_creation_fn()
         self.clf.load_model(fname)
         self.logger.info("Testing restored model")
@@ -169,16 +170,15 @@ class TestCClassifierPyTorch(CUnitTest):
         loss_backup = self.clf._loss
         optimizer_backup = self.clf._optimizer
         optimizer_scheduler_backup = self.clf._optimizer_scheduler
-        self.clf._loss = None
-        self.clf._optimizer = None
-        self.clf._optimizer_scheduler = None
+        del self.clf._loss
+        del self.clf._optimizer
+        del self.clf._optimizer_scheduler
         self._test_performance()
         self.clf._loss = loss_backup
         self.clf._optimizer = optimizer_backup
         self.clf._optimizer_scheduler = optimizer_scheduler_backup
 
         os.remove(fname)
-
 
 if __name__ == '__main__':
     TestCClassifierPyTorch.main()
