@@ -70,7 +70,6 @@ class TestCClassifierPyTorch(CUnitTest):
         # Test gradient at specific layers
         for layer in layer_names:
             self.logger.info("Returning gradient for layer: {:}".format(layer))
-            print(layer)
 
             # construct w
             shape = self.clf.get_layer_output(x, layer).shape

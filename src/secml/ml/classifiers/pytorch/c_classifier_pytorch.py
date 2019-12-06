@@ -292,10 +292,10 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         # State of the wrapping classifier
         state = super(CClassifierPyTorch, self).get_state()
 
-        # Map model and optimizer to CPU before saving
+        # Map model and optimizer and scheduler to CPU before saving
         self._model.to(torch.device('cpu'))
 
-        # Unfortunately optimizer does not have a 'to(device)' method
+        # Unfortunately optimizer and scheduler does not have a 'to(device)' method
         for opt_object in [self._optimizer, self._optimizer_scheduler]:
             if opt_object is not None:
                 for opt_state in opt_object.state.values():
