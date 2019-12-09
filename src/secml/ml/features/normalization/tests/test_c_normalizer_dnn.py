@@ -62,7 +62,7 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         optimizer = optim.SGD(model.parameters(), lr=1e-1)
         cls.net = CClassifierPyTorch(model=model, loss=loss,
                                      optimizer=optimizer, random_state=0,
-                                     epochs=10)
+                                     epochs=10, pretrained=True)
         cls.net.fit(cls.ds)
         cls.norm = CNormalizerDNN(net=cls.net)
 
