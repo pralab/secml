@@ -291,7 +291,20 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                         loss_params, optim_params))
 
     def get_state(self, return_optimizer=True):
-        """Returns the object state dictionary."""
+        """Returns the object state dictionary.
+
+        Parameters
+        ----------
+        return_optimizer : bool, optional
+            If True (default), state of `optimizer` and `optimizer_scheduler`,
+            if defined, will be included in the state dictionary.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the state of the object.
+
+        """
         from copy import deepcopy
 
         # State of the wrapping classifier
@@ -299,9 +312,17 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
         # Map model to CPU before saving
         self._model.to(torch.device('cpu'))
+
         # Use deepcopy as restoring device later will change them
         state['model'] = deepcopy(self._model.state_dict())
 
+        # Restore device for model
+        self._model.to(self._device)
+
+        # When `return_optimizer` is False we do not include `optimizer` and
+        # `optimizer_scheduler` in state dict. However, if `return_optimizer`
+        # is True, `optimizer` and `optimizer_scheduler` should be included,
+        # even if they are None
         if return_optimizer is False:
             state.pop('optimizer')
             state.pop('optimizer_scheduler')
@@ -312,48 +333,48 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                     for k, v in opt_state.items():
                         if isinstance(v, torch.Tensor):
                             opt_state[k] = v.to('cpu')
+
+                # Use deepcopy as restoring device later will change them
                 state['optimizer'] = deepcopy(self._optimizer.state_dict())
-                # Unfortunately optimizer does not have a 'to(device)' method
+
+                # Restore optimizer state to proper device
                 for opt_state in self._optimizer.state.values():
                     for k, v in opt_state.items():
                         if isinstance(v, torch.Tensor):
                             opt_state[k] = v.to(self._device)
 
                 if self._optimizer_scheduler is not None:
-                    # scheduler will be saved only if also optimizer is defined
-                    state['optimizer_scheduler'] = deepcopy(self._optimizer_scheduler.state_dict())
-
-        # Restore device and optimizer
-        self._model.to(self._device)
+                    # Scheduler will be saved only if also optimizer is defined
+                    # No need to map to `cpu`, tensors in state
+                    state['optimizer_scheduler'] = deepcopy(
+                        self._optimizer_scheduler.state_dict())
 
         return state
 
     def set_state(self, state_dict, copy=False):
         """Sets the object state using input dictionary."""
         # TODO: DEEPCOPY FOR torch.load_state_dict?
+
         self._model.load_state_dict(state_dict.pop('model'))
-        if 'optimizer' in state_dict and \
-                self._optimizer is not None:
+
+        if 'optimizer' in state_dict:
+            if self._optimizer is None:
+                raise ValueError(
+                    "optimizer not found in current object but required for "
+                    "restoring state."
+                    "Save the state using `return_optimizer=False` or "
+                    "add an optimizer to the model first.")
             self._optimizer.load_state_dict(state_dict.pop('optimizer'))
 
-        if 'optimizer_scheduler' in state_dict and \
-                self._optimizer_scheduler is not None:
-            self._optimizer_scheduler.load_state_dict(state_dict.pop('optimizer_scheduler'))
-
-
-        # strict set state
-        if 'optimizer' in state_dict and \
-                self._optimizer is None:
-            raise ValueError("optimizer was stored but set to `None` in the created class. "
-                             "Set `return_optimizer=False` in `get_state` or restore the "
-                             "model's optimizer.")
-
-        # strict set state
-        if 'optimizer_scheduler' in state_dict and \
-                self._optimizer_scheduler is None:
-            raise ValueError("optimizer_scheduler was stored but set to `None` in the created class. "
-                             "Set `return_optimizer=False` in `get_state` or restore the "
-                             "model's optimizer_scheduler.")
+        if 'optimizer_scheduler' in state_dict:
+            if self._optimizer_scheduler is None:
+                raise ValueError(
+                    "`optimizer_scheduler` not found in current object "
+                    "but required for restoring state."
+                    "Save the state using `return_optimizer=False` or "
+                    "add an optimizer scheduler to the model first.")
+            self._optimizer_scheduler.load_state_dict(
+                state_dict.pop('optimizer_scheduler'))
 
         super(CClassifierPyTorch, self).set_state(state_dict, copy=copy)
 
@@ -442,11 +463,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                              "input to the `_from_tensor` method.")
         return CArray(x.cpu().numpy()).astype(float)
 
-    def _data_loader(self, data, labels=None, batch_size=10, shuffle=False,
-                     num_workers=0):
-        """
-        Returns `torch.DataLoader` generated from
-        the input CDataset.
+    def _data_loader(self, data, labels=None, batch_size=10,
+                     shuffle=False, num_workers=0):
+        """Returns `torch.DataLoader` generated from the input CDataset.
 
         Parameters
         ----------
@@ -462,8 +481,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             Whether to shuffle the data before dividing in batches.
             Default value is False.
         num_workers : int, optional
-            Number of processes to use for loading the data.
-            Default value is 1.
+            Number of additional processes to use for loading the data.
+            Default value is 0.
 
         Returns
         -------

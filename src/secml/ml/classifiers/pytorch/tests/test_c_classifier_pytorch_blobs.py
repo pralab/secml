@@ -115,16 +115,13 @@ class TestCClassifierPyTorchBlobs(TestCClassifierPyTorch):
         state = self.clf.get_state(return_optimizer=False)
         self.logger.info("State of classifier:\n{:}".format(state))
 
-        # Create an entirely new clf
+        # Create an entirely new clf without optimizer
         net2 = Net(n_features=self.n_features, n_classes=self.n_classes)
-        criterion2 = None
-        optimizer2 = None
-        optimizer_scheduler = None
 
         clf2 = CClassifierPyTorch(model=net2,
-                                  loss=criterion2,
-                                  optimizer=optimizer2,
-                                  optimizer_scheduler=optimizer_scheduler,
+                                  loss=None,
+                                  optimizer=None,
+                                  optimizer_scheduler=None,
                                   epochs=10,
                                   batch_size=self.batch_size)
 
