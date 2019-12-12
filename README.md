@@ -4,25 +4,27 @@ SecML is an open-source Python library for the **security evaluation** of
 Machine Learning (ML) algorithms.
 
 It comes with a set of powerful features:
-- **Dense/Sparse data support.** We provide full, transparent support for both
-  dense (through `numpy` library) and sparse data (through `scipy` library)
-  in a single data structure.
 - **Wide range of supported ML algorithms.** All supervised learning algorithms
   supported by `scikit-learn` are available, as well as Neural Networks (NNs)
   through [PyTorch](https://pytorch.org/) deep learning platform.
 - **Built-in attack algorithms.** Evasion and poisoning attacks based on a
   custom-developed fast solver. In addition, we provide connectors to other 
   third-party Adversarial Machine Learning libraries.
-- **Visualize your results.** We provide visualization and plotting framework
+- **Dense/Sparse data support.** We provide full, transparent support for both
+  dense (through `numpy` library) and sparse data (through `scipy` library)
+  in a single data structure.
+- **Visualize your results.** We provide visualization and plotting framework,
   based on the widely-known library [matplotlib](https://matplotlib.org/).
 - **Explain your results.** Explainable ML methods to interpret model decisions
   via influential features and prototypes.
-- **Extensible.** Easily create new wrappers for ML models or attack algorithms
-  extending our abstract interfaces.
+- **Model Zoo.** Use our pre-trained models to save time and easily replicate 
+  scientific results.
 - **Multi-processing.** Do you want to save time further? We provide full
   compatibility with all the multi-processing features of `scikit-learn` and
   `pytorch`, along with built-in support of the [joblib](
   https://joblib.readthedocs.io/) library.
+- **Extensible.** Easily create new components, like ML models or attack 
+  algorithms, by extending the provided abstract interfaces.
 
 ### SecML is currently in development.
 If you encounter any bug, please report them using the 
@@ -131,7 +133,8 @@ input and output of all other classes in the library.
 
 The `secml.ml` package contains all the Machine Learning algorithms and
 support classes, including classifiers, loss and regularizer functions,
-kernels and performance evaluation functions.
+kernels and performance evaluation functions. Also, a zoo of pre-trained 
+models is provided by the `secml.ml.model_zoo` package.
 
 The `secml.adv` package contains evasion and poisoning attacks based on a
 custom-developed solver, along with classes to easily perform security
