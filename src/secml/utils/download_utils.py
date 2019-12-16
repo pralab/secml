@@ -61,6 +61,7 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
 
     # Build full path of output file
     out_path = fm.join(output_dir, url.split('/')[-1])
+    out_path = out_path.split('?', 1)[0]  # Remove parameters
 
     # Read data and store each chunk
     with open(out_path, 'wb') as f:
