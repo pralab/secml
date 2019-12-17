@@ -13,10 +13,10 @@ from secml.core.type_utils import \
 class TestCArrayInit(CArrayTestCases):
     """Unit test for CArray INIT."""
 
-    def test_init(self):
-        """Test CArray initialization"""
+    def test_init_builtin(self):
+        """Test CArray initialization using builtin types."""
 
-        def test_init_builtin(totest_list):
+        def check_init_builtin(totest_list):
 
             for totest_elem in totest_list:
                 for tosparse in [False, True]:
@@ -43,14 +43,17 @@ class TestCArrayInit(CArrayTestCases):
                             "to test {:}".format(type(totest_elem)))
 
         self.logger.info("Initializing CArray with built-in types...")
-        test_init_builtin([[[2, 3], [22, 33]], [2, 3], [[2], [3]], 3, True,
-                           [[True, False], [True, True]], [True, False]])
+        check_init_builtin([[[2, 3], [22, 33]], [2, 3], [[2], [3]], 3, True,
+                            [[True, False], [True, True]], [True, False]])
+
+    def test_init_array(self):
+        """Test CArray initialization using arrays."""
 
         self.logger.info("Initializing CArray with another CArray...")
         arrays_list = [CArray([[2, 3], [22, 33]]),
-                      CArray([2, 3]),
-                      CArray([[2], [3]]),
-                      CArray(3)]
+                       CArray([2, 3]),
+                       CArray([[2], [3]]),
+                       CArray(3)]
 
         for init_elem in arrays_list:
             array = CArray(init_elem)
@@ -100,6 +103,34 @@ class TestCArrayInit(CArrayTestCases):
             self.assertTrue(array.issparse)
             self.assertTrue(array.shape == init_elem.shape)
 
+    def test_init_reshape(self):
+        """Test CArray reshape during initialization."""
+        arrays = [[[2, 3], [22, 33]], [2, 3], [[2], [3]], 3]
+
+        for a in arrays:
+            for sparse in (False, True):
+                out_def = CArray(a, tosparse=sparse)
+                size = out_def.size  # Expected size
+
+                for shape in [size, (size, ), (1, size), (size, 1)]:
+                    out_res = CArray(a, tosparse=sparse, shape=shape)
+
+                    # Resulting shape will always be (1, n) for sparse
+                    if is_scalar(shape):
+                        shape = (1, shape) if out_res.issparse else (shape, )
+                    if out_res.issparse and len(shape) < 2:
+                        shape = (1, shape[0])
+
+                    self.assertEqual(out_res.shape, shape)
+                    self.logger.info("Expected shape `{:}`, got `{:}`".format(
+                        shape, out_res.shape))
+
+                with self.assertRaises(ValueError):
+                    # Shape with wrong size, expect error
+                    CArray(a, tosparse=sparse, shape=(2, size))
+
+    def test_init_empty(self):
+        """Test CArray initialization using empty structures."""
         # Initialization using empty arrays
         empty_init = []
         for test_case in (False, ):
