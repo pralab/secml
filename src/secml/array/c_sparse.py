@@ -15,7 +15,7 @@ from secml.array.c_array_interface import _CArrayInterface
 from secml.array.c_dense import CDense
 
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
-    is_list, is_slice, is_scalar, is_intlike, is_int, is_bool
+    is_list, is_tuple, is_slice, is_scalar, is_int, is_bool
 from secml.core.constants import inf
 
 
@@ -55,6 +55,31 @@ def _expand_nnz_bool(array, nnz_val):
     return out
 
 
+def _shape_atleast_2d(shape):
+    """Convert input shape to a two-dimensional shape.
+
+    Parameters
+    ----------
+    shape : int or tuple or other
+        Shape to be converted.
+
+    Returns
+    -------
+    tuple
+        Two-dimensional shape.
+        If shape is an int, `(1, shape)` will be returned.
+        If shape is a tuple and `len(shape) == 1`,
+        `(1, shape[0])` will be returned.
+        Otherwise, input shape will be returned as is.
+
+    """
+    if is_int(shape):
+        shape = (1, shape)
+    if is_tuple(shape) and len(shape) < 2:
+        shape = (1, shape[0])
+    return shape
+
+
 class CSparse(_CArrayInterface):
     """Sparse array. Encapsulation for scipy.sparse.csr_matrix."""
     __slots__ = '_data'  # CSparse has only one slot for the scs.csr_matrix
@@ -66,14 +91,15 @@ class CSparse(_CArrayInterface):
             raise TypeError("operator not implemented")
         data = self._buffer_to_builtin(data)
         # Reshaping is not supported for csr_matrix so we need few hacks
-        new_shape = shape
         # We don't use shape when creating the buffer, but we reshape later
-        if is_ndarray(data):  # This problem happens only with dense data
-            shape = None
+        # Scipy >= 1.4, shape must be two dimensional
+        newshape = _shape_atleast_2d(shape)
+        # For special scipy init input shape should be passed to `csr_matrix`
+        shape = None if not is_tuple(data) else newshape
         self._data = scs.csr_matrix(data, shape, dtype, copy)
         # Now we reshape the array if needed (not available for scs.csr_matrix)
-        if new_shape is not None and new_shape != self.shape:
-            self._data = self.reshape(new_shape)._data
+        if newshape is not None and newshape != self.shape:
+            self._data = self.reshape(newshape)._data
 
     # ------------------------------ #
     # # # # # # PROPERTIES # # # # # #
@@ -1023,6 +1049,8 @@ class CSparse(_CArrayInterface):
             varies depending on the type of sparse matrix being used.
 
         """
+        # Scipy >= 1.4, shape must be two dimensional
+        newshape = _shape_atleast_2d(newshape)
         return self.__class__(
             self.tocsr().reshape(newshape, order=order, copy=copy))
 
