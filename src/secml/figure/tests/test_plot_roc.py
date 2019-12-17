@@ -100,7 +100,6 @@ class TestCRoc(CUnitTest):
     def test_compare_sklearn(self):
 
         import numpy as np
-        from scipy import interp
 
         from sklearn import svm, datasets
         from sklearn.metrics import roc_curve, auc
@@ -136,7 +135,7 @@ class TestCRoc(CUnitTest):
             probas_ = classifier.fit(X[train], y[train]).predict_proba(X[test])
             # Compute ROC curve and area the curve
             fpr, tpr, thresholds = roc_curve(y[test], probas_[:, 1])
-            mean_tpr += interp(mean_fpr, fpr, tpr)
+            mean_tpr += np.interp(mean_fpr, fpr, tpr)
             mean_tpr[0] = 0.0
             roc_auc = auc(fpr, tpr)
             roc_fig.sp.plot(fpr, tpr, linewidth=1,
