@@ -90,12 +90,12 @@ class COptimizerPGD(COptimizer):
         Parameters
         ----------
         i : integer
-        index of the current iteration
+            index of the current iteration
 
         Returns
         -------
         x_opt : CArray
-        best point found so far
+            best point found so far
         """
         f_seq = self.f_seq[:i]
         best_sol_idx = f_seq.argmin()
