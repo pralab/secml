@@ -54,3 +54,43 @@ Two common scenarios are listed below:
 Editable installs are also available while using SecML as a
 dependency of other libraries/projects
 (see `Installation Guide <https://secml.gitlab.io/#installation-guide>`_ for more information).
+
+Submitting a bug report or feature request
+------------------------------------------
+
+Before creating an issue we kindly ask you to read the
+`documentation <https://secml.gitlab.io>`_
+and to make sure your answer is not already there.
+
+Bug report
+==========
+
+Please ensure the bug was not already reported.
+If you're unable to find an open issue addressing
+the problem, open a
+`new one <https://gitlab.com/secml/secml/issues/new>`_.
+Be sure to include
+a title and clear description, as much relevant
+information as possible, and a code sample or an
+executable test case demonstrating the expected
+behavior that is not occurring.
+
+Feature request
+===============
+
+Suggestions and feedback are always welcome.
+We ask you to open an
+`issue <https://gitlab.com/secml/secml/issues/new>`_,
+please provide documentation and clear instructions
+on what would be the expected behavior of the new
+feature. Of course, you are free to contribute
+yourself (the next section will address that).
+
+Contributing to the code
+------------------------
+
+Coding guidelines
+-----------------
+
+Tips to read current code
+-------------------------
