@@ -55,6 +55,24 @@ Editable installs are also available while using SecML as a
 dependency of other libraries/projects
 (see `Installation Guide <https://secml.gitlab.io/#installation-guide>`_ for more information).
 
+Ways to contribute
+==================
+
+There are many ways to contribute to our project. The most
+valuable contributions for us are the ones that extend our
+library by connecting it to most-used ML libraries and
+by adding state-of-the art attacks and defenses to use in
+experiments. Other useful contributions are documentation and
+examples of usage, which will greatly help us enlarge our user
+community.
+
+You can also help by answering questions in the issue tracker,
+investigating bugs and collaborating in other merge request with
+other contributors.
+
+Another way of contributing is by sharing our work with colleagues
+and people that may be interested in using it for their experiments.
+
 Submitting a bug report or feature request
 ------------------------------------------
 
@@ -122,7 +140,8 @@ trouble in comparing the differences with git.
 Documentation style guide
 =========================
 
-We use informative docstrings for our code.
+We use informative docstrings for our code. Make sure
+your code is always commented and documented.
 The docstrings follow the NumPy documentation format.
 
 Here is the list of things regarding the documentation
@@ -136,17 +155,60 @@ that you can contribute to:
     with the output so the user won’t need to run them
     for seeing the output.
 
+TODO: guide to build the documentation
+
 Package conventions
 ===================
+
+TODO
 
 Modules conventions
 ===================
 
+TODO
+
 Classes conventions
 ===================
 
+TODO
+
 Tests conventions
 =================
+
+TODO
+
+Merge request checklist
+=======================
+
+Before you ask us to revise the code and merge the code
+into our library, we ask you to pass all the steps
+in this checklist. After that, you can send the merge request
+to us and we will evaluate ourselves. We will refuse
+merge requests not compliant with the following checklist,
+but passing this test is only the first step. We will still
+need to evaluate the code and ensure to benefit from it.
+
+1.  Give informative names to everything. This means not
+    only to give useful names to classes, method and python-related
+    things, but also to the merge request itself.
+2.  Make sure your code passes the tests. Remember to test both
+    CPU and CUDA mode, if applicable.
+3.  Make sure your code is well documented and that the
+    processes inside are commented. Make sure the documentation
+    renders properly by compiling it with Sphinx. Delete commented
+    lines of code.
+4.  Add tests if you are contributing for a new feature. Make sure
+    the new feature is tested correctly and follows the expected
+    behavior correctly.
+5.  Make sure your code does not violate PEP-8.
+    Please avoid reformatting parts of the file that
+    your pull request doesn’t change, as it distracts from code review.
+6.  When applicable, re-use the code in the library without rewriting
+    parts that are already implemented somewhere else.
+7.  (optional) Provide an example of usage in the merge request, so that
+    the contribution to the library will become clear to
+    the reviewers as well as other contributors.
+
 
 Creating a SecML backend
 ------------------------
@@ -322,5 +384,3 @@ The following contribution guides will be updated in future versions.
 
     -   `CPlot`
 
-Tips to read current code
--------------------------
