@@ -1,3 +1,12 @@
+## v0.11.1 (18/12/2019)
+- Fixed compatibility issues with recently released scikit-learn v0.22 and scipy v1.4.
+
+### Fixed (3 changes)
+- #687 Fixed reshaping of sparse arrays to vector-like when using Scipy v1.4.
+- #686 Replaced deprecated import of `interp` function from scipy namespace instead of numpy namespace.
+- #668 Fixed unittests failing under scikit-learn v0.22 due to a change in their class output.
+
+
 ## v0.11 (02/12/2019)
 - #653 Added new `secml.ml.model_zoo` package, which provides a zoo of pre-trained SecML models. The list of available models will be greatly expanded in the future. See https://secml.gitlab.io/secml.ml.model_zoo.html for more details.
 - #629 Greatly improved the performance of the `grad_f_x` method for `CClassifier` and `CPreProcess` classes, especially when nested via `preprocess` attribute.

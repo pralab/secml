@@ -180,7 +180,9 @@ setup(
         'pytorch': ["torch>=1.1", "torchvision>=0.2.2"],
         'cleverhans': ["tensorflow>=1.14,<2", "cleverhans"],
         'tf-gpu': ["tensorflow-gpu>=1.14,<2"],
-        'unittests': ['pytest>=5,<5.1', 'pytest-cov>=2.8', 'jupyter', 'nbval']
+        'unittests': ['pytest>=5,<5.1',
+                      'pytest-cov>=2.8', 'coverage<5',
+                      'jupyter', 'nbval']
     },
     zip_safe=False
 )
