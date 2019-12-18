@@ -84,18 +84,18 @@ class COptimizerPGD(COptimizer):
     #############################################
 
     def _return_best_solution(self, i):
-        """
-        Search the best solution between the ones found so far.
+        """Search the best solution between the ones found so far.
 
         Parameters
         ----------
         i : int
-            index of the current iteration
+            Index of the current iteration.
 
         Returns
         -------
         x_opt : CArray
-            best point found so far
+            Best point found so far.
+
         """
         f_seq = self.f_seq[:i]
         best_sol_idx = f_seq.argmin()
