@@ -175,7 +175,14 @@ TODO
 Tests conventions
 =================
 
-TODO
+We test our code with pervasive unit tests. For this purpose,
+we have `tests` subdirectories in all our packages.
+You can also contribute to writing tests for our code.
+Tests should run smoothly and achieve appropriate initialization
+and cleanup. Make the initialization in the `setUp` method,
+and implement the tests in the other methods. Tests will be
+run automatically only if the file names start with `test_` and
+the methods of the class starts with `test_` as well.
 
 Merge request checklist
 =======================
