@@ -89,7 +89,7 @@ class COptimizerPGD(COptimizer):
 
         Parameters
         ----------
-        i : integer
+        i : int
             index of the current iteration
 
         Returns
