@@ -89,8 +89,238 @@ yourself (the next section will address that).
 Contributing to the code
 ------------------------
 
+Please stay as close as possible to the following
+guidelines. This will ensure quality and easy-to-merge
+requests. Your request to merge will be reviewed
+by one of our maintainers and you will be asked to
+reformat if needed.
+You can find the instructions for sending the merge request
+`here <https://docs.gitlab.com/ee/user/project/repository/forking_workflow.html>`_.
+Changes will be accepted if they add substantial
+improvements to stability, functionality, testability, and
+documentation of the library.
+
 Coding guidelines
 -----------------
+
+In this section, we will summarize standards and conventions
+used in our library.
+
+Code style guide
+================
+We follow python `PEP-8 <https://www.python.org/dev/peps/pep-0008/>`_
+convention for ensuring code readability.
+If you see code not compliant to this standard,
+please do not open an issue for this reason.
+Issues related to cosmetic changes will be closed.
+If you are contributing to the code, please refer
+to these conventions before committing your changes.
+Do not perform refactoring or code reformat in
+already-existing modules: this would cause us some
+trouble in comparing the differences with git.
+
+Documentation style guide
+=========================
+
+We use informative docstrings for our code.
+The docstrings follow the NumPy documentation format.
+
+Here is the list of things regarding the documentation
+that you can contribute to:
+
+*   You can contribute to creating documentation
+    for our code.
+*   You can contribute to the examples in our library,
+    creating a Jupyter notebook well commented and with
+    the discussion of the results. We save our notebooks
+    with the output so the user won’t need to run them
+    for seeing the output.
+
+Package conventions
+===================
+
+Modules conventions
+===================
+
+Classes conventions
+===================
+
+Tests conventions
+=================
+
+Creating a SecML backend
+------------------------
+
+
+A **backend** is an interface that links third-party
+libraries or stand-alone code to the SecML library.
+Since there is a great number of frameworks around
+the web, we cannot provide connectors to all libraries
+on our own. This is why we ask our community to implement
+their own modules and share them with us. We provide
+this guide for the implementation of new modules,
+along with examples of implementation and hints on how
+to define the required modules.
+
+SecML already contains some library connectors and
+backend implementations, remember to check out
+`last version <https://gitlab.com/secml/secml/-/releases>`_ and
+`roadmap <https://secml.gitlab.io/roadmap.html>`_ before diving into code.
+
+Unified backend interface
+=========================
+
+In order to use our powerful APIs, developers will
+have to create **converters** to handle our
+**custom data type** for python arrays, the
+`CArray <https://secml.gitlab.io/secml.array.html#module-secml.array.c_array>`_,
+and implement the interfaces defined in metaclasses
+such as the
+`CClassifier <https://secml.gitlab.io/secml.ml.classifiers.html#module-secml.ml.classifiers.c_classifier>`_.
+
+The CArray class wraps the dense Numpy array and
+the sparse `csr_matrix` so that they have the
+same interface for the user.
+
+The shape of a CArray is either a vector or a
+matrix of rows where each row represents a sample.
+
+Two CArray can be composed in a
+`CDataset <https://secml.gitlab.io/secml.data.html#secml.data.c_dataset.CDataset>`_,
+that can be used to store samples
+(attribute X) and labels (attribute Y).
+
+
+Steps for creating a new backend
+================================
+
+In this section, we list all methods to implement
+for minimal support of a new backend module.
+
+We will list several use cases, so don’t be
+scared if they seem too many.
+
+Focus on your use case, then give a read to
+the methods’ description before writing the code.
+This will help you design the classes and avoid mistakes.
+
+Implementing a Classifier
+=========================
+
+SecML defines a
+`unified classifier interface <https://secml.gitlab.io/
+secml.ml.classifiers.html#secml.ml.classifiers.c_classifier
+.CClassifier>`_ for enforcing the base structure for all
+classifiers. All new classifiers, except for DNNs (the next
+section will discuss this case), which have a more
+specific interface, must inherit from the CClassifier
+class. The class CClassifier requires the developer
+to implement three private methods in order to function.
+
+CClassifier
+===========
+
+Here is the list of methods to implement for creating
+a new classifier (not DNN):
+
+-   `_forward`: performs a forward pass of the input x.
+    It should return the output of the decision function
+    of the classifier.
+
+-   `_backward`: this method returns the gradient
+    of the decision function output with respect to data.
+    It takes a CArray `w` as input, which pre-multiplies
+    the gradient as in standard reverse-mode autodiff.
+
+-   `_fit`: trains the One-Vs-All classifier.
+    Takes as input a CDataset.
+
+Implementing a backend for DNN
+==============================
+
+The backend for DNN ([CClassifierDNN](-))
+is based on the CClassifier class as well
+but adds more methods specific to DNNs and
+their frameworks.
+
+You can see how to use the `CClassifierDNN`
+class in our implemented `PyTorch backend <https://secml.gitlab.io/
+secml.ml.classifiers.html#module-secml.ml
+.classifiers.pytorch.c_classifier_pytorch>`_.
+
+CClassifierDNN
+==============
+
+Here is the list of methods to implement for
+creating a new DNN classifier:
+
+-   _forward: performs a forward pass of the
+    input x. It is slightly different from
+    the `_forward` method of the CClassifier,
+    as it returns the output of the layer of the
+    DNN specified in the attribute `_out_layer`.
+    If `_out_layer` is None, the last layer output
+    is returned (applies the softmax if
+    `softmax_outputs` is True).
+
+-   `_backward`: returns the gradient of the
+    output of the DNN layer specified in
+    `_out_layer`, with respect to the input data.
+
+-   `_fit`: trains the One-Vs-All classifier.
+    Takes as input a CDataset.
+
+-   `layers` (property): returns a list of
+    tuples containing the layers of the model,
+    each tuple is structured as `(layer_name, layer)`.
+
+-   `layer_shapes` (property): returns the
+    output shape of each layer (as a dictionary
+    with layer names as keys).
+
+-   `_to_tensor`: converts a CArray into the
+    tensor data type of the backend framework.
+
+-   `_from_tensor`: converts a backend tensor
+    data type to a CArray
+
+-   `save_model`: saves the model weight and
+    parameters into a gz archive. If possible,
+    it should allow model restoring as a
+    checkpoint - the user should be able to continue
+    training of the restored model.
+
+-   `load_model`: restores the model. If possible,
+    it restores also the optimization parameters
+    as the user may need to continue training.
+
+It may be necessary to implement a custom data loader
+for the specific backend. The data loader should take
+as input a CDataset from SecML and load the data for
+the backend. This is necessary because the inputs to
+the network may have their own shapes, whereas the
+CArray treats each sample as a row vector. We suggest
+to add the `input_shape` as an input parameter of
+the wrapper and handle the conversion inside.
+
+More advanced implementations (not available yet)
+=================================================
+
+The following contribution guides will be updated in future versions.
+
+*   Data processing
+
+    -   `CPreprocess`
+
+    -   `CKernel`
+
+*   Data
+
+    -   `CDataLoader`
+
+*   Visualization
+
+    -   `CPlot`
 
 Tips to read current code
 -------------------------
