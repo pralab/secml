@@ -148,6 +148,7 @@ class COptimizerPGD(COptimizer):
         self._x_seq = CArray.zeros((self._max_iter, x.size))
         self._f_seq = CArray.zeros(self._max_iter)
 
+        i = 0
         for i in range(self._max_iter):
 
             self._x_seq[i, :] = x
