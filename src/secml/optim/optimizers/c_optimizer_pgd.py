@@ -90,8 +90,8 @@ class COptimizerPGD(COptimizer):
         f_seq = self.f_seq[:i]
         best_sol_idx = f_seq.argmin()
 
-        self._x_seq = self.x_seq[:best_sol_idx,:]
-        self._f_seq = self.f_seq[:best_sol_idx]
+        self._x_seq = self.x_seq[:best_sol_idx+1,:]
+        self._f_seq = self.f_seq[:best_sol_idx+1]
         self._x_opt = self._x_seq[-1, :]
 
         return self._x_opt
