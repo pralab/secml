@@ -36,18 +36,27 @@ stages:
     <<: *test-cache
 
 
-package:
+.package:
   stage: package
-  image: ${CI_REGISTRY}/pralab/docker-helper-images/python35-setuptools:latest
   interruptible: true
+
+package:
+  extends: .package
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/python35-setuptools:latest
   before_script:
     - echo $CI_PROJECT_DIR
   script:
     - python setup.py sdist --formats=zip
     - python setup.py bdist_wheel --universal
     - twine check dist/*
-  only:
-    changes:
+  rules:
+    - if: '$CI_MERGE_REQUEST_ID'
+      when: never
+    - if: '$RUN_TESTS'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - changes:
       - src/secml/**/*
       - .gitlab-ci.yml
       - CHANGELOG.md
@@ -56,8 +65,7 @@ package:
       - requirements.txt
       - setup.py
       - tox.ini
-  except:
-    - schedules
+      when: on_success
   artifacts:
     name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
     paths:
@@ -66,17 +74,22 @@ package:
     expire_in: 1 week
 
 package:docs:
-  stage: package
+  extends: .package
   image: ${CI_REGISTRY}/pralab/docker-helper-images/python35-sphinx:latest
-  interruptible: true
   script:
     - echo $CI_PROJECT_DIR
     - python -V
     - pip install tox
     - tox -e docs
     - mv docs/build/html/ public/
-  only:
-    changes:
+  rules:
+    - if: '$CI_MERGE_REQUEST_ID'
+      when: never
+    - if: '$RUN_TESTS'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - changes:
       - docs/**/*
       - tutorials/**/*
       - src/secml/**/*
@@ -86,8 +99,7 @@ package:docs:
       - requirements.txt
       - setup.py
       - tox.ini
-  except:
-    - schedules
+      when: on_success
   artifacts:
     name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}_DOCS"
     paths:
@@ -109,21 +121,25 @@ package:docs:
     - echo $CI_PROJECT_DIR
     - python -V
     - pip install tox
-  only:
-    changes:
+  rules:
+    - if: '$RUN_TESTS'
+      when: on_success
+    - if: '$SKIP_TESTS || $CI_MERGE_REQUEST_ID'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "tags"'
+      when: never
+    - changes:
+      - src/secml/VERSION
+      when: never
+    - changes:
       - src/secml/**/*
       - .gitlab-ci.yml
       - requirements.txt
       - setup.py
       - tox.ini
-  except:
-    refs:
-      - schedules
-      - tags
-    changes:
-      - src/secml/VERSION
-    variables:
-      - $SKIP_TESTS
+      when: on_success
 
 test:py35:latest:
   extends: .test
@@ -153,14 +169,26 @@ test:py37:min:
 .test:notebooks:
   extends: .test
   needs: ["package:docs"]  # Use [] after gitlab 12.6
-  only:
-    changes:
+  rules:
+    - if: '$RUN_TESTS'
+      when: on_success
+    - if: '$SKIP_TESTS || $CI_MERGE_REQUEST_ID'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "tags"'
+      when: never
+    - changes:
+      - src/secml/VERSION
+      when: never
+    - changes:
       - src/secml/**/*
       - tutorials/**/*
       - .gitlab-ci.yml
       - requirements.txt
       - setup.py
       - tox.ini
+      when: on_success
 
 test:notebooks:py35:latest:
   extends: .test:notebooks
@@ -178,14 +206,17 @@ test:notebooks:py35:latest:
     - python -V
   after_script:
     - python -c "import secml"
-  only:
-    refs:
-      - /^release-.*$/
-      - /^.*-stable$/
-      - develop
-      - tags
-      - web
-    changes:
+  rules:
+    - if: '$RUN_TESTS'
+      when: on_success
+    - if: '$SKIP_TESTS || $CI_MERGE_REQUEST_ID'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "tags" || $CI_PIPELINE_SOURCE == "web"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_COMMIT_REF_NAME == "develop" || $CI_COMMIT_REF_NAME =~ /^release-.*$/ || $CI_COMMIT_REF_NAME =~ /^.*-stable$/'
+      changes:
       - src/secml/**/*
       - .gitlab-ci.yml
       - CHANGELOG.md
@@ -194,11 +225,7 @@ test:notebooks:py35:latest:
       - requirements.txt
       - setup.py
       - tox.ini
-  except:
-    refs:
-      - schedules
-    variables:
-      - $SKIP_TESTS
+      when: on_success
 
 .test:install:whl:
   extends: .test:install
@@ -389,8 +416,9 @@ triage:run:
   extends: .triage
   script:
     - gitlab-triage --debug --host-url $CI_PROJECT_DOMAIN --token $API_ACCESS_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
-  only:
-    - schedules
+  rules:
+    - if: '$RUN_TRIAGE'
+      when: always
 
 triage:run:dry:
   stage: triage
@@ -398,6 +426,5 @@ triage:run:dry:
   script:
     - gitlab-triage --dry-run --debug --host-url $CI_PROJECT_DOMAIN --token $API_ACCESS_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
   only:
-    - schedules
     - web
   when: manual
