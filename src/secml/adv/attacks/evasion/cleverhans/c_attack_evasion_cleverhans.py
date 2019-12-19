@@ -101,14 +101,14 @@ class CAttackEvasionCleverhans(CAttackEvasion,
     @property
     def f_eval(self):
         if self._clvrh_clf:
-            return self._clvrh_clf.f_eval
+            return self._last_f_eval
         else:
             raise ValueError("Attack not performed yet!")
 
     @property
     def grad_eval(self):
         if self._clvrh_clf:
-            return self._clvrh_clf.grad_eval
+            return self._last_grad_eval
         else:
             raise ValueError("Attack not performed yet!")
 
@@ -178,6 +178,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         CAttack._set_solver_classifier(self)
 
         # create the cleverhans attack object
+        tf.reset_default_graph()
         self._tfsess.close()
         session_conf = tf.compat.v1.ConfigProto(
             inter_op_parallelism_threads=-1,  # Perform in caller's thread
@@ -264,6 +265,8 @@ class CAttackEvasionCleverhans(CAttackEvasion,
          the objective function and sequence of attack points (if enabled).
 
         """
+        self._clvrh_clf.reset_eval()
+
         # if data can not be modified by the attacker, exit
         if not self.is_attack_class(y0):
             self._x_seq = x_init
@@ -317,6 +320,10 @@ class CAttackEvasionCleverhans(CAttackEvasion,
             # some attack returns at the initial point if
             # condition is not met (e.g. CWL2)
             self._x_opt = self._x_seq[-1, :]
+
+        self._last_f_eval = self._clvrh_clf.f_eval
+        self._last_grad_eval = self._clvrh_clf.grad_eval
+
         return self._x_opt, nan  # TODO: return value of objective_fun(x_opt)
 
 
@@ -343,6 +350,10 @@ class _CModelCleverhans(Model):
     @property
     def grad_eval(self):
         return self._fun.n_grad_eval
+
+    def reset_eval(self):
+        """Reset the number of evaluations."""
+        self._fun.reset_eval()
 
     def _decision_function(self, x):
         """
