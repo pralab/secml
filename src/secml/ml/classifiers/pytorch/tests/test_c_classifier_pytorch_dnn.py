@@ -18,6 +18,7 @@ from secml.ml.features import CNormalizerMinMax
 
 class TestCClassifierPyTorchDNN(TestCClassifierPyTorch):
     def setUp(self):
+        self.logger.info("Testing ResNet11 Model")
         super(TestCClassifierPyTorchDNN, self).setUp()
         self._dataset_creation_resnet()
         self._model_creation_resnet()
@@ -49,19 +50,29 @@ class TestCClassifierPyTorchDNN(TestCClassifierPyTorch):
                                       optimizer=optimizer,
                                       epochs=10,
                                       batch_size=self.batch_size,
-                                      input_shape=(3, 224, 224))
+                                      input_shape=(3, 224, 224),
+                                      pretrained=True)
 
-    def test_big_net(self):
-        self.logger.info("___________________")
-        self.logger.info("Testing ResNet11 Model")
-        self.logger.info("___________________")
+    def test_layer_names(self):
         self._test_layer_names()
+
+    def _test_layer_shapes(self):
         self._test_layer_shapes()
+
+    def test_get_params(self):
         self._test_get_params()
+
+    def test_out_at_layer(self):
         self._test_out_at_layer("layer4:1:relu")
         self._test_out_at_layer('bn1')
         self._test_out_at_layer('fc')
         self._test_out_at_layer(None)
+
+    def test_grad_x(self):
         self._test_grad_x(['fc', None])
+
+    def test_softmax_outputs(self):
         self._test_softmax_outputs()
+
+    def test_save_load(self):
         self._test_save_load(self._model_creation_resnet)

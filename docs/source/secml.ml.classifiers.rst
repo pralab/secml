@@ -101,6 +101,14 @@ CClassifierSVM
    :undoc-members:
    :show-inheritance:
 
+CClassifierDNN
+------------------
+
+.. automodule:: secml.ml.classifiers.c_classifier_dnn
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 CClassifierPyTorch
 ------------------
 

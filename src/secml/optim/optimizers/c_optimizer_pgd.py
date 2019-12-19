@@ -83,6 +83,29 @@ class COptimizerPGD(COptimizer):
     #                  METHODS
     #############################################
 
+    def _return_best_solution(self, i):
+        """Search the best solution between the ones found so far.
+
+        Parameters
+        ----------
+        i : int
+            Index of the current iteration.
+
+        Returns
+        -------
+        x_opt : CArray
+            Best point found so far.
+
+        """
+        f_seq = self.f_seq[:i]
+        best_sol_idx = f_seq.argmin()
+
+        self._x_seq = self.x_seq[:best_sol_idx + 1, :]
+        self._f_seq = self.f_seq[:best_sol_idx + 1]
+        self._x_opt = self._x_seq[-1, :]
+
+        return self._x_opt
+
     def minimize(self, x_init, args=(), **kwargs):
         """Interface to minimizers.
 
@@ -125,6 +148,7 @@ class COptimizerPGD(COptimizer):
         self._x_seq = CArray.zeros((self._max_iter, x.size))
         self._f_seq = CArray.zeros(self._max_iter)
 
+        i = 0
         for i in range(self._max_iter):
 
             self._x_seq[i, :] = x
@@ -133,19 +157,13 @@ class COptimizerPGD(COptimizer):
             if i > 0 and abs(self.f_seq[i - 1] - self.f_seq[i]) < self.eps:
                 self.logger.debug("Flat region, exiting... {:}  {:}".format(
                     self._f_seq[i], self._f_seq[i - 1]))
-                self._x_seq = self.x_seq[:i, :]
-                self._f_seq = self.f_seq[:i]
-                self._x_opt = self._x_seq[-1, :]
-                return self._x_opt
+                return self._return_best_solution(i)
 
             if i > 6 and self.f_seq[-3:].mean() < self.f_seq[-6:-3].mean():
                 self.logger.debug(
                     "Decreasing function, exiting... {:}  {:}".format(
                         self.f_seq[-3:].mean(), self.f_seq[-6:-3].mean()))
-                self._x_seq = self.x_seq[:i-3, :]
-                self._f_seq = self.f_seq[:i-3]
-                self._x_opt = self._x_seq[-4, :]
-                return self._x_opt
+                return self._return_best_solution(i)
 
             grad = self._fun.gradient(x, *args)
 
@@ -163,9 +181,4 @@ class COptimizerPGD(COptimizer):
             if self.bounds is not None and self.bounds.is_violated(x):
                 x = self.bounds.projection(x)
 
-        # self.logger.warning('Maximum iterations reached. Exiting.')
-        self._x_seq = self.x_seq[:self._max_iter - 1, :]
-        self._f_seq = self.f_seq[:self._max_iter - 1]
-        self._x_opt = self._x_seq[-1, :]
-
-        return self._x_opt
+        return self._return_best_solution(i)
