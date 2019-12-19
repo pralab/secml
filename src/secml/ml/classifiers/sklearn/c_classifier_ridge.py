@@ -57,13 +57,6 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
 
         self._tr = None  # slot for the training data
 
-    def is_linear(self):
-        """Return True if the classifier is linear."""
-        if super(CClassifierRidge,
-                 self).is_linear() and self.is_kernel_linear():
-            return True
-        return False
-
     def is_kernel_linear(self):
         """Return True if the kernel is None or linear."""
         if self.kernel is None or self.kernel.class_type == 'linear':

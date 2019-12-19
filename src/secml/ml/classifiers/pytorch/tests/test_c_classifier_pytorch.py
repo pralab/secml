@@ -1,3 +1,4 @@
+import copy
 import os
 from secml.array import CArray
 from secml.testing import CUnitTest
@@ -70,7 +71,6 @@ class TestCClassifierPyTorch(CUnitTest):
         # Test gradient at specific layers
         for layer in layer_names:
             self.logger.info("Returning gradient for layer: {:}".format(layer))
-            print(layer)
 
             # construct w
             shape = self.clf.get_layer_output(x, layer).shape
@@ -162,20 +162,23 @@ class TestCClassifierPyTorch(CUnitTest):
         fname = "state.tar"
         self.clf.save_model(fname)
         self.assertTrue(os.path.exists(fname))
-        self.clf = None
+        del self.clf
         model_creation_fn()
         self.clf.load_model(fname)
         self.logger.info("Testing restored model")
         # test that predict works even if no loss and optimizer have been defined
         loss_backup = self.clf._loss
         optimizer_backup = self.clf._optimizer
-        self.clf._loss = None
-        self.clf._optimizer = None
+        optimizer_scheduler_backup = self.clf._optimizer_scheduler
+        del self.clf._loss
+        del self.clf._optimizer
+        del self.clf._optimizer_scheduler
         self._test_performance()
         self.clf._loss = loss_backup
         self.clf._optimizer = optimizer_backup
-        os.remove(fname)
+        self.clf._optimizer_scheduler = optimizer_scheduler_backup
 
+        os.remove(fname)
 
 if __name__ == '__main__':
     TestCClassifierPyTorch.main()

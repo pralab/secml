@@ -130,6 +130,10 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         """
         if self._clvrh_attack_class == CarliniWagnerL2:
             return self._objective_function_cw(x)
+        elif self._clvrh_attack_class == ElasticNetMethod:
+            return self._objective_function_elastic_net(x)
+        elif self._clvrh_attack_class == SPSA:
+            return self._objective_function_SPSA(x)
         elif self._clvrh_attack_class in [
             FastGradientMethod, ProjectedGradientDescent, LBFGS,
             MomentumIterativeMethod, MadryEtAl, BasicIterativeMethod]:
