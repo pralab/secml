@@ -94,7 +94,7 @@ CClassifierSGD
    :show-inheritance:
 
 CClassifierSVM
-----------------------------------------------
+--------------
 
 .. automodule:: secml.ml.classifiers.sklearn.c_classifier_svm
    :members:
@@ -102,7 +102,7 @@ CClassifierSVM
    :show-inheritance:
 
 CClassifierDNN
-------------------
+--------------
 
 .. automodule:: secml.ml.classifiers.c_classifier_dnn
    :members:
