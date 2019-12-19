@@ -26,8 +26,9 @@ SecML can also be added as a dependency for other libraries/project.
 Just add ``secml`` or the full repository path command
 ``git+ssh://git@{repourl}.git[@branch]#egg=secml`` to the ``requirements.txt`` file.
 
+========================================
 Editable Installation (development mode)
-----------------------------------------
+========================================
 
 For SecML developers or users want to use the latest ``dev`` version of
 the library (soon available to the public), ``pip`` provides a convenient
@@ -56,7 +57,7 @@ dependency of other libraries/projects
 (see `Installation Guide <https://secml.gitlab.io/#installation-guide>`_ for more information).
 
 Ways to contribute
-==================
+------------------
 
 There are many ways to contribute to our project. The most
 valuable contributions for us are the ones that extend our
@@ -73,15 +74,16 @@ other contributors.
 Another way of contributing is by sharing our work with colleagues
 and people that may be interested in using it for their experiments.
 
+==========================================
 Submitting a bug report or feature request
-------------------------------------------
+==========================================
 
 Before creating an issue we kindly ask you to read the
 `documentation <https://secml.gitlab.io>`_
 and to make sure your answer is not already there.
 
 Bug report
-==========
+----------
 
 Please ensure the bug was not already reported.
 If you're unable to find an open issue addressing
@@ -94,7 +96,7 @@ executable test case demonstrating the expected
 behavior that is not occurring.
 
 Feature request
-===============
+---------------
 
 Suggestions and feedback are always welcome.
 We ask you to open an
@@ -104,8 +106,9 @@ on what would be the expected behavior of the new
 feature. Of course, you are free to contribute
 yourself (the next section will address that).
 
+========================
 Contributing to the code
-------------------------
+========================
 
 Please stay as close as possible to the following
 guidelines. This will ensure quality and easy-to-merge
@@ -118,14 +121,16 @@ Changes will be accepted if they add substantial
 improvements to stability, functionality, testability, and
 documentation of the library.
 
+=================
 Coding guidelines
------------------
+=================
 
 In this section, we will summarize standards and conventions
 used in our library.
 
 Code style guide
-================
+----------------
+
 We follow python `PEP-8 <https://www.python.org/dev/peps/pep-0008/>`_
 convention for ensuring code readability.
 If you see code not compliant to this standard,
@@ -138,7 +143,7 @@ already-existing modules: this would cause us some
 trouble in comparing the differences with git.
 
 Documentation style guide
-=========================
+-------------------------
 
 We use informative docstrings for our code. Make sure
 your code is always commented and documented.
@@ -159,7 +164,7 @@ You can build the documentation locally using
 `Sphynx <https://www.sphinx-doc.org/en/master/usage/quickstart.html>`_.
 
 Package conventions
-===================
+-------------------
 
 Our packages are nested inside macro-categories. Every package can
 contain modules, other packages or just directories for
@@ -173,13 +178,13 @@ however it must be possible to disable the visualization and
 storage of the figures, disabled by default.
 
 Modules conventions
-===================
+-------------------
 
 We use separate files for each class so that they can be easily
 found within the package structure.
 
 Classes conventions
-===================
+-------------------
 
 Our class names all start with `C` + <class_name>. Hidden utility
 classes, accessible only internally from other classes,
@@ -205,7 +210,7 @@ class can be instantiated anyway (of course the method not
 implemented cannot be called).
 
 Tests conventions
-=================
+-----------------
 
 We test our code with pervasive unit tests. For this purpose,
 we have `tests` subdirectories in all our packages.
@@ -217,7 +222,7 @@ run automatically only if the file names start with `test_` and
 the methods of the class starts with `test_` as well.
 
 Merge request checklist
-=======================
+-----------------------
 
 Before you ask us to revise the code and merge the code
 into our library, we ask you to pass all the steps
@@ -248,10 +253,9 @@ need to evaluate the code and ensure to benefit from it.
     the contribution to the library will become clear to
     the reviewers as well as other contributors.
 
-
+========================
 Creating a SecML backend
-------------------------
-
+========================
 
 A **backend** is an interface that links third-party
 libraries or stand-alone code to the SecML library.
@@ -269,7 +273,7 @@ backend implementations, remember to check out
 `roadmap <https://secml.gitlab.io/roadmap.html>`_ before diving into code.
 
 Unified backend interface
-=========================
+-------------------------
 
 In order to use our powerful APIs, developers will
 have to create **converters** to handle our
@@ -293,7 +297,7 @@ that can be used to store samples
 
 
 Steps for creating a new backend
-================================
+--------------------------------
 
 In this section, we list all methods to implement
 for minimal support of a new backend module.
@@ -307,7 +311,7 @@ This will help you design the classes and avoid mistakes.
 
 .._implement-clf:
 Implementing a Classifier
-=========================
+-------------------------
 
 SecML defines a
 `unified classifier interface <https://secml.gitlab.io/
@@ -320,7 +324,7 @@ class. The class CClassifier requires the developer
 to implement three private methods in order to function.
 
 CClassifier
-===========
+-----------
 
 Here is the list of methods to implement for creating
 a new classifier (not DNN):
@@ -338,7 +342,7 @@ a new classifier (not DNN):
     Takes as input a CDataset.
 
 Implementing a backend for DNN
-==============================
+------------------------------
 
 The backend for DNN ([CClassifierDNN](-))
 is based on the CClassifier class as well
@@ -351,7 +355,7 @@ secml.ml.classifiers.html#module-secml.ml
 .classifiers.pytorch.c_classifier_pytorch>`_.
 
 CClassifierDNN
-==============
+--------------
 
 Here is the list of methods to implement for
 creating a new DNN classifier:
@@ -406,7 +410,7 @@ to add the `input_shape` as an input parameter of
 the wrapper and handle the conversion inside.
 
 More advanced implementations (not available yet)
-=================================================
+-------------------------------------------------
 
 The following contribution guides will be updated in future versions.
 
