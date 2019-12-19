@@ -155,22 +155,54 @@ that you can contribute to:
     with the output so the user won’t need to run them
     for seeing the output.
 
-TODO: guide to build the documentation
+You can build the documentation locally using
+`Sphynx <https://www.sphinx-doc.org/en/master/usage/quickstart.html>`_.
 
 Package conventions
 ===================
 
-TODO
+Our packages are nested inside macro-categories. Every package can
+contain modules, other packages or just directories for
+keeping everything structured and tidy.
+When the package includes other packages, import all the inner
+modules in the `__init__.py` file of the top-level package, so that
+everything can be imported from there without entering all levels.
+Inside the packages there is a package called `tests`, where all tests
+related to the modules are located. Tests can include plotting,
+however it must be possible to disable the visualization and
+storage of the figures, disabled by default.
 
 Modules conventions
 ===================
 
-TODO
+We use separate files for each class so that they can be easily
+found within the package structure.
 
 Classes conventions
 ===================
 
-TODO
+Our class names all start with `C` + <class_name>. Hidden utility
+classes, accessible only internally from other classes,
+have names starting with underscores (`_C` + <class_name>).
+Classes attributes are all encapsulated - so they should
+be named with the underscore as well - and can be made
+accessible with getters and setters. We uphold the principle
+of least privilege, so if you are unsure whether or not an
+attribute should have a getter and setter leave it
+to us to decide (so don't implement the getter and setter).
+Our methods follow the same principle, if they are used only
+within the class, they should be encapsulated as well.
+The main classes expose public methods that often call
+inner abstract methods. If you are subclassing one of these
+classes, take care of reading the super class code and
+check out the inner methods that you need to implement. See
+next sections (.. _implement-clf:) for an example.
+If the implementation of that method is not suitable for the
+case you are handling, implement the abstract method in your
+class by raising `NotImplementedError` in your subclass. In this
+way we can know that you considered the implementation, and the
+class can be instantiated anyway (of course the method not
+implemented cannot be called).
 
 Tests conventions
 =================
@@ -273,6 +305,7 @@ Focus on your use case, then give a read to
 the methods’ description before writing the code.
 This will help you design the classes and avoid mistakes.
 
+.._implement-clf:
 Implementing a Classifier
 =========================
 
