@@ -38,10 +38,10 @@ different packages of the library:
 .. toctree::
    :hidden:
 
-   contributing.extensions.classifiers
+   contributing.extensions.cclassifier
 
 
-* `CClassifier <contributing.extensions.classifiers.html>`_ -
+* `CClassifier <contributing.extensions.cclassifier.html>`_ -
   classifiers including Deep Neural Networks.
 
 The following contribution guides will be added in a future versions.
