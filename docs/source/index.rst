@@ -65,3 +65,5 @@
    :hidden:
 
    developers/index
+   developers/contributing.code
+   developers/contributing.extensions
