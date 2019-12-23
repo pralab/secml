@@ -65,7 +65,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
     The current Tensorflow default graph will be used.
 
     """
-    class_type = 'e-cleverhans'
+    __class_type = 'e-cleverhans'
 
     def __init__(self, classifier, surrogate_classifier,
                  n_feats, n_classes, surrogate_data=None, y_target=None,
