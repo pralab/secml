@@ -46,9 +46,16 @@ class TestCDense(CUnitTest):
 
         self.assertFalse((a[0, 100] != b).any())
 
-        with self.assertRaises(IndexError) as e:
-            CDense().load(test_file, startrow=10)
-        self.logger.info("Expected error: {:}".format(e.exception))
+        if np.__version__ < '1.18':
+            with self.assertRaises(IndexError) as e:
+                CDense().load(test_file, startrow=10)
+            self.logger.info("Expected error: {:}".format(e.exception))
+        else:
+            with self.logger.catch_warnings():
+                self.logger.filterwarnings(
+                    "ignore", message="genfromtxt: Empty input file")
+                a = CDense().load(test_file, startrow=10)
+                self.assertEqual(a.size, 0)
 
         self.logger.info("UNITTEST - CDense - save/load row vector")
 
@@ -63,12 +70,18 @@ class TestCDense(CUnitTest):
         self.assertFalse((a[:, 100:] != b).any())
 
         # For some reasons np.genfromtxt does not close the file here
-        # Let's handle the resource warning abount unclosed file
+        # Let's handle the resource warning about unclosed file
         with self.logger.catch_warnings():
             self.logger.filterwarnings("ignore", message="unclosed file")
-            with self.assertRaises(IndexError) as e:
-                CDense().load(test_file, startrow=10)
-        self.logger.info("Expected error: {:}".format(e.exception))
+            if np.__version__ < '1.18':
+                with self.assertRaises(IndexError) as e:
+                    CDense().load(test_file, startrow=10)
+                    self.logger.info("Expected error: {:}".format(e.exception))
+            else:
+                self.logger.filterwarnings(
+                    "ignore", message="genfromtxt: Empty input file")
+                a = CDense().load(test_file, startrow=10)
+                self.assertEqual(a.size, 0)
 
         self.logger.info("UNITTEST - CDense - save/load negative vector")
 
