@@ -59,3 +59,11 @@
    update
    changelog
    roadmap
+
+.. toctree::
+   :caption: Developer's Guide
+   :hidden:
+
+   developers/index
+   developers/contributing.code
+   developers/contributing.extensions

@@ -1,3 +1,23 @@
+## v0.11.2 (07/01/2020)
+- This version brings fixes for a few reported issues with `CAttack` and subclasses, along with the new Developers and Contributors guide.
+
+### Requirements (1 change)
+- #700 Temporarily pinned `Pillow` to v6 to avoid breaking `torch` and `torchvision` packages.
+
+### Fixed (7 changes)
+- #698 Fixed `CAttackEvasionCleverhans` definition of `class_type`.
+- #662 The number of function and gradient evaluations made during double initialization in `CAttackEvasionPGDLS` are now correctly considered by `.f_eval` and `.grad_eval` properties.
+- #699 Fixed batch processing in `CClassifierPyTorch` not working properly if the number of samples to be classified is not a multiple of `batch_size`.
+- #691 Function and gradient evaluation counts in `CAttackEvasionCleverhans` returned by `.f_eval` and `.grad_eval` properties now only consider the last optimized sample, consistently with other `CAttack` subclasses.
+- #701 Default value of `double_init` parameter in `CAttackEvasionPGDLS` set to True as originally intended.
+- #684 The solution returned by `COptimizerPGD` is now always the best one found during the minimization process.
+- #697 Fixed unittests failing under numpy v1.18 due to a change in the errors raised by `genfromtxt`.
+
+### Documentation (2 changes)
+- #671 Added Developers and Contributors guide.
+- #694 Added a new notebook tutorial on advanced evasion attacks using Deep Neural Networks and ImageNet dataset.
+
+
 ## v0.11.1 (18/12/2019)
 - Fixed compatibility issues with recently released scikit-learn v0.22 and scipy v1.4.
 

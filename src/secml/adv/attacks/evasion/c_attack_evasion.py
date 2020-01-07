@@ -146,7 +146,7 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
         y0 : int or CArray
             The true label of x0.
         x_init : CArray or None, optional
-            Initialization point. If None, it is set to x0.
+            Initialization point. If None (default), it is set to x0.
 
         """
         raise NotImplementedError
