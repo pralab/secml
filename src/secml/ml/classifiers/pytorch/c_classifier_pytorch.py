@@ -520,7 +520,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 self._cached_s = s
                 self._cached_layer_output = ps
 
-            output[batch_idx * len(s):(batch_idx + 1) * len(s)] = \
+            output[batch_idx * self.batch_size:
+                   batch_idx * self.batch_size + len(s)] = \
                 ps.view(ps.size(0), -1).detach()
 
         # Apply softmax-scaling if needed
