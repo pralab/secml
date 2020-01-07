@@ -20,10 +20,11 @@ class CUnitTest(unittest.TestCase):
     """Superclass for unittests.
 
     Provides a wrapper of `unittests.TestCase` in addition to:
-    - integrated logging functionalities (see `CLog`)
-    - integrated timing functionalities (see `CTimer`)
-    - addition assertion methods from `numpy.testing`
-    - `skip`, `skipif`, `importorskip` functions from `pytest`
+
+     - integrated logging functionalities (see `CLog`)
+     - integrated timing functionalities (see `CTimer`)
+     - addition assertion methods from `numpy.testing`
+     - `skip`, `skipif`, `importorskip` functions from `pytest`
 
     """
 
