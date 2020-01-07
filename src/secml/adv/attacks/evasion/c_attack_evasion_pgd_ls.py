@@ -353,7 +353,7 @@ class CAttackEvasionPGDLS(CAttackEvasion):
     #                              PUBLIC METHODS
     ###########################################################################
 
-    def _run(self, x0, y0, x_init=None, double_init=False):
+    def _run(self, x0, y0, x_init=None, double_init=True):
         """Perform evasion for a given dmax on a single pattern.
 
         It solves:
@@ -367,10 +367,9 @@ class CAttackEvasionPGDLS(CAttackEvasion):
         y0 : int or CArray
             The true label of x0.
         x_init : CArray or None, optional
-            Initialization point. If None, it is set to x0.
+            Initialization point. If None (default), it is set to x0.
         double_init : bool, optional
-            Whether to use or not double init for non-linear classifiers.
-            Default True.
+            If True (default), use double initialization point.
 
         Returns
         -------
@@ -435,15 +434,29 @@ class CAttackEvasionPGDLS(CAttackEvasion):
         # discretize x_min_proj on grid
         # xk_proj = (xk_proj / self._solver.eta).round() * self._solver.eta
 
-        # double initialization
-        if self._objective_function(xk_proj) < f_obj:
+        # TODO: avoid using a private property
+        # if the objective function in the projected point has a lower value
+        # than the one in the previously found optimum perform double init
+        if self._solver._fun.fun(xk_proj) < f_obj:
 
             self.logger.debug("Trying to improve current solution.")
+
+            # TODO: avoid using a private property
+            # store the number of function and gradient evaluations done so far
+            # (the counters will restart from zero otherwise)
+            n_f_eval = self._solver._fun.n_fun_eval
+            n_grad_eval = self._solver._fun.n_grad_eval
 
             self._solver.minimize(xk)
             f_obj_min = self._solver.f_opt
 
-            # if this solution is better than the previous one,
+            # TODO: avoid using a private property
+            # add the number of the previously made iterations to the ones
+            # made after the re-starting
+            self._solver._fun._n_fun_eval += n_f_eval
+            self._solver._fun._n_grad_eval += n_grad_eval
+
+            # if this solution is better than the previously founded one,
             # we use the current solution found by the solver
             if f_obj_min < f_obj:
                 self.logger.info("Better solution from restarting point!")

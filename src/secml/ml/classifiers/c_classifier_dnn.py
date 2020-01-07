@@ -211,8 +211,8 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         return output
 
     def get_layer_gradient(self, x, w, layer=None):
-        """Computes the gradient of the classifier's decision function
-         wrt input.
+        """
+        Computes the gradient of the classifier's decision function wrt input.
 
         Parameters
         ----------
@@ -225,7 +225,7 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         layer : str or None, optional
             Name of the layer.
             If None, the gradient at the last layer will be returned
-             and `y` is required if `w` is None or softmax_outputs is True.
+            and `y` is required if `w` is None or softmax_outputs is True.
             If not None, `w` of proper shape is required.
 
         Returns

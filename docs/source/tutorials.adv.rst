@@ -11,3 +11,4 @@ Adversarial Machine Learning
    tutorials/07-NeuralNetworks-MNIST
    tutorials/08-ImageNet
    tutorials/09-Cleverhans
+   tutorials/11-ImageNet_advanced

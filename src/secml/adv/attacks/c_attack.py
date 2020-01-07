@@ -135,26 +135,86 @@ class CAttack(CCreator, metaclass=ABCMeta):
 
     @property
     def x_opt(self):
+        """Returns the optimal point founded by the attack.
+
+        Warnings
+        --------
+        Due to a known issue, if more then one sample is passed to ``.run()``,
+        this property will only return the data relative to the last
+        optimized one. This behavior will change in a future version.
+
+        """
         return self._x_opt
 
     @property
     def f_opt(self):
+        """
+        Returns the value of the objective function evaluated on the optimal
+        point founded by the attack.
+
+        Warnings
+        --------
+        Due to a known issue, if more then one sample is passed to ``.run()``,
+        this property will only return the data relative to the last
+        optimized one. This behavior will change in a future version.
+
+        """
         return self._f_opt
 
     @property
     def f_seq(self):
+        """
+        Returns a CArray containing the values of the objective function
+        evaluations made by the attack.
+
+        Warnings
+        --------
+        Due to a known issue, if more then one sample is passed to ``.run()``,
+        this property will only return the data relative to the last
+        optimized one. This behavior will change in a future version.
+
+        """
         return self._f_seq
 
     @property
     def x_seq(self):
+        """
+        Returns a CArray (number of iteration * number of features) containing
+        the values of the attack point path.
+
+        Warnings
+        --------
+        Due to a known issue, if more then one sample is passed to ``.run()``,
+        this property will only return the data relative to the last
+        optimized one. This behavior will change in a future version.
+
+        """
         return self._x_seq
 
     @property
     def f_eval(self):
+        """Returns the number of function evaluations made during the attack.
+
+        Warnings
+        --------
+        Due to a known issue, if more then one sample is passed to ``.run()``,
+        this property will only return the data relative to the last
+        optimized one. This behavior will change in a future version.
+
+        """
         return self._solver.f_eval
 
     @property
     def grad_eval(self):
+        """Returns the number of function evaluations made during the attack.
+
+        Warnings
+        --------
+        Due to a known issue, if more then one sample is passed to ``.run()``,
+        this property will only return the data relative to the last
+        optimized one. This behavior will change in a future version.
+
+        """
         return self._solver.grad_eval
 
     ###########################################################################

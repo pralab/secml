@@ -119,7 +119,7 @@ class CSecEval(CCreator):
     #                           PUBLIC METHODS
     ###########################################################################
 
-    def run_sec_eval(self, dataset):
+    def run_sec_eval(self, dataset, **kwargs):
         """Performs attack while the power of the attacker (named param_name)
         increase.
 
@@ -128,6 +128,8 @@ class CSecEval(CCreator):
         dataset : CDataset
             Dataset that contain samples that will be manipulated
             from the attacker while his attack power increase
+        kwargs
+            Additional keyword arguments for the `CAttack.run` method.
 
         """
         # store true labels within class
@@ -162,7 +164,7 @@ class CSecEval(CCreator):
 
             # todo change x_init parameter with p_ds_init
             attack_result = tuple(self._attack.run(
-                dataset.X, dataset.Y, ds_init=adv_ds))
+                dataset.X, dataset.Y, ds_init=adv_ds, **kwargs))
 
             # Expanding generic attack results
             y_pred, scores, adv_ds, fobj = attack_result[:4]
