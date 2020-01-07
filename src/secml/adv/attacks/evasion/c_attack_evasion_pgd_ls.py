@@ -353,7 +353,7 @@ class CAttackEvasionPGDLS(CAttackEvasion):
     #                              PUBLIC METHODS
     ###########################################################################
 
-    def _run(self, x0, y0, x_init=None, double_init=False):
+    def _run(self, x0, y0, x_init=None, double_init=True):
         """Perform evasion for a given dmax on a single pattern.
 
         It solves:
@@ -367,10 +367,9 @@ class CAttackEvasionPGDLS(CAttackEvasion):
         y0 : int or CArray
             The true label of x0.
         x_init : CArray or None, optional
-            Initialization point. If None, it is set to x0.
+            Initialization point. If None (default), it is set to x0.
         double_init : bool, optional
-            Whether to use or not double init for non-linear classifiers.
-            Default True.
+            If True (default), use double initialization point.
 
         Returns
         -------
