@@ -19,6 +19,7 @@ from secml.ml.classifiers import CClassifierPyTorch
 
 
 class TestCClassifierPyTorchMNIST(TestCClassifierPyTorch):
+    
     def setUp(self):
         self.logger.info("Testing MNIST Model")
         super(TestCClassifierPyTorchMNIST, self).setUp()
@@ -85,7 +86,7 @@ class TestCClassifierPyTorchMNIST(TestCClassifierPyTorch):
     def test_performance(self):
         self._test_performance()
 
-    def _test_predict(self):
+    def test_predict(self):
         self._test_predict()
 
     def test_out_at_layer(self):
