@@ -21,6 +21,7 @@ from secml.settings import SECML_PYTORCH_USE_CUDA
 
 
 class TestCClassifierPyTorchDNN(TestCClassifierPyTorch):
+    
     def setUp(self):
         self.logger.info("Testing ResNet11 Model")
         super(TestCClassifierPyTorchDNN, self).setUp()
@@ -59,7 +60,7 @@ class TestCClassifierPyTorchDNN(TestCClassifierPyTorch):
     def test_layer_names(self):
         self._test_layer_names()
 
-    def _test_layer_shapes(self):
+    def test_layer_shapes(self):
         self._test_layer_shapes()
 
     def test_get_params(self):
