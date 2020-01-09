@@ -192,4 +192,4 @@ Innovation programme, grant agreement No. 780788.
 ## Copyright
 SecML has been developed by [PRALab - Pattern Recognition and Applications lab](
 https://pralab.diee.unica.it) and [Pluribus One s.r.l.](https://www.pluribus-one.it/) 
-under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). Copyright 2019.
+under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). All rights reserved.
