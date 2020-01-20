@@ -154,6 +154,24 @@ The contributing and developer's guide is available at:
 https://secml.gitlab.io/developers/
 
 
+## How to cite SecML
+If you use SecML in a scientific publication, please cite the following paper:
+
+[secml: A Python Library for Secure and Explainable Machine Learning](
+https://arxiv.org/abs/1912.10013), Melis *et al.*, arXiv preprint arXiv:1912.10013 (2019).
+
+BibTeX entry:
+
+```bibtex
+@article{melis2019secml,
+  title={secml: A Python Library for Secure and Explainable Machine Learning},
+  author={Melis, Marco and Demontis, Ambra and Pintor, Maura and Sotgiu, Angelo and Biggio, Battista},
+  journal={arXiv preprint arXiv:1912.10013},
+  year={2019}
+}
+```
+
+
 ## Authors
 This library is maintained by 
 [PRALab - Pattern Recognition and Applications Lab](https://pralab.diee.unica.it).
