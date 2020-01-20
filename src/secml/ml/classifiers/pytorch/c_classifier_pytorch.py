@@ -435,6 +435,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         # Setting random seed
         if self._random_state is not None:
             torch.manual_seed(self._random_state)
+            torch.backends.cudnn.deterministic = True
 
         # Make sure that model is a proper PyTorch module
         if not isinstance(self._model, nn.Module):
