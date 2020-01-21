@@ -8,7 +8,6 @@
 import numpy as np
 import numpy.matlib
 from numpy.linalg import inv, pinv
-from scipy import interp as sc_interp
 import scipy.sparse as scs
 
 from copy import deepcopy
@@ -1696,7 +1695,7 @@ class CDense(_CArrayInterface):
         results are nonsense.
 
         """
-        return self.__class__(sc_interp(self.tondarray(),
+        return self.__class__(np.interp(self.tondarray(),
                                         x_data.ravel().tondarray(),
                                         y_data.ravel().tondarray(),
                                         return_left, return_right))

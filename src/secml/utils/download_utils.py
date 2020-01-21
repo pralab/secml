@@ -61,7 +61,7 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
         fm.make_folder(output_dir)
 
     # Get the filename from the response headers
-    if "Content-Disposition" in r.headers.keys():
+    if "Content-Disposition" in r.headers:
         fname = re.findall(
             r"filename=\"(.+)\"", r.headers["Content-Disposition"])[0]
     else:  # Or use the last part of download url (removing parameters)
