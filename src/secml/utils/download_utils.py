@@ -6,6 +6,7 @@
 
 """
 import sys
+import re
 import requests
 import hashlib
 
@@ -59,9 +60,15 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
     if not fm.folder_exist(output_dir):
         fm.make_folder(output_dir)
 
+    # Get the filename from the response headers
+    if "Content-Disposition" in r.headers.keys():
+        fname = re.findall(
+            r"filename=\"(.+)\"", r.headers["Content-Disposition"])[0]
+    else:  # Or use the last part of download url (removing parameters)
+        fname = url.split('/')[-1].split('?', 1)[0]
+
     # Build full path of output file
-    out_path = fm.join(output_dir, url.split('/')[-1])
-    out_path = out_path.split('?', 1)[0]  # Remove parameters
+    out_path = fm.join(output_dir, fname)
 
     # Read data and store each chunk
     with open(out_path, 'wb') as f:
