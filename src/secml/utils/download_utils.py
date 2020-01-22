@@ -66,11 +66,11 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
     if not fm.folder_exist(output_dir):
         fm.make_folder(output_dir)
 
-    # Get the filename from the response headers
-    if "Content-Disposition" in r.headers.keys():
+    try:  # Get the filename from the response headers
         fname = re.findall(
             r"filename=\"(.+)\"", r.headers["Content-Disposition"])[0]
-    else:  # Or use the last part of download url (removing parameters)
+    except (KeyError, IndexError):
+        # Or use the last part of download url (removing parameters)
         fname = url.split('/')[-1].split('?', 1)[0]
 
     # Build full path of output file
