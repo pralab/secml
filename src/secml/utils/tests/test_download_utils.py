@@ -1,12 +1,120 @@
 from secml.testing import CUnitTest
 
-from secml.utils.download_utils import md5
+import tempfile
+import requests_mock
+
+from secml.utils.download_utils import dl_file, md5
+from secml.utils import fm
 
 
 class TestDownloadUtils(CUnitTest):
-    """Unittests for `secml.core`download_utils`."""
+    """Unittests for `utils.download_utils`."""
 
-    def test_md5(self):
+    def setUp(self):
+        # Retrieve the temporary files directory
+        self.tempdir = tempfile.gettempdir()
+        # Url for the mock requests
+        self.test_url = 'mock://test.utils.download_utils'
+
+    @requests_mock.Mocker()
+    def test_dlfile(self, m):
+        """Test for `dl_file` standard beahavior."""
+
+        # Test for an available text file
+        url = self.test_url + '/test.txt'
+        file_content = 'resp'
+
+        m.get(url, text='resp')
+        out_file = dl_file(url, self.tempdir)
+
+        with open(out_file) as f:
+            self.assertEqual(file_content, f.read())
+
+        # Test for an available text file with parameters in the url
+        url = self.test_url + '/test.txt?id=1&out=45'
+        file_content = 'resp'
+
+        m.get(url, text='resp')
+        out_file = dl_file(url, self.tempdir)
+
+        # Check if parameters have been correctly removed
+        self.assertEqual('test.txt', fm.split(out_file)[1])
+
+        with open(out_file) as f:
+            self.assertEqual(file_content, f.read())
+
+        # Test for an unavailable text file
+        url = self.test_url + '/test2.txt'
+        m.get(url, text='Not Found', status_code=404)
+        with self.assertRaises(RuntimeError) as e:
+            dl_file(url, self.tempdir)
+
+        self.assertTrue(
+            'File is not available (error code 404)' in str(e.exception))
+
+    @requests_mock.Mocker()
+    def test_dlfile_content_length(self, m):
+        """Test for `dl_file` beahavior with 'content-length' header."""
+
+        # Test for an available text file (with 'content-length' header)
+        url = self.test_url + '/test.txt'
+        file_content = 'resp'
+
+        m.get(url, text='resp', headers={'Content-Length': '4'})
+        out_file = dl_file(url, self.tempdir)
+
+        with open(out_file) as f:
+            self.assertEqual(file_content, f.read())
+
+    @requests_mock.Mocker()
+    def test_dlfile_content_disposition(self, m):
+        """Test for `dl_file` beahavior with 'Content-Disposition' header."""
+
+        def _test_dlfile(cont_disp, fn='test.txt'):
+            """
+
+            Parameters
+            ----------
+            cont_disp : str
+                Content of the 'Content-Disposition' header
+            fn : str, optional
+                Expected filename. Default 'text.txt'.
+
+            """
+            url = self.test_url + '/test.txt'
+            file_content = 'resp'
+
+            m.get(url, text='resp',
+                  headers={'Content-Length': '4',
+                           'Content-Disposition': cont_disp})
+            out_file = dl_file(url, self.tempdir)
+
+            self.assertEqual(fn, fm.split(out_file)[1])
+
+            with open(out_file) as f:
+                self.assertEqual(file_content, f.read())
+
+        # Test for text file (with 'content-disposition' header)
+        disp = r'inline; filename="test.txt"; filename*=UTF-8\'\'test.txt'
+
+        _test_dlfile(disp)
+
+        # Check for 'content-disposition' filename different from url
+        disp = r'inline; filename="READ.md"; filename*=UTF-8\'\'READ.md'
+
+        _test_dlfile(disp, fn='READ.md')
+
+        # Check for a simpler 'content-disposition' content
+        disp = 'filename="READ.md"'
+
+        _test_dlfile(disp, fn='READ.md')
+
+        # Check for 'content-disposition' without filename
+        disp = 'inline; test="test"'
+
+        _test_dlfile(disp)
+
+    def test_dl_file_md5(self):
 
         # Fixed long string to write to the file
         x = b'abcd' * 10000
@@ -15,7 +123,6 @@ class TestDownloadUtils(CUnitTest):
         md5_test = '3f0f597c3c69ce42e554fdad3adcbeea'
 
         # Generate a temp file to test
-        import tempfile
         with tempfile.NamedTemporaryFile(mode='wb') as fp:
 
             fp.write(x)

@@ -6,6 +6,7 @@
 
 """
 import sys
+import re
 import requests
 import hashlib
 
@@ -44,37 +45,51 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
             "File is not available (error code {:})".format(r.status_code))
 
     # Get file size (bytes)
-    total_size = r.headers.get('content-length').strip()
-    total_size = int(total_size)
+    if "content-length" in r.headers:
+        total_size = r.headers.get('content-length').strip()
+        total_size = int(total_size)
+    else:  # Total size unknown
+        total_size = None
+
     dl = 0
 
     if chunk_size < 1:
         raise ValueError("chunk_size must be at least 1 byte")
 
-    sys.stdout.write(
-        "Downloading from `{:}` ({:} bytes)\n".format(url, total_size))
+    sys.stdout.write("Downloading from `{:}`".format(url))
+    if total_size is not None:
+        sys.stdout.write(" ({:} bytes)".format(total_size))
+    sys.stdout.write("\n")
     sys.stdout.flush()
 
     # Create output directory if not exists
     if not fm.folder_exist(output_dir):
         fm.make_folder(output_dir)
 
+    try:  # Get the filename from the response headers
+        fname = re.findall(
+            r"filename=\"(.+)\"", r.headers["Content-Disposition"])[0]
+    except (KeyError, IndexError):
+        # Or use the last part of download url (removing parameters)
+        fname = url.split('/')[-1].split('?', 1)[0]
+
     # Build full path of output file
-    out_path = fm.join(output_dir, url.split('/')[-1])
+    out_path = fm.join(output_dir, fname)
 
     # Read data and store each chunk
     with open(out_path, 'wb') as f:
         for chunk in r.iter_content(chunk_size=chunk_size):
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
-                # Report progress
-                dl += len(chunk)
-                done = int((50 * dl) / total_size)
-                if sys.stdout.isatty() is True:
-                    # Provide real-time updates (if stdout is a tty)
-                    sys.stdout.write("\r[{:}{:}] {:}/{:}".format(
-                        '=' * done, ' ' * (50-done), dl, total_size))
-                    sys.stdout.flush()
+                # Report progress (if total_size is known)
+                if total_size is not None:
+                    dl += len(chunk)
+                    done = int((50 * dl) / total_size)
+                    if sys.stdout.isatty() is True:
+                        # Provide real-time updates (if stdout is a tty)
+                        sys.stdout.write("\r[{:}{:}] {:}/{:}".format(
+                            '=' * done, ' ' * (50-done), dl, total_size))
+                        sys.stdout.flush()
 
     sys.stdout.write("\nFile stored in `{:}`\n".format(out_path))
     sys.stdout.flush()
