@@ -182,7 +182,7 @@ setup(
         'tf-gpu': ["tensorflow-gpu>=1.14,<2"],
         'unittests': ['pytest>=5,<5.1',
                       'pytest-cov>=2.8', 'coverage<5',
-                      'jupyter', 'nbval']
+                      'jupyter', 'nbval', 'requests-mock']
     },
     zip_safe=False
 )
