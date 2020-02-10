@@ -55,6 +55,11 @@ stages:
     key: "test-cache-py37"
     <<: *test-cache
 
+.test-cache-py38:
+  cache: &test-cache-py38
+    key: "test-cache-py38"
+    <<: *test-cache
+
 
 .package:
   stage: package
@@ -252,6 +257,12 @@ test:py35:latest:win:
   cache: *test-cache-py35-win
   artifacts: *pytest-report
 
+test:py38:min:
+  extends: .test
+  image: python:3.8
+  script: tox -e py38-min
+  cache: *test-cache-py38
+
 
 .test:notebooks:
   extends: .test
@@ -353,6 +364,13 @@ test:install:whl:py37:
     <<: *test-cache-py37
     policy: pull
 
+test:install:whl:py38:
+  extends: .test:install:whl
+  image: python:3.8
+  cache:
+    <<: *test-cache-py38
+    policy: pull
+
 test:install:whl:extras:py35:
   extends: .test:install:whl:extras
   image: python:3.5
@@ -372,6 +390,13 @@ test:install:whl:extras:py37:
   image: python:3.7
   cache:
     <<: *test-cache-py37
+    policy: pull
+
+test:install:whl:extras:py38:
+  extends: .test:install:whl:extras
+  image: python:3.8
+  cache:
+    <<: *test-cache-py38
     policy: pull
 
 
