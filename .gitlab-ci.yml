@@ -35,6 +35,11 @@ stages:
     key: "test-cache-py37"
     <<: *test-cache
 
+.test-cache-py38:
+  cache: &test-cache-py38
+    key: "test-cache-py38"
+    <<: *test-cache
+
 
 .package:
   stage: package
@@ -164,6 +169,12 @@ test:py37:min:
   image: python:3.7
   script: tox -e py37-min
   cache: *test-cache-py37
+
+test:py38:min:
+  extends: .test
+  image: python:3.8
+  script: tox -e py38-min
+  cache: *test-cache-py38
 
 
 .test:notebooks:
