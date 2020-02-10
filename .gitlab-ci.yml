@@ -263,6 +263,12 @@ test:py38:min:
   script: tox -e py38-min
   cache: *test-cache-py38
 
+test:py38:min:
+  extends: .test
+  image: python:3.8
+  script: tox -e py38-min
+  cache: *test-cache-py38
+
 
 .test:notebooks:
   extends: .test
