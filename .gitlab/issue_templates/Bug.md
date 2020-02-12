@@ -9,33 +9,24 @@ filtered by the "bug" label.
 and verify the issue you're about to submit isn't a duplicate.
 --->
 
-### Summary
-
 (Summarize the bug encountered concisely)
 
 ### Steps to reproduce
 
-(How one can reproduce the issue - this is very important)
+(How one can reproduce the issue - **this is very important**)
 
-### What is the current *bug* behavior?
+### [optional] What is the expected *correct* behavior?
 
-(What actually happens)
+(What you are supposed to see in absence of the bug)
 
-### What is the expected *correct* behavior?
+### [optional] Relevant logs, screenshots, CI/CD tests
 
-(What you should see instead)
-
-### Relevant logs and/or screenshots
-
-(Paste any relevant logs - please use code blocks (```) to format console output,
+(Paste any relevant logs, screenshots or links to specific CI/CD jobs 
+that are failing  - please use code blocks (```) to format console output,
 logs, and code as it's very hard to read otherwise.)
 
-### Output of CI/CD tests
+### [optional] Possible fixes
 
-(Link the specific CI/CD jobs that is failing)
-
-### Possible fixes
-
-(If you can, link to the line of code that might be responsible for the problem)
+(Propose a possible fix for the reported problem)
 
 /label ~bug
