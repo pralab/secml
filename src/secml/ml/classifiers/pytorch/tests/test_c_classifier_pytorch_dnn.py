@@ -55,7 +55,8 @@ class TestCClassifierPyTorchDNN(TestCClassifierPyTorch):
                                       epochs=10,
                                       batch_size=self.batch_size,
                                       input_shape=(3, 224, 224),
-                                      pretrained=True)
+                                      pretrained=True,
+                                      random_state=0)
 
     def test_layer_names(self):
         self._test_layer_names()
