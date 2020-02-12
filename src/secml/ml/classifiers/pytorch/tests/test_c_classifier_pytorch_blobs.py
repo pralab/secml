@@ -76,7 +76,8 @@ class TestCClassifierPyTorchBlobs(TestCClassifierPyTorch):
                                       optimizer=optimizer,
                                       optimizer_scheduler=optimizer_scheduler,
                                       epochs=10,
-                                      batch_size=self.batch_size)
+                                      batch_size=self.batch_size,
+                                      random_state=0)
 
     def test_layer_names(self):
         self._test_layer_names()
@@ -101,9 +102,13 @@ class TestCClassifierPyTorchBlobs(TestCClassifierPyTorch):
 
     def test_grad_x(self):
         self._test_grad_x(layer_names=["fc1", 'fc2', None])
+        self._test_gradient_numerical(
+            self.clf, self.tr.X[0, :], th=1e-2, epsilon=1e-3)
 
     def test_softmax_outputs(self):
         self._test_softmax_outputs()
+        self._test_gradient_numerical(
+            self.clf, self.tr.X[0, :], th=1e-2, epsilon=1e-3)
 
     def test_save_load(self):
         self._test_save_load(self._model_creation_blobs)

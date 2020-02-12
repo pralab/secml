@@ -1,14 +1,13 @@
-import copy
 import os
 from secml.array import CArray
-from secml.testing import CUnitTest
+from secml.ml.classifiers.tests import CClassifierTestCases
 
 try:
     import torch
     import torchvision
 except ImportError:
-    CUnitTest.importskip("torch")
-    CUnitTest.importskip("torchvision")
+    CClassifierTestCases.importskip("torch")
+    CClassifierTestCases.importskip("torchvision")
 else:
     from torch import nn, optim
     from torchvision import transforms
@@ -16,7 +15,7 @@ else:
 from secml.ml.peval.metrics import CMetric
 
 
-class TestCClassifierPyTorch(CUnitTest):
+class TestCClassifierPyTorch(CClassifierTestCases):
     """Unittests for CClassifierPyTorch."""
 
     def setUp(self):
@@ -153,10 +152,27 @@ class TestCClassifierPyTorch(CUnitTest):
     def _test_softmax_outputs(self):
         sample = self.tr[0, :].X
         _, scores = self.clf.predict(sample, return_decision_function=True)
+
+        # Store current state of softmax_outputs parameter
+        softmax_outputs = self.clf.softmax_outputs
+
         self.clf.softmax_outputs = True
         _, preds = self.clf.predict(sample, return_decision_function=True)
+
         self.assertNotEqual(scores.sum(), 1.0)
         self.assert_approx_equal(preds.sum(), 1.0)
+
+        # test gradient
+        w_in = CArray.zeros(shape=(self.clf.n_classes, ))
+        w_in[1] = 1
+
+        grad = self.clf.gradient(sample, w=w_in)
+        self.logger.info("Output of grad_f_x: {:}".format(grad))
+
+        self.assertTrue(grad.is_vector_like)
+
+        # Restore original softmax_outputs parameter
+        self.clf.softmax_outputs = softmax_outputs
 
     def _test_save_load(self, model_creation_fn):
         fname = "state.tar"
@@ -179,6 +195,7 @@ class TestCClassifierPyTorch(CUnitTest):
         self.clf._optimizer_scheduler = optimizer_scheduler_backup
 
         os.remove(fname)
+
 
 if __name__ == '__main__':
     TestCClassifierPyTorch.main()

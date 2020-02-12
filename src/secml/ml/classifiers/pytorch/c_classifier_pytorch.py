@@ -641,21 +641,22 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         gradient : CArray
             Accumulated gradient of the module wrt input data.
         """
-        if w is not None:
-            w = self._to_tensor(w.atleast_2d()).reshape(
-                self._cached_layer_output.shape)
-        else:
-            raise ValueError(
-                "Function `_backward` needs the `w` array to run backward with.")
+        if w is None:
+            raise ValueError("Function `_backward` needs the `w` array "
+                             "to run backward with.")
 
         # Apply softmax-scaling if needed (only if last layer is required)
         if self.softmax_outputs is True and self._out_layer is None:
             out_carray = self._from_tensor(
                 self._cached_layer_output.squeeze(0).data)
-            softmax_grad = CSoftmax().gradient(
-                out_carray, y=self._cached_layer_output)
-            self._cached_layer_output *= self._to_tensor(
-                softmax_grad.atleast_2d()).unsqueeze(0)
+            softmax_grad = CArray.zeros(shape=out_carray.shape[0])
+            for y in w.nnz_indices[1]:
+                softmax_grad += w[y] * CSoftmax().gradient(
+                    out_carray, y=y)
+            w = softmax_grad
+
+        w = self._to_tensor(w.atleast_2d()).reshape(
+            self._cached_layer_output.shape)
         w = w.to(self._device)
 
         if self._cached_s.grad is not None:

@@ -42,6 +42,9 @@ class TestCClassifierPyTorchMNIST(TestCClassifierPyTorch):
         self.ts.X /= 255
 
     def _model_creation_mnist(self):
+
+        torch.manual_seed(0)
+
         class Flatten(nn.Module):
             def forward(self, input):
                 return input.view(input.size(0), -1)
@@ -58,7 +61,6 @@ class TestCClassifierPyTorchMNIST(TestCClassifierPyTorch):
             ('fc2', nn.Linear(50, 3)),
         ])
 
-        torch.manual_seed(0)
         net = nn.Sequential(OrderedDict(od))
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(net.parameters(),
@@ -72,7 +74,8 @@ class TestCClassifierPyTorchMNIST(TestCClassifierPyTorch):
                                       epochs=10,
                                       batch_size=self.batch_size,
                                       input_shape=(1, 28, 28),
-                                      optimizer_scheduler=scheduler)
+                                      optimizer_scheduler=scheduler,
+                                      random_state=0)
 
     def test_layer_names(self):
         self._test_layer_names()
