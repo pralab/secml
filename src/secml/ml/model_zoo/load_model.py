@@ -6,13 +6,15 @@
 
 """
 import json
+import re
 
+import secml
 from secml.utils import fm
-from secml.utils.download_utils import dl_file
+from secml.utils.download_utils import dl_file_gitlab
 
 from secml.settings import SECML_MODELS_DIR
 
-MODEL_ZOO_URL = 'https://gitlab.com/secml/secml-zoo/raw/master/models/'
+MODEL_ZOO_REPO_URL = 'https://gitlab.com/secml/secml-zoo'
 MODELS_DICT_PATH = fm.join(fm.abspath(__file__), 'models_dict.json')
 with open(MODELS_DICT_PATH) as fp:
     MODELS_DICT = json.loads(fp.read())
@@ -48,9 +50,20 @@ def load_model(model_id):
     data_path = fm.join(SECML_MODELS_DIR, model_id, model_id + '.gz')
     # Download (if needed) data and extract it
     if not fm.file_exist(data_path):
-        model_url = MODEL_ZOO_URL + model_info['url'] + '.gz'
-        dl_file(model_url, fm.join(SECML_MODELS_DIR, model_id),
-                md5_digest=model_info['md5'])
+        model_url = 'models/' + model_info['url'] + '.gz'
+        out_dir = fm.join(SECML_MODELS_DIR, model_id)
+        try:
+            # Try downloading from the branch corresponding to current version
+            min_version = re.search(r'^\d+.\d+', secml.__version__).group(0)
+            dl_file_gitlab(MODEL_ZOO_REPO_URL, model_url, out_dir,
+                           branch='v' + min_version,
+                           md5_digest=model_info['md5'])
+
+        except RuntimeError:
+            # Raised if file not found. Try looking in 'master' branch
+            dl_file_gitlab(MODEL_ZOO_REPO_URL, model_url, out_dir,
+                           branch='master',
+                           md5_digest=model_info['md5'])
 
         # Check if file has been correctly downloaded
         if not fm.file_exist(data_path):

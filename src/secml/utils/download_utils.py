@@ -9,11 +9,15 @@ import sys
 import re
 import requests
 import hashlib
+from urllib import parse
 
 from secml.utils import fm
 
+__all__ = ['dl_file', 'dl_file_gitlab', 'md5']
 
-def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
+
+def dl_file(url, output_dir, user=None, headers=None,
+            chunk_size=1024, md5_digest=None):
     """Download file from input url and store in output_dir.
 
     Parameters
@@ -25,6 +29,8 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
         If folder does not exists, will be created.
     user : str or None, optional
         String with the user[:password] if required for accessing url.
+    headers : dict or None, optional
+        Dictionary with any additional header for the download request.
     chunk_size : int, optional
         Size of the data chunk to read from url in bytes. Default 1024.
     md5_digest : str or None, optional
@@ -38,7 +44,7 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
     # If no password is specified, use an empty string
     auth = (auth[0], '') if auth is not None and len(auth) == 1 else auth
 
-    r = requests.get(url, auth=auth, stream=True)
+    r = requests.get(url, auth=auth, headers=headers, stream=True)
 
     if r.status_code != 200:
         raise RuntimeError(
@@ -99,6 +105,63 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
         raise ValueError("Unexpected MD5 hash for the downloaded file.")
 
     return out_path
+
+
+def dl_file_gitlab(repo_url, file_path, output_dir, branch='master',
+                   token=None, chunk_size=1024, md5_digest=None):
+    """Download file from a gitlab.com repository and store in output_dir.
+
+    Parameters
+    ----------
+    repo_url : str
+        Url of the repository from which download the file.
+        Can include the `http(s)://gitlab.com/` prefix.
+    file_path : str
+        Path to the file to download, relative to the repository.
+    output_dir : str
+        Path to the directory where the file should be stored.
+        If folder does not exists, will be created.
+    branch : str, optional
+        Branch from which the file should be downloaded. Default 'master'.
+    token : str or None, optional
+        Personal access token, required to access private repositories.
+        See: https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
+    chunk_size : int, optional
+        Size of the data chunk to read from url in bytes. Default 1024.
+    md5_digest : str or None, optional
+        Expected MD5 digest of the downloaded file.
+        If a different digest is computed, the downloaded file will be
+        removed and ValueError is raised.
+
+    """
+    # Url of Repository files API, to be populated later
+    api_url = 'https://gitlab.com/api/v4/projects/' \
+              '{:}/repository/files/{:}/raw?ref={:}'
+
+    # Decode the repository url by removing 'gitlab.com' prefix if defined
+    # To make urlparse work correctly, we should add a '//gitlab.com/' prefix
+    if repo_url.startswith('gitlab.com'):  # Handle 'gitlab.com/REPO' case
+        repo_url = '//' + repo_url
+    if not repo_url.startswith(
+            ('https://gitlab.com', 'http://gitlab.com', '//gitlab.com')):
+        # Handle the '/REPO/' case by stripping the first slash (if any)
+        repo_url = '//gitlab.com/' + repo_url.lstrip('/')
+    # Strip last slash (if any) and parse
+    repo_url_parsed = parse.urlparse(repo_url.rstrip('/'))
+    # Remove the first slash always left by urlparse and encode
+    repo_url_encoded = parse.quote(repo_url_parsed.path[1:], safe='')
+
+    # Strip the first slash (if any) and encode the file path
+    file_path_encoded = parse.quote(file_path.lstrip('/'), safe='')
+
+    # Build the final download url
+    url = api_url.format(repo_url_encoded, file_path_encoded, branch)
+
+    # Pass the private token as a request's header if defined
+    headers = {'PRIVATE-TOKEN': token} if token is not None else None
+
+    return dl_file(url, output_dir, headers=headers,
+                   chunk_size=chunk_size, md5_digest=md5_digest)
 
 
 def md5(fname, blocksize=65536):
