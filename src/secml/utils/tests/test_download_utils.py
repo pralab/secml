@@ -67,6 +67,36 @@ class TestDownloadUtils(CUnitTest):
             self.assertEqual(file_content, f.read())
 
     @requests_mock.Mocker()
+    def test_dlfile_headers(self, m):
+        """Test for `dl_file` beahavior with additional headers."""
+
+        # Test for an available text file (with 'content-length' header)
+        url = self.test_url + '/test.txt'
+        file_content = 'resp'
+
+        m.get(url, text='resp', request_headers={'TOKEN': 'test'})
+
+        out_file = dl_file(url, self.tempdir, headers={'TOKEN': 'test'})
+
+        with open(out_file) as f:
+            self.assertEqual(file_content, f.read())
+
+        # Additional headers should be ignored
+        out_file = dl_file(url, self.tempdir,
+                           headers={'TOKEN': 'test', 'HEADER2': '2'})
+
+        with open(out_file) as f:
+            self.assertEqual(file_content, f.read())
+
+        # download should fail if no header or wrong header is defined
+        with self.assertRaises(Exception):
+            dl_file(url, self.tempdir)
+        with self.assertRaises(Exception):
+            dl_file(url, self.tempdir, headers={'TOKEN': '2'})
+        with self.assertRaises(Exception):
+            dl_file(url, self.tempdir, headers={'HEADER2': 'test'})
+
+    @requests_mock.Mocker()
     def test_dlfile_content_disposition(self, m):
         """Test for `dl_file` beahavior with 'Content-Disposition' header."""
 

@@ -13,7 +13,9 @@ import hashlib
 from secml.utils import fm
 
 
-def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
+
+def dl_file(url, output_dir, user=None, headers=None,
+            chunk_size=1024, md5_digest=None):
     """Download file from input url and store in output_dir.
 
     Parameters
@@ -25,6 +27,8 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
         If folder does not exists, will be created.
     user : str or None, optional
         String with the user[:password] if required for accessing url.
+    headers : dict or None, optional
+        Dictionary with any additional header for the download request.
     chunk_size : int, optional
         Size of the data chunk to read from url in bytes. Default 1024.
     md5_digest : str or None, optional
@@ -38,7 +42,7 @@ def dl_file(url, output_dir, user=None, chunk_size=1024, md5_digest=None):
     # If no password is specified, use an empty string
     auth = (auth[0], '') if auth is not None and len(auth) == 1 else auth
 
-    r = requests.get(url, auth=auth, stream=True)
+    r = requests.get(url, auth=auth, headers=headers, stream=True)
 
     if r.status_code != 200:
         raise RuntimeError(
