@@ -7,17 +7,115 @@
 """
 import json
 import re
+from datetime import datetime, timedelta
 
 import secml
 from secml.utils import fm
-from secml.utils.download_utils import dl_file_gitlab
+from secml.utils.download_utils import dl_file_gitlab, md5
 
 from secml.settings import SECML_MODELS_DIR
 
 MODEL_ZOO_REPO_URL = 'https://gitlab.com/secml/secml-zoo'
-MODELS_DICT_PATH = fm.join(fm.abspath(__file__), 'models_dict.json')
-with open(MODELS_DICT_PATH) as fp:
-    MODELS_DICT = json.loads(fp.read())
+MODELS_DICT_FILE = 'models_dict.json'
+MODELS_DICT_PATH = fm.join(SECML_MODELS_DIR, MODELS_DICT_FILE)
+
+
+def _dl_data_versioned(file_path, output_dir, md5_digest=None):
+    """Download the from different branches depending on version.
+
+    This function tries to download a model zoo resource from:
+     1. the branch corresponding to current version,
+        e.g. branch `v0.12` for `0.12.*` version
+     2. the `master` branch
+
+    Parameters
+    ----------
+    file_path : str
+        Path to the file to download, relative to the repository.
+    output_dir : str
+        Path to the directory where the file should be stored.
+        If folder does not exists, will be created.
+    md5_digest : str or None, optional
+        Expected MD5 digest of the downloaded file.
+        If a different digest is computed, the downloaded file will be
+        removed and ValueError is raised.
+
+    """
+    try:
+        # Try downloading from the branch corresponding to current version
+        min_version = re.search(r'^\d+.\d+', secml.__version__).group(0)
+        dl_file_gitlab(MODEL_ZOO_REPO_URL, file_path, output_dir,
+                       branch='v' + min_version, md5_digest=md5_digest)
+
+    except RuntimeError:
+        # Raised if file not found. Try looking in 'master' branch
+        dl_file_gitlab(MODEL_ZOO_REPO_URL, file_path, output_dir,
+                       branch='master', md5_digest=md5_digest)
+
+
+def _get_models_dict():
+    """Downloads the ditionary of models definitions.
+
+    File will be re-downloaded every 30 minutes (upon request) to update
+    the models definitions from repository.
+
+    Returns
+    -------
+    models_dict : dict
+        Dictionary with models definitions. Each key is an available model.
+        Each model entry is defined by:
+         - "model", path to the script with model definition
+         - "state", path to the archive containing the pre-saved model state
+         - "model_md5", md5 checksum of model definition
+         - "state_md5", md5 checksum of pre-saved model state
+
+    """
+    # The `.last_update` contains the last time MODELS_DICT_FILE
+    # has been download. Read the last update time if this file is available.
+    # Otherwise the file will be created later
+    last_update_path = fm.join(SECML_MODELS_DIR, '.last_update')
+    last_update_format = "%d %m %Y %H:%M"  # Specific format to avoid locale
+    current_datetime = datetime.utcnow()  # UTC datetime to avoid locale
+    last_update = None
+    if fm.file_exist(last_update_path):
+        try:
+            with open(last_update_path) as fp:
+                last_update = datetime.strptime(fp.read(), last_update_format)
+                # Compute the threshold for triggering an update
+                last_update_th = last_update + timedelta(minutes=30)
+        except ValueError:
+            # Error occurred while reading the last update file.
+            # clean it and re-download
+            fm.remove_file(last_update_path)
+
+    # Download (if needed) data and extract it.
+    # Refresh if last update is unknown or last update threshold has passed
+    if not fm.file_exist(MODELS_DICT_PATH) or last_update is None or \
+            (last_update and current_datetime > last_update_th):
+
+        # Download definitions from current version's branch first,
+        # then from master branch
+        _dl_data_versioned(MODELS_DICT_FILE, SECML_MODELS_DIR)
+
+        # Check if file has been correctly downloaded
+        if not fm.file_exist(MODELS_DICT_PATH):
+            raise RuntimeError(
+                'Something wrong happened while downloading the '
+                'models definitions. Please try again.')
+
+        # Update the "last update" file
+        with open(last_update_path, "w") as fp:
+            fp.write(current_datetime.strftime(last_update_format))
+
+    if last_update is None:  # Create the "last update" file
+        with open(last_update_path, "w") as fp:
+            fp.write(current_datetime.strftime(last_update_format))
+
+    with open(MODELS_DICT_PATH) as fp:
+        return json.loads(fp.read())
+
+
+MODELS_DICT = _get_models_dict()  # Populate the models dict
 
 
 def load_model(model_id):
@@ -25,15 +123,7 @@ def load_model(model_id):
 
     Returns a pre-trained SecML classifier given the id of the model.
 
-    The following models are available:
-     - `mnist-svm`,
-            multiclass `CClassifierSVM` trained on MNIST
-     - `mnist59-svm`,
-            multiclass `CClassifierSVM` with RBF Kernel trained on MNIST59
-     - `mnist59-svm-rbf`,
-            multiclass `CClassifierSVM` with RBF Kernel trained on MNIST59
-     - `mnist159-cnn`,
-            `CClassifierPyTorch` CNN trained on MNIST159
+    Check https://gitlab.com/secml/secml-zoo for the list of available models.
 
     Parameters
     ----------
@@ -47,28 +137,36 @@ def load_model(model_id):
 
     """
     model_info = MODELS_DICT[model_id]
-    data_path = fm.join(SECML_MODELS_DIR, model_id, model_id + '.gz')
-    # Download (if needed) data and extract it
-    if not fm.file_exist(data_path):
-        model_url = 'models/' + model_info['url'] + '.gz'
-        out_dir = fm.join(SECML_MODELS_DIR, model_id)
-        try:
-            # Try downloading from the branch corresponding to current version
-            min_version = re.search(r'^\d+.\d+', secml.__version__).group(0)
-            dl_file_gitlab(MODEL_ZOO_REPO_URL, model_url, out_dir,
-                           branch='v' + min_version,
-                           md5_digest=model_info['md5'])
 
-        except RuntimeError:
-            # Raised if file not found. Try looking in 'master' branch
-            dl_file_gitlab(MODEL_ZOO_REPO_URL, model_url, out_dir,
-                           branch='master',
-                           md5_digest=model_info['md5'])
+    model_path = fm.join(SECML_MODELS_DIR, model_info['model'] + '.py')
+    # Download (if needed) model's script, check md5 and extract it
+    if not fm.file_exist(model_path) or \
+            model_info['model_md5'] != md5(model_path):
+        model_url = fm.join('models', model_info['model'] + '.py')
+        out_dir = fm.abspath(model_path)
+        # Download requested model from current version's branch first,
+        # then from master branch
+        _dl_data_versioned(model_url, out_dir, model_info['model_md5'])
 
         # Check if file has been correctly downloaded
-        if not fm.file_exist(data_path):
+        if not fm.file_exist(model_path):
             raise RuntimeError('Something wrong happened while '
-                               'downloading the model. Please try again')
+                               'downloading the model. Please try again.')
+
+    state_path = fm.join(SECML_MODELS_DIR, model_info['state'] + '.gz')
+    # Download (if needed) state, check md5 and extract it
+    if not fm.file_exist(state_path) or \
+            model_info['state_md5'] != md5(state_path):
+        state_url = fm.join('models', model_info['state'] + '.gz')
+        out_dir = fm.abspath(state_path)
+        # Download requested model state from current version's branch first,
+        # then from master branch
+        _dl_data_versioned(state_url, out_dir, model_info['state_md5'])
+
+        # Check if file has been correctly downloaded
+        if not fm.file_exist(state_path):
+            raise RuntimeError('Something wrong happened while '
+                               'downloading the model. Please try again.')
 
     def import_module(full_name, path):
         """Import a python module from a path."""
@@ -85,14 +183,12 @@ def load_model(model_id):
     model_name = model_info["model"].split('/')[-1]
 
     # Import the python module containing the function returning the model
-    model_path = fm.join(
-        fm.abspath(__file__), 'models', model_info["model"] + '.py')
     model_module = import_module(model_name, model_path)
 
     # Run the function returning the model
     model = getattr(model_module, model_name)()
 
     # Restore the state of the model from file
-    model.load_state(data_path)
+    model.load_state(state_path)
 
     return model
