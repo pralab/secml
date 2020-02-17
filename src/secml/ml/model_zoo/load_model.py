@@ -137,17 +137,32 @@ def load_model(model_id):
 
     """
     model_info = MODELS_DICT[model_id]
-    data_path = fm.join(SECML_MODELS_DIR, model_id, model_id + '.gz')
-    # Download (if needed) data and extract it
-    if not fm.file_exist(data_path):
-        model_url = 'models/' + model_info['state'] + '.gz'
-        out_dir = fm.join(SECML_MODELS_DIR, model_id)
+
+    model_path = fm.join(SECML_MODELS_DIR, model_info['model'] + '.py')
+    # Download (if needed) model's script and extract it
+    if not fm.file_exist(model_path):
+        model_url = fm.join('models', model_info['model'] + '.py')
+        out_dir = fm.abspath(model_path)
         # Download requested model from current version's branch first,
         # then from master branch
-        _dl_data_versioned(model_url, out_dir, model_info['state_md5'])
+        _dl_data_versioned(model_url, out_dir, model_info['model_md5'])
 
         # Check if file has been correctly downloaded
-        if not fm.file_exist(data_path):
+        if not fm.file_exist(model_path):
+            raise RuntimeError('Something wrong happened while '
+                               'downloading the model. Please try again.')
+
+    state_path = fm.join(SECML_MODELS_DIR, model_info['state'] + '.gz')
+    # Download (if needed) state and extract it
+    if not fm.file_exist(state_path):
+        state_url = fm.join('models', model_info['state'] + '.gz')
+        out_dir = fm.abspath(state_path)
+        # Download requested model state from current version's branch first,
+        # then from master branch
+        _dl_data_versioned(state_url, out_dir, model_info['state_md5'])
+
+        # Check if file has been correctly downloaded
+        if not fm.file_exist(state_path):
             raise RuntimeError('Something wrong happened while '
                                'downloading the model. Please try again.')
 
@@ -166,14 +181,12 @@ def load_model(model_id):
     model_name = model_info["model"].split('/')[-1]
 
     # Import the python module containing the function returning the model
-    model_path = fm.join(
-        fm.abspath(__file__), 'models', model_info["model"] + '.py')
     model_module = import_module(model_name, model_path)
 
     # Run the function returning the model
     model = getattr(model_module, model_name)()
 
     # Restore the state of the model from file
-    model.load_state(data_path)
+    model.load_state(state_path)
 
     return model
