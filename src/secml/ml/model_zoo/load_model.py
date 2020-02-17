@@ -7,6 +7,7 @@
 """
 import json
 import re
+from datetime import datetime, timedelta
 
 import secml
 from secml.utils import fm
@@ -55,6 +56,9 @@ def _dl_data_versioned(file_path, output_dir, md5_digest=None):
 def _get_models_dict():
     """Downloads the ditionary of models definitions.
 
+    File will be re-downloaded every 30 minutes (upon request) to update
+    the models definitions from repository.
+
     Returns
     -------
     models_dict : dict
@@ -66,8 +70,28 @@ def _get_models_dict():
          - "state_md5", md5 checksum of pre-saved model state
 
     """
-    # Download (if needed) data and extract it
-    if not fm.file_exist(MODELS_DICT_PATH):
+    # The `.last_update` contains the last time MODELS_DICT_FILE
+    # has been download. Read the last update time if this file is available.
+    # Otherwise the file will be created later
+    last_update_path = fm.join(SECML_MODELS_DIR, '.last_update')
+    last_update_format = "%d %m %Y %H:%M"  # Specific format to avoid locale
+    current_datetime = datetime.utcnow()  # UTC datetime to avoid locale
+    last_update = None
+    if fm.file_exist(last_update_path):
+        try:
+            with open(last_update_path) as fp:
+                last_update = datetime.strptime(fp.read(), last_update_format)
+                # Compute the threshold for triggering an update
+                last_update_th = last_update + timedelta(minutes=30)
+        except ValueError:
+            # Error occurred while reading the last update file.
+            # clean it and re-download
+            fm.remove_file(last_update_path)
+
+    # Download (if needed) data and extract it.
+    # Refresh if last update is unknown or last update threshold has passed
+    if not fm.file_exist(MODELS_DICT_PATH) or last_update is None or \
+            (last_update and current_datetime > last_update_th):
 
         # Download definitions from current version's branch first,
         # then from master branch
@@ -78,6 +102,14 @@ def _get_models_dict():
             raise RuntimeError(
                 'Something wrong happened while downloading the '
                 'models definitions. Please try again.')
+
+        # Update the "last update" file
+        with open(last_update_path, "w") as fp:
+            fp.write(current_datetime.strftime(last_update_format))
+
+    if last_update is None:  # Create the "last update" file
+        with open(last_update_path, "w") as fp:
+            fp.write(current_datetime.strftime(last_update_format))
 
     with open(MODELS_DICT_PATH) as fp:
         return json.loads(fp.read())
