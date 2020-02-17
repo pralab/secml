@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 
 import secml
 from secml.utils import fm
-from secml.utils.download_utils import dl_file_gitlab
+from secml.utils.download_utils import dl_file_gitlab, md5
 
 from secml.settings import SECML_MODELS_DIR
 
@@ -139,8 +139,9 @@ def load_model(model_id):
     model_info = MODELS_DICT[model_id]
 
     model_path = fm.join(SECML_MODELS_DIR, model_info['model'] + '.py')
-    # Download (if needed) model's script and extract it
-    if not fm.file_exist(model_path):
+    # Download (if needed) model's script, check md5 and extract it
+    if not fm.file_exist(model_path) or \
+            model_info['model_md5'] != md5(model_path):
         model_url = fm.join('models', model_info['model'] + '.py')
         out_dir = fm.abspath(model_path)
         # Download requested model from current version's branch first,
@@ -153,8 +154,9 @@ def load_model(model_id):
                                'downloading the model. Please try again.')
 
     state_path = fm.join(SECML_MODELS_DIR, model_info['state'] + '.gz')
-    # Download (if needed) state and extract it
-    if not fm.file_exist(state_path):
+    # Download (if needed) state, check md5 and extract it
+    if not fm.file_exist(state_path) or \
+            model_info['state_md5'] != md5(state_path):
         state_url = fm.join('models', model_info['state'] + '.gz')
         out_dir = fm.abspath(state_path)
         # Download requested model state from current version's branch first,
