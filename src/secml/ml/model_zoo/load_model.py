@@ -76,40 +76,54 @@ def _get_models_dict():
     last_update_path = fm.join(SECML_MODELS_DIR, '.last_update')
     last_update_format = "%d %m %Y %H:%M"  # Specific format to avoid locale
     current_datetime = datetime.utcnow()  # UTC datetime to avoid locale
-    last_update = None
-    if fm.file_exist(last_update_path):
-        try:
-            with open(last_update_path) as fp:
-                last_update = datetime.strptime(fp.read(), last_update_format)
-                # Compute the threshold for triggering an update
-                last_update_th = last_update + timedelta(minutes=30)
-        except ValueError:
-            # Error occurred while reading the last update file.
-            # clean it and re-download
-            fm.remove_file(last_update_path)
 
-    # Download (if needed) data and extract it.
-    # Refresh if last update is unknown or last update threshold has passed
-    if not fm.file_exist(MODELS_DICT_PATH) or last_update is None or \
-            (last_update and current_datetime > last_update_th):
+    update_models_dict = None  # Trigger flag for model definitions update
+    if fm.file_exist(MODELS_DICT_PATH):
+        update_models_dict = True  # By default, trigger update
+        if fm.file_exist(last_update_path):
+            try:
+                with open(last_update_path) as fp:
+                    last_update = \
+                        datetime.strptime(fp.read(), last_update_format)
+                    # Compute the threshold for triggering an update
+                    last_update_th = last_update + timedelta(minutes=30)
+            except ValueError:
+                # Error occurred while parsing the last update date from file
+                # Clean it and re-create later. Definitions update stays True
+                fm.remove_file(last_update_path)
+            else:
+                # Do not trigger update if last update threshold is not passed
+                if current_datetime < last_update_th:
+                    update_models_dict = False
 
-        # Download definitions from current version's branch first,
-        # then from master branch
-        _dl_data_versioned(MODELS_DICT_FILE, SECML_MODELS_DIR)
+    if update_models_dict is not False:
+        # if update_models_dict is None means that models dict is not available
+        # if it is True means that an update has been triggered
+        # Either cases, we need to download the data and extract it
 
-        # Check if file has been correctly downloaded
-        if not fm.file_exist(MODELS_DICT_PATH):
-            raise RuntimeError(
-                'Something wrong happened while downloading the '
-                'models definitions. Please try again.')
+        try:  # Catch download errors
 
-        # Update the "last update" file
-        with open(last_update_path, "w") as fp:
-            fp.write(current_datetime.strftime(last_update_format))
+            # Download definitions from current version's branch first,
+            # then from master branch
+            _dl_data_versioned(MODELS_DICT_FILE, SECML_MODELS_DIR)
 
-    if last_update is None:  # Create the "last update" file
-        with open(last_update_path, "w") as fp:
-            fp.write(current_datetime.strftime(last_update_format))
+        except Exception as e:
+            if update_models_dict is None:
+                # If update_models_dict is still None, means that models dict
+                # is not available, so we propagate the error. Otherwise pass
+                raise e
+
+        else:  # No error raised during download process
+
+            # Check if file has been correctly downloaded
+            if not fm.file_exist(MODELS_DICT_PATH):
+                raise RuntimeError(
+                    'Something wrong happened while downloading the '
+                    'models definitions. Please try again.')
+
+            # Update or create the "last update" file
+            with open(last_update_path, "w") as fp:
+                fp.write(current_datetime.strftime(last_update_format))
 
     with open(MODELS_DICT_PATH) as fp:
         return json.loads(fp.read())
