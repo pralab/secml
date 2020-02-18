@@ -3,7 +3,7 @@ from secml.ml.features.tests import CPreProcessTestCases
 from sklearn.feature_extraction.text import TfidfTransformer
 
 from secml.array import CArray
-from secml.ml.features.normalization import CNormalizerTfIdf
+from secml.ml.features.normalization import CNormalizerTFIDF
 
 
 class TestCNormalizerTFIDF(CPreProcessTestCases):
@@ -23,7 +23,7 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
             target = CArray(sk_norm.transform(array_sk))
 
             # Our normalizer
-            our_norm = CNormalizerTfIdf().fit(array)
+            our_norm = CNormalizerTFIDF().fit(array)
             result = our_norm.transform(array)
 
             self.logger.info("Correct result is:\n{:}".format(target))
