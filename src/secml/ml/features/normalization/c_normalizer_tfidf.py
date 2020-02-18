@@ -67,22 +67,6 @@ class CNormalizerTFIDF(CNormalizer):
     shape (1, array.size). This means that normalizing a flat vector is
     equivalent to transform array.atleast_2d(). To obtain a numpy-style
     normalization of flat vectors, transpose array first.
-
-    Examples
-    --------
-    >>> from secml.array import CArray
-    >>> from secml.ml.features.normalization import CNormalizerMinMax
-    >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
-
-    >>> print(CNormalizerMinMax().fit_transform(array))
-    CArray([[0.5      0.       1.      ]
-     [1.       0.5      0.333333]
-     [0.       1.       0.      ]])
-
-    >>> print(CNormalizerMinMax(feature_range=(-1,1)).fit_transform(array))
-    CArray([[ 0.       -1.        1.      ]
-     [ 1.        0.       -0.333333]
-     [-1.        1.       -1.      ]])
     """
 
     __class_type = 'tf-idf'
@@ -108,18 +92,18 @@ class CNormalizerTFIDF(CNormalizer):
     def _document_frequency(self, X):
         """Count the number of non-zero values for each feature in sparse X."""
 
-        # todo: manage not sparse array
-
-        if not X.issparse:
-            X = X.tosparse()
-
-        df = CArray(np.bincount(np.array(X.nnz_indices[1]),
-                                minlength=X.shape[1]))
+        if X.issparse:
+            df = CArray(np.bincount(np.array(X.nnz_indices[1]),
+                                    minlength=X.shape[1]))
+        else:
+            bin_x = X.deepcopy()
+            bin_x[bin_x > 0] = 1
+            df = CArray(bin_x.sum(axis=0).ravel())
 
         return df
 
     def _forward(self, x):
-        """Apply the TfIdf transform
+        """Apply the TF-IDF transform
 
         Parameters
         ----------
@@ -132,9 +116,9 @@ class CNormalizerTFIDF(CNormalizer):
         Shape of returned array is the same of the original array.
 
         """
-        if x.atleast_2d().shape[1] != self._idf.shape[1]:
+        if x.atleast_2d().shape[1] != self._idf.size:
             raise ValueError("array to normalize must have {:} "
-                             "features (columns).".format(self._idf.shape[1]))
+                             "features (columns).".format(self._idf.size))
 
         x = x.atleast_2d()
 
@@ -143,19 +127,20 @@ class CNormalizerTFIDF(CNormalizer):
         if self._norm_type is not None:
             n_samples = x.shape[0]
             self._norm = CArray.zeros(n_samples)
+
             for i in range(n_samples):
 
                 # for each row compute the norm and normalize tf idf
                 if self._norm_type == 'l2':
-                    self._norm[i] = tf_idf[i,:].norm(2)
+                    self._norm[i] = tf_idf[i, :].norm(2)
                 elif self._norm_type == 'l1':
-                    self._norm[i] = tf_idf[i,:].norm(1)
-                tf_idf[i,:] /= self._norm[i]
+                    self._norm[i] = tf_idf[i, :].norm(1)
+                tf_idf[i, :] /= self._norm[i]
 
         return tf_idf
 
     def _fit(self, x, y=None):
-        """Learn the TfIdf normalizer
+        """Learn the normalizer.
 
         Parameters
         ----------
@@ -168,7 +153,7 @@ class CNormalizerTFIDF(CNormalizer):
 
         Returns
         -------
-        CNormalizerTfIdf
+        CNormalizerTFIDF
             Instance of the trained normalizer.
         """
         x = x.atleast_2d()
@@ -189,7 +174,7 @@ class CNormalizerTFIDF(CNormalizer):
         ----------
         x : CArray
             Array to be reverted. Must have been normalized by the same
-            calling instance of the CNormalizerLinear.
+            calling transform.
 
         Returns
         -------
@@ -204,8 +189,8 @@ class CNormalizerTFIDF(CNormalizer):
         if self._norm_type is not None:
             x *= self._norm.T
 
-        x[:, self._idf != 0] /= self._idf[self._idf != 0]  # avoids division
-        #  by zero
+        # avoids division by zero
+        x[:, self._idf != 0] /= self._idf[self._idf != 0]
 
         x = x.ravel() if x.ndim <= 1 else x
 
@@ -223,7 +208,7 @@ class CNormalizerTFIDF(CNormalizer):
         Returns
         -------
         gradient : CArray
-            Gradient of the linear normalizer wrt input data.
+            Gradient of the normalizer wrt input data.
             - a flat array of shape (x.shape[1], ) if `w` is None;
             - if `w` is passed as input, will have (w.shape[0], x.shape[1]),
               or (x.shape[1], ) if `w` is a flat array.
@@ -231,7 +216,7 @@ class CNormalizerTFIDF(CNormalizer):
         """
         grad = self._idf
 
-        if self._norm_type != None:
+        if self._norm_type is not None:
             grad /= self._norm
 
         return w * grad if w is not None else grad
@@ -239,56 +224,56 @@ class CNormalizerTFIDF(CNormalizer):
 
 #
 # # todo: creare un test
-# norm = CNormalizerTfIdf()
-# x = CArray([[0, 2, 0], [1, 7, 0], [1, 5, 0], [1, 5, 0]])
-# #
-# print(x)
-# norm.fit(x)
+norm = CNormalizerTFIDF()
+x = CArray([[0, 2, 0], [1, 7, 0], [1, 5, 0], [1, 5, 0]])
 #
-# tr = norm.transform(x)
-# print("transform:", tr.todense())
-#
-# inv_t = norm.inverse_transform(tr)
-# # # controlla che sia uguale al valore iniziale.
-# print("inverse transform", inv_t.todense())
-#
-# x0 = x[0, :]
-# print("x0", x0)
-#
-# tr = norm.transform(x0)
-# print("transform x0:", tr.todense())
-#
-# # Analytical gradient
-# grad = norm.gradient(x0, w=CArray([1, 0, 0]))
-#
-# # CArray([0.695089 0.       1.693147])
-#
-# # check the gradient comparing it with the numerical one
-#
-# print("grad ", grad)
-#
-# aug_x0 = (x0 * grad)
-#
-# tr = norm.transform(aug_x0)
-#
-# print(tr)
-#
-#
-# def _get_transform_component(x):
-#     trans = norm.transform(x).todense()
-#     return trans[0]
-#
-#
-# # Numerical gradient
-# from secml.optim.function import CFunction
-#
-# num_gradient = CFunction(
-#     _get_transform_component).approx_fprime(x0.todense(), epsilon=1e-5)
-#
-# print("grad ", grad)
-# print("num grad ", num_gradient)
-#
-# # Compute the norm of the difference
-# error = (grad - num_gradient).norm()
-#
-# print("error ", error)
+print(x)
+norm.fit(x)
+
+tr = norm.transform(x)
+print("transform:", tr.todense())
+
+inv_t = norm.inverse_transform(tr)
+# # controlla che sia uguale al valore iniziale.
+print("inverse transform", inv_t.todense())
+
+x0 = x[0, :]
+print("x0", x0)
+
+tr = norm.transform(x0)
+print("transform x0:", tr.todense())
+
+# Analytical gradient
+grad = norm.gradient(x0, w=CArray([1, 0, 0]))
+
+# CArray([0.695089 0.       1.693147])
+
+# check the gradient comparing it with the numerical one
+
+print("grad ", grad)
+
+aug_x0 = (x0 * grad)
+
+tr = norm.transform(aug_x0)
+
+print(tr)
+
+
+def _get_transform_component(x):
+    trans = norm.transform(x).todense()
+    return trans[0]
+
+
+# Numerical gradient
+from secml.optim.function import CFunction
+
+num_gradient = CFunction(
+    _get_transform_component).approx_fprime(x0.todense(), epsilon=1e-5)
+
+print("grad ", grad)
+print("num grad ", num_gradient)
+
+# Compute the norm of the difference
+error = (grad - num_gradient).norm()
+
+print("error ", error)
