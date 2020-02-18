@@ -72,7 +72,6 @@ class CNormalizerTFIDF(CNormalizer):
         self._tfidf_norm = None
         super(CNormalizerTFIDF, self).__init__(preprocess=preprocess)
 
-
     @property
     def norm(self):
         """Type of norm used to normalize the tf-idf."""
@@ -144,9 +143,10 @@ class CNormalizerTFIDF(CNormalizer):
 
                 # for each row compute the norm and normalize tf idf
                 if self._norm == 'l2':
-                    self._tf_idf_norm[i] = tf_idf[i, :].norm(2)
+                    _tf_idf_norm = tf_idf[i, :].norm(2)
                 elif self._norm == 'l1':
-                    self._tf_idf_norm[i] = tf_idf[i, :].norm(1)
+                    _tf_idf_norm = tf_idf[i, :].norm(1)
+                self._tf_idf_norm[i] = _tf_idf_norm if _tf_idf_norm > 0 else 1
                 tf_idf[i, :] /= self._tf_idf_norm[i]
 
         return tf_idf
@@ -194,6 +194,7 @@ class CNormalizerTFIDF(CNormalizer):
             Array with features scaled back to original values.
 
         """
+        x = x.deepcopy()
         if x.atleast_2d().shape[1] != self._idf.size:
             raise ValueError("array to revert must have {:} "
                              "features (columns).".format(self._idf.size))
@@ -232,4 +233,3 @@ class CNormalizerTFIDF(CNormalizer):
             grad /= self._tf_idf_norm
 
         return w * grad if w is not None else grad
-
