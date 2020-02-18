@@ -112,6 +112,37 @@ class CNormalizerTFIDF(CNormalizer):
 
         return df
 
+
+    def _get_norm(self, x, norm='l2'):
+        """Compute the required norm on each row.
+
+        Parameters
+        ----------
+        x : CArray
+            Array of which we would like to compute the norm.
+        norm: string 'l2' or 'l1' (l2 default)
+            norm that we would like to compute.
+
+        Returns
+        -------
+        Array with the computed norm.
+        """
+
+        if norm == 'l2':
+            ord = 2
+        elif norm == 'l1':
+            ord = 1
+        else:
+            raise ValueError("unknown norm")
+
+        norm = CArray(np.linalg.norm(x.tondarray(), axis=1, keepdims=True,
+                                     ord=ord))
+
+        # to avoid nan values
+        norm[norm==0] = 1
+
+        return norm
+
     def _forward(self, x):
         """
         Applies the TF-IDF transform.
@@ -139,15 +170,9 @@ class CNormalizerTFIDF(CNormalizer):
             n_samples = x.shape[0]
             self._tf_idf_norm = CArray.zeros(n_samples)
 
-            for i in range(n_samples):
-
-                # for each row compute the norm and normalize tf idf
-                if self._norm == 'l2':
-                    _tf_idf_norm = tf_idf[i, :].norm(2)
-                elif self._norm == 'l1':
-                    _tf_idf_norm = tf_idf[i, :].norm(1)
-                self._tf_idf_norm[i] = _tf_idf_norm if _tf_idf_norm > 0 else 1
-                tf_idf[i, :] /= self._tf_idf_norm[i]
+            if self._norm_type is not None:
+                self._norm = self._get_norm(tf_idf, norm=self._norm_type)
+                tf_idf = tf_idf / self._norm
 
         return tf_idf
 
@@ -200,7 +225,7 @@ class CNormalizerTFIDF(CNormalizer):
                              "features (columns).".format(self._idf.size))
 
         if self._norm is not None:
-            x *= self._tf_idf_norm.T
+            x *= self._tf_idf_norm
 
         # avoids division by zero
         x[:, self._idf != 0] /= self._idf[self._idf != 0]
