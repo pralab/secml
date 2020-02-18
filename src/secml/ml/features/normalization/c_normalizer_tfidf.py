@@ -29,20 +29,15 @@ class CNormalizerTFIDF(CNormalizer):
 
     The formula that is used to compute the tf-idf for a term t of a document
     d in a document set is tf-idf(t, d) = tf(t, d) * idf(t), and the idf is
-    computed as idf(t) = log [ n / df(t) ] + 1 (if smooth_idf=False), where n
+    computed as idf(t) = log [ (1 + n) / (1 + df(d, t)) ] + 1, where n
     is the total number of documents in the document set and df(t) is the
     document frequency of t; the document frequency is the number of documents
-    in the document set that contain the term t. The effect of adding “1” to
+    in the document set that contains the term t. The effect of adding “1” to
     the idf in the equation above is that terms with zero idf, i.e., terms
     that occur in all documents in a training set, will not be entirely
     ignored. (Note that the idf formula above differs from the standard
     textbook notation that defines the idf as
     idf(t) = log [ n / (df(t) + 1) ]).
-
-    If smooth_idf=True (the default), the constant “1” is added to the
-    numerator and denominator of the idf as if an extra document was seen
-    containing every term in the collection exactly once, which prevents zero
-    divisions: idf(d, t) = log [ (1 + n) / (1 + df(d, t)) ] + 1.
 
     Parameters
     ----------
@@ -73,12 +68,18 @@ class CNormalizerTFIDF(CNormalizer):
 
     def __init__(self, norm='l2', preprocess=None):
 
-        self._norm_type = norm
+        self._norm = norm
         self._tfidf_norm = None
         super(CNormalizerTFIDF, self).__init__(preprocess=preprocess)
 
+
+    @property
+    def norm(self):
+        """Type of norm used to normalize the tf-idf."""
+        return self._n
+
     def _check_is_fitted(self):
-        """Check if the preprocessor is trained (fitted).
+        """Checks if the preprocessor is trained (fitted).
 
         Raises
         ------
@@ -90,7 +91,17 @@ class CNormalizerTFIDF(CNormalizer):
             raise ValueError("The normalizer has not been trained.")
 
     def _document_frequency(self, X):
-        """Count the number of non-zero values for each feature in sparse X."""
+        """Counts the number of non-zero values for each feature in sparse X.
+
+        Parameters
+        ----------
+        X : CArray
+            Matrix containing the term frequencies.
+
+         Returns
+        -------
+        Array with the document frequencies.
+        """
 
         if X.issparse:
             df = CArray(np.bincount(np.array(X.nnz_indices[1]),
@@ -103,7 +114,8 @@ class CNormalizerTFIDF(CNormalizer):
         return df
 
     def _forward(self, x):
-        """Apply the TF-IDF transform
+        """
+        Applies the TF-IDF transform.
 
         Parameters
         ----------
@@ -124,23 +136,23 @@ class CNormalizerTFIDF(CNormalizer):
 
         tf_idf = x * self._idf
 
-        if self._norm_type is not None:
+        if self._norm is not None:
             n_samples = x.shape[0]
-            self._norm = CArray.zeros(n_samples)
+            self._tf_idf_norm = CArray.zeros(n_samples)
 
             for i in range(n_samples):
 
                 # for each row compute the norm and normalize tf idf
-                if self._norm_type == 'l2':
-                    self._norm[i] = tf_idf[i, :].norm(2)
-                elif self._norm_type == 'l1':
-                    self._norm[i] = tf_idf[i, :].norm(1)
-                tf_idf[i, :] /= self._norm[i]
+                if self._norm == 'l2':
+                    self._tf_idf_norm[i] = tf_idf[i, :].norm(2)
+                elif self._norm == 'l1':
+                    self._tf_idf_norm[i] = tf_idf[i, :].norm(1)
+                tf_idf[i, :] /= self._tf_idf_norm[i]
 
         return tf_idf
 
     def _fit(self, x, y=None):
-        """Learn the normalizer.
+        """Learns the normalizer.
 
         Parameters
         ----------
@@ -157,7 +169,7 @@ class CNormalizerTFIDF(CNormalizer):
             Instance of the trained normalizer.
         """
         x = x.atleast_2d()
-        self._tfidf_norm = TfidfTransformer(norm=self._norm_type,
+        self._tfidf_norm = TfidfTransformer(norm=self._norm,
                                             smooth_idf=True)
         self._tfidf_norm.fit(x.tondarray(), None)
 
@@ -184,10 +196,10 @@ class CNormalizerTFIDF(CNormalizer):
         """
         if x.atleast_2d().shape[1] != self._idf.size:
             raise ValueError("array to revert must have {:} "
-                             "features (columns).".format(self.w.size))
+                             "features (columns).".format(self._idf.size))
 
-        if self._norm_type is not None:
-            x *= self._norm.T
+        if self._norm is not None:
+            x *= self._tf_idf_norm.T
 
         # avoids division by zero
         x[:, self._idf != 0] /= self._idf[self._idf != 0]
@@ -197,7 +209,7 @@ class CNormalizerTFIDF(CNormalizer):
         return x
 
     def _backward(self, w=None):
-        """Compute the gradient wrt the cached inputs during the forward pass.
+        """Computes the gradient wrt the cached inputs during the forward pass.
 
         Parameters
         ----------
@@ -216,8 +228,8 @@ class CNormalizerTFIDF(CNormalizer):
         """
         grad = self._idf
 
-        if self._norm_type is not None:
-            grad /= self._norm
+        if self._norm is not None:
+            grad /= self._tf_idf_norm
 
         return w * grad if w is not None else grad
 
