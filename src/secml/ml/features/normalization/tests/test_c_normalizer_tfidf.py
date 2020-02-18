@@ -76,6 +76,28 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
         # Expected shape is (n_feats, ), so (4, )
         self.assertEqual((self.array_dense.shape[1], ), grad.shape)
 
+    def test_inverse_transform(self):
+        """Check the inverse transform."""
+
+        def transf_and_inverse(array):
+
+            self.logger.info("Original array is:\n{:}".format(array))
+
+            # Our normalizer
+            our_norm = CNormalizerTFIDF().fit(array)
+            trans = our_norm.transform(array)
+            orig = our_norm.inverse_transform(trans)
+
+            self.assert_array_almost_equal(array, orig)
+
+        transf_and_inverse(self.array_dense)
+        transf_and_inverse(self.array_sparse)
+        transf_and_inverse(self.row_dense.atleast_2d())
+        transf_and_inverse(self.row_sparse)
+        transf_and_inverse(self.column_dense)
+        transf_and_inverse(self.column_sparse)
+
+
 
 if __name__ == '__main__':
     CPreProcessTestCases.main()
