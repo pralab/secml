@@ -112,7 +112,6 @@ class CNormalizerTFIDF(CNormalizer):
 
         return df
 
-
     def _get_norm(self, x, norm='l2'):
         """Compute the required norm on each row.
 
@@ -139,7 +138,7 @@ class CNormalizerTFIDF(CNormalizer):
                                      ord=ord))
 
         # to avoid nan values
-        norm[norm==0] = 1
+        norm[norm == 0] = 1
 
         return norm
 
@@ -170,9 +169,9 @@ class CNormalizerTFIDF(CNormalizer):
             n_samples = x.shape[0]
             self._tf_idf_norm = CArray.zeros(n_samples)
 
-            if self._norm_type is not None:
-                self._norm = self._get_norm(tf_idf, norm=self._norm_type)
-                tf_idf = tf_idf / self._norm
+            if self.norm is not None:
+                self._tf_idf_norm = self._get_norm(tf_idf, norm=self._norm)
+                tf_idf = tf_idf / self._tf_idf_norm
 
         return tf_idf
 
