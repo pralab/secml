@@ -75,7 +75,7 @@ class CNormalizerTFIDF(CNormalizer):
     @property
     def norm(self):
         """Type of norm used to normalize the tf-idf."""
-        return self._n
+        return self._norm
 
     def _check_is_fitted(self):
         """Checks if the preprocessor is trained (fitted).
@@ -164,14 +164,11 @@ class CNormalizerTFIDF(CNormalizer):
         x = x.atleast_2d()
 
         tf_idf = x * self._idf
+        self._unnorm_tf_idf = tf_idf
 
-        if self._norm is not None:
-            n_samples = x.shape[0]
-            self._tf_idf_norm = CArray.zeros(n_samples)
-
-            if self.norm is not None:
-                self._tf_idf_norm = self._get_norm(tf_idf, norm=self._norm)
-                tf_idf = tf_idf / self._tf_idf_norm
+        if self.norm is not None:
+            self._tf_idf_norm = self._get_norm(tf_idf, norm=self.norm)
+            tf_idf = tf_idf / self._tf_idf_norm
 
         return tf_idf
 
@@ -193,7 +190,7 @@ class CNormalizerTFIDF(CNormalizer):
             Instance of the trained normalizer.
         """
         x = x.atleast_2d()
-        self._tfidf_norm = TfidfTransformer(norm=self._norm,
+        self._tfidf_norm = TfidfTransformer(norm=self.norm,
                                             smooth_idf=True)
         self._tfidf_norm.fit(x.tondarray(), None)
 
@@ -223,7 +220,7 @@ class CNormalizerTFIDF(CNormalizer):
             raise ValueError("array to revert must have {:} "
                              "features (columns).".format(self._idf.size))
 
-        if self._norm is not None:
+        if self.norm is not None:
             x *= self._tf_idf_norm
 
         # avoids division by zero
@@ -253,7 +250,31 @@ class CNormalizerTFIDF(CNormalizer):
         """
         grad = self._idf
 
-        if self._norm is not None:
-            grad /= self._tf_idf_norm
+        if self.norm is None:
+            return w * grad if w is not None else grad
 
-        return w * grad if w is not None else grad
+        else:
+            # todo: we can speed up this avoiding some computation if we
+            # usually call this passing w
+
+            # compute the gradient of norm(tfidf) w.r.t. x
+            if self.norm == 'l2':
+                grad_tfidf_x = self._cached_x / self._tf_idf_norm
+
+            elif self.norm == 'l1':
+                sign = self._unnorm_tf_idf.sign()
+                sign[sign == 0] = 1
+                grad_tfidf_x = sign
+
+            else:
+                raise ValueError("Norm type unknown")
+
+            # the first term is zero for the element of the gradient not in
+            # the diagonal
+            grad = CArray.diag(
+                grad) * self._tf_idf_norm - self._unnorm_tf_idf.T.dot(
+                grad_tfidf_x)
+
+            grad /= (self._tf_idf_norm ** 2)
+
+            return w.dot(grad) if w is not None else grad
