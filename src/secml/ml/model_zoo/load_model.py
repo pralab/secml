@@ -129,9 +129,6 @@ def _get_models_dict():
         return json.loads(fp.read())
 
 
-MODELS_DICT = _get_models_dict()  # Populate the models dict
-
-
 def load_model(model_id):
     """Load a pre-trained classifier.
 
@@ -150,7 +147,7 @@ def load_model(model_id):
         Desired pre-trained model.
 
     """
-    model_info = MODELS_DICT[model_id]
+    model_info = _get_models_dict()[model_id]
 
     model_path = fm.join(SECML_MODELS_DIR, model_info['model'] + '.py')
     # Download (if needed) model's script, check md5 and extract it
