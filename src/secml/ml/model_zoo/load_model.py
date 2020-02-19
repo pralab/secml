@@ -10,7 +10,8 @@ import re
 from datetime import datetime, timedelta
 
 import secml
-from secml.utils import fm
+from secml.settings import SECML_LOGS_PATH, SECML_STORE_LOGS
+from secml.utils import fm, CLog
 from secml.utils.download_utils import dl_file_gitlab, md5
 
 from secml.settings import SECML_MODELS_DIR
@@ -18,6 +19,10 @@ from secml.settings import SECML_MODELS_DIR
 MODEL_ZOO_REPO_URL = 'https://gitlab.com/secml/secml-zoo'
 MODELS_DICT_FILE = 'models_dict.json'
 MODELS_DICT_PATH = fm.join(SECML_MODELS_DIR, MODELS_DICT_FILE)
+
+_logger = CLog(
+    logger_id=__name__,
+    file_handler=SECML_LOGS_PATH if SECML_STORE_LOGS is True else None)
 
 
 def _dl_data_versioned(file_path, output_dir, md5_digest=None):
@@ -47,8 +52,9 @@ def _dl_data_versioned(file_path, output_dir, md5_digest=None):
         dl_file_gitlab(MODEL_ZOO_REPO_URL, file_path, output_dir,
                        branch='v' + min_version, md5_digest=md5_digest)
 
-    except RuntimeError:
-        # Raised if file not found. Try looking in 'master' branch
+    except Exception as e:  # Try looking into 'master' branch...
+        _logger.debug(e)
+        _logger.debug("Looking in the `master` branch...")
         dl_file_gitlab(MODEL_ZOO_REPO_URL, file_path, output_dir,
                        branch='master', md5_digest=md5_digest)
 
@@ -87,9 +93,11 @@ def _get_models_dict():
                         datetime.strptime(fp.read(), last_update_format)
                     # Compute the threshold for triggering an update
                     last_update_th = last_update + timedelta(minutes=30)
-            except ValueError:
+            except ValueError as e:
                 # Error occurred while parsing the last update date from file
                 # Clean it and re-create later. Definitions update stays True
+                _logger.debug(e)  # Log the error for debug purposes
+                _logger.debug("Removing `{:}`".format(last_update_path))
                 fm.remove_file(last_update_path)
             else:
                 # Do not trigger update if last update threshold is not passed
@@ -112,6 +120,9 @@ def _get_models_dict():
                 # If update_models_dict is still None, means that models dict
                 # is not available, so we propagate the error. Otherwise pass
                 raise e
+            _logger.debug(e)  # Log the error for debug purposes
+            _logger.debug("Error when updating the models definitions. "
+                          "Using the last available ones...")
 
         else:  # No error raised during download process
 
