@@ -10,7 +10,7 @@ from secml.ml.features.normalization import CNormalizerTFIDF
 class TestCNormalizerTFIDF(CPreProcessTestCases):
     """Unittest for TestCNormalizerTFIDF."""
 
-    norms = [None, 'l2']
+    norms = [None, 'l2', 'l1']
 
     def test_norm_minmax(self):
         """Test for TestCNormalizerTFIDF."""
@@ -49,13 +49,13 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
 
             self.assert_array_almost_equal(target, result)
 
-        for norm in self.norms:
-            sklearn_comp(self.array_dense, norm)
-            sklearn_comp(self.array_sparse, norm)
-            sklearn_comp(self.row_dense.atleast_2d(), norm)
-            sklearn_comp(self.row_sparse, norm)
-            sklearn_comp(self.column_dense, norm)
-            sklearn_comp(self.column_sparse, norm)
+        for norm_type in self.norms:
+            sklearn_comp(self.array_dense, norm_type)
+            sklearn_comp(self.array_sparse, norm_type)
+            sklearn_comp(self.row_dense.atleast_2d(), norm_type)
+            sklearn_comp(self.row_sparse, norm_type)
+            sklearn_comp(self.column_dense, norm_type)
+            sklearn_comp(self.column_sparse, norm_type)
 
     def test_chain(self):
         """Test a chain of preprocessors."""
@@ -84,25 +84,34 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
 
             self.assert_array_almost_equal(array, orig)
 
-        for norm in self.norms:
-            transf_and_inverse(self.array_dense, norm)
-            transf_and_inverse(self.array_sparse, norm)
-            transf_and_inverse(self.row_dense.atleast_2d(), norm)
-            transf_and_inverse(self.row_sparse, norm)
-            transf_and_inverse(self.column_dense, norm)
-            transf_and_inverse(self.column_sparse, norm)
+        for norm_type in self.norms:
+            transf_and_inverse(self.array_dense, norm_type)
+            transf_and_inverse(self.array_sparse, norm_type)
+            transf_and_inverse(self.row_dense.atleast_2d(), norm_type)
+            transf_and_inverse(self.row_sparse, norm_type)
+            transf_and_inverse(self.column_dense, norm_type)
+            transf_and_inverse(self.column_sparse, norm_type)
 
 
     def test_gradient(self):
         """Check the normalizer gradient."""
 
-        def compare_analytical_and_numerical_grad(array, norm):
+        def compare_analytical_and_numerical_grad(array, norm_type):
 
             def _get_transform_component(x,y):
                 trans = norm.transform(x).todense()
                 return trans[y]
 
-            norm = CNormalizerTFIDF(norm=norm).fit(array)
+            norm = CNormalizerTFIDF(norm=norm_type).fit(array)
+
+            if norm_type == 'l1':
+                # if the norm is one we are computing a subgradient
+                decimal = 1
+            else:
+                decimal = 4
+            # check if they are almost equal
+            self.logger.info("norm:\n{:}".format(
+                norm))
 
             # check the gradient comparing it with the numerical one
             n_feats = array.size
@@ -125,13 +134,13 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
                 self.logger.info("numerical gradient is:\n{:}".format(
                     num_grad))
 
-                # check if they are almost equal
-                self.assert_array_almost_equal(an_grad, num_grad, decimal=4)
+                self.assert_array_almost_equal(an_grad, num_grad,
+                                               decimal=decimal)
 
-        for norm in self.norms:
+        for norm_type in self.norms:
             compare_analytical_and_numerical_grad(self.row_dense.ravel(),
-                                                  norm = norm)
-            compare_analytical_and_numerical_grad(self.row_sparse, norm = norm)
+                                                  norm_type = norm_type)
+            compare_analytical_and_numerical_grad(self.row_sparse, norm_type = norm_type)
 
 
 if __name__ == '__main__':
