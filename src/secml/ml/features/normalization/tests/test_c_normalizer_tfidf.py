@@ -1,22 +1,20 @@
-from secml.ml.features.tests import CPreProcessTestCases
-
 from sklearn.feature_extraction.text import TfidfTransformer
-from secml.optim.function import CFunction
 
 from secml.array import CArray
 from secml.ml.features.normalization import CNormalizerTFIDF
+from secml.ml.features.tests import CPreProcessTestCases
+from secml.optim.function import CFunction
 
 
 class TestCNormalizerTFIDF(CPreProcessTestCases):
     """Unittest for TestCNormalizerTFIDF."""
 
-    norms = [None, 'l2', 'l1']
+    norm_type_lst = [None, 'l2', 'l1']
 
     def test_norm_minmax(self):
         """Test for TestCNormalizerTFIDF."""
 
         def sklearn_comp(array, norm):
-
             self.logger.info("Original array is:\n{:}".format(array))
 
             # Sklearn normalizer (requires float dtype input)
@@ -49,7 +47,7 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
 
             self.assert_array_almost_equal(target, result)
 
-        for norm_type in self.norms:
+        for norm_type in self.norm_type_lst:
             sklearn_comp(self.array_dense, norm_type)
             sklearn_comp(self.array_sparse, norm_type)
             sklearn_comp(self.row_dense.atleast_2d(), norm_type)
@@ -67,24 +65,23 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
 
         # Expected shape is (3, 3), as pca max n_components is 4-1
         self.assertEqual((self.array_dense.shape[0],
-                          self.array_dense.shape[1]-1), x_chain.shape)
+                          self.array_dense.shape[1] - 1), x_chain.shape)
 
     def test_inverse_transform(self):
         """Check the inverse transform."""
 
         def transf_and_inverse(array, norm):
-
             self.logger.info("Original array is:\n{:}".format(array))
             self.logger.info("Considered norm :\n{:}".format(norm))
 
             # Our normalizer
-            our_norm = CNormalizerTFIDF(norm=norm).fit(array)
-            trans = our_norm.transform(array)
-            orig = our_norm.inverse_transform(trans)
+            norm = CNormalizerTFIDF(norm=norm).fit(array)
+            trans = norm.transform(array)
+            orig = norm.inverse_transform(trans)
 
             self.assert_array_almost_equal(array, orig)
 
-        for norm_type in self.norms:
+        for norm_type in self.norm_type_lst:
             transf_and_inverse(self.array_dense, norm_type)
             transf_and_inverse(self.array_sparse, norm_type)
             transf_and_inverse(self.row_dense.atleast_2d(), norm_type)
@@ -92,13 +89,12 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
             transf_and_inverse(self.column_dense, norm_type)
             transf_and_inverse(self.column_sparse, norm_type)
 
-
     def test_gradient(self):
         """Check the normalizer gradient."""
 
         def compare_analytical_and_numerical_grad(array, norm_type):
 
-            def _get_transform_component(x,y):
+            def _get_transform_component(x, y):
                 trans = norm.transform(x).todense()
                 return trans[y]
 
@@ -117,7 +113,6 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
             n_feats = array.size
 
             for f in range(n_feats):
-
                 self.logger.info("Compare the gradient of feature:\n{"
                                  ":}".format(f))
 
@@ -137,13 +132,12 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
                 self.assert_array_almost_equal(an_grad, num_grad,
                                                decimal=decimal)
 
-        for norm_type in self.norms:
+        for norm_type in self.norm_type_lst:
             compare_analytical_and_numerical_grad(self.row_dense.ravel(),
-                                                  norm_type = norm_type)
-            compare_analytical_and_numerical_grad(self.row_sparse, norm_type = norm_type)
+                                                  norm_type=norm_type)
+            compare_analytical_and_numerical_grad(self.row_sparse,
+                                                  norm_type=norm_type)
 
 
 if __name__ == '__main__':
     CPreProcessTestCases.main()
-
-
