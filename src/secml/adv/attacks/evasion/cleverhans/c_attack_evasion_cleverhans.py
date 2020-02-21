@@ -52,9 +52,9 @@ class CAttackEvasionCleverhans(CAttackEvasion,
     surrogate_data: CDataset
         Used to train the surrogate classifier.
     y_target : int or None, optional
-            If None an indiscriminate attack will be performed, else a
-            targeted attack to have the samples misclassified as
-            belonging to the y_target class.
+        If None an indiscriminate attack will be performed, else a
+        targeted attack to have the samples misclassified as
+        belonging to the y_target class.
     clvh_attack_class: cleverhans.attacks.Attack
         The CleverHans class that implement the attack
     store_var_list: list
