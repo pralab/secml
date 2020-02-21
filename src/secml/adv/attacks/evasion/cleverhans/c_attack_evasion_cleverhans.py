@@ -131,6 +131,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
     @property
     def stored_vars(self):
+        """Variables extracted from the graph during execution of the attack."""
         return self._stored_vars
 
     ###########################################################################
