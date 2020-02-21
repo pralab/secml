@@ -128,16 +128,17 @@ class TestEvasion2dDatasetCleverhans(CUnitTest):
         self.y_pred_CH, _, self.adv_ds_CH, _ = self.attack.run(self._x0, self._y0)
         self._test_confidence()
         self._test_plot()
+        self._test_stored_consts()
 
     def test_enmethod(self):
         attack_params = {
-            'binary_search_steps': 1,
-            'initial_const': 0.3,
+            'binary_search_steps': 3,
+            'initial_const': 0.01,
             'confidence': 10,
             'abort_early': True,
             'clip_min': self.lb,
             'clip_max': self.ub,
-            'max_iterations': 50,
+            'max_iterations': 30,
             'learning_rate': 0.03,
         }
         self.attack = CAttackEvasionCleverhans(
@@ -153,6 +154,8 @@ class TestEvasion2dDatasetCleverhans(CUnitTest):
         self.y_pred_CH, _, self.adv_ds_CH, _ = self.attack.run(self._x0, self._y0)
         self._test_confidence()
         self._test_plot()
+        self._test_stored_consts()
+
 
     def _test_confidence(self):
         init_pred, init_score = self.classifier.predict(self._x0, return_decision_function=True)
@@ -175,9 +178,16 @@ class TestEvasion2dDatasetCleverhans(CUnitTest):
                                          plot_background=False,
                                          n_grid_points=200)
 
-            fig.title("y_target: {}".format(self.y_target))
+            fig.title("ATTACK: {}, y_target: {}".format(self.attack._clvrh_attack_class.__name__,
+                                                        self.y_target))
             fig.savefig(self.name_file)
             fig.show()
+
+    def _test_stored_consts(self):
+        self.logger.info("Testing stored variables")
+        self.assertTrue(len(self.attack.stored_vars.keys()) > 0)
+        self.logger.info("Stored vars: {}".format(self.attack.stored_vars))
+
 
 if __name__ == '__main__':
     CUnitTest.main()

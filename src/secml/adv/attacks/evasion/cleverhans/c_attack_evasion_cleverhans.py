@@ -52,11 +52,16 @@ class CAttackEvasionCleverhans(CAttackEvasion,
     surrogate_data: CDataset
         Used to train the surrogate classifier.
     y_target : int or None, optional
-            If None an indiscriminate attack will be performed, else a
-            targeted attack to have the samples misclassified as
-            belonging to the y_target class.
-    clvh_attack_class
+        If None an indiscriminate attack will be performed, else a
+        targeted attack to have the samples misclassified as
+        belonging to the y_target class.
+    clvh_attack_class:
         The CleverHans class that implement the attack
+    store_var_list: list
+        list of variables to store from the graph during attack
+        run. The variables will be stored as key-value dictionary
+        and can be retrieved through the property `stored_vars`.
+
     **kwargs
         Any other parameter for the cleverhans attack.
 
@@ -69,7 +74,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
     def __init__(self, classifier, surrogate_classifier,
                  n_feats, n_classes, surrogate_data=None, y_target=None,
-                 clvh_attack_class=CarliniWagnerL2, **kwargs):
+                 clvh_attack_class=CarliniWagnerL2, store_var_list=None, **kwargs):
 
         self._tfsess = tf.compat.v1.Session()
 
@@ -89,10 +94,29 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
         self._clvrh_clf = None
 
+        if store_var_list is not None:
+            # first, check if the user has set stored variables
+            self._stored_vars = {k: [] for k in store_var_list}
+        elif any([self._clvrh_attack_class == CarliniWagnerL2,
+                  self._clvrh_attack_class == ElasticNetMethod, ]):
+            # store `const` by default for these attacks as it
+            # is needed in the `objective_function` computation
+            self._stored_vars = {'const': []}
+        else:
+            self._stored_vars = None
+
         CAttackEvasion.__init__(self, classifier=classifier,
                                 surrogate_classifier=surrogate_classifier,
                                 surrogate_data=surrogate_data,
                                 y_target=y_target)
+
+    def run(self, x, y, ds_init=None, *args, **kargs):
+        # override run for applying storage of internally
+        # optimized variables
+        if self._stored_vars is not None:
+            for key in self._stored_vars:
+                self._stored_vars[key] = []
+        return super(CAttackEvasionCleverhans, self).run(x, y, ds_init=ds_init, *args, **kargs)
 
     ###########################################################################
     #                           READ-ONLY ATTRIBUTES
@@ -111,6 +135,11 @@ class CAttackEvasionCleverhans(CAttackEvasion,
             return self._last_grad_eval
         else:
             raise ValueError("Attack not performed yet!")
+
+    @property
+    def stored_vars(self):
+        """Variables extracted from the graph during execution of the attack."""
+        return self._stored_vars
 
     ###########################################################################
     #                              PRIVATE METHODS
@@ -321,10 +350,19 @@ class CAttackEvasionCleverhans(CAttackEvasion,
             # condition is not met (e.g. CWL2)
             self._x_opt = self._x_seq[-1, :]
 
+        if self._stored_vars is not None:
+            for key in self._stored_vars:
+                self._stored_vars[key].append(self._get_variable_value(key))
+
         self._last_f_eval = self._clvrh_clf.f_eval
         self._last_grad_eval = self._clvrh_clf.grad_eval
 
         return self._x_opt, nan  # TODO: return value of objective_fun(x_opt)
+
+    def _get_variable_value(self, var_name):
+        const = self._clvrh_clf.get_variable_value(var_name)
+        const_value = self._tfsess.run(const)
+        return const_value
 
 
 class _CModelCleverhans(Model):
@@ -420,6 +458,9 @@ class _CModelCleverhans(Model):
             self._is_init = True
         else:
             self._x_seq = None
+
+    def get_variable_value(self, variable_name):
+        return tf.get_default_graph().get_tensor_by_name("{:}:0".format(variable_name))
 
 
 class _CClassifierToTF:

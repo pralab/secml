@@ -17,6 +17,26 @@ class CAttackEvasionCleverhansLossesMixin(object):
     Cleverhans attacks."""
 
     def _objective_function_cw(self, x):
+        if self._stored_vars is not None and \
+                'const' in self._stored_vars:
+            stored_const = self._stored_vars['const'][0]
+            if self._x0.shape[0] == 1:
+                # use same const for all points
+                c_weight = stored_const.item()
+            else:
+                # each point has it own optimized const
+                c_weight = CArray.empty(shape=(len(stored_const)))
+                for i, c in enumerate(stored_const):
+                    c_weight[i] = c
+        else:
+            self.logger.warning('Constant value not stored during run. Using '
+                                'initial_const value. For computing the loss '
+                                'with the actual value of const set '
+                                '`store_var_list=["const"]` in '
+                                'CAttackEvasionCleverhans.__init__().')
+
+            c_weight = self._clvrh_attack.initial_const
+
         l2dist = ((self._x0 - x) ** 2).sum(axis=1).ravel()
         z_labels, z_predicted = self.classifier.predict(
             x, return_decision_function=True)
@@ -41,18 +61,6 @@ class CAttackEvasionCleverhansLossesMixin(object):
         # the difference between the logit of the target and any other class
         # differs by at least confidence). Hence the rearrangement here.
 
-        # FIXME: the value of c_weight should be collected from the
-        #  graph after the attack run as it is optimized through
-        #  a binary search and it is a variable in the tf graph
-        if self._clvrh_attack.binary_search_steps > 1:
-            self.logger.warning(
-                "The objective function computation currently only supports "
-                "`binary_search_steps=1`. The attack is running the "
-                "line search, but the loss function obtained with "
-                "this method is not yet recovering the value of `c` "
-                "after optimization. Using initial value of constant `c` "
-                "for computing the loss.")
-        c_weight = self._clvrh_attack.initial_const
         self.confidence = self._clvrh_attack.confidence
 
         if self.y_target is not None:
@@ -66,20 +74,37 @@ class CAttackEvasionCleverhansLossesMixin(object):
         return c_weight * loss + l2dist
 
     def _objective_function_cross_entropy(self, x):
-
         preds, scores = self.classifier.predict(
             x, return_decision_function=True)
-
         if self.y_target is None:
             target = self._y0
         else:
             target = CArray(self.y_target)
         loss = CLossCrossEntropy()
         f_obj = loss.loss(y_true=target, score=scores)
-
         return f_obj if self.y_target is not None else -f_obj
 
     def _objective_function_elastic_net(self, x):
+
+        if self._stored_vars is not None and \
+                'const' in self._stored_vars:
+            stored_const = self._stored_vars['const'][0]
+            if self._x0.shape[0] == 1:
+                # use same const for all points
+                c_weight = stored_const.item()
+            else:
+                # each point has it own optimized const
+                c_weight = CArray.empty(shape=(len(stored_const)))
+                for i, c in enumerate(stored_const):
+                    c_weight[i] = c
+        else:
+            self.logger.warning('Constant value not stored during run. Using '
+                             'initial_const value. For computing the loss '
+                             'with the actual value of const set '
+                             '`store_var_list=["const"]` in '
+                             'CAttackEvasionCleverhans.__init__().')
+
+            c_weight = self._clvrh_attack.initial_const
 
         if self._clvrh_attack.decision_rule is 'L1':
             d = ((self._x0 - x).abs()).sum(axis=1).ravel()
@@ -114,18 +139,6 @@ class CAttackEvasionCleverhansLossesMixin(object):
         # would have the desired effect (loss term is <= 0 if and only if
         # the difference between the logit of the target and any other class
         # differs by at least confidence). Hence the rearrangement here.
-        # FIXME: the value of c_weight should be collected from the
-        #  graph after the attack run as it is optimized through
-        #  a binary search and it is a variable in the tf graph
-        if self._clvrh_attack.binary_search_steps > 1:
-            self.logger.warning(
-                "The objective function computation currently only supports "
-                "`binary_search_steps=1`. The attack is running the "
-                "line search, but the loss function obtained with this "
-                "method is not yet recovering the value of `c` after "
-                "optimization. Using initial value of constant `c` "
-                "for computing the loss.")
-        c_weight = self._clvrh_attack.initial_const
         self.confidence = self._clvrh_attack.confidence
 
         if self.y_target is not None:
@@ -144,7 +157,7 @@ class CAttackEvasionCleverhansLossesMixin(object):
         preds, scores = self.classifier.predict(x, return_decision_function=True)
         label_logits_mask = CArray.zeros(shape=scores.shape)
         label_logits_mask[:, label] = 1
-        highest_nonlabel_logits = scores - label_logits_mask*9999
+        highest_nonlabel_logits = scores - label_logits_mask * 9999
         highest_nonlabel_logits = highest_nonlabel_logits.max(axis=1).sum(axis=-1)
         label_logits = scores[:, label].sum(axis=-1)
         loss = highest_nonlabel_logits - label_logits
