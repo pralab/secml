@@ -71,6 +71,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
     """
     __class_type = 'e-cleverhans'
+
     def __init__(self, classifier, surrogate_classifier,
                  n_feats, n_classes, surrogate_data=None, y_target=None,
                  clvh_attack_class=CarliniWagnerL2, store_var_list=None, **kwargs):
@@ -94,7 +95,13 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         self._clvrh_clf = None
 
         if store_var_list is not None:
+            # first, check if the user has set stored variables
             self._stored_vars = {k: [] for k in store_var_list}
+        elif any([self._clvrh_attack_class == CarliniWagnerL2,
+                  self._clvrh_attack_class == ElasticNetMethod, ]):
+            # store `const` by default for these attacks as it
+            # is needed in the `objective_function` computation
+            self._stored_vars = {'const': []}
         else:
             self._stored_vars = None
 
