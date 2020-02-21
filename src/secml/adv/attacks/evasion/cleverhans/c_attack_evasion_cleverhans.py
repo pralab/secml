@@ -55,7 +55,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         If None an indiscriminate attack will be performed, else a
         targeted attack to have the samples misclassified as
         belonging to the y_target class.
-    clvh_attack_class: cleverhans.attacks.Attack
+    clvh_attack_class:
         The CleverHans class that implement the attack
     store_var_list: list
         list of variables to store from the graph during attack
