@@ -124,7 +124,6 @@ class TestEvasion2dDatasetCleverhans(CUnitTest):
             n_classes=self.classifier.n_classes,
             n_feats=self.classifier.n_features,
             clvh_attack_class=CarliniWagnerL2,
-            store_var_lst=['const'],
             **attack_params)
         self.y_pred_CH, _, self.adv_ds_CH, _ = self.attack.run(self._x0, self._y0)
         self._test_confidence()
@@ -151,7 +150,6 @@ class TestEvasion2dDatasetCleverhans(CUnitTest):
             decision_rule='END',
             n_feats=self.classifier.n_features,
             clvh_attack_class=ElasticNetMethod,
-            store_var_lst=['const'],
             **attack_params)
         self.y_pred_CH, _, self.adv_ds_CH, _ = self.attack.run(self._x0, self._y0)
         self._test_confidence()
