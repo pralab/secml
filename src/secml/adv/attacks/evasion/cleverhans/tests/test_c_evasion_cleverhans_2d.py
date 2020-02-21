@@ -187,7 +187,7 @@ class TestEvasion2dDatasetCleverhans(CUnitTest):
 
     def _test_stored_consts(self):
         self.logger.info("Testing stored variables")
-        assert len(self.attack.stored_vars.keys()) > 0
+        self.assertTrue(len(self.attack.stored_vars.keys()) > 0)
         self.logger.info("Stored vars: {}".format(self.attack.stored_vars))
 
 
