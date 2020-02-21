@@ -55,8 +55,13 @@ class CAttackEvasionCleverhans(CAttackEvasion,
             If None an indiscriminate attack will be performed, else a
             targeted attack to have the samples misclassified as
             belonging to the y_target class.
-    clvh_attack_class
+    clvh_attack_class: cleverhans.attacks.Attack
         The CleverHans class that implement the attack
+    store_var_list: list
+        list of variables to store from the graph during attack
+        run. The variables will be stored as key-value dictionary
+        and can be retrieved through the property `stored_vars`.
+
     **kwargs
         Any other parameter for the cleverhans attack.
 
@@ -66,7 +71,6 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
     """
     __class_type = 'e-cleverhans'
-
     def __init__(self, classifier, surrogate_classifier,
                  n_feats, n_classes, surrogate_data=None, y_target=None,
                  clvh_attack_class=CarliniWagnerL2, store_var_list=None, **kwargs):
