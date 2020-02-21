@@ -15,7 +15,7 @@ from secml.ml.features.normalization import CNormalizer
 
 class CNormalizerTFIDF(CNormalizer):
     """
-    Transform a count matrix to a normalized tf or tf-idf representation
+    Transform a count matrix to a normalized tf or tf-idf representation.
 
     Tf means term-frequency while tf-idf means term-frequency times inverse
     document-frequency. This is a common term weighting scheme in information
@@ -78,7 +78,7 @@ class CNormalizerTFIDF(CNormalizer):
         return self._norm
 
     def _check_is_fitted(self):
-        """Checks if the preprocessor is trained (fitted).
+        """Checks if the preprocessor has been trained (fitted).
 
         Raises
         ------
@@ -113,7 +113,7 @@ class CNormalizerTFIDF(CNormalizer):
         return df
 
     def _get_norm(self, x, norm='l2'):
-        """Compute the required norm on each row.
+        """Computes the required norm on each row.
 
         Parameters
         ----------
@@ -149,7 +149,7 @@ class CNormalizerTFIDF(CNormalizer):
         Parameters
         ----------
         x : CArray
-            Array with features to be scaled.
+            Array with features to be transformed.
 
         Returns
         -------
@@ -179,10 +179,10 @@ class CNormalizerTFIDF(CNormalizer):
         ----------
         x : CArray
             Array to be used as training set. Each row must correspond to
-            one single patterns, so each column is a different feature.
+            one single pattern and each column is a different feature.
         y : CArray or None, optional
             Flat array with the label of each pattern.
-            Can be None if not required by the preprocessing algorithm.
+            Can be None if not required by the pre-processing algorithm.
 
         Returns
         -------
@@ -206,8 +206,8 @@ class CNormalizerTFIDF(CNormalizer):
         Parameters
         ----------
         x : CArray
-            Array to be reverted. Must have been normalized by the same
-            calling transform.
+            Array to be reverted. Must have been normalized using the same
+            normalizer calling the function `transform`.
 
         Returns
         -------
@@ -231,7 +231,8 @@ class CNormalizerTFIDF(CNormalizer):
         return x
 
     def _backward(self, w=None):
-        """Computes the gradient wrt the cached inputs during the forward pass.
+        """Computes the gradient w.r.t. the input cached during the forward
+        pass.
 
         Parameters
         ----------
@@ -243,10 +244,12 @@ class CNormalizerTFIDF(CNormalizer):
         -------
         gradient : CArray
             Gradient of the normalizer wrt input data.
-            - a flat array of shape (x.shape[1], ) if `w` is None;
-            - if `w` is passed as input, will have (w.shape[0], x.shape[1]),
-              or (x.shape[1], ) if `w` is a flat array.
-
+            - if `w` is passed as input and is two-dimensional it will have
+            shape (w.shape[0], x.shape[1]),
+            - if `w` is a flat array it will be:
+                an array of shape (x.shape[1], x.shape[1]) if the parameter
+                norm is not None or a flat array of shape (x.shape[1],
+                ) if the parameter norm is equal to None;
         """
         grad = self._idf
 
@@ -255,9 +258,9 @@ class CNormalizerTFIDF(CNormalizer):
 
         else:
             # todo: we can speed up this avoiding some computation if we
-            # usually call this passing w
+            # usually call this function passing a flat w
 
-            # compute the gradient of norm(tfidf) w.r.t. x
+            # computes the gradient of norm(tf-idf) w.r.t. x
             if self.norm == 'l2':
                 grad_tfidf_x = self._cached_x / self._tf_idf_norm
 
