@@ -29,11 +29,11 @@ class CAttackEvasionCleverhansLossesMixin(object):
                 for i, c in enumerate(stored_const):
                     c_weight[i] = c
         else:
-            self.logger.info('Constant value not stored during run. Using '
-                             'initial_const value. For computing the loss '
-                             'with the actual value of const set '
-                             '`store_var_lst=["const"]` in '
-                             'CAttackEvasionCleverhans.__init__().')
+            self.logger.warning('Constant value not stored during run. Using '
+                                'initial_const value. For computing the loss '
+                                'with the actual value of const set '
+                                '`store_var_lst=["const"]` in '
+                                'CAttackEvasionCleverhans.__init__().')
 
             c_weight = self._clvrh_attack.initial_const
 
@@ -98,7 +98,7 @@ class CAttackEvasionCleverhansLossesMixin(object):
                 for i, c in enumerate(stored_const):
                     c_weight[i] = c
         else:
-            self.logger.info('Constant value not stored during run. Using '
+            self.logger.warning('Constant value not stored during run. Using '
                              'initial_const value. For computing the loss '
                              'with the actual value of const set '
                              '`store_var_lst=["const"]` in '
@@ -157,7 +157,7 @@ class CAttackEvasionCleverhansLossesMixin(object):
         preds, scores = self.classifier.predict(x, return_decision_function=True)
         label_logits_mask = CArray.zeros(shape=scores.shape)
         label_logits_mask[:, label] = 1
-        highest_nonlabel_logits = scores - label_logits_mask*9999
+        highest_nonlabel_logits = scores - label_logits_mask * 9999
         highest_nonlabel_logits = highest_nonlabel_logits.max(axis=1).sum(axis=-1)
         label_logits = scores[:, label].sum(axis=-1)
         loss = highest_nonlabel_logits - label_logits
