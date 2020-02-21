@@ -32,7 +32,7 @@ class CAttackEvasionCleverhansLossesMixin(object):
             self.logger.warning('Constant value not stored during run. Using '
                                 'initial_const value. For computing the loss '
                                 'with the actual value of const set '
-                                '`store_var_lst=["const"]` in '
+                                '`store_var_list=["const"]` in '
                                 'CAttackEvasionCleverhans.__init__().')
 
             c_weight = self._clvrh_attack.initial_const
@@ -101,7 +101,7 @@ class CAttackEvasionCleverhansLossesMixin(object):
             self.logger.warning('Constant value not stored during run. Using '
                              'initial_const value. For computing the loss '
                              'with the actual value of const set '
-                             '`store_var_lst=["const"]` in '
+                             '`store_var_list=["const"]` in '
                              'CAttackEvasionCleverhans.__init__().')
 
             c_weight = self._clvrh_attack.initial_const

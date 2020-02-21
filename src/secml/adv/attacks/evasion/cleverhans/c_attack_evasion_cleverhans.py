@@ -69,7 +69,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
     def __init__(self, classifier, surrogate_classifier,
                  n_feats, n_classes, surrogate_data=None, y_target=None,
-                 clvh_attack_class=CarliniWagnerL2, store_var_lst=None, **kwargs):
+                 clvh_attack_class=CarliniWagnerL2, store_var_list=None, **kwargs):
 
         self._tfsess = tf.compat.v1.Session()
 
@@ -89,8 +89,8 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
         self._clvrh_clf = None
 
-        if store_var_lst is not None:
-            self._stored_vars = {k: [] for k in store_var_lst}
+        if store_var_list is not None:
+            self._stored_vars = {k: [] for k in store_var_list}
         else:
             self._stored_vars = None
 
