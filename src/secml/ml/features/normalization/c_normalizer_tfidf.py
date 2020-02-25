@@ -69,7 +69,7 @@ class CNormalizerTFIDF(CNormalizer):
     def __init__(self, norm='l2', preprocess=None):
 
         self._norm = norm
-        self._tfidf_norm = None
+        self._sk_tfidf = None
         super(CNormalizerTFIDF, self).__init__(preprocess=preprocess)
 
     @property
@@ -86,7 +86,7 @@ class CNormalizerTFIDF(CNormalizer):
             If the preprocessor is not fitted.
 
         """
-        if self._tfidf_norm is None:
+        if self._sk_tfidf is None:
             raise ValueError("The normalizer has not been trained.")
 
     @staticmethod
@@ -192,13 +192,13 @@ class CNormalizerTFIDF(CNormalizer):
             Instance of the trained normalizer.
         """
         x = x.atleast_2d()
-        self._tfidf_norm = TfidfTransformer(norm=self.norm,
+        self._sk_tfidf = TfidfTransformer(norm=self.norm,
                                             smooth_idf=True)
-        self._tfidf_norm.fit(x.tondarray(), None)
+        self._sk_tfidf.fit(x.tondarray(), None)
 
         self._n = x.shape[0]
         self._df = self._document_frequency(x)
-        self._idf = CArray(self._tfidf_norm.idf_)
+        self._idf = CArray(self._sk_tfidf.idf_)
 
         return self
 
