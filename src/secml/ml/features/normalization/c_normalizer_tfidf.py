@@ -193,7 +193,7 @@ class CNormalizerTFIDF(CNormalizer):
         """
         x = x.atleast_2d()
         self._sk_tfidf = TfidfTransformer(norm=self.norm,
-                                            smooth_idf=True)
+                                          smooth_idf=True)
         self._sk_tfidf.fit(x.tondarray(), None)
 
         self._n = x.shape[0]
@@ -283,3 +283,13 @@ class CNormalizerTFIDF(CNormalizer):
             grad /= (self._tf_idf_norm ** 2)
 
             return w.dot(grad) if w is not None else grad
+
+    def gradient(self, x, w=None):
+        """Compute gradient at x by doing a backward pass.
+
+        Input will be preprocessed first and pre-multiplied by w if provided.
+
+        """
+        # Transform data using inner preprocess, if defined
+        self.forward(x, caching=True)
+        return self.backward(w)
