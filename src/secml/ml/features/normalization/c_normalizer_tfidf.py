@@ -260,7 +260,7 @@ class CNormalizerTFIDF(CNormalizer):
 
         else:
             # todo: we can speed up this avoiding some computation if we
-            # usually call this function passing a flat w
+            #  usually call this function passing a flat w
 
             # computes the gradient of norm(tf-idf) w.r.t. x
             if self.norm == 'l2':
