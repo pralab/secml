@@ -12,6 +12,16 @@ class CClassifierTestCases(CUnitTest):
     """Unittests interface for CClassifier."""
 
     def _check_df_scores(self, s, n_samples):
+        """Checks for `decision_function` output.
+
+        Parameters
+        ----------
+        s : CArray
+            Scores.
+        n_samples : int
+            Number of expected samples.
+
+        """
         self.assertEqual(type(s), CArray)
         self.assertTrue(s.isdense)
         self.assertEqual(1, s.ndim)
@@ -19,6 +29,20 @@ class CClassifierTestCases(CUnitTest):
         self.assertEqual(float, s.dtype)
 
     def _check_classify_scores(self, l, s, n_samples, n_classes):
+        """Checks for `classify` output.
+
+        Parameters
+        ----------
+        l : CArray
+            Labels.
+        s : CArray
+            Scores.
+        n_samples : int
+            Number of expected samples.
+        n_classes : int
+            Number of expected classes.
+
+        """
         self.assertEqual(type(l), CArray)
         self.assertEqual(type(s), CArray)
         self.assertTrue(l.isdense)
