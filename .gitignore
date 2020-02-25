@@ -185,4 +185,3 @@ pip-selfcheck.json
 ###################################
 src/secml/VERSION_REV
 *.pdf
-!/src/secml/ml/features/normalization/c_normalizer_tfidf.py
