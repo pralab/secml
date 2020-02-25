@@ -89,7 +89,8 @@ class CNormalizerTFIDF(CNormalizer):
         if self._tfidf_norm is None:
             raise ValueError("The normalizer has not been trained.")
 
-    def _document_frequency(self, X):
+    @staticmethod
+    def _document_frequency(X):
         """Counts the number of non-zero values for each feature in sparse X.
 
         Parameters
@@ -112,7 +113,8 @@ class CNormalizerTFIDF(CNormalizer):
 
         return df
 
-    def _get_norm(self, x, norm='l2'):
+    @staticmethod
+    def _get_norm(x, norm='l2'):
         """Computes the required norm on each row.
 
         Parameters
@@ -162,7 +164,6 @@ class CNormalizerTFIDF(CNormalizer):
         if x.shape[1] != self._idf.size:
             raise ValueError("array to normalize must have {:} "
                              "features (columns).".format(self._idf.size))
-
 
         tf_idf = x * self._idf
         self._unnorm_tf_idf = tf_idf
