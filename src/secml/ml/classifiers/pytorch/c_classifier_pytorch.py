@@ -64,10 +64,10 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     batch_size: int
         size of the batches to use for loading the data. Default value is 1.
     n_jobs: int
-        number of workers to use for data loading and processing. This parameter
-        follows the library expected behavior of having 1 worker as the main
-        process. The loader will spawn `n_jobs-1` workers. Default value for
-        n_jobs is 1 (zero additional workers spawned).
+        number of workers to use for data loading and processing.
+        This parameter follows the library expected behavior of having 1 worker
+        as the main process. The loader will spawn `n_jobs-1` workers.
+        Default value for n_jobs is 1 (zero additional workers spawned).
 
     Attributes
     ----------
@@ -570,6 +570,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             s = s.to(self._device)
 
             if self._cached_x is None:
+                self._cached_s = None
+                self._cached_layer_output = None
                 with torch.no_grad():
                     ps = self._get_layer_output(s, self._out_layer)
 
@@ -687,7 +689,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             state['optimizer_state'] = self._optimizer.state_dict()
 
         if self._optimizer_scheduler is not None:
-            state['optimizer_scheduler_state'] = self._optimizer_scheduler.state_dict()
+            state['optimizer_scheduler_state'] = \
+                self._optimizer_scheduler.state_dict()
 
         torch.save(state, filename)
 
@@ -727,7 +730,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
             if 'optimizer_scheduler_state' in state \
                     and self._optimizer_scheduler is not None:
-                self._optimizer_scheduler.load_state_dict(state['optimizer_scheduler_state'])
+                self._optimizer_scheduler.load_state_dict(
+                    state['optimizer_scheduler_state'])
             else:
                 self._optimizer_scheduler = None
 
