@@ -237,3 +237,12 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         grad = self.gradient(x=x, w=w)
         self._out_layer = None
         return grad
+
+    def gradient(self, x, w=None):
+        """Compute gradient at x by doing a forward and a backward pass.
+
+        The gradient is pre-multiplied by w.
+
+        """
+        self.forward(x, caching=True)
+        return self.backward(w)
