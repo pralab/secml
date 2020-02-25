@@ -157,11 +157,12 @@ class CNormalizerTFIDF(CNormalizer):
         Shape of returned array is the same of the original array.
 
         """
-        if x.atleast_2d().shape[1] != self._idf.size:
+        x = x.atleast_2d()
+
+        if x.shape[1] != self._idf.size:
             raise ValueError("array to normalize must have {:} "
                              "features (columns).".format(self._idf.size))
 
-        x = x.atleast_2d()
 
         tf_idf = x * self._idf
         self._unnorm_tf_idf = tf_idf
