@@ -8,7 +8,6 @@ class TestCConstraintL2(CConstraintTestCases):
     """Unittest for CConstraintL2."""
 
     def setUp(self):
-
         self.c = CConstraintL2(center=1, radius=1)
         self.c_array = CConstraintL2(center=CArray([1, 1]), radius=1)
 
@@ -84,6 +83,13 @@ class TestCConstraintL2(CConstraintTestCases):
         # Plotting constraint and "critical" points
         self._test_plot(
             self.c, self.p1_inside, self.p2_outside, self.p3_on)
+
+    def test_projection_and_violated(self):
+        """Test that projection returns a point within the domain, even when
+        numerical errors may create problems."""
+        p = CArray([-10.00000053, 100000.432235252352]) + 2.32323
+        p = self.c.projection(p)
+        self.assertFalse(self.c.is_violated(p))
 
 
 if __name__ == '__main__':
