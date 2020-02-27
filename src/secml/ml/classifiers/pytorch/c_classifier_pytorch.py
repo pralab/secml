@@ -558,7 +558,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         self._model.eval()
 
         out_shape = self.n_classes if self._out_layer is None else \
-            reduce((lambda x, y: x * y), self.layer_shapes[self._out_layer])
+            reduce((lambda z, v: z * v), self.layer_shapes[self._out_layer])
         output = torch.empty((len(data_loader.dataset), out_shape))
 
         for batch_idx, (s, _) in enumerate(data_loader):
