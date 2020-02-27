@@ -17,8 +17,8 @@ from cleverhans.model import Model
 
 from secml.adv.attacks import CAttack
 from secml.adv.attacks.evasion import CAttackEvasion
-from secml.adv.attacks.evasion.cleverhans.c_attack_evasion_cleverhans_losses import \
-    CAttackEvasionCleverhansLossesMixin
+from secml.adv.attacks.evasion.cleverhans.c_attack_evasion_cleverhans_losses \
+    import CAttackEvasionCleverhansLossesMixin
 from secml.array import CArray
 from secml.core.constants import nan
 from secml.core.exceptions import NotFittedError
@@ -44,8 +44,6 @@ class CAttackEvasionCleverhans(CAttackEvasion,
     classifier : CClassifier
         Target classifier on which the efficacy of the computed attack
         points is evaluates
-    n_feats : int
-        Number of features of the dataset used to train the classifiers.
     surrogate_classifier : CClassifier
         Surrogate classifier against which the attack is computed.
         This is assumed to be already trained on surrogate_data.
@@ -73,8 +71,9 @@ class CAttackEvasionCleverhans(CAttackEvasion,
     __class_type = 'e-cleverhans'
 
     def __init__(self, classifier, surrogate_classifier,
-                 n_feats, n_classes, surrogate_data=None, y_target=None,
-                 clvh_attack_class=CarliniWagnerL2, store_var_list=None, **kwargs):
+                 surrogate_data=None, y_target=None,
+                 clvh_attack_class=CarliniWagnerL2,
+                 store_var_list=None, **kwargs):
 
         self._tfsess = tf.compat.v1.Session()
 
@@ -86,11 +85,6 @@ class CAttackEvasionCleverhans(CAttackEvasion,
             raise ValueError("This cleverhans attack is not supported yet!")
 
         self._clvrh_attack_class = clvh_attack_class
-
-        # store the number of features
-        self._n_feats = n_feats
-        # store the number of dataset classes
-        self._n_classes = n_classes
 
         self._clvrh_clf = None
 
@@ -116,7 +110,8 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         if self._stored_vars is not None:
             for key in self._stored_vars:
                 self._stored_vars[key] = []
-        return super(CAttackEvasionCleverhans, self).run(x, y, ds_init=ds_init, *args, **kargs)
+        return super(CAttackEvasionCleverhans, self).run(
+            x, y, ds_init=ds_init, *args, **kargs)
 
     ###########################################################################
     #                           READ-ONLY ATTRIBUTES
@@ -138,7 +133,9 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
     @property
     def stored_vars(self):
-        """Variables extracted from the graph during execution of the attack."""
+        """Variables extracted from the graph during execution of the attack.
+
+        """
         return self._stored_vars
 
     ###########################################################################
@@ -176,8 +173,9 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
     def _create_tf_operations(self):
         """
-        Calls the function of the cleverhans attack called `generate` that
-        constucts the Tensorflow operation needed to perform the attack
+        Call `generate` from the Cleverhans attack to
+        construct the Tensorflow operation needed to perform the attack
+
         """
         if self.y_target is None:
             if 'y' in self._clvrh_attack.feedable_kwargs:
@@ -195,16 +193,16 @@ class CAttackEvasionCleverhans(CAttackEvasion,
                 self._initial_x_P, y_target=self._y_P, **self._clvrh_params)
 
     def _set_solver_classifier(self):
-        """This function set the surrogate classifier,
-        if differentiable; otherwise, it learns a smooth approximation for
-        the nondiff. (surrogate) classifier (e.g., decision tree)
-        using an SVM with the RBF kernel."""
+        """Sets the classifier of the solver."""
 
         # update the surrogate classifier
         # we skip the function provided by the superclass as we do not need
         # to set xk and we call directly the one of CAttack that instead
         # learn a differentiable classifier
         CAttack._set_solver_classifier(self)
+
+        self._n_classes = self._surrogate_classifier.n_classes
+        self._n_feats = self._surrogate_classifier.n_features
 
         # create the cleverhans attack object
         tf.reset_default_graph()
@@ -254,6 +252,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         Cleverhans attacks need to receive y as a one hot vector.
         y is equal to the y target if y_target is present, otherwhise is
         equal to the true class of the attack sample.
+
         """
         one_hot_y = CArray.zeros(shape=(1, self._n_classes),
                                  dtype=np.float32)
@@ -460,7 +459,8 @@ class _CModelCleverhans(Model):
             self._x_seq = None
 
     def get_variable_value(self, variable_name):
-        return tf.get_default_graph().get_tensor_by_name("{:}:0".format(variable_name))
+        return tf.get_default_graph().get_tensor_by_name(
+            "{:}:0".format(variable_name))
 
 
 class _CClassifierToTF:

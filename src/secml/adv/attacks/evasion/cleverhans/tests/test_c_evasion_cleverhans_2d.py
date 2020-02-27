@@ -1,4 +1,5 @@
-from cleverhans.attacks import ElasticNetMethod, CarliniWagnerL2, ProjectedGradientDescent, SPSA
+from cleverhans.attacks import ElasticNetMethod, CarliniWagnerL2, \
+    ProjectedGradientDescent, SPSA
 
 from secml.testing import CUnitTest
 
@@ -6,7 +7,6 @@ try:
     import cleverhans
 except ImportError:
     CUnitTest.importskip("cleverhans")
-
 
 from secml.array import CArray
 from secml.data.loader import CDLRandomBlobs
@@ -31,14 +31,12 @@ class TestEvasion2dDatasetCleverhans(CUnitTest):
         self.y_target = None
 
         self.nmz = CNormalizerMinMax()
-        self.classifier = CClassifierMulticlassOVA(CClassifierSVM,
-                                                   kernel=CKernelRBF(gamma=10),
-                                                   C=0.1,
-                                                   preprocess=self.nmz)
+        self.classifier = CClassifierMulticlassOVA(
+            CClassifierSVM, kernel=CKernelRBF(gamma=10),
+            C=0.1, preprocess=self.nmz)
 
         self.lb = 0.0
         self.ub = 1.0
-
 
     def setUp(self):
         # Set as true to save data required by `visualization_script`
@@ -76,11 +74,10 @@ class TestEvasion2dDatasetCleverhans(CUnitTest):
             surrogate_classifier=self.classifier,
             surrogate_data=self.ds,
             y_target=self.y_target,
-            n_classes=self.classifier.n_classes,
-            n_feats=self.classifier.n_features,
             clvh_attack_class=SPSA,
             **attack_params)
-        self.y_pred_CH, _, self.adv_ds_CH, _ = self.attack.run(self._x0, self._y0)
+        self.y_pred_CH, _, self.adv_ds_CH, _ = self.attack.run(
+            self._x0, self._y0)
         self._test_confidence()
         self._test_plot()
 
@@ -97,11 +94,10 @@ class TestEvasion2dDatasetCleverhans(CUnitTest):
             surrogate_classifier=self.classifier,
             surrogate_data=self.ds,
             y_target=self.y_target,
-            n_classes=self.classifier.n_classes,
-            n_feats=self.classifier.n_features,
             clvh_attack_class=ProjectedGradientDescent,
             **attack_params)
-        self.y_pred_CH, _, self.adv_ds_CH, _ = self.attack.run(self._x0, self._y0)
+        self.y_pred_CH, _, self.adv_ds_CH, _ = self.attack.run(
+            self._x0, self._y0)
         self._test_confidence()
         self._test_plot()
 
@@ -121,11 +117,10 @@ class TestEvasion2dDatasetCleverhans(CUnitTest):
             surrogate_classifier=self.classifier,
             surrogate_data=self.ds,
             y_target=self.y_target,
-            n_classes=self.classifier.n_classes,
-            n_feats=self.classifier.n_features,
             clvh_attack_class=CarliniWagnerL2,
             **attack_params)
-        self.y_pred_CH, _, self.adv_ds_CH, _ = self.attack.run(self._x0, self._y0)
+        self.y_pred_CH, _, self.adv_ds_CH, _ = self.attack.run(
+            self._x0, self._y0)
         self._test_confidence()
         self._test_plot()
         self._test_stored_consts()
@@ -146,29 +141,30 @@ class TestEvasion2dDatasetCleverhans(CUnitTest):
             surrogate_classifier=self.classifier,
             surrogate_data=self.ds,
             y_target=self.y_target,
-            n_classes=self.classifier.n_classes,
             decision_rule='END',
-            n_feats=self.classifier.n_features,
             clvh_attack_class=ElasticNetMethod,
             **attack_params)
-        self.y_pred_CH, _, self.adv_ds_CH, _ = self.attack.run(self._x0, self._y0)
+        self.y_pred_CH, _, self.adv_ds_CH, _ = self.attack.run(
+            self._x0, self._y0)
         self._test_confidence()
         self._test_plot()
         self._test_stored_consts()
 
-
     def _test_confidence(self):
-        init_pred, init_score = self.classifier.predict(self._x0, return_decision_function=True)
-        final_pred, final_score = self.classifier.predict(self.adv_ds_CH.X, return_decision_function=True)
+        init_pred, init_score = self.classifier.predict(
+            self._x0, return_decision_function=True)
+        final_pred, final_score = self.classifier.predict(
+            self.adv_ds_CH.X, return_decision_function=True)
         if self.y_target is not None:
-            self.assertGreater(final_score[:, self.y_target].item(), init_score[:, self.y_target].item())
-        self.assertLess(final_score[self._y0].item(), init_score[self._y0].item())
-
+            self.assertGreater(final_score[:, self.y_target].item(),
+                               init_score[:, self.y_target].item())
+        self.assertLess(final_score[self._y0].item(),
+                        init_score[self._y0].item())
 
     def _test_plot(self):
         if self.save_info_for_plot:
             self.name_file = '{}_evasion2D_target_{}.png'.format(
-                self.attack._clvrh_attack_class.__name__,self.y_target)
+                self.attack._clvrh_attack_class.__name__, self.y_target)
             fig = CFigure()
 
             fig.sp.plot_path(self.attack.x_seq)
@@ -178,8 +174,8 @@ class TestEvasion2dDatasetCleverhans(CUnitTest):
                                          plot_background=False,
                                          n_grid_points=200)
 
-            fig.title("ATTACK: {}, y_target: {}".format(self.attack._clvrh_attack_class.__name__,
-                                                        self.y_target))
+            fig.title("ATTACK: {}, y_target: {}".format(
+                self.attack._clvrh_attack_class.__name__, self.y_target))
             fig.savefig(self.name_file)
             fig.show()
 
