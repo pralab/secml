@@ -260,8 +260,6 @@ class TestEvasionMNISTCleverhansAttack(CUnitTest):
                 self._evasion_obj = CAttackEvasionCleverhans(
                     classifier=self.classifier,
                     surrogate_classifier=self.classifier,
-                    n_feats=self.tr.num_features,
-                    n_classes=self.tr.num_classes,
                     surrogate_data=self.val,
                     y_target=y_target_idx,
                     clvh_attack_class=self.clvh_attacks[atk_idx]['class'],
