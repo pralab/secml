@@ -11,7 +11,23 @@ from secml.utils.dict_utils import merge_dicts, SubLevelsDict
 
 
 class CClassifierSkLearn(CClassifier):
-    """Generic wrapper for SkLearn classifiers."""
+    """Generic wrapper for SkLearn classifiers.
+
+    Parameters
+    ----------
+    sklearn_model : `sklearn.base.BaseEstimator` object
+        The scikit-learn model to wrap. Must implement `fit` and either
+        `decision_function` or `predict_proba` methods.
+    preprocess : CPreProcess or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CPreProcess subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
+
+    Attributes
+    ----------
+    class_type : 'sklearn-clf'
+
+    """
     __class_type = 'sklearn-clf'
 
     def __init__(self, sklearn_model, preprocess=None):

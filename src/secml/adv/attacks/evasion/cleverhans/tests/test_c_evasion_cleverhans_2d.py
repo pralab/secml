@@ -15,7 +15,7 @@ from secml.ml.classifiers import CClassifierSVM
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.adv.attacks import CAttackEvasionCleverhans
 from secml.ml.features import CNormalizerMinMax
-from secml.ml.kernel import CKernelRBF
+from secml.ml.kernels import CKernelRBF
 
 
 class TestEvasion2dDatasetCleverhans(CUnitTest):

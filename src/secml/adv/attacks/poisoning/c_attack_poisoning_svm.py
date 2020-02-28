@@ -212,7 +212,8 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         xc = xc if clf.preprocess is None else clf.preprocess.transform(xc)
         xk = xk if clf.preprocess is None else clf.preprocess.transform(xk)
 
-        dKkc = alpha_c * clf.kernel.gradient(xk, xc)
+        clf.kernel.rv = xk
+        dKkc = alpha_c * clf.kernel.gradient(xc)
         return dKkc.T  # d * k
 
     def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr, k=None):
@@ -267,7 +268,8 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # handle normalizer, if present
         xc = xc if clf.preprocess is None else clf.preprocess.transform(xc)
         G = CArray.zeros(shape=(gt.size, s + 1))
-        G[:, :s] = svm.kernel.gradient(xs, xc).T
+        svm.kernel.rv = xs
+        G[:, :s] = svm.kernel.gradient(xc).T
         G *= alpha_c
 
         # warm start is disabled if the set of SVs changes!

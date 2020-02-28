@@ -5,7 +5,7 @@ from secml.adv.attacks.evasion.tests.test_evasion_reject import \
 from secml.ml.classifiers.reject import CClassifierRejectThreshold
 from secml.ml.classifiers import CClassifierSVM
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
-from secml.ml.kernel import CKernelRBF
+from secml.ml.kernels import CKernelRBF
 
 
 class TestEvasionRejectThreshold(CEvasionRejectTestCases.TestCEvasionReject):

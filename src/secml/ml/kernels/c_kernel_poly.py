@@ -9,21 +9,17 @@
 from sklearn import metrics
 
 from secml.array import CArray
-from secml.ml.kernel import CKernel
+from secml.ml.kernels import CKernel
 
 
 class CKernelPoly(CKernel):
     """Polynomial kernel.
 
-    Given matrices X and Y, this is computed by::
+    Given matrices X and RV, this is computed by::
 
-        K(x, y) = (coef0 + gamma * <x, y>)^degree
+        K(x, rv) = (coef0 + gamma * <x, rv>)^degree
 
-    for each pair of rows in X and in Y.
-
-    Attributes
-    ----------
-    class_type : 'poly'
+    for each pair of rows in X and in RV.
 
     Parameters
     ----------
@@ -35,10 +31,14 @@ class CKernelPoly(CKernel):
         Free parameter used for trading off the influence of higher-order
         versus lower-order terms in the kernel. Default 1.0.
 
+    Attributes
+    ----------
+    class_type : 'poly'
+
     Examples
     --------
     >>> from secml.array import CArray
-    >>> from secml.ml.kernel.c_kernel_poly import CKernelPoly
+    >>> from secml.ml.kernels.c_kernel_poly import CKernelPoly
 
     >>> print(CKernelPoly(degree=3, gamma=0.001, coef0=2).k(CArray([[1,2],[3,4]]), CArray([[10,20],[30,40]])))
     CArray([[ 8.615125  9.393931]
@@ -57,6 +57,7 @@ class CKernelPoly(CKernel):
         self.degree = degree
         self.gamma = gamma
         self.coef0 = coef0
+        super(CKernelPoly, self).__init__()
 
     @property
     def degree(self):
@@ -110,82 +111,67 @@ class CKernelPoly(CKernel):
         """
         self._coef0 = float(coef0)
 
-    def _k(self, x, y):
-        """Compute the polynomial kernel between x and y.
+    def _forward(self, x):
+        """Compute the polynomial kernel between x and cached rv.
 
         Parameters
         ----------
         x : CArray or array_like
-            First array of shape (n_x, n_features).
-        y : CArray or array_like
-            Second array of shape (n_y, n_features).
+            Array of shape (n_x, n_features).
 
         Returns
         -------
         kernel : CArray
-            Kernel between x and y. Array of shape (n_x, n_y).
-
-        See Also
-        --------
-        :meth:`.CKernel.k` : Common computation interface for kernels.
+            Kernel between x and rv. Array of shape (n_x, n_rv).
 
         """
         return CArray(metrics.pairwise.polynomial_kernel(
-            CArray(x).get_data(), CArray(y).get_data(),
+            CArray(x).get_data(), CArray(self._rv).get_data(),
             self.degree, self.gamma, self.coef0))
 
     # TODO: check for high gamma,
     #  we may have uncontrolled behavior (too high values)
-    def _gradient(self, u, v):
-        """Calculate Polynomial kernel gradient wrt vector 'v'.
+    def _backward(self, w=None):
+        """Calculate Polynomial kernel gradient wrt cached vector 'x'.
 
         The gradient of Polynomial kernel is given by::
 
-            dK(u,v)/dv =     u * gamma * degree * k(u,v, degree-1)
+            dK(rv,x)/dy = rv * gamma * degree * k(rv,x, degree-1)
 
         Parameters
         ----------
-        u : CArray or array_like
-            First array of shape (1, n_features).
-        v : CArray or array_like
-            Second array of shape (1, n_features).
+        w : CArray of shape (1, n_rv) or None
+            if CArray, it is pre-multiplied to the gradient
+            of the module, as in standard reverse-mode autodiff.
 
         Returns
         -------
         kernel_gradient : CArray
-            Kernel gradient of u with respect to vector v,
-            shape (1, n_features).
-
-        See Also
-        --------
-        :meth:`.CKernel.gradient` : Common gradient computation interface for kernels.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-        >>> from secml.ml.kernel.c_kernel_poly import CKernelPoly
-
-        >>> array = CArray([[15,25],[45,55]])
-        >>> vector = CArray([2,5])
-        >>> print(CKernelPoly(degree=3, gamma=1e-4, coef0=2).gradient(array, vector))
-        CArray([[0.01828  0.030467]
-         [0.055989 0.068431]])
-
-        >>> print(CKernelPoly().gradient(vector, vector))
-        CArray([240. 600.])
+            Kernel gradient of rv with respect to vector x,
+            shape (n_rv, n_features) if n_rv > 1 and w is None,
+            else (1, n_features).
 
         """
+        # Checking if cached x is a vector
+        if not self._cached_x.is_vector_like:
+            raise ValueError(
+                "kernel gradient can be computed only wrt vector-like arrays.")
+
+        if self._rv is None:
+            raise ValueError("Please run forward with caching=True or set"
+                             "`rv` first.")
+
         k = CArray(metrics.pairwise.polynomial_kernel(
-            u.get_data(), v.get_data(),
+            self._rv.get_data(), self._cached_x.get_data(),
             self.degree - 1, self.gamma, self.coef0))
 
-        # Format of output array should be the same as v
-        if v.issparse:
-            u = u.tosparse()
+        # Format of output array should be the same as cached x
+        if self._cached_x.issparse:
+            rv = self._rv.tosparse()
             # Casting the kernel to sparse for efficient broadcasting
             k = k.tosparse()
         else:
-            u = u.todense()
+            rv = self._rv.todense()
 
-        grad = u * k * self.gamma * self.degree
-        return grad
+        grad = rv * k * self.gamma * self.degree
+        return grad if w is None else w.dot(grad)

@@ -8,7 +8,7 @@ from secml.array import CArray
 from secml.utils import fm
 from secml.adv.seceval import CSecEval
 from secml.adv.attacks.evasion import CAttackEvasion
-from secml.ml.kernel import CKernelRBF
+from secml.ml.kernels import CKernelRBF
 
 
 def _generate_advx(dataset, clf_norej):

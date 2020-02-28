@@ -4,7 +4,7 @@ from secml.array import CArray
 from secml.data import CDataset
 from secml.figure import CFigure
 from secml.ml.classifiers import CClassifierSVM
-from secml.ml.kernel import CKernelRBF
+from secml.ml.kernels import CKernelRBF
 
 
 class TestCFigure(CUnitTest):

@@ -3,7 +3,7 @@ from secml.testing import CUnitTest
 from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.core.type_utils import is_scalar
-from secml.ml.kernel import CKernel
+from secml.ml.kernels import CKernel
 from secml.optim.function import CFunction
 
 
@@ -26,7 +26,8 @@ class CCKernelTestCases(CUnitTest):
 
     def _has_gradient(self):
         try:
-            self.kernel.gradient(self.p1_dense, self.p2_dense)
+            self.kernel.rv = self.p1_dense
+            self.kernel.gradient(self.p2_dense)
             return True
         except NotImplementedError:
             return False
@@ -91,10 +92,11 @@ class CCKernelTestCases(CUnitTest):
         # we invert the order of input patterns as we compute the kernel
         # gradient wrt the second point but check_grad needs it as first input
         def kern_f_for_test(p2, p1, kernel_func):
-            return kernel_func.similarity(p1, p2)
+            return kernel_func.k(p2, p1)
 
         def kern_grad_for_test(p2, p1, kernel_func):
-            return kernel_func.gradient(p1, p2)
+            kernel_func.rv = p1
+            return kernel_func.gradient(p2)
 
         self.logger.info("Testing gradient with dense data.")
         self.logger.info("Kernel type: %s", self.kernel.class_type)
@@ -107,7 +109,8 @@ class CCKernelTestCases(CUnitTest):
             # if analytical gradient is zero, numerical estimation does not
             # work, as it is using one-side estimation. We should use centered
             # numerical differences to gain precision.
-            grad = self.kernel.gradient(self.d_dense.X[i, :], self.p2_dense)
+            self.kernel.rv = self.d_dense.X[i, :]
+            grad = self.kernel.gradient(self.p2_dense)
             if grad.norm() >= 1e-10:
                 grad_error = CFunction(
                     kern_f_for_test, kern_grad_for_test).check_grad(
@@ -128,17 +131,20 @@ class CCKernelTestCases(CUnitTest):
         self.logger.info("Testing gradient with sparse data.")
         self.logger.info("Kernel type: %s", self.kernel.class_type)
 
-        k_grad = self.kernel.gradient(self.d_sparse.X, self.p2_dense)
+        self.kernel.rv = self.d_sparse.X
+        k_grad = self.kernel.gradient(self.p2_dense)
         self.logger.info(
             "sparse/dense ->.isdense: {:}".format(k_grad.isdense))
         self.assertTrue(k_grad.isdense)
 
-        k_grad = self.kernel.gradient(self.d_dense.X, self.p2_sparse)
+        self.kernel.rv = self.d_dense.X
+        k_grad = self.kernel.gradient(self.p2_sparse)
         self.logger.info(
             "dense/sparse ->.issparse: {:}".format(k_grad.issparse))
         self.assertTrue(k_grad.issparse)
 
-        k_grad = self.kernel.gradient(self.d_sparse.X, self.p2_sparse)
+        self.kernel.rv = self.d_sparse.X
+        k_grad = self.kernel.gradient(self.p2_sparse)
         self.logger.info(
             "sparse/sparse ->.issparse: {:}".format(k_grad.issparse))
         self.assertTrue(k_grad.issparse)
@@ -155,17 +161,21 @@ class CCKernelTestCases(CUnitTest):
         # check if gradient computed on multiple points is the same as
         # the gradients computed on one point at a time.
         data = self.d_dense.X[0:5, :]  # using same no. of points and features
-        k1 = self.kernel.gradient(data, self.p2_dense)
+        self.kernel.rv = data
+        k1 = self.kernel.gradient(self.p2_dense)
         k2 = CArray.zeros(shape=k1.shape)
         for i in range(k2.shape[0]):
-            k2[i, :] = self.kernel.gradient(data[i, :], self.p2_dense)
+            self.kernel.rv = data[i, :]
+            k2[i, :] = self.kernel.gradient(self.p2_dense)
         self.assertTrue((k1 - k2).ravel().norm() < 1e-4)
 
         data = self.d_dense.X  # using different no. of points/features
-        k1 = self.kernel.gradient(data, self.p2_dense)
+        self.kernel.rv = data
+        k1 = self.kernel.gradient(self.p2_dense)
         k2 = CArray.zeros(shape=k1.shape)
         for i in range(k2.shape[0]):
-            k2[i, :] = self.kernel.gradient(data[i, :], self.p2_dense)
+            self.kernel.rv = data[i, :]
+            k2[i, :] = self.kernel.gradient(self.p2_dense)
         self.assertTrue((k1 - k2).ravel().norm() < 1e-4)
 
     def _test_gradient_multiple_points_sparse(self):
@@ -180,18 +190,53 @@ class CCKernelTestCases(CUnitTest):
         # check if gradient computed on multiple points is the same as
         # the gradients computed on one point at a time.
         data = self.d_sparse.X[0:5, :]  # using same no. of points and features
-        k1 = self.kernel.gradient(data, self.p2_dense)
+        self.kernel.rv = data
+        k1 = self.kernel.gradient(self.p2_dense)
         k2 = CArray.zeros(shape=k1.shape)
         for i in range(k2.shape[0]):
-            k2[i, :] = self.kernel.gradient(data[i, :], self.p2_dense)
+            self.kernel.rv = data[i, :]
+            k2[i, :] = self.kernel.gradient(self.p2_dense)
         self.assertTrue((k1 - k2).ravel().norm() < 1e-4)
 
         data = self.d_sparse.X  # using different no. of points/features
-        k1 = self.kernel.gradient(data, self.p2_dense)
+        self.kernel.rv = data
+        k1 = self.kernel.gradient(self.p2_dense)
         k2 = CArray.zeros(shape=k1.shape)
         for i in range(k2.shape[0]):
-            k2[i, :] = self.kernel.gradient(data[i, :], self.p2_dense)
+            self.kernel.rv = data[i, :]
+            k2[i, :] = self.kernel.gradient(self.p2_dense)
         self.assertTrue((k1 - k2).ravel().norm() < 1e-4)
+
+    def _test_gradient_w(self):
+        """Test for backard passing of w in kernel gradients"""
+
+        if not self._has_gradient():
+            self.logger.info(
+                "Gradient is not implemented for %s. "
+                "Skipping multiple-point tests.", self.kernel.class_type)
+            return
+
+        # check if the gradient computed when passing w is the same as the
+        # gradient computed with w=None and pre-multiplied with w
+
+        # test on single point
+        w = CArray.rand(shape=(1,), random_state=0)
+        self.kernel.rv = self.p2_dense
+        grad_1 = self.kernel.gradient(self.p1_dense, w=w)
+        grad_2 = w * (self.kernel.gradient(self.p1_dense))
+        grad_2 = grad_2.ravel()
+        self.assertTrue(grad_1.is_vector_like)
+        self.assertTrue(grad_2.is_vector_like)
+        self.assert_array_almost_equal(grad_1, grad_2, decimal=10)
+
+        # test on multiple points
+        w = CArray.rand(shape=(5,), random_state=0)
+        self.kernel.rv = self.d_dense[:5, :].X
+        grad_1 = self.kernel.gradient(self.p1_dense, w=w)
+        grad_2 = w.dot(self.kernel.gradient(self.p1_dense)).ravel()
+        self.assertTrue(grad_1.is_vector_like)
+        self.assertTrue(grad_2.is_vector_like)
+        self.assert_array_almost_equal(grad_1, grad_2, decimal=10)
 
 
 if __name__ == '__main__':

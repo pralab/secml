@@ -1,11 +1,11 @@
-from secml.ml.kernel.tests import CCKernelTestCases
+from secml.ml.kernels.tests import CCKernelTestCases
 
 
-class TestCKernelLinear(CCKernelTestCases):
-    """Unit test for CKernelLinear."""
+class TestCKernelHistIntersect(CCKernelTestCases):
+    """Unit test for CKernelHistIntersect."""
 
     def setUp(self):
-        self._set_up('linear')
+        self._set_up('hist-intersect')
 
     def test_similarity_shape(self):
         """Test shape of kernel."""
@@ -17,6 +17,7 @@ class TestCKernelLinear(CCKernelTestCases):
         self._test_gradient_sparse()
         self._test_gradient_multiple_points()
         self._test_gradient_multiple_points_sparse()
+        self._test_gradient_w()
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 from secml.ml.classifiers.tests import CClassifierTestCases
 
 from secml.ml.classifiers import CClassifierRidge, CClassifierSVM
-from secml.ml.kernel import *
+from secml.ml.kernels import *
 from secml.data.loader import CDLRandom
 from secml.ml.features.normalization import CNormalizerMinMax
 from secml.ml.peval.metrics import CMetric

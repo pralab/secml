@@ -22,10 +22,25 @@ class CClassifierLogistic(CClassifierLinear, CClassifierGradientLogisticMixin):
 
     Parameters
     ----------
+    C : float, optional
+        Penalty parameter C of the error term. Default 1.0.
+    max_iter : int, optional
+        Maximum number of iterations taken for the solvers to converge.
+        Default 100.
+    random_state : int, RandomState or None, optional
+        The seed of the pseudo random number generator to use when shuffling
+        the data.  If int, random_state is the seed used by the random number
+        generator; If RandomState instance, random_state is the random number
+        generator; If None, the random number generator is the RandomState
+        instance used by `np.random`. Default None.
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.
         Can be a CPreProcess subclass or a string with the type of the
         desired preprocessor. If None, input data is used as is.
+
+    Attributes
+    ----------
+    class_type : 'logistic'
 
     """
     __class_type = 'logistic'
