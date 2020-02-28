@@ -10,11 +10,13 @@ from sklearn.linear_model import RidgeClassifier
 
 from secml.ml.classifiers import CClassifierLinear
 from secml.array import CArray
-from secml.ml.kernel import CKernel
+from secml.ml.kernels import CKernel
 from secml.ml.classifiers.gradients import CClassifierGradientRidgeMixin
 from secml.ml.classifiers.loss import CLossSquare
 from secml.ml.classifiers.regularizer import CRegularizerL2
 from secml.utils.mixed_utils import check_is_fitted
+
+import warnings
 
 
 class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
@@ -22,6 +24,33 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
 
     Parameters
     ----------
+    alpha : float, optional
+        Regularization strength; must be a positive float. Regularization
+        improves the conditioning of the problem and reduces the variance of
+        the estimates. Larger values specify stronger regularization.
+        Default 1.0.
+    kernel : None or CKernel subclass, optional
+
+        .. deprecated:: 0.12
+
+        Instance of a CKernel subclass to be used for computing similarity
+        between patterns. If None (default), a linear SVM will be created.
+        In the future this parameter will be removed from this classifier and
+        kernels will have to be passed as preprocess.
+    max_iter : int, optional
+        Maximum number of iterations for conjugate gradient solver.
+        Default 1e5.
+    class_weight : {dict, 'balanced', None}, optional
+        Set the parameter C of class i to `class_weight[i] * C`.
+        If not given (default), all classes are supposed to have
+        weight one. The 'balanced' mode uses the values of labels to
+        automatically adjust weights inversely proportional to
+        class frequencies as `n_samples / (n_classes * np.bincount(y))`.
+    tol : float, optional
+        Precision of the solution. Default 1e-4.
+    fit_intercept : bool, optional
+        If True (default), the intercept is calculated, else no intercept will
+        be used in calculations (e.g. data is expected to be already centered).
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.
         Can be a CPreProcess subclass or a string with the type of the
@@ -53,6 +82,11 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
 
         # Similarity function (bound) to use for computing features
         # Keep private (not a param of RIDGE)
+        if kernel is not None:
+            warnings.warn("`kernel` parameter in `CClassifierRidge` is "
+                          "deprecated from 0.12, in the future kernels will "
+                          "have to be passed as preprocess.",
+                          DeprecationWarning)
         self._kernel = kernel if kernel is None else CKernel.create(kernel)
 
         self._tr = None  # slot for the training data
@@ -83,7 +117,12 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
 
     @kernel.setter
     def kernel(self, kernel):
-        """Setting up the Kernel function (None if a linear classifier)."""
+        """Setting up the Kernel function (None if a linear classifier).
+        This property is deprecated, as in the future kernel will have to be
+        passed as preprocess."""
+        warnings.warn("`kernel` parameter in `CClassifierRidge` is "
+                      "deprecated from 0.12, in the future kernels will "
+                      "have to be passed as preprocess.", DeprecationWarning)
         self._kernel = kernel
 
     @property
@@ -169,7 +208,7 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
             # Training classifier
             ridge.fit(dataset.X.get_data(), dataset.Y.tondarray())
         else:
-            # Training SGD classifier with kernel mapping
+            # Training Ridge classifier with kernel mapping
             ridge.fit(CArray(
                 self.kernel.k(dataset.X)).get_data(), dataset.Y.tondarray())
 
@@ -229,8 +268,8 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
         if self.is_kernel_linear():  # Simply return w for a linear Ridge
             gradient = self.w.ravel()
         else:
-            gradient = self.kernel.gradient(
-                self._tr, self._cached_x).atleast_2d()
+            self.kernel.reference_samples = self._tr
+            gradient = self.kernel.gradient(self._cached_x).atleast_2d()
 
             # Few shape check to ensure broadcasting works correctly
             if gradient.shape != (self._tr.shape[0], self.n_features):

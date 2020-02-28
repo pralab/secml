@@ -2,7 +2,7 @@ from secml.testing import CUnitTest
 
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.ml.classifiers import CClassifierSVM
-from secml.ml.kernel import CKernelRBF
+from secml.ml.kernels import CKernelRBF
 from secml.data.loader import CDLDigits
 from secml.array import CArray
 from secml.figure import CFigure

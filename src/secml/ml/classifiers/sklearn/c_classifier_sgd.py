@@ -8,13 +8,14 @@
 from sklearn import linear_model
 
 from secml.array import CArray
-from secml.core.constants import inf
 from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.loss import CLoss
 from secml.ml.classifiers.regularizer import CRegularizer
-from secml.ml.kernel import CKernel
+from secml.ml.kernels import CKernel
 from secml.utils.mixed_utils import check_is_fitted
 from secml.ml.classifiers.gradients import CClassifierGradientSGDMixin
+
+import warnings
 
 
 class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
@@ -22,6 +23,64 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
 
     Parameters
     ----------
+    loss : CLoss
+        Loss function to be used during classifier training.
+    regularizer : CRegularizer
+        Regularizer function to be used during classifier training.
+    kernel : None or CKernel subclass, optional
+
+        .. deprecated:: 0.12
+
+        Instance of a CKernel subclass to be used for computing similarity
+        between patterns. If None (default), a linear SVM will be created.
+        In the future this parameter will be removed from this classifier and
+        kernels will have to be passed as preprocess.
+    alpha : float, optional
+        Constant that multiplies the regularization term. Default 0.01.
+        Also used to compute learning_rate when set to 'optimal'.
+    fit_intercept : bool, optional
+        If True (default), the intercept is calculated, else no intercept will
+        be used in calculations (e.g. data is expected to be already centered).
+    max_iter : int, optional
+        The maximum number of passes over the training data (aka epochs).
+        Default 1000.
+    tol : float or None, optional
+        The stopping criterion. If it is not None, the iterations will stop
+        when (loss > best_loss - tol) for 5 consecutive epochs. Default None.
+    shuffle : bool, optional
+        If True (default) the training data is shuffled after each epoch.
+    learning_rate : str, optional
+        The learning rate schedule. If 'constant', eta = eta0;
+        if 'optimal' (default), eta = 1.0 / (alpha * (t + t0)), where t0 is
+        chosen by a heuristic proposed by Leon Bottou; if 'invscaling',
+        eta = eta0 / pow(t, power_t); if 'adaptive', eta = eta0, as long as
+        the training keeps decreasing.
+    eta0 : float, optional
+        The initial learning rate for the 'constant', 'invscaling' or
+        'adaptive' schedules. Default 10.0.
+    power_t : float, optional
+        The exponent for inverse scaling learning rate. Default 0.5.
+    class_weight : {dict, 'balanced', None}, optional
+        Set the parameter C of class i to `class_weight[i] * C`.
+        If not given (default), all classes are supposed to have
+        weight one. The 'balanced' mode uses the values of labels to
+        automatically adjust weights inversely proportional to
+        class frequencies as `n_samples / (n_classes * np.bincount(y))`.
+    warm_start : bool, optional
+        If True, reuse the solution of the previous call to fit as
+        initialization, otherwise, just erase the previous solution.
+        Default False.
+    average : bool or int, optional
+        If True, computes the averaged SGD weights and stores the result in
+        the `coef_` attribute. If set to an int greater than 1, averaging
+        will begin once the total number of samples seen reaches average.
+        Default False.
+    random_state : int, RandomState or None, optional
+        The seed of the pseudo random number generator to use when shuffling
+        the data.  If int, random_state is the seed used by the random number
+        generator; If RandomState instance, random_state is the random number
+        generator; If None, the random number generator is the RandomState
+        instance used by `np.random`. Default None.
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.
         Can be a CPreProcess subclass or a string with the type of the
@@ -65,6 +124,10 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
 
         # Similarity function (bound) to use for computing features
         # Keep private (not a param of SGD)
+        if kernel is not None:
+            warnings.warn("`kernel` parameter in `CClassifierSGD` is "
+                          "deprecated from 0.12, in the future kernels will "
+                          "have to be passed as preprocess.")
         self._kernel = kernel if kernel is None else CKernel.create(kernel)
 
         self._tr = None  # slot for the training data
@@ -173,7 +236,12 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
 
     @kernel.setter
     def kernel(self, kernel):
-        """Setting up the Kernel function (None if a linear classifier)."""
+        """Setting up the Kernel function (None if a linear classifier).
+        This property is deprecated, as in the future kernel will have to be
+        passed as preprocess."""
+        warnings.warn("`kernel` parameter in `CClassifierSGD` is "
+                      "deprecated from 0.12, in the future kernels will "
+                      "have to be passed as preprocess.", DeprecationWarning)
         self._kernel = kernel
 
     @property
@@ -295,11 +363,9 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
 
         Parameters
         ----------
-        x : CArray or None, optional
-            The gradient is computed in the neighborhood of x.
-        y : int, optional
-            Binary index of the class wrt the gradient must be computed.
-            Default is 1, corresponding to the positive class.
+        w : CArray or None
+            if CArray, it is pre-multiplied to the gradient
+            of the module, as in standard reverse-mode autodiff.
 
         Returns
         -------
@@ -311,8 +377,8 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
         if self.is_kernel_linear():  # Simply return w for a linear Ridge
             gradient = self.w.ravel()
         else:
-            gradient = self.kernel.gradient(
-                self._tr, self._cached_x).atleast_2d()
+            self.kernel.reference_samples = self._tr
+            gradient = self.kernel.gradient(self._cached_x).atleast_2d()
 
             # Few shape check to ensure broadcasting works correctly
             if gradient.shape != (self._tr.shape[0], self.n_features):

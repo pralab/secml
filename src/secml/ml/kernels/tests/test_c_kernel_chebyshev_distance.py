@@ -1,4 +1,4 @@
-from secml.ml.kernel.tests import CCKernelTestCases
+from secml.ml.kernels.tests import CCKernelTestCases
 
 
 class TestCKernelChebyshevDistance(CCKernelTestCases):
@@ -18,9 +18,18 @@ class TestCKernelChebyshevDistance(CCKernelTestCases):
 
     def test_gradient(self):
         self._test_gradient()
-        self._test_gradient_sparse()
+        try:
+            self._test_gradient_sparse()
+        except TypeError:
+            # computation of kernel is not supported on sparse matrices
+            pass
         self._test_gradient_multiple_points()
-        self._test_gradient_multiple_points_sparse()
+        try:
+            self._test_gradient_multiple_points_sparse()
+        except TypeError:
+            # computation of kernel is not supported on sparse matrices
+            pass
+        self._test_gradient_w()
 
 
 if __name__ == '__main__':

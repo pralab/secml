@@ -1,11 +1,11 @@
-from secml.ml.kernel.tests import CCKernelTestCases
+from secml.ml.kernels.tests import CCKernelTestCases
 
 
-class TestCKernelEuclidean(CCKernelTestCases):
-    """Unit test for CKernelHamming."""
+class TestCKernelRBF(CCKernelTestCases):
+    """Unit test for CKernelRBF."""
 
     def setUp(self):
-        self._set_up('euclidean')
+        self._set_up('rbf')
 
     def test_similarity_shape(self):
         """Test shape of kernel."""
@@ -16,9 +16,8 @@ class TestCKernelEuclidean(CCKernelTestCases):
         self._test_gradient()
         self._test_gradient_sparse()
         self._test_gradient_multiple_points()
-        self._test_gradient_multiple_points()
-
-    # TODO test when squared=True. but this needs to be passed to __init__
+        self._test_gradient_multiple_points_sparse()
+        self._test_gradient_w()
 
 
 if __name__ == '__main__':

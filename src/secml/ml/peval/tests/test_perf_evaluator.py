@@ -5,7 +5,7 @@ import numpy as np
 
 from secml.ml.classifiers import CClassifierSVM
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
-from secml.ml.kernel import CKernel
+from secml.ml.kernels import CKernel
 from secml.data.splitter import CDataSplitter
 from secml.array import CArray
 from secml.data.loader import CDLRandom

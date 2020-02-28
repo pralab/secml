@@ -1,11 +1,11 @@
-from secml.ml.kernel.tests import CCKernelTestCases
+from secml.ml.kernels.tests import CCKernelTestCases
 
 
-class TestCKernelPoly(CCKernelTestCases):
-    """Unit test for CKernelPoly."""
+class TestCKernelLaplacian(CCKernelTestCases):
+    """Unit test for CKernelLaplacian."""
 
     def setUp(self):
-        self._set_up('poly')
+        self._set_up('laplacian')
 
     def test_similarity_shape(self):
         """Test shape of kernel."""
@@ -17,6 +17,7 @@ class TestCKernelPoly(CCKernelTestCases):
         self._test_gradient_sparse()
         self._test_gradient_multiple_points()
         self._test_gradient_multiple_points_sparse()
+        self._test_gradient_w()
 
 
 if __name__ == '__main__':

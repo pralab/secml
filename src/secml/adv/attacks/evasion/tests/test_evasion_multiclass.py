@@ -6,7 +6,7 @@ from secml.array import CArray
 from secml.data.loader import CDLRandom
 from secml.ml.classifiers import CClassifierSVM
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
-from secml.ml.kernel import CKernelRBF
+from secml.ml.kernels import CKernelRBF
 from secml.utils import fm
 
 from secml.figure import CFigure

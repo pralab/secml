@@ -6,7 +6,7 @@ from secml.data.splitter import CDataSplitterKFold
 from secml.ml.peval.metrics import CMetricAccuracy
 from secml.ml.classifiers import \
     CClassifierSVM, CClassifierLogistic, CClassifierRidge
-from secml.ml.kernel import CKernelRBF
+from secml.ml.kernels import CKernelRBF
 from secml.ml.classifiers.gradients.tests.test_c_classifier_gradient import \
     CClassifierGradientTest
 

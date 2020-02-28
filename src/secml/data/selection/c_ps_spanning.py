@@ -7,7 +7,7 @@
 """
 from secml.data.selection import CPrototypesSelector
 from secml.array import CArray
-from secml.ml.kernel import CKernelEuclidean
+from secml.ml.kernels import CKernelEuclidean
 
 
 class CPSSpanning(CPrototypesSelector):

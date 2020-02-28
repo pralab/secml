@@ -9,7 +9,7 @@ from secml.data.loader import CDLRandom
 from secml.array import CArray
 from secml.ml.classifiers import CClassifierSVM
 from secml.figure import CFigure
-from secml.ml.kernel import *
+from secml.ml.kernels import *
 from secml.utils import fm
 
 

@@ -50,7 +50,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
 
     def test_set(self):
 
-        from secml.ml.kernel import CKernelRBF
+        from secml.ml.kernels import CKernelRBF
         multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                               C=1, kernel=CKernelRBF())
         # Test set before training

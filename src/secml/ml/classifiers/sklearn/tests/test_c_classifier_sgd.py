@@ -5,7 +5,7 @@ import numpy as np
 from secml.ml.classifiers import CClassifierSGD, CClassifierSVM
 from secml.ml.classifiers.regularizer import *
 from secml.ml.classifiers.loss import *
-from secml.ml.kernel import *
+from secml.ml.kernels import *
 from secml.array import CArray
 from secml.data.loader import CDLRandom, CDLRandomBlobs
 from secml.ml.features.normalization import CNormalizerMinMax
