@@ -1,2 +1,1 @@
-from .c_attack_poisoning_lin_test import CAttackPoisoningLinTest
-from .test_c_poisoning import CPoisoningTestCases
+from .c_attack_poisoning_testcases import CAttackPoisoningTestCases
