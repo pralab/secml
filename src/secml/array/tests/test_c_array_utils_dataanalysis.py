@@ -140,14 +140,17 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         """Test for CArray.bincount() method."""
         self.logger.info("Test for CArray.bincount() method.")
 
-        def _check_bincount(array, expected):
+        def _check_bincount(array, expected, minlength=0):
             self.logger.info("Array:\n{:}".format(array))
 
-            res = array.bincount()
+            res = array.bincount(minlength=minlength)
             self.logger.info("array.bincount():\n{:}".format(res))
 
             self.assertTrue(res.is_vector_like)
-            self.assertEqual(res.size, array.max()+1)
+            expected_length = array.max() + 1 if (minlength == 0) or (
+                    minlength < array.max() + 1) \
+                else minlength
+            self.assertEqual(res.size, expected_length)
             self.assertFalse((res != expected).any())
 
         with self.assertRaises(ValueError):
@@ -161,6 +164,34 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         _check_bincount(self.row_flat_dense, CArray([1, 0, 0, 0, 1, 0, 1]))
         _check_bincount(self.single_flat_dense, CArray([0, 0, 0, 0, 1]))
         _check_bincount(self.single_bool_flat_dense, CArray([0, 1]))
+        _check_bincount(self.row_flat_dense,
+                        CArray([1, 0, 0, 0, 1, 0, 1, 0, 0, 0]), minlength=10)
+        _check_bincount(self.row_sparse,
+                        CArray([1, 0, 0, 0, 1, 0, 1, 0, 0, 0]), minlength=10)
+        _check_bincount(
+            self.row_sparse, CArray([1, 0, 0, 0, 1, 0, 1]), minlength=3)
+        _check_bincount(self.row_flat_dense,
+                        CArray([1, 0, 0, 0, 1, 0, 1]), minlength=3)
+
+        # test when no zeros are present in input
+        input_data = CArray([1, 2], tosparse=True)
+        output_data = CArray([0, 1, 1])
+        _check_bincount(input_data, output_data)
+        _check_bincount(input_data, output_data, minlength=2)
+        _check_bincount(input_data.todense().ravel(), output_data)
+        _check_bincount(input_data.todense().ravel(), output_data, minlength=2)
+
+        # test for negative minlength (exception is raised)
+        with self.assertRaises(ValueError):
+            self.row_flat_dense.bincount(minlength=-2)
+        with self.assertRaises(ValueError):
+            self.row_sparse.bincount(minlength=-2)
+
+        # test vector with negative elements (exception is raised)
+        with self.assertRaises(ValueError):
+            (-self.row_flat_dense).bincount()
+        with self.assertRaises(ValueError):
+            (-self.row_sparse).bincount()
 
     def test_norm(self):
         """Test for CArray.norm() method."""
@@ -182,7 +213,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             self.logger.info("array:\n{:}".format(array))
 
             for ord_idx, order in enumerate((None, 'fro', inf, -inf,
-                                           0, 1, -1, 2, -2, 3, -3)):
+                                             0, 1, -1, 2, -2, 3, -3)):
 
                 if order == 'fro':  # Frobenius is a matrix norm
                     self.logger.info(
@@ -426,8 +457,10 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         _check_sum(self.row_dense, (10, CArray([[4, 0, 6]]), CArray([[10]])))
         _check_sum(self.row_sparse, (10, CArray([[4, 0, 6]]), CArray([[10]])))
 
-        _check_sum(self.column_dense, (10, CArray([[10]]), CArray([[4], [0], [6]])))
-        _check_sum(self.column_sparse, (10, CArray([[10]]), CArray([[4], [0], [6]])))
+        _check_sum(self.column_dense,
+                   (10, CArray([[10]]), CArray([[4], [0], [6]])))
+        _check_sum(self.column_sparse,
+                   (10, CArray([[10]]), CArray([[4], [0], [6]])))
 
         _check_sum(self.single_flat_dense, (4, CArray([4]), CArray([4])))
         _check_sum(self.single_dense, (4, CArray([[4]]), CArray([[4]])))
@@ -578,8 +611,9 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
 
         _check_prod(self.column_dense,
                     (0, CArray([[0]]), CArray([[4], [0], [6]])))
-        _check_prod(self.column_sparse,(0, CArray([[0]], tosparse=True),
-                                        CArray([[4], [0], [6]], tosparse=True)))
+        _check_prod(self.column_sparse, (0, CArray([[0]], tosparse=True),
+                                         CArray([[4], [0], [6]],
+                                                tosparse=True)))
 
         _check_prod(self.single_flat_dense, (4, CArray([4]), CArray([4])))
         _check_prod(self.single_dense, (4, CArray([[4]]), CArray([[4]])))
@@ -1360,13 +1394,13 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             if pos is not None:
                 self.assertTrue(all(res[pos]))
                 self.assertEqual(
-                    len(pos[0]) if is_list_of_lists(pos) else len(pos), res.nnz)
+                    len(pos[0]) if is_list_of_lists(pos) else len(pos),
+                    res.nnz)
 
         for test_fun, sub_val in (
                 (CArray.is_inf, inf), (CArray.is_inf, -inf),
                 (CArray.is_posinf, inf), (CArray.is_neginf, -inf),
                 (CArray.is_nan, nan)):
-
             self.logger.info(
                 "Test for CArray.{:}() method.".format(test_fun.__name__))
 

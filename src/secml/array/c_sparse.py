@@ -386,7 +386,7 @@ class CSparse(_CArrayInterface):
         for elem_idx, elem in enumerate(idx):
             # boolean arrays in tuple (cross-indices) must be 1-Dimensional
             if elem is not None and elem.dtype.kind == 'b' and \
-                    elem.size != self.shape[elem_idx]:
+                            elem.size != self.shape[elem_idx]:
                 raise IndexError(
                     "boolean index array for axis {:} must have "
                     "size {:}.".format(elem_idx, self.shape[elem_idx]))
@@ -1420,7 +1420,7 @@ class CSparse(_CArrayInterface):
                     # If a element is missing for indices[1]
                     # (nz column indices), means there is a zero there!
                     if i + 1 > len(flat_a.nnz_indices[1]) or \
-                            flat_a.nnz_indices[1][i] != i:
+                                    flat_a.nnz_indices[1][i] != i:
                         unique_index = CDense([i])
                         break
 
@@ -1449,12 +1449,13 @@ class CSparse(_CArrayInterface):
 
         return tuple(outputs)
 
-    def bincount(self):
-        """Count the number of occurrences of each value in array of non-negative ints."""
-        n_zeros = self.size - self.nnz
-        nnz_bincount = np.bincount(self._data.data)
-        # The number of zeros must be replaced (no zeros in nnz_data)
-        nnz_bincount[0] = n_zeros
+    def bincount(self, minlength=0):
+        """Count the number of occurrences of each value in array 
+        of non-negative ints."""
+        # count number of elements (except zeros)
+        nnz_bincount = np.bincount(self._data.data, minlength=minlength)
+        # count number of zeros and set it
+        nnz_bincount[0] = self.size - self.nnz
         return CDense(nnz_bincount)
 
     def norm(self, order=None):

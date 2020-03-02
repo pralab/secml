@@ -2807,16 +2807,23 @@ class CArray(_CArrayInterface):
         else:
             return self.__class__(out)
 
-    def bincount(self):
-        """Count the number of occurrences of each value in array of non-negative ints.
+    def bincount(self, minlength=0):
+        """Count the number of occurrences of each value in array of
+        non-negative ints.
 
         Only vector like arrays of integer dtype are supported.
+
+        Parameters
+        ----------
+        minlength : int, optional
+            A minimum number of bins for the output.
 
         Returns
         -------
         CArray
             The occurrence number for every different element of array.
-            The length of output array is equal to a.max()+1.
+            The length of output array is equal to a.max()+1 if an
+            argument for the parameter minlenght is not provided.
 
         Examples
         --------
@@ -2829,8 +2836,9 @@ class CArray(_CArrayInterface):
         """
         if (self.isdense and self.ndim > 1) or \
                 (self.issparse and not self.is_vector_like):
-            raise ValueError("array must be 1-Dimensional")
-        return self.__class__(self._data.bincount())
+            raise ValueError("Array must be one-dimensional.")
+
+        return self.__class__(self._data.bincount(minlength))
 
     def norm(self, order=None):
         """Entrywise vector norm.
