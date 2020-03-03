@@ -193,7 +193,7 @@ class CFigure(CCreator):
             figure(s) are closed.
 
         """
-        plt.show(block)
+        plt.show(block=block)
 
     def close(self, fig=None):
         """Close current or input figure.
