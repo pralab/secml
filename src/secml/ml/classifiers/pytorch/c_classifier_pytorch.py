@@ -395,16 +395,15 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                         return self._optimizer.param_groups[0][key]
                     else:
                         raise NotImplementedError(
-                            "__getattribute__ is not yet "
-                            "supported for optimizers with "
-                            "more than one element in "
+                            "__getattribute__ is not yet supported for "
+                            "optimizers with more than one element in "
                             "param_groups.")
                 elif hasattr(self, '_optimizer_scheduler') and \
                         self._optimizer_scheduler is not None and \
                         key in self._optimizer_scheduler.state_dict():
                     return self._optimizer_scheduler[key]
 
-        except KeyError:
+        except (KeyError, AttributeError):
             pass  # Parameter not found in PyTorch model
             # Try to get the parameter from self
         return super(CClassifierPyTorch, self).__getattribute__(key)
