@@ -161,6 +161,8 @@ class CClassifierPyTorchTestCases(CClassifierTestCases):
         tr : CDataset
 
         """
+        # FIXME: why __deepcopy__ is internally called 2 times when this test
+        #  is executed with others and 1 time if executed by itself?
         clf_copy = clf.deepcopy()
 
         self.logger.info("Testing assignment on optimizer")
