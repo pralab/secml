@@ -46,7 +46,7 @@ class CPSBorder(CPrototypesSelector):
 
         """
         # Precomputing distances
-        k_euclidean = CKernelEuclidean().k(dataset.X)
+        k_euclidean = - CKernelEuclidean().k(dataset.X)
         # List of selected prototypes (indices)
         sel_idx = []
         set_indices = list(range(dataset.num_samples))
