@@ -177,7 +177,7 @@ This library is maintained by
 [PRALab - Pattern Recognition and Applications Lab](https://pralab.diee.unica.it).
 
 List of contributors:
- - Marco Melis (maintainer) [1]
+ - Marco Melis [1]
  - Ambra Demontis [1]
  - Maura Pintor [1], [2]
  - Battista Biggio [1], [2]
