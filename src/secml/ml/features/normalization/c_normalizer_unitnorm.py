@@ -3,10 +3,13 @@
    :synopsis: Normalize patterns individually to unit norm.
 
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
+.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from secml.array import CArray
 from secml.ml.features.normalization import CNormalizer
+from secml.core.constants import inf
 
 
 class CNormalizerUnitNorm(CNormalizer):
@@ -14,7 +17,7 @@ class CNormalizerUnitNorm(CNormalizer):
 
     Each pattern (i.e. each row of the data matrix) with at least
     one non zero component is rescaled independently of other
-    patterns so that its norm (l1 or l2) equals one.
+    patterns so that its norm (l1 or l2 or max) equals one.
 
     For the Row normalizer, no training routine is needed, so using
     fit_normalize() method is suggested for clarity. Use fit() method,
@@ -22,10 +25,8 @@ class CNormalizerUnitNorm(CNormalizer):
 
     Parameters
     ----------
-    order : {1, 2}, optional
-        Order of the norm to normalize each pattern with. Only
-        1 ('l1') and 2 ('l2') norm are supported. 2 ('l2') is default.
-        For sparse arrays, only 2nd order norm is supported.
+    norm : {'l1', 'l2', 'max'}, optional
+        Order of the norm to normalize each pattern with.'l2' is the default.
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.
         Can be a CPreProcess subclass or a string with the type of the
@@ -48,13 +49,19 @@ class CNormalizerUnitNorm(CNormalizer):
     >>> from secml.ml.features.normalization import CNormalizerUnitNorm
     >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
 
-    >>> dense_normalized = CNormalizerUnitNorm().fit_transform(array)
+    >>> dense_normalized = CNormalizerUnitNorm(norm="l2").fit_transform(array)
     >>> print(dense_normalized)
     CArray([[ 0.408248 -0.408248  0.816497]
      [ 1.        0.        0.      ]
      [ 0.        0.707107 -0.707107]])
 
-    >>> print(CNormalizerUnitNorm(order=1).fit_transform(array))
+    >>> dense_normalized =(CNormalizerUnitNorm(norm="l1").fit_transform(array))
+    >>> print(dense_normalized)
+    CArray([[ 0.25 -0.25  0.5 ]
+     [ 1.    0.    0.  ]
+     [ 0.    0.5  -0.5 ]])
+
+    >>> print(array / array.norm_2d(order=1, axis=1, keepdims=True))
     CArray([[ 0.25 -0.25  0.5 ]
      [ 1.    0.    0.  ]
      [ 0.    0.5  -0.5 ]])
@@ -62,25 +69,30 @@ class CNormalizerUnitNorm(CNormalizer):
     """
     __class_type = 'unit-norm'
 
-    def __init__(self, order=2, preprocess=None):
+    def __init__(self, norm="l2", preprocess=None):
         """Class constructor"""
-        if order != 1 and order != 2:
-            raise ValueError("Norm of order {:} is not supported.".format(order))
-        self._order = order
-
-        self._norm = None
-
+        self._order = None
+        self.norm = norm
         super(CNormalizerUnitNorm, self).__init__(preprocess=preprocess)
 
     @property
-    def order(self):
-        """Returns the order of the norm used for patterns normalization."""
-        return self._order
-
-    @property
     def norm(self):
-        """Returns the norm of each training array's patterns."""
+        """Return the norm of each training array's patterns."""
         return self._norm
+
+    @norm.setter
+    def norm(self, value):
+        """Set the norm that must be used to normalize each row."""
+        self._norm = value
+
+        if self._norm == 'l2':
+            self._order = 2
+        elif self._norm == 'l1':
+            self._order = 1
+        elif self._norm == "max":
+            self._order = inf
+        else:
+            raise ValueError("unknown norm")
 
     def _check_is_fitted(self):
         """Check if the preprocessor is trained (fitted).
@@ -117,6 +129,46 @@ class CNormalizerUnitNorm(CNormalizer):
         """
         return self
 
+    def _compute_x_norm(self, x):
+        """Compute the norm of x: ||x||."""
+        x_norm = x.norm_2d(axis=1, keepdims=True, order=self._order)
+        x_norm[x_norm == 0] = 1  # to avoid nan values
+        return x_norm
+
+    def _compute_norm_gradient(self, x, x_norm):
+        """Compute the gradient of the chosen norm on x.
+
+        Parameters
+        ----------
+        x : CArray
+            The input sample.
+        x_norm : CArray
+            Array containing its pre-computed norm ||x||.
+
+        Returns
+        -------
+        CArray
+            The derivative d||x||/dx of the chosen norm.
+
+        """
+        d = x.size  # number of features
+        if self.norm == "l2":
+            grad_norm_x = x / x_norm
+        elif self.norm == "l1":
+            sign = x.sign()
+            grad_norm_x = sign
+        elif self.norm == 'max':
+            grad_norm_x = CArray.zeros(d, sparse=x.issparse)
+            abs_x = x.abs()  # take absolute values of x...
+            max_abs_x = abs_x.max()  # ... and the maximum absolute value
+            max_abs_x -= 1e-8  # add small tolerance
+            max_idx = abs_x >= max_abs_x  # find idx of maximum values
+            grad_norm_x[max_idx] = x[max_idx].sign()
+        else:
+            raise ValueError("Unsupported norm.")
+        # return the gradient of ||x||
+        return grad_norm_x
+
     def _forward(self, x):
         """Transform array patterns to have unit norm.
 
@@ -134,88 +186,55 @@ class CNormalizerUnitNorm(CNormalizer):
         --------
         >>> from secml.array import CArray
         >>> from secml.ml.features.normalization import CNormalizerUnitNorm
-        >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]], tosparse=True)
+        >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]])
+        >>> array = array.tosparse()
 
         >>> normalizer = CNormalizerUnitNorm().fit(array)
         >>> array_normalized = normalizer.transform(array)
         >>> print(array_normalized)  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	0.4082482904638631
-          (0, 1)	-0.4082482904638631
-          (0, 2)	0.8164965809277261
-          (1, 0)	1.0
-          (2, 1)	0.7071067811865475
-          (2, 2)	-0.7071067811865475)
-        >>> print(array_normalized.todense().norm_2d(order=normalizer.order, axis=1))
+        CArray([[ 0.408248 -0.408248  0.816497]
+         [ 1.        0.        0.      ]
+         [ 0.        0.707107 -0.707107]])
+        >>> print(array_normalized.todense().norm_2d(order=2, axis=1))
         CArray([[1.]
          [1.]
          [1.]])
 
         """
-        # Computing and storing norm (can be used for revert)
-        self._norm = x.norm_2d(order=self.order, axis=1)
+        x_norm = self._compute_x_norm(x)
+        # fixme: if you do x/x_norm with x sparse, result is dense
+        #  this needs patching in CArray
+        return 1.0 / x_norm * x
 
-        # Makes sure that whenever scale is zero, we handle it correctly
-        scale = self._norm.deepcopy()
-        scale[scale == 0.0] = 1.0
-
-        if x.issparse:  # Avoid conversion to dense
-            x = x.deepcopy().astype(float)
-            # Fixes setting floats to int array (result will be float anyway)
-            for e_idx, e in enumerate(scale):
-                x[e_idx, :] /= e
-        else:
-            x /= scale  # This creates a copy
-
-        return x
-
-    def _inverse_transform(self, x):
-        """Undo the normalization of data according to training data.
+    def _backward(self, w=None):
+        """
+        Compute the gradient w.r.t. the input cached during the forward pass.
 
         Parameters
         ----------
-        x : CArray
-            Array to be reverted, 2-D. Must have been normalized by the same
-            calling instance of CNormalizerRow or by a normalizer trained
-            with the same data.
+        w : CArray or None, optional
+            If CArray, will be left-multiplied to the gradient
+            of the preprocessor.
 
         Returns
         -------
-        original_array : CArray
-            Array with patterns normalized back to original values according
-            to training data.
-
-        Notes
-        -----
-        Due to machine precision errors array returned by inverse_trasnform()
-        is not guaranteed to have exactly the same values of original array.
-        To solve the problem just use round() function with an arbitrary
-        number of decimals.
-
-        Examples
-        --------
-        >>> from secml.array import CArray
-        >>> from secml.ml.features.normalization import CNormalizerUnitNorm
-        >>> array = CArray([[1., -1., 2.], [2., 0., 0.], [0., 1., -1.]], tosparse=True)
-
-        >>> normalizer = CNormalizerUnitNorm().fit(array)
-        >>> array_normalized = normalizer.transform(array)
-        >>> print(normalizer.inverse_transform(array_normalized))  # doctest: +NORMALIZE_WHITESPACE
-        CArray(  (0, 0)	1.0
-          (0, 1)	-1.0
-          (0, 2)	2.0
-          (1, 0)	2.0
-          (2, 1)	1.0
-          (2, 2)	-1.0)
+        gradient : CArray
+            Gradient of the normalizer wrt input data.
+            it will have dimensionality
+            shape (w.shape[0], x.shape[1]) if `w` is passed as input
+            (x.shape[1], x.shape[1]) otherwise.
 
         """
-        x = x.atleast_2d()
+        x = self._cached_x
+        d = self._cached_x.size  # get the number of features
 
-        if self.norm is None:  # special case of "check_is_fitted"
-            raise ValueError("call `.transform` at least one time "
-                             "before using `.inverse_transform`.")
+        # compute the norm of x: ||x||
+        x_norm = self._compute_x_norm(x)
+        # compute the gradient of the given norm: d||x||/dx
+        grad_norm_x = self._compute_norm_gradient(x, x_norm)
 
-        if x.shape[0] != self.norm.size:
-            raise ValueError("array to revert must have {:} patterns (rows)."
-                             "".format(self.norm.size))
+        # this is the derivative of the ratio x/||x||
+        grad = CArray.eye(d, d) * x_norm.item() - grad_norm_x.T.dot(x)
+        grad /= (x_norm ** 2)
 
-        return x * self.norm
+        return grad if w is None else w.dot(grad)

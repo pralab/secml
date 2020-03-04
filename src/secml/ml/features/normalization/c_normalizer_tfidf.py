@@ -3,14 +3,14 @@
    :synopsis: Applies tf-idf normalization on a count matrix.
 
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 
-import numpy as np
 from sklearn.feature_extraction.text import TfidfTransformer
 
 from secml.array import CArray
-from secml.ml.features.normalization import CNormalizer
+from secml.ml.features.normalization import CNormalizer, CNormalizerUnitNorm
 
 
 class CNormalizerTFIDF(CNormalizer):
@@ -41,11 +41,12 @@ class CNormalizerTFIDF(CNormalizer):
 
     Parameters
     ----------
-    norm : ‘l1’, ‘l2’ or None, optional (default=’l2’)
+    norm : ‘l1’, ‘l2’, ’max’ or None, optional (default=’l2’)
         Each output row will have unit norm, either: * ‘l2’: Sum of squares of
         vector elements is 1. The cosine similarity between two vectors is
         their dot product when l2 norm has been applied. * ‘l1’: Sum of
-        absolute values of vector elements is 1.
+        absolute values of vector elements is 1. * ’max’ : maximum of absolute
+        values of vector elements.
 
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.
@@ -61,24 +62,37 @@ class CNormalizerTFIDF(CNormalizer):
     Differently from numpy, we manage flat vectors as 2-Dimensional of
     shape (1, array.size). This means that normalizing a flat vector is
     equivalent to transform array.atleast_2d(). To obtain a numpy-style
-    normalization of flat vectors, transpose array first.
-    """
+    normalization of flat vectors, transpose the array first.
 
+    """
     __class_type = 'tf-idf'
 
     def __init__(self, norm='l2', preprocess=None):
+        # init attributes
+        self._norm = None
+        self._cached_x_tfidf = None  # cached x after tfidf for gradient comp.
+        self._unitnorm = CNormalizerUnitNorm()
+        self._sklearn_tfidf = TfidfTransformer(
+            norm=None, use_idf=True, smooth_idf=True, sublinear_tf=False)
 
-        self._norm = norm
-        self._sk_tfidf = None
         super(CNormalizerTFIDF, self).__init__(preprocess=preprocess)
+        # set norm
+        self.norm = norm
 
     @property
     def norm(self):
         """Type of norm used to normalize the tf-idf."""
         return self._norm
 
+    @norm.setter
+    def norm(self, value):
+        """Set norm."""
+        if value is not None:
+            self._unitnorm.norm = value
+        self._norm = value
+
     def _check_is_fitted(self):
-        """Checks if the preprocessor has been trained (fitted).
+        """Check if the preprocessor has been trained (fitted).
 
         Raises
         ------
@@ -86,96 +100,11 @@ class CNormalizerTFIDF(CNormalizer):
             If the preprocessor is not fitted.
 
         """
-        if self._sk_tfidf is None:
+        if not hasattr(self._sklearn_tfidf, 'idf_'):
             raise ValueError("The normalizer has not been trained.")
 
-    @staticmethod
-    def _document_frequency(X):
-        """Counts the number of non-zero values for each feature in sparse X.
-
-        Parameters
-        ----------
-        X : CArray
-            Matrix containing the term frequencies.
-
-         Returns
-        -------
-        Array with the document frequencies.
-        """
-
-        if X.issparse:
-            df = CArray(np.bincount(np.array(X.nnz_indices[1]),
-                                    minlength=X.shape[1]))
-        else:
-            bin_x = X.deepcopy()
-            bin_x[bin_x > 0] = 1
-            df = CArray(bin_x.sum(axis=0).ravel())
-
-        return df
-
-    @staticmethod
-    def _get_norm(x, norm='l2'):
-        """Computes the required norm on each row.
-
-        Parameters
-        ----------
-        x : CArray
-            Array of which we would like to compute the norm.
-        norm: string 'l2' or 'l1' (l2 default)
-            norm that we would like to compute.
-
-        Returns
-        -------
-        Array with the computed norm.
-        """
-
-        if norm == 'l2':
-            ord = 2
-        elif norm == 'l1':
-            ord = 1
-        else:
-            raise ValueError("unknown norm")
-
-        norm = CArray(np.linalg.norm(x.tondarray(), axis=1, keepdims=True,
-                                     ord=ord))
-
-        # to avoid nan values
-        norm[norm == 0] = 1
-
-        return norm
-
-    def _forward(self, x):
-        """
-        Applies the TF-IDF transform.
-
-        Parameters
-        ----------
-        x : CArray
-            Array with features to be transformed.
-
-        Returns
-        -------
-        Array with normalized features.
-        Shape of returned array is the same of the original array.
-
-        """
-        x = x.atleast_2d()
-
-        if x.shape[1] != self._idf.size:
-            raise ValueError("array to normalize must have {:} "
-                             "features (columns).".format(self._idf.size))
-
-        tf_idf = x * self._idf
-        self._unnorm_tf_idf = tf_idf
-
-        if self.norm is not None:
-            self._tf_idf_norm = self._get_norm(tf_idf, norm=self.norm)
-            tf_idf = tf_idf / self._tf_idf_norm
-
-        return tf_idf
-
     def _fit(self, x, y=None):
-        """Learns the normalizer.
+        """Learn the normalizer.
 
         Parameters
         ----------
@@ -191,50 +120,37 @@ class CNormalizerTFIDF(CNormalizer):
         CNormalizerTFIDF
             Instance of the trained normalizer.
         """
+        # this sets idf_ inside the sklearn normalizer
         x = x.atleast_2d()
-        self._sk_tfidf = TfidfTransformer(norm=self.norm,
-                                          smooth_idf=True)
-        self._sk_tfidf.fit(x.tondarray(), None)
-
-        self._n = x.shape[0]
-        self._df = self._document_frequency(x)
-        self._idf = CArray(self._sk_tfidf.idf_)
-
+        self._sklearn_tfidf.fit(x.get_data(), None)
         return self
 
-    def _inverse_transform(self, x):
-        """Undo the normalization of input data.
+    def _forward(self, x):
+        """
+        Apply the TF-IDF transform.
 
         Parameters
         ----------
         x : CArray
-            Array to be reverted. Must have been normalized using the same
-            normalizer calling the function `transform`.
+            Array with features to be transformed.
 
         Returns
         -------
-        original_array : CArray
-            Array with features scaled back to original values.
+        Array with normalized features.
+        Shape of returned array is the same of the original array.
 
         """
-        x = x.deepcopy()
-        if x.atleast_2d().shape[1] != self._idf.size:
-            raise ValueError("array to revert must have {:} "
-                             "features (columns).".format(self._idf.size))
-
-        if self.norm is not None:
-            x *= self._tf_idf_norm
-
-        # avoids division by zero
-        x[:, self._idf != 0] /= self._idf[self._idf != 0]
-
-        x = x.ravel() if x.ndim <= 1 else x
-
+        # transform data
+        x = CArray(self._sklearn_tfidf.transform(x.get_data()))
+        if self.norm is not None:  # apply unitnorm if set
+            # store x after the tf-idf transformation (needed for grad. comp.)
+            self._cached_x_tfidf = x.deepcopy()
+            x = self._unitnorm.transform(x)
         return x
 
     def _backward(self, w=None):
-        """Computes the gradient w.r.t. the input cached during the forward
-        pass.
+        """
+        Compute the gradient w.r.t. the input cached during the forward pass.
 
         Parameters
         ----------
@@ -250,39 +166,18 @@ class CNormalizerTFIDF(CNormalizer):
             shape (w.shape[0], x.shape[1]),
             - if `w` is a flat array it will be:
                 an array of shape (x.shape[1], x.shape[1]) if the parameter
-                norm is not None or a flat array of shape (x.shape[1],
-                ) if the parameter norm is equal to None;
+                norm is not None or a flat array of shape (x.shape[1],)
+                if the parameter norm is equal to None;
         """
-        grad = self._idf
+        grad = CArray(self._sklearn_tfidf.idf_)  # flat vector
 
         if self.norm is None:
             return w * grad if w is not None else grad
-
         else:
-            # todo: we can speed up this avoiding some computation if we
-            #  usually call this function passing a flat w
-
-            # computes the gradient of norm(tf-idf) w.r.t. x
-            if self.norm == 'l2':
-                grad_tfidf_x = self._cached_x / self._tf_idf_norm
-
-            elif self.norm == 'l1':
-                sign = self._unnorm_tf_idf.sign()
-                sign[sign == 0] = 1
-                grad_tfidf_x = sign
-
-            else:
-                raise ValueError("Norm type unknown")
-
-            # the first term is zero for the element of the gradient not in
-            # the diagonal
-            grad = CArray.diag(
-                grad) * self._tf_idf_norm - self._unnorm_tf_idf.T.dot(
-                grad_tfidf_x)
-
-            grad /= (self._tf_idf_norm ** 2)
-
-            return w.dot(grad) if w is not None else grad
+            self._unitnorm.forward(self._cached_x_tfidf, caching=True)
+            # compute the gradient using the chain rule
+            grad_unitnorm = self._unitnorm.backward(w)
+            return grad_unitnorm * grad
 
     def gradient(self, x, w=None):
         """Compute gradient at x by doing a backward pass.
@@ -291,5 +186,6 @@ class CNormalizerTFIDF(CNormalizer):
 
         """
         # Transform data using inner preprocess, if defined
+        self._cached_x_tfidf = None  # cache cleaning
         self.forward(x, caching=True)
         return self.backward(w)
