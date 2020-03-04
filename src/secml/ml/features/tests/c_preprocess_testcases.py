@@ -14,6 +14,9 @@ class CPreProcessTestCases(CUnitTest):
                                    [3, 6, 0, 0]])
         self.array_sparse = CArray(self.array_dense.deepcopy(), tosparse=True)
 
+        # found bug in sklearn normalizer, see:
+        # https://github.com/scikit-learn/scikit-learn/issues/16632
+        # self.row_dense = CArray([-4, 0, 6])
         self.row_dense = CArray([4, 0, 6])
         self.column_dense = self.row_dense.deepcopy().T
 

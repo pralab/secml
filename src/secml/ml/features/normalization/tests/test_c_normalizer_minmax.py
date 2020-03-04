@@ -14,7 +14,7 @@ class TestCNormalizerLinear(CPreProcessTestCases):
 
         def sklearn_comp(array):
 
-            self.logger.info("Original array is:\n{:}".format(array))
+            self.logger.info("Original array is:  {:}".format(array))
 
             # Sklearn normalizer (requires float dtype input)
             array_sk = array.astype(float).tondarray()
@@ -26,8 +26,8 @@ class TestCNormalizerLinear(CPreProcessTestCases):
             our_norm = CNormalizerMinMax().fit(array)
             result = our_norm.transform(array)
 
-            self.logger.info("Correct result is:\n{:}".format(target))
-            self.logger.info("Our result is:\n{:}".format(result))
+            self.logger.info("Correct result is:  {:}".format(target))
+            self.logger.info("Our result is:  {:}".format(result))
 
             self.assert_array_almost_equal(target, result)
 
@@ -41,8 +41,8 @@ class TestCNormalizerLinear(CPreProcessTestCases):
             # Our normalizer
             result = our_norm.transform(array * 2)
 
-            self.logger.info("Correct result is:\n{:}".format(target))
-            self.logger.info("Our result is:\n{:}".format(result))
+            self.logger.info("Correct result is:  {:}".format(target))
+            self.logger.info("Our result is:  {:}".format(result))
 
             self.assert_array_almost_equal(target, result)
 
