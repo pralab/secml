@@ -208,7 +208,7 @@ class CAttackPoisoningTestCases(CUnitTest):
 
     def _set_up(self, poisoning_class, clf_idx, clf_class, clf_params):
 
-        self.plot_creation = True
+        self.plot_creation = False
 
         self.clf_idx = clf_idx
         self.pois_class = poisoning_class
