@@ -19,6 +19,11 @@ class TestCClassifierGradientBinary(
 
     @property
     def clf_creation_function(self):
+
+        # TODO: remove this filter when `kernel` parameter is removed from SGD Classifier
+        self.logger.filterwarnings("ignore", message="`kernel` parameter.*",
+                                   category=DeprecationWarning)
+
         return binary_clf_creation
 
     def _dataset_creation(self):

@@ -127,7 +127,8 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
         if kernel is not None:
             warnings.warn("`kernel` parameter in `CClassifierSGD` is "
                           "deprecated from 0.12, in the future kernels will "
-                          "have to be passed as preprocess.")
+                          "have to be passed as preprocess.",
+                          DeprecationWarning)
         self._kernel = kernel if kernel is None else CKernel.create(kernel)
 
         self._tr = None  # slot for the training data
