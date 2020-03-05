@@ -16,7 +16,7 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
         """Test for TestCNormalizerTFIDF."""
 
         def sklearn_comp(array, norm):
-            self.logger.info("Original array is:  {:}".format(array))
+            self.logger.info("Original array is:\n{:}".format(array))
 
             # Sklearn normalizer (requires float dtype input)
             array_sk = array.astype(float).tondarray()
@@ -28,8 +28,8 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
             our_norm = CNormalizerTFIDF(norm).fit(array)
             result = our_norm.transform(array)
 
-            self.logger.info("Correct result is:  {:}".format(target))
-            self.logger.info("Our result is:  {:}".format(result))
+            self.logger.info("Correct result is:\n{:}".format(target))
+            self.logger.info("Our result is:\n{:}".format(result))
 
             self.assert_array_almost_equal(target, result)
 
@@ -42,8 +42,8 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
             # Our normalizer
             result = our_norm.transform(array * 2)
 
-            self.logger.info("Correct result is:  {:}".format(target))
-            self.logger.info("Our result is:  {:}".format(result))
+            self.logger.info("Correct result is:\n{:}".format(target))
+            self.logger.info("Our result is:\n{:}".format(result))
 
             self.assert_array_almost_equal(target, result)
 
@@ -74,8 +74,8 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
         """Check the inverse transform."""
 
         def transf_and_inverse(array, norm):
-            self.logger.info("Original array is: {:}".format(array))
-            self.logger.info("Considered norm : {:}".format(norm))
+            self.logger.info("Original array is:\n{:}".format(array))
+            self.logger.info("Considered norm :\n{:}".format(norm))
 
             # create our normalizer
             norm = CNormalizerTFIDF(norm=norm).fit(array)
@@ -124,11 +124,11 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
                 w[f] = 1
 
                 an_grad = norm.gradient(array, w=w)
-                self.logger.info("Analytical gradient is: {:}".format(an_grad))
+                self.logger.info("Analytical gradient is:\n{:}".format(an_grad))
 
                 num_grad = CFunction(_get_transform_component).approx_fprime(
                     array.todense(), epsilon=1e-5, y=f)
-                self.logger.info("Numerical gradient is: {:}".format(num_grad))
+                self.logger.info("Numerical gradient is:\n{:}".format(num_grad))
 
                 self.assert_array_almost_equal(an_grad, num_grad,
                                                decimal=decimal)

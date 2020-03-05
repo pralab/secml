@@ -2,7 +2,6 @@
 .. module:: CNormalizerUnitNorm
    :synopsis: Normalize patterns individually to unit norm.
 
-.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 

@@ -14,7 +14,7 @@ class TestCNormalizerMeanStd(CPreProcessTestCases):
 
         def sklearn_comp(array):
 
-            self.logger.info("Original array is:  {:}".format(array))
+            self.logger.info("Original array is:\n{:}".format(array))
 
             # Sklearn normalizer
             target = CArray(StandardScaler().fit_transform(
@@ -23,8 +23,8 @@ class TestCNormalizerMeanStd(CPreProcessTestCases):
             n = CNormalizerMeanStd().fit(array)
             result = n.transform(array)
 
-            self.logger.info("Correct result is:  {:}".format(target))
-            self.logger.info("Our result is:  {:}".format(result))
+            self.logger.info("Correct result is:\n{:}".format(target))
+            self.logger.info("Our result is:\n{:}".format(result))
 
             self.assert_array_almost_equal(target, result)
 
@@ -36,8 +36,8 @@ class TestCNormalizerMeanStd(CPreProcessTestCases):
             n = CNormalizerMeanStd(with_std=False).fit(array)
             result = n.transform(array)
 
-            self.logger.info("Correct result is:  {:}".format(target))
-            self.logger.info("Our result is:  {:}".format(result))
+            self.logger.info("Correct result is:\n{:}".format(target))
+            self.logger.info("Our result is:\n{:}".format(result))
 
             self.assert_array_almost_equal(target, result)
 
@@ -55,20 +55,20 @@ class TestCNormalizerMeanStd(CPreProcessTestCases):
                             ((1.0, 1.1, 1.2, 1.3), (0.0, 0.1, 0.2, 0.3))]:
             for array in [self.array_dense, self.array_sparse]:
 
-                self.logger.info("Original array is:  {:}".format(array))
+                self.logger.info("Original array is:\n{:}".format(array))
                 self.logger.info(
                     "Normalizing using mean: {:} std: {:}".format(mean, std))
 
                 n = CNormalizerMeanStd(mean=mean, std=std).fit(array)
                 out = n.transform(array)
 
-                self.logger.info("Result is:  {:}".format(out))
+                self.logger.info("Result is:\n{:}".format(out))
 
                 out_mean = out.mean(axis=0, keepdims=False)
                 out_std = out.std(axis=0, keepdims=False)
 
-                self.logger.info("Result mean is:  {:}".format(out_mean))
-                self.logger.info("Result std is:  {:}".format(out_std))
+                self.logger.info("Result mean is:\n{:}".format(out_mean))
+                self.logger.info("Result std is:\n{:}".format(out_std))
 
                 rev = n.inverse_transform(out)
 
