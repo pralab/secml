@@ -26,8 +26,8 @@ class TestCNormalizerUnitNorm(CPreProcessTestCases):
             # Create our normalizer
             result = CNormalizerUnitNorm(norm=norm_type).fit_transform(array)
 
-            self.logger.info("Correct result is: {:}".format(target))
-            self.logger.info("Our result is: {:}".format(result))
+            self.logger.info("Correct result is:\n{:}".format(target))
+            self.logger.info("Our result is:\n{:}".format(result))
 
             self.assert_array_almost_equal(target, result)
 

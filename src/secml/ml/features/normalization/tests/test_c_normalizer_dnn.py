@@ -79,8 +79,8 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         out_norm = self.norm.transform(x)
         out_net = self.net.get_layer_output(x, layer=None)
 
-        self.logger.info("Output of normalize:  {:}".format(out_norm))
-        self.logger.info("Output of net:  {:}".format(out_net))
+        self.logger.info("Output of normalize:\n{:}".format(out_norm))
+        self.logger.info("Output of net:\n{:}".format(out_net))
 
         self.assert_allclose(out_norm, out_net)
 
@@ -92,8 +92,8 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         out_norm = self.norm.transform(x)
         out_net = self.net.get_layer_output(x, layer=self.norm.out_layer)
 
-        self.logger.info("Output of normalize:  {:}".format(out_norm))
-        self.logger.info("Output of net:  {:}".format(out_net))
+        self.logger.info("Output of normalize:\n{:}".format(out_norm))
+        self.logger.info("Output of net:\n{:}".format(out_net))
 
         self.assert_allclose(out_norm, out_net)
 
@@ -115,7 +115,7 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         w[0] = 1
         grad = self.norm.gradient(x, w=w)
 
-        self.logger.info("Output of gradient_f_x:  {:}".format(grad))
+        self.logger.info("Output of gradient_f_x:\n{:}".format(grad))
 
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
@@ -127,7 +127,7 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         self.logger.info("Returning gradient for layer: {:}".format(layer))
         grad = self.norm.gradient(x, w=out)
 
-        self.logger.info("Output of grad_f_x:  {:}".format(grad))
+        self.logger.info("Output of grad_f_x:\n{:}".format(grad))
 
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
@@ -156,9 +156,9 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
 
         y_pred, scores = clf.predict(
             self.ds.X, return_decision_function=True)
-        self.logger.info("TRUE:  {:}".format(self.ds.Y.tolist()))
-        self.logger.info("Predictions:  {:}".format(y_pred.tolist()))
-        self.logger.info("Scores:  {:}".format(scores))
+        self.logger.info("TRUE:\n{:}".format(self.ds.Y.tolist()))
+        self.logger.info("Predictions:\n{:}".format(y_pred.tolist()))
+        self.logger.info("Scores:\n{:}".format(scores))
 
         x = self.ds.X[0, :]
 
@@ -169,7 +169,7 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
 
             grad = clf.grad_f_x(x, y=c)
 
-            self.logger.info("Output of grad_f_x:  {:}".format(grad))
+            self.logger.info("Output of grad_f_x:\n{:}".format(grad))
 
             check_grad_val = CFunction(
                 clf.decision_function, clf.grad_f_x).check_grad(
@@ -190,13 +190,13 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
 
         y_pred, scores = clf.predict(
             self.ds.X, return_decision_function=True)
-        self.logger.info("TRUE:  {:}".format(self.ds.Y.tolist()))
-        self.logger.info("Predictions:  {:}".format(y_pred.tolist()))
-        self.logger.info("Scores:  {:}".format(scores))
+        self.logger.info("TRUE:\n{:}".format(self.ds.Y.tolist()))
+        self.logger.info("Predictions:\n{:}".format(y_pred.tolist()))
+        self.logger.info("Scores:\n{:}".format(scores))
 
         self.logger.info("Testing 'linear1' layer gradient")
         grad = clf.grad_f_x(x, y=0)  # y is required for multiclassova
-        self.logger.info("Output of grad_f_x:  {:}".format(grad))
+        self.logger.info("Output of grad_f_x:\n{:}".format(grad))
 
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
