@@ -19,6 +19,11 @@ class TestCClassifierSGD(CClassifierTestCases):
 
     def setUp(self):
         """Test for init and fit methods."""
+
+        # TODO: remove this filter when `kernel` parameter is removed from SGD Classifier
+        self.logger.filterwarnings("ignore", message="`kernel` parameter.*",
+                                   category=DeprecationWarning)
+
         # generate synthetic data
         self.dataset = CDLRandom(n_features=100, n_redundant=20,
                                  n_informative=25,
