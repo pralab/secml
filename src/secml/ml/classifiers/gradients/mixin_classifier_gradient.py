@@ -7,7 +7,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 
 
 class CClassifierGradientMixin(metaclass=ABCMeta):

@@ -7,7 +7,7 @@ from secml.ml.peval.metrics import CMetricAccuracy
 from secml.ml.classifiers import \
     CClassifierSVM, CClassifierLogistic, CClassifierRidge
 from secml.ml.kernels import CKernelRBF
-from secml.ml.classifiers.gradients.tests.test_c_classifier_gradient import \
+from secml.ml.classifiers.gradients.tests.test_classes import \
     CClassifierGradientTest
 
 from secml.explanation import CExplainerInfluenceFunctions
