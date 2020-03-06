@@ -213,10 +213,6 @@ class CAttackEvasionTestCases(CUnitTest):
         with self.logger.timer():
             y_pred, scores, adv_ds, f_obj = evas.run(x0, y0)
 
-        if evas._xk is not None:
-            self.logger.info(
-                "Alternative init point(s):\n{:}".format(evas._xk))
-
         self.logger.info("Starting score: " + str(
             evas.classifier.decision_function(x0, y=1).item()))
 
