@@ -1035,10 +1035,11 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             self.logger.info("a: \n{:}".format(array))
             argmin_res = array.argmin(axis=0)
             self.logger.info("a.argmin(axis=0): \n{:}".format(argmin_res))
-            min_res = array.min(axis=0)
-            self.assertIsInstance(min_res, CArray)
-            self.assertEqual(1, min_res.shape[0])
+            self.assertIsInstance(argmin_res, CArray)
+            self.assertIsSubDtype(argmin_res.dtype, int)
+            self.assertEqual(1, argmin_res.shape[0])
             # We create a find_2d-like mask to check result
+            min_res = array.min(axis=0)
             argmin_res = [
                 argmin_res.ravel().tolist(), list(range(array.shape[1]))]
             self.assert_array_equal(
@@ -1047,12 +1048,12 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             self.logger.info("a: \n{:}".format(array))
             argmin_res = array.argmin(axis=1)
             self.logger.info("a.argmin(axis=1): \n{:}".format(argmin_res))
-            min_res = array.min(axis=1)
-            self.assertIsInstance(min_res, CArray)
-            self.assertEqual(1, min_res.shape[1])
-            # max will return a column but let's compare as a row
-            min_res = min_res.T
+            self.assertIsInstance(argmin_res, CArray)
+            self.assertIsSubDtype(argmin_res.dtype, int)
+            self.assertEqual(1, argmin_res.shape[1])
             # We create a find_2d-like mask to check result
+            min_res = array.min(axis=1)
+            min_res = min_res.T  # will return a column but we compare as a row
             argmin_res = [
                 list(range(array.shape[0])), argmin_res.ravel().tolist()]
             self.assert_array_equal(
@@ -1064,6 +1065,14 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         _argmin(self.array_dense)
         _argmin(self.row_sparse)
         _argmin(self.column_dense)
+
+        # Repeat the test after converting to float
+        _argmin(self.array_sparse.astype(float))
+        _argmin(self.row_sparse.astype(float))
+        _argmin(self.column_sparse.astype(float))
+        _argmin(self.array_dense.astype(float))
+        _argmin(self.row_sparse.astype(float))
+        _argmin(self.column_dense.astype(float))
 
         # argmin on empty arrays should raise ValueError
         with self.assertRaises(ValueError):
@@ -1086,10 +1095,11 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             self.logger.info("a: \n{:}".format(array))
             argmax_res = array.argmax(axis=0)
             self.logger.info("a.argmax(axis=0): \n{:}".format(argmax_res))
-            max_res = array.max(axis=0)
-            self.assertIsInstance(max_res, CArray)
-            self.assertEqual(1, max_res.shape[0])
+            self.assertIsInstance(argmax_res, CArray)
+            self.assertIsSubDtype(argmax_res.dtype, int)
+            self.assertEqual(1, argmax_res.shape[0])
             # We create a find_2d-like mask to check result
+            max_res = array.max(axis=0)
             argmax_res = [
                 argmax_res.ravel().tolist(), list(range(array.shape[1]))]
             self.assert_array_equal(
@@ -1098,12 +1108,12 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             self.logger.info("a: \n{:}".format(array))
             argmax_res = array.argmax(axis=1)
             self.logger.info("a.argmax(axis=1): \n{:}".format(argmax_res))
-            max_res = array.max(axis=1)
-            self.assertIsInstance(max_res, CArray)
-            self.assertEqual(1, max_res.shape[1])
-            # max will return a column but let's compare as a row
-            max_res = max_res.T
+            self.assertIsInstance(argmax_res, CArray)
+            self.assertIsSubDtype(argmax_res.dtype, int)
+            self.assertEqual(1, argmax_res.shape[1])
             # We create a find_2d-like mask to check result
+            max_res = array.max(axis=1)
+            max_res = max_res.T  # max return a column but we compare as a row
             argmax_res = [
                 list(range(array.shape[0])), argmax_res.ravel().tolist()]
             self.assert_array_equal(
@@ -1115,6 +1125,14 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         _argmax(self.array_dense)
         _argmax(self.row_sparse)
         _argmax(self.column_dense)
+
+        # Repeat the test after converting to float
+        _argmax(self.array_sparse.astype(float))
+        _argmax(self.row_sparse.astype(float))
+        _argmax(self.column_sparse.astype(float))
+        _argmax(self.array_dense.astype(float))
+        _argmax(self.row_sparse.astype(float))
+        _argmax(self.column_dense.astype(float))
 
         # argmax on empty arrays should raise ValueError
         with self.assertRaises(ValueError):
