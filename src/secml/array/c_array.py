@@ -845,7 +845,7 @@ class CArray(_CArrayInterface):
             format of current array:
              - sparse * sparse : sparse
              - sparse * dense : sparse
-             - dense * sparse : dense
+             - dense * sparse : sparse
              - dense * dense : dense
 
         See Also
@@ -909,8 +909,8 @@ class CArray(_CArrayInterface):
             If input is a scalar or a boolean, array format is preserved.
             If input is a CArray, format of output array depends on the
             format of current array:
-             - sparse / sparse : sparse
-             - sparse / dense : sparse
+             - sparse / sparse : dense
+             - sparse / dense : dense
              - dense / sparse : dense
              - dense / dense : dense
 
