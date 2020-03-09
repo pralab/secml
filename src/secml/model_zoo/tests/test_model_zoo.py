@@ -6,13 +6,13 @@ import re
 
 import secml
 from secml.settings import SECML_MODELS_DIR
-from secml.ml.model_zoo import load_model
-from secml.ml.model_zoo.load_model import MODELS_DICT_PATH, _logger
+from secml.model_zoo import load_model
+from secml.model_zoo.load_model import MODELS_DICT_PATH, _logger
 from secml.utils import fm
 
 
 class TestModelZoo(CUnitTest):
-    """Unittests for `ml.model_zoo`."""
+    """Unittests for `model_zoo`."""
 
     @classmethod
     def setUpClass(cls):

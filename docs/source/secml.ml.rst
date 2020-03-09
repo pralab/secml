@@ -14,4 +14,3 @@ secml.ml
    secml.ml.kernels
    secml.ml.peval
    secml.ml.stats
-   secml.ml.model_zoo

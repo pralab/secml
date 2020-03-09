@@ -134,7 +134,7 @@ input and output of all other classes in the library.
 The `secml.ml` package contains all the Machine Learning algorithms and
 support classes, including classifiers, loss and regularizer functions,
 kernels and performance evaluation functions. Also, a zoo of pre-trained 
-models is provided by the `secml.ml.model_zoo` package.
+models is provided by the `secml.model_zoo` package.
 
 The `secml.adv` package contains evasion and poisoning attacks based on a
 custom-developed solver, along with classes to easily perform security
