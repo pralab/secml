@@ -1628,7 +1628,7 @@ class CSparse(_CArrayInterface):
         else:
             raise ValueError("{:} is not a valid axis.")
 
-        index_matrix = CDense.zeros(axis_elem_num, dtype=array.dtype)
+        index_matrix = CDense.zeros(axis_elem_num, dtype=int)
 
         for i in range(axis_elem_num):
 
@@ -1720,7 +1720,7 @@ class CSparse(_CArrayInterface):
         else:
             raise ValueError("{:} is not a valid axis.")
 
-        index_matrix = CDense.zeros(axis_elem_num, dtype=array.dtype)
+        index_matrix = CDense.zeros(axis_elem_num, dtype=int)
 
         for i in range(axis_elem_num):
 
