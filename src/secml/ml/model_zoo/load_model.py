@@ -12,7 +12,7 @@ from secml.utils.download_utils import dl_file
 
 from secml.settings import SECML_MODELS_DIR
 
-MODEL_ZOO_URL = 'https://gitlab.com/secml/secml-zoo/raw/master/models/'
+MODEL_ZOO_URL = 'https://gitlab.com/secml/secml-zoo/raw/v0.11/models/'
 MODELS_DICT_PATH = fm.join(fm.abspath(__file__), 'models_dict.json')
 with open(MODELS_DICT_PATH) as fp:
     MODELS_DICT = json.loads(fp.read())
