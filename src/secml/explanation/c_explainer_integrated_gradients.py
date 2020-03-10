@@ -91,7 +91,7 @@ class CExplainerIntegratedGradients(CExplainerGradient):
         self.logger.debug(
             "Attributions for class {:}:\n{:}".format(y, a))
 
-        # Checks prop 1: attr should adds up to the difference between
+        # Checks prop 1: attr should add up to the difference between
         # the score at the input and that at the reference
         self.check_attributions(x, reference, y, a)
 
@@ -101,7 +101,7 @@ class CExplainerIntegratedGradients(CExplainerGradient):
         """Check proposition 1 on attributions.
 
         Proposition 1:
-         Attributions should adds up to the difference between
+         Attributions should add up to the difference between
          the score at the input and that at the reference point.
 
         Parameters
@@ -116,7 +116,7 @@ class CExplainerIntegratedGradients(CExplainerGradient):
             Attributions for sample `x` to check.
 
         """
-        # Checks prop 1: attr should adds up to the difference between
+        # Checks prop 1: attr should add up to the difference between
         # the score at the input and that at the reference
         x_pred, x_score = self.clf.predict(
             x, return_decision_function=True)
@@ -126,7 +126,7 @@ class CExplainerIntegratedGradients(CExplainerGradient):
         prop_check = abs(prop_check - abs(attributions.sum())).item()
         if prop_check > 1e-1:
             self.logger.warning(
-                "Attributions should adds up to the difference between the "
+                "Attributions should add up to the difference between the "
                 "score at the input and that at the reference. Increase `m` "
                 "or change the reference. Current value {:}.".format(prop_check))
 

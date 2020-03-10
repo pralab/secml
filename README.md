@@ -134,7 +134,7 @@ input and output of all other classes in the library.
 The `secml.ml` package contains all the Machine Learning algorithms and
 support classes, including classifiers, loss and regularizer functions,
 kernels and performance evaluation functions. Also, a zoo of pre-trained 
-models is provided by the `secml.ml.model_zoo` package.
+models is provided by the `secml.model_zoo` package.
 
 The `secml.adv` package contains evasion and poisoning attacks based on a
 custom-developed solver, along with classes to easily perform security
@@ -154,12 +154,30 @@ The contributing and developer's guide is available at:
 https://secml.gitlab.io/developers/
 
 
+## How to cite SecML
+If you use SecML in a scientific publication, please cite the following paper:
+
+[secml: A Python Library for Secure and Explainable Machine Learning](
+https://arxiv.org/abs/1912.10013), Melis *et al.*, arXiv preprint arXiv:1912.10013 (2019).
+
+BibTeX entry:
+
+```bibtex
+@article{melis2019secml,
+  title={secml: A Python Library for Secure and Explainable Machine Learning},
+  author={Melis, Marco and Demontis, Ambra and Pintor, Maura and Sotgiu, Angelo and Biggio, Battista},
+  journal={arXiv preprint arXiv:1912.10013},
+  year={2019}
+}
+```
+
+
 ## Authors
 This library is maintained by 
 [PRALab - Pattern Recognition and Applications Lab](https://pralab.diee.unica.it).
 
 List of contributors:
- - Marco Melis (maintainer) [1]
+ - Marco Melis [1]
  - Ambra Demontis [1]
  - Maura Pintor [1], [2]
  - Battista Biggio [1], [2]
@@ -192,4 +210,4 @@ Innovation programme, grant agreement No. 780788.
 ## Copyright
 SecML has been developed by [PRALab - Pattern Recognition and Applications lab](
 https://pralab.diee.unica.it) and [Pluribus One s.r.l.](https://www.pluribus-one.it/) 
-under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). Copyright 2019.
+under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). All rights reserved.

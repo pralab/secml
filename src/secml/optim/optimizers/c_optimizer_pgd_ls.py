@@ -273,9 +273,6 @@ class COptimizerPGDLS(COptimizer):
             self._x_opt = x0
             return
 
-        # eval fun at x
-        fx = self._fun.fun(x_init, *args)
-
         # if x is outside of the feasible domain, project it
         if self.bounds is not None and self.bounds.is_violated(x_init):
             x_init = self.bounds.projection(x_init)
@@ -298,12 +295,12 @@ class COptimizerPGDLS(COptimizer):
         # The first point is obviously the starting point,
         # and the constraint is not violated (false...)
         x = x_init
+        fx = self._fun.fun(x, *args)  # eval fun at x, for iteration 0
         self._x_seq[0, :] = x
         self._f_seq[0] = fx
 
         # debugging information
-        self.logger.debug('Iter.: ' + str(0) +
-                          ', f(x): ' + str(fx))
+        self.logger.debug('Iter.: ' + str(0) + ', f(x): ' + str(fx))
 
         for i in range(1, self.max_iter):
 
@@ -323,9 +320,9 @@ class COptimizerPGDLS(COptimizer):
             diff = abs(self.f_seq[i].item() - self.f_seq[i - 1].item())
 
             if diff < self.eps:
-                self.logger.debug("Flat region, exiting... ({:.4f} / {:.4f})".format(
-                    self._f_seq[i].item(),
-                    self._f_seq[i - 1].item()))
+                self.logger.debug(
+                    "Flat region, exiting... ({:.4f} / {:.4f})".format(
+                        self._f_seq[i].item(), self._f_seq[i - 1].item()))
                 self._x_seq = self.x_seq[:i + 1, :]
                 self._f_seq = self.f_seq[:i + 1]
                 return x

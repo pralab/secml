@@ -27,6 +27,7 @@
    secml.ml
    secml.adv
    secml.optim
+   secml.model_zoo
 
 .. toctree::
    :hidden:

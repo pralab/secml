@@ -52,14 +52,6 @@ class CClassifierLinear(CClassifier, metaclass=ABCMeta):
         """Bias calculated from training data."""
         return self._b
 
-    @deprecated('0.11')
-    def is_linear(self):
-        """Return True as the classifier is linear."""
-        if self.preprocess is None or \
-                self.preprocess is not None and self.preprocess.is_linear():
-            return True
-        return False
-
     def _check_is_fitted(self):
         """Check if the classifier is trained (fitted).
 

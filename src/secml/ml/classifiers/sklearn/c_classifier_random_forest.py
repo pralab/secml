@@ -16,6 +16,28 @@ class CClassifierRandomForest(CClassifierSkLearn):
 
     Parameters
     ----------
+    n_estimators : int, optional
+        The number of trees in the forest. Default 10.
+    criterion : str, optional
+        The function to measure the quality of a split. Supported criteria are
+        'gini' (default) for the Gini impurity and 'entropy' for the
+        information gain.
+    max_depth : int or None, optional
+        The maximum depth of the tree. If None (default), then nodes are
+        expanded until all leaves are pure or until all leaves contain less
+        than min_samples_split samples.
+    min_samples_split : int or float, optional
+        The minimum number of samples required to split an internal node.
+        If int, then consider `min_samples_split` as the minimum number.
+        If float, then `min_samples_split` is a fraction and
+        `ceil(min_samples_split * n_samples)` are the minimum number of samples
+        for each split. Default 2.
+    random_state : int, RandomState or None, optional
+        The seed of the pseudo random number generator to use when shuffling
+        the data.  If int, random_state is the seed used by the random number
+        generator; If RandomState instance, random_state is the random number
+        generator; If None, the random number generator is the RandomState
+        instance used by `np.random`. Default None.
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.
         Can be a CPreProcess subclass or a string with the type of the
