@@ -16,18 +16,26 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
 
     Parameters
     ----------
-    model:
-        backend-supported model
-    preprocess:
-        preprocessing module.
-    softmax_outputs: bool, optional
-        if set to True, a softmax function will be applied to
-        the return value of the decision function. Note: some
-        implementation adds the softmax function to the network
-        class as last layer or last forward function, or even in the
-        loss function (see torch.nn.CrossEntropyLoss). Be aware that the
-        softmax may have already been applied.
-        Default value is False.
+    model : model dtype of the specific backend
+        The model to wrap.
+    input_shape : tuple or None, optional
+        Shape of the input for the DNN, it will
+        be used for reshaping the input data to
+        the expected shape.
+    preprocess : CPreprocess or str or None, optional
+        Preprocessing module.
+    pretrained : bool, optional
+        Whether or not the model is pretrained. If the
+        model is pretrained, the user won't need to call
+        `fit` after loading the model. Default False.
+    pretrained_classes : None or CArray, optional
+        List of classes labels if the model is pretrained. If
+        set to None, the class labels for the pretrained model should
+        be inferred at the moment of initialization of the model
+        and set to CArray.arange(n_classes). Default None.
+    softmax_outputs : bool, optional
+        Whether or not to add a softmax layer after the
+        logits. Default False.
 
     Attributes
     ----------
@@ -37,16 +45,21 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
     __class_type = ' dnn-clf'
 
     def __init__(self, model, input_shape=None, preprocess=None,
-                 softmax_outputs=False, **kwargs):
+                 pretrained=False, pretrained_classes=None,
+                 softmax_outputs=False):
+
         super(CClassifierDNN, self).__init__(preprocess=preprocess)
 
         self._model = model
         self._out_layer = None
         self._trained = False
-        self._input_shape = input_shape
-        self._softmax_outputs = softmax_outputs
+
         self._model_layers = None
         self._model_layer_shapes = None
+        self._pretrained = pretrained
+        self._pretrained_classes = pretrained_classes
+        self._input_shape = input_shape
+        self._softmax_outputs = softmax_outputs
 
     @property
     def input_shape(self):
@@ -77,7 +90,6 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         the network already has a softmax operation in the end
         this parameter will be disabled.
         """
-        self.check_softmax()
         self._softmax_outputs = active
 
     @property
@@ -90,26 +102,13 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
     @property
     def layer_names(self):
         """Returns the names of the layers of the model."""
-        return list(zip(*self.layers))[0]
+        return list(zip(*(self.layers)))[0]
 
     @property
     @abstractmethod
     def layer_shapes(self):
         """Returns a dictionary containing the shapes of the output
         of each layer of the model."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def check_softmax(self):
-        """
-        Checks if a softmax layer has been defined in the
-        network.
-
-        Returns
-        -------
-        Boolean value stating if a softmax layer has been
-        defined.
-        """
         raise NotImplementedError
 
     @staticmethod
@@ -212,7 +211,8 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
 
     def get_layer_gradient(self, x, w, layer=None):
         """
-        Computes the gradient of the classifier's decision function wrt input.
+        Computes the gradient of the classifier's decision function
+        wrt input.
 
         Parameters
         ----------
@@ -232,9 +232,17 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         -------
         gradient : CArray
             Gradient of the classifier's df wrt its input. Vector-like array.
-
         """
         self._out_layer = layer
         grad = self.gradient(x=x, w=w)
         self._out_layer = None
         return grad
+
+    def gradient(self, x, w=None):
+        """Compute gradient at x by doing a forward and a backward pass.
+
+        The gradient is pre-multiplied by w.
+
+        """
+        self.forward(x, caching=True)
+        return self.backward(w)

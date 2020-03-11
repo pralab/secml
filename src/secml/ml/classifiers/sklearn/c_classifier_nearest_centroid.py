@@ -15,12 +15,16 @@ from secml.ml.classifiers import CClassifierSkLearn
 from sklearn.metrics.pairwise import pairwise_distances
 
 
-# TODO: EXPAND CLASS DOCSTRING
 class CClassifierNearestCentroid(CClassifierSkLearn):
     """CClassifierNearestCentroid.
 
     Parameters
     ----------
+    metric : str or callable, optional
+        The metric to use when calculating distance between instances in a
+        feature array. Default 'euclidean'.
+    shrink_threshold : float, optional
+        Threshold for shrinking centroids to remove features.
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.
         Can be a CPreProcess subclass or a string with the type of the

@@ -17,8 +17,8 @@ from cleverhans.model import Model
 
 from secml.adv.attacks import CAttack
 from secml.adv.attacks.evasion import CAttackEvasion
-from secml.adv.attacks.evasion.cleverhans.c_attack_evasion_cleverhans_losses import \
-    CAttackEvasionCleverhansLossesMixin
+from secml.adv.attacks.evasion.cleverhans.c_attack_evasion_cleverhans_losses \
+    import CAttackEvasionCleverhansLossesMixin
 from secml.array import CArray
 from secml.core.constants import nan
 from secml.core.exceptions import NotFittedError
@@ -44,19 +44,22 @@ class CAttackEvasionCleverhans(CAttackEvasion,
     classifier : CClassifier
         Target classifier on which the efficacy of the computed attack
         points is evaluates
-    n_feats : int
-        Number of features of the dataset used to train the classifiers.
     surrogate_classifier : CClassifier
         Surrogate classifier against which the attack is computed.
         This is assumed to be already trained on surrogate_data.
     surrogate_data: CDataset
         Used to train the surrogate classifier.
     y_target : int or None, optional
-            If None an indiscriminate attack will be performed, else a
-            targeted attack to have the samples misclassified as
-            belonging to the y_target class.
-    clvh_attack_class
+        If None an indiscriminate attack will be performed, else a
+        targeted attack to have the samples misclassified as
+        belonging to the y_target class.
+    clvh_attack_class:
         The CleverHans class that implement the attack
+    store_var_list: list
+        list of variables to store from the graph during attack
+        run. The variables will be stored as key-value dictionary
+        and can be retrieved through the property `stored_vars`.
+
     **kwargs
         Any other parameter for the cleverhans attack.
 
@@ -68,8 +71,9 @@ class CAttackEvasionCleverhans(CAttackEvasion,
     __class_type = 'e-cleverhans'
 
     def __init__(self, classifier, surrogate_classifier,
-                 n_feats, n_classes, surrogate_data=None, y_target=None,
-                 clvh_attack_class=CarliniWagnerL2, **kwargs):
+                 surrogate_data=None, y_target=None,
+                 clvh_attack_class=CarliniWagnerL2,
+                 store_var_list=None, **kwargs):
 
         self._tfsess = tf.compat.v1.Session()
 
@@ -82,17 +86,32 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
         self._clvrh_attack_class = clvh_attack_class
 
-        # store the number of features
-        self._n_feats = n_feats
-        # store the number of dataset classes
-        self._n_classes = n_classes
-
         self._clvrh_clf = None
+
+        if store_var_list is not None:
+            # first, check if the user has set stored variables
+            self._stored_vars = {k: [] for k in store_var_list}
+        elif any([self._clvrh_attack_class == CarliniWagnerL2,
+                  self._clvrh_attack_class == ElasticNetMethod, ]):
+            # store `const` by default for these attacks as it
+            # is needed in the `objective_function` computation
+            self._stored_vars = {'const': []}
+        else:
+            self._stored_vars = None
 
         CAttackEvasion.__init__(self, classifier=classifier,
                                 surrogate_classifier=surrogate_classifier,
                                 surrogate_data=surrogate_data,
                                 y_target=y_target)
+
+    def run(self, x, y, ds_init=None, *args, **kargs):
+        # override run for applying storage of internally
+        # optimized variables
+        if self._stored_vars is not None:
+            for key in self._stored_vars:
+                self._stored_vars[key] = []
+        return super(CAttackEvasionCleverhans, self).run(
+            x, y, ds_init=ds_init, *args, **kargs)
 
     ###########################################################################
     #                           READ-ONLY ATTRIBUTES
@@ -112,6 +131,13 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         else:
             raise ValueError("Attack not performed yet!")
 
+    @property
+    def stored_vars(self):
+        """Variables extracted from the graph during execution of the attack.
+
+        """
+        return self._stored_vars
+
     ###########################################################################
     #                              PRIVATE METHODS
     ###########################################################################
@@ -130,6 +156,10 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         """
         if self._clvrh_attack_class == CarliniWagnerL2:
             return self._objective_function_cw(x)
+        elif self._clvrh_attack_class == ElasticNetMethod:
+            return self._objective_function_elastic_net(x)
+        elif self._clvrh_attack_class == SPSA:
+            return self._objective_function_SPSA(x)
         elif self._clvrh_attack_class in [
             FastGradientMethod, ProjectedGradientDescent, LBFGS,
             MomentumIterativeMethod, MadryEtAl, BasicIterativeMethod]:
@@ -143,8 +173,9 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
     def _create_tf_operations(self):
         """
-        Calls the function of the cleverhans attack called `generate` that
-        constucts the Tensorflow operation needed to perform the attack
+        Call `generate` from the Cleverhans attack to
+        construct the Tensorflow operation needed to perform the attack
+
         """
         if self.y_target is None:
             if 'y' in self._clvrh_attack.feedable_kwargs:
@@ -162,16 +193,16 @@ class CAttackEvasionCleverhans(CAttackEvasion,
                 self._initial_x_P, y_target=self._y_P, **self._clvrh_params)
 
     def _set_solver_classifier(self):
-        """This function set the surrogate classifier,
-        if differentiable; otherwise, it learns a smooth approximation for
-        the nondiff. (surrogate) classifier (e.g., decision tree)
-        using an SVM with the RBF kernel."""
+        """Sets the classifier of the solver."""
 
         # update the surrogate classifier
         # we skip the function provided by the superclass as we do not need
         # to set xk and we call directly the one of CAttack that instead
         # learn a differentiable classifier
         CAttack._set_solver_classifier(self)
+
+        self._n_classes = self._surrogate_classifier.n_classes
+        self._n_feats = self._surrogate_classifier.n_features
 
         # create the cleverhans attack object
         tf.reset_default_graph()
@@ -221,6 +252,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         Cleverhans attacks need to receive y as a one hot vector.
         y is equal to the y target if y_target is present, otherwhise is
         equal to the true class of the attack sample.
+
         """
         one_hot_y = CArray.zeros(shape=(1, self._n_classes),
                                  dtype=np.float32)
@@ -317,10 +349,19 @@ class CAttackEvasionCleverhans(CAttackEvasion,
             # condition is not met (e.g. CWL2)
             self._x_opt = self._x_seq[-1, :]
 
+        if self._stored_vars is not None:
+            for key in self._stored_vars:
+                self._stored_vars[key].append(self._get_variable_value(key))
+
         self._last_f_eval = self._clvrh_clf.f_eval
         self._last_grad_eval = self._clvrh_clf.grad_eval
 
         return self._x_opt, nan  # TODO: return value of objective_fun(x_opt)
+
+    def _get_variable_value(self, var_name):
+        const = self._clvrh_clf.get_variable_value(var_name)
+        const_value = self._tfsess.run(const)
+        return const_value
 
 
 class _CModelCleverhans(Model):
@@ -416,6 +457,10 @@ class _CModelCleverhans(Model):
             self._is_init = True
         else:
             self._x_seq = None
+
+    def get_variable_value(self, variable_name):
+        return tf.get_default_graph().get_tensor_by_name(
+            "{:}:0".format(variable_name))
 
 
 class _CClassifierToTF:

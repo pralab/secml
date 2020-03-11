@@ -1,7 +1,7 @@
-secml.ml.model_zoo
-==================
+secml.model_zoo
+===============
 
-.. automodule:: secml.ml.model_zoo
+.. automodule:: secml.model_zoo
    :members:
    :undoc-members:
    :show-inheritance:
@@ -9,7 +9,7 @@ secml.ml.model_zoo
 load_model
 ----------
 
-.. automodule:: secml.ml.model_zoo.load_model
+.. automodule:: secml.model_zoo.load_model
    :members:
    :undoc-members:
    :show-inheritance:
