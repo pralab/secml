@@ -1,3 +1,59 @@
+## v0.12 (11/03/2020)
+- #726 Refactored kernel package (now `secml.ml.kernels`). Kernel classes are now inherited from `CModule`, which enables computing gradients more efficiently. This will enable us to use kernels as preprocessors in future releases.
+- #755 Package `secml.ml.model_zoo` has been moved to `secml.model_zoo`.
+- #721 Dictionary with model zoo definitions is now dynamically downloaded and updated from our repository located at https://gitlab.com/secml/secml-zoo. The package `model_zoo.models` containing python scripts defining models structure is now removed and the scripts will be downloaded from the same repository upon request.
+
+### Added (7 changes)
+- #660 `CClassifierPyTorch` now accepts as input a PyTorch learning rate scheduler via the `optimizer_scheduler` parameter.
+- #678 Added new parameter `return_optimizer` to `CClassifierPyTorch.get_state` which allows getting the state of the classifier without including the state of the `optimizer` (and of the new `optimizer_scheduler`).
+- Added `random_state` parameter to `CPSKMedians`.
+- Added the parameter `minlength` to the `bincount` method of `CArray`.
+- Added new `CNormalizerTFIDF` which implements a term frequency–inverse document frequency features normalizer.
+- #666 Added new `utils.download_utils.dl_file_gitlab` function which allows downloading a file from a [gitlab.com](https://gitlab.com) repository, including branch and access token setting.
+- #722 Added new optional parameter `headers` to `utils.download_utils.dl_file` function which allows specifying additional headers for the download request.
+
+### Improved (8 changes)
+- #664 The following `CClassifierPyTorch` parameters can now be modified after instancing the class: `optimizer`, `epochs`, `batch_size`. This will make some procedures easier, like fine-tuning a pre-trained network.
+- #712 `download_utils.dl_file()` will now use the filename stored in response's headers if available. The previous behavior (get the last part of the download url) will be used as a fallback.
+- #748 `CNormalizerUnitNorm` re-factored by adding gradient computation.
+- #706 Rewrite `CKernelRBF` gradient when passing `w` to speed up computations by avoiding broadcasting.
+- #730 `CClassifierPyTorch` has been modified to clean cached outputs and save memory when caching such data is not required.
+- Internally optimized variables can be stored inside the attack class and fetched when needed.
+- Accurate evaluation of objective function for some cleverhans attacks (CW, Elastic Net).
+- #666 Model zoo downloader `ml.model_zoo.load_model` function will now try to download the version of a requested model corresponding to the version of secml. If not found, the latest 'master' version of the model will be downloaded instead.
+
+### Changed (3 changes)
+- #664 When passing pre-trained models to `CClassifierDNN` and subclasses the new `pretrained` parameter should now be set to `True`. Optionally, an array of classes on which the model has been pre-trained can be passed via the new `pretrained_classes` parameter. If `pretrained_classes` is left `None`, the number of classes will be inferred from the size of the last DNN layer as before.
+- `CConstraintL2.project(x)` projects now `x` onto a hypersphere of radius `radius-tol`, with `tol=1e-6`. This conservative projection ensures that `x` is projected always inside the hypersphere, overcoming projection violations due to numerical rounding errors.
+- `CModule.gradient` is not calling `forward` anymore, but only prepares data for `backward`. The forward step is not required, indeed, for modules that implement analytical gradients rather than autodiff.
+
+### Fixed (10 changes)
+- #677 Fixed `CClassifierPyTorch.get_state` crashing when optimizer is not defined.
+- #134 Fixed passage of `n_jobs` parameter to `CDataLoaderPyTorch` in `CClassifierPyTorch` where 2 processes are being used by the loader even if `n_jobs` is set to 1. The default value for parameter `num_workers` in `CDataLoaderPyTorch` is now correctly 0.
+- #749 Fixed `CArray.argmin` and `.argmax` returning float types when applied to sparse arrays of float dtype.
+- Gradient is now correctly computed in `CClassifierPytorch` even if `softmax_outputs` are active.
+- #707 Fixed initial value of the objective function being computed before starting point projection in `COptimizerPGDLS`.
+- #667 Fixed `download_utils.dl_file()` not removing url parameters from the name of the stored file.
+- #715 `download_utils.dl_file()` now correctly manage the absence of the 'content-length' header from response.
+- Inverted sign of computed kernel similarity (to have a distance measure).
+- #710 Random seed in `CClassifierPyTorch` is now correctly applied also when running on the CuDNN backend.
+- #639: Objective function parameter (`objective_function`) in `CAttackEvasionCleverhans` is now correctly populated for `ElasticNetMethod` and `SPSA` attacks.
+
+### Removed & Deprecated (5 changes)
+- #748 `CNormalizerUnitNorm.inverse_transform` has been removed (it only worked if one inverted `x` after transforming it, but not if other transforms were applied in between).
+- Removed the parameters `n_feats` and `n_classes` from the interface of `CAttackEvasionCleverhans`.
+- #744 Deprecate kernel parameter from `CClassifierSGD` and `CClassifierRidge` and removed deprecated parameter `kernel='linear'` from notebook `01-Training.ipynb`.
+- #643 Removed deprecated parameter `random_seed` from `CClassifierLogistic`. Use `random_state` instead.
+- #643 Removed deprecated method `is_linear` from `CClassifier`, `CNormalizer`, and related subclasses.
+
+### Documentation (5 changes)
+- #756 Fixed format of output arrays reported in `CArray.__mul__` and `.__truediv__` methods.
+- #681 Fixed few typos in `CExplainerIntegratedGradients`.
+- #674 Added `CClassifierDNN` to the documentation.
+- #711 Added a "How to cite SecML" section in README.
+- #703 Updated copyright notice in README.
+
+
 ## v0.11.2 (07/01/2020)
 - This version brings fixes for a few reported issues with `CAttack` and subclasses, along with the new Developers and Contributors guide.
 
