@@ -86,7 +86,10 @@ class CConstraintL2(CConstraint):
             Projected x onto feasible domain if constraint is violated.
 
         """
-        sub = self._radius * (x - self.center)
+        # define tolerance and project onto radius-tol
+        # to ensure that numerical errors do not violate the projection
+        tol = 1e-6
+        sub = (self._radius-tol) * (x - self.center)
         sub_l2 = (x - self.center).norm(order=2)
         if sub_l2 != 0:  # Avoid division by 0
             sub /= sub_l2

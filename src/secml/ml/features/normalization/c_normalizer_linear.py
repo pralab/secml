@@ -35,11 +35,6 @@ class CNormalizerLinear(CNormalizer):
 
     """
 
-    @deprecated('0.11')
-    def is_linear(self):
-        """Returns True for linear normalizers."""
-        return True
-
     @property
     @abstractmethod
     def w(self):

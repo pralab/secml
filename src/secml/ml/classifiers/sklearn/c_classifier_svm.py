@@ -11,7 +11,7 @@ from sklearn.svm import SVC
 from secml.array import CArray
 from secml.ml.classifiers import CClassifierLinear
 from secml.ml.classifiers.clf_utils import convert_binary_labels
-from secml.ml.kernel import CKernel
+from secml.ml.kernels import CKernel
 from secml.ml.classifiers.gradients import CClassifierGradientSVMMixin
 from secml.ml.classifiers.loss import CLossHinge
 from secml.utils.mixed_utils import check_is_fitted
@@ -89,12 +89,6 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         # slot for the computed kernel function (to speed up multiclass)
         # DO NOT CLEAR
         self._k = None
-
-    def is_linear(self):
-        """Return True if the classifier is linear."""
-        if super(CClassifierSVM, self).is_linear() and self.is_kernel_linear():
-            return True
-        return False
 
     def is_kernel_linear(self):
         """Return True if the kernel is None or linear."""
@@ -445,8 +439,8 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
             m = int(self.grad_sampling * self.n_sv.sum())  # floor
             idx = CArray.randsample(self.alpha.size, m)  # adding randomness
 
-            gradient = self.kernel.gradient(
-                self.sv[idx, :], self._cached_x).atleast_2d()
+            self.kernel.rv = self.sv[idx, :]
+            gradient = self.kernel.gradient(self._cached_x).atleast_2d()
 
             # Few shape check to ensure broadcasting works correctly
             if gradient.shape != (idx.size, self.n_features):

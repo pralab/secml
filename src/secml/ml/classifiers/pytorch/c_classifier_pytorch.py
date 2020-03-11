@@ -9,7 +9,6 @@ from functools import reduce
 
 import torch
 from torch import nn
-import torchvision
 from torchvision.models.resnet import BasicBlock
 from torchvision.transforms import transforms
 
@@ -26,27 +25,13 @@ use_cuda = torch.cuda.is_available() and SECML_PYTORCH_USE_CUDA
 
 
 def get_layers(net):
-    # TODO remove when dropping support for python 2
-    layers = list()
     for name, layer in net._modules.items():
         # If it is a sequential, don't return its name
         # but recursively register all it's module children
         if isinstance(layer, nn.Sequential) or isinstance(layer, BasicBlock):
-            layers += [(":".join([name, l]), m) for (l, m) in
-                       get_layers(layer)]
+            yield from [(":".join([name, l]), m) for (l, m) in get_layers(layer)]
         else:
-            layers.append((name, layer))
-    else:
-        return layers
-
-    # TODO and uncomment this
-    # for name, layer in net._modules.items():
-    #     # If it is a sequential, don't return its name
-    #     # but recursively register all it's module children
-    #     if isinstance(layer, nn.Sequential) or isinstance(layer, BasicBlock):
-    #         yield from [(":".join([name, l]), m) for (l, m) in get_layers(layer)]
-    #     else:
-    #         yield (name, layer)
+            yield (name, layer)
 
 
 class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
@@ -79,7 +64,10 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     batch_size: int
         size of the batches to use for loading the data. Default value is 1.
     n_jobs: int
-        number of workers to use for data loading and processing. Default value is 1.
+        number of workers to use for data loading and processing.
+        This parameter follows the library expected behavior of having 1 worker
+        as the main process. The loader will spawn `n_jobs-1` workers.
+        Default value for n_jobs is 1 (zero additional workers spawned).
 
     Attributes
     ----------
@@ -88,7 +76,11 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     """
     __class_type = 'pytorch-clf'
 
-    def __init__(self, model, loss=None, optimizer=None,
+    def __init__(self, model, loss=None,
+                 optimizer=None,
+                 optimizer_scheduler=None,
+                 pretrained=False,
+                 pretrained_classes=None,
                  input_shape=None,
                  random_state=None, preprocess=None,
                  softmax_outputs=False,
@@ -96,11 +88,25 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
         self._device = self._set_device()
         self._random_state = random_state
-        super(CClassifierPyTorch, self).__init__(model=model,
-                                                 preprocess=preprocess,
-                                                 input_shape=input_shape,
-                                                 softmax_outputs=softmax_outputs)
+
+        super(CClassifierPyTorch, self).__init__(
+            model=model,
+            preprocess=preprocess,
+            pretrained=pretrained,
+            pretrained_classes=pretrained_classes,
+            input_shape=input_shape,
+            softmax_outputs=softmax_outputs)
+
         self._init_model()
+
+        self._n_jobs = n_jobs
+        self._batch_size = batch_size
+
+        if self._batch_size is None:
+            self.logger.info(
+                "No batch size passed. Value will be set to the default "
+                "value of 1.")
+            self._batch_size = 1
 
         if self._input_shape is None:
             # try to infer from first layer
@@ -112,42 +118,19 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                     "Input shape should be specified if the first "
                     "layer is not a `nn.Linear` module.")
 
-        # check softmax redundancy
-        if isinstance(loss, nn.CrossEntropyLoss) and self.check_softmax():
-            raise ValueError("Please remove softmax redundancy. Either "
-                             "use `torch.nn.NLLLoss` or remove softmax "
-                             "layer from the network.")
-
         self._loss = loss
         self._optimizer = optimizer
-
-        if self._optimizer is not None:
-            # check softmax redundancy
-            if self.check_softmax() and softmax_outputs:
-                self.logger.warning(
-                    "Softmax layer has been defined in the network. Disabling "
-                    "parameter softmax_outputs.")
-                self._softmax_outputs = False
-            else:
-                self._softmax_outputs = softmax_outputs
-        else:
-            self._softmax_outputs = False
+        self._optimizer_scheduler = optimizer_scheduler
 
         self._epochs = epochs
-        self._batch_size = batch_size
 
-        if self._batch_size is None:
-            self.logger.info(
-                "No batch size passed. Value will be set to the default "
-                "value of 1.")
-            self._batch_size = 1
-
-        self._n_jobs = n_jobs
-
-        if self._model.__class__.__name__ in dir(torchvision.models):
+        if self._pretrained is True:
             self._trained = True
-            self._classes = CArray.arange(
-                list(self._model.modules())[-1].out_features)
+            if self._pretrained_classes is not None:
+                self._classes = self._pretrained_classes
+            else:
+                self._classes = CArray.arange(
+                    list(self._model.modules())[-1].out_features)
             self._n_features = reduce(lambda a, b: a * b, self._input_shape)
 
         # hooks for getting intermediate outputs
@@ -162,6 +145,11 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         """Returns the loss function used by classifier."""
         return self._loss
 
+    @loss.setter
+    def loss(self, loss):
+        """Sets the loss function to use for training."""
+        self._loss = loss
+
     @property
     def model(self):
         """Returns the model used by classifier."""
@@ -172,23 +160,48 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         """Returns the optimizer used by classifier."""
         return self._optimizer
 
+    @optimizer.setter
+    def optimizer(self, optimizer):
+        """Sets the optimizer for the DNN."""
+        self._optimizer = optimizer
+
+    @property
+    def optimizer_scheduler(self):
+        """Returns the optimizer used by classifier."""
+        return self._optimizer_scheduler
+
+    @optimizer_scheduler.setter
+    def optimizer_scheduler(self, optimizer_scheduler):
+        """Sets the scheduler for training the DNN"""
+        self._optimizer_scheduler = optimizer_scheduler
+
     @property
     def epochs(self):
         """Returns the number of epochs for which the model
         will be trained."""
         return self._epochs
 
+    @epochs.setter
+    def epochs(self, epochs):
+        """Sets the number of epochs for training."""
+        self._epochs = epochs
+
     @property
     def batch_size(self):
         """Returns the batch size used for the dataset loader."""
         return self._batch_size
+
+    @batch_size.setter
+    def batch_size(self, batch_size):
+        """Sets the batch size for loading the batches."""
+        self._batch_size = batch_size
 
     @property
     def layers(self):
         """Returns the layers of the model, if possible. """
         if self._model_layers is None:
             if isinstance(self._model, nn.Module):
-                self._model_layers = get_layers(self._model)
+                self._model_layers = list(get_layers(self._model))
             else:
                 raise TypeError(
                     "The input model must be an instance of `nn.Module`.")
@@ -266,69 +279,104 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         """Returns the dictionary of class parameters."""
         loss_params = {'loss': self._loss}
         optim_params = {
-            'optimizer': self._optimizer.state_dict()['param_groups'][0]
-            if self._optimizer is not None else None
+            'optimizer':
+                self._optimizer.state_dict()['param_groups'][0]
+                if self._optimizer is not None else None,
+            'optimizer_scheduler':
+                self._optimizer_scheduler.state_dict()
+                if self._optimizer_scheduler is not None else None
         }
         return SubLevelsDict(
             merge_dicts(super(CClassifierPyTorch, self).get_params(),
                         loss_params, optim_params))
 
-    def get_state(self):
-        """Returns the object state dictionary."""
+    def get_state(self, return_optimizer=True):
+        """Returns the object state dictionary.
+
+        Parameters
+        ----------
+        return_optimizer : bool, optional
+            If True (default), state of `optimizer` and `optimizer_scheduler`,
+            if defined, will be included in the state dictionary.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the state of the object.
+
+        """
         from copy import deepcopy
 
         # State of the wrapping classifier
         state = super(CClassifierPyTorch, self).get_state()
 
-        # Map model and optimizer to CPU before saving
+        # Map model to CPU before saving
         self._model.to(torch.device('cpu'))
-
-        # Unfortunately optimizer does not have a 'to(device)' method
-        for opt_state in self._optimizer.state.values():
-            for k, v in opt_state.items():
-                if isinstance(v, torch.Tensor):
-                    opt_state[k] = v.to('cpu')
 
         # Use deepcopy as restoring device later will change them
         state['model'] = deepcopy(self._model.state_dict())
-        state['optimizer'] = deepcopy(self._optimizer.state_dict())
 
-        # Restore device and optimizer
+        # Restore device for model
         self._model.to(self._device)
 
-        # Unfortunately optimizer does not have a 'to(device)' method
-        for opt_state in self._optimizer.state.values():
-            for k, v in opt_state.items():
-                if isinstance(v, torch.Tensor):
-                    opt_state[k] = v.to(self._device)
+        # When `return_optimizer` is False we do not include `optimizer` and
+        # `optimizer_scheduler` in state dict. However, if `return_optimizer`
+        # is True, `optimizer` and `optimizer_scheduler` should be included,
+        # even if they are None
+        if return_optimizer is False:
+            state.pop('optimizer')
+            state.pop('optimizer_scheduler')
+        else:
+            # Unfortunately optimizer does not have a 'to(device)' method
+            if self._optimizer is not None:
+                for opt_state in self._optimizer.state.values():
+                    for k, v in opt_state.items():
+                        if isinstance(v, torch.Tensor):
+                            opt_state[k] = v.to('cpu')
+
+                # Use deepcopy as restoring device later will change them
+                state['optimizer'] = deepcopy(self._optimizer.state_dict())
+
+                # Restore optimizer state to proper device
+                for opt_state in self._optimizer.state.values():
+                    for k, v in opt_state.items():
+                        if isinstance(v, torch.Tensor):
+                            opt_state[k] = v.to(self._device)
+
+                if self._optimizer_scheduler is not None:
+                    # Scheduler will be saved only if also optimizer is defined
+                    # No need to map to `cpu`, tensors in state
+                    state['optimizer_scheduler'] = deepcopy(
+                        self._optimizer_scheduler.state_dict())
 
         return state
 
     def set_state(self, state_dict, copy=False):
         """Sets the object state using input dictionary."""
         # TODO: DEEPCOPY FOR torch.load_state_dict?
+
         self._model.load_state_dict(state_dict.pop('model'))
-        self._optimizer.load_state_dict(state_dict.pop('optimizer'))
+
+        if 'optimizer' in state_dict:
+            if self._optimizer is None:
+                raise ValueError(
+                    "optimizer not found in current object but required for "
+                    "restoring state."
+                    "Save the state using `return_optimizer=False` or "
+                    "add an optimizer to the model first.")
+            self._optimizer.load_state_dict(state_dict.pop('optimizer'))
+
+        if 'optimizer_scheduler' in state_dict:
+            if self._optimizer_scheduler is None:
+                raise ValueError(
+                    "`optimizer_scheduler` not found in current object "
+                    "but required for restoring state."
+                    "Save the state using `return_optimizer=False` or "
+                    "add an optimizer scheduler to the model first.")
+            self._optimizer_scheduler.load_state_dict(
+                state_dict.pop('optimizer_scheduler'))
+
         super(CClassifierPyTorch, self).set_state(state_dict, copy=copy)
-
-    def check_softmax(self):
-        """
-        Checks if a softmax layer has been defined in the
-        network.
-
-        Returns
-        -------
-        Boolean value stating if a softmax layer has been
-        defined.
-        """
-        x = torch.ones(tuple([1] + list(self.input_shape)))
-        x = x.to(self._device)
-
-        outputs = self._model(x)
-
-        if outputs.sum() == 1:
-            return True
-        return False
 
     def __getattribute__(self, key):
         """Get an attribute.
@@ -337,7 +385,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         loss and optimizer."""
         try:
             # If we are not getting the model itself
-            if key not in ['_model', '_optimizer']:
+            if key not in ['_model', '_optimizer', '_optimizer_scheduler']:
                 if hasattr(self, '_model') and key in self._model._modules:
                     return self._model[key]
                 elif hasattr(self, '_optimizer') and \
@@ -347,11 +395,15 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                         return self._optimizer.param_groups[0][key]
                     else:
                         raise NotImplementedError(
-                            "__getattribute__ is not yet "
-                            "supported for optimizers with "
-                            "more than one element in "
+                            "__getattribute__ is not yet supported for "
+                            "optimizers with more than one element in "
                             "param_groups.")
-        except KeyError:
+                elif hasattr(self, '_optimizer_scheduler') and \
+                        self._optimizer_scheduler is not None and \
+                        key in self._optimizer_scheduler.state_dict():
+                    return self._optimizer_scheduler[key]
+
+        except (KeyError, AttributeError):
             pass  # Parameter not found in PyTorch model
             # Try to get the parameter from self
         return super(CClassifierPyTorch, self).__getattribute__(key)
@@ -370,6 +422,10 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 self._optimizer is not None and \
                 key in self._optimizer.state_dict()['param_groups'][0]:
             self._optimizer.param_groups[0][key] = value
+        elif hasattr(self, '_optimizer_scheduler') and \
+                self._optimizer_scheduler is not None and \
+                key in self._optimizer_scheduler.state_dict():
+            self._optimizer_scheduler.state_dict[key] = value
         else:  # Otherwise, normal python set behavior
             super(CClassifierPyTorch, self).__setattr__(key, value)
 
@@ -378,6 +434,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         # Setting random seed
         if self._random_state is not None:
             torch.manual_seed(self._random_state)
+            torch.backends.cudnn.deterministic = True
 
         # Make sure that model is a proper PyTorch module
         if not isinstance(self._model, nn.Module):
@@ -406,11 +463,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                              "input to the `_from_tensor` method.")
         return CArray(x.cpu().numpy()).astype(float)
 
-    def _data_loader(self, data, labels=None, batch_size=10, shuffle=False,
-                     num_workers=1):
-        """
-        Returns `torch.DataLoader` generated from
-        the input CDataset.
+    def _data_loader(self, data, labels=None, batch_size=10,
+                     shuffle=False, num_workers=0):
+        """Returns `torch.DataLoader` generated from the input CDataset.
 
         Parameters
         ----------
@@ -426,8 +481,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             Whether to shuffle the data before dividing in batches.
             Default value is False.
         num_workers : int, optional
-            Number of processes to use for loading the data.
-            Default value is 1.
+            Number of additional processes to use for loading the data.
+            Default value is 0.
 
         Returns
         -------
@@ -450,7 +505,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                              "in order to fit the model.")
 
         train_loader = self._data_loader(dataset.X, dataset.Y,
-                                         batch_size=self._batch_size)
+                                         batch_size=self._batch_size,
+                                         num_workers=self._n_jobs - 1)
 
         for epoch in range(self._epochs):
             running_loss = 0.0
@@ -470,6 +526,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                     self.logger.info('[%d, %5d] loss: %.3f' %
                                      (epoch + 1, i + 1, running_loss / 2000))
                     running_loss = 0.0
+
+            if self._optimizer_scheduler is not None:
+                self._optimizer_scheduler.step()
 
         self._trained = True
         return self._model
@@ -491,14 +550,14 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             Transformed input data.
 
         """
-        data_loader = self._data_loader(x, num_workers=self._n_jobs,
+        data_loader = self._data_loader(x, num_workers=self._n_jobs - 1,
                                         batch_size=self._batch_size)
 
         # Switch to evaluation mode
         self._model.eval()
 
         out_shape = self.n_classes if self._out_layer is None else \
-            reduce((lambda x, y: x * y), self.layer_shapes[self._out_layer])
+            reduce((lambda z, v: z * v), self.layer_shapes[self._out_layer])
         output = torch.empty((len(data_loader.dataset), out_shape))
 
         for batch_idx, (s, _) in enumerate(data_loader):
@@ -510,6 +569,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             s = s.to(self._device)
 
             if self._cached_x is None:
+                self._cached_s = None
+                self._cached_layer_output = None
                 with torch.no_grad():
                     ps = self._get_layer_output(s, self._out_layer)
 
@@ -581,21 +642,22 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         gradient : CArray
             Accumulated gradient of the module wrt input data.
         """
-        if w is not None:
-            w = self._to_tensor(w.atleast_2d()).reshape(
-                self._cached_layer_output.shape)
-        else:
-            raise ValueError(
-                "Function `_backward` needs the `w` array to run backward with.")
+        if w is None:
+            raise ValueError("Function `_backward` needs the `w` array "
+                             "to run backward with.")
 
         # Apply softmax-scaling if needed (only if last layer is required)
         if self.softmax_outputs is True and self._out_layer is None:
             out_carray = self._from_tensor(
                 self._cached_layer_output.squeeze(0).data)
-            softmax_grad = CSoftmax().gradient(
-                out_carray, y=self._cached_layer_output)
-            self._cached_layer_output *= self._to_tensor(
-                softmax_grad.atleast_2d()).unsqueeze(0)
+            softmax_grad = CArray.zeros(shape=out_carray.shape[0])
+            for y in w.nnz_indices[1]:
+                softmax_grad += w[y] * CSoftmax().gradient(
+                    out_carray, y=y)
+            w = softmax_grad
+
+        w = self._to_tensor(w.atleast_2d()).reshape(
+            self._cached_layer_output.shape)
         w = w.to(self._device)
 
         if self._cached_s.grad is not None:
@@ -618,10 +680,16 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         """
         state = {
             'model_state': self._model.state_dict(),
-            'optimizer_state': self._optimizer.state_dict(),
             'n_features': self.n_features,
             'classes': self.classes,
         }
+
+        if self.optimizer is not None:
+            state['optimizer_state'] = self._optimizer.state_dict()
+
+        if self._optimizer_scheduler is not None:
+            state['optimizer_scheduler_state'] = \
+                self._optimizer_scheduler.state_dict()
 
         torch.save(state, filename)
 
@@ -644,7 +712,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
         """
         state = torch.load(filename, map_location=self._device)
-        keys = ['model_state', 'optimizer_state', 'n_features', 'classes']
+        keys = ['model_state', 'n_features', 'classes']
         if all(key in state for key in keys):
             if classes is not None:
                 self.logger.warning(
@@ -652,7 +720,20 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                     "The parameter `classes` will be ignored.")
             # model was stored with save_model method
             self._model.load_state_dict(state['model_state'])
-            self._optimizer.load_state_dict(state['optimizer_state'])
+
+            if 'optimizer_state' in state \
+                    and self._optimizer is not None:
+                self._optimizer.load_state_dict(state['optimizer_state'])
+            else:
+                self._optimizer = None
+
+            if 'optimizer_scheduler_state' in state \
+                    and self._optimizer_scheduler is not None:
+                self._optimizer_scheduler.load_state_dict(
+                    state['optimizer_scheduler_state'])
+            else:
+                self._optimizer_scheduler = None
+
             self._n_features = state['n_features']
             self._classes = state['classes']
         else:  # model was stored outside secml framework
