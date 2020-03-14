@@ -17,6 +17,33 @@ class CClassifierKNN(CClassifierSkLearn):
 
     Parameters
     ----------
+    n_neighbors : int, optional
+        Number of neighbors to use by default for :meth:`kneighbors` queries.
+        Default 5.
+    weights : str or callable, optional
+        Weight function used in prediction. If 'uniform' (default), all points
+        in each neighborhood are weighted equally; if 'distance' points are
+        weighted by the inverse of their distance. Can also be an user-defined
+        function which accepts an array of distances, and returns an array of
+        the same shape containing the weights.
+    algorithm : {'auto', 'ball_tree', 'kd_tree', 'brute'}, optional
+        Algorithm used to compute the nearest neighbors. If 'auto' (default),
+        the most appropriate algorithm is decided based on the values passed
+        to :meth:`fit` method.
+    leaf_size : int, optional
+        Leaf size passed to BallTree or KDTree. Default 30.
+    p : int, optional
+        Power parameter for the Minkowski metric. When p = 1, this is
+        equivalent to using manhattan_distance (l1), and euclidean_distance
+        (l2) for p = 2 (default). For arbitrary p, minkowski_distance (l_p)
+        is used.
+    metric : str or callable, optional
+        The distance metric to use for the tree. If 'minkowski' (default) and
+        p = 2, it is equivalent to the standard Euclidean metric.
+        If metric is 'precomputed', X is assumed to be a distance matrix and
+        must be square during fit.
+    metric_params : dict, optional
+        Additional keyword arguments for the metric function.
     preprocess : CPreProcess or str or None, optional
         Features preprocess to be applied to input data.
         Can be a CPreProcess subclass or a string with the type of the

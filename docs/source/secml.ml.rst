@@ -11,7 +11,6 @@ secml.ml
 
    secml.ml.classifiers
    secml.ml.features
-   secml.ml.kernel
+   secml.ml.kernels
    secml.ml.peval
    secml.ml.stats
-   secml.ml.model_zoo

@@ -1,10 +1,19 @@
+"""
+.. module:: CModule
+   :synopsis: Common interface for implementing pre-processing chains and
+    automatic differentiation with forward/backward passes.
+
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Angelo Sotgiu <angelo.sotgiu@unica.it>
+
+"""
 from abc import ABCMeta, abstractmethod
 from secml.core import CCreator
 
 
 class CModule(CCreator, metaclass=ABCMeta):
-    """Common interface for handling preprocessing chains and implementing
-    autodiff with forward/backward passes.
+    """Common interface for handling pre-processing chains and implementing
+     automatic differentiation with forward/backward passes.
 
     Parameters
     ----------
@@ -55,23 +64,33 @@ class CModule(CCreator, metaclass=ABCMeta):
         self._preprocess = preprocess
 
     def _preprocess_data(self, x, caching=True):
-        """Apply the inner preprocess (if any) to the input data x.
+        """This function prepares the input for `_forward` and `_backward`.
+
+        It checks if x has the proper format and the current module is fitted.
+        Then, it applies inner pre-processing (if defined), and caches
+        the input data for backward pass (when required).
 
         Parameters
         ----------
         x : CArray
-            Data to be transformed using inner preprocess, if defined.
+            Input data to be transformed via pre-processing, if set.
 
         caching: bool
-                 True if preprocessed input should be cached for backward pass.
+            True if preprocessed input should be cached for backward pass.
 
         Returns
         -------
         CArray
-            If an inner preprocess is defined, will be the transformed data.
-            Otherwise input data is returned as is.
+            Either the input data x (if pre-processing is not set), or its
+            transformed version after pre-processing.
 
         """
+        self._cached_x = None  # reset cached values (if any)
+
+        x = x.atleast_2d()  # Ensuring input is 2-D
+        self._check_input(x)
+        self._check_is_fitted()
+
         if self.preprocess is not None:
             # apply preprocessing to x
             x_prc = self.preprocess.forward(x)
@@ -80,10 +99,9 @@ class CModule(CCreator, metaclass=ABCMeta):
             x_prc = x
 
         if caching is True:
-            # cache intermediate representation of x if required
+            # cache intermediate representation of x if required,
+            # e.g., if backward has to be called after forward.
             self._cached_x = x_prc
-        else:
-            self._cached_x = None
 
         return x_prc
 
@@ -107,14 +125,8 @@ class CModule(CCreator, metaclass=ABCMeta):
             Transformed input data.
 
         """
-        self._cached_x = None  # reset cached values (if any)
-        x = x.atleast_2d()  # Ensuring input is 2-D
-        self._check_input(x)
-        self._check_is_fitted()
-
         # Transform data using inner preprocess, if defined
         x = self._preprocess_data(x, caching=caching)
-
         return self._forward(x)
 
     @abstractmethod
@@ -147,6 +159,7 @@ class CModule(CCreator, metaclass=ABCMeta):
         -------
         gradient : CArray
             Accumulated gradient of the module wrt input data.
+
         """
 
         if self._cached_x is None:
@@ -167,8 +180,11 @@ class CModule(CCreator, metaclass=ABCMeta):
     _backward.__doc__ = backward.__doc__  # Same doc for the protected method
 
     def gradient(self, x, w=None):
-        """Compute gradient at x by doing a forward and a backward pass.
-        The gradient is pre-multiplied by w.
+        """Compute gradient at x by doing a backward pass.
+
+        Input will be preprocessed first and pre-multiplied by w if provided.
+
         """
-        self.forward(x, caching=True)
+        # Transform data using inner preprocess, if defined
+        self._preprocess_data(x, caching=True)
         return self.backward(w)

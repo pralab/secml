@@ -342,11 +342,12 @@ release:gitlab-repo:
   before_script: *release-ssh
   variables:
     CI_REPO: secml/secml.git
-    CI_REPO_BRANCH: release-$CI_COMMIT_TAG
   dependencies: []  # We do not need artifacts in this job
   script:
     # Validate access to ssh
     - ssh -T git@gitlab.com
+    # Use main TAG version (excluding e.g. "-rc1" suffix)
+    - CI_REPO_BRANCH=release-$(echo $CI_COMMIT_TAG | ( IFS="-$IFS" ; read a b && echo $a ))
     # Clone gitlab.com repository
     - git clone -b $CI_REPO_BRANCH git@gitlab.com:$CI_REPO gitlab-secml
     # Remove all files in target repository (excluding .git folder)

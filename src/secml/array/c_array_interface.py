@@ -440,7 +440,7 @@ class _CArrayInterface(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def bincount(self):
+    def bincount(self, bincount=0):
         """Count the occurrences of each value of non-negative ints."""
         raise NotImplementedError
 

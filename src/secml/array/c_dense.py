@@ -1318,9 +1318,10 @@ class CDense(_CArrayInterface):
                 out_list.append(elem)
             return tuple(out_list)
 
-    def bincount(self):
+    def bincount(self, minlength=0):
         """Count the number of occurrences of each non-negative int."""
-        return self.__class__(np.bincount(self.tondarray()))
+        return self.__class__(
+            np.bincount(self.tondarray(), minlength=minlength))
 
     def norm(self, order=None, axis=None, keepdims=False):
         """Wrapper for numpy norm."""
