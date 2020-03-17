@@ -10,18 +10,18 @@ class TestCNormalizerLinear(CNormalizerTestCases):
 
     def test_norm_minmax(self):
         """Test for CNormalizerMinMax."""
-        self.sklearn_comp(self.array_dense, MinMaxScaler(), CNormalizerMinMax())
-        self.sklearn_comp(self.array_sparse, MinMaxScaler(), CNormalizerMinMax())
-        self.sklearn_comp(self.row_dense.atleast_2d(), MinMaxScaler(), CNormalizerMinMax())
-        self.sklearn_comp(self.row_sparse, MinMaxScaler(), CNormalizerMinMax())
-        self.sklearn_comp(self.column_dense, MinMaxScaler(), CNormalizerMinMax())
-        self.sklearn_comp(self.column_sparse, MinMaxScaler(), CNormalizerMinMax())
-        self.sklearn_comp(self.array_dense*2, MinMaxScaler(), CNormalizerMinMax())
-        self.sklearn_comp(self.array_sparse*2, MinMaxScaler(), CNormalizerMinMax())
-        self.sklearn_comp(self.row_dense.atleast_2d()*2, MinMaxScaler(), CNormalizerMinMax())
-        self.sklearn_comp(self.row_sparse*2, MinMaxScaler(), CNormalizerMinMax())
-        self.sklearn_comp(self.column_dense*2, MinMaxScaler(), CNormalizerMinMax())
-        self.sklearn_comp(self.column_sparse*2, MinMaxScaler(), CNormalizerMinMax())
+        self._sklearn_comp(self.array_dense, MinMaxScaler(), CNormalizerMinMax())
+        self._sklearn_comp(self.array_sparse, MinMaxScaler(), CNormalizerMinMax())
+        self._sklearn_comp(self.row_dense.atleast_2d(), MinMaxScaler(), CNormalizerMinMax())
+        self._sklearn_comp(self.row_sparse, MinMaxScaler(), CNormalizerMinMax())
+        self._sklearn_comp(self.column_dense, MinMaxScaler(), CNormalizerMinMax())
+        self._sklearn_comp(self.column_sparse, MinMaxScaler(), CNormalizerMinMax())
+        self._sklearn_comp(self.array_dense*2, MinMaxScaler(), CNormalizerMinMax())
+        self._sklearn_comp(self.array_sparse*2, MinMaxScaler(), CNormalizerMinMax())
+        self._sklearn_comp(self.row_dense.atleast_2d()*2, MinMaxScaler(), CNormalizerMinMax())
+        self._sklearn_comp(self.row_sparse*2, MinMaxScaler(), CNormalizerMinMax())
+        self._sklearn_comp(self.column_dense*2, MinMaxScaler(), CNormalizerMinMax())
+        self._sklearn_comp(self.column_sparse*2, MinMaxScaler(), CNormalizerMinMax())
 
     def test_chain(self):
         """Test a chain of preprocessors."""

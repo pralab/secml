@@ -5,10 +5,9 @@ from secml.ml.features import CPreProcess
 
 
 class CNormalizerTestCases(CUnitTest):
-
     """Unittests interface for CPreProcess."""
 
-    def sklearn_comp(self, array, norm_sklearn, norm):
+    def _sklearn_comp(self, array, norm_sklearn, norm):
         """Check if the result given by the sklearn normalizer is almost equal to the one given by our normalizer"""
 
         self.logger.info("Original array is:\n{:}".format(array))
