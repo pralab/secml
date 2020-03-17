@@ -1,0 +1,87 @@
+host_url: https://pragit.diee.unica.it
+resource_rules:
+  issues:
+    rules:
+      - name: UnlabelledIssues
+        conditions:
+          date:
+            attribute: updated_at
+            condition: older_than
+            interval_type: days
+            interval: 5
+          state: opened
+          labels:
+            - No Label
+        limits:
+          most_recent: 50
+        actions:
+          mention:
+            - m.melis
+          comment: |
+            {{author}} This issue is unlabelled after 5 days. It needs attention. Please take care of this before the end of #{2.days.from_now.strftime('%Y-%m-%d')}
+      - name: RemovePriorityAfterClosing
+        conditions:
+          date:
+            attribute: updated_at
+            condition: older_than
+            interval_type: days
+            interval: 1
+          state: closed
+          labels:
+            - priority-{medium, high}
+        limits:
+          oldest: 50
+        actions:
+          remove_labels:
+            - priority-medium
+            - priority-high
+
+  merge_requests:
+    rules:
+      - name: RemoveNeedReviewAfterClosingMerging
+        conditions:
+          date:
+            attribute: updated_at
+            condition: older_than
+            interval_type: days
+            interval: 1
+          ruby: milestone.state == "closed" || milestone.state == "merged"
+          labels:
+            - needs review
+        limits:
+          oldest: 50
+        actions:
+          remove_labels:
+            - needs review
+      - name: RemovePriorityAfterClosing
+        conditions:
+          date:
+            attribute: updated_at
+            condition: older_than
+            interval_type: days
+            interval: 1
+          state: closed
+          labels:
+            - priority-{medium, high}
+        limits:
+          oldest: 50
+        actions:
+          remove_labels:
+            - priority-medium
+            - priority-high
+      - name: RemovePriorityAfterMerging
+        conditions:
+          date:
+            attribute: updated_at
+            condition: older_than
+            interval_type: days
+            interval: 1
+          state: merged
+          labels:
+            - priority-{medium, high}
+        limits:
+          oldest: 50
+        actions:
+          remove_labels:
+            - priority-medium
+            - priority-high
