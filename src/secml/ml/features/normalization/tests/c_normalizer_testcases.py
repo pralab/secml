@@ -1,5 +1,4 @@
 from secml.testing import CUnitTest
-
 from secml.array import CArray
 from secml.ml.features import CPreProcess
 
@@ -9,34 +8,14 @@ class CNormalizerTestCases(CUnitTest):
 
     def _sklearn_comp(self, array, norm_sklearn, norm):
         """Check if the result given by the sklearn normalizer is almost equal to the one given by our normalizer"""
-
         self.logger.info("Original array is:\n{:}".format(array))
         target = CArray(norm_sklearn.fit_transform(array.astype(float).tondarray()))
         # Our normalizer
         n = norm.fit(array)
         result = n.transform(array)
-
         self.logger.info("Correct result is:\n{:}".format(target))
         self.logger.info("Our result is:\n{:}".format(result))
-
         self.assert_array_almost_equal(target, result)
-
-    def setup_x_chain(self, name, feature_range=None):
-        """Arranges a setup for x_chain depending on the normalizer and tests a chain of preprocessors"""
-        if feature_range is None:
-            feature_range = {}
-        x_chain = self._test_chain(
-            self.array_dense,
-            ['min-max', 'pca', name],
-            [{'feature_range': (-5, 5)}, {}, feature_range]
-        )
-        self.assertEqual((self.array_dense.shape[0],
-                          self.array_dense.shape[1] - 1), x_chain.shape)
-
-    def setup_grad(self, names, feature_ranges):
-        """Arranges a setup for the gradient of a chain of preprocessors and tests it"""
-        grad = self._test_chain_gradient(self.array_dense, names, feature_ranges)
-        self.assertEqual((self.array_dense.shape[1],), grad.shape)
 
     def setUp(self):
 
@@ -91,6 +70,9 @@ class CNormalizerTestCases(CUnitTest):
         except NotImplementedError:
             self.logger.info("inverse_transform not available")
 
+        self.assertEqual((self.array_dense.shape[0],
+                          self.array_dense.shape[1] - 1), x_chain.shape)
+
         return x_chain
 
     def _test_chain_gradient(self, x, pre_id_list, kwargs_list, y=None):
@@ -121,10 +103,10 @@ class CNormalizerTestCases(CUnitTest):
         grad = None
         for i, v in enumerate(v_list):
             grad = pre_list[i].gradient(v, w=grad)
-
         self.logger.info(
             "gradient({:}) (manual):\n{:}".format(v, grad))
         self.assert_allclose(grad_chain, grad)
+        self.assertEqual((self.array_dense.shape[1],), grad_chain.shape)
 
         return grad_chain
 

@@ -1,7 +1,5 @@
 from secml.ml.features.normalization.tests import CNormalizerTestCases
-
 from sklearn.preprocessing import Normalizer
-
 from secml.array import CArray
 from secml.ml.features.normalization import CNormalizerUnitNorm
 from secml.optim.function import CFunction
@@ -21,7 +19,7 @@ class TestCNormalizerUnitNorm(CNormalizerTestCases):
 
             # Sklearn normalizer (requires float dtype input)
             target = CArray(Normalizer(norm=norm_type).fit_transform(
-                            array.astype(float).get_data()))
+                array.astype(float).get_data()))
 
             # Create our normalizer
             result = CNormalizerUnitNorm(norm=norm_type).fit_transform(array)
@@ -41,7 +39,9 @@ class TestCNormalizerUnitNorm(CNormalizerTestCases):
 
     def test_chain(self):
         """Test a chain of preprocessors."""
-        self.setup_x_chain('unit-norm')
+        self._test_chain(self.array_dense,
+                         ['min-max', 'pca', 'unit-norm'],
+                         [{'feature_range': (-5, 5)}, {}, {}])
         # Expected shape is (3, 3), as pca max n_components is 4-1
 
     def _test_gradient(self):

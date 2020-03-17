@@ -1,7 +1,5 @@
 from secml.ml.features.normalization.tests import CNormalizerTestCases
-
 from sklearn.preprocessing import StandardScaler
-
 from secml.ml.features.normalization import CNormalizerMeanStd
 
 
@@ -53,15 +51,15 @@ class TestCNormalizerMeanStd(CNormalizerTestCases):
 
     def test_chain(self):
         """Test a chain of preprocessors."""
-        self.setup_x_chain('mean-std')
+        self._test_chain(self.array_dense,
+                         ['min-max', 'pca', 'mean-std'],
+                         [{'feature_range': (-5, 5)}, {}, {}])
         # Expected shape is (3, 3), as pca max n_components is 4-1
 
     def test_chain_gradient(self):
         """Check gradient of a chain of preprocessors."""
-        names = ['min-max', 'mean-std']
-        feature_ranges = [{'feature_range': (-5, 5)}, {}]
         # Expected shape is (n_feats, ), so (4, )
-        self.setup_grad(names, feature_ranges)
+        self._test_chain_gradient(self.array_dense, ['min-max', 'mean-std'], [{'feature_range': (-5, 5)}, {}])
 
 
 if __name__ == '__main__':
