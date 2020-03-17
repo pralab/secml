@@ -1,0 +1,134 @@
+from secml.testing import CUnitTest
+
+from secml.array import CArray
+from secml.ml.features import CPreProcess
+
+
+class CNormalizerTestCases(CUnitTest):
+
+    """Unittests interface for CPreProcess."""
+
+    def sklearn_comp(self, array, norm_sklearn, norm):
+        """Check if the result given by the sklearn normalizer is almost equal to the one given by our normalizer"""
+
+        self.logger.info("Original array is:\n{:}".format(array))
+        target = CArray(norm_sklearn.fit_transform(array.astype(float).tondarray()))
+        # Our normalizer
+        n = norm.fit(array)
+        result = n.transform(array)
+
+        self.logger.info("Correct result is:\n{:}".format(target))
+        self.logger.info("Our result is:\n{:}".format(result))
+
+        self.assert_array_almost_equal(target, result)
+
+    def setup_x_chain(self, name, feature_range=None):
+        """Arranges a setup for x_chain depending on the normalizer and tests a chain of preprocessors"""
+        if feature_range is None:
+            feature_range = {}
+        x_chain = self._test_chain(
+            self.array_dense,
+            ['min-max', 'pca', name],
+            [{'feature_range': (-5, 5)}, {}, feature_range]
+        )
+        self.assertEqual((self.array_dense.shape[0],
+                          self.array_dense.shape[1] - 1), x_chain.shape)
+
+    def setup_grad(self, names, feature_ranges):
+        """Arranges a setup for the gradient of a chain of preprocessors and tests it"""
+        grad = self._test_chain_gradient(self.array_dense, names, feature_ranges)
+        self.assertEqual((self.array_dense.shape[1],), grad.shape)
+
+    def setUp(self):
+
+        self.array_dense = CArray([[1, 0, 0, 5],
+                                   [2, 4, 0, 0],
+                                   [3, 6, 0, 0]])
+        self.array_sparse = CArray(self.array_dense.deepcopy(), tosparse=True)
+
+        self.row_dense = CArray([4, 0, 6])
+        self.column_dense = self.row_dense.deepcopy().T
+
+        self.row_sparse = CArray(self.row_dense.deepcopy(), tosparse=True)
+        self.column_sparse = self.row_sparse.deepcopy().T
+
+    @staticmethod
+    def _create_chain(pre_id_list, kwargs_list):
+        """Creates a preprocessor with other preprocessors chained
+        and a list of the same preprocessors (not chained)"""
+        chain = None
+        pre_list = []
+        for i, pre_id in enumerate(pre_id_list):
+            chain = CPreProcess.create(
+                pre_id, preprocess=chain, **kwargs_list[i])
+            pre_list.append(CPreProcess.create(pre_id, **kwargs_list[i]))
+
+        return chain, pre_list
+
+    def _test_chain(self, x, pre_id_list, kwargs_list, y=None):
+        """Tests if preprocess chain and manual chaining yield same result."""
+        chain, pre_list = self._create_chain(pre_id_list, kwargs_list)
+
+        chain = chain.fit(x, y=y)
+        self.logger.info("Preprocessors chain:\n{:}".format(chain))
+
+        x_chain = chain.transform(x)
+        self.logger.info("Trasformed X (chain):\n{:}".format(x_chain))
+
+        # Train the manual chain and transform
+        x_manual = x
+        for pre in pre_list:
+            x_manual = pre.fit_transform(x_manual, y=y)
+
+        self.logger.info("Trasformed X (manual):\n{:}".format(x_manual))
+        self.assert_allclose(x_chain, x_manual)
+
+        # Reverting array (if available)
+        try:
+            x_chain_revert = chain.inverse_transform(x_chain)
+            self.logger.info("Reverted X (chain):\n{:}".format(x_chain_revert))
+            self.logger.info("Original X:\n{:}".format(x))
+            self.assert_array_almost_equal(x_chain_revert, x)
+        except NotImplementedError:
+            self.logger.info("inverse_transform not available")
+
+        return x_chain
+
+    def _test_chain_gradient(self, x, pre_id_list, kwargs_list, y=None):
+        """Tests if gradient preprocess chain and
+        gradient of manual chaining yield same result."""
+        chain, pre_list = self._create_chain(pre_id_list, kwargs_list)
+
+        chain = chain.fit(x, y=y)
+        self.logger.info("Preprocessors chain:\n{:}".format(chain))
+
+        v = x[1, :]
+        grad_chain = chain.gradient(v)
+        self.logger.info(
+            "gradient({:}) (chain):\n{:}".format(v, grad_chain))
+
+        # Manually compose the chain and transform
+        for pre in pre_list:
+            x = pre.fit_transform(x, y=y)
+
+        v_list = [v]
+        for pre in pre_list[:-1]:
+            v = pre.transform(v)
+            v_list.append(v)
+
+        v_list = list(reversed(v_list))
+        pre_list = list(reversed(pre_list))
+
+        grad = None
+        for i, v in enumerate(v_list):
+            grad = pre_list[i].gradient(v, w=grad)
+
+        self.logger.info(
+            "gradient({:}) (manual):\n{:}".format(v, grad))
+        self.assert_allclose(grad_chain, grad)
+
+        return grad_chain
+
+
+if __name__ == '__main__':
+    CUnitTest.main()

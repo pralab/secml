@@ -1,4 +1,4 @@
-from secml.ml.features.tests import CPreProcessTestCases
+from secml.ml.features.normalization.tests import CNormalizerTestCases
 
 from sklearn.preprocessing import Normalizer
 
@@ -7,7 +7,7 @@ from secml.ml.features.normalization import CNormalizerUnitNorm
 from secml.optim.function import CFunction
 
 
-class TestCNormalizerUnitNorm(CPreProcessTestCases):
+class TestCNormalizerUnitNorm(CNormalizerTestCases):
     """Unittest for CNormalizerUnitNorm."""
 
     def test_norm_unitnorm(self):
@@ -41,15 +41,8 @@ class TestCNormalizerUnitNorm(CPreProcessTestCases):
 
     def test_chain(self):
         """Test a chain of preprocessors."""
-        x_chain = self._test_chain(
-            self.array_dense,
-            ['min-max', 'pca', 'unit-norm'],
-            [{'feature_range': (-5, 5)}, {}, {}]
-        )
-
+        self.setup_x_chain('unit-norm')
         # Expected shape is (3, 3), as pca max n_components is 4-1
-        self.assertEqual((self.array_dense.shape[0],
-                          self.array_dense.shape[1] - 1), x_chain.shape)
 
     def _test_gradient(self):
         """Check the normalizer gradient."""
@@ -108,4 +101,4 @@ class TestCNormalizerUnitNorm(CPreProcessTestCases):
 
 
 if __name__ == '__main__':
-    CPreProcessTestCases.main()
+    CNormalizerTestCases.main()

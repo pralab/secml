@@ -1,52 +1,30 @@
-from secml.ml.features.tests import CPreProcessTestCases
+from secml.ml.features.normalization.tests import CNormalizerTestCases
 
 from sklearn.preprocessing import StandardScaler
 
-from secml.array import CArray
 from secml.ml.features.normalization import CNormalizerMeanStd
 
 
-class TestCNormalizerMeanStd(CPreProcessTestCases):
+class TestCNormalizerMeanStd(CNormalizerTestCases):
     """Unittest for CNormalizerMeanStd"""
 
     def test_zscore(self):
         """Test for CNormalizerMeanStd to obtain zero mean and unit variance"""
 
-        def sklearn_comp(array):
+        self.sklearn_comp(self.array_dense, StandardScaler(), CNormalizerMeanStd())
+        self.sklearn_comp(self.array_sparse, StandardScaler(), CNormalizerMeanStd())
+        self.sklearn_comp(self.row_dense.atleast_2d(), StandardScaler(), CNormalizerMeanStd())
+        self.sklearn_comp(self.row_sparse, StandardScaler(), CNormalizerMeanStd())
+        self.sklearn_comp(self.column_dense, StandardScaler(), CNormalizerMeanStd())
+        self.sklearn_comp(self.column_sparse, StandardScaler(), CNormalizerMeanStd())
 
-            self.logger.info("Original array is:\n{:}".format(array))
-
-            # Sklearn normalizer
-            target = CArray(StandardScaler().fit_transform(
-                array.astype(float).tondarray()))
-            # Our normalizer
-            n = CNormalizerMeanStd().fit(array)
-            result = n.transform(array)
-
-            self.logger.info("Correct result is:\n{:}".format(target))
-            self.logger.info("Our result is:\n{:}".format(result))
-
-            self.assert_array_almost_equal(target, result)
-
-            self.logger.info("Testing without std")
-            # Sklearn normalizer
-            target = CArray(StandardScaler(with_std=False).fit_transform(
-                array.astype(float).tondarray()))
-            # Our normalizer
-            n = CNormalizerMeanStd(with_std=False).fit(array)
-            result = n.transform(array)
-
-            self.logger.info("Correct result is:\n{:}".format(target))
-            self.logger.info("Our result is:\n{:}".format(result))
-
-            self.assert_array_almost_equal(target, result)
-
-        sklearn_comp(self.array_dense)
-        sklearn_comp(self.array_sparse)
-        sklearn_comp(self.row_dense.atleast_2d())
-        sklearn_comp(self.row_sparse)
-        sklearn_comp(self.column_dense)
-        sklearn_comp(self.column_sparse)
+        self.sklearn_comp(self.array_dense, StandardScaler(with_std=False), CNormalizerMeanStd(with_std=False))
+        self.sklearn_comp(self.array_sparse, StandardScaler(with_std=False), CNormalizerMeanStd(with_std=False))
+        self.sklearn_comp(self.row_dense.atleast_2d(), StandardScaler(with_std=False),
+                          CNormalizerMeanStd(with_std=False))
+        self.sklearn_comp(self.row_sparse, StandardScaler(with_std=False), CNormalizerMeanStd(with_std=False))
+        self.sklearn_comp(self.column_dense, StandardScaler(with_std=False), CNormalizerMeanStd(with_std=False))
+        self.sklearn_comp(self.column_sparse, StandardScaler(with_std=False), CNormalizerMeanStd(with_std=False))
 
     def test_normalizer_mean_std(self):
         """Test for CNormalizerMeanStd."""
@@ -76,27 +54,16 @@ class TestCNormalizerMeanStd(CPreProcessTestCases):
 
     def test_chain(self):
         """Test a chain of preprocessors."""
-        x_chain = self._test_chain(
-            self.array_dense,
-            ['min-max', 'pca', 'mean-std'],
-            [{'feature_range': (-5, 5)}, {}, {}]
-        )
-
+        self.setup_x_chain('mean-std')
         # Expected shape is (3, 3), as pca max n_components is 4-1
-        self.assertEqual((self.array_dense.shape[0],
-                          self.array_dense.shape[1]-1), x_chain.shape)
 
     def test_chain_gradient(self):
         """Check gradient of a chain of preprocessors."""
-        grad = self._test_chain_gradient(
-            self.array_dense,
-            ['min-max', 'mean-std'],
-            [{'feature_range': (-5, 5)}, {}]
-        )
-
+        names = ['min-max', 'mean-std']
+        feature_ranges = [{'feature_range': (-5, 5)}, {}]
         # Expected shape is (n_feats, ), so (4, )
-        self.assertEqual((self.array_dense.shape[1], ), grad.shape)
+        self.setup_grad(names, feature_ranges)
 
 
 if __name__ == '__main__':
-    CPreProcessTestCases.main()
+    CNormalizerTestCases.main()
