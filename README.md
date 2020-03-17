@@ -25,12 +25,14 @@ It comes with a set of powerful features:
   https://joblib.readthedocs.io/) library.
 - **Extensible.** Easily create new components, like ML models or attack 
   algorithms, by extending the provided abstract interfaces.
+  
+### Source code hosted at: https://gitlab.com/secml/secml
 
-### SecML is currently in development.
-If you encounter any bug, please report them using the 
-[GitLab issue tracker](https://gitlab.com/secml/secml/issues).  
-Please see our [ROADMAP](https://secml.gitlab.io/roadmap.html) for an overview 
-of the future development directions.
+**SecML is currently in development.**
+If you encounter any bugs, please report them using the 
+[GitLab issue tracker](https://gitlab.com/secml/secml/issues).
+Also, have a look at our [ROADMAP](https://secml.gitlab.io/roadmap.html) 
+for an overview of the future development directions.
 
 [![Status Alpha](https://img.shields.io/badge/status-alpha-yellow.svg)](.)
 [![Python 3.5 | 3.6 | 3.7](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7-brightgreen.svg)](.)
