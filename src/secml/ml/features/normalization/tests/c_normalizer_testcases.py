@@ -4,10 +4,12 @@ from secml.ml.features import CPreProcess
 
 
 class CNormalizerTestCases(CUnitTest):
-    """Unittests interface for CPreProcess."""
+    """Unittests interface for CPreProcess.
+    """
 
     def _sklearn_comp(self, array, norm_sklearn, norm):
-        """Check if the result given by the sklearn normalizer is almost equal to the one given by our normalizer"""
+        """Check if the result given by the sklearn normalizer is almost equal to the one given by our normalizer
+        """
         self.logger.info("Original array is:\n{:}".format(array))
         target = CArray(norm_sklearn.fit_transform(array.astype(float).tondarray()))
         # Our normalizer
@@ -33,7 +35,8 @@ class CNormalizerTestCases(CUnitTest):
     @staticmethod
     def _create_chain(pre_id_list, kwargs_list):
         """Creates a preprocessor with other preprocessors chained
-        and a list of the same preprocessors (not chained)"""
+        and a list of the same preprocessors (not chained)
+        """
         chain = None
         pre_list = []
         for i, pre_id in enumerate(pre_id_list):
@@ -44,7 +47,8 @@ class CNormalizerTestCases(CUnitTest):
         return chain, pre_list
 
     def _test_chain(self, x, pre_id_list, kwargs_list, y=None):
-        """Tests if preprocess chain and manual chaining yield same result."""
+        """Tests if preprocess chain and manual chaining yield same result.
+        """
         chain, pre_list = self._create_chain(pre_id_list, kwargs_list)
 
         chain = chain.fit(x, y=y)
@@ -77,7 +81,8 @@ class CNormalizerTestCases(CUnitTest):
 
     def _test_chain_gradient(self, x, pre_id_list, kwargs_list, y=None):
         """Tests if gradient preprocess chain and
-        gradient of manual chaining yield same result."""
+        gradient of manual chaining yield same result.
+        """
         chain, pre_list = self._create_chain(pre_id_list, kwargs_list)
 
         chain = chain.fit(x, y=y)

@@ -6,11 +6,12 @@ from secml.optim.function import CFunction
 
 
 class TestCNormalizerUnitNorm(CNormalizerTestCases):
-    """Unittest for CNormalizerUnitNorm."""
+    """Unittest for CNormalizerUnitNorm.
+    """
 
     def test_norm_unitnorm(self):
-        """Test for CNormalizerUnitNorm."""
-
+        """Test for CNormalizerUnitNorm.
+        """
         norm_type_lst = ["l1", "l2", "max"]
 
         def sklearn_comp(array, norm_type):
@@ -38,14 +39,16 @@ class TestCNormalizerUnitNorm(CNormalizerTestCases):
             sklearn_comp(self.column_sparse, norm_type)
 
     def test_chain(self):
-        """Test a chain of preprocessors."""
+        """Test a chain of preprocessors.
+        """
         self._test_chain(self.array_dense,
                          ['min-max', 'pca', 'unit-norm'],
                          [{'feature_range': (-5, 5)}, {}, {}])
         # Expected shape is (3, 3), as pca max n_components is 4-1
 
     def _test_gradient(self):
-        """Check the normalizer gradient."""
+        """Check the normalizer gradient.
+        """
 
         norm_type_lst = ["l1", "l2", "max"]
 

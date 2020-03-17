@@ -4,11 +4,11 @@ from secml.ml.features.normalization import CNormalizerMeanStd
 
 
 class TestCNormalizerMeanStd(CNormalizerTestCases):
-    """Unittest for CNormalizerMeanStd"""
-
+    """Unittest for CNormalizerMeanStd
+    """
     def test_zscore(self):
-        """Test for CNormalizerMeanStd to obtain zero mean and unit variance"""
-
+        """Test for CNormalizerMeanStd to obtain zero mean and unit variance
+        """
         self._sklearn_comp(self.array_dense, StandardScaler(), CNormalizerMeanStd())
         self._sklearn_comp(self.array_sparse, StandardScaler(), CNormalizerMeanStd())
         self._sklearn_comp(self.row_dense.atleast_2d(), StandardScaler(), CNormalizerMeanStd())
@@ -25,8 +25,8 @@ class TestCNormalizerMeanStd(CNormalizerTestCases):
         self._sklearn_comp(self.column_sparse, StandardScaler(with_std=False), CNormalizerMeanStd(with_std=False))
 
     def test_normalizer_mean_std(self):
-        """Test for CNormalizerMeanStd."""
-
+        """Test for CNormalizerMeanStd.
+        """
         for (mean, std) in [(1.5, 0.1),
                             ((1.0, 1.1, 1.2, 1.3), (0.0, 0.1, 0.2, 0.3))]:
             for array in [self.array_dense, self.array_sparse]:
@@ -50,14 +50,16 @@ class TestCNormalizerMeanStd(CNormalizerTestCases):
                 self.assert_array_almost_equal(array, rev)
 
     def test_chain(self):
-        """Test a chain of preprocessors."""
+        """Test a chain of preprocessors.
+        """
         self._test_chain(self.array_dense,
                          ['min-max', 'pca', 'mean-std'],
                          [{'feature_range': (-5, 5)}, {}, {}])
         # Expected shape is (3, 3), as pca max n_components is 4-1
 
     def test_chain_gradient(self):
-        """Check gradient of a chain of preprocessors."""
+        """Check gradient of a chain of preprocessors.
+        """
         # Expected shape is (n_feats, ), so (4, )
         self._test_chain_gradient(self.array_dense, ['min-max', 'mean-std'], [{'feature_range': (-5, 5)}, {}])
 
