@@ -6,23 +6,36 @@ from secml.ml.features.normalization import CNormalizerMeanStd
 class TestCNormalizerMeanStd(CNormalizerTestCases):
     """Unittest for CNormalizerMeanStd
     """
+
     def test_zscore(self):
         """Test for CNormalizerMeanStd to obtain zero mean and unit variance
         """
-        self._sklearn_comp(self.array_dense, StandardScaler(), CNormalizerMeanStd())
-        self._sklearn_comp(self.array_sparse, StandardScaler(), CNormalizerMeanStd())
-        self._sklearn_comp(self.row_dense.atleast_2d(), StandardScaler(), CNormalizerMeanStd())
-        self._sklearn_comp(self.row_sparse, StandardScaler(), CNormalizerMeanStd())
-        self._sklearn_comp(self.column_dense, StandardScaler(), CNormalizerMeanStd())
-        self._sklearn_comp(self.column_sparse, StandardScaler(), CNormalizerMeanStd())
+        self._sklearn_comp(self.array_dense, StandardScaler(),
+                           CNormalizerMeanStd())
+        self._sklearn_comp(self.array_sparse, StandardScaler(),
+                           CNormalizerMeanStd())
+        self._sklearn_comp(self.row_dense.atleast_2d(), StandardScaler(),
+                           CNormalizerMeanStd())
+        self._sklearn_comp(self.row_sparse, StandardScaler(),
+                           CNormalizerMeanStd())
+        self._sklearn_comp(self.column_dense, StandardScaler(),
+                           CNormalizerMeanStd())
+        self._sklearn_comp(self.column_sparse, StandardScaler(),
+                           CNormalizerMeanStd())
 
-        self._sklearn_comp(self.array_dense, StandardScaler(with_std=False), CNormalizerMeanStd(with_std=False))
-        self._sklearn_comp(self.array_sparse, StandardScaler(with_std=False), CNormalizerMeanStd(with_std=False))
-        self._sklearn_comp(self.row_dense.atleast_2d(), StandardScaler(with_std=False),
+        self._sklearn_comp(self.array_dense, StandardScaler(with_std=False),
                            CNormalizerMeanStd(with_std=False))
-        self._sklearn_comp(self.row_sparse, StandardScaler(with_std=False), CNormalizerMeanStd(with_std=False))
-        self._sklearn_comp(self.column_dense, StandardScaler(with_std=False), CNormalizerMeanStd(with_std=False))
-        self._sklearn_comp(self.column_sparse, StandardScaler(with_std=False), CNormalizerMeanStd(with_std=False))
+        self._sklearn_comp(self.array_sparse, StandardScaler(with_std=False),
+                           CNormalizerMeanStd(with_std=False))
+        self._sklearn_comp(self.row_dense.atleast_2d(),
+                           StandardScaler(with_std=False),
+                           CNormalizerMeanStd(with_std=False))
+        self._sklearn_comp(self.row_sparse, StandardScaler(with_std=False),
+                           CNormalizerMeanStd(with_std=False))
+        self._sklearn_comp(self.column_dense, StandardScaler(with_std=False),
+                           CNormalizerMeanStd(with_std=False))
+        self._sklearn_comp(self.column_sparse, StandardScaler(with_std=False),
+                           CNormalizerMeanStd(with_std=False))
 
     def test_normalizer_mean_std(self):
         """Test for CNormalizerMeanStd.

@@ -8,7 +8,8 @@ class CNormalizerTestCases(CPreProcessTestCases):
     """
 
     def _sklearn_comp(self, array, norm_sklearn, norm, sparse=False):
-        """Check if the result given by the sklearn normalizer is almost equal to the one given by our normalizer
+        """Check if the result given by the sklearn normalizer is almost
+            equal to the one given by our normalizer
         """
         self.logger.info("Original array is:\n{:}".format(array))
         if sparse:
@@ -25,7 +26,8 @@ class CNormalizerTestCases(CPreProcessTestCases):
     def _test_chain(self, x, pre_id_list, kwargs_list, y=None):
         """Tests if preprocess chain and manual chaining yield same result.
         """
-        x_chain = super(CNormalizerTestCases, self)._test_chain(x, pre_id_list, kwargs_list, y=None)
+        x_chain = super(CNormalizerTestCases, self)._test_chain(
+            x, pre_id_list, kwargs_list, y=None)
         self.assertEqual((self.array_dense.shape[0],
                           self.array_dense.shape[1] - 1), x_chain.shape)
 
@@ -33,7 +35,8 @@ class CNormalizerTestCases(CPreProcessTestCases):
         """Tests if gradient preprocess chain and
         gradient of manual chaining yield same result.
         """
-        grad_chain = super(CNormalizerTestCases, self)._test_chain_gradient(x, pre_id_list, kwargs_list, y=None)
+        grad_chain = super(CNormalizerTestCases, self)._test_chain_gradient(
+            x, pre_id_list, kwargs_list, y=None)
         self.assertEqual((self.array_dense.shape[1],), grad_chain.shape)
 
 

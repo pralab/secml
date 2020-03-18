@@ -12,7 +12,8 @@ class TestCNormalizerUnitNorm(CNormalizerTestCases):
         self.logger.info("Norm type: {:}".format(norm_type))
         norm_sklearn = norm_sklearn(norm=norm_type)
         norm = norm(norm=norm_type)
-        super(TestCNormalizerUnitNorm, self)._sklearn_comp(array, norm_sklearn, norm, sparse=True)
+        super(TestCNormalizerUnitNorm, self)._sklearn_comp(array, norm_sklearn,
+                                                           norm, sparse=True)
 
     def test_norm_unitnorm(self):
         """Test for CNormalizerUnitNorm.
@@ -20,12 +21,18 @@ class TestCNormalizerUnitNorm(CNormalizerTestCases):
         norm_type_lst = ["l1", "l2", "max"]
 
         for norm_type in norm_type_lst:
-            self._sklearn_comp(self.array_dense, Normalizer, CNormalizerUnitNorm, norm_type)
-            self._sklearn_comp(self.array_sparse, Normalizer, CNormalizerUnitNorm, norm_type)
-            self._sklearn_comp(self.row_dense.atleast_2d(), Normalizer, CNormalizerUnitNorm, norm_type)
-            self._sklearn_comp(self.row_sparse, Normalizer, CNormalizerUnitNorm, norm_type)
-            self._sklearn_comp(self.column_dense, Normalizer, CNormalizerUnitNorm, norm_type)
-            self._sklearn_comp(self.column_sparse, Normalizer, CNormalizerUnitNorm, norm_type)
+            self._sklearn_comp(self.array_dense, Normalizer,
+                               CNormalizerUnitNorm, norm_type)
+            self._sklearn_comp(self.array_sparse, Normalizer,
+                               CNormalizerUnitNorm, norm_type)
+            self._sklearn_comp(self.row_dense.atleast_2d(), Normalizer,
+                               CNormalizerUnitNorm, norm_type)
+            self._sklearn_comp(self.row_sparse, Normalizer,
+                               CNormalizerUnitNorm, norm_type)
+            self._sklearn_comp(self.column_dense, Normalizer,
+                               CNormalizerUnitNorm, norm_type)
+            self._sklearn_comp(self.column_sparse, Normalizer,
+                               CNormalizerUnitNorm, norm_type)
 
     def test_chain(self):
         """Test a chain of preprocessors.
