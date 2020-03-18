@@ -11,7 +11,7 @@ class CNormalizerTestCases(CUnitTest):
         """Check if the result given by the sklearn normalizer is almost equal to the one given by our normalizer
         """
         self.logger.info("Original array is:\n{:}".format(array))
-        target = CArray(norm_sklearn.fit_transform(array.astype(float).tondarray()))
+        target = CArray(norm_sklearn.fit_transform(array.tondarray()))
         # Our normalizer
         n = norm.fit(array)
         result = n.transform(array)

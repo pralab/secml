@@ -8,35 +8,24 @@ from secml.optim.function import CFunction
 class TestCNormalizerUnitNorm(CNormalizerTestCases):
     """Unittest for CNormalizerUnitNorm.
     """
+    def _sklearn_comp(self, array, norm_sklearn, norm, norm_type=None):
+        self.logger.info("Norm type: {:}".format(norm_type))
+        norm_sklearn = norm_sklearn(norm=norm_type)
+        norm = norm(norm=norm_type)
+        super(TestCNormalizerUnitNorm, self)._sklearn_comp(array, norm_sklearn, norm)
 
     def test_norm_unitnorm(self):
         """Test for CNormalizerUnitNorm.
         """
         norm_type_lst = ["l1", "l2", "max"]
 
-        def sklearn_comp(array, norm_type):
-            self.logger.info("Norm type: {:}".format(norm_type))
-            self.logger.info("Original array is: {:}".format(array))
-
-            # Sklearn normalizer (requires float dtype input)
-            target = CArray(Normalizer(norm=norm_type).fit_transform(
-                array.astype(float).get_data()))
-
-            # Create our normalizer
-            result = CNormalizerUnitNorm(norm=norm_type).fit_transform(array)
-
-            self.logger.info("Correct result is:\n{:}".format(target))
-            self.logger.info("Our result is:\n{:}".format(result))
-
-            self.assert_array_almost_equal(target, result)
-
         for norm_type in norm_type_lst:
-            sklearn_comp(self.array_dense, norm_type)
-            sklearn_comp(self.array_sparse, norm_type)
-            sklearn_comp(self.row_dense.atleast_2d(), norm_type)
-            sklearn_comp(self.row_sparse, norm_type)
-            sklearn_comp(self.column_dense, norm_type)
-            sklearn_comp(self.column_sparse, norm_type)
+            self._sklearn_comp(self.array_dense, Normalizer, CNormalizerUnitNorm, norm_type)
+            self._sklearn_comp(self.array_sparse, Normalizer, CNormalizerUnitNorm, norm_type)
+            self._sklearn_comp(self.row_dense.atleast_2d(), Normalizer, CNormalizerUnitNorm, norm_type)
+            self._sklearn_comp(self.row_sparse, Normalizer, CNormalizerUnitNorm, norm_type)
+            self._sklearn_comp(self.column_dense, Normalizer, CNormalizerUnitNorm, norm_type)
+            self._sklearn_comp(self.column_sparse, Normalizer, CNormalizerUnitNorm, norm_type)
 
     def test_chain(self):
         """Test a chain of preprocessors.
