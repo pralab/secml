@@ -7,11 +7,14 @@ class CNormalizerTestCases(CUnitTest):
     """Unittests interface for CPreProcess.
     """
 
-    def _sklearn_comp(self, array, norm_sklearn, norm):
+    def _sklearn_comp(self, array, norm_sklearn, norm, sparse=False):
         """Check if the result given by the sklearn normalizer is almost equal to the one given by our normalizer
         """
         self.logger.info("Original array is:\n{:}".format(array))
-        target = CArray(norm_sklearn.fit_transform(array.tondarray()))
+        if sparse:
+            target = CArray(norm_sklearn.fit_transform(array.get_data()))
+        else:
+            target = CArray(norm_sklearn.fit_transform(array.tondarray()))
         # Our normalizer
         n = norm.fit(array)
         result = n.transform(array)
