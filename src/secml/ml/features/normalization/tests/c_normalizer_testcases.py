@@ -32,15 +32,8 @@ class CNormalizerTestCases(CUnitTest):
         self.row_sparse = CArray(self.row_dense.deepcopy(), tosparse=True)
         self.column_sparse = self.row_sparse.deepcopy().T
 
-    # _create_chain issue: added method...
-    # This is a possible solution:
     @staticmethod
     def _create_chain(pre_id_list, kwargs_list):
-        return CPreProcess._create_chain2(pre_id_list, kwargs_list)
-
-    # remove the x in chain'x' to return to the standard version
-    @staticmethod
-    def _create_chainx(pre_id_list, kwargs_list):
         """Creates a preprocessor with other preprocessors chained
         and a list of the same preprocessors (not chained)
         """
