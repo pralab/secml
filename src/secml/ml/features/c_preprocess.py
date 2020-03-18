@@ -29,6 +29,22 @@ class CPreProcess(CModule, metaclass=ABCMeta):
             else CPreProcess.create(preprocess)
         CModule.__init__(self, preprocess=preprocess)
 
+    # Remove this method to return to the standard version
+    # This is a possible solution to _create_chain in NormalizerTestcases:
+    @staticmethod
+    def _create_chain2(pre_id_list, kwargs_list):
+        """Creates a preprocessor with other preprocessors chained
+        and a list of the same preprocessors (not chained)
+        """
+        chain = None
+        pre_list = []
+        for i, pre_id in enumerate(pre_id_list):
+            chain = CPreProcess.create(
+                pre_id, preprocess=chain, **kwargs_list[i])
+            pre_list.append(CPreProcess.create(pre_id, **kwargs_list[i]))
+
+        return chain, pre_list
+
     @staticmethod
     def create_chain(class_items, kwargs_list):
         """Creates a chain of preprocessors.
