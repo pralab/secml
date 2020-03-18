@@ -61,7 +61,9 @@ class TestCNormalizerMeanStd(CNormalizerTestCases):
         """Check gradient of a chain of preprocessors.
         """
         # Expected shape is (n_feats, ), so (4, )
-        self._test_chain_gradient(self.array_dense, ['min-max', 'mean-std'], [{'feature_range': (-5, 5)}, {}])
+        self._test_chain_gradient(self.array_dense,
+                                  ['min-max', 'mean-std'],
+                                  [{'feature_range': (-5, 5)}, {}])
 
 
 if __name__ == '__main__':
