@@ -11,12 +11,9 @@ class TestCNormalizerMinMax(CNormalizerTestCases):
         """Tests if the sklearn normalizer (MinMaxScaler) and
         our normalizer (CNormalizerMinMax) yield same result.
         """
-        super(TestCNormalizerMinMax, self)._sklearn_comp(
+        target, result, sk_norm, our_norm, array_sk = super(
+            TestCNormalizerMinMax, self)._sklearn_comp(
             array, norm_sklearn, norm, sparse)
-
-        array_sk = array.tondarray()
-        sk_norm = norm_sklearn.fit(array_sk)
-        our_norm = norm.fit(array)
 
         # Testing out of range normalization
 
@@ -33,7 +30,7 @@ class TestCNormalizerMinMax(CNormalizerTestCases):
 
         self.assert_array_almost_equal(target, result)
 
-        return target, result
+        return target, result, sk_norm, our_norm, array_sk
 
     def test_norm_minmax(self):
         """Test for CNormalizerMinMax."""

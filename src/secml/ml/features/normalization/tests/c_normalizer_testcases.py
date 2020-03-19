@@ -11,9 +11,14 @@ class CNormalizerTestCases(CPreProcessTestCases):
         """
         self.logger.info("Original array is:\n{:}".format(array))
         if sparse:
-            target = CArray(norm_sklearn.fit_transform(array.get_data()))
+            array_sk = array.get_data()
         else:
-            target = CArray(norm_sklearn.fit_transform(array.tondarray()))
+            array_sk = array.tondarray()
+
+        # Sklearn normalizer
+        sk_norm = norm_sklearn.fit(array_sk)
+        target = CArray(sk_norm.transform(array_sk))
+
         # Our normalizer
         n = norm.fit(array)
         result = n.transform(array)
@@ -21,7 +26,10 @@ class CNormalizerTestCases(CPreProcessTestCases):
         self.logger.info("Our result is:\n{:}".format(result))
         self.assert_array_almost_equal(target, result)
 
-        return target, result
+        array_sk = array.tondarray()
+        sk_norm = norm_sklearn.fit(array_sk)
+
+        return target, result, sk_norm, n, array_sk
 
     def _test_chain(self, x, pre_id_list, kwargs_list, y=None):
         """Tests if preprocess chain and manual chaining yield same result."""

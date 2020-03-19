@@ -15,10 +15,11 @@ class TestCNormalizerUnitNorm(CNormalizerTestCases):
         self.logger.info("Norm type: {:}".format(norm_type))
         norm_sklearn = norm_sklearn(norm=norm_type)
         norm = norm(norm=norm_type)
-        target, result = super(TestCNormalizerUnitNorm, self)._sklearn_comp(
+        target, result, sk_norm, our_norm, array_sk = super(
+            TestCNormalizerUnitNorm, self)._sklearn_comp(
             array, norm_sklearn, norm, True)
 
-        return target, result
+        return target, result, sk_norm, our_norm, array_sk
 
     def test_norm_unitnorm(self):
         """Test for CNormalizerUnitNorm."""
