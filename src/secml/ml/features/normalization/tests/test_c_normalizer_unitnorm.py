@@ -6,18 +6,20 @@ from secml.optim.function import CFunction
 
 
 class TestCNormalizerUnitNorm(CNormalizerTestCases):
-    """Unittest for CNormalizerUnitNorm.
-    """
+    """Unittest for CNormalizerUnitNorm."""
+
     def _sklearn_comp(self, array, norm_sklearn, norm, norm_type=None):
+        """Check if the result given by the sklearn normalizer is almost
+            equal to the one given by our normalizer
+        """
         self.logger.info("Norm type: {:}".format(norm_type))
         norm_sklearn = norm_sklearn(norm=norm_type)
         norm = norm(norm=norm_type)
         super(TestCNormalizerUnitNorm, self)._sklearn_comp(array, norm_sklearn,
-                                                           norm, sparse=True)
+                                                           norm, True)
 
     def test_norm_unitnorm(self):
-        """Test for CNormalizerUnitNorm.
-        """
+        """Test for CNormalizerUnitNorm."""
         norm_type_lst = ["l1", "l2", "max"]
 
         for norm_type in norm_type_lst:
@@ -35,16 +37,14 @@ class TestCNormalizerUnitNorm(CNormalizerTestCases):
                                CNormalizerUnitNorm, norm_type)
 
     def test_chain(self):
-        """Test a chain of preprocessors.
-        """
+        """Test a chain of preprocessors."""
         self._test_chain(self.array_dense,
                          ['min-max', 'pca', 'unit-norm'],
                          [{'feature_range': (-5, 5)}, {}, {}])
         # Expected shape is (3, 3), as pca max n_components is 4-1
 
     def _test_gradient(self):
-        """Check the normalizer gradient.
-        """
+        """Check the normalizer gradient."""
 
         norm_type_lst = ["l1", "l2", "max"]
 

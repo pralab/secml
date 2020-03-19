@@ -4,8 +4,7 @@ from secml.ml.features.tests import CPreProcessTestCases
 
 
 class CNormalizerTestCases(CPreProcessTestCases):
-    """Unittests interface for CPreProcess.
-    """
+    """Unittests interface for Normalizers."""
 
     def _sklearn_comp(self, array, norm_sklearn, norm, sparse=False):
         """Check if the result given by the sklearn normalizer is almost
@@ -24,10 +23,9 @@ class CNormalizerTestCases(CPreProcessTestCases):
         self.assert_array_almost_equal(target, result)
 
     def _test_chain(self, x, pre_id_list, kwargs_list, y=None):
-        """Tests if preprocess chain and manual chaining yield same result.
-        """
+        """Tests if preprocess chain and manual chaining yield same result."""
         x_chain = super(CNormalizerTestCases, self)._test_chain(
-            x, pre_id_list, kwargs_list, y=None)
+            x, pre_id_list, kwargs_list, y)
         self.assertEqual((self.array_dense.shape[0],
                           self.array_dense.shape[1] - 1), x_chain.shape)
 
@@ -36,7 +34,7 @@ class CNormalizerTestCases(CPreProcessTestCases):
         gradient of manual chaining yield same result.
         """
         grad_chain = super(CNormalizerTestCases, self)._test_chain_gradient(
-            x, pre_id_list, kwargs_list, y=None)
+            x, pre_id_list, kwargs_list, y)
         self.assertEqual((self.array_dense.shape[1],), grad_chain.shape)
 
 
