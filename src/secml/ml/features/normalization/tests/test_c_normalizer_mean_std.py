@@ -7,7 +7,8 @@ class TestCNormalizerMeanStd(CNormalizerTestCases):
     """Unittest for CNormalizerMeanStd."""
 
     def test_zscore(self):
-        """Test for CNormalizerMeanStd to obtain zero mean and unit variance."""
+        """Test for CNormalizerMeanStd to obtain zero mean and unit variance.
+        """
         self._sklearn_comp(self.array_dense, StandardScaler(),
                            CNormalizerMeanStd())
         self._sklearn_comp(self.array_sparse, StandardScaler(),
