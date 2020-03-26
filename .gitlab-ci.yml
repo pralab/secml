@@ -168,7 +168,7 @@ test:py37:min:
 
 .test:notebooks:
   extends: .test
-  needs: ["package:docs"]  # Use [] after gitlab 12.6
+  needs: []
   rules:
     - if: '$RUN_TESTS'
       when: on_success
