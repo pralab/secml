@@ -1,4 +1,4 @@
-from secml.ml.features.tests import CPreProcessTestCases
+from secml.ml.features.normalization.tests import CNormalizerTestCases
 
 from sklearn.preprocessing import Normalizer
 
@@ -7,49 +7,36 @@ from secml.ml.features.normalization import CNormalizerUnitNorm
 from secml.optim.function import CFunction
 
 
-class TestCNormalizerUnitNorm(CPreProcessTestCases):
+class TestCNormalizerUnitNorm(CNormalizerTestCases):
     """Unittest for CNormalizerUnitNorm."""
 
-    def test_norm_unitnorm(self):
-        """Test for CNormalizerUnitNorm."""
-
-        norm_type_lst = ["l1", "l2", "max"]
-
-        def sklearn_comp(array, norm_type):
-            self.logger.info("Norm type: {:}".format(norm_type))
-            self.logger.info("Original array is: {:}".format(array))
-
-            # Sklearn normalizer (requires float dtype input)
-            target = CArray(Normalizer(norm=norm_type).fit_transform(
-                            array.astype(float).get_data()))
-
-            # Create our normalizer
-            result = CNormalizerUnitNorm(norm=norm_type).fit_transform(array)
-
-            self.logger.info("Correct result is:\n{:}".format(target))
-            self.logger.info("Our result is:\n{:}".format(result))
-
-            self.assert_array_almost_equal(target, result)
-
-        for norm_type in norm_type_lst:
-            sklearn_comp(self.array_dense, norm_type)
-            sklearn_comp(self.array_sparse, norm_type)
-            sklearn_comp(self.row_dense.atleast_2d(), norm_type)
-            sklearn_comp(self.row_sparse, norm_type)
-            sklearn_comp(self.column_dense, norm_type)
-            sklearn_comp(self.column_sparse, norm_type)
+    def test_transform(self):
+        """Test for `.transform()` method."""
+        for norm_type in ["l1", "l2", "max"]:
+            self._sklearn_comp(self.array_dense,
+                               Normalizer(norm=norm_type),
+                               CNormalizerUnitNorm(norm=norm_type))
+            self._sklearn_comp(self.array_sparse,
+                               Normalizer(norm=norm_type),
+                               CNormalizerUnitNorm(norm=norm_type))
+            self._sklearn_comp(self.row_dense.atleast_2d(),
+                               Normalizer(norm=norm_type),
+                               CNormalizerUnitNorm(norm=norm_type))
+            self._sklearn_comp(self.row_sparse,
+                               Normalizer(norm=norm_type),
+                               CNormalizerUnitNorm(norm=norm_type))
+            self._sklearn_comp(self.column_dense,
+                               Normalizer(norm=norm_type),
+                               CNormalizerUnitNorm(norm=norm_type))
+            self._sklearn_comp(self.column_sparse,
+                               Normalizer(norm=norm_type),
+                               CNormalizerUnitNorm(norm=norm_type))
 
     def test_chain(self):
         """Test a chain of preprocessors."""
-        x_chain = self._test_chain(
-            self.array_dense,
-            ['min-max', 'pca', 'unit-norm'],
-            [{'feature_range': (-5, 5)}, {}, {}]
-        )
-
-        # Expected shape is (3, 3), as pca max n_components is 4-1
-        self.assertEqual((self.array_dense.shape[0],
-                          self.array_dense.shape[1] - 1), x_chain.shape)
+        self._test_chain(self.array_dense,
+                         ['min-max', 'pca', 'unit-norm'],
+                         [{'feature_range': (-5, 5)}, {}, {}])
 
     def _test_gradient(self):
         """Check the normalizer gradient."""
@@ -108,4 +95,4 @@ class TestCNormalizerUnitNorm(CPreProcessTestCases):
 
 
 if __name__ == '__main__':
-    CPreProcessTestCases.main()
+    CNormalizerTestCases.main()
