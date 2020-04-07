@@ -2054,13 +2054,10 @@ class CSparse(_CArrayInterface):
             array2 = array2.ravel()
             axis = 1  # Simulate an horizontal concatenation
 
-        # TODO: do not call _data after implementing #769 and #770
         if axis == 0:  # Vertical
-            return cls(
-                scs.vstack([array1._data.tocsr(), array2._data.tocsr()]))
+            return cls(scs.vstack([array1.tocsr(), array2.tocsr()]))
         elif axis == 1:  # Horizontal
-            return cls(
-                scs.hstack([array1._data.tocsc(), array2._data.tocsc()]))
+            return cls(scs.hstack([array1.tocsc(), array2.tocsc()]))
         else:
             raise ValueError("axis should be one of {0, 1, None}")
 
