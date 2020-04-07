@@ -1175,13 +1175,8 @@ class CSparse(_CArrayInterface):
     # ------------ #
 
     def append(self, array, axis=None):
-        """Append an  arrays along the given axis."""
-        # If axis is None we simulate numpy flattening
-        if axis is None:
-            return self.__class__.concatenate(self.ravel(),
-                                              array.ravel(), axis=1)
-        else:
-            return self.__class__.concatenate(self, array, axis)
+        """Append an array along the given axis."""
+        return self.__class__.concatenate(self, array, axis)
 
     def repmat(self, m, n):
         """Wrapper for repmat
@@ -2033,29 +2028,20 @@ class CSparse(_CArrayInterface):
             raise TypeError(
                 "both arrays to concatenate must be {:}".format(cls))
 
-        if axis is not None:
-            if array1.shape[abs(axis - 1)] != array2.shape[abs(axis - 1)]:
-                raise ValueError("all the input array dimensions except for "
-                                 "the concatenation axis must match exactly.")
-        else:  # axis is None, both arrays should be ravelled
+        if axis is None:  # both arrays should be ravelled
             array1 = array1.ravel()
             array2 = array2.ravel()
             axis = 1  # Simulate an horizontal concatenation
 
-        if axis == 1:  # horizontal concatenation
-            array1 = array1.T
-            array2 = array2.T
-
-        # Use vertical concatenation in all cases
-        data = np.append(array1._data.data, array2._data.data)
-        indices = np.append(array1._data.indices, array2._data.indices)
-        indptr = np.append(array1._data.indptr,
-                           array2._data.indptr[1:] + array1._data.indptr[-1])
-        new_array = cls(
-            (data, indices, indptr),
-            shape=(array1.shape[0] + array2.shape[0], array1.shape[1]))
-
-        return new_array.T if axis == 1 else new_array
+        # TODO: do not call _data after implementing #769 and #770
+        if axis == 0:  # Vertical
+            return cls(
+                scs.vstack([array1._data.tocsr(), array2._data.tocsr()]))
+        elif axis == 1:  # Horizontal
+            return cls(
+                scs.hstack([array1._data.tocsc(), array2._data.tocsc()]))
+        else:
+            raise ValueError("axis should be one of {0, 1, None}")
 
     @classmethod
     def comblist(cls, list_of_list, dtype=float):
