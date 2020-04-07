@@ -170,7 +170,7 @@ class CSparse(_CArrayInterface):
 
     def tocsr(self):
         """Convert to csr_matrix."""
-        return self._data
+        return self._data.tocsr()
 
     def tolist(self):
         """Convert to list."""
