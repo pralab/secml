@@ -117,6 +117,27 @@ class CDense(_CArrayInterface):
         """Return current CDense as a scipy.sparse.csr_matrix."""
         return scs.csr_matrix(self.tondarray())
 
+    def tocoo(self):
+        """Return current CDense as a scipy.sparse.coo_matrix."""
+        return scs.coo_matrix(self.tondarray())
+
+    def tocsc(self):
+        """Return current CDense as a scipy.sparse.csc_matrix."""
+        return scs.csc_matrix(self.tondarray())
+
+    def todia(self):
+        """Return current CDense as a scipy.sparse.dia_matrix."""
+        return scs.dia_matrix(self.tondarray())
+
+    def todok(self):
+        """Return current CDense as a scipy.sparse.dok_matrix."""
+        # dok_matrix does not support casting from 1-D ndarrays
+        return scs.dok_matrix(self.atleast_2d().tondarray())
+
+    def tolil(self):
+        """Return current CDense as a scipy.sparse.lil_matrix."""
+        return scs.lil_matrix(self.tondarray())
+
     def tolist(self):
         """Return current CDense as a list."""
         return self._data.tolist()

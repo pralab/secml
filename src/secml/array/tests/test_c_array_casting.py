@@ -7,50 +7,114 @@ import scipy.sparse as scs
 class TestCArrayCasting(CArrayTestCases):
     """Unit test for CArray CASTING methods."""
 
-    def test_tondarray_tocsr(self):
-        """Test for CArray.tondarray(), CArray.tocsr() method."""
-        self.logger.info("Test for CArray.tondarray(), CArray.tocsr() method.")
+    def test_tondarray(self):
+        """Test for CArray.tondarray() method."""
+        self.logger.info("Test for CArray.tondarray() method.")
 
-        def _check_tondarray_tocsr(array):
+        def _check_tondarray(array):
             self.logger.info("array:\n{:}".format(array))
 
             ndarray = array.tondarray()
             self.logger.info("array.tondarray():\n{:}".format(ndarray))
-            csr = array.tocsr()
-            self.logger.info("array.tocsr():\n{:}".format(csr))
 
             self.assertIsInstance(ndarray, np.ndarray)
-            self.assertIsInstance(csr, scs.csr_matrix)
 
             self.assertEqual(array.size, ndarray.size)
-            self.assertEqual(array.size, csr.shape[0] * csr.shape[1])
-
             self.assertEqual(array.shape, ndarray.shape)
-            if array.isdense:  # flat dense arrays become 2D when sparse
-                self.assertEqual(array.atleast_2d().shape, csr.shape)
 
         # Sparse arrays
-        _check_tondarray_tocsr(self.array_sparse)
-        _check_tondarray_tocsr(self.row_sparse)
-        _check_tondarray_tocsr(self.column_sparse)
+        _check_tondarray(self.array_sparse)
+        _check_tondarray(self.row_sparse)
+        _check_tondarray(self.column_sparse)
 
         # Dense arrays
-        _check_tondarray_tocsr(self.array_dense)
-        _check_tondarray_tocsr(self.row_flat_dense)
-        _check_tondarray_tocsr(self.row_dense)
-        _check_tondarray_tocsr(self.column_dense)
+        _check_tondarray(self.array_dense)
+        _check_tondarray(self.row_flat_dense)
+        _check_tondarray(self.row_dense)
+        _check_tondarray(self.column_dense)
 
         # Bool arrays
-        _check_tondarray_tocsr(self.array_dense_bool)
-        _check_tondarray_tocsr(self.array_sparse_bool)
+        _check_tondarray(self.array_dense_bool)
+        _check_tondarray(self.array_sparse_bool)
 
-        _check_tondarray_tocsr(self.single_flat_dense)
-        _check_tondarray_tocsr(self.single_dense)
-        _check_tondarray_tocsr(self.single_sparse)
+        _check_tondarray(self.single_flat_dense)
+        _check_tondarray(self.single_dense)
+        _check_tondarray(self.single_sparse)
 
-        _check_tondarray_tocsr(self.empty_dense)
-        _check_tondarray_tocsr(self.empty_flat_dense)
-        _check_tondarray_tocsr(self.empty_sparse)
+        _check_tondarray(self.empty_dense)
+        _check_tondarray(self.empty_flat_dense)
+        _check_tondarray(self.empty_sparse)
+
+    def test_toscs(self):
+        """Test for CArray.tocsr(), CArray.tocoo(), CArray.tocsc(),
+        CArray.todia(), CArray.todok(), CArray.tolil() methods."""
+        # Will test conversion from dense and between each sparse format
+        scs_formats = (
+            ('csr', scs.csr_matrix),
+            ('coo', scs.coo_matrix),
+            ('csc', scs.csc_matrix),
+            ('dia', scs.dia_matrix),
+            ('dok', scs.dok_matrix),
+            ('lil', scs.lil_matrix)
+        )
+        for scs_format, scs_type in scs_formats:
+            self.logger.info(
+                "Test for CArray.to{:}() method.".format(scs_format))
+
+            def _check_conversion(array):
+                self.logger.info("array:\n{:}".format(array))
+                if array.issparse:
+                    self.logger.info("array sparse format: {:}".format(
+                        array._data._data.getformat()))
+
+                res = getattr(array, 'to{:}'.format(scs_format))()
+                self.logger.info(
+                    "array.to{:}():\n{:}".format(scs_format, res))
+                self.logger.info(
+                    "result sparse format: {:}".format(res.getformat()))
+
+                self.assertIsInstance(res, scs_type)
+
+                # size returns the nnz for sparse arrays, DO NOT USE IT
+                self.assertEqual(array.size, res.shape[0] * res.shape[1])
+
+                if array.isdense:  # flat dense arrays become 2D when sparse
+                    self.assertEqual(array.atleast_2d().shape, res.shape)
+
+            # Sparse arrays
+            # Checking conversion from default sparse format (csr)
+            _check_conversion(self.array_sparse)
+            _check_conversion(self.row_sparse)
+            _check_conversion(self.column_sparse)
+            # Inner loop to check between formats conversion
+            for scs_format_start, _ in scs_formats:
+                self.array_sparse._data._data = getattr(
+                    self.array_sparse, 'to{:}'.format(scs_format_start))()
+                _check_conversion(self.array_sparse)
+                self.row_sparse._data._data = getattr(
+                    self.row_sparse, 'to{:}'.format(scs_format_start))()
+                _check_conversion(self.row_sparse)
+                self.column_sparse._data._data = getattr(
+                    self.column_sparse, 'to{:}'.format(scs_format_start))()
+                _check_conversion(self.column_sparse)
+
+            # Dense arrays
+            _check_conversion(self.array_dense)
+            _check_conversion(self.row_flat_dense)
+            _check_conversion(self.row_dense)
+            _check_conversion(self.column_dense)
+
+            # Bool arrays
+            _check_conversion(self.array_dense_bool)
+            _check_conversion(self.array_sparse_bool)
+
+            _check_conversion(self.single_flat_dense)
+            _check_conversion(self.single_dense)
+            _check_conversion(self.single_sparse)
+
+            _check_conversion(self.empty_dense)
+            _check_conversion(self.empty_flat_dense)
+            _check_conversion(self.empty_sparse)
 
     def test_tolist(self):
         """Test for CArray.tolist() method."""

@@ -169,15 +169,35 @@ class CSparse(_CArrayInterface):
         return self._data.toarray(order)
 
     def tocsr(self):
-        """Convert to csr_matrix."""
-        return self._data
+        """Return data as csr_matrix."""
+        return self._data.tocsr()
+
+    def tocoo(self):
+        """Return data as coo_matrix."""
+        return self._data.tocoo()
+
+    def tocsc(self):
+        """Return data as csc_matrix."""
+        return self._data.tocsc()
+
+    def todia(self):
+        """Return data as dia_matrix."""
+        return self._data.todia()
+
+    def todok(self):
+        """Return data as dok_matrix."""
+        return self._data.todok()
+
+    def tolil(self):
+        """Return data as lil_matrix."""
+        return self._data.tolil()
 
     def tolist(self):
-        """Convert to list."""
+        """Return data as list."""
         return self.todense().tolist()
 
     def todense(self, order=None):
-        """Convert to CDense."""
+        """Return data as CDense."""
         return CDense(self.tondarray(order))
 
     def _buffer_to_builtin(self, data):
@@ -1918,7 +1938,8 @@ class CSparse(_CArrayInterface):
 
     def inv(self):
         """Compute the (multiplicative) inverse of a square matrix."""
-        return self.__class__(inv(self._data))
+        # scipy.sparse.linalg.spsolve is more efficient on csc arrays
+        return self.__class__(inv(self.tocsc()))
 
     def pinv(self, rcond=1e-15):
         """Compute the (Moore-Penrose) pseudo-inverse of a matrix."""
@@ -2033,13 +2054,10 @@ class CSparse(_CArrayInterface):
             array2 = array2.ravel()
             axis = 1  # Simulate an horizontal concatenation
 
-        # TODO: do not call _data after implementing #769 and #770
         if axis == 0:  # Vertical
-            return cls(
-                scs.vstack([array1._data.tocsr(), array2._data.tocsr()]))
+            return cls(scs.vstack([array1.tocsr(), array2.tocsr()]))
         elif axis == 1:  # Horizontal
-            return cls(
-                scs.hstack([array1._data.tocsc(), array2._data.tocsc()]))
+            return cls(scs.hstack([array1.tocsc(), array2.tocsc()]))
         else:
             raise ValueError("axis should be one of {0, 1, None}")
 
