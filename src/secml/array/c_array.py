@@ -386,6 +386,166 @@ class CArray(_CArrayInterface):
         """
         return self._data.tocsr()
 
+    def tocoo(self):
+        """Return a sparse scipy.sparse.coo_matrix representation of array.
+
+        Returns
+        -------
+        scipy.sparse.coo_matrix
+            A representation of current data as scipy.sparse.coo_matrix.
+            If possible, we avoid copying original data.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> array = CArray([[1,2],[0,4]], tosparse=True).tocoo()
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 0)	1
+          (0, 1)	2
+          (1, 1)	4
+        >>> type(array)
+        <class 'scipy.sparse.coo.coo_matrix'>
+
+        >>> array = CArray([1,2,3]).tocoo()
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 0)	1
+          (0, 1)	2
+          (0, 2)	3
+        >>> type(array)
+        <class 'scipy.sparse.coo.coo_matrix'>
+
+        """
+        return self._data.tocoo()
+
+    def tocsc(self):
+        """Return a sparse scipy.sparse.csc_matrix representation of array.
+
+        Returns
+        -------
+        scipy.sparse.csc_matrix
+            A representation of current data as scipy.sparse.csc_matrix.
+            If possible, we avoid copying original data.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> array = CArray([[1,2],[0,4]], tosparse=True).tocsc()
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 0)	1
+          (0, 1)	2
+          (1, 1)	4
+        >>> type(array)
+        <class 'scipy.sparse.csc.csc_matrix'>
+
+        >>> array = CArray([1,2,3]).tocsc()
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 0)	1
+          (0, 1)	2
+          (0, 2)	3
+        >>> type(array)
+        <class 'scipy.sparse.csc.csc_matrix'>
+
+        """
+        return self._data.tocsc()
+
+    def todia(self):
+        """Return a sparse scipy.sparse.dia_matrix representation of array.
+
+        Returns
+        -------
+        scipy.sparse.dia_matrix
+            A representation of current data as scipy.sparse.dia_matrix.
+            If possible, we avoid copying original data.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> array = CArray([[1,2],[0,4]], tosparse=True).todia()
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 0)	1
+          (1, 1)	4
+          (0, 1)	2
+        >>> type(array)
+        <class 'scipy.sparse.dia.dia_matrix'>
+
+        >>> array = CArray([1,2,3]).todia()
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 0)	1
+          (0, 1)	2
+          (0, 2)	3
+        >>> type(array)
+        <class 'scipy.sparse.dia.dia_matrix'>
+
+        """
+        return self._data.todia()
+
+    def todok(self):
+        """Return a sparse scipy.sparse.dok_matrix representation of array.
+
+        Returns
+        -------
+        scipy.sparse.dok_matrix
+            A representation of current data as scipy.sparse.dok_matrix.
+            If possible, we avoid copying original data.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> array = CArray([[1,2],[0,4]], tosparse=True).todok()
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 1)	2
+          (0, 0)	1
+          (1, 1)	4
+        >>> type(array)
+        <class 'scipy.sparse.dok.dok_matrix'>
+
+        >>> array = CArray([1,2,3]).todok()
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 1)	2
+          (0, 0)	1
+          (0, 2)	3
+        >>> type(array)
+        <class 'scipy.sparse.dok.dok_matrix'>
+
+        """
+        return self._data.todok()
+
+    def tolil(self):
+        """Return a sparse scipy.sparse.lil_matrix representation of array.
+
+        Returns
+        -------
+        scipy.sparse.lil_matrix
+            A representation of current data as scipy.sparse.lil_matrix.
+            If possible, we avoid copying original data.
+
+        Examples
+        --------
+        >>> from secml.array import CArray
+
+        >>> array = CArray([[1,2],[0,4]], tosparse=True).tolil()
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 0)	1
+          (0, 1)	2
+          (1, 1)	4
+        >>> type(array)
+        <class 'scipy.sparse.lil.lil_matrix'>
+
+        >>> array = CArray([1,2,3]).tolil()
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 0)	1
+          (0, 1)	2
+          (0, 2)	3
+        >>> type(array)
+        <class 'scipy.sparse.lil.lil_matrix'>
+
+        """
+        return self._data.tolil()
+
     def tolist(self):
         """Return the array as a (possibly nested) list.
 
@@ -2324,7 +2484,7 @@ class CArray(_CArrayInterface):
         >>> print(x.repeat(2, axis=1))  # No columns to repeat
         Traceback (most recent call last):
           ...
-        numpy.core._internal.AxisError: axis 1 is out of bounds for array of dimension 1
+        numpy.AxisError: axis 1 is out of bounds for array of dimension 1
 
         """
         if isinstance(repeats, (self.__class__, list)):
@@ -4564,7 +4724,7 @@ class CArray(_CArrayInterface):
         >>> CArray([[1.,2.,3.], [4., 5.,6.]]).inv()
         Traceback (most recent call last):
             ...
-        numpy.linalg.linalg.LinAlgError: Last 2 dimensions of the array must be square
+        numpy.linalg.LinAlgError: Last 2 dimensions of the array must be square
 
         """
         return self.__class__(self._data.inv())
