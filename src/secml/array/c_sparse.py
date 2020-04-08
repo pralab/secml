@@ -1611,77 +1611,9 @@ class CSparse(_CArrayInterface):
         In case of multiple occurrences of the maximum values, the
         indices corresponding to the first occurrence are returned.
 
-        Examples
-        --------
-        >>> from secml.array.c_sparse import CSparse
-
-        >>> CSparse([-1, 0, 3]).argmax()
-        CDense([2], dtype=int64)
-
-        >>> CSparse([[-1, 0],[4, 3]]).argmax(axis=0)  # We return the index of minimum for each row
-        CDense([[1, 1]], dtype=int64)
-
-        >>> CSparse([[-1, 0],[4, 3]]).argmax(axis=1)  # We return the index of maximum for each column
-        CDense([[1],
-               [0]], dtype=int64)
-
         """
-        if self.size == 0:
-            raise ValueError("attempt to get argmin of an empty sequence")
-
-        # Preparing data
-        if axis is None or axis == 1 or axis == -1:  # max for row
-            array = self.ravel() if axis is None else self
-            axis_elem_num = array.shape[0]
-            this_indices = CDense(array.nnz_indices[0])
-            other_axis_indices = CDense(array.nnz_indices[1])
-        elif axis == 0:  # max for column
-            array = self
-            axis_elem_num = array.shape[1]
-            this_indices = CDense(array.nnz_indices[1])
-            other_axis_indices = CDense(array.nnz_indices[0])
-        else:
-            raise ValueError("{:} is not a valid axis.")
-
-        index_matrix = CDense.zeros(axis_elem_num, dtype=int)
-
-        for i in range(axis_elem_num):
-
-            # search maximum between non zero element for current row/column
-            i_indices = this_indices.find(this_indices == i)[1]
-
-            if len(i_indices) != 0:
-                # there is at least one element different from zero
-                current_elem = array._data.data[i_indices]
-                elem_max_idx = current_elem.argmax()
-                nnz_max = current_elem[elem_max_idx]
-                nnz_max_idx = other_axis_indices[i_indices][elem_max_idx]
-            else:
-                nnz_max = 0
-                nnz_max_idx = 0
-
-            # if max found is below zero...
-            if nnz_max < 0:
-
-                use_axis = 1 if axis is None or axis == 1 or axis == -1 else 0
-
-                # ...at least a zero in current row/column, zero is the max
-                if len(i_indices) < array.shape[use_axis]:
-
-                    if use_axis == 1:  # order for row
-                        all_i_element = array[i, :].todense()
-                    elif use_axis == 0:  # order for column
-                        all_i_element = array.T[i, :].todense()
-                    else:
-                        raise ValueError("{:} is not a valid axis.")
-
-                    nnz_max_idx = all_i_element.find(all_i_element == 0)[1][0]
-
-            index_matrix[0, i] = nnz_max_idx
-
-        return index_matrix.ravel()[0, 0] if axis is None else \
-            [index_matrix.atleast_2d() if axis == 0 else
-             index_matrix.atleast_2d().T][0]
+        res = self._data.argmax(axis=axis)  # np.matrix or int
+        return CDense(res) if axis is not None else res
 
     def argmin(self, axis=None):
         """Indices of the minimum values along an axis.
@@ -1703,77 +1635,9 @@ class CSparse(_CArrayInterface):
         In case of multiple occurrences of the minimum values, the
         indices corresponding to the first occurrence are returned.
 
-        Examples
-        --------
-        >>> from secml.array.c_sparse import CSparse
-
-        >>> CSparse([-1, 0, 3]).argmin()
-        CDense([0], dtype=int64)
-
-        >>> CSparse([[-1, 0],[4, 3]]).argmin(axis=0)  # We return the index of minimum for each row
-        CDense([[0, 0]], dtype=int64)
-
-        >>> CSparse([[-1, 0],[4, 3]]).argmin(axis=1)  # We return the index of maximum for each column
-        CDense([[0],
-               [1]], dtype=int64)
-
         """
-        if self.size == 0:
-            raise ValueError("attempt to get argmin of an empty sequence")
-
-        # Preparing data
-        if axis is None or axis == 1 or axis == -1:
-            array = self.ravel() if axis is None else self
-            axis_elem_num = array.shape[0]  # min for row
-            this_indices = CDense(array.nnz_indices[0])
-            other_axis_indices = CDense(array.nnz_indices[1])
-        elif axis == 0:
-            array = self
-            axis_elem_num = array.shape[1]  # min for column
-            this_indices = CDense(array.nnz_indices[1])
-            other_axis_indices = CDense(array.nnz_indices[0])
-        else:
-            raise ValueError("{:} is not a valid axis.")
-
-        index_matrix = CDense.zeros(axis_elem_num, dtype=int)
-
-        for i in range(axis_elem_num):
-
-            # search minimum between non zero element for current row/column
-            i_indices = this_indices.find(this_indices == i)[1]
-
-            if len(i_indices) != 0:
-                # there is at least one element different from zero
-                current_elem = array._data.data[i_indices]
-                elem_min_idx = current_elem.argmin()
-                nnz_min = current_elem[elem_min_idx]
-                nnz_min_idx = other_axis_indices[0, i_indices][0, elem_min_idx]
-            else:
-                nnz_min = 0
-                nnz_min_idx = 0
-
-            # if min found is greater than zero...
-            if nnz_min > 0:
-
-                use_axis = 1 if axis is None or axis == 1 or axis == -1 else 0
-
-                # ...at least a zero in current row/column, zero is the min
-                if len(i_indices) < array.shape[use_axis]:
-
-                    if use_axis == 1:  # order for row
-                        all_i_element = array[i, :].todense()
-                    elif use_axis == 0:  # order for column
-                        all_i_element = array.T[i, :].todense()
-                    else:
-                        raise ValueError("{:} is not a valid axis.")
-
-                    nnz_min_idx = all_i_element.find(all_i_element == 0)[1][0]
-
-            index_matrix[0, i] = nnz_min_idx
-
-        return index_matrix.ravel()[0, 0] if axis is None else \
-            [index_matrix.atleast_2d() if axis == 0 else
-             index_matrix.atleast_2d().T][0]
+        res = self._data.argmin(axis=axis)  # np.matrix or int
+        return CDense(res) if axis is not None else res
 
     def nanmax(self, axis=None, keepdims=True):
         raise NotImplementedError

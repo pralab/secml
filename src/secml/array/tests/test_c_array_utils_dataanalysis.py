@@ -1036,6 +1036,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             argmin_res = array.argmin(axis=0)
             self.logger.info("a.argmin(axis=0): \n{:}".format(argmin_res))
             self.assertIsInstance(argmin_res, CArray)
+            self.assertTrue(argmin_res.isdense)
             self.assertIsSubDtype(argmin_res.dtype, int)
             self.assertEqual(1, argmin_res.shape[0])
             # We create a find_2d-like mask to check result
@@ -1049,6 +1050,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             argmin_res = array.argmin(axis=1)
             self.logger.info("a.argmin(axis=1): \n{:}".format(argmin_res))
             self.assertIsInstance(argmin_res, CArray)
+            self.assertTrue(argmin_res.isdense)
             self.assertIsSubDtype(argmin_res.dtype, int)
             self.assertEqual(1, argmin_res.shape[1])
             # We create a find_2d-like mask to check result
@@ -1096,6 +1098,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             argmax_res = array.argmax(axis=0)
             self.logger.info("a.argmax(axis=0): \n{:}".format(argmax_res))
             self.assertIsInstance(argmax_res, CArray)
+            self.assertTrue(argmax_res.isdense)
             self.assertIsSubDtype(argmax_res.dtype, int)
             self.assertEqual(1, argmax_res.shape[0])
             # We create a find_2d-like mask to check result
@@ -1109,6 +1112,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             argmax_res = array.argmax(axis=1)
             self.logger.info("a.argmax(axis=1): \n{:}".format(argmax_res))
             self.assertIsInstance(argmax_res, CArray)
+            self.assertTrue(argmax_res.isdense)
             self.assertIsSubDtype(argmax_res.dtype, int)
             self.assertEqual(1, argmax_res.shape[1])
             # We create a find_2d-like mask to check result
