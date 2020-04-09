@@ -60,9 +60,10 @@ class TestCArrayClassMethods(CArrayTestCases):
         _concat_allaxis(self.array_sparse, self.array_dense)
         _concat_allaxis(self.array_dense, self.array_sparse)
 
-        # Test for #767 append does not work when one of the arrays is csc
-        self.array_sparse._data._data = self.array_sparse._data._data.tocsc()
+        # Test for #767 append does not work when one of the arrays is not csr
+        self.array_sparse._data._data = self.array_sparse._data._data.todok()
         _concat_allaxis(self.array_sparse, self.array_sparse)
+        self.array_sparse._data._data = self.array_sparse._data._data.tocsr()
 
         # check concat on empty arrays
         empty_sparse = CArray([], tosparse=True)

@@ -200,6 +200,13 @@ class CSparse(_CArrayInterface):
         """Return data as CDense."""
         return CDense(self.tondarray(order))
 
+    def _tocoo_or_tocsr(self):
+        """Return data as coo_matrix if data is not as csr_matrix,
+        return csr_matrix otherwise."""
+        if self._data.getformat() != 'csr':
+            return self.tocoo()
+        return self.tocsr()
+
     def _buffer_to_builtin(self, data):
         """Convert data buffer to built-in arrays"""
         if isinstance(data, CDense):  # Extract np.ndarray
@@ -713,10 +720,10 @@ class CSparse(_CArrayInterface):
                 raise NotImplementedError(
                     "using zero or a boolean False as power is not supported "
                     "for sparse arrays. Convert to dense if needed.")
+            x = self.tocsr()  # self.__class__ expects a csr
             # indices/indptr must passed as copies (pow creates new data)
-            return self.__class__((pow(self._data.data, power),
-                                   self._data.indices, self._data.indptr),
-                                  shape=self.shape, copy=True)
+            return self.__class__((pow(x.data, power), x.indices, x.indptr),
+                                  shape=x.shape, copy=True)
         else:
             return NotImplemented
 
@@ -972,15 +979,16 @@ class CSparse(_CArrayInterface):
             raise IOError("File {:} already exists. Specify overwrite=True "
                           "or delete the file.".format(datafile))
 
+        x = self.tocsr()  # Load expects a csr_matrix
+
         # Flatting data to store (for sparse this results in 1 x size arrays)
-        data_cndarray = CDense(
-            self._data.data).reshape((1, self._data.data.shape[0]))
+        data_cndarray = CDense(x.data).reshape((1, x.data.shape[0]))
         # Converting explicitly to int as in 64 bit machines the
         # following arrays are stored with dtype == np.int32
-        indices_cndarray = CDense(self._data.indices).reshape(
-            (1, self._data.indices.shape[0])).astype(int)
-        indptr_cndarray = CDense(self._data.indptr).reshape(
-            (1, self._data.indptr.shape[0])).astype(int)
+        indices_cndarray = \
+            CDense(x.indices).reshape((1, x.indices.shape[0])).astype(int)
+        indptr_cndarray = \
+            CDense(x.indptr).reshape((1, x.indptr.shape[0])).astype(int)
 
         # Error handling is managed by CDense.save()
         # file will be closed exiting from context
@@ -988,7 +996,7 @@ class CSparse(_CArrayInterface):
             data_cndarray.save(fhandle)
             indices_cndarray.save(fhandle)
             indptr_cndarray.save(fhandle)
-            fhandle.write(str(self.shape[0]) + " " + str(self.shape[1]))
+            fhandle.write(str(x.shape[0]) + " " + str(x.shape[1]))
 
     @classmethod
     def load(cls, datafile, dtype=float):
@@ -1087,16 +1095,19 @@ class CSparse(_CArrayInterface):
 
     def nan_to_num(self):
         """Replace nan with zero and inf with finite numbers."""
+        # Use 'coo' for fast conversion (if not a 'csr')
+        self._data = self._tocoo_or_tocsr()
         self._data.data = np.nan_to_num(self._data.data)
+        self._data = self.tocsr()  # Converting back to 'csr'
 
     def round(self, decimals=0):
         """Evenly round to the given number of decimals."""
-        data = np.round(self._data.data, decimals=decimals)
+        x = self.tocsr()  # self.__class__ expects a csr
+        data = np.round(x.data, decimals=decimals)
         # Round does not allocate new memory (data.flags.OWNDATA = False)
         # and indices/indptr must passed as copies
         return self.__class__(
-            (data, self._data.indices, self._data.indptr),
-            shape=self.shape, copy=True)
+            (data, x.indices, x.indptr), shape=self.shape, copy=True)
 
     def ceil(self):
         """Return the ceiling of the input, element-wise."""
@@ -1136,10 +1147,11 @@ class CSparse(_CArrayInterface):
         return tosort
 
     def argsort(self, axis=-1, kind='quicksort'):
-        """
-        Returns the indices that would sort an array.
-        If possible is better if you use sort function
-        axis= -1 order based on last axis (which in sparse matrix is 1 horizontal)
+        """Returns the indices that would sort an array.
+
+        If possible is better if you use sort function axis=-1 order based
+        on last axis (which in sparse matrix is 1 horizontal).
+
         """
         if kind != 'quicksort':
             raise ValueError("only `quicksort` algorithm is supported")
@@ -1236,21 +1248,6 @@ class CSparse(_CArrayInterface):
         CSparse
             The element-wise logical AND between the two arrays.
 
-        Examples
-        --------
-        >>> from secml.array.c_sparse import CSparse
-
-        >>> CSparse([[-1,0],[2,0]]).logical_and(CSparse([[2,-1],[2,-1]])).todense()
-        CDense([[ True, False],
-               [ True, False]])
-
-        >>> CSparse([-1]).logical_and(CSparse([2])).todense()
-        CDense([[ True]])
-
-        >>> array = CSparse([1,0,2,-1])
-        >>> (array > 0).logical_and(array < 2).todense()
-        CDense([[ True, False, False, False]])
-
         """
         if self.shape != array.shape:
             raise ValueError(
@@ -1259,9 +1256,15 @@ class CSparse(_CArrayInterface):
         # This create an empty sparse matrix (basically full of zeros)
         and_result = self.__class__(self.shape, dtype=bool)
 
+        # Ensure we have the expected type
+        # Use 'coo' for fast conversion (if not a 'csr')
+        x = self._tocoo_or_tocsr()
+        x_array = array.tocoo() if \
+            array._data.getformat() != 'csr' else array.tocsr()
+
         # Iterate over non-zero elements
         # This also works for any explicitly stored zero
-        for e_i, e in enumerate(self._data.data):
+        for e_i, e in enumerate(x.data):
             # Get indices of current element
             this_elem_row = self.nnz_indices[0][e_i]
             this_elem_col = self.nnz_indices[1][e_i]
@@ -1271,8 +1274,7 @@ class CSparse(_CArrayInterface):
                     CDense(array.nnz_indices[1]) == this_elem_col)
             if y_same_bool.any():  # Found a corresponding element
                 # Now extract the value to compare from second array
-                same_position_val = int(
-                    array._data.data[y_same_bool.tondarray()])
+                same_position_val = int(x_array.data[y_same_bool.tondarray()])
                 # Compare element from self with the one from 2nd array
                 if np.logical_and(e, same_position_val):
                     and_result[this_elem_row, this_elem_col] = True
@@ -1296,22 +1298,6 @@ class CSparse(_CArrayInterface):
         -------
         out_and : CSparse or bool
             The element-wise logical OR between the two arrays.
-
-
-        Examples
-        --------
-        >>> from secml.array.c_sparse import CSparse
-
-        >>> CSparse([[-1,0],[2,0]]).logical_or(CSparse([[2,0],[2,-1]])).todense()
-        CDense([[ True, False],
-               [ True,  True]])
-
-        >>> CSparse([False]).logical_and(CSparse([False])).todense()
-        CDense([[False]])
-
-        >>> array = CSparse([1,0,2,-1])
-        >>> (array > 0).logical_or(array < 2).todense()
-        CDense([[ True,  True,  True,  True]])
 
         """
         if self.shape != array.shape:
@@ -1405,7 +1391,7 @@ class CSparse(_CArrayInterface):
         n_zeros = self.size - self.nnz
         unique_items = [0] if n_zeros > 0 else []  # We have at least a zero?
         # Appending nonzero elements
-        out = np.unique(self._data.data,
+        out = np.unique(self.tocsr().data,
                         return_index=return_index,
                         return_inverse=return_inverse,
                         return_counts=return_counts)
@@ -1422,9 +1408,9 @@ class CSparse(_CArrayInterface):
         if return_index is True:
 
             # Indices will be extracted from flattened array
-            flat_a = self.ravel()
+            flat_a = self.ravel()  # Returns a csr
 
-            # csr_matrix indices must be sorted to extract unique indices
+            # csr indices must be sorted to extract unique indices
             if not bool(flat_a._data.has_sorted_indices):
                 flat_a._data.sort_indices()
 
@@ -1467,8 +1453,12 @@ class CSparse(_CArrayInterface):
     def bincount(self, minlength=0):
         """Count the number of occurrences of each value in array 
         of non-negative ints."""
+        # Use 'coo' for fast conversion (if not a 'csr')
+        x = self._tocoo_or_tocsr()
+        # Ensure we eliminate redundant zeros to obtain correct counts
+        x.eliminate_zeros()
         # count number of elements (except zeros)
-        nnz_bincount = np.bincount(self._data.data, minlength=minlength)
+        nnz_bincount = np.bincount(x.data, minlength=minlength)
         # count number of zeros and set it
         nnz_bincount[0] = self.size - self.nnz
         return CDense(nnz_bincount)
@@ -1539,7 +1529,9 @@ class CSparse(_CArrayInterface):
         else:
             if axis is None:  # Global product
                 if self.size == self.nnz:
-                    return self.__class__(self._data.data.prod(), dtype=dtype)
+                    # Use 'coo' for fast conversion (if not a 'csr')
+                    x = self._tocoo_or_tocsr()
+                    return self.__class__(x.data.prod(), dtype=dtype)
                 else:  # If any element is zero, product is zero
                     return self.__class__(0.0, dtype=dtype)
             elif axis == 0:
@@ -1564,20 +1556,22 @@ class CSparse(_CArrayInterface):
         if axis is not None or keepdims is not True:
             raise NotImplementedError(
                 "`axis` and `keepdims` are currently not supported")
-
-        return bool(self.size == self.nnz and self._data.data.all())
+        # Use 'coo' for fast conversion (if not a 'csr')
+        return bool(
+            self.size == self.nnz and self._tocoo_or_tocsr().data.all())
 
     def any(self, axis=None, keepdims=True):
         """Return True if any array element is boolean True."""
         if axis is not None or keepdims is not True:
             raise NotImplementedError(
                 "`axis` and `keepdims` are currently not supported")
-
-        return bool(self._data.data.any())
+        # Use 'coo' for fast conversion (if not a 'csr')
+        return bool(self._tocoo_or_tocsr().data.any())
 
     def max(self, axis=None, keepdims=True):
         """Max of array elements over a given axis."""
-        out = self._data.max(axis=axis)
+        # Use 'coo' for fast conversion (if not a 'csr')
+        out = self._tocoo_or_tocsr().max(axis=axis)
         if axis is None:  # return scalar
             return out
         out = CDense(out.toarray())
@@ -1585,7 +1579,8 @@ class CSparse(_CArrayInterface):
 
     def min(self, axis=None, keepdims=True):
         """Min of array elements over a given axis."""
-        out = self._data.min(axis=axis)
+        # Use 'coo' for fast conversion (if not a 'csr')
+        out = self._tocoo_or_tocsr().min(axis=axis)
         if axis is None:  # return scalar
             return out
         out = CDense(out.toarray())
@@ -1830,7 +1825,9 @@ class CSparse(_CArrayInterface):
 
     @classmethod
     def eye(cls, n_rows, n_cols=None, k=0, dtype=float):
-        """Return an array of desired dimension with ones on the diagonal and zeros elsewhere.
+        """Return an array of desired dimension with ones on the diagonal
+        and zeros elsewhere.
+
         See scipy.sparse.eye for more informations.
 
         Parameters
@@ -1838,28 +1835,14 @@ class CSparse(_CArrayInterface):
         n_rows : number of rows for output array, integer.
         n_cols : number of columns in the output. If None, defaults to n_rows.
         k : index of the diagonal. 0 (the default) refers to the main diagonal,
-            a positive value refers to an upper diagonal, and a negative value to a lower diagonal.
+            a positive value refers to an upper diagonal, and a negative value
+            to a lower diagonal.
         dtype : datatype of array data.
 
         Returns
         -------
-        Sparse array of desired shape with ones on the diagonal and zeros elsewhere.
-
-        Examples
-        --------
-        >>> from secml.array.c_sparse import CSparse
-        >>> array = CSparse.eye(2)
-        >>> print(array)  # doctest: +SKIP
-        (0, 0)	1.0
-        (1, 1)	1.0
-        >>> print(array.shape)
-        (2, 2)
-
-        >>> array = CSparse.eye(2, k=1, dtype=int)
-        >>> print(array)  # doctest: +SKIP
-        (0, 1)	1
-        >>> print(array.shape)
-        (2, 2)
+        Sparse array of desired shape with ones on the diagonal and
+        zeros elsewhere.
 
         """
         return cls(scs.eye(n_rows, n_cols, k=k, dtype=dtype, format='csr'))
