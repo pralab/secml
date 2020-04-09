@@ -37,6 +37,12 @@ class TestCArrayUtilsComparison(CArrayTestCases):
         _logical_and(self.column_dense, self.column_sparse,
                      self.column_dense.astype(bool))
 
+        # Should work independently of sparse format
+        self.array_sparse._data._data = self.array_sparse._data.todok()
+        _logical_and(self.array_sparse, self.array_dense,
+                     self.array_sparse.astype(bool))
+        self.array_sparse._data._data = self.array_sparse._data.tocsr()
+
         _logical_and(self.array_sparse, self.array_sparse_nozero,
                      self.array_sparse.astype(bool))
         _logical_and(self.array_dense, self.array_dense_nozero,

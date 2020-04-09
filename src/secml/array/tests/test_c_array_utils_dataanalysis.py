@@ -120,6 +120,11 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         _unique(self.array_dense, CArray([0, 1, 2, 3, 4, 5, 6]))
         _unique(self.array_sparse, CArray([0, 1, 2, 3, 4, 5, 6]))
 
+        # Should work independently of sparse format
+        self.array_sparse._data._data = self.array_sparse._data.todok()
+        _unique(self.array_sparse, CArray([0, 1, 2, 3, 4, 5, 6]))
+        self.array_sparse._data._data = self.array_sparse._data.tocsr()
+
         _unique(self.row_sparse, CArray([4, 0, 6]))
         _unique(self.column_sparse, CArray([4, 0, 6]))
 
@@ -172,6 +177,11 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
             self.row_sparse, CArray([1, 0, 0, 0, 1, 0, 1]), minlength=3)
         _check_bincount(self.row_flat_dense,
                         CArray([1, 0, 0, 0, 1, 0, 1]), minlength=3)
+
+        # Should work independently of sparse format
+        self.row_sparse._data._data = self.row_sparse._data.todok()
+        _check_bincount(self.row_sparse, CArray([1, 0, 0, 0, 1, 0, 1]))
+        self.row_sparse._data._data = self.row_sparse._data.tocsr()
 
         # test when no zeros are present in input
         input_data = CArray([1, 2], tosparse=True)
@@ -554,7 +564,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                             if dtype is None:
                                 if array.dtype.kind in ('i', 'u', 'b'):
                                     dtype_none = int
-                                elif array.dtype.kind in ('f'):
+                                elif array.dtype.kind in ('f',):
                                     dtype_none = float
                                 else:
                                     dtype_none = array.dtype.type
@@ -578,7 +588,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                             if dtype is None:
                                 if array.dtype.kind in ('i', 'u', 'b'):
                                     dtype_none = int
-                                elif array.dtype.kind in ('f'):
+                                elif array.dtype.kind in ('f',):
                                     dtype_none = float
                                 else:
                                     dtype_none = array.dtype.type
@@ -620,6 +630,11 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         _check_prod(self.single_sparse, (4, CArray([[4]], tosparse=True),
                                          CArray([[4]], tosparse=True)))
 
+        self.single_sparse._data._data = self.single_sparse._data.todok()
+        _check_prod(self.single_sparse, (4, CArray([[4]], tosparse=True),
+                                         CArray([[4]], tosparse=True)))
+        self.single_sparse._data._data = self.single_sparse._data.tocsr()
+
         _check_prod(self.single_bool_flat_dense, (1, CArray([1]), CArray([1])))
         _check_prod(self.single_bool_dense, (1, CArray([[1]]), CArray([[1]])))
         _check_prod(self.single_bool_sparse, (1, CArray([[1]], tosparse=True),
@@ -634,15 +649,13 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         """Test for CArray.all() method."""
         self.logger.info("Test for CArray.all() method")
 
-        def _all(matrix, matrix_nozero, matrix_bool, matrix_bool_true):
-
+        def _all(matrix):
             for axis in (None, 0, 1):
-
                 if matrix.issparse is True and axis is not None:
                     with self.assertRaises(NotImplementedError):
                         matrix.all(axis=axis)
                 else:
-                    # all() on an array that contain also zeros gives False?
+                    # all() on array that contain also zeros gives False?
                     self.logger.info("matrix: \n" + str(matrix))
                     all_res = matrix.all(axis=axis)
                     self.logger.info("matrix.all(axis={:}) result is:\n"
@@ -653,12 +666,15 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                     else:
                         self.assertIsInstance(all_res, CArray)
 
+        def _all_nozero(matrix_nozero):
+            for axis in (None, 0, 1):
                 if matrix_nozero.issparse is True and axis is not None:
                     with self.assertRaises(NotImplementedError):
                         matrix_nozero.all(axis=axis)
                 else:
                     # all() on an array with no zeros gives True?
-                    self.logger.info("matrix_nozero: \n" + str(matrix_nozero))
+                    self.logger.info(
+                        "matrix_nozero: \n" + str(matrix_nozero))
                     all_res = matrix_nozero.all(axis=axis)
                     self.logger.info("matrix_nozero.all(axis={:}):\n"
                                      "{:}".format(axis, all_res))
@@ -669,6 +685,8 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                         self.assertIsInstance(all_res, CArray)
                         self.assertFalse((all_res != True).any())
 
+        def _all_bool(matrix_bool):
+            for axis in (None, 0, 1):
                 if matrix_bool.issparse is True and axis is not None:
                     with self.assertRaises(NotImplementedError):
                         matrix_bool.all(axis=axis)
@@ -684,6 +702,8 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                     else:
                         self.assertIsInstance(all_res, CArray)
 
+        def _all_bool_true(matrix_bool_true):
+            for axis in (None, 0, 1):
                 if matrix_bool_true.issparse is True and axis is not None:
                     with self.assertRaises(NotImplementedError):
                         matrix_bool_true.all(axis=axis)
@@ -701,19 +721,30 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                         self.assertIsInstance(all_res, CArray)
                         self.assertFalse((all_res != True).any())
 
-        _all(self.array_sparse, self.array_sparse_nozero,
-             self.array_sparse_bool, self.array_sparse_bool_true)
-        _all(self.array_dense, self.array_dense_nozero,
-             self.array_dense_bool, self.array_dense_bool_true)
+        _all(self.array_sparse)
+        _all_nozero(self.array_sparse_nozero)
+        _all_bool(self.array_sparse_bool)
+        _all_bool_true(self.array_sparse_bool_true)
+
+        # Should work independently of sparse format
+        # Use a nonzero array to avoid short-circuit
+        self.array_sparse_nozero._data._data = \
+            self.array_sparse_nozero._data.todok()
+        _all_nozero(self.array_sparse_nozero)
+        self.array_sparse_nozero._data._data = \
+            self.array_sparse_nozero._data.tocsr()
+
+        _all(self.array_dense)
+        _all_nozero(self.array_dense_nozero)
+        _all_bool(self.array_dense_bool)
+        _all_bool_true(self.array_dense_bool_true)
 
     def test_any(self):
         """Test for CArray.any() method."""
         self.logger.info("Test for CArray.any() method")
 
-        def _any(matrix, matrix_allzero, matrix_bool, matrix_bool_false):
-
+        def _any(matrix):
             for axis in (None, 0, 1):
-
                 if matrix.issparse is True and axis is not None:
                     with self.assertRaises(NotImplementedError):
                         matrix.any(axis=axis)
@@ -729,6 +760,8 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                     else:
                         self.assertIsInstance(any_res, CArray)
 
+        def _any_allzero(matrix_allzero):
+            for axis in (None, 0, 1):
                 if matrix_allzero.issparse is True and axis is not None:
                     with self.assertRaises(NotImplementedError):
                         matrix_allzero.any(axis=axis)
@@ -746,6 +779,8 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                         self.assertIsInstance(any_res, CArray)
                         self.assertFalse((any_res != False).any())
 
+        def _any_bool(matrix_bool):
+            for axis in (None, 0, 1):
                 if matrix_bool.issparse is True and axis is not None:
                     with self.assertRaises(NotImplementedError):
                         matrix_bool.any(axis=axis)
@@ -761,6 +796,8 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                     else:
                         self.assertIsInstance(any_res, CArray)
 
+        def _any_bool_false(matrix_bool_false):
+            for axis in (None, 0, 1):
                 if matrix_bool_false.issparse is True and axis is not None:
                     with self.assertRaises(NotImplementedError):
                         matrix_bool_false.any(axis=axis)
@@ -778,10 +815,23 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                         self.assertIsInstance(any_res, CArray)
                         self.assertFalse((any_res != False).any())
 
-        _any(self.array_sparse, self.array_sparse_allzero,
-             self.array_sparse_bool, self.array_sparse_bool_false)
-        _any(self.array_dense, self.array_dense_allzero,
-             self.array_dense_bool, self.array_dense_bool_false)
+        _any(self.array_sparse)
+        _any_allzero(self.array_sparse_allzero)
+        _any_bool(self.array_sparse_bool)
+        _any_bool_false(self.array_sparse_bool_false)
+
+        # Should work independently of sparse format
+        # Use a allzero array to avoid short-circuit
+        self.array_sparse_allzero._data._data = \
+            self.array_sparse_allzero._data.todok()
+        _any_allzero(self.array_sparse_allzero)
+        self.array_sparse_allzero._data._data = \
+            self.array_sparse_allzero._data.tocsr()
+
+        _any(self.array_dense)
+        _any_allzero(self.array_dense_allzero)
+        _any_bool(self.array_dense_bool)
+        _any_bool_false(self.array_dense_bool_false)
 
     def test_min_max_mean(self):
         """Test for CArray.min(), CArray.max(), CArray.mean() method."""
@@ -838,6 +888,13 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         _check_minmaxmean('min', self.array_dense,
                           (0, CArray([[1, 0, 0, 0]]), CArray([[0], [0], [0]])))
 
+        # Should work independently of sparse format
+        self.array_sparse._data._data = self.array_sparse._data.todok()
+        _check_minmaxmean('min', self.array_sparse,
+                          (0, CArray([[1, 0, 0, 0]]),
+                           CArray([[0], [0], [0]])))
+        self.array_sparse._data._data = self.array_sparse._data.tocsr()
+
         _check_minmaxmean('min', self.row_flat_dense,
                           (0, CArray([4, 0, 6]), 0))
         _check_minmaxmean('min', self.row_sparse,
@@ -867,6 +924,13 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                            CArray([[5], [4], [6]])))
         _check_minmaxmean('max', self.array_dense,
                           (6, CArray([[3, 6, 0, 5]]), CArray([[5], [4], [6]])))
+
+        # Should work independently of sparse format
+        self.array_sparse._data._data = self.array_sparse._data.todok()
+        _check_minmaxmean('max', self.array_sparse,
+                          (6, CArray([[3, 6, 0, 5]]),
+                           CArray([[5], [4], [6]])))
+        self.array_sparse._data._data = self.array_sparse._data.tocsr()
 
         _check_minmaxmean('max', self.row_flat_dense,
                           (6, CArray([4, 0, 6]), CArray([6])))
@@ -898,6 +962,13 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
         _check_minmaxmean('mean', self.array_dense,
                           (1.75, CArray([[2, 3.33, 0, 1.67]]),
                            CArray([[1.5], [1.5], [2.25]])))
+
+        # Should work independently of sparse format
+        self.array_sparse._data._data = self.array_sparse._data.todok()
+        _check_minmaxmean('mean', self.array_sparse,
+                          (1.75, CArray([[2, 3.33, 0, 1.67]]),
+                           CArray([[1.5], [1.5], [2.25]])))
+        self.array_sparse._data._data = self.array_sparse._data.tocsr()
 
         _check_minmaxmean('mean', self.row_flat_dense,
                           (3.33, CArray([4, 0, 6]), CArray([3.33])))
