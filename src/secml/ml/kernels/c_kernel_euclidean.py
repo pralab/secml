@@ -2,7 +2,6 @@
 .. module:: CKernelEuclidean
    :synopsis: Euclidean distance kernel.
 
-.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 .. moduleauthor:: Angelo Sotgiu <angelo.sotgiu@unica.it>
 
@@ -27,6 +26,9 @@ class CKernelEuclidean(CKernel):
     ----------
     squared : bool, optional
         If True, return squared Euclidean distances. Default False.
+    preprocess : CModule or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CModule subclass. If None, input data is used as is.
 
     Attributes
     ----------
@@ -48,11 +50,17 @@ class CKernelEuclidean(CKernel):
     """
     __class_type = 'euclidean'
 
-    def __init__(self, squared=False):
+    def __init__(self, squared=False, preprocess=None):
         self._squared = squared
         self._x_norm_squared = None
         self._rv_norm_squared = None
-        super(CKernelEuclidean, self).__init__()
+        super(CKernelEuclidean, self).__init__(preprocess=preprocess)
+
+    @property
+    def _grad_requires_forward(self):
+        """Returns True as kernel is cached in the forward pass and then
+        used by backward when computing the gradient."""
+        return True
 
     @property
     def squared(self):
@@ -188,13 +196,3 @@ class CKernelEuclidean(CKernel):
 
         # Casting to sparse if necessary
         return grad.tosparse() if diff.issparse else grad
-
-    def gradient(self, x, w=None):
-        """Compute gradient at x by doing a forward and a backward pass.
-
-        The gradient is pre-multiplied by w.
-
-        """
-        self._cached_kernel = None
-        self.forward(x)
-        return self.backward(w)

@@ -47,7 +47,6 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
     def __init__(self, model, input_shape=None, preprocess=None,
                  pretrained=False, pretrained_classes=None,
                  softmax_outputs=False):
-
         super(CClassifierDNN, self).__init__(preprocess=preprocess)
 
         self._model = model
@@ -60,6 +59,12 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         self._pretrained_classes = pretrained_classes
         self._input_shape = input_shape
         self._softmax_outputs = softmax_outputs
+
+    @property
+    def _grad_requires_forward(self):
+        """Returns True as deep-learning frameworks use auto-differentiation
+        to compute gradients, thus requiring a forward pass before backward."""
+        return True
 
     @property
     def input_shape(self):
@@ -237,12 +242,3 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
         grad = self.gradient(x=x, w=w)
         self._out_layer = None
         return grad
-
-    def gradient(self, x, w=None):
-        """Compute gradient at x by doing a forward and a backward pass.
-
-        The gradient is pre-multiplied by w.
-
-        """
-        self.forward(x, caching=True)
-        return self.backward(w)

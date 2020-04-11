@@ -15,7 +15,7 @@ class TestCClassifierDecisionTree(CClassifierTestCases):
     def test_classify(self):
         """Test for predict method. """
         self.logger.info("Testing decision tree classifier training ")
-        self.dec_tree.fit(self.dataset)
+        self.dec_tree.fit(self.dataset.X, self.dataset.Y)
 
         self.logger.info("Testing classification with trees")
 

@@ -79,6 +79,15 @@ class CNormalizerTFIDF(CNormalizer):
         # set norm
         self.norm = norm
 
+    def _clear_cache(self):
+        """Clears cached values within this class instance."""
+        self._cached_x_tfidf = None
+        super(CNormalizerTFIDF, self)._clear_cache()
+
+    @property
+    def _grad_requires_forward(self):
+        return True
+
     @property
     def norm(self):
         """Type of norm used to normalize the tf-idf."""
@@ -178,14 +187,3 @@ class CNormalizerTFIDF(CNormalizer):
             # compute the gradient using the chain rule
             grad_unitnorm = self._unitnorm.backward(w)
             return grad_unitnorm * grad
-
-    def gradient(self, x, w=None):
-        """Compute gradient at x by doing a backward pass.
-
-        Input will be preprocessed first and pre-multiplied by w if provided.
-
-        """
-        # Transform data using inner preprocess, if defined
-        self._cached_x_tfidf = None  # cache cleaning
-        self.forward(x, caching=True)
-        return self.backward(w)

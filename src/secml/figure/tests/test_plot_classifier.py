@@ -16,7 +16,7 @@ class TestCPlotClassifier(CUnitTest):
         self.dataset = CDLRandomBlobs(
             random_state=3, n_features=2, centers=4).load()
         self.dataset.X = CNormalizerMinMax().fit_transform(self.dataset.X)
-        self.clf.fit(self.dataset)
+        self.clf.fit(self.dataset.X, self.dataset.Y)
 
     def test_plot_decision_regions(self):
         """Test for `.plot_decision_regions` method."""

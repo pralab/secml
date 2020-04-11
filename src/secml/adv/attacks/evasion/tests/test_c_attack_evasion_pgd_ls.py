@@ -37,11 +37,12 @@ class TestCAttackEvasionPGDLS(CAttackEvasionTestCases):
 
         if not params["classifier"].is_fitted():
             self.logger.info("Training classifier...")
-            params["classifier"].fit(ds)
+            params["classifier"].fit(ds.X, ds.Y)
 
         if not params["surrogate_classifier"].is_fitted():
             self.logger.info("Training surrogate classifier...")
-            params["surrogate_classifier"].fit(params["surrogate_data"])
+            params["surrogate_classifier"].fit(
+                params["surrogate_data"].X,params["surrogate_data"].Y)
 
         evas = CAttackEvasionPGDLS(**params)
         evas.verbose = 2

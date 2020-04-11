@@ -14,7 +14,7 @@ class TestCPlot(CUnitTest):
         self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
                                  n_clusters_per_class=1).load()
         self.dataset.X = CNormalizerMinMax().fit_transform(self.dataset.X)
-        self.clf.fit(self.dataset)
+        self.clf.fit(self.dataset.X, self.dataset.Y)
 
     def test_fun(self):
         """Test for CPlotFunction.plot_fun method."""

@@ -30,6 +30,9 @@ class CKernelPoly(CKernel):
     coef0 : float, optional
         Free parameter used for trading off the influence of higher-order
         versus lower-order terms in the kernel. Default 1.0.
+    preprocess : CModule or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CModule subclass. If None, input data is used as is.
 
     Attributes
     ----------
@@ -51,13 +54,13 @@ class CKernelPoly(CKernel):
     """
     __class_type = 'poly'
 
-    def __init__(self, degree=2, gamma=1.0, coef0=1.0):
+    def __init__(self, degree=2, gamma=1.0, coef0=1.0, preprocess=None):
 
         # kernel parameters
         self.degree = degree
         self.gamma = gamma
         self.coef0 = coef0
-        super(CKernelPoly, self).__init__()
+        super(CKernelPoly, self).__init__(preprocess=preprocess)
 
     @property
     def degree(self):

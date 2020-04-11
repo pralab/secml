@@ -107,7 +107,7 @@ class CClassifierLogistic(CClassifierLinear, CClassifierGradientLogisticMixin):
             warm_start=False,
         )
 
-    def _fit(self, dataset):
+    def _fit(self, x, y):
         """Trains the One-Vs-All Logistic classifier.
 
         The following is a private method computing one single
@@ -118,22 +118,24 @@ class CClassifierLogistic(CClassifierLinear, CClassifierGradientLogisticMixin):
 
         Parameters
         ----------
-        dataset : CDataset
-            Binary (2-classes) training set. Must be a :class:`.CDataset`
-            instance with patterns data and corresponding labels.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class
+            labels (2-classes only).
 
         Returns
         -------
-        trained_cls : classifier
-            Instance of the used solver trained using input dataset.
+        CClassifierLogistic
+            Trained classifier.
 
         """
         self._init_clf()
 
-        self._sklearn_clf.fit(dataset.X.get_data(), dataset.Y.tondarray())
+        self._sklearn_clf.fit(x.get_data(), y.tondarray())
 
         self._w = CArray(
-            self._sklearn_clf.coef_, tosparse=dataset.issparse).ravel()
+            self._sklearn_clf.coef_, tosparse=x.issparse).ravel()
         self._b = CArray(self._sklearn_clf.intercept_[0])[0]
 
         return self

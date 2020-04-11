@@ -55,7 +55,7 @@ class TestCClassifierPyTorchBlobs(CClassifierPyTorchTestCases):
             cls.n_features, cls.n_classes, cls.batch_size)
 
         # Train the classifier
-        cls.clf.fit(cls.tr)
+        cls.clf.fit(cls.tr.X, cls.tr.Y)
 
     @staticmethod
     def _create_tr_ts(n_tr, n_ts, n_classes, n_features):

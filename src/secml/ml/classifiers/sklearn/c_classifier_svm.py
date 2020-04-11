@@ -299,7 +299,7 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         ys = self.alpha.sign()
         return ys[self.sv_margin_idx(tol=tol)]
 
-    def fit(self, dataset, n_jobs=1):
+    def fit(self, x, y, n_jobs=1):
         """Fit the SVM classifier.
 
         We use :class:`sklearn.svm.SVC` for weights and Support Vectors
@@ -312,38 +312,42 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
 
         Parameters
         ----------
-        dataset : CDataset
-            Binary (2-classes) Training set. Must be a :class:`.CDataset`
-            instance with patterns data and corresponding labels.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class
+            labels (2-classes only).
         n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
 
         Returns
         -------
-        trained_cls : CClassifierSVM
-            Instance of the SVM classifier trained using input dataset.
+        CClassifierSVM
+            Trained classifier.
 
         """
-        super(CClassifierSVM, self).fit(dataset, n_jobs=n_jobs)
+        super(CClassifierSVM, self).fit(x, y, n_jobs=n_jobs)
         # Cleaning up kernel matrix to free memory
         self._k = None
 
         return self
 
-    def _fit(self, dataset):
+    def _fit(self, x, y):
         """Trains the One-Vs-All SVM classifier.
 
         Parameters
         ----------
-        dataset : CDataset
-            Binary (2-classes) training set. Must be a :class:`.CDataset`
-            instance with patterns data and corresponding labels.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class
+            labels (2-classes only).
 
         Returns
         -------
-        trained_cls : CCLassifierSVM
-            Instance of the SVM classifier trained using input dataset.
+        CClassifierSVM
+            Trained classifier.
 
         """
         self.logger.info(
@@ -355,12 +359,12 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
 
         # Computing the kernel matrix
         if not self.is_kernel_linear():
-            self._k = CArray(self.kernel.k(dataset.X))
+            self._k = CArray(self.kernel.k(x))
         else:
-            self._k = dataset.X
+            self._k = x
 
         # Training classifier using precomputed kernel
-        classifier.fit(self._k.get_data(), dataset.Y.tondarray())
+        classifier.fit(self._k.get_data(), y.tondarray())
 
         # Intercept
         self._b = CArray(classifier.intercept_[0])[0]
@@ -370,7 +374,7 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         self._w = None  # Resetting `_w` to leave it None next cond is False
         if self.is_kernel_linear():  # Linear SVM
             self._w = CArray(
-                CArray(classifier.coef_, tosparse=dataset.issparse).ravel())
+                CArray(classifier.coef_, tosparse=x.issparse).ravel())
             self.logger.debug(
                 "Classifier SVM linear weights: \n{:}".format(self._w))
 
@@ -379,9 +383,9 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
             self._n_sv = CArray(classifier.n_support_)
             self._sv_idx = CArray(classifier.support_).ravel()
             # Compatibility fix for differences between sklearn versions
-            self._alpha = convert_binary_labels(dataset.Y[self.sv_idx]) * \
-                          abs(CArray(classifier.dual_coef_).todense().ravel())
-            self._sv = CArray(dataset.X[self.sv_idx, :])
+            self._alpha = convert_binary_labels(y[self.sv_idx]) * \
+                abs(CArray(classifier.dual_coef_).todense().ravel())
+            self._sv = CArray(x[self.sv_idx, :])
             self.logger.debug("Classifier SVM dual weights (alphas): "
                               "\n{:}".format(self._alpha))
         else:  # Resetting the dual parameters

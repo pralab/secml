@@ -45,7 +45,7 @@ def _fit_one_ova(
     # Setting verbosity level
     classifier_instance.verbose = multi_ova.verbose
     # Training one-vs-all classifier
-    classifier_instance.fit(train_ds)
+    classifier_instance.fit(train_ds.X, train_ds.Y)
 
     return classifier_instance
 
@@ -76,16 +76,17 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
             **clf_params
         )
 
-    def _fit(self, dataset, n_jobs=1):
+    def _fit(self, x, y, n_jobs=1):
         """Trains the classifier.
 
         A One-Vs-All classifier is trained for each dataset class.
 
         Parameters
         ----------
-        dataset : CDataset
-            Training set. Must be a :class:`.CDataset` instance with
-            patterns data and corresponding labels.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class labels.
         n_jobs : int
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
@@ -97,13 +98,13 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
 
         """
         # Preparing the binary classifiers
-        self.prepare(dataset.num_classes)
+        self.prepare(y.unique().size)
 
         # Fit a one-vs-all classifier for each class
         # Use the specified number of workers
         self._binary_classifiers = parfor2(_fit_one_ova,
                                            self.classes.size,
-                                           n_jobs, self, dataset,
+                                           n_jobs, self, CDataset(x, y),
                                            self.verbose)
 
         return self
@@ -140,9 +141,6 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : int or None, optional
-            The label of the class wrt the function should be calculated.
-            If None, return the output for all classes.
 
         Returns
         -------

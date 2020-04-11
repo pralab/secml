@@ -496,17 +496,24 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                                   transform=transform,
                                   num_workers=num_workers, ).get_loader()
 
-    def _fit(self, dataset):
-        """Fit PyTorch model."""
+    def _fit(self, x, y):
+        """Fit PyTorch model.
 
+        Parameters
+        ----------
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class labels.
+
+        """
         if any([self._optimizer is None,
                 self._loss is None]):
             raise ValueError("Optimizer and loss should both be defined "
                              "in order to fit the model.")
 
-        train_loader = self._data_loader(dataset.X, dataset.Y,
-                                         batch_size=self._batch_size,
-                                         num_workers=self._n_jobs - 1)
+        train_loader = self._data_loader(
+            x, y, batch_size=self._batch_size, num_workers=self._n_jobs - 1)
 
         for epoch in range(self._epochs):
             running_loss = 0.0

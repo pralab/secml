@@ -10,6 +10,7 @@ from sklearn.linear_model import RidgeClassifier
 
 from secml.ml.classifiers import CClassifierLinear
 from secml.array import CArray
+from secml.data import CDataset
 from secml.ml.kernels import CKernel
 from secml.ml.classifiers.gradients import CClassifierGradientRidgeMixin
 from secml.ml.classifiers.loss import CLossSquare
@@ -167,7 +168,7 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
         """Returns the number of training samples."""
         return self._tr.shape[0] if self._tr is not None else None
 
-    def _fit(self, dataset):
+    def _fit(self, x, y):
         """Trains the One-Vs-All Ridge classifier.
 
         The following is a private method computing one single
@@ -178,17 +179,19 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
 
         Parameters
         ----------
-        dataset : CDataset
-            Binary (2-classes) training set. Must be a :class:`.CDataset`
-            instance with patterns data and corresponding labels.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class
+            labels (2-classes only).
 
         Returns
         -------
-        trained_cls : classifier
-            Instance of the used solver trained using input dataset.
+        CClassifierRidge
+            Trained classifier.
 
         """
-        if dataset.num_classes != 2:
+        if y.unique().size != 2:
             raise ValueError("training can be performed on binary "
                              "(2-classes) datasets only.")
 
@@ -201,19 +204,19 @@ class CClassifierRidge(CClassifierLinear, CClassifierGradientRidgeMixin):
                                 solver='auto')
 
         # Storing training dataset (only if required by kernel)
-        self._tr = dataset.X if self._kernel is not None else None
+        self._tr = x if self._kernel is not None else None
 
         # Storing the training matrix for kernel mapping
         if self.is_kernel_linear():
             # Training classifier
-            ridge.fit(dataset.X.get_data(), dataset.Y.tondarray())
+            ridge.fit(x.get_data(), y.tondarray())
         else:
             # Training Ridge classifier with kernel mapping
             ridge.fit(CArray(
-                self.kernel.k(dataset.X)).get_data(), dataset.Y.tondarray())
+                self.kernel.k(x)).get_data(), y.tondarray())
 
         # Updating global classifier parameters
-        self._w = CArray(ridge.coef_, tosparse=dataset.issparse).ravel()
+        self._w = CArray(ridge.coef_, tosparse=x.issparse).ravel()
         self._b = CArray(ridge.intercept_)[0] if self.fit_intercept else 0
 
     # TODO: this function can be removed when removing kernel support

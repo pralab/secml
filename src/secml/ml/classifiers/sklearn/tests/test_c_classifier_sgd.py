@@ -49,7 +49,7 @@ class TestCClassifierSGD(CClassifierTestCases):
 
         for sgd in self.sgds:
             sgd.verbose = 2  # Enabling debug output for each classifier
-            sgd.fit(self.dataset)
+            sgd.fit(self.dataset.X, self.dataset.Y)
 
     def test_draw(self):
         """ Compare the classifiers graphically"""
@@ -60,10 +60,10 @@ class TestCClassifierSGD(CClassifierTestCases):
                             n_clusters_per_class=1).load()
         dataset.X = CNormalizerMinMax().fit_transform(dataset.X)
 
-        self.sgds[0].fit(dataset)
+        self.sgds[0].fit(dataset.X, dataset.Y)
 
         svm = CClassifierSVM()
-        svm.fit(dataset)
+        svm.fit(dataset.X, dataset.Y)
 
         fig = CFigure(width=10, markersize=8)
         fig.subplot(2, 1, 1)
@@ -96,7 +96,7 @@ class TestCClassifierSGD(CClassifierTestCases):
 
             svm = CClassifierSVM(sgd.kernel)
 
-            svm.fit(self.dataset)
+            svm.fit(self.dataset.X, self.dataset.Y)
 
             label_svm, y_svm = svm.predict(
                 self.dataset.X, return_decision_function=True)
@@ -126,7 +126,7 @@ class TestCClassifierSGD(CClassifierTestCases):
         # fit the model
         clf = CClassifierSGD(loss=CLossHinge(), regularizer=CRegularizerL2(),
                              alpha=0.01, max_iter=200, random_state=0)
-        clf.fit(dataset)
+        clf.fit(dataset.X, dataset.Y)
 
         # plot the line, the points, and the nearest vectors to the plane
         xx = CArray.linspace(-1, 5, 10)
@@ -182,7 +182,7 @@ class TestCClassifierSGD(CClassifierTestCases):
 
             self.logger.info("Testing dense data...")
             ds = self.dataset.todense()
-            sgd.fit(ds)
+            sgd.fit(ds.X, ds.Y)
 
             # Run the comparison with numerical gradient
             # (all classes will be tested)
@@ -190,7 +190,7 @@ class TestCClassifierSGD(CClassifierTestCases):
 
             self.logger.info("Testing sparse data...")
             ds = self.dataset.tosparse()
-            sgd.fit(ds)
+            sgd.fit(ds.X, ds.Y)
 
             # Run the comparison with numerical gradient
             # (all classes will be tested)

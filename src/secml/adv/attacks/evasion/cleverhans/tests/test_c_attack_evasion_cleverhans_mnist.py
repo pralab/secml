@@ -39,7 +39,7 @@ class TestCAttackEvasionCleverhansMNIST(CAttackEvasionCleverhansTestCases):
             cls.img_w, cls.img_h = cls._load_mnist()
 
         cls.clf = CClassifierMulticlassOVA(CClassifierSVM)
-        cls.clf.fit(cls.tr)
+        cls.clf.fit(cls.tr.X, cls.tr.Y)
         
         cls.x0_img_class = 1
         cls.y_target = 2  # Target class for targeted tests

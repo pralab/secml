@@ -25,7 +25,7 @@ class TestCExplainerIntegratedGradients(CUnitTest):
             CClassifierSVM, kernel=CKernelRBF(gamma=1e-3))
 
         # Training classifier
-        cls.clf.fit(cls.ds)
+        cls.clf.fit(cls.ds.X, cls.ds.Y)
 
     def setUp(self):
 

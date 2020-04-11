@@ -45,7 +45,7 @@ class TestCAttackEvasionCleverhans(CAttackEvasionCleverhansTestCases):
                                 n_samples=100,
                                 random_state=cls.seed).load()
 
-        cls.clf.fit(cls.ds)
+        cls.clf.fit(cls.ds.X, cls.ds.Y)
 
         cls.x0 = CArray([0.6, 0.2])
         cls.y0 = CArray(cls.clf.predict(cls.x0))

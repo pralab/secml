@@ -45,7 +45,7 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
         self.multiclass.verbose = 0
 
         # Training and classification
-        self.multiclass.fit(self.ds)
+        self.multiclass.fit(self.ds.X, self.ds.Y)
 
         self.y_pred, self.score_pred = self.multiclass.predict(
             self.ds.X, return_decision_function=True)

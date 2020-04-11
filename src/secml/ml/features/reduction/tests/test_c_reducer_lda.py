@@ -30,7 +30,7 @@ class TestCLda(CPreProcessTestCases):
             target = CArray(sklearn_lda.transform(array.tondarray()))
             # Our normalizer
             lda = CLDA().fit(array, y)
-            result = lda.transform(array)
+            result = lda.forward(array)
 
             self.logger.info("Sklearn result is:\n{:}".format(target))
             self.logger.info("Result is:\n{:}".format(result))
@@ -77,7 +77,7 @@ class TestCLda(CPreProcessTestCases):
             self.array_dense,
             ['min-max', 'mean-std', 'lda'],
             [{'feature_range': (-5, 5)}, {}, {}],
-            y=CArray([1, 0, 1])  # LDA is supervised
+            y=self.labels # LDA is supervised
         )
 
         # Expected shape is (3, 1), as lda max n_components is classes - 1
@@ -87,7 +87,7 @@ class TestCLda(CPreProcessTestCases):
             self.array_dense,
             ['mean-std', 'lda', 'min-max'],
             [{}, {}, {}],
-            y=CArray([1, 0, 1])  # LDA is supervised
+            y=self.labels  # LDA is supervised
         )
 
         # Expected shape is (3, 1), as lda max n_components is classes - 1

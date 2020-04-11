@@ -16,7 +16,7 @@ class TestCSoftmax(CUnitTest):
 
         self.logger.info("Fit an SVM and classify dataset...")
         self.ova = CClassifierMulticlassOVA(CClassifierSVM)
-        self.ova.fit(self.ds)
+        self.ova.fit(self.ds.X, self.ds.Y)
         self.labels, self.scores = self.ova.predict(
             self.ds.X, return_decision_function=True)
 

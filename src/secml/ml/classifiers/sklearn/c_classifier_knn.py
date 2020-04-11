@@ -9,6 +9,7 @@
 from sklearn import neighbors
 
 from secml.array import CArray
+from secml.data import CDataset
 from secml.ml.classifiers import CClassifierSkLearn
 
 
@@ -75,14 +76,26 @@ class CClassifierKNN(CClassifierSkLearn):
         """Training set."""
         return self._tr
 
-    def _fit(self, dataset):
+    def _fit(self, x, y):
         """Trains the KNeighbors classifier.
 
         Training dataset is stored to use in kneighbors() method.
 
+        Parameters
+        ----------
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features)
+        y : CArray
+            Array of shape (n_samples,) containing the class labels.
+
+        Returns
+        -------
+        CClassifierKNN
+            Trained classifier.
+
         """
-        self._tr = dataset
-        return CClassifierSkLearn._fit(self, dataset)
+        self._tr = CDataset(x, y)
+        return CClassifierSkLearn._fit(self, x, y)
 
     def kneighbors(self, x, num_samples=None):
         """

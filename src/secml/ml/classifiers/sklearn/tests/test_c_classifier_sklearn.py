@@ -132,7 +132,7 @@ class TestCClassifierSkLearn(CClassifierTestCases):
 
         clf = svm.SVC(kernel='linear')
         secmlclf = CClassifierSkLearn(clf)
-        secmlclf.fit(CDataset(X, y))
+        secmlclf.fit(X, y)
 
         y_pred_secml = secmlclf.predict(CArray(X))
 
@@ -151,7 +151,7 @@ class TestCClassifierSkLearn(CClassifierTestCases):
             sklearn_model=SVC(kernel="rbf", gamma=2, C=1, random_state=0),
             preprocess=pre)
 
-        clf.fit(self.dataset)
+        clf.fit(self.dataset.X, self.dataset.Y)
         pred_y = clf.predict(self.dataset.X)
         self.logger.info(
             "Predictions before restoring state:\n{:}".format(pred_y))

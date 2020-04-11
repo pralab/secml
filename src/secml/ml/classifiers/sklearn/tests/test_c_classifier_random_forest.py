@@ -15,7 +15,7 @@ class TestCClassifierRandomForest(CClassifierTestCases):
 
     def test_classify(self):
         self.logger.info("Testing random forest training ")
-        self.rnd_forest.fit(self.dataset)
+        self.rnd_forest.fit(self.dataset.X, self.dataset.Y)
 
         self.logger.info("Testing classification with trees")
 
