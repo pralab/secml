@@ -9,6 +9,7 @@
 """
 from abc import ABCMeta, abstractmethod
 from secml.core import CCreator
+from secml.array import CArray
 
 
 class CModule(CCreator, metaclass=ABCMeta):
@@ -17,20 +18,58 @@ class CModule(CCreator, metaclass=ABCMeta):
 
     Parameters
     ----------
-    preprocess : CPreProcess or None, optional
-        Features preprocess to be applied to input data.
-        Can be a CPreProcess subclass. If None, input data is used as is.
+    preprocess : CModule or None, optional
+        Feature preprocessing to be applied to input data.
+        Can be a CModule subclass. If None, input data is used as is.
 
     """
     __super__ = 'CModule'
 
     def __init__(self, preprocess=None):
-        self._preprocess = preprocess
         self._cached_x = None  # cached internal x repr. for backward pass
+        self.preprocess = preprocess  # call setter
+
+    @staticmethod
+    def create_chain(class_items, kwargs_list):
+        """Creates a chain of preprocessors.
+
+        Parameters
+        ----------
+        class_items : list of str or class instances
+            A list of mixed class types or CPreProcess instances.
+            The object created with the first type/instance of the list
+            will be the preprocess of the object created using the second
+            type/instance in the list and so on until the end of the list.
+        kwargs_list : list of dict
+            A list of dictionaries, one for each item in `class_items`,
+            to specify any additional argument for each specific preprocessor.
+
+        Returns
+        -------
+        CPreProcess
+            The chain of preprocessors.
+
+        """
+        chain = None
+        for i, pre_id in enumerate(class_items):
+            chain = CModule.create(
+                pre_id, preprocess=chain, **kwargs_list[i])
+
+        return chain
+
+    @property
+    def _grad_requires_forward(self):
+        """Returns True if gradient requires calling forward besides just
+        computing the pre-processed input x. This is useful for modules that
+        use auto-differentiation, like PyTorch, or if caching is required
+        during the forward step (e.g., in exponential kernels).
+        It is False by default for modules in this library, as we compute
+        gradients analytically and only require the pre-processed input x."""
+        return False
 
     @abstractmethod
     def _check_is_fitted(self):
-        """Check if the module is trained (fitted).
+        """Checks if the module is trained (fitted).
 
         Raises
         ------
@@ -40,19 +79,41 @@ class CModule(CCreator, metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    def _check_input(self, x):
-        """Check if input is properly formatted
+    def _check_input(self, x, y=None):
+        """Checks if input x and y can be casted to CArray, respectively
+        as a matrix of shape=(n_samples, n_features) and
+        as a vector of shape=(n_samples,)
+
+        Parameters
+        ----------
+        x : CArray (or compatible)
+            Matrix of input samples with shape=(n_samples, n_features)
+
+        y: CArray (or compatible) or None
+            Class labels with shape=(n_samples,)
 
         Raises
         ------
-        ValueError
-            if x is not properly formatted.
+        TypeError
+            if x or y are not properly formatted or cannot be casted to the
+            desired format.
+
+        Returns
+        -------
+        x: CArray
+            Matrix of input samples with shape=(n_samples, n_features)
+        y: CArray or None
+            Class labels with shape=(n_samples,) or None (if y is not passed).
 
         """
-        # TODO: make abstract and raise exception.
-        #  at this stage we pass as no checks are implemented by default
-        # raise NotImplementedError
-        pass
+        x = CArray(x).atleast_2d()  # Ensuring input is 2-D
+        if y is not None:
+            y = CArray(y).ravel()
+        return x, y
+
+    def _clear_cache(self):
+        """Clears cached values within this class instance."""
+        self._cached_x = None
 
     @property
     def preprocess(self):
@@ -61,10 +122,12 @@ class CModule(CCreator, metaclass=ABCMeta):
 
     @preprocess.setter
     def preprocess(self, preprocess):
-        self._preprocess = preprocess
+        self._preprocess = None if preprocess is None \
+            else CModule.create(preprocess)
 
-    def _preprocess_data(self, x, caching=True):
-        """This function prepares the input for `_forward` and `_backward`.
+    def _forward_preprocess(self, x, caching=True):
+        """Runs forward through the pre-processing chain,
+        preparing the input for `_forward` and `_backward`.
 
         It checks if x has the proper format and the current module is fitted.
         Then, it applies inner pre-processing (if defined), and caches
@@ -85,14 +148,8 @@ class CModule(CCreator, metaclass=ABCMeta):
             transformed version after pre-processing.
 
         """
-        self._cached_x = None  # reset cached values (if any)
-
-        x = x.atleast_2d()  # Ensuring input is 2-D
-        self._check_input(x)
-        self._check_is_fitted()
-
         if self.preprocess is not None:
-            # apply preprocessing to x
+            # apply pre-processing to x
             x_prc = self.preprocess.forward(x)
         else:
             # use directly x as input to this module
@@ -125,8 +182,12 @@ class CModule(CCreator, metaclass=ABCMeta):
             Transformed input data.
 
         """
+        x, y = self._check_input(x)
+        self._check_is_fitted()
+        self._clear_cache()
+
         # Transform data using inner preprocess, if defined
-        x = self._preprocess_data(x, caching=caching)
+        x = self._forward_preprocess(x=x, caching=caching)
         return self._forward(x)
 
     @abstractmethod
@@ -179,6 +240,73 @@ class CModule(CCreator, metaclass=ABCMeta):
 
     _backward.__doc__ = backward.__doc__  # Same doc for the protected method
 
+    @abstractmethod
+    def _fit(self, x, y=None):
+        raise NotImplementedError("Fit is not implemented.")
+
+    def fit(self, x, y=None):
+        """Fit estimator.
+
+        Parameters
+        ----------
+        x : CArray
+            Array to be used for training.
+            Shape of input array depends on the algorithm itself.
+        y : CArray
+            Flat array with the label of each pattern.
+            Can be None if not required by the algorithm.
+
+        Returns
+        -------
+        CModule
+            Trained instance of CModule.
+
+        """
+        x, y = self._check_input(x, y)
+        self._clear_cache()
+
+        if self.preprocess is not None:
+            x = self.preprocess.fit_forward(x, y)
+
+        return self._fit(x, y)
+
+    _fit.__doc__ = fit.__doc__  # Same doc for the protected method
+
+    # TODO: make abstract or call _fit_forward
+    def fit_forward(self, x, y=None, caching=False):
+        """Fit estimator using data and then execute forward on the data.
+
+        This method is equivalent to call fit(data) and forward(data)
+        in sequence, but it's useful when data is both the training array
+        and the array to be transformed.
+
+        Parameters
+        ----------
+        x : CArray
+            Array to be transformed.
+            Each row must correspond to one single patterns, so each
+            column is a different feature.
+        y : CArray or None, optional
+            Flat array with the label of each pattern.
+            Can be None if not required by the preprocessing algorithm.
+        caching: bool
+                 True if preprocessed x should be cached for backward pass
+
+        Returns
+        -------
+        CArray
+            Transformed input data.
+
+        See Also
+        --------
+        fit : fit the preprocessor.
+        forward : run forward function on input data.
+
+        """
+        # TODO: this is inefficient: it's going twice through pre-processing
+        self.fit(x, y)  # train preprocessor chain first
+        return self.forward(x, caching=caching)  # fwd again through the chain
+
     def gradient(self, x, w=None):
         """Compute gradient at x by doing a backward pass.
 
@@ -186,5 +314,11 @@ class CModule(CCreator, metaclass=ABCMeta):
 
         """
         # Transform data using inner preprocess, if defined
-        self._preprocess_data(x, caching=True)
+        x, y = self._check_input(x)
+        self._check_is_fitted()
+        self._clear_cache()
+
+        x_prc = self._forward_preprocess(x, caching=True)
+        if self._grad_requires_forward:
+            self._forward(x_prc)  # this is called only if required
         return self.backward(w)

@@ -17,7 +17,7 @@ class TestCFigure(CUnitTest):
         self.dataset = CDataset(self.X, self.Y)
 
         self.classifier = CClassifierSVM(kernel=CKernelRBF())
-        self.classifier.fit(self.dataset)
+        self.classifier.fit(self.dataset.X, self.dataset.Y)
 
         self.x_min, self.x_max = (self.X[:, [0]].min() - 1,
                                   self.X[:, [0]].max() + 1)

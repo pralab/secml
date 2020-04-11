@@ -26,7 +26,7 @@ class TestCClassifierRejectThreshold(CClassifierRejectTestCases):
 
         self.clf = CClassifierRejectThreshold(self.clf_norej, threshold=0.6)
         self.clf.verbose = 2  # Enabling debug output for each classifier
-        self.clf.fit(self.dataset)
+        self.clf.fit(self.dataset.X, self.dataset.Y)
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
@@ -44,8 +44,8 @@ class TestCClassifierRejectThreshold(CClassifierRejectTestCases):
         clf_reject = self.clf.deepcopy()
 
         # Training the classifiers
-        clf_reject.fit(self.dataset)
-        clf.fit(self.dataset)
+        clf_reject.fit(self.dataset.X, self.dataset.Y)
+        clf.fit(self.dataset.X, self.dataset.Y)
 
         # Classification of another dataset
         y_pred_reject, score_pred_reject = clf_reject.predict(
@@ -85,14 +85,14 @@ class TestCClassifierRejectThreshold(CClassifierRejectTestCases):
 
         self.logger.info("Testing with dense data...")
         ds = self.dataset.todense()
-        clf = self.clf.fit(ds)
+        clf = self.clf.fit(ds.X, ds.Y)
 
         grads_d = self._test_gradient_numerical(
             clf, ds.X[i, :], extra_classes=[-1])
 
         self.logger.info("Testing with sparse data...")
         ds = self.dataset.tosparse()
-        clf = self.clf.fit(ds)
+        clf = self.clf.fit(ds.X, ds.Y)
 
         grads_s = self._test_gradient_numerical(
             clf, ds.X[i, :], extra_classes=[-1])

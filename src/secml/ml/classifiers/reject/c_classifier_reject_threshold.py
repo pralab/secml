@@ -88,7 +88,7 @@ class CClassifierRejectThreshold(CClassifierReject):
         """Number of classes of training dataset, plus the rejection class."""
         return self._clf.n_classes + 1
 
-    def fit(self, dataset, n_jobs=1):
+    def fit(self, x, y, n_jobs=1):
         """Trains the classifier.
 
         If a preprocess has been specified,
@@ -96,9 +96,10 @@ class CClassifierRejectThreshold(CClassifierReject):
 
         Parameters
         ----------
-        dataset : CDataset
-            Training set. Must be a :class:`.CDataset` instance with
-            patterns data and corresponding labels.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class labels.
         n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
@@ -109,24 +110,24 @@ class CClassifierRejectThreshold(CClassifierReject):
             Instance of the classifier trained using input dataset.
 
         """
-        self._n_features = dataset.num_features
+        self._n_features = x.shape[1]
 
-        data_x = dataset.X
         # Transform data if a preprocess is defined
         if self.preprocess is not None:
-            data_x = self.preprocess.fit_transform(dataset.X)
+            x = self.preprocess.fit_transform(x)
 
-        return self._fit(CDataset(data_x, dataset.Y), n_jobs=n_jobs)
+        return self._fit(x, y, n_jobs=n_jobs)
 
-    def _fit(self, dataset, n_jobs=1):
+    def _fit(self, x, y, n_jobs=1):
         """Private method that trains the One-Vs-All classifier.
         Must be reimplemented by subclasses.
 
         Parameters
         ----------
-        dataset : CDataset
-            Training set. Must be a :class:`.CDataset` instance with
-            patterns data and corresponding labels.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class labels.
         n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
@@ -137,7 +138,7 @@ class CClassifierRejectThreshold(CClassifierReject):
             Instance of the classifier trained using input dataset.
 
         """
-        self._clf.fit(dataset, n_jobs=n_jobs)
+        self._clf.fit(x, y, n_jobs=n_jobs)
         return self
 
     def _forward(self, x):

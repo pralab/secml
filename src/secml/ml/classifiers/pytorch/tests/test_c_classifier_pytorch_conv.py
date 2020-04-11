@@ -38,7 +38,7 @@ class TestCClassifierPyTorchMNIST(CClassifierPyTorchTestCases):
         cls.clf = cls._create_clf(cls.batch_size)
 
         # Train the classifier
-        cls.clf.fit(cls.tr)
+        cls.clf.fit(cls.tr.X, cls.tr.Y)
 
     @staticmethod
     def _create_tr_ts(n_tr, n_ts):

@@ -44,7 +44,7 @@ class TestCClassifierLogistic(CClassifierTestCases):
 
         self.logger.info("Testing dense data...")
         ds = self.dataset.todense()
-        self.log.fit(ds)
+        self.log.fit(ds.X, ds.Y)
 
         # Run the comparison with numerical gradient
         # (all classes will be tested)
@@ -52,7 +52,7 @@ class TestCClassifierLogistic(CClassifierTestCases):
 
         self.logger.info("Testing sparse data...")
         ds = self.dataset.tosparse()
-        self.log.fit(ds)
+        self.log.fit(ds.X, ds.Y)
 
         # Run the comparison with numerical gradient
         # (all classes will be tested)

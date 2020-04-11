@@ -16,7 +16,7 @@ class TestCClassifierGradientSVMMixin(CClassifierGradientMixinTestCases):
 
         for n in (None, CNormalizerMinMax((-10, 10))):
             clf = CClassifierSVM(store_dual_vars=True, preprocess=n)
-            clf.fit(self.ds)
+            clf.fit(self.ds.X, self.ds.Y)
             self._test_grad_tr_params(clf)
 
     def test_grad_tr_params_nonlinear(self):
@@ -24,7 +24,7 @@ class TestCClassifierGradientSVMMixin(CClassifierGradientMixinTestCases):
 
         for n in (None, CNormalizerMinMax((-10, 10))):
             clf = CClassifierSVM(kernel='rbf', preprocess=n)
-            clf.fit(self.ds)
+            clf.fit(self.ds.X, self.ds.Y)
             self._test_grad_tr_params(clf)
 
 

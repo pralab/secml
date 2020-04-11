@@ -65,38 +65,6 @@ class CClassifierLinear(CClassifier, metaclass=ABCMeta):
         check_is_fitted(self, 'w')
         super(CClassifierLinear, self)._check_is_fitted()
 
-    def fit(self, dataset, n_jobs=1):
-        """Trains the linear classifier.
-
-        If a preprocess has been specified,
-        input is normalized before training.
-
-        Training on 2nd class is avoided to speed up classification.
-
-        Parameters
-        ----------
-        dataset : CDataset
-            Binary (2-classes) training set. Must be a :class:`.CDataset`
-            instance with patterns data and corresponding labels.
-        n_jobs : int
-            Number of parallel workers to use for training the classifier.
-            Default 1. Cannot be higher than processor's number of cores.
-
-        Returns
-        -------
-        trained_cls : CClassifier
-            Instance of the classifier trained using input dataset.
-
-        """
-        if not isinstance(dataset, CDataset):
-            raise TypeError(
-                "training set should be provided as a single dataset.")
-        if dataset.num_classes != 2:
-            raise ValueError(
-                "training available on binary (2-classes) datasets only.")
-
-        return super(CClassifierLinear, self).fit(dataset, n_jobs=n_jobs)
-
     def _forward(self, x):
         """Computes the distance of each pattern in x to the hyperplane.
 

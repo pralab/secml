@@ -179,7 +179,7 @@ class CClassifierPyTorchTestCases(CClassifierTestCases):
         self.assertEqual(clf_copy.predict(tr[0, :].X).size,
                          clf.predict(tr[0, :].X).size)
 
-        clf_copy.fit(tr)
+        clf_copy.fit(tr.X, tr.Y)
         self.assertNotEqual(id(clf._optimizer), id(clf_copy._optimizer))
 
         clf_copy.fc2 = torch.nn.Linear(20, 20)

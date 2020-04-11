@@ -70,7 +70,7 @@ class TestCDataLoaderTorchDataset(CUnitTest):
     def test_train_net(self):
         self._create_ds()
         self._create_net()
-        self.clf.fit(self.tr)
+        self.clf.fit(self.tr.X, self.tr.Y)
         label_torch, y_torch = self.clf.predict(
             self.ts.X, return_decision_function=True)
         acc_torch = CMetric.create('accuracy').performance_score(self.ts.Y,

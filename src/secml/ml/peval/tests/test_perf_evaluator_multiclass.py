@@ -40,7 +40,7 @@ class TestCPerfEvaluatorMulticlass(CUnitTest):
                 clf.kernel.gamma, expected_best['kernel.gamma'][clf_idx])
 
         # Final test: fit using best parameters
-        multiclass.fit(self.tr)
+        multiclass.fit(self.tr.X, self.tr.Y)
 
         for clf_idx, clf in enumerate(multiclass._binary_classifiers):
             for param in best_params:

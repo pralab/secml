@@ -46,7 +46,7 @@ class TestCSecEval(CUnitTest):
             tr = ds[:n_tr, :]
             ts = ds[n_tr:, :]
             
-            classifier.fit(tr)
+            classifier.fit(tr.X, tr.Y)
             
             self.attack_ds.append(ts)
 

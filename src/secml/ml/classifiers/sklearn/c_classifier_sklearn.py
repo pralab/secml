@@ -86,9 +86,24 @@ class CClassifierSkLearn(CClassifier):
         else:  # Otherwise, normal python set behavior
             super(CClassifierSkLearn, self).__setattr__(key, value)
 
-    def _fit(self, dataset):
-        """Fit sklearn model."""
-        self._sklearn_model.fit(dataset.X.get_data(), dataset.Y.get_data())
+    def _fit(self, x, y):
+        """Fit sklearn model.
+
+        Parameters
+        ----------
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class labels.
+
+        Returns
+        -------
+        CClassifierSkLearn
+            Trained classifier.
+
+        """
+        self._sklearn_model.fit(x.get_data(), y.get_data())
+        return self
 
     def _forward(self, x):
         """Implementation of decision function."""

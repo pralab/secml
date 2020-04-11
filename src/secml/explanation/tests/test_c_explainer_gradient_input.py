@@ -22,8 +22,7 @@ class TestCExplainerGradientInput(CUnitTest):
             CClassifierSVM, kernel=CKernelRBF(gamma=1e-3))
 
         # Training classifier
-        self.clf.fit(self.ds)
-
+        self.clf.fit(self.ds.X, self.ds.Y)
         self.explainer = CExplainerGradientInput(self.clf)
 
     def test_explain(self):

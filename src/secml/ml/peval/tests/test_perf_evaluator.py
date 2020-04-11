@@ -108,7 +108,8 @@ class TestCPerfEvaluator(CUnitTest):
                 self.svm.kernel.gamma = parameters_combination[comb][1]
 
                 self.svm.fit(
-                    self.training_dataset[xval_splitter.tr_idx[f], :])
+                    self.training_dataset[xval_splitter.tr_idx[f], :].X,
+                    self.training_dataset[xval_splitter.tr_idx[f], :].Y)
 
                 this_fold_predicted = self.svm.predict(
                     self.training_dataset[xval_splitter.ts_idx[f], :].X)
@@ -208,7 +209,7 @@ class TestCPerfEvaluator(CUnitTest):
             self.assertEqual(clf.kernel.gamma, expected_best['kernel.gamma'])
 
         # Final test: fit using best parameters
-        multiclass.fit(tr)
+        multiclass.fit(tr.X, tr.Y)
 
         for clf in multiclass._binary_classifiers:
             for param in best_params:

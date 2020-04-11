@@ -56,7 +56,7 @@ class CPerfEvaluatorXVal(CPerfEvaluator):
             test_dataset = dataset[self.splitter.ts_idx[split_idx], :]
 
             # Train the estimator
-            estimator.fit(train_dataset)
+            estimator.fit(train_dataset.X, train_dataset.Y)
 
             pred_label, pred_score = estimator.predict(
                 test_dataset.X, return_decision_function=True)

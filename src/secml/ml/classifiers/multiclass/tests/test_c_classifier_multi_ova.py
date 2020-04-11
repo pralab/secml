@@ -27,7 +27,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
                                               class_weight='balanced')
         multiclass.verbose = 2
 
-        multiclass.fit(self.dataset, n_jobs=2)
+        multiclass.fit(self.dataset.X, self.dataset.Y, n_jobs=2)
         class_pred, score_pred = multiclass.predict(
             self.dataset.X, return_decision_function=True)
 
@@ -70,7 +70,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         multiclass.set('kernel.gamma', different_gamma)
 
         # Fit multiclass classifier than test set after training
-        multiclass.fit(self.dataset)
+        multiclass.fit(self.dataset.X, self.dataset.Y)
 
         for clf_idx, clf in enumerate(multiclass._binary_classifiers):
             self.assertEqual(clf.C, different_c[clf_idx])
@@ -108,7 +108,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
 
         multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                               class_weight='balanced')
-        multiclass.fit(self.dataset)
+        multiclass.fit(self.dataset.X, self.dataset.Y)
         multiclass.apply_method(CClassifierSVM.set, param_name='C',
                                 param_value=150)
 
@@ -124,13 +124,13 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
 
         multi_nonorm = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                                 class_weight='balanced')
-        multi_nonorm.fit(CDataset(ds_norm_x, self.dataset.Y))
+        multi_nonorm.fit(ds_norm_x, self.dataset.Y)
         pred_y_nonorm = multi_nonorm.predict(ds_norm_x)
 
         multi = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                          class_weight='balanced',
                                          preprocess='min-max')
-        multi.fit(self.dataset)
+        multi.fit(self.dataset.X, self.dataset.Y)
         pred_y = multi.predict(self.dataset.X)
 
         self.logger.info(
@@ -153,7 +153,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
             preprocess='min-max')
 
         # Training and classification
-        multiclass.fit(ds)
+        multiclass.fit(ds.X, ds.Y)
         y_pred, score_pred = multiclass.predict(
             ds.X, return_decision_function=True)
 
@@ -222,7 +222,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
 
         self.logger.info("Testing with dense data...")
         ds = self.dataset.todense()
-        multiclass.fit(ds)
+        multiclass.fit(ds.X, ds.Y)
 
         pattern = ds.X[i, :]
 
@@ -242,7 +242,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
 
         self.logger.info("Testing with sparse data...")
         ds = self.dataset.tosparse()
-        multiclass.fit(ds)
+        multiclass.fit(ds.X, ds.Y)
 
         pattern = ds.X[i, :]
 
@@ -265,7 +265,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
 
         multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,
                                               class_weight='balanced')
-        multiclass.fit(self.dataset)
+        multiclass.fit(self.dataset.X, self.dataset.Y)
         div = CArray.rand(shape=multiclass.n_classes, random_state=0)
 
         def f_x(x):
@@ -320,7 +320,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         different_gamma = (50, 60, 70, 80)
         multi.set('kernel.gamma', different_gamma)
 
-        multi.fit(self.dataset)
+        multi.fit(self.dataset.X, self.dataset.Y)
         pred_y = multi.predict(self.dataset.X)
         self.logger.info(
             "Predictions before restoring state:\n{:}".format(pred_y))

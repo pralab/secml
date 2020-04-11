@@ -294,7 +294,7 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
             n_jobs=n_jobs)
 
     @abstractmethod
-    def _fit(self, dataset, n_jobs=1):
+    def _fit(self, x, y, n_jobs=1):
         """Trains the classifier.
 
         This method should store the list of trained classifiers
@@ -304,17 +304,19 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
 
         Parameters
         ----------
-        dataset : CDataset
-            Training set. Must be a :class:`.CDataset` instance with
-            patterns data and corresponding labels.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class labels.
+
         n_jobs : int
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
 
         Returns
         -------
-        trained_cls : CClassifierMulticlass
-            Instance of the classifier trained using input dataset.
+        CClassifierMulticlass
+            Trained classifier.
 
         """
         raise NotImplementedError

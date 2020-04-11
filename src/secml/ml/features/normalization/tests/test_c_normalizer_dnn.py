@@ -63,7 +63,7 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         cls.net = CClassifierPyTorch(model=model, loss=loss,
                                      optimizer=optimizer, random_state=0,
                                      epochs=10, pretrained=True)
-        cls.net.fit(cls.ds)
+        cls.net.fit(cls.ds.X, cls.ds.Y)
         cls.norm = CNormalizerDNN(net=cls.net)
 
         CPreProcessTestCases.setUpClass()
@@ -143,7 +143,7 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         net = CClassifierPyTorch(model=model, loss=loss,
                                  optimizer=optimizer, random_state=0,
                                  epochs=10, preprocess='min-max')
-        net.fit(self.ds)
+        net.fit(self.ds.X, self.ds.Y)
 
         norm = CNormalizerDNN(net=net)
 
@@ -152,7 +152,7 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
 
         self.logger.info("Testing last layer")
 
-        clf.fit(self.ds)
+        clf.fit(self.ds.X, self.ds.Y)
 
         y_pred, scores = clf.predict(
             self.ds.X, return_decision_function=True)
@@ -186,7 +186,7 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
 
         self.logger.info("Testing layer {:}".format(norm.out_layer))
 
-        clf.fit(self.ds)
+        clf.fit(self.ds.X, self.ds.Y)
 
         y_pred, scores = clf.predict(
             self.ds.X, return_decision_function=True)

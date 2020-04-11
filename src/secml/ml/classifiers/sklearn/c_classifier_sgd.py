@@ -255,7 +255,7 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
         """Returns the number of training samples."""
         return self._tr.shape[0] if self._tr is not None else None
 
-    def _fit(self, dataset):
+    def _fit(self, x, y):
         """Trains the One-Vs-All SGD classifier.
 
         The following is a private method computing one single
@@ -266,19 +266,21 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
 
         Parameters
         ----------
-        dataset : CDataset
-            Binary (2-classes) training set. Must be a :class:`.CDataset`
-            instance with patterns data and corresponding labels.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class
+            labels (2-classes only).
 
         Returns
         -------
-        trained_cls : classifier
-            Instance of the used solver trained using input dataset.
+        CClassifierSGD
+            Trained classifier.
 
         """
         # TODO: remove this check from here.
         #  It should be handled in CClassifierLinear
-        if dataset.num_classes != 2:
+        if y.unique().size != 2:
             raise ValueError("training can be performed on binary "
                              "(2-classes) datasets only.")
 
@@ -308,19 +310,19 @@ class CClassifierSGD(CClassifierLinear, CClassifierGradientSGDMixin):
 
         # TODO: remove unconventional kernel usage. This is a linear classifier
         # Storing training dataset (will be used by decision function)
-        self._tr = dataset.X if not self.is_kernel_linear() else None
+        self._tr = x if not self.is_kernel_linear() else None
 
         # Storing the training matrix for kernel mapping
         if self.is_kernel_linear():
             # Training SGD classifier
-            sgd.fit(dataset.X.get_data(), dataset.Y.tondarray())
+            sgd.fit(x.get_data(), y.tondarray())
         else:
             # Training SGD classifier with kernel mapping
             sgd.fit(CArray(
-                self.kernel.k(dataset.X)).get_data(), dataset.Y.tondarray())
+                self.kernel.k(x)).get_data(), y.tondarray())
 
         # Temporary storing attributes of trained classifier
-        self._w = CArray(sgd.coef_, tosparse=dataset.issparse).ravel()
+        self._w = CArray(sgd.coef_, tosparse=x.issparse).ravel()
         if self.fit_intercept is True:
             self._b = CArray(sgd.intercept_)[0]
         else:

@@ -329,7 +329,7 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
             if self.classifier.preprocess is not None:
                 self._poisoned_clf.retrain_normalizer = train_normalizer
 
-            self._poisoned_clf.fit(tr)
+            self._poisoned_clf.fit(tr.X, tr.Y)
 
         return self._poisoned_clf, tr
 

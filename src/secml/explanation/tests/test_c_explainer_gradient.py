@@ -18,8 +18,7 @@ class TestCExplainerGradient(CUnitTest):
         self.ds = CDLDigits(class_list=[0, 1], zero_one=True).load()
 
         # Training classifier
-        self.clf.fit(self.ds)
-
+        self.clf.fit(self.ds.X, self.ds.Y)
         self.explainer = CExplainerGradient(self.clf)
 
     def test_explain(self):

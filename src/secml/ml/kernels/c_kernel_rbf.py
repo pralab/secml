@@ -27,6 +27,9 @@ class CKernelRBF(CKernel):
         Default is 1.0. Equals to `-0.5 * sigma^-2` in the standard
         formulation of rbf kernel, it is a free parameter to be used
         for balancing.
+    preprocess : CModule or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CModule subclass. If None, input data is used as is.
 
     Attributes
     ----------
@@ -48,11 +51,17 @@ class CKernelRBF(CKernel):
     """
     __class_type = 'rbf'
 
-    def __init__(self, gamma=1.0):
+    def __init__(self, gamma=1.0, preprocess=None):
 
         # Using a float gamma to avoid dtype casting problems
         self.gamma = gamma
-        super(CKernelRBF, self).__init__()
+        super(CKernelRBF, self).__init__(preprocess=preprocess)
+
+    @property
+    def _grad_requires_forward(self):
+        """Returns True as kernel is cached in the forward pass and then
+        used by backward when computing the gradient."""
+        return True
 
     @property
     def gamma(self):
@@ -138,13 +147,3 @@ class CKernelRBF(CKernel):
                 k_grad = k_grad.tosparse()
             grad = CArray(2 * self.gamma * diff * k_grad)
             return grad if w is None else w.dot(grad)
-
-    def gradient(self, x, w=None):
-        """Compute gradient at x by doing a forward and a backward pass.
-
-        The gradient is pre-multiplied by w.
-
-        """
-        self._cached_kernel = None
-        self.forward(x)
-        return self.backward(w)

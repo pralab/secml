@@ -2,8 +2,8 @@
 .. module:: CClassifier
    :synopsis: Interface and common functions for classification
 
-.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod
@@ -11,10 +11,9 @@ from abc import ABCMeta, abstractmethod
 from secml.ml import CModule
 from secml.array import CArray
 from secml.data import CDataset
-from secml.ml.features import CPreProcess
+from secml.data.splitter import CDataSplitterKFold
 from secml.utils.mixed_utils import check_is_fitted
 from secml.core.exceptions import NotFittedError
-from secml.core.decorators import deprecated
 
 
 class CClassifier(CModule, metaclass=ABCMeta):
@@ -43,9 +42,6 @@ class CClassifier(CModule, metaclass=ABCMeta):
         # Number of features of the training dataset
         self._n_features = None
 
-        # TODO: CModule.__init__ should handle the call to create.
-        preprocess = preprocess if preprocess is None \
-            else CPreProcess.create(preprocess)
         CModule.__init__(self, preprocess=preprocess)
 
     @property
@@ -91,25 +87,27 @@ class CClassifier(CModule, metaclass=ABCMeta):
         check_is_fitted(self, ['classes', 'n_features'])
 
     @abstractmethod
-    def _fit(self, dataset):
+    def _fit(self, x, y=None):
         """Private method that trains the One-Vs-All classifier.
         Must be reimplemented by subclasses.
 
         Parameters
         ----------
-        dataset : CDataset
-            Training set. Must be a :class:`.CDataset` instance with
-            patterns data and corresponding labels.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray or None, optional
+            Array of shape (n_samples,) containing the class labels.
+            Can be None if not required by the algorithm.
 
         Returns
         -------
-        trained_cls : CClassifier
-            Instance of the classifier trained using input dataset.
+        CClassifier
+            Trained classifier.
 
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
-    def fit(self, dataset, n_jobs=1):
+    def fit(self, x, y=None, n_jobs=1):
         """Trains the classifier.
 
         If a preprocess has been specified,
@@ -119,39 +117,95 @@ class CClassifier(CModule, metaclass=ABCMeta):
 
         Parameters
         ----------
-        dataset : CDataset
-            Training set. Must be a :class:`.CDataset` instance with
-            patterns data and corresponding labels.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray or None, optional
+            Array of shape (n_samples,) containing the class labels.
+            Can be None if not required by the algorithm.
         n_jobs : int
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
 
         Returns
         -------
-        trained_cls : CClassifier
-            Instance of the classifier trained using input dataset.
+        CClassifier
+            Trained classifier.
 
         """
-        if not isinstance(dataset, CDataset):
+        x = CArray(x).atleast_2d()  # try casting to CArray
+        y = CArray(y)
+
+        if x.shape[0] != y.size:
             raise TypeError(
-                "training set should be provided as a CDataset object.")
+                "Input data x and y do not have consistent shapes.")
 
-        # Storing dataset classes
-        self._classes = dataset.classes
-        self._n_features = dataset.num_features
+        # storing classes and features
+        self._classes = y.unique()
+        self._n_features = x.shape[1]
 
-        data_x = dataset.X
         # Transform data if a preprocess is defined
         if self.preprocess is not None:
-            data_x = self.preprocess.fit_transform(dataset.X)
+            x = self.preprocess.fit_forward(x)
 
         # Data is ready: fit the classifier
         try:  # Try to use parallelization
-            self._fit(CDataset(data_x, dataset.Y), n_jobs=n_jobs)
+            self._fit(x, y, n_jobs=n_jobs)  # TODO: remove n_jobs from here
         except TypeError:  # Parallelization is probably not supported
-            self._fit(CDataset(data_x, dataset.Y))
+            self._fit(x, y)
 
         return self
+
+    # TODO: add option to exclude xval or customize it.
+    def fit_forward(self, x, y=None, caching=False):
+        """Fit estimator using data and then execute forward on the data.
+
+        To avoid returning over-fitted scores on the training set, this method
+        runs a 5-fold cross validation on training data and
+        returns the validation scores.
+
+        Parameters
+        ----------
+        x : CArray
+            Array with shape (n_samples, n_features) to be transformed and
+            to be used for training.
+        y : CArray or None, optional
+            Array of shape (n_samples,) containing the class labels.
+            Can be None if not required by the algorithm.
+        caching: bool
+             True if preprocessed x should be cached for backward pass
+
+        Returns
+        -------
+        CArray
+            Transformed input data.
+
+        See Also
+        --------
+        fit : fit the preprocessor.
+        forward : run forward function on input data.
+
+        """
+        kfold = CDataSplitterKFold(
+            num_folds=5, random_state=0).compute_indices(CDataset(x, y))
+
+        scores = CArray.zeros(shape=(x.shape[0], self.classes.size))
+
+        # TODO: samples can be first preprocessed and cached, if required.
+        #  then we can use _fit and _forward to work on the preprocessed data
+        for k in range(kfold.num_folds):
+            tr_idx = kfold.tr_idx[k]
+            ts_idx = kfold.ts_idx[k]
+            self.fit(x[tr_idx, :], y[tr_idx])
+            scores[ts_idx, :] = self.forward(x[ts_idx, :], caching=False)
+
+        # train on the full training set after computing the xval scores
+        self.fit(x, y)
+
+        # cache x if required
+        if caching is True:
+            self._forward_preprocess(x, caching=True)
+
+        return scores
 
     def decision_function(self, x, y=None):
         """Computes the decision function for each pattern in x.

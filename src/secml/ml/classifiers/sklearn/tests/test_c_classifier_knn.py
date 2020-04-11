@@ -20,7 +20,7 @@ class TestCClassifierKNN(CClassifierTestCases):
 
         self.logger.info("Initializing KNeighbors Classifier... ")
         self.knn = CClassifierKNN(n_neighbors=3)
-        self.knn.fit(self.dataset)
+        self.knn.fit(self.dataset.X, self.dataset.Y)
 
     def test_plot(self):
         ds = CDLRandomBlobs(n_samples=100, centers=3, n_features=2,

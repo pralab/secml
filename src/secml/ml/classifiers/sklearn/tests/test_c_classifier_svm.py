@@ -62,8 +62,8 @@ class TestCClassifierSVM(CClassifierTestCases):
         self.assertEqual('linear', linear_svm.kernel.class_type)
 
         self.logger.info("Training both classifiers on dense data")
-        linear_svm.fit(self.dataset)
-        kernel_linear_svm.fit(self.dataset)
+        linear_svm.fit(self.dataset.X, self.dataset.Y)
+        kernel_linear_svm.fit(self.dataset.X, self.dataset.Y)
 
         linear_svm_pred_y, linear_svm_pred_score = linear_svm.predict(
             self.dataset.X, return_decision_function=True)
@@ -75,8 +75,8 @@ class TestCClassifierSVM(CClassifierTestCases):
         self.assert_array_equal(linear_svm_pred_y, kernel_linear_svm_pred_y)
 
         self.logger.info("Training both classifiers on sparse data")
-        linear_svm.fit(self.dataset_sparse)
-        kernel_linear_svm.fit(self.dataset_sparse)
+        linear_svm.fit(self.dataset_sparse.X, self.dataset_sparse.Y)
+        kernel_linear_svm.fit(self.dataset_sparse.X, self.dataset_sparse.Y)
 
         self.assertTrue(linear_svm.w.issparse,
                         "Weights vector is not sparse even "
@@ -100,7 +100,7 @@ class TestCClassifierSVM(CClassifierTestCases):
                 "SVM \\w similarity function: %s", svm.kernel.__class__)
 
             # Training and predicting using our SVM
-            svm.fit(self.dataset)
+            svm.fit(self.dataset.X, self.dataset.Y)
 
             pred_y, pred_score = svm.predict(
                 self.dataset.X, return_decision_function=True)
@@ -150,7 +150,7 @@ class TestCClassifierSVM(CClassifierTestCases):
                 "SVM \\w similarity function: %s", svm.kernel.__class__)
 
             # Training and predicting using our SVM
-            svm.fit(self.dataset)
+            svm.fit(self.dataset.X, self.dataset.Y)
             pred_y, pred_score = svm.predict(
                 self.dataset.X, return_decision_function=True)
             # chose random one pattern
@@ -186,26 +186,26 @@ class TestCClassifierSVM(CClassifierTestCases):
                 "SVM \\w similarity function: %s", svm.kernel.__class__)
 
             # Training and predicting on dense data for reference
-            svm.fit(self.dataset)
+            svm.fit(self.dataset.X, self.dataset.Y)
             pred_y, pred_score = svm.predict(
                 self.dataset.X, return_decision_function=True)
 
             # Training and predicting on sparse data
-            svm.fit(self.dataset_sparse)
+            svm.fit(self.dataset_sparse.X, self.dataset_sparse.Y)
             pred_y_sparse, pred_score_sparse = svm.predict(
                 self.dataset_sparse.X, return_decision_function=True)
 
             _check_sparsedata(pred_y, pred_score, pred_y_sparse, pred_score_sparse)
 
             # Training on sparse and predicting on dense
-            svm.fit(self.dataset_sparse)
+            svm.fit(self.dataset_sparse.X, self.dataset_sparse.Y)
             pred_y_sparse, pred_score_sparse = svm.predict(
                 self.dataset.X, return_decision_function=True)
 
             _check_sparsedata(pred_y, pred_score, pred_y_sparse, pred_score_sparse)
 
             # Training on dense and predicting on sparse
-            svm.fit(self.dataset)
+            svm.fit(self.dataset.X, self.dataset.Y)
             pred_y_sparse, pred_score_sparse = svm.predict(
                 self.dataset_sparse.X, return_decision_function=True)
 
@@ -228,7 +228,7 @@ class TestCClassifierSVM(CClassifierTestCases):
 
         # fit the model
         clf = CClassifierSVM()
-        clf.fit(dataset)
+        clf.fit(dataset.X, dataset.Y)
 
         w = clf.w
         a = -w[0] / w[1]
@@ -237,7 +237,7 @@ class TestCClassifierSVM(CClassifierTestCases):
         yy = a * xx - clf.b / w[1]
 
         wclf = CClassifierSVM(class_weight={0: 1, 1: 10})
-        wclf.fit(dataset)
+        wclf.fit(dataset.X, dataset.Y)
 
         ww = wclf.w
         wa = -ww[0] / ww[1]
@@ -260,21 +260,21 @@ class TestCClassifierSVM(CClassifierTestCases):
         svm = CClassifierSVM(kernel=None)
 
         self.assertIsNone(svm.store_dual_vars)
-        svm.fit(self.dataset)
+        svm.fit(self.dataset.X, self.dataset.Y)
         self.assertIsNone(svm.sv)
 
         self.logger.info("Changing store_dual_vars to True")
         svm.store_dual_vars = True
 
         self.assertTrue(svm.store_dual_vars)
-        svm.fit(self.dataset)
+        svm.fit(self.dataset.X, self.dataset.Y)
         self.assertIsNotNone(svm.sv)
 
         self.logger.info("Changing store_dual_vars to False")
         svm.store_dual_vars = False
 
         self.assertFalse(svm.store_dual_vars)
-        svm.fit(self.dataset)
+        svm.fit(self.dataset.X, self.dataset.Y)
         self.assertIsNone(svm.sv)
 
         self.logger.info("Changing kernel to nonlinear when "
@@ -286,14 +286,14 @@ class TestCClassifierSVM(CClassifierTestCases):
         svm = CClassifierSVM(kernel='rbf')
 
         self.assertIsNone(svm.store_dual_vars)
-        svm.fit(self.dataset)
+        svm.fit(self.dataset.X, self.dataset.Y)
         self.assertIsNotNone(svm.sv)
 
         self.logger.info("Changing store_dual_vars to True")
         svm.store_dual_vars = True
 
         self.assertTrue(svm.store_dual_vars)
-        svm.fit(self.dataset)
+        svm.fit(self.dataset.X, self.dataset.Y)
         self.assertIsNotNone(svm.sv)
 
         self.logger.info(
@@ -331,7 +331,7 @@ class TestCClassifierSVM(CClassifierTestCases):
 
             self.logger.info("Testing dense data...")
             ds = self.dataset.todense()
-            svm.fit(ds)
+            svm.fit(ds.X, ds.Y)
 
             grads_d = []
             for i in samps:
@@ -344,7 +344,7 @@ class TestCClassifierSVM(CClassifierTestCases):
 
             self.logger.info("Testing sparse data...")
             ds = self.dataset.tosparse()
-            svm.fit(ds)
+            svm.fit(ds.X, ds.Y)
 
             grads_s = []
             for i in samps:

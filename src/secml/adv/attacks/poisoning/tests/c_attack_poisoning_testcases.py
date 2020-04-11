@@ -225,7 +225,7 @@ class CAttackPoisoningTestCases(CUnitTest):
                                          **self.clf_params)
         self.classifier.store_dual_vars = True
         # fit the classifier
-        self.classifier.fit(self.tr)
+        self.classifier.fit(self.tr.X, self.tr.Y)
 
     def _clf_poisoning(self):
         """
@@ -252,7 +252,7 @@ class CAttackPoisoningTestCases(CUnitTest):
 
         pois_clf = self.classifier.deepcopy()
 
-        pois_clf.fit(tr)
+        pois_clf.fit(tr.X, tr.Y)
         y_pred, scores = pois_clf.predict(self.ts.X,
                                           return_decision_function=True)
         pois_acc = metric.performance_score(y_true=self.ts.Y,

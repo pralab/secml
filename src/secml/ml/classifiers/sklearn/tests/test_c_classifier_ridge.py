@@ -34,7 +34,7 @@ class TestCClassifierRidge(CClassifierTestCases):
 
         for ridge in self.ridges:
             ridge.verbose = 2  # Enabling debug output for each classifier
-            ridge.fit(self.dataset)
+            ridge.fit(self.dataset.X, self.dataset.Y)
 
     def test_time(self):
         """ Compare execution time of ridge and SVM"""
@@ -47,11 +47,11 @@ class TestCClassifierRidge(CClassifierTestCases):
             svm = CClassifierSVM(ridge.kernel)
 
             with self.timer() as t_svm:
-                svm.fit(self.dataset)
+                svm.fit(self.dataset.X, self.dataset.Y)
             self.logger.info(
                 "Execution time of SVM: {:}".format(t_svm.interval))
             with self.timer() as t_ridge:
-                ridge.fit(self.dataset)
+                ridge.fit(self.dataset.X, self.dataset.Y)
             self.logger.info(
                 "Execution time of ridge: {:}".format(t_ridge.interval))
 
@@ -73,7 +73,7 @@ class TestCClassifierRidge(CClassifierTestCases):
             self.logger.info("RIDGE kernel: {:}".format(ridge.kernel))
 
             svm = CClassifierSVM(ridge.kernel)
-            svm.fit(self.dataset)
+            svm.fit(self.dataset.X, self.dataset.Y)
 
             label_svm, y_svm = svm.predict(
                 self.dataset.X, return_decision_function=True)
@@ -124,7 +124,7 @@ class TestCClassifierRidge(CClassifierTestCases):
 
             self.logger.info("Testing dense data...")
             ds = self.dataset.todense()
-            ridge.fit(ds)
+            ridge.fit(ds.X, ds.Y)
 
             # Run the comparison with numerical gradient
             # (all classes will be tested)
@@ -132,7 +132,7 @@ class TestCClassifierRidge(CClassifierTestCases):
 
             self.logger.info("Testing sparse data...")
             ds = self.dataset.tosparse()
-            ridge.fit(ds)
+            ridge.fit(ds.X, ds.Y)
 
             # Run the comparison with numerical gradient
             # (all classes will be tested)

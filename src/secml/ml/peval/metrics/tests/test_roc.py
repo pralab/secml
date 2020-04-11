@@ -22,7 +22,7 @@ class TestCRoc(CUnitTest):
         self.ds1 = self.dl1.load()
         self.ds2 = self.dl2.load()
 
-        self.svm = CClassifierSVM(C=1e-7).fit(self.ds1)
+        self.svm = CClassifierSVM(C=1e-7).fit(self.ds1.X, self.ds1.Y)
 
         self.y1, self.s1 = self.svm.predict(
             self.ds1.X, return_decision_function=True)

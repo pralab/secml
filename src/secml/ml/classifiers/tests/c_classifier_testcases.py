@@ -76,7 +76,7 @@ class CClassifierTestCases(CUnitTest):
         else:
             self.logger.info("Testing on dense data...")
 
-        clf.fit(ds)
+        clf.fit(ds.X, ds.Y)
 
         # we have to ensure at least 2d here, since _decision_function is not
         # applying this change anymore (while decision_function does).
@@ -145,7 +145,7 @@ class CClassifierTestCases(CUnitTest):
         self.logger.info("Testing classifiers graphically")
         # Preparation of the grid
         fig = CFigure(width=8, height=4, fontsize=8)
-        clf.fit(ds)
+        clf.fit(ds.X, ds.Y)
 
         fig.subplot(1, 2, 1)
         fig.sp.plot_ds(ds)
@@ -161,6 +161,7 @@ class CClassifierTestCases(CUnitTest):
 
         return fig
 
+    # TODO: consider moving at the CModule level!
     def _test_gradient_numerical(self, clf, x, extra_classes=None,
                                  th=1e-3, epsilon=eps, **grad_kwargs):
         """Test for clf.grad_f_x comparing to numerical gradient.
@@ -273,8 +274,8 @@ class CClassifierTestCases(CUnitTest):
         clf_pre = clf.deepcopy()
         clf_pre.preprocess = pre2
 
-        clf_pre.fit(ds)
-        clf.fit(CDataset(data_pre, ds.Y))
+        clf_pre.fit(ds.X, ds.Y)
+        clf.fit(data_pre, ds.Y)
 
         return pre1, data_pre, clf_pre, clf
 
@@ -407,7 +408,7 @@ class CClassifierTestCases(CUnitTest):
         ds_sparse = ds.tosparse()
 
         # Fitting on sparse data
-        clf.fit(ds_sparse)
+        clf.fit(ds_sparse.X, ds_sparse.Y)
 
         # Resulting weights vector must be sparse
         self.assertTrue(clf.w.issparse)

@@ -85,7 +85,7 @@ class TestCExplainerInfluenceFunctions(CUnitTest):
     def _compute_influences(self):
         self._clf_loss = self._clf._loss.class_type
 
-        self._clf.fit(self._tr)
+        self._clf.fit(self._tr.X, self._tr.Y)
 
         self._check_accuracy()
 
@@ -129,7 +129,7 @@ class TestCExplainerInfluenceFunctions(CUnitTest):
         clf_copy = self._clf.deepcopy()
         new_dataset = self._get_tr_without_point(point_idx)
 
-        clf_copy.fit(new_dataset)
+        clf_copy.fit(new_dataset.X, new_dataset.Y)
 
         loss = (1 / self._ts.num_samples) * self.clf_gradients.l(
             self._ts.X, self._ts.Y, clf_copy).sum(axis=None)
