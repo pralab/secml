@@ -169,8 +169,8 @@ class COptimizerPGD(COptimizer):
 
             # debugging information
             self.logger.debug(
-                'Iter.: ' + str(i) + ', x: ' + str(x) + ', f(x): ' +
-                str(self._f_seq[i]) + '|g(x)|_2: ' + str(grad.norm()))
+                'Iter.: ' + str(i) + ', f(x): ' +
+                str(self._f_seq[i].item()) + ', |df/dx|: ' + str(grad.norm()))
 
             # make a step into the deepest descent direction
             x -= self.eta * grad

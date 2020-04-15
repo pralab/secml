@@ -254,8 +254,10 @@ class CAttackEvasionPGDLS(CAttackEvasion):
 
         k, c = self._find_k_c(y_pred, scores)
 
-        grad = self._solver_clf.grad_f_x(x, y=k.item()) - \
-               self._solver_clf.grad_f_x(x, y=c.item())
+        w = CArray.zeros(shape=(self._solver_clf.n_classes,))
+        w[k.item()] = 1
+        w[c.item()] = -1
+        grad = self._solver_clf.gradient(x, w)
 
         return grad if self.y_target is None else -grad
 
