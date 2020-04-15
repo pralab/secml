@@ -85,7 +85,7 @@ class TestCAttackEvasionPGD(CAttackEvasionTestCases):
     def test_linear_l2(self):
         """Test evasion of a linear classifier using L2 distance."""
 
-        eta = 0.5
+        eta = 0.01
         sparse = True
         seed = 48574308
 
@@ -109,7 +109,7 @@ class TestCAttackEvasionPGD(CAttackEvasionTestCases):
         evas, x0, y0 = self._set_evasion(ds, evasion_params)
 
         # Expected final optimal point
-        expected_x = CArray([0.1697, 0.67])
+        expected_x = CArray([0.3872, 0.67])
         expected_y = 0
 
         self._run_evasion(evas, x0, y0, expected_x, expected_y)

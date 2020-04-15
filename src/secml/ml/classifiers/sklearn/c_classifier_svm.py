@@ -384,7 +384,7 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
             self._sv_idx = CArray(classifier.support_).ravel()
             # Compatibility fix for differences between sklearn versions
             self._alpha = convert_binary_labels(y[self.sv_idx]) * \
-                abs(CArray(classifier.dual_coef_).todense().ravel())
+                          abs(CArray(classifier.dual_coef_).todense().ravel())
             self._sv = CArray(x[self.sv_idx, :])
             self.logger.debug("Classifier SVM dual weights (alphas): "
                               "\n{:}".format(self._alpha))
@@ -443,22 +443,20 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
             m = int(self.grad_sampling * self.n_sv.sum())  # floor
             idx = CArray.randsample(self.alpha.size, m)  # adding randomness
 
-            self.kernel.rv = self.sv[idx, :]
-            gradient = self.kernel.gradient(self._cached_x).atleast_2d()
-
-            # Few shape check to ensure broadcasting works correctly
-            if gradient.shape != (idx.size, self.n_features):
-                raise ValueError("Gradient shape must be ({:}, {:})".format(
-                    idx.size, self.n_features))
-
             alpha_2d = self.alpha[idx].atleast_2d()
-            if gradient.issparse is True:  # To ensure the sparse dot is used
+            # TODO: this should be handled by CArray directly.
+            #  we should not do conversions here to ensure sparsity
+            # To ensure the sparse dot is used
+            if self._cached_x.issparse is True:
                 alpha_2d = alpha_2d.tosparse()
             if alpha_2d.shape != (1, idx.size):
                 raise ValueError(
                     "Alpha vector shape must be "
                     "({:}, {:}) or ravel equivalent".format(1, idx.size))
-            gradient = alpha_2d.dot(gradient).ravel()
+
+            self.kernel.rv = self.sv[idx, :]
+            gradient = self.kernel.gradient(
+                self._cached_x, alpha_2d).ravel()
 
         # Gradient sign depends on input label (0/1)
         if w is not None:

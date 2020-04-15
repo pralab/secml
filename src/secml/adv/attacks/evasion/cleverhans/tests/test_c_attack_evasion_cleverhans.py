@@ -165,6 +165,7 @@ class TestCAttackEvasionCleverhans(CAttackEvasionCleverhansTestCases):
             **attack_params)
 
         # Expected final optimal point
+        # expected_x = CArray([0.7885, 0.7719])
         expected_x = CArray([0.7651, 0.7406])
 
         self._run_evasion(evas, self.x0, self.y0, expected_x=expected_x)
