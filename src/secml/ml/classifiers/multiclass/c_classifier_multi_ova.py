@@ -68,15 +68,16 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
     """
     __class_type = 'ova'
 
-    def __init__(self, classifier, preprocess=None, **clf_params):
+    def __init__(self, classifier, preprocess=None, n_jobs=1, **clf_params):
 
         super(CClassifierMulticlassOVA, self).__init__(
             classifier=classifier,
             preprocess=preprocess,
+            n_jobs=n_jobs,
             **clf_params
         )
 
-    def _fit(self, x, y, n_jobs=1):
+    def _fit(self, x, y):
         """Trains the classifier.
 
         A One-Vs-All classifier is trained for each dataset class.
@@ -87,9 +88,6 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
             Array to be used for training with shape (n_samples, n_features).
         y : CArray
             Array of shape (n_samples,) containing the class labels.
-        n_jobs : int
-            Number of parallel workers to use for training the classifier.
-            Default 1. Cannot be higher than processor's number of cores.
 
         Returns
         -------
@@ -104,7 +102,7 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
         # Use the specified number of workers
         self._binary_classifiers = parfor2(_fit_one_ova,
                                            self.classes.size,
-                                           n_jobs, self, CDataset(x, y),
+                                           self.n_jobs, self, CDataset(x, y),
                                            self.verbose)
 
         return self

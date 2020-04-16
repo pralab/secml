@@ -9,7 +9,7 @@
 from sklearn.svm import SVC
 
 from secml.array import CArray
-from secml.ml.classifiers import CClassifierLinear
+from secml.ml.classifiers import CClassifierLinearMixin, CClassifier
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.ml.kernels import CKernel
 from secml.ml.classifiers.gradients import CClassifierGradientSVMMixin
@@ -17,7 +17,8 @@ from secml.ml.classifiers.loss import CLossHinge
 from secml.utils.mixed_utils import check_is_fitted
 
 
-class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
+class CClassifierSVM(CClassifierLinearMixin, CClassifier,
+                     CClassifierGradientSVMMixin):
     """Support Vector Machine (SVM) classifier.
 
     Parameters
@@ -65,7 +66,7 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
                  preprocess=None, grad_sampling=1.0, store_dual_vars=None):
 
         # Calling the superclass init
-        CClassifierLinear.__init__(self, preprocess=preprocess)
+        CClassifier.__init__(self, preprocess=preprocess)
 
         # Classifier parameters
         self.C = C
@@ -81,14 +82,31 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
             else CKernel.create(kernel)
 
         # After-training attributes
+        self._w = None
+        self._b = None
         self._n_sv = None
         self._sv_idx = None
         self._alpha = None
         self._sv = None
 
         # slot for the computed kernel function (to speed up multiclass)
-        # DO NOT CLEAR
+        # TODO: is this still used?
         self._k = None
+
+    @property
+    def w(self):
+        return self._w
+
+    @property
+    def b(self):
+        return self._b
+
+    def _check_input(self, x, y=None):
+        """Check if y contains only two classes."""
+        x, y = CClassifier._check_input(self, x, y)
+        if y is not None and y.unique().size != 2:
+            raise ValueError("The data (x,y) has more than two classes.")
+        return x, y
 
     def is_kernel_linear(self):
         """Return True if the kernel is None or linear."""
@@ -299,7 +317,7 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         ys = self.alpha.sign()
         return ys[self.sv_margin_idx(tol=tol)]
 
-    def fit(self, x, y, n_jobs=1):
+    def fit(self, x, y):
         """Fit the SVM classifier.
 
         We use :class:`sklearn.svm.SVC` for weights and Support Vectors
@@ -317,9 +335,6 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         y : CArray
             Array of shape (n_samples,) containing the class
             labels (2-classes only).
-        n_jobs : int, optional
-            Number of parallel workers to use for training the classifier.
-            Default 1. Cannot be higher than processor's number of cores.
 
         Returns
         -------
@@ -327,7 +342,7 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
             Trained classifier.
 
         """
-        super(CClassifierSVM, self).fit(x, y, n_jobs=n_jobs)
+        super(CClassifierSVM, self).fit(x, y)
         # Cleaning up kernel matrix to free memory
         self._k = None
 
@@ -420,10 +435,10 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         """
 
         if self.is_kernel_linear():  # Scores are given by the linear model
-            return CClassifierLinear._forward(self, x)
-
-        k = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
-        score = CArray(k).todense().ravel() + self.b
+            score = CArray(x.dot(self.w.T)).todense().ravel() + self.b
+        else:
+            k = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
+            score = CArray(k).todense().ravel() + self.b
 
         scores = CArray.ones(shape=(x.shape[0], self.n_classes))
         scores[:, 0] = -score.ravel().T

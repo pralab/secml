@@ -95,11 +95,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             pretrained=pretrained,
             pretrained_classes=pretrained_classes,
             input_shape=input_shape,
-            softmax_outputs=softmax_outputs)
+            softmax_outputs=softmax_outputs, n_jobs=n_jobs)
 
         self._init_model()
-
-        self._n_jobs = n_jobs
         self._batch_size = batch_size
 
         if self._batch_size is None:
@@ -269,11 +267,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
     def _set_device(self):
         return torch.device("cuda" if use_cuda else "cpu")
-
-    def n_jobs(self):
-        """Returns the number of workers being used for loading
-        and processing the data."""
-        return self._n_jobs
 
     def get_params(self):
         """Returns the dictionary of class parameters."""
@@ -513,7 +506,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                              "in order to fit the model.")
 
         train_loader = self._data_loader(
-            x, y, batch_size=self._batch_size, num_workers=self._n_jobs - 1)
+            x, y, batch_size=self._batch_size, num_workers=self.n_jobs - 1)
 
         for epoch in range(self._epochs):
             running_loss = 0.0
@@ -557,7 +550,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             Transformed input data.
 
         """
-        data_loader = self._data_loader(x, num_workers=self._n_jobs - 1,
+        data_loader = self._data_loader(x, num_workers=self.n_jobs - 1,
                                         batch_size=self._batch_size)
 
         # Switch to evaluation mode

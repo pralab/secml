@@ -10,35 +10,18 @@ from secml.array import CArray
 from secml.utils.dict_utils import merge_dicts, SubLevelsDict
 
 
-class CClassifierSkLearn(CClassifier):
-    """Generic wrapper for SkLearn classifiers.
+class CWrapperSkLearnMixin:
+    """Generic wrapper for SkLearn instances.
 
     Parameters
     ----------
     sklearn_model : `sklearn.base.BaseEstimator` object
-        The scikit-learn model to wrap. Must implement `fit` and either
-        `decision_function` or `predict_proba` methods.
-    preprocess : CPreProcess or str or None, optional
-        Features preprocess to be applied to input data.
-        Can be a CPreProcess subclass or a string with the type of the
-        desired preprocessor. If None, input data is used as is.
-
-    Attributes
-    ----------
-    class_type : 'sklearn-clf'
+        The scikit-learn instance to wrap.
 
     """
-    __class_type = 'sklearn-clf'
 
-    def __init__(self, sklearn_model, preprocess=None):
-
-        CClassifier.__init__(self, preprocess=preprocess)
+    def __init__(self, sklearn_model):
         self._sklearn_model = sklearn_model
-
-        if hasattr(sklearn_model, 'classes_'):  # Model is pretrained
-            self._classes = CArray(sklearn_model.classes_)
-            # FIXME: how to obtain this from pretrained models?
-            self._n_features = 0
 
     @property
     def sklearn_model(self):
@@ -56,7 +39,7 @@ class CClassifierSkLearn(CClassifier):
         # as keys the attributes names without the accessibility prefix
         # We merge our dict with the sklearn `.get_params()` dict
         return SubLevelsDict(
-            merge_dicts(super(CClassifierSkLearn, self).get_params(),
+            merge_dicts(super(CWrapperSkLearnMixin, self).get_params(),
                         self._sklearn_model.get_params()))
 
     def __getattribute__(self, key):
@@ -72,7 +55,7 @@ class CClassifierSkLearn(CClassifier):
         except KeyError:
             pass  # Parameter not found in sklearn model
         # Try to get the parameter from self
-        return super(CClassifierSkLearn, self).__getattribute__(key)
+        return super(CWrapperSkLearnMixin, self).__getattribute__(key)
 
     def __setattr__(self, key, value):
         """Set an attribute.
@@ -84,9 +67,41 @@ class CClassifierSkLearn(CClassifier):
                 key in self._sklearn_model.get_params():
             self._sklearn_model.set_params(**{key: value})
         else:  # Otherwise, normal python set behavior
-            super(CClassifierSkLearn, self).__setattr__(key, value)
+            super(CWrapperSkLearnMixin, self).__setattr__(key, value)
 
-    def _fit(self, x, y):
+
+class CClassifierSkLearn(CWrapperSkLearnMixin, CClassifier):
+    """Generic wrapper for SkLearn classifiers.
+
+    Parameters
+    ----------
+    sklearn_model : `sklearn.base.BaseEstimator` object
+        The scikit-learn model to wrap. Must implement `fit` and either
+        `decision_function` or `predict_proba` methods.
+    preprocess : CModule or str or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CModule subclass or a string with the type of the
+        desired preprocessor. If None, input data is used as is.
+
+    Attributes
+    ----------
+    class_type : 'sklearn-clf'
+
+    """
+
+    __class_type = 'sklearn-clf'
+
+    def __init__(self, sklearn_model, preprocess=None):
+
+        CWrapperSkLearnMixin.__init__(self, sklearn_model)
+        CClassifier.__init__(self, preprocess=preprocess)
+
+        if hasattr(sklearn_model, 'classes_'):  # Model is pretrained
+            self._classes = CArray(sklearn_model.classes_)
+            # FIXME: how to obtain this from pretrained models?
+            self._n_features = 0
+
+    def _fit(self, x, y=None):
         """Fit sklearn model.
 
         Parameters
@@ -132,5 +147,8 @@ class CClassifierSkLearn(CClassifier):
                 "Number of columns is not equal to number of classes!")
 
         scores.atleast_2d()
-
         return scores
+
+    def _backward(self, w):
+        raise NotImplementedError(
+            "`_backward` is not implemented for this generic sklearn wrapper.")

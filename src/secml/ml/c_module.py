@@ -22,12 +22,17 @@ class CModule(CCreator, metaclass=ABCMeta):
         Feature preprocessing to be applied to input data.
         Can be a CModule subclass. If None, input data is used as is.
 
+    n_jobs : int, optional
+        Number of parallel workers to use for training the classifier.
+        Cannot be higher than processor's number of cores. Default is 1.
+
     """
     __super__ = 'CModule'
 
-    def __init__(self, preprocess=None):
+    def __init__(self, preprocess=None, n_jobs=1):
         self._cached_x = None  # cached internal x repr. for backward pass
         self.preprocess = preprocess  # call setter
+        self.n_jobs = n_jobs
 
     @staticmethod
     def create_chain(class_items, kwargs_list):
@@ -56,6 +61,14 @@ class CModule(CCreator, metaclass=ABCMeta):
                 pre_id, preprocess=chain, **kwargs_list[i])
 
         return chain
+
+    @property
+    def n_jobs(self):
+        return self._n_jobs
+
+    @n_jobs.setter
+    def n_jobs(self, value):
+        self._n_jobs = int(value)
 
     @property
     def _grad_requires_forward(self):
@@ -233,7 +246,6 @@ class CModule(CCreator, metaclass=ABCMeta):
 
         return grad.ravel() if grad.is_vector_like else grad
 
-    # TODO: make abstract!
     def _backward(self, w):
         raise NotImplementedError("`_backward` is not implemented for {:}"
                                   "".format(self.__class__.__name__))
@@ -241,10 +253,10 @@ class CModule(CCreator, metaclass=ABCMeta):
     _backward.__doc__ = backward.__doc__  # Same doc for the protected method
 
     @abstractmethod
-    def _fit(self, x, y=None):
+    def _fit(self, x, y):
         raise NotImplementedError("Fit is not implemented.")
 
-    def fit(self, x, y=None):
+    def fit(self, x, y):
         """Fit estimator.
 
         Parameters

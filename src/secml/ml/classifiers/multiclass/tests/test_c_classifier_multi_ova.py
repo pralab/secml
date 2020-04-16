@@ -24,10 +24,11 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         svc = SVC(kernel='linear', class_weight='balanced')
         multiclass_sklearn = OneVsRestClassifier(svc)
         multiclass = CClassifierMulticlassOVA(classifier=CClassifierSVM,
-                                              class_weight='balanced')
+                                              class_weight='balanced',
+                                              n_jobs=2)
         multiclass.verbose = 2
 
-        multiclass.fit(self.dataset.X, self.dataset.Y, n_jobs=2)
+        multiclass.fit(self.dataset.X, self.dataset.Y)
         class_pred, score_pred = multiclass.predict(
             self.dataset.X, return_decision_function=True)
 
@@ -232,7 +233,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
         # Check if we can return the i_th classifier
         for i in range(multiclass.num_classifiers):
 
-            ova_grad = multiclass._binary_classifiers[i].grad_f_x(pattern)
+            ova_grad = multiclass._binary_classifiers[i].grad_f_x(pattern, y=1)
 
             gradient = multiclass.grad_f_x(pattern, y=i)
             self.logger.info(

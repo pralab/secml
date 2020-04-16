@@ -31,6 +31,7 @@ class CClassifierGradientTestLinear(CClassifierGradientTest):
         """Return a deepcopy of the given classifier with the value
         of the parameters changed."""
         new_clf = clf.deepcopy()
-        new_clf._w = params[:-1]
-        new_clf._b = params[-1]
+        # modifying internal variables w, b from sklearn models
+        new_clf._sklearn_model.coef_ = params[:-1].tondarray()
+        new_clf._sklearn_model.intercept_ = params[-1].tondarray()
         return new_clf

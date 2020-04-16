@@ -14,9 +14,6 @@ class TestCClassifierRidge(CClassifierTestCases):
     def setUp(self):
         """Test for init and fit methods."""
 
-        # TODO: remove this filter when `kernel` parameter is removed from Ridge Classifier
-        self.logger.filterwarnings("ignore", message="`kernel` parameter.*",
-                                   category=DeprecationWarning)
         # generate synthetic data
         self.dataset = CDLRandom(n_features=100, n_redundant=20,
                                  n_informative=25,
@@ -27,10 +24,10 @@ class TestCClassifierRidge(CClassifierTestCases):
 
         kernel_types = (None, CKernelLinear, CKernelRBF, CKernelPoly)
         self.ridges = [CClassifierRidge(
-            kernel=kernel() if kernel is not None else None)
-                for kernel in kernel_types]
+            preprocess=kernel() if kernel is not None else None)
+            for kernel in kernel_types]
         self.logger.info(
-            "Testing RIDGE with kernel unctions: %s", str(kernel_types))
+            "Testing RIDGE with kernel functions: %s", str(kernel_types))
 
         for ridge in self.ridges:
             ridge.verbose = 2  # Enabling debug output for each classifier
@@ -41,10 +38,9 @@ class TestCClassifierRidge(CClassifierTestCases):
         self.logger.info("Testing training speed of ridge compared to SVM ")
 
         for ridge in self.ridges:
+            self.logger.info("RIDGE kernel: {:}".format(ridge.preprocess))
 
-            self.logger.info("RIDGE kernel: {:}".format(ridge.kernel))
-
-            svm = CClassifierSVM(ridge.kernel)
+            svm = CClassifierSVM(ridge.preprocess)
 
             with self.timer() as t_svm:
                 svm.fit(self.dataset.X, self.dataset.Y)
@@ -70,9 +66,14 @@ class TestCClassifierRidge(CClassifierTestCases):
                          "classifiers on the training set")
 
         for ridge in self.ridges:
-            self.logger.info("RIDGE kernel: {:}".format(ridge.kernel))
+            self.logger.info("RIDGE kernel: {:}".format(ridge.preprocess))
 
-            svm = CClassifierSVM(ridge.kernel)
+            if ridge.preprocess is not None:
+                svm_kernel = ridge.preprocess.deepcopy()
+            else:
+                svm_kernel = None
+
+            svm = CClassifierSVM(kernel=svm_kernel)
             svm.fit(self.dataset.X, self.dataset.Y)
 
             label_svm, y_svm = svm.predict(
@@ -95,8 +96,7 @@ class TestCClassifierRidge(CClassifierTestCases):
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
         for ridge in self.ridges:
-
-            self.logger.info("RIDGE kernel: {:}".format(ridge.kernel))
+            self.logger.info("RIDGE kernel: {:}".format(ridge.preprocess))
 
             scores_d = self._test_fun(ridge, self.dataset.todense())
             scores_s = self._test_fun(ridge, self.dataset.tosparse())
@@ -115,11 +115,12 @@ class TestCClassifierRidge(CClassifierTestCases):
         for ridge in self.ridges:
 
             self.logger.info(
-                "Checking gradient for Ridge with kernel: %s", ridge.kernel)
+                "Checking grad. for Ridge with kernel: %s", ridge.preprocess)
 
-            if hasattr(ridge.kernel, 'gamma'):  # set gamma for poly and rbf
+            # set gamma for poly and rbf
+            if hasattr(ridge.preprocess, 'gamma'):
                 ridge.set('gamma', 1e-5)
-            if hasattr(ridge.kernel, 'degree'):  # set degree for poly
+            if hasattr(ridge.preprocess, 'degree'):  # set degree for poly
                 ridge.set('degree', 3)
 
             self.logger.info("Testing dense data...")

@@ -30,7 +30,7 @@ class TestCPlot(CUnitTest):
         fig.sp.plot_ds(self.dataset)
 
         fig.sp.plot_fun(self.clf.decision_function, y=1)
-        fig.sp.plot_fgrads(lambda x: self.clf.grad_f_x(x))
+        fig.sp.plot_fgrads(lambda x: self.clf.grad_f_x(x, y=1))
         fig.show()
 
 

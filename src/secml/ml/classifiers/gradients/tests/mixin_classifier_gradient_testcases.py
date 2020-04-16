@@ -60,7 +60,7 @@ class CClassifierGradientMixinTestCases(CUnitTest):
         i = self.ds.X.randsample(
             CArray.arange(self.ds.num_samples), 1, random_state=self.seed)
         x, y = self.ds.X[i, :], self.ds.Y[i]
-        self.logger.info("P {:}: x {:}, y {:}".format(i.item(), x, y))
+        self.logger.info("idx {:}: x {:}, y {:}".format(i.item(), x, y))
 
         params = self.clf_grads_class.params(clf)
 
@@ -71,10 +71,8 @@ class CClassifierGradientMixinTestCases(CUnitTest):
             x0=x, y0=y, clf_grads=self.clf_grads_class, clf=clf)
 
         error = (gradient - num_gradient).norm()
-
         self.logger.info("Analytical gradient:\n{:}".format(gradient))
         self.logger.info("Numerical gradient:\n{:}".format(num_gradient))
-
         self.logger.info("norm(grad - grad_num): {:}".format(error))
         self.assertLess(error, 1e-2)
 

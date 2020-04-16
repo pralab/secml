@@ -88,7 +88,7 @@ class CClassifierRejectThreshold(CClassifierReject):
         """Number of classes of training dataset, plus the rejection class."""
         return self._clf.n_classes + 1
 
-    def fit(self, x, y, n_jobs=1):
+    def fit(self, x, y):
         """Trains the classifier.
 
         If a preprocess has been specified,
@@ -116,9 +116,9 @@ class CClassifierRejectThreshold(CClassifierReject):
         if self.preprocess is not None:
             x = self.preprocess.fit_transform(x)
 
-        return self._fit(x, y, n_jobs=n_jobs)
+        return self._fit(x, y)
 
-    def _fit(self, x, y, n_jobs=1):
+    def _fit(self, x, y):
         """Private method that trains the One-Vs-All classifier.
         Must be reimplemented by subclasses.
 
@@ -138,7 +138,7 @@ class CClassifierRejectThreshold(CClassifierReject):
             Instance of the classifier trained using input dataset.
 
         """
-        self._clf.fit(x, y, n_jobs=n_jobs)
+        self._clf.fit(x, y)
         return self
 
     def _forward(self, x):

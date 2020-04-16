@@ -13,12 +13,13 @@ class TestCClassifierLogistic(CClassifierTestCases):
         """Test for init and fit methods."""
         # generate synthetic data
         self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
-                                 n_clusters_per_class=1, random_state=99).load()
+                                 n_clusters_per_class=1,
+                                 random_state=99).load()
 
         self.dataset.X = CNormalizerMinMax().fit_transform(self.dataset.X)
 
         self.logger.info("Testing classifier creation ")
-        
+
         self.log = CClassifierLogistic(random_state=99)
 
     def test_plot(self):
@@ -60,8 +61,7 @@ class TestCClassifierLogistic(CClassifierTestCases):
 
         # Compare dense gradients with sparse gradients
         for grad_i, grad in enumerate(grads_d):
-            self.assert_array_almost_equal(
-                grad.atleast_2d(), grads_s[grad_i])
+            self.assert_array_almost_equal(grad, grads_s[grad_i])
 
     def test_sparse(self):
         """Test classifier operations on sparse data."""

@@ -20,10 +20,6 @@ class TestCClassifierSGD(CClassifierTestCases):
     def setUp(self):
         """Test for init and fit methods."""
 
-        # TODO: remove this filter when `kernel` parameter is removed from SGD Classifier
-        self.logger.filterwarnings("ignore", message="`kernel` parameter.*",
-                                   category=DeprecationWarning)
-
         # generate synthetic data
         self.dataset = CDLRandom(n_features=100, n_redundant=20,
                                  n_informative=25,
@@ -37,18 +33,21 @@ class TestCClassifierSGD(CClassifierTestCases):
                                   loss=CLossHinge(),
                                   random_state=0)
 
+        # this is equivalent to C=1 for SGD
+        alpha = 1 / self.dataset.num_samples
+
         kernel_types = \
             (None, CKernelLinear(), CKernelRBF(), CKernelPoly(degree=3))
         self.sgds = [CClassifierSGD(
             regularizer=CRegularizerL2(), loss=CLossHinge(),
-            max_iter=500, random_state=0,
-            kernel=kernel if kernel is not None else None)
-                for kernel in kernel_types]
+            max_iter=1000, random_state=0, alpha=alpha,
+            preprocess=kernel if kernel is not None else None)
+            for kernel in kernel_types]
         self.logger.info(
             "Testing SGD with kernel functions: %s", str(kernel_types))
 
         for sgd in self.sgds:
-            sgd.verbose = 2  # Enabling debug output for each classifier
+            sgd.verbose = 0  # Enabling debug output for each classifier
             sgd.fit(self.dataset.X, self.dataset.Y)
 
     def test_draw(self):
@@ -92,9 +91,13 @@ class TestCClassifierSGD(CClassifierTestCases):
 
         for sgd in self.sgds:
 
-            self.logger.info("SGD kernel: {:}".format(sgd.kernel))
+            self.logger.info("SGD kernel: {:}".format(sgd.preprocess))
 
-            svm = CClassifierSVM(sgd.kernel)
+            if sgd.preprocess is not None:
+                k = sgd.preprocess.deepcopy()
+            else:
+                k = None
+            svm = CClassifierSVM(kernel=k)
 
             svm.fit(self.dataset.X, self.dataset.Y)
 
@@ -153,8 +156,7 @@ class TestCClassifierSGD(CClassifierTestCases):
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
         for clf in self.sgds:
-
-            self.logger.info("SGD kernel: {:}".format(clf.kernel))
+            self.logger.info("SGD kernel: {:}".format(clf.preprocess))
 
             scores_d = self._test_fun(clf, self.dataset.todense())
             scores_s = self._test_fun(clf, self.dataset.tosparse())
@@ -173,11 +175,11 @@ class TestCClassifierSGD(CClassifierTestCases):
         for sgd in self.sgds:
 
             self.logger.info(
-                "Checking gradient for SGD with kernel: %s", sgd.kernel)
+                "Checking gradient for SGD with kernel: %s", sgd.preprocess)
 
-            if hasattr(sgd.kernel, 'gamma'):  # set gamma for poly and rbf
+            if hasattr(sgd.preprocess, 'gamma'):  # set gamma for poly and rbf
                 sgd.set('gamma', 1e-5)
-            if hasattr(sgd.kernel, 'degree'):  # set degree for poly
+            if hasattr(sgd.preprocess, 'degree'):  # set degree for poly
                 sgd.set('degree', 3)
 
             self.logger.info("Testing dense data...")
