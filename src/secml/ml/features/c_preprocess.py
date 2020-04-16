@@ -26,7 +26,27 @@ class CPreProcess(CModule, metaclass=ABCMeta):
     def __init__(self, preprocess=None):
         CModule.__init__(self, preprocess=preprocess)
 
-    def fit_transform(self, x, y=None, caching=False):
+    def fit(self, x, y=None):
+        """Fit the preprocessor.
+
+        Parameters
+        ----------
+        x : CArray
+            Array to be used as training set. Each row must correspond to
+            one single patterns, so each column is a different feature.
+        y : CArray or None, optional
+            Flat array with the label of each pattern.
+            Can be None if not required by the preprocessing algorithm.
+
+        Returns
+        -------
+        CPreProcess
+            Instance of the trained normalizer.
+
+        """
+        return CModule.fit(self, x, y)
+
+    def fit_transform(self, x, y=None):
         """Fit preprocessor using data and then transform data.
 
         This method is equivalent to call fit(data) and transform(data)
@@ -42,8 +62,6 @@ class CPreProcess(CModule, metaclass=ABCMeta):
         y : CArray or None, optional
             Flat array with the label of each pattern.
             Can be None if not required by the preprocessing algorithm.
-        caching: bool
-                 True if preprocessed x should be cached for backward pass
 
         Returns
         -------
@@ -56,7 +74,7 @@ class CPreProcess(CModule, metaclass=ABCMeta):
         transform : transform input data.
 
         """
-        return self.fit_forward(x=x, y=y, caching=caching)
+        return self.fit_forward(x=x, y=y, caching=False)
 
     def transform(self, x):
         """Apply the transformation algorithm on data.

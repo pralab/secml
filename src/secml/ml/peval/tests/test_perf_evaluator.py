@@ -60,16 +60,17 @@ class TestCPerfEvaluator(CUnitTest):
     def test_parameters_setting(self):
 
         # Changing default parameters to be sure are not used
-        self.svm.set_params({'C': 25, 'kernel.gamma': 1e-1})
+        self.svm.set_params({'C': 25, 'kernel.gamma': 1e-1, 'n_jobs': 2})
 
         xval_parameters = {'C': [1, 10, 100], 'kernel.gamma': [1, 50]}
 
         # DO XVAL FOR CHOOSE BEST PARAMETERS
-        xval_splitter = CDataSplitter.create('kfold', num_folds=5, random_state=50000)
+        xval_splitter = CDataSplitter.create(
+            'kfold', num_folds=5, random_state=50000)
 
         # Set the best parameters inside the classifier
         self.svm.estimate_parameters(self.training_dataset, xval_parameters,
-                                     xval_splitter, 'accuracy', n_jobs=2)
+                                     xval_splitter, 'accuracy')
 
         self.logger.info(
             "SVM has now the following parameters: {:}".format(
@@ -84,7 +85,7 @@ class TestCPerfEvaluator(CUnitTest):
         perf_eval.verbose = 1
 
         best_params, best_score = perf_eval.evaluate_params(
-            self.svm, self.training_dataset, xval_parameters, n_jobs=2)
+            self.svm, self.training_dataset, xval_parameters)
 
         for param in xval_parameters:
             self.logger.info(
@@ -103,7 +104,6 @@ class TestCPerfEvaluator(CUnitTest):
             num_xval_fold = len(xval_splitter.tr_idx)
 
             for f in range(num_xval_fold):
-
                 self.svm.set("C", parameters_combination[comb][0])
                 self.svm.kernel.gamma = parameters_combination[comb][1]
 
@@ -116,7 +116,7 @@ class TestCPerfEvaluator(CUnitTest):
 
                 this_fold_accuracy = skm.accuracy_score(
                     self.training_dataset[
-                        xval_splitter.ts_idx[f], :].Y.get_data(),
+                    xval_splitter.ts_idx[f], :].Y.get_data(),
                     this_fold_predicted.get_data())
                 this_fold_score.append(this_fold_accuracy)
 
@@ -198,7 +198,7 @@ class TestCPerfEvaluator(CUnitTest):
 
         # Set the best parameters inside the classifier
         best_params = multiclass.estimate_parameters(
-            tr, xval_params, xval_splitter, 'accuracy', n_jobs=1)
+            tr, xval_params, xval_splitter, 'accuracy')
 
         self.logger.info(
             "Multiclass SVM has now the following parameters: {:}".format(

@@ -4,91 +4,58 @@
 
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
+.. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
-from abc import ABCMeta
+from abc import abstractmethod
 
-from secml.ml.classifiers import CClassifier
 from secml.array import CArray
-from secml.data import CDataset
-from secml.utils.mixed_utils import check_is_fitted
-from secml.core.decorators import deprecated
 
 
-class CClassifierLinear(CClassifier, metaclass=ABCMeta):
-    """Abstract class that defines basic methods for linear classifiers.
+class CClassifierLinearMixin:
+    """Mixin class that defines basic methods for linear classifiers.
 
-    A linear classifier assign a label (class) to new patterns
+    A linear classifier assigns a label (class) to new patterns
     computing the inner product between the patterns and a vector
     of weights for each training set feature.
 
-    This interface implements a set of generic methods for training
-    and classification that can be used for every linear model.
-
-    Parameters
-    ----------
-    preprocess : CPreProcess or str or None, optional
-        Features preprocess to be applied to input data.
-        Can be a CPreProcess subclass or a string with the type of the
-        desired preprocessor. If None, input data is used as is.
+    This interface defines the weight and bias, and the forward and backward
+    functions for linear classifiers.
 
     """
 
-    def __init__(self, preprocess=None):
-        # Linear classifier parameters
-        self._w = None
-        self._b = None
-
-        # Calling init of CClassifier
-        CClassifier.__init__(self, preprocess=preprocess)
-
     @property
+    @abstractmethod
     def w(self):
-        """Vector with each feature's weight (dense or sparse)."""
-        return self._w
+        """Vector with feature weights (dense or sparse)."""
+        raise NotImplementedError()
 
     @property
+    @abstractmethod
     def b(self):
-        """Bias calculated from training data."""
-        return self._b
-
-    def _check_is_fitted(self):
-        """Check if the classifier is trained (fitted).
-
-        Raises
-        ------
-        NotFittedError
-            If the classifier is not fitted.
-
-        """
-        # Do not check `b` as some classifiers do not set it
-        check_is_fitted(self, 'w')
-        super(CClassifierLinear, self)._check_is_fitted()
+        """Bias term."""
+        raise NotImplementedError()
 
     def _forward(self, x):
-        """Computes the distance of each pattern in x to the hyperplane.
+        """Compute scores proportionally to the distance to the
+        hyperplane as w'x + b.
 
         Parameters
         ----------
         x : CArray
-            Array with new patterns to classify, 2-Dimensional of shape
-            (n_patterns, n_features).
+            Input samples given as matrix with shape=(n_samples, n_features).
 
         Returns
         -------
         score : CArray
-            Value of the decision function for each test pattern.
-            Dense flat array of shape (n_samples,) if y is not None,
-            otherwise a (n_samples, n_classes) array.
+            Value of the decision function for each sample, given as a matrix
+            with shape=(n_samples, n_classes).
 
         """
-        # Computing: `x * w^T`
         score = CArray(x.dot(self.w.T)).todense().ravel() + self.b
-
-        scores = CArray.ones(shape=(x.shape[0], self.n_classes))
+        scores = CArray.ones(shape=(x.shape[0], 2))
         scores[:, 0] = -score.ravel().T
         scores[:, 1] = score.ravel().T
-
         return scores
 
     def _backward(self, w):
@@ -100,11 +67,8 @@ class CClassifierLinear(CClassifier, metaclass=ABCMeta):
 
         Parameters
         ----------
-        x : CArray or None, optional
-            The gradient is computed in the neighborhood of x.
-        y : int, optional
-            Binary index of the class wrt the gradient must be computed.
-            Default is 1, corresponding to the positive class.
+        w : CArray
+            The vector to be pre-multiplied (reverse mode diff)
 
         Returns
         -------
@@ -118,23 +82,3 @@ class CClassifierLinear(CClassifier, metaclass=ABCMeta):
             return w[0] * -self.w + w[1] * self.w
         else:
             raise ValueError("w cannot be set as None.")
-
-    def grad_f_x(self, x, y=1):
-        """Computes the gradient of the classifier's decision function wrt x.
-
-        Parameters
-        ----------
-        x : CArray or None, optional
-            The input point. The gradient will be computed at x.
-        y : int
-            Binary index of the class wrt the gradient must be computed.
-            Default is y=1 to return gradient wrt the positive class.
-
-        Returns
-        -------
-        gradient : CArray
-            The gradient of the linear classifier's decision function
-            wrt decision function input. Vector-like array.
-
-        """
-        return CClassifier.grad_f_x(self, x=x, y=y)

@@ -36,6 +36,9 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
     softmax_outputs : bool, optional
         Whether or not to add a softmax layer after the
         logits. Default False.
+    n_jobs : int, optional
+        Number of parallel workers to use for training the classifier.
+        Cannot be higher than processor's number of cores. Default is 1.
 
     Attributes
     ----------
@@ -46,8 +49,9 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
 
     def __init__(self, model, input_shape=None, preprocess=None,
                  pretrained=False, pretrained_classes=None,
-                 softmax_outputs=False):
-        super(CClassifierDNN, self).__init__(preprocess=preprocess)
+                 softmax_outputs=False, n_jobs=1):
+        super(CClassifierDNN, self).__init__(
+            preprocess=preprocess, n_jobs=n_jobs)
 
         self._model = model
         self._out_layer = None

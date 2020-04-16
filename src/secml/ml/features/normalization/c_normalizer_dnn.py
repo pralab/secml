@@ -90,7 +90,7 @@ class CNormalizerDNN(CNormalizer):
         """
         return self
 
-    def fit(self, x, y=None):
+    def fit(self, x, y):
         # The inner preprocessor is managed by the inner DNN
         return self._fit(x, y)
 

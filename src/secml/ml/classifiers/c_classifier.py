@@ -33,16 +33,20 @@ class CClassifier(CModule, metaclass=ABCMeta):
         Can be a CPreProcess subclass or a string with the type of the
         desired preprocessor. If None, input data is used as is.
 
+    n_jobs : int, optional
+        Number of parallel workers to use for training the classifier.
+        Cannot be higher than processor's number of cores. Default is 1.
+
     """
     __super__ = 'CClassifier'
 
-    def __init__(self, preprocess=None):
+    def __init__(self, preprocess=None, n_jobs=1):
         # List of classes on which training has been performed
         self._classes = None
         # Number of features of the training dataset
         self._n_features = None
 
-        CModule.__init__(self, preprocess=preprocess)
+        CModule.__init__(self, preprocess=preprocess, n_jobs=n_jobs)
 
     @property
     def classes(self):
@@ -87,7 +91,7 @@ class CClassifier(CModule, metaclass=ABCMeta):
         check_is_fitted(self, ['classes', 'n_features'])
 
     @abstractmethod
-    def _fit(self, x, y=None):
+    def _fit(self, x, y):
         """Private method that trains the One-Vs-All classifier.
         Must be reimplemented by subclasses.
 
@@ -107,7 +111,7 @@ class CClassifier(CModule, metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    def fit(self, x, y=None, n_jobs=1):
+    def fit(self, x, y):
         """Trains the classifier.
 
         If a preprocess has been specified,
@@ -122,9 +126,6 @@ class CClassifier(CModule, metaclass=ABCMeta):
         y : CArray or None, optional
             Array of shape (n_samples,) containing the class labels.
             Can be None if not required by the algorithm.
-        n_jobs : int
-            Number of parallel workers to use for training the classifier.
-            Default 1. Cannot be higher than processor's number of cores.
 
         Returns
         -------
@@ -132,28 +133,11 @@ class CClassifier(CModule, metaclass=ABCMeta):
             Trained classifier.
 
         """
-        x = CArray(x).atleast_2d()  # try casting to CArray
-        y = CArray(y)
-
-        if x.shape[0] != y.size:
-            raise TypeError(
-                "Input data x and y do not have consistent shapes.")
-
+        x, y = self._check_input(x, y)
         # storing classes and features
         self._classes = y.unique()
         self._n_features = x.shape[1]
-
-        # Transform data if a preprocess is defined
-        if self.preprocess is not None:
-            x = self.preprocess.fit_forward(x)
-
-        # Data is ready: fit the classifier
-        try:  # Try to use parallelization
-            self._fit(x, y, n_jobs=n_jobs)  # TODO: remove n_jobs from here
-        except TypeError:  # Parallelization is probably not supported
-            self._fit(x, y)
-
-        return self
+        return super(CClassifier, self).fit(x, y)
 
     # TODO: add option to exclude xval or customize it.
     def fit_forward(self, x, y=None, caching=False):
@@ -315,7 +299,7 @@ class CClassifier(CModule, metaclass=ABCMeta):
         return (labels, scores) if return_decision_function is True else labels
 
     def estimate_parameters(self, dataset, parameters, splitter, metric,
-                            pick='first', perf_evaluator='xval', n_jobs=1):
+                            pick='first', perf_evaluator='xval'):
         """Estimate parameter that give better result respect a chose metric.
 
         Parameters
@@ -344,9 +328,6 @@ class CClassifier(CModule, metaclass=ABCMeta):
             to the parameters dict passed as input.
         perf_evaluator : CPerfEvaluator or str, optional
             Performance Evaluator to use. Default 'xval'.
-        n_jobs : int, optional
-            Number of parallel workers to use for performance evaluation.
-            Default 1. Cannot be higher than processor's number of cores.
 
         Returns
         -------
@@ -365,7 +346,7 @@ class CClassifier(CModule, metaclass=ABCMeta):
 
         # Evaluate the best parameters for the classifier (self)
         best_params = perf_eval.evaluate_params(
-            self, dataset, parameters, pick=pick, n_jobs=n_jobs)[0]
+            self, dataset, parameters, pick=pick, n_jobs=self.n_jobs)[0]
 
         # Set the best parameters in classifier
         self.set_params(best_params)

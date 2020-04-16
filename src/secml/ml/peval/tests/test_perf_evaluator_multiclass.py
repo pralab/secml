@@ -27,7 +27,7 @@ class TestCPerfEvaluatorMulticlass(CUnitTest):
         # Set the best parameters inside the classifier
         best_params = multiclass.estimate_parameters(
             self.tr, xval_params, xval_splitter, 'accuracy',
-            perf_evaluator='xval-multiclass', n_jobs=1)
+            perf_evaluator='xval-multiclass')
 
         self.logger.info(
             "Multiclass SVM has now the following parameters: {:}".format(

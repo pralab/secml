@@ -17,6 +17,7 @@ class TestCClassifierGradientLogisticMixin(CClassifierGradientMixinTestCases):
         for n in (None, CNormalizerMinMax((-10, 10))):
             clf = CClassifierLogistic(preprocess=n)
             clf.fit(self.ds.X, self.ds.Y)
+            self.logger.info('w: ' + str(clf.w) + ', b: ' + str(clf.b))
             self._test_grad_tr_params(clf)
 
 

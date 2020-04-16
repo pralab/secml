@@ -155,7 +155,7 @@ class TestCClassifierSVM(CClassifierTestCases):
                 self.dataset.X, return_decision_function=True)
             # chose random one pattern
             pattern = CArray(random.choice(self.dataset.X.get_data()))
-            gradient = svm.grad_f_x(pattern)
+            gradient = svm.grad_f_x(pattern, y=1)
 
             if svm.is_kernel_linear():
                 _check_flattness(svm.w)

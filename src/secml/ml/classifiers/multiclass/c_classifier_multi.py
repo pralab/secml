@@ -22,15 +22,20 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
         Features preprocess to be applied to input data.
         Can be a CPreProcess subclass or a string with the type of the
         desired preprocessor. If None, input data is used as is.
+    n_jobs : int
+        Number of parallel workers to use for training the classifier.
+        Default 1. Cannot be higher than processor's number of cores.
+
     clf_params : kwargs
         Any other construction parameter for the binary classifiers.
 
     """
     __super__ = 'CClassifierMulticlass'
 
-    def __init__(self, classifier, preprocess=None, **clf_params):
+    def __init__(self, classifier, preprocess=None, n_jobs=1, **clf_params):
         # Calling init of CClassifier
-        super(CClassifierMulticlass, self).__init__(preprocess=preprocess)
+        super(CClassifierMulticlass, self).__init__(
+            preprocess=preprocess, n_jobs=n_jobs)
         # Binary classifier to use
         if not issubclass(classifier, CClassifier):
             raise TypeError(
@@ -242,7 +247,7 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
         del self._binary_classifiers[num_classes:]
 
     def estimate_parameters(self, dataset, parameters, splitter, metric,
-                            pick='first', perf_evaluator='xval', n_jobs=1):
+                            pick='first', perf_evaluator='xval'):
         """Estimate parameter that give better result respect a chose metric.
 
         Parameters
@@ -271,9 +276,6 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
             to the parameters dict passed as input.
         perf_evaluator : CPerfEvaluator or str, optional
             Performance Evaluator to use. Default 'xval'.
-        n_jobs : int, optional
-            Number of parallel workers to use for performance evaluation.
-            Default 1. Cannot be higher than processor's number of cores.
 
         Returns
         -------
@@ -290,11 +292,10 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
             splitter=splitter,
             metric=metric,
             pick=pick,
-            perf_evaluator=perf_evaluator,
-            n_jobs=n_jobs)
+            perf_evaluator=perf_evaluator)
 
     @abstractmethod
-    def _fit(self, x, y, n_jobs=1):
+    def _fit(self, x, y):
         """Trains the classifier.
 
         This method should store the list of trained classifiers
@@ -308,10 +309,6 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
             Array to be used for training with shape (n_samples, n_features).
         y : CArray
             Array of shape (n_samples,) containing the class labels.
-
-        n_jobs : int
-            Number of parallel workers to use for training the classifier.
-            Default 1. Cannot be higher than processor's number of cores.
 
         Returns
         -------
