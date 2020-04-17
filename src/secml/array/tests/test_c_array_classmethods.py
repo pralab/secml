@@ -158,9 +158,9 @@ class TestCArrayClassMethods(CArrayTestCases):
                         else:
                             self.assertEqual(res.shape, (shape, ))
                     if dtype is None:  # Default dtype is float
-                        self.assertEqual(res.dtype, float)
+                        self.assertIsSubDtype(res.dtype, float)
                     else:
-                        self.assertEqual(res.dtype, dtype)
+                        self.assertIsSubDtype(res.dtype, dtype)
                     self.assertTrue((res == 1).all())
 
     def test_zeros(self):
@@ -190,9 +190,9 @@ class TestCArrayClassMethods(CArrayTestCases):
                         else:
                             self.assertEqual(res.shape, (shape, ))
                     if dtype is None:  # Default dtype is float
-                        self.assertEqual(res.dtype, float)
+                        self.assertIsSubDtype(res.dtype, float)
                     else:
-                        self.assertEqual(res.dtype, dtype)
+                        self.assertIsSubDtype(res.dtype, dtype)
                     self.assertFalse((res != 0).any())
 
     def test_empty(self):
@@ -222,9 +222,9 @@ class TestCArrayClassMethods(CArrayTestCases):
                         else:
                             self.assertEqual(res.shape, (shape, ))
                     if dtype is None:  # Default dtype is float
-                        self.assertEqual(res.dtype, float)
+                        self.assertIsSubDtype(res.dtype, float)
                     else:
-                        self.assertEqual(res.dtype, dtype)
+                        self.assertIsSubDtype(res.dtype, dtype)
 
                     # NOTE: values of empty arrays are random so
                     # we cannot check the result content
@@ -250,9 +250,9 @@ class TestCArrayClassMethods(CArrayTestCases):
                             self.assertEqual(res.issparse, sparse)
 
                             if dtype is None:  # Default dtype is float
-                                self.assertEqual(res.dtype, float)
+                                self.assertIsSubDtype(res.dtype, float)
                             else:
-                                self.assertEqual(res.dtype, dtype)
+                                self.assertIsSubDtype(res.dtype, dtype)
 
                             # n_cols takes n_rows if None
                             n_cols = n_rows if n_cols is None else n_cols
@@ -304,7 +304,7 @@ class TestCArrayClassMethods(CArrayTestCases):
                     self.assertEqual(res.shape, (1, shape[0]))
                 else:
                     self.assertEqual(res.shape, shape)
-                self.assertEqual(res.dtype, float)
+                self.assertIsSubDtype(res.dtype, float)
 
                 # Interval of random values is [0.0, 1.0)
                 self.assertFalse((res < 0).any())
@@ -321,7 +321,7 @@ class TestCArrayClassMethods(CArrayTestCases):
 
             self.assertIsInstance(res, CArray)
             self.assertEqual(res.shape, shape)
-            self.assertEqual(res.dtype, float)
+            self.assertIsSubDtype(res.dtype, float)
 
             # NOTE: values are from a random normal distribution so
             # we cannot check the result content
@@ -353,7 +353,7 @@ class TestCArrayClassMethods(CArrayTestCases):
                             self.assertEqual(res.shape, (1, shape))
                         else:
                             self.assertEqual(res.shape, (shape, ))
-                    self.assertEqual(res.dtype, int)
+                    self.assertIsSubDtype(res.dtype, int)
 
                 # Checking intervals
                 if not isinstance(inter, tuple):
@@ -395,7 +395,7 @@ class TestCArrayClassMethods(CArrayTestCases):
                             self.assertEqual(res.shape, (1, shape))
                         else:
                             self.assertEqual(res.shape, (shape, ))
-                    self.assertEqual(res.dtype, float)
+                    self.assertIsSubDtype(res.dtype, float)
 
                 # Checking intervals
                 if not isinstance(inter, tuple):

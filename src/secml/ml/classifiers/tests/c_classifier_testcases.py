@@ -26,7 +26,7 @@ class CClassifierTestCases(CUnitTest):
         self.assertTrue(s.isdense)
         self.assertEqual(1, s.ndim)
         self.assertEqual((n_samples,), s.shape)
-        self.assertEqual(float, s.dtype)
+        self.assertIsSubDtype(s.dtype, float)
 
     def _check_classify_scores(self, l, s, n_samples, n_classes):
         """Checks for `classify` output.
@@ -51,8 +51,8 @@ class CClassifierTestCases(CUnitTest):
         self.assertEqual(2, s.ndim)
         self.assertEqual((n_samples,), l.shape)
         self.assertEqual((n_samples, n_classes), s.shape)
-        self.assertEqual(int, l.dtype)
-        self.assertEqual(float, s.dtype)
+        self.assertIsSubDtype(l.dtype, int)
+        self.assertIsSubDtype(s.dtype, float)
 
     def _test_fun(self, clf, ds):
         """Test for `decision_function` and `predict`
