@@ -153,15 +153,15 @@ class TestDownloadUtils(CUnitTest):
         # Expected digest of the file
         md5_test = '3f0f597c3c69ce42e554fdad3adcbeea'
 
-        # Generate a temp file to test
-        with tempfile.NamedTemporaryFile(mode='wb') as fp:
-
+        # Generate a temp file to test and write content
+        tempf = fm.join(self.tempdir, 'test_dl_file_md5')
+        with open(tempf, 'wb') as fp:
             fp.write(x)
 
-            md5_digest = md5(fp.name)
+        md5_digest = md5(fp.name)
 
-            self.logger.info("MD5: {:}".format(md5_digest))
-            self.assertEqual(md5_test, md5_digest)
+        self.logger.info("MD5: {:}".format(md5_digest))
+        self.assertEqual(md5_test, md5_digest)
 
     @requests_mock.Mocker()
     def test_dlfile_gitlab(self, m):
