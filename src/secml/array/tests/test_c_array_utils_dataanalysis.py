@@ -99,11 +99,11 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
 
             # unique_indices construct unique array from original FLAT one
             self.assertEqual(array_unique.size, u_indices.size)
-            self.assertEqual(u_indices.dtype, int)
+            self.assertIsSubDtype(u_indices.dtype, int)
             self.assert_array_equal(array.ravel()[u_indices], arr_comp)
 
             self.assertEqual(array_unique.size, u_counts.size)
-            self.assertEqual(u_counts.dtype, int)
+            self.assertIsSubDtype(u_counts.dtype, int)
             for e_idx, e in enumerate(array_unique):
                 if e == 0:
                     # Comparing a sparse matrix with 0 using == is inefficient
@@ -353,7 +353,7 @@ class TestCArrayUtilsDataAnalysis(CArrayTestCases):
                             self.assertEqual(0, res)
                         else:
                             self.assertEqual(2, res.ndim)  # Out always 2D
-                            self.assertEqual(float, res.dtype)
+                            self.assertIsSubDtype(res.dtype, float)
                             self.assertFalse((CArray([[0.0]]) != res).any())
                         continue
 

@@ -40,7 +40,7 @@ class TestCLossClassification(CUnitTest):
             self.assertTrue(l.isdense)
             self.assertEqual(1, l.ndim)
             self.assertEqual(n_samples, l.size)
-            self.assertEqual(l.dtype, float)
+            self.assertIsSubDtype(l.dtype, float)
 
         for loss_id in ('hinge', 'hinge-squared', 'square', 'log'):
 
