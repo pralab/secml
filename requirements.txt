@@ -9,3 +9,4 @@ python-dateutil
 torch
 torchvision
 cleverhans
+tensorflow
