@@ -6,3 +6,4 @@ joblib
 Pillow
 requests
 python-dateutil
+torch
