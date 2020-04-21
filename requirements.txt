@@ -7,3 +7,4 @@ Pillow
 requests
 python-dateutil
 torch
+torchvision
