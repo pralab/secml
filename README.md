@@ -1,6 +1,5 @@
 # SecML: A library for Secure and Explainable Machine Learning
 
-
 SecML is an open-source Python library for the **security evaluation** of
 Machine Learning (ML) algorithms.
 
