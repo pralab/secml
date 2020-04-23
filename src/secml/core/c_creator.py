@@ -285,7 +285,7 @@ class CCreator:
         created by `.get_params`.
         Only parameters, i.e. PUBLIC or READ/WRITE attributes, can be set.
 
-        For more informations on the setting behaviour see `.CCreator.set`.
+        For more information on the setting behaviour see `.CCreator.set`.
 
         If possible, a reference to the parameter to set is assigned.
         Use `copy=True` to always make a deepcopy before set.

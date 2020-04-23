@@ -168,7 +168,7 @@ class CDatasetHeader(CCreator):
 
         See Also
         --------
-        CArray.append : More informations about arrays append.
+        CArray.append : More information about arrays append.
 
         Examples
         --------

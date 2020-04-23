@@ -1,6 +1,6 @@
 """
 .. module:: Logger
-   :synopsis: Log and store code informations on disk.
+   :synopsis: Log and store code information on disk.
 
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
@@ -35,7 +35,7 @@ formatter = logging.Formatter(
 class CLog:
     """Manager for logging and logfiles.
 
-    Logger can be used to save important runtime code informations
+    Logger can be used to save important runtime code information
     to disk instead of built-in function 'print'. Along with any
     print-like formatted string, the logger stores full time stamp
     and calling class name.
@@ -388,7 +388,7 @@ class CTimer:
 
     See Also
     --------
-    .CLog : CLog and store runtime informations on disk.
+    .CLog : CLog and store runtime information on disk.
 
     Examples
     --------
@@ -468,7 +468,7 @@ class CTimer:
 
         See Also
         --------
-        .CLog : CLog and store runtime informations on disk.
+        .CLog : CLog and store runtime information on disk.
 
         Examples
         --------

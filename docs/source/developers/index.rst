@@ -14,7 +14,7 @@ it to most-used ML libraries and by adding state-of-the art attacks and
 defenses to use in experiments. Other useful contributions are documentation
 and examples of usage, which will greatly help us enlarge our user community.
 See `Code Contributions <contributing.code.html>`_ and
-`Extending SecML <contributing.extensions.html>`_ for more detailed informations.
+`Extending SecML <contributing.extensions.html>`_ for more detailed information.
 
 Finally, another way of contributing is sharing our work with colleagues
 and people that may be interested in using it for their experiments.

@@ -14,7 +14,7 @@ class CClassifierReject(CClassifier, metaclass=ABCMeta):
     """Abstract class that defines basic methods for Classifiers with reject.
 
     A classifier assign a label (class) to new patterns using the
-    informations learned from training set.
+    information learned from training set.
 
     This interface implements a set of generic methods for training
     and classification that can be used for every algorithms. However,

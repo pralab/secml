@@ -1737,7 +1737,7 @@ class CDense(_CArrayInterface):
     @classmethod
     def empty(cls, shape, dtype=float):
         """Return an (theoretically) empty array of desired shape.
-        See numpy.empty for more informations.
+        See numpy.empty for more information.
 
         Parameters
         ----------
@@ -1770,7 +1770,7 @@ class CDense(_CArrayInterface):
     @classmethod
     def zeros(cls, shape, dtype=float):
         """Return an array of desired shape with zeros.
-        See numpy.zeros for more informations.
+        See numpy.zeros for more information.
 
         Parameters
         ----------
@@ -1803,7 +1803,7 @@ class CDense(_CArrayInterface):
     @classmethod
     def ones(cls, shape, dtype=float):
         """Return an array of desired shape with ones.
-        See numpy.ones for more informations.
+        See numpy.ones for more information.
 
         Parameters
         ----------
@@ -1836,7 +1836,7 @@ class CDense(_CArrayInterface):
     @classmethod
     def eye(cls, n_rows, n_cols=None, k=0, dtype=float):
         """Return an array of desired dimension with ones on the diagonal and zeros elsewhere.
-        See numpy.eye for more informations.
+        See numpy.eye for more information.
 
         Parameters
         ----------
