@@ -172,7 +172,7 @@ class CClassifierRejectThreshold(CClassifierReject):
 
         The predicted class is therefore:
 
-        .. math:: c = \\operatorname*{argmin}_k f_k(x)
+        .. math:: c = \\operatorname*{argmax}_k f_k(x)
 
         where :math:`c` correspond to the rejection class (i.e., :math:`c=-1`)
         only when the maximum taken over the other classes (excluding the
