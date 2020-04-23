@@ -28,7 +28,7 @@ class CDataset(CCreator):
         and flattened before storing.
     header : CDatasetHeader or None, optional
         The header for the dataset. Will define any extra parameter.
-        See `CDatasetHeader` docs for more informations.
+        See `CDatasetHeader` docs for more information.
 
     Examples
     --------
@@ -259,7 +259,7 @@ class CDataset(CCreator):
 
         See Also
         --------
-        :meth:`CArray.append` : More informations about arrays append.
+        :meth:`CArray.append` : More information about arrays append.
 
         Examples
         --------

@@ -263,12 +263,12 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
             A splitter type can be passed as string, in this case all
             default parameters will be used. For data splitters, num_folds
             is set to 3 by default.
-            See CDataSplitter docs for more informations.
+            See CDataSplitter docs for more information.
         metric : CMetric or str
             Object with the metric to use while evaluating the performance.
             A metric type can be passed as string, in this case all
             default parameters will be used.
-            See CMetric docs for more informations.
+            See CMetric docs for more information.
         pick : {'first', 'last', 'random'}, optional
             Defines which of the best parameters set pick.
             Usually, 'first' correspond to the smallest parameters while

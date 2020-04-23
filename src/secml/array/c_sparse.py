@@ -1828,7 +1828,7 @@ class CSparse(_CArrayInterface):
         """Return an array of desired dimension with ones on the diagonal
         and zeros elsewhere.
 
-        See scipy.sparse.eye for more informations.
+        See scipy.sparse.eye for more information.
 
         Parameters
         ----------

@@ -20,7 +20,7 @@ class CClassifier(CModule, metaclass=ABCMeta):
     """Abstract class that defines basic methods for Classifiers.
 
     A classifier assign a label (class) to new patterns using the
-    informations learned from training set.
+    information learned from training set.
 
     This interface implements a set of generic methods for training
     and classification that can be used for every algorithms. However,
@@ -315,12 +315,12 @@ class CClassifier(CModule, metaclass=ABCMeta):
             A splitter type can be passed as string, in this case all
             default parameters will be used. For data splitters, num_folds
             is set to 3 by default.
-            See CDataSplitter docs for more informations.
+            See CDataSplitter docs for more information.
         metric : CMetric or str
             Object with the metric to use while evaluating the performance.
             A metric type can be passed as string, in this case all
             default parameters will be used.
-            See CMetric docs for more informations.
+            See CMetric docs for more information.
         pick : {'first', 'last', 'random'}, optional
             Defines which of the best parameters set pick.
             Usually, 'first' correspond to the smallest parameters while

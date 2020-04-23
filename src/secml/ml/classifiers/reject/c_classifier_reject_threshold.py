@@ -18,7 +18,7 @@ class CClassifierRejectThreshold(CClassifierReject):
      based on a certain threshold.
 
     A classifier assign a label (class) to new patterns using the
-    informations learned from training set.
+    information learned from training set.
 
     The samples for which the higher score is under a certain threshold are
     rejected by the classifier.
