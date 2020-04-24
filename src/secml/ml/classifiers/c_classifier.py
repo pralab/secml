@@ -172,7 +172,7 @@ class CClassifier(CModule, metaclass=ABCMeta):
         kfold = CDataSplitterKFold(
             num_folds=5, random_state=0).compute_indices(CDataset(x, y))
 
-        scores = CArray.zeros(shape=(x.shape[0], self.classes.size))
+        scores = CArray.zeros(shape=(x.shape[0], y.unique().size))
 
         # TODO: samples can be first preprocessed and cached, if required.
         #  then we can use _fit and _forward to work on the preprocessed data
