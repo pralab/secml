@@ -35,9 +35,25 @@ resource_rules:
           remove_labels:
             - priority-medium
             - priority-high
+      - name: SetMilestoneLabel
+        conditions:
+          ruby: |
+            milestone&.title && milestone_open? && !has_milestone_label?
+        actions:
+          comment: |
+            /label ~"#{ milestone.title }"
+            #{ unlabel_no_milestone_labels }
 
   merge_requests:
     rules:
+      - name: SetMilestoneLabel
+        conditions:
+          ruby: |
+            milestone&.title && milestone_open? && !has_milestone_label?
+        actions:
+          comment: |
+            /label ~"#{ milestone.title }"
+            #{ unlabel_no_milestone_labels }
       - name: RemoveNeedReviewAfterClosingMerging
         conditions:
           date:

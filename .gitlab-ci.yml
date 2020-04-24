@@ -447,6 +447,7 @@ release:pypi:dry:
 
 .triage:
   image: ruby:2.4
+  needs: []
   cache: {}
   before_script:
     - gem install gitlab-triage
@@ -456,7 +457,7 @@ triage:run:
   stage: triage
   extends: .triage
   script:
-    - gitlab-triage --debug --host-url $CI_PROJECT_DOMAIN --token $API_ACCESS_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
+    - gitlab-triage -r $CI_PROJECT_DIR/.gitlab/triage_extra.rb --debug --host-url $CI_PROJECT_DOMAIN --token $API_ACCESS_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
   rules:
     - if: '$RUN_TRIAGE'
       when: always
@@ -465,7 +466,7 @@ triage:run:dry:
   stage: triage
   extends: .triage
   script:
-    - gitlab-triage --dry-run --debug --host-url $CI_PROJECT_DOMAIN --token $API_ACCESS_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
+    - gitlab-triage -r $CI_PROJECT_DIR/.gitlab/triage_extra.rb --dry-run --debug --host-url $CI_PROJECT_DOMAIN --token $API_ACCESS_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
   only:
     - web
   when: manual
