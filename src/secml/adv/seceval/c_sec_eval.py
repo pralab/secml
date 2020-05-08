@@ -53,6 +53,12 @@ class CSecEval(CCreator):
         self._sec_eval_data = CSecEvalData()
         self._sec_eval_data.param_name = param_name
         self._sec_eval_data.param_values = param_values
+
+        if param_name not in self.attack.get_params():
+            raise ValueError("param_name ({:}) should be a parameter of the "
+                             "attack but it was not found. Run `attack.get_params()` "
+                             "for getting the list of available parameters.".format(param_name))
+
         if not self._attack.y_target is None:
             self._sec_eval_data.Y_target = CArray(self._attack.y_target).deepcopy()
 

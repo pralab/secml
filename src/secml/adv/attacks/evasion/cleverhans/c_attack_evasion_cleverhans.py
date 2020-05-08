@@ -20,6 +20,7 @@ from secml.adv.attacks.evasion import CAttackEvasion
 from secml.adv.attacks.evasion.cleverhans.c_attack_evasion_cleverhans_losses \
     import CAttackEvasionCleverhansLossesMixin
 from secml.array import CArray
+from secml.core import CCreator
 from secml.core.constants import nan
 from secml.core.exceptions import NotFittedError
 from secml.ml.classifiers.reject import CClassifierReject
@@ -77,8 +78,10 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
         self._tfsess = tf.compat.v1.Session()
 
+        self._eps_0 = False
+
         # store the cleverhans attack parameters
-        self._clvrh_params = kwargs
+        self.attack_params = kwargs
 
         # Check if the cleverhans attack is supported
         if clvh_attack_class not in SUPPORTED_ATTACKS:
@@ -87,6 +90,9 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         self._clvrh_attack_class = clvh_attack_class
 
         self._clvrh_clf = None
+
+        self._last_f_eval = 0
+        self._last_grad_eval = 0
 
         if store_var_list is not None:
             # first, check if the user has set stored variables
@@ -103,6 +109,25 @@ class CAttackEvasionCleverhans(CAttackEvasion,
                                 surrogate_classifier=surrogate_classifier,
                                 surrogate_data=surrogate_data,
                                 y_target=y_target)
+
+    def set(self, param_name, param_value, copy=False):
+
+        # we need the possibility of running the attack for eps==0,
+        # this is not allowed in standard cleverhans
+        if 'eps' in param_name:
+            if param_value == 0:
+                param_value = 1
+
+                self._eps_0 = True
+            else:
+                self._eps_0 = False
+
+        if param_name.startswith('attack_params'):
+            super(CAttackEvasionCleverhans, self).set(param_name, param_value,
+                                                      copy)
+
+        # re-initialize the Tensorflow operations
+        self._initialize_tf_ops()
 
     def run(self, x, y, ds_init=None, *args, **kargs):
         # override run for applying storage of internally
@@ -137,6 +162,20 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
         """
         return self._stored_vars
+
+    @property
+    def attack_params(self):
+        """Object containing all Cleverhans parameters
+
+        """
+        return self._attack_params
+
+    @attack_params.setter
+    def attack_params(self, value):
+        """Object containing all Cleverhans parameters
+
+        """
+        self._attack_params = _CClvrh_params(value)
 
     ###########################################################################
     #                              PRIVATE METHODS
@@ -180,17 +219,50 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         if self.y_target is None:
             if 'y' in self._clvrh_attack.feedable_kwargs:
                 self._adv_x_T = self._clvrh_attack.generate(
-                    self._initial_x_P, y=self._y_P, **self._clvrh_params)
+                    self._initial_x_P, y=self._y_P, **self.attack_params.__dict__)
             else:  # 'y' not required by attack
                 self._adv_x_T = self._clvrh_attack.generate(
-                    self._initial_x_P, **self._clvrh_params)
+                    self._initial_x_P, **self.attack_params.__dict__)
         else:
             if 'y_target' not in self._clvrh_attack.feedable_kwargs:
                 raise RuntimeError(
                     "cannot perform a targeted {:} attack".format(
                         self._clvrh_attack.__class__.__name__))
             self._adv_x_T = self._clvrh_attack.generate(
-                self._initial_x_P, y_target=self._y_P, **self._clvrh_params)
+                self._initial_x_P, y_target=self._y_P, **self._attack_params.__dict__)
+
+    def _initialize_tf_ops(self):
+
+        # create the cleverhans attack object
+        tf.reset_default_graph()
+        self._tfsess.close()
+        session_conf = tf.compat.v1.ConfigProto(
+            inter_op_parallelism_threads=-1,  # Perform in caller's thread
+            use_per_session_threads=False  # Per-session thread pools
+        )
+        self._tfsess = tf.compat.v1.Session(config=session_conf)
+
+        # wrap the surrogate classifier into a cleverhans classifier
+        self._clvrh_clf = _CModelCleverhans(
+            self._surrogate_classifier, out_dims=self._n_classes)
+
+        # create an instance of the chosen cleverhans attack
+        self._clvrh_attack = self._clvrh_attack_class(
+            self._clvrh_clf, sess=self._tfsess)
+
+        # create the placeholder to feed into the attack the initial evasion
+        # samples
+        self._initial_x_P = tf.compat.v1.placeholder(
+            tf.float32, shape=(None, self._n_feats))
+
+        # placeholder used to feed the true or the target label (it is a
+        # one-hot encoded vector)
+        self._y_P = tf.compat.v1.placeholder(
+            tf.float32, shape=(1, self._n_classes))
+
+        # call the function of the cleverhans attack called `generate` that
+        # constucts the Tensorflow operation needed to perform the attack
+        self._create_tf_operations()
 
     def _set_solver_classifier(self):
         """Sets the classifier of the solver."""
@@ -308,6 +380,9 @@ class CAttackEvasionCleverhans(CAttackEvasion,
 
         if not isinstance(x_init, CArray):
             raise TypeError("Input vectors should be of class CArray")
+
+        if self._eps_0 is True:
+            return x0, nan
 
         self._x0 = x0
         self._y0 = y0
@@ -623,3 +698,8 @@ def _py_func_with_gradient(
             {"PyFunc": rnd_name, "PyFuncStateless": rnd_name}):
         return tf.compat.v1.py_func(
             func, inp, Tout, stateful=stateful, name=pyfun_name)
+
+class _CClvrh_params(CCreator):
+    def __init__(self, param_dict):
+        # create a property for each dictionary key
+        self.__dict__ = param_dict
