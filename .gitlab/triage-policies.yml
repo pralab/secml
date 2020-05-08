@@ -1,4 +1,3 @@
-host_url: https://pragit.diee.unica.it
 resource_rules:
   issues:
     rules:
