@@ -117,6 +117,7 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
         # hashing xc to avoid re-training clf when xc does not change
         self._xc_hash = None
 
+        self._x0 = None # set the initial poisoning sample feature
         self._xc = None  # set of poisoning points along with their labels yc
         self._yc = None
         self._idx = None  # index of the current point to be optimized
@@ -193,6 +194,36 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
             return
         self._n_points = int(value)
 
+    @property
+    def x0(self):
+        """Returns the attacker's initial sample features"""
+        return self._x0
+
+    @x0.setter
+    def x0(self, value):
+        """Set the attacker's initial sample features"""
+        self._x0 = value
+
+    @property
+    def xc(self):
+        """Returns the attacker's sample features"""
+        return self._xc
+
+    @xc.setter
+    def xc(self, value):
+        """Set the attacker's sample features"""
+        self._xc = value
+
+    @property
+    def yc(self):
+        """Returns the attacker's sample label"""
+        return self._yc
+
+    @yc.setter
+    def yc(self, value):
+        """Set the attacker's sample label"""
+        self._yc = value
+
     ###########################################################################
     #                              PRIVATE METHODS
     ###########################################################################
@@ -215,8 +246,8 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
             raise ValueError('Solver not set properly!')
 
         # map attributes to fun, constr, box
-        fun = CFunction(fun=self._objective_function,
-                        gradient=self._objective_function_gradient,
+        fun = CFunction(fun=self.objective_function,
+                        gradient=self.objective_function_gradient,
                         n_dim=self._classifier.n_features)
 
         bounds, constr = self._constraint_creation()
@@ -337,6 +368,18 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
     #                  OBJECTIVE FUNCTION & GRAD COMPUTATION
     ###########################################################################
 
+    def objective_function(self, xc, acc=False):
+        """
+        Parameters
+        ----------
+        xc: poisoning point
+
+        Returns
+        -------
+        f_obj: values of objective function (average hinge loss) at x
+        """
+        return self._objective_function(xc, acc)
+
     def _objective_function(self, xc, acc=False):
         """
         Parameters
@@ -380,6 +423,16 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
         obj = error.mean()
 
         return obj
+
+    def objective_function_gradient(self, xc, normalization=True):
+        """
+        Compute the loss derivative wrt the attack sample xc
+
+        The derivative is decomposed as:
+
+        dl / x = sum^n_c=1 ( dl / df_c * df_c / x )
+        """
+        return self._objective_function_gradient(xc, normalization)
 
     def _objective_function_gradient(self, xc, normalization=True):
         """
