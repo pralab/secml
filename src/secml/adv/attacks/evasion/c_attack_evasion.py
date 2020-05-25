@@ -7,14 +7,14 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 
-from secml.adv.attacks import CAttack
+from secml.adv.attacks import CAttack, CAttackMixin
 from secml.array import CArray
 from secml.data import CDataset
 
 
-class CAttackEvasion(CAttack, metaclass=ABCMeta):
+class CAttackEvasion(CAttackMixin, CAttack, metaclass=ABCMeta):
     """Interface for Evasion attacks.
 
     Parameters
@@ -33,17 +33,6 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
 
     """
     __super__ = 'CAttackEvasion'
-
-    def __init__(self, classifier,
-                 surrogate_classifier,
-                 surrogate_data=None,
-                 y_target=None):
-
-        super(CAttackEvasion, self).__init__(
-            classifier=classifier,
-            surrogate_classifier=surrogate_classifier,
-            surrogate_data=surrogate_data,
-            y_target=y_target)
 
     ###########################################################################
     #                              PUBLIC METHODS
@@ -98,6 +87,7 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
             k = idx[i].item()  # idx of sample that can be modified
 
             xi = x[k, :] if x_init is None else x_init[k, :]
+            # TODO: remove optional arguments (it's for double_init)
             x_opt, f_opt = self._run(x[k, :], y[k], x_init=xi, *args, **kargs)
 
             self.logger.info(
@@ -117,36 +107,3 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
         f_obj = fs_opt.mean()
 
         return y_pred, scores, adv_ds, f_obj
-
-    def objective_function(self, x):
-        """Objective function.
-
-        Parameters
-        ----------
-        x : CArray
-            Array with points on which the objective function
-            should be computed.
-
-        Returns
-        -------
-        CArray
-            Value of the objective function on each point.
-
-        """
-        return self._objective_function(x)
-
-    @abstractmethod
-    def _run(self, x0, y0, x_init=None):
-        """Perform evasion on a single pattern.
-
-        Parameters
-        ----------
-        x0 : CArray
-            Initial sample.
-        y0 : int or CArray
-            The true label of x0.
-        x_init : CArray or None, optional
-            Initialization point. If None (default), it is set to x0.
-
-        """
-        raise NotImplementedError

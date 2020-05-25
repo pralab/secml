@@ -9,7 +9,7 @@
 import warnings
 from abc import ABCMeta, abstractmethod
 
-from secml.adv.attacks import CAttack
+from secml.adv.attacks import CAttack, CAttackMixin
 from secml.optim.optimizers import COptimizer
 from secml.array import CArray
 from secml.data import CDataset
@@ -19,7 +19,7 @@ from secml.optim.constraints import CConstraint
 from secml.optim.function import CFunction
 
 
-class CAttackPoisoning(CAttack, metaclass=ABCMeta):
+class CAttackPoisoning(CAttackMixin, CAttack, metaclass=ABCMeta):
     """Interface for poisoning attacks.
 
     Parameters
@@ -82,18 +82,19 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
                  init_type='random',
                  random_seed=None):
 
-        CAttack.__init__(self, classifier=classifier,
-                         surrogate_classifier=surrogate_classifier,
-                         surrogate_data=surrogate_data,
-                         distance=distance,
-                         dmax=dmax,
-                         lb=lb,
-                         ub=ub,
-                         discrete=discrete,
-                         y_target=y_target,
-                         attack_classes=attack_classes,
-                         solver_type=solver_type,
-                         solver_params=solver_params)
+        super(CAttackPoisoning, self).__init__(
+            classifier=classifier,
+            surrogate_classifier=surrogate_classifier,
+            surrogate_data=surrogate_data,
+            distance=distance,
+            dmax=dmax,
+            lb=lb,
+            ub=ub,
+            discrete=discrete,
+            y_target=y_target,
+            attack_classes=attack_classes,
+            solver_type=solver_type,
+            solver_params=solver_params)
 
         if discrete:
             raise ValueError(
@@ -117,7 +118,7 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
         # hashing xc to avoid re-training clf when xc does not change
         self._xc_hash = None
 
-        self._x0 = None # set the initial poisoning sample feature
+        self._x0 = None  # set the initial poisoning sample feature
         self._xc = None  # set of poisoning points along with their labels yc
         self._yc = None
         self._idx = None  # index of the current point to be optimized
@@ -378,18 +379,6 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
         -------
         f_obj: values of objective function (average hinge loss) at x
         """
-        return self._objective_function(xc, acc)
-
-    def _objective_function(self, xc, acc=False):
-        """
-        Parameters
-        ----------
-        xc: poisoning point
-
-        Returns
-        -------
-        f_obj: values of objective function (average hinge loss) at x
-        """
 
         # index of poisoning point within xc.
         # This will be replaced by the input parameter xc
@@ -425,16 +414,6 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
         return obj
 
     def objective_function_gradient(self, xc, normalization=True):
-        """
-        Compute the loss derivative wrt the attack sample xc
-
-        The derivative is decomposed as:
-
-        dl / x = sum^n_c=1 ( dl / df_c * df_c / x )
-        """
-        return self._objective_function_gradient(xc, normalization)
-
-    def _objective_function_gradient(self, xc, normalization=True):
         """
         Compute the loss derivative wrt the attack sample xc
 

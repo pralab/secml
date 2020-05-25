@@ -102,18 +102,19 @@ class CAttackEvasionPGDLS(CAttackEvasion):
         # class (indiscriminate evasion). See _get_point_with_min_f_obj()
         self._xk = None
 
-        CAttack.__init__(self, classifier=classifier,
-                         surrogate_classifier=surrogate_classifier,
-                         surrogate_data=surrogate_data,
-                         distance=distance,
-                         dmax=dmax,
-                         lb=lb,
-                         ub=ub,
-                         discrete=discrete,
-                         y_target=y_target,
-                         attack_classes=attack_classes,
-                         solver_type='pgd-ls',
-                         solver_params=solver_params)
+        super(CAttackEvasionPGDLS, self).__init__(
+            classifier=classifier,
+            surrogate_classifier=surrogate_classifier,
+            surrogate_data=surrogate_data,
+            distance=distance,
+            dmax=dmax,
+            lb=lb,
+            ub=ub,
+            discrete=discrete,
+            y_target=y_target,
+            attack_classes=attack_classes,
+            solver_type='pgd-ls',
+            solver_params=solver_params)
 
     ###########################################################################
     #                           READ-WRITE ATTRIBUTES
@@ -182,7 +183,7 @@ class CAttackEvasionPGDLS(CAttackEvasion):
 
         return k, c
 
-    def _objective_function(self, x):
+    def objective_function(self, x):
         """Compute the objective function of the evasion attack.
 
         The objective function is:
@@ -237,7 +238,7 @@ class CAttackEvasionPGDLS(CAttackEvasion):
 
         return f_obj if self.y_target is None else -f_obj
 
-    def _objective_function_gradient(self, x):
+    def objective_function_gradient(self, x):
         """Compute the gradient of the evasion objective function.
 
         Parameters
@@ -258,7 +259,6 @@ class CAttackEvasionPGDLS(CAttackEvasion):
         w[k.item()] = 1
         w[c.item()] = -1
         grad = self._solver_clf.gradient(x, w)
-
         return grad if self.y_target is None else -grad
 
     def _init_solver(self):
@@ -268,8 +268,8 @@ class CAttackEvasionPGDLS(CAttackEvasion):
             raise ValueError('Solver not set properly!')
 
         # map attributes to fun, constr, box
-        fun = CFunction(fun=self._objective_function,
-                        gradient=self._objective_function_gradient,
+        fun = CFunction(fun=self.objective_function,
+                        gradient=self.objective_function_gradient,
                         n_dim=self.n_dim)
 
         constr = CConstraint.create(self._distance)
@@ -286,8 +286,10 @@ class CAttackEvasionPGDLS(CAttackEvasion):
             self._solver_type,
             fun=fun, constr=constr,
             bounds=bounds,
-            discrete=self._discrete,
             **self._solver_params)
+
+        if self.solver_type == 'pgd-ls':
+            self._solver.discrete = self._discrete
 
         # TODO: fix this verbose level propagation
         self._solver.verbose = self.verbose

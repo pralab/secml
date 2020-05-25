@@ -187,7 +187,7 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
 
         fig = self._plot_decision_function(fig)
 
-        fig.sp.plot_fgrads(eva._objective_function_gradient,
+        fig.sp.plot_fgrads(eva.objective_function_gradient,
                            grid_limits=ds_bounds, n_grid_points=20,
                            color='k', alpha=.5)
 
@@ -206,7 +206,7 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
                         levels_style=':', levels_linewidth=2.0,
                         alpha_levels=.5, c=x0, r=dmax)
 
-        fig.sp.plot_fun(lambda z: eva._objective_function(z),
+        fig.sp.plot_fun(lambda z: eva.objective_function(z),
                         multipoint=True,
                         grid_limits=ds_bounds,
                         colorbar=False, n_grid_points=20,

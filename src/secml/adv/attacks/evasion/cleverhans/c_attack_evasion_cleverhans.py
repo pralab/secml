@@ -181,7 +181,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
     #                              PRIVATE METHODS
     ###########################################################################
 
-    def _objective_function(self, x):
+    def objective_function(self, x):
         """Objective function.
 
         Parameters
@@ -206,7 +206,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         else:
             raise NotImplementedError
 
-    def _objective_function_gradient(self, x):
+    def objective_function_gradient(self, x):
         """Gradient of the objective function."""
         raise NotImplementedError
 
@@ -271,7 +271,7 @@ class CAttackEvasionCleverhans(CAttackEvasion,
         # we skip the function provided by the superclass as we do not need
         # to set xk and we call directly the one of CAttack that instead
         # learn a differentiable classifier
-        CAttack._set_solver_classifier(self)
+        super(CAttackEvasionCleverhans, self)._set_solver_classifier()
 
         self._n_classes = self._surrogate_classifier.n_classes
         self._n_feats = self._surrogate_classifier.n_features

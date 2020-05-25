@@ -1,6 +1,6 @@
 """
-.. module:: COptimizerPGDLS
-   :synopsis: Optimizer using Projected Gradient Descent with Bisect Line Search.
+.. module:: COptimizerPGDExp
+   :synopsis: Optimizer using Projected Gradient Descent with Exponential Line Search.
 
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
@@ -8,10 +8,10 @@
 
 from secml.array import CArray
 from secml.optim.optimizers import COptimizer
-from secml.optim.optimizers.line_search import CLineSearchBisect
+from secml.optim.optimizers.line_search import CLineSearchBisectProj
 
 
-class COptimizerPGDLS(COptimizer):
+class COptimizerPGDExp(COptimizer):
     """Solves the following problem:
 
     min  f(x)
@@ -24,20 +24,15 @@ class COptimizerPGDLS(COptimizer):
 
     The solution algorithm is based on a line-search exploring one feature
     (i.e., dimension) at a time (for l1-constrained problems), or all features
-    (for l2-constrained problems). This solver also works for discrete
-    problems, where x is integer valued. In this case, exploration works
-    by manipulating one feature at a time.
+    (for l2-constrained problems).
 
-    Differently from standard line searches, it explores a subset of
-    `n_dimensions` at a time. In this sense, it is an extension of the
-    classical line-search approach.
 
     Attributes
     ----------
-    class_type : 'pgd-ls'
+    class_type : 'pgd-exp'
 
     """
-    __class_type = 'pgd-ls'
+    __class_type = 'pgd-exp'
 
     def __init__(self, fun,
                  constr=None, bounds=None,
@@ -133,12 +128,14 @@ class COptimizerPGDLS(COptimizer):
             raise NotImplementedError(
                 "L2 constraint is not supported for discrete optimization")
 
-        self._line_search = CLineSearchBisect(
+        self._line_search = CLineSearchBisectProj(
             fun=self._fun,
             constr=self._constr,
             bounds=self._bounds,
-            max_iter=50,
+            max_iter=20,
             eta=eta, eta_min=eta_min, eta_max=eta_max)
+
+        # self._line_search.verbose = 2
 
     @staticmethod
     def _l1_projected_gradient(grad):
@@ -210,6 +207,9 @@ class COptimizerPGDLS(COptimizer):
         if self.constr is not None and self.constr.is_violated(next_point):
             self.logger.debug("Line-search on distance constraint.")
             grad = CArray(x - self.constr.projection(next_point))
+            grad_norm = grad.norm(order=2)
+            if grad_norm > 1e-20:
+                grad /= grad_norm
             if self.constr.class_type == 'l1':
                 grad = grad.sign()  # to move along the l1 ball surface
             z, fz = self._line_search.minimize(x, -grad, fx)
@@ -218,11 +218,43 @@ class COptimizerPGDLS(COptimizer):
         if self.bounds is not None and self.bounds.is_violated(next_point):
             self.logger.debug("Line-search on box constraint.")
             grad = CArray(x - self.bounds.projection(next_point))
+            grad_norm = grad.norm(order=2)
+            if grad_norm > 1e-20:
+                grad /= grad_norm
             z, fz = self._line_search.minimize(x, -grad, fx)
             return z, fz
 
         z, fz = self._line_search.minimize(x, -grad, fx)
         return z, fz
+
+    def _return_best_solution(self, i=None):
+        """Search the best solution between the ones found so far.
+
+        Parameters
+        ----------
+        i : int
+            Index of the current iteration.
+
+        Returns
+        -------
+        x_opt : CArray
+            Best point found so far.
+
+        """
+        if i is not None:
+            f_seq = self.f_seq[:i + 1]
+        else:
+            f_seq = self.f_seq
+        best_sol_idx = f_seq.argmin()
+
+        self.logger.debug("solutions {:}".format(f_seq))
+        self.logger.debug("best solution {:}".format(best_sol_idx))
+
+        self._x_seq = self.x_seq[:best_sol_idx + 1, :]
+        self._f_seq = self.f_seq[:best_sol_idx + 1]
+        self._x_opt = self._x_seq[-1, :]
+
+        return self._x_opt
 
     def minimize(self, x_init, args=(), **kwargs):
         """
@@ -284,6 +316,9 @@ class COptimizerPGDLS(COptimizer):
             raise ValueError(
                 "x_init " + str(x_init) + " is outside of feasible domain.")
 
+        # eval fun at x
+        fx = self._fun.fun(x_init, *args)
+
         # initialize x_seq and f_seq
         self._x_seq = CArray.zeros(
             (self.max_iter, x_init.size), sparse=x_init.issparse)
@@ -294,12 +329,15 @@ class COptimizerPGDLS(COptimizer):
         # The first point is obviously the starting point,
         # and the constraint is not violated (false...)
         x = x_init
-        fx = self._fun.fun(x, *args)  # eval fun at x, for iteration 0
         self._x_seq[0, :] = x
         self._f_seq[0] = fx
 
         # debugging information
-        self.logger.debug('Iter.: ' + str(0) + ', f(x): ' + str(fx))
+        self.logger.debug('Iter.: ' + str(0) +
+                          ', f(x): ' + str(fx.item()) +
+                          ', d(x,x0): ' + str(
+            (x - self.constr.center).norm(order=2)))
+
 
         for i in range(1, self.max_iter):
 
@@ -312,19 +350,26 @@ class COptimizerPGDLS(COptimizer):
             self._x_opt = x
 
             self.logger.debug('Iter.: ' + str(i) +
-                              ', f(x): ' + str(fx) +
+                              ', f(x): ' + str(fx.item()) +
                               ', norm(gr(x)): ' +
-                              str(CArray(self._grad).norm()))
+                              str(CArray(self._grad).norm()) +
+                              ', d(x,x0): ' + str(
+                (x - self.constr.center).norm(order=2)))
 
             diff = abs(self.f_seq[i].item() - self.f_seq[i - 1].item())
 
             if diff < self.eps:
                 self.logger.debug(
                     "Flat region, exiting... ({:.4f} / {:.4f})".format(
-                        self._f_seq[i].item(), self._f_seq[i - 1].item()))
-                self._x_seq = self.x_seq[:i + 1, :]
-                self._f_seq = self.f_seq[:i + 1]
-                return x
+                        self._f_seq[i].item(),
+                        self._f_seq[i - 1].item()))
+                return self._return_best_solution(i)
+
+            if i > 20 and abs(self.f_seq[-10:].mean() -
+                              self.f_seq[-20:-10].mean()) < self.eps:
+                self.logger.debug(
+                    "Flat region for 20 iterations, exiting...")
+                return self._return_best_solution(i)
 
         self.logger.warning('Maximum iterations reached. Exiting.')
-        return x
+        return self._return_best_solution()
