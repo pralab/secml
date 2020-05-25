@@ -1,10 +1,8 @@
 """
-.. module:: CAttackEvasionPGD
+.. module:: CAttackEvasionPGDExp
    :synopsis: Evasion attack using Projected Gradient Descent.
 
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
-.. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from secml import _NoValue
@@ -15,28 +13,28 @@ from secml.optim.constraints import CConstraint
 from secml.optim.optimizers import COptimizer
 
 
-class CAttackEvasionPGD(CAttackEvasionPGDLS):
-    """Evasion attacks using Projected Gradient Descent.
+class CAttackEvasionPGDExp(CAttackEvasionPGDLS):
+    """Evasion attacks using Projected Gradient Descent with Exponential line search.
 
     This class implements the maximum-confidence evasion attacks proposed in:
 
+     - https://arxiv.org/abs/1910.00470, EURASIP JIS, 2020.
      - https://arxiv.org/abs/1708.06939, ICCV W. ViPAR, 2017.
 
-    This is the multi-class extension of our original work in:
+    It is the multi-class extension of our original work in:
 
      - https://arxiv.org/abs/1708.06131, ECML 2013,
        implemented using a standard projected gradient solver.
 
-    It can also be used on sparse, high-dimensional feature spaces, using an
-    L1 constraint on the manipulation of samples to preserve sparsity,
-    as we did for crafting adversarial Android malware in:
+    This attack uses a faster line search than PGD-LS.
 
-     - https://arxiv.org/abs/1704.08996, IEEE TDSC 2017.
+    In all our attacks, we use a smart double initialization to avoid using the
+    mimicry term from our ECML 2013 paper, as described in:
+    - https://pralab.diee.unica.it/sites/default/files/zhang15-tcyb.pdf, IEEE TCYB, 2015
 
-    For more on evasion attacks, see also:
-
-     - https://arxiv.org/abs/1809.02861, USENIX Sec. 2019
-     - https://arxiv.org/abs/1712.03141, Patt. Rec. 2018
+    If the attack is not successful when starting from x0,
+    we initialize the optimization by projecting a point from another
+    class onto the feasible domain and try again.
 
     Parameters
     ----------
@@ -69,10 +67,10 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
 
     Attributes
     ----------
-    class_type : 'e-pgd'
+    class_type : 'e-pgd-exp'
 
     """
-    __class_type = 'e-pgd'
+    __class_type = 'e-pgd-exp'
 
     def __init__(self, classifier,
                  surrogate_classifier,
@@ -81,7 +79,7 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
                  dmax=0,
                  lb=0,
                  ub=1,
-                 discrete=_NoValue,
+                 discrete=False,
                  y_target=None,
                  attack_classes='all',
                  solver_params=None):
@@ -95,11 +93,7 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
         # class (indiscriminate evasion). See _get_point_with_min_f_obj()
         self._xk = None
 
-        # pgd solver does not accepts parameter `discrete`
-        if discrete is not _NoValue:
-            raise ValueError("`pgd` solver does not work in discrete space.")
-
-        super(CAttackEvasionPGD, self).__init__(
+        super(CAttackEvasionPGDExp, self).__init__(
             classifier=classifier,
             surrogate_classifier=surrogate_classifier,
             surrogate_data=surrogate_data,
@@ -107,9 +101,9 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
             dmax=dmax,
             lb=lb,
             ub=ub,
-            discrete=False,
+            discrete=discrete,
             y_target=y_target,
             attack_classes=attack_classes,
             solver_params=solver_params)
 
-        self.solver_type = 'pgd'
+        self.solver_type = 'pgd-exp'
