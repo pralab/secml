@@ -278,8 +278,8 @@ class CAttackPoisoningTestCases(CUnitTest):
         x0 = self.xc  # starting poisoning point
         xc = self._clf_poisoning()[1]
 
-        fobj_x0 = self.poisoning._objective_function(xc=x0)
-        fobj_xc = self.poisoning._objective_function(xc=xc)
+        fobj_x0 = self.poisoning.objective_function(xc=x0)
+        fobj_xc = self.poisoning.objective_function(xc=xc)
 
         self.logger.info(
             "Objective function before the attack {:}".format(fobj_x0))
@@ -356,9 +356,9 @@ class CAttackPoisoningTestCases(CUnitTest):
 
         fig.subplot(n_rows, n_cols, grid_slot=1)
         fig.sp.title('Attacker objective and gradients')
-        self._plot_func(fig, self.poisoning._objective_function)
+        self._plot_func(fig, self.poisoning.objective_function)
         self._plot_obj_grads(
-            fig, self.poisoning._objective_function_gradient)
+            fig, self.poisoning.objective_function_gradient)
         fig.sp.plot_ds(self.tr)
         fig.sp.plot_decision_regions(self.clf_orig, plot_background=False,
                                      grid_limits=self.grid_limits,
@@ -371,7 +371,7 @@ class CAttackPoisoningTestCases(CUnitTest):
 
         fig.subplot(n_rows, n_cols, grid_slot=2)
         fig.sp.title('Classification error on val')
-        self._plot_func(fig, self.poisoning._objective_function,
+        self._plot_func(fig, self.poisoning.objective_function,
                         acc=True)
         fig.sp.plot_ds(self.tr)
         fig.sp.plot_decision_regions(pois_clf, plot_background=False,
