@@ -333,11 +333,7 @@ class COptimizerPGDExp(COptimizer):
         self._f_seq[0] = fx
 
         # debugging information
-        self.logger.debug('Iter.: ' + str(0) +
-                          ', f(x): ' + str(fx.item()) +
-                          ', d(x,x0): ' + str(
-            (x - self.constr.center).norm(order=2)))
-
+        self.logger.debug('Iter.: ' + str(0) + ', f(x): ' + str(fx))
 
         for i in range(1, self.max_iter):
 
@@ -350,11 +346,9 @@ class COptimizerPGDExp(COptimizer):
             self._x_opt = x
 
             self.logger.debug('Iter.: ' + str(i) +
-                              ', f(x): ' + str(fx.item()) +
+                              ', f(x): ' + str(fx) +
                               ', norm(gr(x)): ' +
-                              str(CArray(self._grad).norm()) +
-                              ', d(x,x0): ' + str(
-                (x - self.constr.center).norm(order=2)))
+                              str(CArray(self._grad).norm()))
 
             diff = abs(self.f_seq[i].item() - self.f_seq[i - 1].item())
 
@@ -365,10 +359,9 @@ class COptimizerPGDExp(COptimizer):
                         self._f_seq[i - 1].item()))
                 return self._return_best_solution(i)
 
-            if i > 20 and abs(self.f_seq[-10:].mean() -
-                              self.f_seq[-20:-10].mean()) < self.eps:
-                self.logger.debug(
-                    "Flat region for 20 iterations, exiting...")
+            if i > 20 and abs(self.f_seq[i - 10:i].mean() -
+                              self.f_seq[i - 20:i - 10].mean()) < self.eps:
+                self.logger.debug("Flat region for 20 iterations, exiting...")
                 return self._return_best_solution(i)
 
         self.logger.warning('Maximum iterations reached. Exiting.')

@@ -272,8 +272,6 @@ class TestCAttackEvasionCleverhansMNIST(CAttackEvasionCleverhansTestCases):
 
         evas = CAttackEvasionCleverhans(
             classifier=self.clf,
-            surrogate_classifier=self.clf,
-            surrogate_data=self.val,
             y_target=y_target,
             clvh_attack_class=attack['class'],
             **attack['params']

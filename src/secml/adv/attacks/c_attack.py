@@ -6,20 +6,124 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 from secml.core import CCreator
-from secml.core.type_utils import is_int
-from secml.core.exceptions import NotFittedError
 from secml.array import CArray
 from secml.ml.classifiers import CClassifier
-from secml.data import CDataset
 
 
 class CAttack(CCreator, metaclass=ABCMeta):
-    """Interface class for evasion and poisoning attacks."""
+    """Generic interface class for adversarial attacks.
+
+    Parameters
+    ----------
+    classifier : CClassifier
+        Target classifier.
+
+    """
 
     __super__ = 'CAttack'
+
+    def __init__(self, classifier):
+        # set the classifier to be attacked
+        if not isinstance(classifier, CClassifier):
+            raise ValueError("Classifier is not a CClassifier!")
+        self._classifier = classifier
+
+        # These are internal parameters populated by _run,
+        # for the *last* attack point:
+        self._x_opt = None  # the final/optimal attack point
+        self._f_opt = None  # the objective value at the optimum
+        self._x_seq = None  # the path of points through the optimization
+        self._f_seq = None  # the objective values along the optimization path
+
+    ###########################################################################
+    #                           READ-ONLY ATTRIBUTES
+    ###########################################################################
+
+    @property
+    def classifier(self):
+        """Returns classifier"""
+        return self._classifier
+
+    @property
+    def x_opt(self):
+        """Returns the optimal point founded by the attack.
+
+        Warnings
+        --------
+        Due to a known issue, if more then one sample is passed to ``.run()``,
+        this property will only return the data relative to the last
+        optimized one. This behavior will change in a future version.
+
+        """
+        return self._x_opt
+
+    @property
+    def f_opt(self):
+        """
+        Returns the value of the objective function evaluated on the optimal
+        point founded by the attack.
+
+        Warnings
+        --------
+        Due to a known issue, if more then one sample is passed to ``.run()``,
+        this property will only return the data relative to the last
+        optimized one. This behavior will change in a future version.
+
+        """
+        return self._f_opt
+
+    @property
+    def f_seq(self):
+        """
+        Returns a CArray containing the values of the objective function
+        evaluations made by the attack.
+
+        Warnings
+        --------
+        Due to a known issue, if more then one sample is passed to ``.run()``,
+        this property will only return the data relative to the last
+        optimized one. This behavior will change in a future version.
+
+        """
+        return self._f_seq
+
+    @property
+    def x_seq(self):
+        """
+        Returns a CArray (number of iteration * number of features) containing
+        the values of the attack point path.
+
+        Warnings
+        --------
+        Due to a known issue, if more then one sample is passed to ``.run()``,
+        this property will only return the data relative to the last
+        optimized one. This behavior will change in a future version.
+
+        """
+        return self._x_seq
+
+    ###########################################################################
+    #                       ABSTRACT PROPERTIES/METHODS
+    ###########################################################################
+
+    @property
+    @abstractmethod
+    def f_eval(self):
+        """Returns the number of function evaluations made during the attack.
+
+        """
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def grad_eval(self):
+        """Returns the number of gradient evaluations made during the attack.
+
+        """
+        raise NotImplementedError
 
     @abstractmethod
     def run(self, x, y, ds_init=None):
@@ -56,24 +160,4 @@ class CAttack(CCreator, metaclass=ABCMeta):
             The true label of x.
 
         """
-        raise NotImplementedError
-
-    @abstractmethod
-    def objective_function(self, x):
-        """Objective function.
-
-        Parameters
-        ----------
-        x : CArray or CDataset
-
-        Returns
-        -------
-        f_obj : float or CArray of floats
-
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def objective_function_gradient(self, x):
-        """Gradient of the objective function."""
         raise NotImplementedError

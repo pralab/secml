@@ -32,17 +32,9 @@ class TestCAttackEvasionPGDLS(CAttackEvasionTestCases):
             Label of the initial attack point.
 
         """
-        if params["discrete"] is True:
-            ds = self._discretize_data(ds, params["solver_params"]["eta"])
-
         if not params["classifier"].is_fitted():
             self.logger.info("Training classifier...")
             params["classifier"].fit(ds.X, ds.Y)
-
-        if not params["surrogate_classifier"].is_fitted():
-            self.logger.info("Training surrogate classifier...")
-            params["surrogate_classifier"].fit(
-                params["surrogate_data"].X,params["surrogate_data"].Y)
 
         evas = CAttackEvasionPGDExp(**params)
         evas.verbose = 2
@@ -55,7 +47,6 @@ class TestCAttackEvasionPGDLS(CAttackEvasionTestCases):
     def test_linear_l1(self):
         """Test evasion of a linear classifier using L1 distance."""
 
-        discrete = True
         eta = 0.01
         sparse = True
         seed = 10
@@ -64,13 +55,11 @@ class TestCAttackEvasionPGDLS(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf,
-            "surrogate_classifier": clf,
             "surrogate_data": ds,
             "distance": 'l1',
             "dmax": 1.05,
             "lb": -1.05,
             "ub": 1.05,
-            "discrete": discrete,
             "attack_classes": CArray([1]),
             "y_target": 0,
             "solver_params": {
@@ -83,7 +72,7 @@ class TestCAttackEvasionPGDLS(CAttackEvasionTestCases):
         evas, x0, y0 = self._set_evasion(ds, evasion_params)
 
         # Expected final optimal point
-        expected_x = CArray([0.02, -1.05])
+        expected_x = CArray([0.0176, -1.05])
         expected_y = 0
 
         self._run_evasion(evas, x0, y0, expected_x, expected_y)
@@ -93,7 +82,6 @@ class TestCAttackEvasionPGDLS(CAttackEvasionTestCases):
     def test_linear_l2(self):
         """Test evasion of a linear classifier using L2 distance."""
 
-        discrete = False
         eta = 0.5
         sparse = True
         seed = 48574308
@@ -102,13 +90,11 @@ class TestCAttackEvasionPGDLS(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf,
-            "surrogate_classifier": clf,
             "surrogate_data": ds,
             "distance": 'l2',
             "dmax": 1.05,
             "lb": -0.67,
             "ub": 0.67,
-            "discrete": discrete,
             "attack_classes": CArray([1]),
             "y_target": 0,
             "solver_params": {
@@ -131,7 +117,6 @@ class TestCAttackEvasionPGDLS(CAttackEvasionTestCases):
     def test_nonlinear_l1(self):
         """Test evasion of a nonlinear classifier using L1 distance."""
 
-        discrete = False
         eta = 0.1
         sparse = False
         seed = 87985889
@@ -140,13 +125,11 @@ class TestCAttackEvasionPGDLS(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf,
-            "surrogate_classifier": clf,
             "surrogate_data": ds,
             "distance": 'l1',
             "dmax": 1.0,
             "lb": -1.0,
             "ub": 1.0,
-            "discrete": discrete,
             "attack_classes": CArray([1]),
             "y_target": 0,
             "solver_params": {
@@ -169,7 +152,6 @@ class TestCAttackEvasionPGDLS(CAttackEvasionTestCases):
     def test_nonlinear_l2(self):
         """Test evasion of a nonlinear classifier using L2 distance."""
 
-        discrete = False
         eta = 0.01
         sparse = False
         seed = 534513
@@ -178,13 +160,11 @@ class TestCAttackEvasionPGDLS(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf,
-            "surrogate_classifier": clf,
             "surrogate_data": ds,
             "distance": 'l2',
             "dmax": 1.25,
             "lb": -0.65,
             "ub": 1.0,
-            "discrete": discrete,
             "attack_classes": CArray([1]),
             "y_target": 0,
             "solver_params": {
@@ -207,7 +187,6 @@ class TestCAttackEvasionPGDLS(CAttackEvasionTestCases):
     def test_tree_l1(self):
         """Test evasion of a tree classifier using L1 distance."""
 
-        discrete = False
         eta = 1.0
         sparse = False
         seed = 0
@@ -215,14 +194,12 @@ class TestCAttackEvasionPGDLS(CAttackEvasionTestCases):
         ds, clf, clf_surr = self._prepare_tree_nonlinear_svm(sparse, seed)
 
         evasion_params = {
-            "classifier": clf,
-            "surrogate_classifier": clf_surr,
+            "classifier": clf_surr,
             "surrogate_data": ds,
             "distance": 'l1',
             "dmax": 2.0,
             "lb": -1.5,
             "ub": 1.5,
-            "discrete": discrete,
             "attack_classes": CArray([1]),
             "y_target": 0,
             "solver_params": {

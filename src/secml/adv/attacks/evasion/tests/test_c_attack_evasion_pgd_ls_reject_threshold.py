@@ -97,7 +97,6 @@ class TestCAttackEvasionPGDLSRejectThreshold(CAttackEvasionTestCases):
         self.solver_params = {'eta': 0.5, 'max_iter': 3}
 
         eva = CAttackEvasionPGDLS(classifier=self.multiclass,
-                                  surrogate_classifier=self.multiclass,
                                   surrogate_data=self.ds,
                                   distance='l2', dmax=dmax, lb=lb, ub=ub,
                                   solver_params=self.solver_params,

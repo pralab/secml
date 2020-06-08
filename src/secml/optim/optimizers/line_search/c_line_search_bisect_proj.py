@@ -60,18 +60,24 @@ class CLineSearchBisectProj(CLineSearchBisect):
         In practice, if f(x + eta*d) increases on d, we return x."""
 
         v = x + d * self._best_eta
-        v = self.bounds.projection(v) if self.bounds is not None else v
-        v = self.constr.projection(v) if self.bounds is not None else v
+        if self.bounds is not None:
+            v = self.bounds.projection(v) if self.bounds is not None else v
+        if self.constr is not None:
+            v = self.constr.projection(v) if self.bounds is not None else v
         if self._is_feasible(v):
             return v, self._best_score
 
         x1 = CArray(x + d * self.eta * idx_min)
-        x1 = self.bounds.projection(x1) if self.bounds is not None else x1
-        x1 = self.constr.projection(x1) if self.constr is not None else x1
+        if self.bounds is not None:
+            x1 = self.bounds.projection(x1) if self.bounds is not None else x1
+        if self.constr is not None:
+            x1 = self.constr.projection(x1) if self.constr is not None else x1
 
         x2 = CArray(x + d * self.eta * idx_max)
-        x2 = self.bounds.projection(x2) if self.bounds is not None else x2
-        x2 = self.constr.projection(x2) if self.constr is not None else x2
+        if self.bounds is not None:
+            x2 = self.bounds.projection(x2) if self.bounds is not None else x2
+        if self.constr is not None:
+            x2 = self.constr.projection(x2) if self.constr is not None else x2
 
         self.logger.debug("Select best point between: f[a], f[b]: [" +
                           str(self._fun_idx_min) + "," +
@@ -213,8 +219,8 @@ class CLineSearchBisectProj(CLineSearchBisect):
 
             self.logger.debug(
                 "[_compute_eta_max] eta: " + str(eta.item()) +
-                ", f(z0): " + str(self._fun_idx_min.item()) +
-                ", f(z1): " + str(self._fun_idx_max.item()))
+                ", f(z0): " + str(self._fun_idx_min) +
+                ", f(z1): " + str(self._fun_idx_max))
 
             self._n_iter += 1
 
@@ -269,7 +275,7 @@ class CLineSearchBisectProj(CLineSearchBisect):
 
         self.logger.info(
             "line search: " +
-            ", f(x): " + str(self._fx.item()))
+            ", f(x): " + str(self._fx))
 
         # reset cached values
         self._fun_idx_min = None

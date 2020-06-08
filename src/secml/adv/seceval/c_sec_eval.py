@@ -57,10 +57,12 @@ class CSecEval(CCreator):
         if param_name not in self.attack.get_params():
             raise ValueError("param_name ({:}) should be a parameter of the "
                              "attack but it was not found. Run `attack.get_params()` "
-                             "for getting the list of available parameters.".format(param_name))
+                             "for getting the list of available parameters.".format(
+                param_name))
 
         if not self._attack.y_target is None:
-            self._sec_eval_data.Y_target = CArray(self._attack.y_target).deepcopy()
+            self._sec_eval_data.Y_target = CArray(
+                self._attack.y_target).deepcopy()
 
     ###########################################################################
     #                     READ-WRITE ATTRIBUTES (INPUTS)
@@ -151,9 +153,11 @@ class CSecEval(CCreator):
         self._sec_eval_data.Y_pred = [CArray(Y_pred).deepcopy() for i in range(
             self._sec_eval_data.param_values.size)]
 
-        self._sec_eval_data.time = CArray.zeros(shape=(self._sec_eval_data.param_values.size,))
+        self._sec_eval_data.time = CArray.zeros(
+            shape=(self._sec_eval_data.param_values.size,))
 
-        self._sec_eval_data.fobj = CArray.zeros((self._sec_eval_data.param_values.size,))
+        self._sec_eval_data.fobj = CArray.zeros(
+            shape=(self._sec_eval_data.param_values.size,))
 
         # manipulate attack samples
         adv_ds = None
