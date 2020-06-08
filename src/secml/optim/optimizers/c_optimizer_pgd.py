@@ -84,7 +84,7 @@ class COptimizerPGD(COptimizer):
     #############################################
 
     def _return_best_solution(self, i):
-        """Search the best solution between the ones found so far.
+        """Return the best solution among the ones found up to iteration i.
 
         Parameters
         ----------
@@ -159,10 +159,12 @@ class COptimizerPGD(COptimizer):
                     self._f_seq[i], self._f_seq[i - 1]))
                 return self._return_best_solution(i)
 
-            if i > 6 and self.f_seq[-3:].mean() < self.f_seq[-6:-3].mean():
+            if i > 10 and abs(self.f_seq[i - 5:i].mean() -
+                              self.f_seq[i - 10:i - 5].mean()) < self.eps:
                 self.logger.debug(
-                    "Decreasing function, exiting... {:}  {:}".format(
-                        self.f_seq[-3:].mean(), self.f_seq[-6:-3].mean()))
+                    "Flat region over 10 iterations, exiting... {:}  {:}".format(
+                        self.f_seq[i - 3:i].mean(),
+                        self.f_seq[i - 6:i - 3].mean()))
                 return self._return_best_solution(i)
 
             grad = self._fun.gradient(x, *args)

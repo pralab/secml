@@ -35,11 +35,6 @@ class TestCAttackEvasionPGD(CAttackEvasionTestCases):
             self.logger.info("Training classifier...")
             params["classifier"].fit(ds.X, ds.Y)
 
-        if not params["surrogate_classifier"].is_fitted():
-            self.logger.info("Training surrogate classifier...")
-            params["surrogate_classifier"].fit(
-                params["surrogate_data"].X, params["surrogate_data"].Y)
-
         evas = CAttackEvasionPGD(**params)
         evas.verbose = 2
 
@@ -59,7 +54,6 @@ class TestCAttackEvasionPGD(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf,
-            "surrogate_classifier": clf,
             "surrogate_data": ds,
             "distance": 'l1',
             "dmax": 1.05,
@@ -93,7 +87,6 @@ class TestCAttackEvasionPGD(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf,
-            "surrogate_classifier": clf,
             "surrogate_data": ds,
             "distance": 'l2',
             "dmax": 1.05,
@@ -127,7 +120,6 @@ class TestCAttackEvasionPGD(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf,
-            "surrogate_classifier": clf,
             "surrogate_data": ds,
             "distance": 'l1',
             "dmax": 1.0,
@@ -161,7 +153,6 @@ class TestCAttackEvasionPGD(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf,
-            "surrogate_classifier": clf,
             "surrogate_data": ds,
             "distance": 'l2',
             "dmax": 1.25,
@@ -194,8 +185,7 @@ class TestCAttackEvasionPGD(CAttackEvasionTestCases):
         ds, clf, clf_surr = self._prepare_tree_nonlinear_svm(sparse, seed)
 
         evasion_params = {
-            "classifier": clf,
-            "surrogate_classifier": clf_surr,
+            "classifier": clf_surr,
             "surrogate_data": ds,
             "distance": 'l1',
             "dmax": 2.0,

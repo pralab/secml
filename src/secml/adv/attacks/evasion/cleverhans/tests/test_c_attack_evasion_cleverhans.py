@@ -65,8 +65,6 @@ class TestCAttackEvasionCleverhans(CAttackEvasionCleverhansTestCases):
         }
         evas = CAttackEvasionCleverhans(
             classifier=self.clf,
-            surrogate_classifier=self.clf,
-            surrogate_data=self.ds,
             y_target=self.y_target,
             clvh_attack_class=SPSA,
             **attack_params)
@@ -92,8 +90,6 @@ class TestCAttackEvasionCleverhans(CAttackEvasionCleverhansTestCases):
         }
         evas = CAttackEvasionCleverhans(
             classifier=self.clf,
-            surrogate_classifier=self.clf,
-            surrogate_data=self.ds,
             y_target=self.y_target,
             clvh_attack_class=ProjectedGradientDescent,
             **attack_params)
@@ -124,8 +120,6 @@ class TestCAttackEvasionCleverhans(CAttackEvasionCleverhansTestCases):
         }
         evas = CAttackEvasionCleverhans(
             classifier=self.clf,
-            surrogate_classifier=self.clf,
-            surrogate_data=self.ds,
             y_target=self.y_target,
             clvh_attack_class=CarliniWagnerL2,
             **attack_params)
@@ -157,8 +151,6 @@ class TestCAttackEvasionCleverhans(CAttackEvasionCleverhansTestCases):
         }
         evas = CAttackEvasionCleverhans(
             classifier=self.clf,
-            surrogate_classifier=self.clf,
-            surrogate_data=self.ds,
             y_target=self.y_target,
             decision_rule='END',
             clvh_attack_class=ElasticNetMethod,

@@ -86,11 +86,6 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
             self.logger.info("Training classifier...")
             params["classifier"].fit(self._tr.X, self._tr.Y)
 
-        if not params["surrogate_classifier"].is_fitted():
-            self.logger.info("Training surrogate classifier...")
-            params["surrogate_classifier"].fit(
-                params["surrogate_data"].X,params["surrogate_data"].Y)
-
         evas = CAttackEvasionPGDLS(**params)
         evas.verbose = 2
 
@@ -145,7 +140,6 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf,
-            "surrogate_classifier": clf,
             "surrogate_data": self._val_dts,
             "distance": 'l1',
             "dmax": 10,

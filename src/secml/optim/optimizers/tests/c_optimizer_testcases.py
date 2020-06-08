@@ -170,9 +170,9 @@ class COptimizerTestCases(CUnitTest):
                                     label=label)
 
         # Round results for easier asserts
-        self.assertAlmostEqual(opt.f_opt, fun.global_min(), places=4)
+        self.assertAlmostEqual(opt.f_opt, fun.global_min(), places=3)
         self.assert_array_almost_equal(
-            min_x.todense().ravel(), fun.global_min_x(), decimal=4)
+            min_x.todense().ravel(), fun.global_min_x(), decimal=3)
 
         # Check if the type of the solution is correct
         self.assertEqual(fun_dict['x0'].issparse, min_x.issparse)

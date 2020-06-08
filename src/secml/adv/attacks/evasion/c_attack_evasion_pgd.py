@@ -45,8 +45,10 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
     surrogate_classifier : CClassifier
         Surrogate classifier, assumed to be already trained.
     surrogate_data : CDataset or None, optional
-        Dataset on which the the surrogate classifier has been trained on.
-        Is only required if the classifier is nonlinear.
+        Dataset used to initialize an alternative init point (double init).
+    double_init : bool, optional
+            If True (default), use double initialization point.
+            Needs surrogate_data not to be None.
     distance : {'l1' or 'l2'}, optional
         Norm to use for computing the distance of the adversarial example
         from the original sample. Default 'l2'.
@@ -75,8 +77,8 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
     __class_type = 'e-pgd'
 
     def __init__(self, classifier,
-                 surrogate_classifier,
                  surrogate_data=None,
+                 double_init=True,
                  distance='l1',
                  dmax=0,
                  lb=0,
@@ -101,13 +103,12 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
 
         super(CAttackEvasionPGD, self).__init__(
             classifier=classifier,
-            surrogate_classifier=surrogate_classifier,
             surrogate_data=surrogate_data,
+            double_init=double_init,
             distance=distance,
             dmax=dmax,
             lb=lb,
             ub=ub,
-            discrete=False,
             y_target=y_target,
             attack_classes=attack_classes,
             solver_params=solver_params)

@@ -18,9 +18,6 @@ class TestCSecEval(CUnitTest):
         self.classifier = CClassifierSVM(
             kernel='linear', C=1.0, grad_sampling=1.0)
 
-        # data parameters
-        self.discrete = False
-
         self.lb = -2
         self.ub = +2
 
@@ -68,12 +65,10 @@ class TestCSecEval(CUnitTest):
     def _attack_pgd_ls(self):
         params = {
             "classifier": self.classifier,
-            "surrogate_classifier": self.classifier,
             "surrogate_data": self.tr,
             "distance": 'l1',
             "lb": self.lb,
             "ub": self.ub,
-            "discrete": self.discrete,
             "y_target": self.y_target,
             "attack_classes": self.attack_classes,
             "solver_params": {'eta': 0.5, 'eps': 1e-2}
@@ -99,7 +94,6 @@ class TestCSecEval(CUnitTest):
 
         attack = CAttackEvasionCleverhans(
             classifier = self.classifier,
-            surrogate_classifier = self.classifier,
             surrogate_data = self.tr,
             y_target = self.y_target,
             clvh_attack_class = FastGradientMethod,
