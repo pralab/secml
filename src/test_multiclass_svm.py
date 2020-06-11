@@ -29,6 +29,7 @@ classifiers = [
     CClassifierSVMM(kernel=kernel, C=100),
 ]
 
+grads = []
 for clf in classifiers:
     # We can now fit the classifier
     print("Fit")
@@ -43,3 +44,7 @@ for clf in classifiers:
     acc = metric.performance_score(y_true=ts.Y, y_pred=y_pred)
 
     print("Accuracy on test set: {:.2%}".format(acc))
+
+    grads.append(clf.grad_f_x(ts.X[1, :], 8))
+
+print((grads[0] - grads[1]).norm())

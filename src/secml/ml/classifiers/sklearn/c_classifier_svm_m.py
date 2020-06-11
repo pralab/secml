@@ -147,7 +147,7 @@ class CClassifierSVMM(CClassifier):
             self._alpha = CArray.zeros(shape=(self.n_classes, x.shape[1]))
         self._b = CArray.zeros(shape=(self.n_classes,))
 
-        # ova
+        # ova (but we can also implement ovo - let's do separate functions)
         for k, c in enumerate(self.classes):
             # Training one vs all
             classifier = SVC(C=self.C, kernel=kernel)
@@ -183,9 +183,10 @@ class CClassifierSVMM(CClassifier):
             otherwise a (n_samples, n_classes) array.
 
         """
-        if self._is_kernel_linear():
-            scores = CArray(x.dot(self.w.T)) + self.b
-        else:
-            # here x is already kernel-precomputed
-            scores = CArray(x.dot(self._alpha.T)) + self.b
+        v = self.w if self._is_kernel_linear() else self._alpha
+        scores = CArray(x.dot(v.T)) + self.b
         return scores
+
+    def _backward(self, w):
+        v = self.w if self._is_kernel_linear() else self._alpha
+        return w.dot(v)
