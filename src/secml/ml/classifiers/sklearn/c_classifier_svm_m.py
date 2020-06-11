@@ -64,20 +64,35 @@ class CClassifierSVMM(CClassifier):
         # Calling the superclass init
         CClassifier.__init__(self, preprocess=preprocess)
 
-        # Classifier parameters
+        # Classifier hyperparameters
         self.C = C
+        self.kernel = kernel
 
         # After-training attributes
         self._w = None
         self._b = None
-
-        self._kernel = CKernel.create(kernel)
 
     def _is_kernel_linear(self):
         if self._kernel.__class__ == 'linear':
             return True
         else:
             return False
+
+    @property
+    def kernel(self):
+        """Kernel function (None if a linear classifier)."""
+        return self._kernel
+
+    @kernel.setter
+    def kernel(self, kernel):
+        """Setting up the Kernel function (None if a linear classifier)."""
+        self._kernel = CKernel.create(kernel)
+
+        if not self._is_kernel_linear():
+            # set kernel as preprocessor for the current classifier
+            preprocess = self.preprocess
+            self.preprocess = self.kernel
+            self.kernel.preprocess = preprocess
 
     @property
     def w(self):
@@ -126,20 +141,17 @@ class CClassifierSVMM(CClassifier):
         # Setting up classifier parameters
         if self._is_kernel_linear():
             kernel = 'linear'
-            z = x
-            self._w = CArray.zeros(shape=(self.n_classes, self.n_features))
+            self._w = CArray.zeros(shape=(self.n_classes, x.shape[1]))
         else:
             kernel = 'precomputed'
-            z = self._kernel.k(x)
-            self._alpha = CArray.zeros(shape=(self.n_classes, z.shape[0]))
+            self._alpha = CArray.zeros(shape=(self.n_classes, x.shape[1]))
         self._b = CArray.zeros(shape=(self.n_classes,))
 
         # ova
         for k, c in enumerate(self.classes):
             # Training one vs all
             classifier = SVC(C=self.C, kernel=kernel)
-            labels = y == c
-            classifier.fit(z.get_data(), labels.tondarray())
+            classifier.fit(x.get_data(), (y == c).tondarray())
             if self._is_kernel_linear():
                 self._w[k, :] = CArray(classifier.coef_.ravel())
             else:
@@ -161,7 +173,7 @@ class CClassifierSVMM(CClassifier):
         ----------
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
-            (n_patterns, n_features).
+            (n_patterns, n_features) or (n_patterns, n_sv) if kernel is used.
 
         Returns
         -------
@@ -174,6 +186,6 @@ class CClassifierSVMM(CClassifier):
         if self._is_kernel_linear():
             scores = CArray(x.dot(self.w.T)) + self.b
         else:
-            z = self._kernel.forward(x)
-            scores = CArray(z.dot(self._alpha.T)) + self.b
+            # here x is already kernel-precomputed
+            scores = CArray(x.dot(self._alpha.T)) + self.b
         return scores
