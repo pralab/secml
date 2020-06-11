@@ -71,6 +71,7 @@ class CClassifierSVMM(CClassifier):
         # After-training attributes
         self._w = None
         self._b = None
+        self._alpha = None
 
     def _is_kernel_linear(self):
         if self._kernel.__class__ == 'linear':
@@ -101,6 +102,11 @@ class CClassifierSVMM(CClassifier):
     @property
     def b(self):
         return self._b
+
+    @property
+    def alpha(self):
+        """Signed coefficients of the SVs in the decision function."""
+        return self._alpha
 
     @property
     def C(self):
@@ -144,19 +150,19 @@ class CClassifierSVMM(CClassifier):
             self._w = CArray.zeros(shape=(self.n_classes, x.shape[1]))
         else:
             kernel = 'precomputed'
-            self._alpha = CArray.zeros(shape=(self.n_classes, x.shape[1]))
+            self._alpha = CArray.zeros(
+                shape=(self.n_classes, x.shape[1]), sparse=True)
         self._b = CArray.zeros(shape=(self.n_classes,))
 
         # ova (but we can also implement ovo - let's do separate functions)
         for k, c in enumerate(self.classes):
-            # Training one vs all
             classifier = SVC(C=self.C, kernel=kernel)
             classifier.fit(x.get_data(), (y == c).tondarray())
             if self._is_kernel_linear():
                 self._w[k, :] = CArray(classifier.coef_.ravel())
             else:
-                self._sv_idx = CArray(classifier.support_).ravel()
-                self._alpha[k, self._sv_idx] = CArray(classifier.dual_coef_)
+                sv_idx = CArray(classifier.support_).ravel()
+                self._alpha[k, sv_idx] = CArray(classifier.dual_coef_)
             self._b[k] = CArray(classifier.intercept_[0])[0]
 
         return self
@@ -183,10 +189,10 @@ class CClassifierSVMM(CClassifier):
             otherwise a (n_samples, n_classes) array.
 
         """
-        v = self.w if self._is_kernel_linear() else self._alpha
+        v = self.w if self._is_kernel_linear() else self.alpha
         scores = CArray(x.dot(v.T)) + self.b
         return scores
 
     def _backward(self, w):
-        v = self.w if self._is_kernel_linear() else self._alpha
+        v = self.w if self._is_kernel_linear() else self.alpha
         return w.dot(v)
