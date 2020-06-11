@@ -144,7 +144,6 @@ class CClassifierSVMM(CClassifier):
                 self._w[k, :] = CArray(classifier.coef_.ravel())
             else:
                 self._sv_idx = CArray(classifier.support_).ravel()
-                print(classifier.n_support_, classifier.support_.shape)
                 self._alpha[k, self._sv_idx] = CArray(classifier.dual_coef_)
             self._b[k] = CArray(classifier.intercept_[0])[0]
 
@@ -175,8 +174,6 @@ class CClassifierSVMM(CClassifier):
         if self._is_kernel_linear():
             scores = CArray(x.dot(self.w.T)) + self.b
         else:
-            print(self._kernel.rv.shape)
             z = self._kernel.forward(x)
-            print(z.shape, self._alpha.shape)
             scores = CArray(z.dot(self._alpha.T)) + self.b
         return scores
