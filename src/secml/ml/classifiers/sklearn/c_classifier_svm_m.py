@@ -57,14 +57,15 @@ class CClassifierSVMM(CClassifier):
 
     _loss = CLossHinge()
 
-    def __init__(self, C=1.0, kernel='linear', preprocess=None,
-                 store_dual_vars=False):
+    def __init__(self, kernel='linear', C=1.0, class_weight=None,
+                 preprocess=None, store_dual_vars=None):
 
         # calling the superclass init
         CClassifier.__init__(self, preprocess=preprocess)
 
         # Classifier hyperparameters
         self.C = C
+        self.class_weight = class_weight
 
         # After-training attributes
         self._w = None
@@ -99,12 +100,38 @@ class CClassifierSVMM(CClassifier):
     def store_dual_vars(self):
         """Train the SVM classifier in the dual.
 
-        By default is False. If True, the SVM is trained in the dual even if
-        the kernel is linear. For nonlinear kernels, the SVM is always trained
-        in the dual (this value is ignored).
+        By default is None or False.
+        If True, the SVM is trained in the dual even if the kernel is linear.
+        For nonlinear kernels, the SVM is always trained in the dual
+        (this value is ignored).
 
         """
         return self._store_dual_vars
+
+    @property
+    def class_weight(self):
+        """Weight of each training class."""
+        return self._class_weight
+
+    @class_weight.setter
+    def class_weight(self, value):
+        """Sets the weight of each training class.
+
+        Parameters
+        ----------
+        value : {dict, 'balanced', None}
+            Set the parameter C of class i to `class_weight[i] * C`.
+            If None, all classes are supposed to have weight one.
+            The 'auto' mode uses the values of labels to automatically
+             adjust weights inversely proportional to class frequencies
+             as `n_samples / (n_classes * np.bincount(y))`.
+
+        """
+        # TODO we can have one weight per class but only for OVO
+        if isinstance(value, dict) and len(value) != 2:
+            raise ValueError("weight of positive (+1) and negative (0) "
+                             "classes only must be specified.")
+        self._class_weight = value
 
     @property
     def w(self):
@@ -181,17 +208,10 @@ class CClassifierSVMM(CClassifier):
             self._fit_OVA(x, y, svc_kernel)
         else:
             # fit binary
-            classifier = SVC(C=self.C, kernel=svc_kernel)
-            classifier.fit(x.get_data(), y.get_data())
-            if not self._kernelized():
-                self._w = CArray(classifier.coef_.ravel())
-            else:
-                sv_idx = CArray(classifier.support_).ravel()
-                self._alpha[sv_idx] = CArray(classifier.dual_coef_)
-            self._b = CArray(classifier.intercept_[0])[0]
+            self._fit_binary(x, y, svc_kernel)
 
         # remove unused support vectors from kernel
-        if self._alpha is not None:  # trained in the dual
+        if self._kernelized():  # trained in the dual
             sv = abs(self._alpha).sum(axis=0) > 0
             self.kernel.rv = self.kernel.rv[sv, :]
             self._alpha = self._alpha[:, sv]
@@ -201,7 +221,9 @@ class CClassifierSVMM(CClassifier):
     def _fit_OVA(self, x, y, svc_kernel):
         # ova (but we can also implement ovo - let's do separate functions)
         for k, c in enumerate(self.classes):
-            classifier = SVC(C=self.C, kernel=svc_kernel)
+            # TODO: class weights - balanced by default?
+            classifier = SVC(C=self.C, kernel=svc_kernel,
+                             class_weight=self.class_weight)
             classifier.fit(x.get_data(), CArray(y == c).get_data())
             if not self._kernelized():
                 self._w[k, :] = CArray(classifier.coef_.ravel())
@@ -210,6 +232,17 @@ class CClassifierSVMM(CClassifier):
                 self._alpha[k, sv_idx] = CArray(classifier.dual_coef_)
             self._b[k] = CArray(classifier.intercept_[0])[0]
         return
+
+    def _fit_binary(self, x, y, svc_kernel):
+        classifier = SVC(C=self.C, kernel=svc_kernel,
+                         class_weight=self.class_weight)
+        classifier.fit(x.get_data(), y.get_data())
+        if not self._kernelized():
+            self._w = CArray(classifier.coef_.ravel())
+        else:
+            sv_idx = CArray(classifier.support_).ravel()
+            self._alpha[sv_idx] = CArray(classifier.dual_coef_)
+        self._b = CArray(classifier.intercept_[0])[0]
 
     def _forward(self, x):
         """Compute decision function for SVMs, proportional to the distance of
