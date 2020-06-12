@@ -1,6 +1,6 @@
 from secml.data.loader import CDataLoaderMNIST
+from secml.ml.classifiers.sklearn.c_classifier_svm import CClassifierSVM as CClassifierSVMO
 from secml.ml.classifiers import CClassifierSVM
-from secml.ml.classifiers.sklearn.c_classifier_svm_m import CClassifierSVMM
 from secml.ml.kernels import CKernelRBF
 from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
 from secml.ml.peval.metrics import CMetricAccuracy
@@ -29,8 +29,8 @@ svm_params = {
     'store_dual_vars': None
 }
 classifiers = [
-    CClassifierMulticlassOVA(CClassifierSVM, **svm_params),
-    CClassifierSVMM(**svm_params),
+    CClassifierMulticlassOVA(CClassifierSVMO, **svm_params),
+    CClassifierSVM(**svm_params),
 ]
 
 grads = []
@@ -58,3 +58,5 @@ if clf.alpha is not None:
     print("alpha: ", clf.alpha.shape)
 
 print('grad-diff: ', (grads[0] - grads[1]).norm())
+
+clf.set('kernel.gamma', 0.01)

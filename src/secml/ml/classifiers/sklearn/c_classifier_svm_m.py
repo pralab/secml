@@ -77,13 +77,7 @@ class CClassifierSVM(CClassifier):
         self._preprocess_before_kernel = preprocess
         self._store_dual_vars = bool(store_dual_vars)
 
-        kernel = 'linear' if kernel is None else kernel
-        self._kernel = CKernel.create(kernel)
-        if self._kernelized():
-            # set kernel as preprocessor for the current classifier
-            # and train classifier in the dual (using the precomputed kernel)
-            self.preprocess = self.kernel
-            self.kernel.preprocess = self._preprocess_before_kernel
+        self.kernel = kernel
 
     def _kernelized(self):
         """Return True if SVM has to be trained in the dual space."""
@@ -96,6 +90,17 @@ class CClassifierSVM(CClassifier):
     def kernel(self):
         """Kernel function."""
         return self._kernel
+
+    @kernel.setter
+    def kernel(self, kernel):
+        """Setting up the Kernel function (None if a linear classifier)."""
+        kernel = 'linear' if kernel is None else kernel
+        self._kernel = CKernel.create(kernel)
+        if self._kernelized():
+            # set kernel as preprocessor for the current classifier
+            # and train classifier in the dual (using the precomputed kernel)
+            self.preprocess = self.kernel
+            self.kernel.preprocess = self._preprocess_before_kernel
 
     @property
     def store_dual_vars(self):
