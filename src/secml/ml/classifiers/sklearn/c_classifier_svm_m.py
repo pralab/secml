@@ -177,9 +177,11 @@ class CClassifierSVMM(CClassifier):
                 self._alpha[sv_idx] = CArray(classifier.dual_coef_)
             self._b = CArray(classifier.intercept_[0])[0]
 
-        # TODO: remove useless rv from kernel
-        print(self.kernel.rv.shape)
-        print(self.preprocess.rv.shape)
+        # remove unused support vectors from kernel
+        if self._alpha is not None:  # trained in the dual
+            sv = abs(self._alpha).sum(axis=0) > 0
+            self.kernel.rv = self.kernel.rv[sv, :]
+            self._alpha = self._alpha[:, sv]
 
         return self
 

@@ -7,9 +7,9 @@ from secml.ml.peval.metrics import CMetricAccuracy
 
 random_state = 999
 
-digits = (4, 6)  # tuple(range(0, 10))
+digits = tuple(range(0, 10))
 
-n_tr = 500  # Number of training set samples
+n_tr = 800  # Number of training set samples
 n_ts = 1000  # Number of test set samples
 
 loader = CDataLoaderMNIST()
@@ -22,11 +22,12 @@ ts.X /= 255
 
 # Force storing of the dual space variables (alphas and support vectors)
 # Will be used by the poisoning attack later
-kernel = CKernelRBF(gamma=0.1)
-C = 100
+# kernel = CKernelRBF(gamma=10)
+kernel = 'linear'
+C = 1
 classifiers = [
-    CClassifierMulticlassOVA(CClassifierSVM, kernel=kernel, C=100),
-    CClassifierSVMM(kernel=kernel, C=100),
+    CClassifierMulticlassOVA(CClassifierSVM, kernel=kernel, C=C),
+    CClassifierSVMM(kernel=kernel, C=C),
 ]
 
 grads = []
