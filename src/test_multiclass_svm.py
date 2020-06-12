@@ -23,9 +23,9 @@ ts.X /= 255
 # Force storing of the dual space variables (alphas and support vectors)
 # Will be used by the poisoning attack later
 svm_params = {
-    'kernel': CKernelRBF(gamma=0.01),
-    'C': 1,
-    'class_weight': {0: 0.01, 1: 10},
+    'kernel': CKernelRBF(gamma=0.1),
+    'C': 10,
+    'class_weight': {0: 1, 1: 1},
     'store_dual_vars': None
 }
 classifiers = [
