@@ -142,7 +142,8 @@ class TestCClassifierSVM(CClassifierTestCases):
         self.logger.info("Testing SVM related vector shape")
 
         def _check_flattness(array):
-            self.assertEqual(len(array.shape) == 1, True)
+            #self.assertEqual(len(array.shape) == 1, True)
+            self.assertTrue(array.is_vector_like)
 
         for svm in self.svms:
 
@@ -157,11 +158,10 @@ class TestCClassifierSVM(CClassifierTestCases):
             pattern = CArray(random.choice(self.dataset.X.get_data()))
             gradient = svm.grad_f_x(pattern, y=1)
 
-            if svm.is_kernel_linear():
+            if svm.w is not None:
                 _check_flattness(svm.w)
             else:
                 _check_flattness(svm.alpha)
-                _check_flattness(svm.sv_idx)
 
             _check_flattness(pred_y)
             _check_flattness(gradient)
@@ -244,8 +244,8 @@ class TestCClassifierSVM(CClassifierTestCases):
         wyy = wa * xx - wclf.b / ww[1]
 
         fig = CFigure(linewidth=1)
-        fig.sp.plot(xx, yy, 'k-', label='no weights')
-        fig.sp.plot(xx, wyy, 'k--', label='with weights')
+        fig.sp.plot(xx, yy.ravel(), 'k-', label='no weights')
+        fig.sp.plot(xx, wyy.ravel(), 'k--', label='with weights')
         fig.sp.scatter(X[:, 0].ravel(), X[:, 1].ravel(), c=y)
         fig.sp.legend()
 
@@ -259,47 +259,28 @@ class TestCClassifierSVM(CClassifierTestCases):
         self.logger.info("Instancing a linear SVM")
         svm = CClassifierSVM(kernel=None)
 
-        self.assertIsNone(svm.store_dual_vars)
         svm.fit(self.dataset.X, self.dataset.Y)
-        self.assertIsNone(svm.sv)
+        self.assertIsNone(svm.alpha)
 
         self.logger.info("Changing store_dual_vars to True")
-        svm.store_dual_vars = True
+        svm = CClassifierSVM(kernel=None, store_dual_vars=True)
 
         self.assertTrue(svm.store_dual_vars)
         svm.fit(self.dataset.X, self.dataset.Y)
-        self.assertIsNotNone(svm.sv)
+        self.assertIsNotNone(svm.alpha)
 
         self.logger.info("Changing store_dual_vars to False")
-        svm.store_dual_vars = False
+        svm._store_dual_vars = False
 
         self.assertFalse(svm.store_dual_vars)
         svm.fit(self.dataset.X, self.dataset.Y)
-        self.assertIsNone(svm.sv)
-
-        self.logger.info("Changing kernel to nonlinear when "
-                         "store_dual_vars is False should raise ValueError")
-        with self.assertRaises(ValueError):
-            svm.kernel = CKernelRBF()
+        self.assertIsNone(svm.alpha)
 
         self.logger.info("Instancing a nonlinear SVM")
         svm = CClassifierSVM(kernel='rbf')
 
-        self.assertIsNone(svm.store_dual_vars)
         svm.fit(self.dataset.X, self.dataset.Y)
-        self.assertIsNotNone(svm.sv)
-
-        self.logger.info("Changing store_dual_vars to True")
-        svm.store_dual_vars = True
-
-        self.assertTrue(svm.store_dual_vars)
-        svm.fit(self.dataset.X, self.dataset.Y)
-        self.assertIsNotNone(svm.sv)
-
-        self.logger.info(
-            "Changing store_dual_vars to False should raise ValueError")
-        with self.assertRaises(ValueError):
-            svm.store_dual_vars = False
+        self.assertIsNotNone(svm.alpha)
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""

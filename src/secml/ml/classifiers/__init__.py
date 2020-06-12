@@ -10,7 +10,7 @@ from .sklearn.c_classifier_nearest_centroid import CClassifierNearestCentroid
 from .sklearn.c_classifier_random_forest import CClassifierRandomForest
 from .sklearn.c_classifier_ridge import CClassifierRidge
 from .sklearn.c_classifier_sgd import CClassifierSGD
-from .sklearn.c_classifier_svm import CClassifierSVM
+from .sklearn.c_classifier_svm_m import CClassifierSVM
 
 try:
     import torch

@@ -16,7 +16,7 @@ from secml.ml.classifiers.loss import CLossHinge
 from secml.utils.mixed_utils import check_is_fitted
 
 
-class CClassifierSVMM(CClassifier):
+class CClassifierSVM(CClassifier):
     """Support Vector Machine (SVM) classifier.
 
     Parameters
@@ -77,6 +77,7 @@ class CClassifierSVMM(CClassifier):
         self._preprocess_before_kernel = preprocess
         self._store_dual_vars = bool(store_dual_vars)
 
+        kernel = 'linear' if kernel is None else kernel
         self._kernel = CKernel.create(kernel)
         if self._kernelized():
             # set kernel as preprocessor for the current classifier
@@ -238,7 +239,7 @@ class CClassifierSVMM(CClassifier):
                          class_weight=self.class_weight)
         classifier.fit(x.get_data(), y.get_data())
         if not self._kernelized():
-            self._w = CArray(classifier.coef_.ravel())
+            self._w = CArray(classifier.coef_)
         else:
             sv_idx = CArray(classifier.support_).ravel()
             self._alpha[sv_idx] = CArray(classifier.dual_coef_)
@@ -267,7 +268,7 @@ class CClassifierSVMM(CClassifier):
 
         """
         v = self.w if not self._kernelized() else self.alpha
-        score = CArray(x.dot(v.T)) + self.b
+        score = CArray(x.dot(v.T)).todense() + self.b
         if self.n_classes > 2:  # return current score matrix
             scores = score
         else:  # concatenate scores
