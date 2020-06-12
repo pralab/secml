@@ -144,28 +144,57 @@ class CClassifierSVMM(CClassifier):
         """
         self.logger.info(
             "Training SVM with parameters: {:}".format(self.get_params()))
-        # Setting up classifier parameters
+
+        # reset training
+        self._w = None
+        self._b = None
+        self._alpha = None
+
+        # shape of w or alpha
+        n_rows = self.n_classes if self.n_classes > 2 else 1
+        n_cols = x.shape[1]
+
+        # initialize params
         if self._is_kernel_linear():
-            kernel = 'linear'
-            self._w = CArray.zeros(shape=(self.n_classes, x.shape[1]))
+            svc_kernel = 'linear'
+            self._w = CArray.zeros(shape=(n_rows, n_cols))
         else:
-            kernel = 'precomputed'
-            self._alpha = CArray.zeros(
-                shape=(self.n_classes, x.shape[1]), sparse=True)
+            svc_kernel = 'precomputed'
+            self._alpha = CArray.zeros(shape=(n_rows, n_cols), sparse=True)
         self._b = CArray.zeros(shape=(self.n_classes,))
 
+        if self.n_classes > 2:
+            # fit OVA
+            self._fit_OVA(x, y, svc_kernel)
+        else:
+            # fit binary
+            classifier = SVC(C=self.C, kernel=svc_kernel)
+            classifier.fit(x.get_data(), y.get_data())
+            if self._is_kernel_linear():
+                self._w = CArray(classifier.coef_.ravel())
+            else:
+                sv_idx = CArray(classifier.support_).ravel()
+                self._alpha[sv_idx] = CArray(classifier.dual_coef_)
+            self._b = CArray(classifier.intercept_[0])[0]
+
+        # TODO: remove useless rv from kernel
+        print(self.kernel.rv.shape)
+        print(self.preprocess.rv.shape)
+
+        return self
+
+    def _fit_OVA(self, x, y, svc_kernel):
         # ova (but we can also implement ovo - let's do separate functions)
         for k, c in enumerate(self.classes):
-            classifier = SVC(C=self.C, kernel=kernel)
-            classifier.fit(x.get_data(), (y == c).tondarray())
+            classifier = SVC(C=self.C, kernel=svc_kernel)
+            classifier.fit(x.get_data(), CArray(y == c).get_data())
             if self._is_kernel_linear():
                 self._w[k, :] = CArray(classifier.coef_.ravel())
             else:
                 sv_idx = CArray(classifier.support_).ravel()
                 self._alpha[k, sv_idx] = CArray(classifier.dual_coef_)
             self._b[k] = CArray(classifier.intercept_[0])[0]
-
-        return self
+        return
 
     def _forward(self, x):
         """Compute decision function for SVMs, proportional to the distance of
@@ -190,9 +219,18 @@ class CClassifierSVMM(CClassifier):
 
         """
         v = self.w if self._is_kernel_linear() else self.alpha
-        scores = CArray(x.dot(v.T)) + self.b
+        score = CArray(x.dot(v.T)) + self.b
+        if self.n_classes > 2:  # return current score matrix
+            scores = score
+        else:  # concatenate scores
+            scores = CArray.ones(shape=(x.shape[0], self.n_classes))
+            scores[:, 0] = -score.ravel().T
+            scores[:, 1] = score.ravel().T
         return scores
 
     def _backward(self, w):
         v = self.w if self._is_kernel_linear() else self.alpha
-        return w.dot(v)
+        if self.n_classes > 2:
+            return w.dot(v)
+        else:
+            return w[0] * -v + w[1] * v

@@ -7,10 +7,10 @@ from secml.ml.peval.metrics import CMetricAccuracy
 
 random_state = 999
 
-digits = tuple(range(0, 10))
+digits = (4, 6)  # tuple(range(0, 10))
 
-n_tr = 1000  # Number of training set samples
-n_ts = 2000  # Number of test set samples
+n_tr = 500  # Number of training set samples
+n_ts = 1000  # Number of test set samples
 
 loader = CDataLoaderMNIST()
 tr = loader.load('training', digits=digits, num_samples=n_tr)
@@ -45,6 +45,7 @@ for clf in classifiers:
 
     print("Accuracy on test set: {:.2%}".format(acc))
 
-    grads.append(clf.grad_f_x(ts.X[1, :], 8))
+    grads.append(clf.grad_f_x(ts.X[1, :], 1))
 
+print(clf.alpha.shape)
 print((grads[0] - grads[1]).norm())
