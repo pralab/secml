@@ -37,9 +37,6 @@ class CClassifierSVMM(CClassifier):
         Features preprocess to be applied to input data.
         Can be a CPreProcess subclass or a string with the type of the
         desired preprocessor. If None, input data is used as is.
-    grad_sampling : float
-        Percentage in (0.0, 1.0] of the alpha weights to be considered
-        when computing the classifier gradient.
 
     Attributes
     ----------
@@ -60,40 +57,54 @@ class CClassifierSVMM(CClassifier):
 
     _loss = CLossHinge()
 
-    def __init__(self, C=1.0, kernel='linear', preprocess=None):
-        # Calling the superclass init
+    def __init__(self, C=1.0, kernel='linear', preprocess=None,
+                 store_dual_vars=False):
+
+        # calling the superclass init
         CClassifier.__init__(self, preprocess=preprocess)
 
         # Classifier hyperparameters
         self.C = C
-        self.kernel = kernel
 
         # After-training attributes
         self._w = None
         self._b = None
         self._alpha = None
 
-    def _is_kernel_linear(self):
-        if self._kernel.__class__ == 'linear':
-            return True
-        else:
+        # store preprocess
+        # setters are messy here... we should not have setters for preproc...
+        self._preprocess_before_kernel = preprocess
+        self._store_dual_vars = bool(store_dual_vars)
+
+        self._kernel = CKernel.create(kernel)
+        if self._kernelized():
+            # set kernel as preprocessor for the current classifier
+            # and train classifier in the dual (using the precomputed kernel)
+            self.preprocess = self.kernel
+            self.kernel.preprocess = self._preprocess_before_kernel
+
+    def _kernelized(self):
+        """Return True if SVM has to be trained in the dual space."""
+        if self._kernel.class_type == 'linear' and not self.store_dual_vars:
             return False
+        else:
+            return True
 
     @property
     def kernel(self):
-        """Kernel function (None if a linear classifier)."""
+        """Kernel function."""
         return self._kernel
 
-    @kernel.setter
-    def kernel(self, kernel):
-        """Setting up the Kernel function (None if a linear classifier)."""
-        self._kernel = CKernel.create(kernel)
+    @property
+    def store_dual_vars(self):
+        """Train the SVM classifier in the dual.
 
-        if not self._is_kernel_linear():
-            # set kernel as preprocessor for the current classifier
-            preprocess = self.preprocess
-            self.preprocess = self.kernel
-            self.kernel.preprocess = preprocess
+        By default is False. If True, the SVM is trained in the dual even if
+        the kernel is linear. For nonlinear kernels, the SVM is always trained
+        in the dual (this value is ignored).
+
+        """
+        return self._store_dual_vars
 
     @property
     def w(self):
@@ -155,10 +166,12 @@ class CClassifierSVMM(CClassifier):
         n_cols = x.shape[1]
 
         # initialize params
-        if self._is_kernel_linear():
+        if not self._kernelized():
+            # no kernel preprocessing, training in the primal
             svc_kernel = 'linear'
             self._w = CArray.zeros(shape=(n_rows, n_cols))
         else:
+            # inputs are kernel values, training in the dual
             svc_kernel = 'precomputed'
             self._alpha = CArray.zeros(shape=(n_rows, n_cols), sparse=True)
         self._b = CArray.zeros(shape=(self.n_classes,))
@@ -170,7 +183,7 @@ class CClassifierSVMM(CClassifier):
             # fit binary
             classifier = SVC(C=self.C, kernel=svc_kernel)
             classifier.fit(x.get_data(), y.get_data())
-            if self._is_kernel_linear():
+            if not self._kernelized():
                 self._w = CArray(classifier.coef_.ravel())
             else:
                 sv_idx = CArray(classifier.support_).ravel()
@@ -190,7 +203,7 @@ class CClassifierSVMM(CClassifier):
         for k, c in enumerate(self.classes):
             classifier = SVC(C=self.C, kernel=svc_kernel)
             classifier.fit(x.get_data(), CArray(y == c).get_data())
-            if self._is_kernel_linear():
+            if not self._kernelized():
                 self._w[k, :] = CArray(classifier.coef_.ravel())
             else:
                 sv_idx = CArray(classifier.support_).ravel()
@@ -220,7 +233,7 @@ class CClassifierSVMM(CClassifier):
             otherwise a (n_samples, n_classes) array.
 
         """
-        v = self.w if self._is_kernel_linear() else self.alpha
+        v = self.w if not self._kernelized() else self.alpha
         score = CArray(x.dot(v.T)) + self.b
         if self.n_classes > 2:  # return current score matrix
             scores = score
@@ -231,7 +244,7 @@ class CClassifierSVMM(CClassifier):
         return scores
 
     def _backward(self, w):
-        v = self.w if self._is_kernel_linear() else self.alpha
+        v = self.w if not self._kernelized() else self.alpha
         if self.n_classes > 2:
             return w.dot(v)
         else:

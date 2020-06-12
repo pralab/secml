@@ -22,12 +22,12 @@ ts.X /= 255
 
 # Force storing of the dual space variables (alphas and support vectors)
 # Will be used by the poisoning attack later
-# kernel = CKernelRBF(gamma=10)
-kernel = 'linear'
+kernel = CKernelRBF(gamma=10)
+# kernel = 'linear'
 C = 1
 classifiers = [
     CClassifierMulticlassOVA(CClassifierSVM, kernel=kernel, C=C),
-    CClassifierSVMM(kernel=kernel, C=C),
+    CClassifierSVMM(kernel=kernel, C=C, store_dual_vars=False),
 ]
 
 grads = []
@@ -48,5 +48,6 @@ for clf in classifiers:
 
     grads.append(clf.grad_f_x(ts.X[1, :], 1))
 
-print(clf.alpha.shape)
+print("w: " , clf.w is not None)
+print("alpha: ", clf.alpha is not None)
 print((grads[0] - grads[1]).norm())
