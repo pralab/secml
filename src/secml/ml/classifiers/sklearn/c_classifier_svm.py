@@ -343,6 +343,14 @@ class CClassifierSVM(CClassifier):
         else:  # no margin SVs
             return None, None
 
+    def _Kss(self, xs):
+        """Compute kernel matrix between margin SVs."""
+        sv = self.kernel.rv  # store and recover current sv set
+        self.kernel.rv = xs
+        k = self.kernel._forward(xs)  # no preprocessing
+        self.kernel.rv = sv
+        return k
+
     def hessian_tr_params(self, x=None, y=None):
         """
         Hessian of the training objective w.r.t. the classifier parameters.
@@ -351,10 +359,7 @@ class CClassifierSVM(CClassifier):
         s = xs.shape[0]
 
         H = CArray.ones(shape=(s + 1, s + 1))
-        sv = self.kernel.rv  # store and recover current sv set
-        self.kernel.rv = xs
-        H[:s, :s] = self.kernel._forward(xs)  # no preprocessing
-        self.kernel.rv = sv
+        H[:s, :s] = self._Kss(xs)
         H[-1, -1] = 0
 
         return H
@@ -435,13 +440,8 @@ class CClassifierSVM(CClassifier):
 
         # compute the regularizer derivative w.r.t alpha
         xs, idx = self._sv_margin()
-
-        sv = self.kernel.rv  # store and recover current sv set
-        self.kernel.rv = xs
-        K = self.kernel._forward(xs)
-        self.kernel.rv = sv
-
-        d_reg = 2 * K.dot(self.alpha[idx].T)  # s * 1
+        k = self._Kss(xs)
+        d_reg = 2 * k.dot(self.alpha[idx].T)  # s * 1
 
         # add the regularizer to the gradient of the alphas
         s = idx.size
