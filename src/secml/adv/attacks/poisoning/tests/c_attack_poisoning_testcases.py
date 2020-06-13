@@ -206,7 +206,7 @@ class CAttackPoisoningTestCases(CUnitTest):
 
     def _set_up(self, poisoning_class, clf_idx, clf_class, clf_params):
 
-        self.plot_creation = False
+        self.plot_creation = True
 
         self.clf_idx = clf_idx
         self.pois_class = poisoning_class
@@ -384,8 +384,12 @@ class CAttackPoisoningTestCases(CUnitTest):
         fig.tight_layout()
         exp_idx = "2d_pois_"
         exp_idx += self.clf_idx
-        if self.classifier.preprocess is not None:
-            exp_idx += "_norm"
+        if self.classifier.class_type == 'svm':
+            if self.classifier.kernel.preprocess is not None:
+                exp_idx += "_norm"
+        else:
+            if self.classifier.preprocess is not None:
+                exp_idx += "_norm"
         fig.savefig(exp_idx + '.pdf', file_format='pdf')
 
     #####################################################################

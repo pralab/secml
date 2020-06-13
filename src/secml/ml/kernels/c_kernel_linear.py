@@ -6,8 +6,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from sklearn import metrics
-
 from secml.array import CArray
 from secml.ml.kernels import CKernel
 
@@ -55,8 +53,7 @@ class CKernelLinear(CKernel):
             Kernel between x and cached rv. Array of shape (n_x, n_rv).
 
         """
-        return CArray(metrics.pairwise.linear_kernel(
-            CArray(x).get_data(), CArray(self._rv).get_data()))
+        return CArray(x.dot(self.rv.T))
 
     def _backward(self, w=None):
         """Calculate Linear kernel gradient wrt cached vector 'x'.

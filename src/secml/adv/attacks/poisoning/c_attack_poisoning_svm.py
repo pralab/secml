@@ -142,9 +142,11 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # as this set is appended to the training set, idx is shifted
         idx += self._surrogate_data.num_samples
 
+        # k is the index of sv_idx corresponding to the training idx of xc
         k = clf.sv_idx.find(clf.sv_idx == idx)
         if len(k) == 1:  # if not empty
-            return clf.alpha[k]
+            alpha_c = clf.alpha[k].todense().ravel()
+            return alpha_c
         return 0
 
     def alpha_xc(self, xc):
@@ -201,8 +203,10 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # xc = xc if clf.kernel.preprocess is None else clf.kernel.preprocess.transform(xc)
         xk = xk if clf.kernel.preprocess is None else clf.kernel.preprocess.transform(xk)
 
+        rv = clf.kernel.rv
         clf.kernel.rv = xk
         dKkc = alpha_c * clf.kernel.gradient(xc)
+        clf.kernel.rv = rv
         return dKkc.T  # d * k
 
     def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr, k=None):
@@ -212,12 +216,9 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         """
 
         svm = clf  # classifier is an SVM
-
         xc0 = xc.deepcopy()
-
         d = xc.size
         grad = CArray.zeros(shape=(d,))  # gradient in input space
-
         alpha_c = self._alpha_c(clf)
 
         if abs(alpha_c) == 0:  # < svm.C:  # this include alpha_c == 0
@@ -233,6 +234,8 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # gt is the derivative of the loss computed on a validation
         # set w.r.t. xc
         Kd_xc = self._Kd_xc(svm, alpha_c, xc, xk)
+        assert (clf.kernel.rv.shape[0] == clf.alpha.shape[1])
+
         gt = Kd_xc.dot(grad_loss_fk).ravel()  # gradient of the loss w.r.t. xc
 
         xs, sv_idx = clf._sv_margin()  # these points are already normalized
@@ -240,15 +243,14 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         if xs is None:
             self.logger.debug("Warning: xs is empty "
                               "(all points are error vectors).")
-            return gt if svm.preprocess is None else \
-                svm.preprocess.gradient(xc0, w=gt)
+            return gt if svm.kernel.preprocess is None else \
+                svm.kernel.preprocess.gradient(xc0, w=gt)
 
         s = xs.shape[0]
 
         # derivative of the loss computed on a validation set w.r.t. the
         # classifier params
         fd_params = svm.grad_f_params(xk)
-        # grad_loss_params = fd_params.dot(-grad_loss_fk)
         grad_loss_params = fd_params.dot(grad_loss_fk)
 
         H = clf.hessian_tr_params()
@@ -281,7 +283,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         gt += v
 
         # propagating gradient back to input space
-        if clf.preprocess is not None:
-            return clf.preprocess.gradient(xc0, w=gt)
+        if clf.kernel.preprocess is not None:
+            return clf.kernel.preprocess.gradient(xc0, w=gt)
 
         return gt

@@ -98,11 +98,15 @@ class CClassifierSVM(CClassifier):
     @kernel.setter
     def kernel(self, kernel):
         """Set the kernel function."""
-        # extract previous preprocess attached to kernel, if any
-        p = self.preprocess if self.kernel is None else self.kernel.preprocess
+        # extract preprocess attached to kernel, if any
+        if self.preprocess is self.kernel:  # if point to the same ref
+            p = self.kernel.preprocess if self.kernel is not None else None
+        else:
+            p = self.preprocess
 
         kernel = 'linear' if kernel is None else kernel
         self._kernel = CKernel.create(kernel)
+
         if self._is_kernelized():
             # set kernel as preprocessor for the current classifier
             # and train classifier in the dual (using the precomputed kernel)
@@ -216,9 +220,6 @@ class CClassifierSVM(CClassifier):
         self.logger.info(
             "Training SVM with parameters: {:}".format(self.get_params()))
 
-        print(self)
-        print(x.shape)
-
         # reset training
         self._w = None
         self._b = None
@@ -253,6 +254,8 @@ class CClassifierSVM(CClassifier):
             self.kernel.rv = self.kernel.rv[sv, :]
             self._alpha = self._alpha[:, sv]
 
+        assert (self.kernel.rv.shape[0] == self.alpha.shape[1])
+
         return self
 
     def _fit_one_vs_all(self, x, y, svc_kernel):
@@ -277,8 +280,11 @@ class CClassifierSVM(CClassifier):
         if not self._is_kernelized():
             self._w = CArray(classifier.coef_)
         else:
-            self._sv_idx = CArray(classifier.support_).ravel()
-            self._alpha[self._sv_idx] = CArray(classifier.dual_coef_)
+            sv_idx = CArray(classifier.support_).ravel()
+            self._alpha__ = CArray(classifier.dual_coef_)
+            self._alpha[sv_idx] = CArray(classifier.dual_coef_)
+            # we need to sort indices too to be consistent with alpha
+            self._sv_idx = sv_idx.sort()
         self._b = CArray(classifier.intercept_[0])[0]
 
     def _forward(self, x):
@@ -327,11 +333,16 @@ class CClassifierSVM(CClassifier):
         if self.n_classes > 2:
             raise ValueError("SVM is not binary!")
 
+        assert (self.kernel.rv.shape[0] == self.alpha.shape[1])
+
         alpha = self.alpha.todense()
-        s = CArray(alpha.find(
+        s = alpha.find(
             (abs(alpha) >= tol) *
-            (abs(alpha) <= self.C - tol)))
-        return self.kernel.rv[s, :], s
+            (abs(alpha) <= self.C - tol))
+        if len(s) > 0:
+            return self.kernel.rv[s, :], CArray(s)
+        else:  # no margin SVs
+            return None, None
 
     def hessian_tr_params(self, x=None, y=None):
         """
@@ -350,17 +361,17 @@ class CClassifierSVM(CClassifier):
         return H
 
     def grad_f_params(self, x, y=1):
-        """Derivative of the decision function w.r.t. the classifier parameters.
+        """Derivative of the decision function w.r.t. alpha and b
 
         Parameters
         ----------
         x : CArray
-            Features of the dataset on which the training objective is computed.
+            Samples on which the training objective is computed.
         y : int
             Index of the class wrt the gradient must be computed.
 
         """
-        xs, _ = self._sv_margin()  # these points are already normalized
+        xs, _ = self._sv_margin()  # these points are already preprocessed
 
         if xs is None:
             self.logger.debug("Warning: sv_margin is empty "
@@ -373,14 +384,15 @@ class CClassifierSVM(CClassifier):
         Ksk_ext = CArray.ones(shape=(s + 1, k))
 
         sv = self.kernel.rv  # store and recover current sv set
-        Ksk_ext[:s, :] = self.kernel.k(x, xs).T  # x and xs are preprocessed
+        self.kernel.rv = xs
+        Ksk_ext[:s, :] = self.kernel.forward(x).T  # x and xs are preprocessed
         self.kernel.rv = sv
 
         return convert_binary_labels(y) * Ksk_ext  # (s + 1) * k
 
     def grad_loss_params(self, x, y, loss=None):
         """
-        Derivative of the loss w.r.t. the classifier parameters
+        Derivative of the loss w.r.t. the classifier parameters (alpha, b)
 
         dL / d_params = dL / df * df / d_params
 
@@ -401,12 +413,9 @@ class CClassifierSVM(CClassifier):
         # compute the loss derivative w.r.t. alpha
         f_params = self.grad_f_params(x)  # (s + 1) * n_samples
         scores = self.decision_function(x)
-
         dL_s = loss.dloss(y, score=scores).atleast_2d()
         dL_params = dL_s * f_params  # (s + 1) * n_samples
-
         grad = self.C * dL_params
-
         return grad
 
     def grad_tr_params(self, x, y):
@@ -423,18 +432,19 @@ class CClassifierSVM(CClassifier):
             Features of the training samples
 
         """
-        grad = self.grad_loss_params(x, y)
+        grad = self.grad_loss_params(x, y)  # (s+1) * n_samples
 
         # compute the regularizer derivative w.r.t alpha
-        xs, margin_sv_idx = self._sv_margin()
+        xs, idx = self._sv_margin()
 
         sv = self.kernel.rv  # store and recover current sv set
-        K = self.kernel.k(xs, xs)
+        self.kernel.rv = xs
+        K = self.kernel._forward(xs)
         self.kernel.rv = sv
 
-        d_reg = 2 * K.dot(self.alpha[margin_sv_idx].T)  # s * 1
+        d_reg = 2 * K.dot(self.alpha[idx].T)  # s * 1
 
         # add the regularizer to the gradient of the alphas
-        s = margin_sv_idx.size
+        s = idx.size
         grad[:s, :] += d_reg
-        return grad  # (s +1) * n_samples
+        return grad  # (s+1) * n_samples

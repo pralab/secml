@@ -27,12 +27,12 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
     def train_obj(self, x, y, clf):
         """Classifier training objective function."""
         loss = self.l(x, y, clf)
-
         xs, margin_sv_idx = clf._sv_margin()
-
         alpha_s = clf.alpha[margin_sv_idx]
+        p = clf.kernel.preprocess
+        clf.kernel.preprocess = None  # remove preproc as xs is already scaled
         reg = alpha_s.atleast_2d().dot(clf.kernel.k(xs, xs).dot(alpha_s.T))
-
+        clf.kernel.preprocess = p
         return clf.C * loss + reg
 
     def change_params(self, params, clf):
