@@ -198,8 +198,8 @@ class CAttackPoisoningSVM(CAttackPoisoning):
             computed
         """
         # handle normalizer, if present
-        xc = xc if clf.preprocess is None else clf.preprocess.transform(xc)
-        xk = xk if clf.preprocess is None else clf.preprocess.transform(xk)
+        # xc = xc if clf.kernel.preprocess is None else clf.kernel.preprocess.transform(xc)
+        xk = xk if clf.kernel.preprocess is None else clf.kernel.preprocess.transform(xk)
 
         clf.kernel.rv = xk
         dKkc = alpha_c * clf.kernel.gradient(xc)
@@ -235,7 +235,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         Kd_xc = self._Kd_xc(svm, alpha_c, xc, xk)
         gt = Kd_xc.dot(grad_loss_fk).ravel()  # gradient of the loss w.r.t. xc
 
-        xs, sv_idx = clf.sv_margin()  # these points are already normalized
+        xs, sv_idx = clf._sv_margin()  # these points are already normalized
 
         if xs is None:
             self.logger.debug("Warning: xs is empty "
@@ -255,7 +255,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         H += 1e-9 * CArray.eye(s + 1)
 
         # handle normalizer, if present
-        xc = xc if clf.preprocess is None else clf.preprocess.transform(xc)
+        # xc = xc if clf.preprocess is None else clf.kernel.transform(xc)
         G = CArray.zeros(shape=(gt.size, s + 1))
         svm.kernel.rv = xs
         G[:, :s] = svm.kernel.gradient(xc).T

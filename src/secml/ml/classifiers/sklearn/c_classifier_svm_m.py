@@ -71,6 +71,7 @@ class CClassifierSVM(CClassifier):
         self._w = None
         self._b = None
         self._alpha = None
+        self._sv_idx = None  # idx of SVs in TR data (only for binary SVM)
 
         self._store_dual_vars = bool(store_dual_vars)
 
@@ -85,6 +86,11 @@ class CClassifierSVM(CClassifier):
             return True
 
     @property
+    def sv_idx(self):
+        """Indices of Support Vectors within the training dataset."""
+        return self._sv_idx
+
+    @property
     def kernel(self):
         """Kernel function."""
         return self._kernel
@@ -93,7 +99,7 @@ class CClassifierSVM(CClassifier):
     def kernel(self, kernel):
         """Set the kernel function."""
         # extract previous preprocess attached to kernel, if any
-        preprocess = None if self.kernel is None else self.kernel.preprocess
+        p = self.preprocess if self.kernel is None else self.kernel.preprocess
 
         kernel = 'linear' if kernel is None else kernel
         self._kernel = CKernel.create(kernel)
@@ -102,7 +108,9 @@ class CClassifierSVM(CClassifier):
             # and train classifier in the dual (using the precomputed kernel)
             self.preprocess = self.kernel
             # connect new kernel to previous pre-processing chain
-            self.kernel.preprocess = preprocess
+            self.kernel.preprocess = p
+        else:
+            self.preprocess = p  # bypass (linear) kernel
 
     @property
     def store_dual_vars(self):
@@ -130,6 +138,8 @@ class CClassifierSVM(CClassifier):
 
         """
         self._store_dual_vars = bool(value)
+        if self.kernel.class_type == 'linear':
+            self.kernel = self.kernel  # need to reset kernel and preprocessing
 
     @property
     def class_weight(self):
@@ -206,10 +216,14 @@ class CClassifierSVM(CClassifier):
         self.logger.info(
             "Training SVM with parameters: {:}".format(self.get_params()))
 
+        print(self)
+        print(x.shape)
+
         # reset training
         self._w = None
         self._b = None
         self._alpha = None
+        self._sv_idx = None
 
         # shape of w or alpha
         n_rows = self.n_classes if self.n_classes > 2 else 1
@@ -263,8 +277,8 @@ class CClassifierSVM(CClassifier):
         if not self._is_kernelized():
             self._w = CArray(classifier.coef_)
         else:
-            sv_idx = CArray(classifier.support_).ravel()
-            self._alpha[sv_idx] = CArray(classifier.dual_coef_)
+            self._sv_idx = CArray(classifier.support_).ravel()
+            self._alpha[self._sv_idx] = CArray(classifier.dual_coef_)
         self._b = CArray(classifier.intercept_[0])[0]
 
     def _forward(self, x):
@@ -327,7 +341,8 @@ class CClassifierSVM(CClassifier):
         s = xs.shape[0]
 
         H = CArray.ones(shape=(s + 1, s + 1))
-        sv = self.kernel.rv
+        sv = self.kernel.rv  # store and recover current sv set
+        self.kernel.rv = xs
         H[:s, :s] = self.kernel._forward(xs)  # no preprocessing
         self.kernel.rv = sv
         H[-1, -1] = 0
@@ -352,15 +367,13 @@ class CClassifierSVM(CClassifier):
                               "(all points are error vectors).")
             return None
 
-        xk = x if self.kernel.preprocess is None else \
-            self.kernel.preprocess.forward(x)
-
         s = xs.shape[0]  # margin support vector
-        k = xk.shape[0]
+        k = x.shape[0]
 
         Ksk_ext = CArray.ones(shape=(s + 1, k))
-        sv = self.kernel.rv
-        Ksk_ext[:s, :] = self.kernel.k(xk, xs).T  # both preprocessed
+
+        sv = self.kernel.rv  # store and recover current sv set
+        Ksk_ext[:s, :] = self.kernel.k(x, xs).T  # x and xs are preprocessed
         self.kernel.rv = sv
 
         return convert_binary_labels(y) * Ksk_ext  # (s + 1) * k
@@ -414,9 +427,11 @@ class CClassifierSVM(CClassifier):
 
         # compute the regularizer derivative w.r.t alpha
         xs, margin_sv_idx = self._sv_margin()
-        sv = self.kernel.rv
+
+        sv = self.kernel.rv  # store and recover current sv set
         K = self.kernel.k(xs, xs)
         self.kernel.rv = sv
+
         d_reg = 2 * K.dot(self.alpha[margin_sv_idx].T)  # s * 1
 
         # add the regularizer to the gradient of the alphas

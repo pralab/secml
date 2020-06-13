@@ -66,6 +66,8 @@ class CClassifierGradientMixinTestCases(CUnitTest):
 
         # Compare the analytical grad with the numerical grad
         gradient = clf.grad_tr_params(x, y).ravel()
+        print(x)
+        print(gradient)
         num_gradient = CFunction(self._grad_tr_fun).approx_fprime(
             params, epsilon=1e-6,
             x0=x, y0=y, clf_grads=self.clf_grads_class, clf=clf)
