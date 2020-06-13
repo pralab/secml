@@ -12,9 +12,7 @@ from secml.array import CArray
 from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.ml.kernels import CKernel
-from secml.ml.classifiers.gradients import CClassifierGradientSVMMixin
 from secml.ml.classifiers.loss import CLossHinge
-from secml.utils.mixed_utils import check_is_fitted
 
 
 class CClassifierSVM(CClassifier):
