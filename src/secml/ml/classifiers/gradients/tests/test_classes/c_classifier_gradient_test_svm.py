@@ -16,7 +16,8 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
 
     def params(self, clf):
         """Classifier parameters."""
-        return clf.alpha[clf.sv_margin_idx()].append(CArray(clf.b), axis=None)
+        _, idx = clf._sv_margin()  # only alphas for margin SVs
+        return clf.alpha[idx].append(CArray(clf.b), axis=None)
 
     def l(self, x, y, clf):
         """Classifier loss."""

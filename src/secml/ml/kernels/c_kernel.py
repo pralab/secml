@@ -67,6 +67,9 @@ class CKernel(CModule, metaclass=ABCMeta):
             One or more reference vectors.
 
         """
+        if self.preprocess is not None:
+            rv = self._forward_preprocess(rv, caching=False)
+        # store preprocessed rv within the class
         self._rv = CArray(rv).atleast_2d()
 
     def k(self, x, rv=None):
@@ -112,7 +115,8 @@ class CKernel(CModule, metaclass=ABCMeta):
         CArray([[1.]])
 
         """
-        self._rv = x.atleast_2d() if rv is None else rv.atleast_2d()
+        # do pre-processing (if any) and stores preprocessed rv
+        self.rv = x.atleast_2d() if rv is None else rv.atleast_2d()
 
         kernel = self.forward(x, caching=False)
 

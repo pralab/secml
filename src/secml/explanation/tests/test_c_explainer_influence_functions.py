@@ -19,35 +19,27 @@ class TestCExplainerInfluenceFunctions(CUnitTest):
     @classmethod
     def setUpClass(cls):
         CUnitTest.setUpClass()
-
         cls._tr, cls._val, cls._ts = cls._create_mnist_dataset()
         cls._metric = CMetricAccuracy()
 
     def test_explanation_svm(self):
-        self._clf = CClassifierSVM()
-        self._clf.store_dual_vars = True
+        self._clf = CClassifierSVM(store_dual_vars=True)
         self._clf_idx = 'lin-svm'
-
         self._test_explanation_simple_clf()
 
     def test_explanation_logistic(self):
         self._clf = CClassifierLogistic()
         self._clf_idx = 'logistic regression'
-
         self._test_explanation_simple_clf()
 
     def test_explanation_svm_rbf(self):
         self._clf = CClassifierSVM(kernel=CKernelRBF(gamma=0.01), C=10)
-        self._clf.kernel.gamma = 0.01
-        self._clf.store_dual_vars = True
         self._clf_idx = 'rbf-svm'
-
         self._test_explanation_simple_clf()
 
     def test_explanation_ridge(self):
         self._clf = CClassifierRidge()
         self._clf_idx = 'Ridge'
-
         self._test_explanation_simple_clf()
 
     @staticmethod
