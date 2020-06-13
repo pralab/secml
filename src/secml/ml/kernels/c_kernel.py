@@ -126,14 +126,3 @@ class CKernel(CModule, metaclass=ABCMeta):
             return kernel.item()
         else:
             return kernel
-
-    @deprecated("0.12", extra="use `.k` instead.")
-    def similarity(self, x, rv=None):
-        """Computes kernel. Wrapper of 'k' function.
-
-        See Also
-        --------
-        :meth:`.CKernel.k` : Main computation interface for kernels.
-
-        """
-        return self.k(x, rv)
