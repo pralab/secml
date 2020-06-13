@@ -2,6 +2,7 @@
 .. module:: CClassifierSVM
    :synopsis: Support Vector Machine (SVM) classifier
 
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
@@ -253,8 +254,6 @@ class CClassifierSVM(CClassifier):
             sv = abs(self._alpha).sum(axis=0) > 0
             self.kernel.rv = self.kernel.rv[sv, :]
             self._alpha = self._alpha[:, sv]
-
-        assert (self.kernel.rv.shape[0] == self.alpha.shape[1])
 
         return self
 
