@@ -200,8 +200,9 @@ class CAttackPoisoningSVM(CAttackPoisoning):
             computed
         """
         # handle normalizer, if present
-        # xc = xc if clf.kernel.preprocess is None else clf.kernel.preprocess.transform(xc)
-        xk = xk if clf.kernel.preprocess is None else clf.kernel.preprocess.transform(xk)
+        p = clf.kernel.preprocess
+        # xc = xc if p is None else p.forward(xc, caching=False)
+        xk = xk if p is None else p.forward(xk, caching=False)
 
         rv = clf.kernel.rv
         clf.kernel.rv = xk
@@ -215,7 +216,6 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         computed on a set of points xk w.r.t. a single poisoning point xc
         """
 
-        svm = clf  # classifier is an SVM
         xc0 = xc.deepcopy()
         d = xc.size
         grad = CArray.zeros(shape=(d,))  # gradient in input space
@@ -233,7 +233,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # this gradient component is the only one if margin SV set is empty
         # gt is the derivative of the loss computed on a validation
         # set w.r.t. xc
-        Kd_xc = self._Kd_xc(svm, alpha_c, xc, xk)
+        Kd_xc = self._Kd_xc(clf, alpha_c, xc, xk)
         assert (clf.kernel.rv.shape[0] == clf.alpha.shape[1])
 
         gt = Kd_xc.dot(grad_loss_fk).ravel()  # gradient of the loss w.r.t. xc
@@ -243,14 +243,14 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         if xs is None:
             self.logger.debug("Warning: xs is empty "
                               "(all points are error vectors).")
-            return gt if svm.kernel.preprocess is None else \
-                svm.kernel.preprocess.gradient(xc0, w=gt)
+            return gt if clf.kernel.preprocess is None else \
+                clf.kernel.preprocess.gradient(xc0, w=gt)
 
         s = xs.shape[0]
 
         # derivative of the loss computed on a validation set w.r.t. the
         # classifier params
-        fd_params = svm.grad_f_params(xk)
+        fd_params = clf.grad_f_params(xk)
         grad_loss_params = fd_params.dot(grad_loss_fk)
 
         H = clf.hessian_tr_params()
@@ -259,8 +259,10 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # handle normalizer, if present
         # xc = xc if clf.preprocess is None else clf.kernel.transform(xc)
         G = CArray.zeros(shape=(gt.size, s + 1))
-        svm.kernel.rv = xs
-        G[:, :s] = svm.kernel.gradient(xc).T
+        rv = clf.kernel.rv
+        clf.kernel.rv = xs
+        G[:, :s] = clf.kernel.gradient(xc).T
+        clf.kernel.rv = rv
         G *= alpha_c
 
         # warm start is disabled if the set of SVs changes!

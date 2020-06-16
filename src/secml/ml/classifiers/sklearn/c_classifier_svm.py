@@ -20,12 +20,13 @@ class CClassifierSVM(CClassifier):
 
     Parameters
     ----------
+    C : float, optional
+        Penalty hyper-parameter C of the error term. Default 1.0.
     kernel : None or CKernel subclass, optional
         Instance of a CKernel subclass to be used for computing
         similarity between patterns. If None (default), a linear
-        SVM will be created.
-    C : float, optional
-        Penalty parameter C of the error term. Default 1.0.
+        SVM is trained in the primal; otherwise an SVM is trained in the dual,
+        using the precomputed kernel values.
     class_weight : {dict, 'balanced', None}, optional
         Set the parameter C of class i to `class_weight[i] * C`.
         If not given (default), all classes are supposed to have
@@ -39,7 +40,7 @@ class CClassifierSVM(CClassifier):
 
     Attributes
     ----------
-    class_type : 'svm-m'
+    class_type : 'svm'
 
     Notes
     -----
@@ -49,15 +50,14 @@ class CClassifierSVM(CClassifier):
     See Also
     --------
     CKernel : Pairwise kernels and metrics.
-    CClassifierLinear : Common interface for linear classifiers.
 
     """
     __class_type = 'svm'
 
     _loss = CLossHinge()
 
-    def __init__(self, kernel='linear', C=1.0, class_weight=None,
-                 preprocess=None, store_dual_vars=None):
+    def __init__(self, C=1.0, kernel=None,
+                 class_weight=None, preprocess=None):
 
         # calling the superclass init
         CClassifier.__init__(self, preprocess=preprocess)
@@ -72,17 +72,12 @@ class CClassifierSVM(CClassifier):
         self._alpha = None
         self._sv_idx = None  # idx of SVs in TR data (only for binary SVM)
 
-        self._store_dual_vars = bool(store_dual_vars)
-
         self._kernel = None
-        self.kernel = kernel
-
-    def _is_kernelized(self):
-        """Return True if SVM has to be trained in the dual space."""
-        if self._kernel.class_type == 'linear' and not self.store_dual_vars:
-            return False
-        else:
-            return True
+        if kernel is not None:
+            self._kernel = CKernel.create(kernel)
+            # set pre-processing chain as svm <- kernel <- preprocess
+            self._kernel.preprocess = self.preprocess
+            self.preprocess = self._kernel
 
     @property
     def sv_idx(self):
@@ -93,56 +88,6 @@ class CClassifierSVM(CClassifier):
     def kernel(self):
         """Kernel function."""
         return self._kernel
-
-    @kernel.setter
-    def kernel(self, kernel):
-        """Set the kernel function."""
-        # extract preprocess attached to kernel, if any
-        if self.preprocess is self.kernel:  # if point to the same ref
-            p = self.kernel.preprocess if self.kernel is not None else None
-        else:
-            p = self.preprocess
-
-        kernel = 'linear' if kernel is None else kernel
-        self._kernel = CKernel.create(kernel)
-
-        if self._is_kernelized():
-            # set kernel as preprocessor for the current classifier
-            # and train classifier in the dual (using the precomputed kernel)
-            self.preprocess = self.kernel
-            # connect new kernel to previous pre-processing chain
-            self.kernel.preprocess = p
-        else:
-            self.preprocess = p  # bypass (linear) kernel
-
-    @property
-    def store_dual_vars(self):
-        """Train the SVM classifier in the dual.
-
-        By default is None or False.
-        If True, the SVM is trained in the dual even if the kernel is linear.
-        For nonlinear kernels, the SVM is always trained in the dual
-        (this value is ignored).
-
-        """
-        return self._store_dual_vars
-
-    @store_dual_vars.setter
-    def store_dual_vars(self, value):
-        """Train the SVM classifier in the dual.
-
-        Parameters
-        ----------
-        value : bool
-            By default is None or False.
-            If True, the SVM is trained in the dual even if the kernel
-            is linear. For nonlinear kernels, the SVM is always trained
-            in the dual(this value is ignored).
-
-        """
-        self._store_dual_vars = bool(value)
-        if self.kernel.class_type == 'linear':
-            self.kernel = self.kernel  # need to reset kernel and preprocessing
 
     @property
     def class_weight(self):
@@ -230,8 +175,8 @@ class CClassifierSVM(CClassifier):
         n_cols = x.shape[1]
 
         # initialize params
-        if not self._is_kernelized():
-            # no kernel preprocessing, training in the primal
+        if self.kernel is None:
+            # no kernel pre-processing, training in the primal
             svc_kernel = 'linear'
             self._w = CArray.zeros(shape=(n_rows, n_cols))
         else:
@@ -248,7 +193,7 @@ class CClassifierSVM(CClassifier):
             self._fit_binary(x, y, svc_kernel)
 
         # remove unused support vectors from kernel
-        if self._is_kernelized():  # trained in the dual
+        if self.kernel is not None:  # trained in the dual
             sv = abs(self._alpha).sum(axis=0) > 0
             self.kernel.rv = self.kernel.rv[sv, :]
             self._alpha = self._alpha[:, sv]
@@ -262,7 +207,7 @@ class CClassifierSVM(CClassifier):
             classifier = SVC(C=self.C, kernel=svc_kernel,
                              class_weight=self.class_weight)
             classifier.fit(x.get_data(), CArray(y == c).get_data())
-            if not self._is_kernelized():
+            if self.kernel is None:
                 self._w[k, :] = CArray(classifier.coef_.ravel())
             else:
                 sv_idx = CArray(classifier.support_).ravel()
@@ -274,7 +219,7 @@ class CClassifierSVM(CClassifier):
         classifier = SVC(C=self.C, kernel=svc_kernel,
                          class_weight=self.class_weight)
         classifier.fit(x.get_data(), y.get_data())
-        if not self._is_kernelized():
+        if self.kernel is None:
             self._w = CArray(classifier.coef_)
         else:
             sv_idx = CArray(classifier.support_).ravel()
@@ -303,7 +248,7 @@ class CClassifierSVM(CClassifier):
             otherwise a (n_samples, n_classes) array.
 
         """
-        v = self.w if not self._is_kernelized() else self.alpha
+        v = self.w if self.kernel is None else self.alpha
         score = CArray(x.dot(v.T)).todense() + self.b
         if self.n_classes > 2:  # return current score matrix
             scores = score
@@ -314,7 +259,7 @@ class CClassifierSVM(CClassifier):
         return scores
 
     def _backward(self, w):
-        v = self.w if not self._is_kernelized() else self.alpha
+        v = self.w if self.kernel is None else self.alpha
         if self.n_classes > 2:
             return w.dot(v)
         else:
@@ -339,8 +284,8 @@ class CClassifierSVM(CClassifier):
             return None, None
 
     def _kernel_function(self, x, z=None):
-        """Compute kernel matrix between x and z, without preprocessing."""
-        # clone kernel removing rv and preprocessing
+        """Compute kernel matrix between x and z, without pre-processing."""
+        # clone kernel removing rv and pre-processing
         kernel_params = self.kernel.get_params()
         kernel_params.pop('preprocess')  # detach preprocess and rv
         kernel_params.pop('rv')
