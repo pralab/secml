@@ -50,7 +50,7 @@ class TestCClassifierSVM(CClassifierTestCases):
             svm.set('C', 10)
             self.assertEqual(svm.C, 10)
             svm.set('class_weight', {-1: 1, 1: 50})
-            # set gamma for poly and rbf in svm and check if it change also into the kernel
+            # set gamma for poly and rbf and check if it is set properly
             if hasattr(svm.kernel, 'gamma'):
                 svm.set('gamma', 100)
                 self.assertEqual(svm.kernel.gamma, 100)
