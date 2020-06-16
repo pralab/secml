@@ -353,20 +353,24 @@ class CCreator:
         # Support for recursive setting, e.g. -> kernel.gamma
         param_name = param_name.split('.')
 
-        # Attributes to set in this function must be writable
-        # PUBLIC and READ/WRITE accessibility is checked
-        if not is_writable(self, param_name[0]):
-            raise AttributeError(
-                "can't set `{:}`, must be writable.".format(param_name[0]))
-
         attr0 = param_name[0]
         if hasattr(self, attr0):
-            # 1 level set or multiple sublevels set?
+            # Level 0 set or multiple sublevels set?
             if len(param_name) == 1:  # Set attribute directly
+                # Level 0 attribute must be writable
+                # PUBLIC and READ/WRITE accessibility is checked
+                if not is_writable(self, attr0):
+                    raise AttributeError(
+                        "can't set `{:}`, must be writable.".format(attr0))
                 setattr(self, attr0, copy_attr(param_value)
                         if copy is True else param_value)
                 return
             else:  # Start recursion on sublevels
+                # Level 0 attribute must be accessible (readable)
+                # PUBLIC, READ/WRITE and READ ONLY accessibility is checked
+                if not is_readable(self, attr0):
+                    raise AttributeError(
+                        "can't set `{:}`, must be accessible.".format(attr0))
                 sub_param_name = '.'.join(param_name[1:])
                 # Calling `.set` method of the next sublevel
                 getattr(self, attr0).set(sub_param_name, param_value, copy)
@@ -381,6 +385,11 @@ class CCreator:
                 attr = getattr(self, attr_name)
                 # If parameter is an attribute of current attribute set it
                 if hasattr(attr, attr0):
+                    # Attributes to set must be writable
+                    # PUBLIC and READ/WRITE accessibility is checked
+                    if not is_writable(attr, attr0):
+                        raise AttributeError(
+                            "can't set `{:}`, must be writable.".format(attr0))
                     setattr(attr, attr0, copy_attr(param_value)
                             if copy is True else param_value)
                     return
