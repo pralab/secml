@@ -40,7 +40,7 @@ class TestCClassifierRidge(CClassifierTestCases):
         for ridge in self.ridges:
             self.logger.info("RIDGE kernel: {:}".format(ridge.preprocess))
 
-            svm = CClassifierSVM(ridge.preprocess)
+            svm = CClassifierSVM(kernel=ridge.preprocess)
 
             with self.timer() as t_svm:
                 svm.fit(self.dataset.X, self.dataset.Y)

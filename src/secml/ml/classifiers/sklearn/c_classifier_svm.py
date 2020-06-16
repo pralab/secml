@@ -218,7 +218,11 @@ class CClassifierSVM(CClassifier):
     def _fit_binary(self, x, y, svc_kernel):
         classifier = SVC(C=self.C, kernel=svc_kernel,
                          class_weight=self.class_weight)
-        classifier.fit(x.get_data(), y.get_data())
+        if svc_kernel == 'precomputed':
+            # training on sparse precomputed kernels is not supported
+            classifier.fit(x.tondarray(), y.get_data())
+        else:
+            classifier.fit(x.get_data(), y.get_data())
         if self.kernel is None:
             self._w = CArray(classifier.coef_)
         else:
