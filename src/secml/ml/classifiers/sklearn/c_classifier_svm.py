@@ -9,6 +9,7 @@
 from sklearn.svm import SVC
 
 from secml.array import CArray
+from secml.ml import CModule
 from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.ml.kernels import CKernel
@@ -62,7 +63,7 @@ class CClassifierSVM(CClassifier):
         # calling the superclass init
         CClassifier.__init__(self, preprocess=preprocess)
 
-        # Classifier hyperparameters
+        # Classifier hyper-parameters
         self.C = C
         self.class_weight = class_weight
 
@@ -72,12 +73,12 @@ class CClassifierSVM(CClassifier):
         self._alpha = None
         self._sv_idx = None  # idx of SVs in TR data (only for binary SVM)
 
-        self._kernel = None
+        self._kernel = kernel
         if kernel is not None:
-            self._kernel = CKernel.create(kernel)
             # set pre-processing chain as svm <- kernel <- preprocess
-            self._kernel.preprocess = self.preprocess
-            self.preprocess = self._kernel
+            p = self.preprocess
+            self.preprocess = CKernel.create(kernel)
+            self.preprocess.preprocess = p
 
     @property
     def sv_idx(self):
@@ -86,7 +87,7 @@ class CClassifierSVM(CClassifier):
 
     @property
     def kernel(self):
-        """Kernel function."""
+        """Kernel type (None or string)."""
         return self._kernel
 
     @property
@@ -195,7 +196,7 @@ class CClassifierSVM(CClassifier):
         # remove unused support vectors from kernel
         if self.kernel is not None:  # trained in the dual
             sv = abs(self._alpha).sum(axis=0) > 0
-            self.kernel.rv = self.kernel.rv[sv, :]
+            self.preprocess.rv = self.preprocess.rv[sv, :]
             self._alpha = self._alpha[:, sv]
             self._sv_idx = CArray(sv.find(sv > 0)).ravel()  # store SV indices
         return self
@@ -274,25 +275,25 @@ class CClassifierSVM(CClassifier):
         if self.n_classes > 2:
             raise ValueError("SVM is not binary!")
 
-        assert (self.kernel.rv.shape[0] == self.alpha.shape[1])
+        assert (self.preprocess.rv.shape[0] == self.alpha.shape[1])
 
         alpha = self.alpha.todense()
         s = alpha.find(
             (abs(alpha) >= tol) *
             (abs(alpha) <= self.C - tol))
         if len(s) > 0:
-            return self.kernel.rv[s, :], CArray(s)
+            return self.preprocess.rv[s, :], CArray(s)
         else:  # no margin SVs
             return None, None
 
     def _kernel_function(self, x, z=None):
         """Compute kernel matrix between x and z, without pre-processing."""
         # clone kernel removing rv and pre-processing
-        kernel_params = self.kernel.get_params()
+        kernel_params = self.preprocess.get_params()
         kernel_params.pop('preprocess')  # detach preprocess and rv
         kernel_params.pop('rv')
         kernel_params.pop('n_jobs')  # TODO: not accepted by kernel constructor
-        kernel = CKernel.create(self.kernel.class_type, **kernel_params)
+        kernel = CKernel.create(self.preprocess.class_type, **kernel_params)
         z = z if z is not None else x
         return kernel.k(x, z)
 
@@ -332,10 +333,10 @@ class CClassifierSVM(CClassifier):
 
         Ksk_ext = CArray.ones(shape=(s + 1, k))
 
-        sv = self.kernel.rv  # store and recover current sv set
-        self.kernel.rv = xs
-        Ksk_ext[:s, :] = self.kernel.forward(x).T  # x and xs are preprocessed
-        self.kernel.rv = sv
+        sv = self.preprocess.rv  # store and recover current sv set
+        self.preprocess.rv = xs
+        Ksk_ext[:s, :] = self.preprocess.forward(x).T  # x and xs are pre-proc.
+        self.preprocess.rv = sv
 
         return convert_binary_labels(y) * Ksk_ext  # (s + 1) * k
 
