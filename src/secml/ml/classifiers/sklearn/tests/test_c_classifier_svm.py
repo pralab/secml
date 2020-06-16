@@ -297,8 +297,7 @@ class TestCClassifierSVM(CClassifierTestCases):
         for svm in self.svms:
 
             self.logger.info(
-                "Computing gradient for SVM with kernel: %s",
-                svm.kernel.class_type if svm.kernel is not None else 'None')
+                "Computing gradient for SVM with kernel: %s", svm.kernel)
 
             if hasattr(svm.kernel, 'gamma'):  # set gamma for poly and rbf
                 svm.set('gamma', 1e-5)
