@@ -37,7 +37,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
     Parameters
     ----------
     classifier : CClassifierSVM
-        Target classifier. If linear, requires `store_dual_vars = True`.
+        Target SVM, trained in the dual (i.e., with kernel not set to None).
     training_data : CDataset
         Dataset on which the the classifier has been trained on.
     val : CDataset
@@ -100,11 +100,10 @@ class CAttackPoisoningSVM(CAttackPoisoning):
                                   init_type=init_type,
                                   random_seed=random_seed)
 
-        # enforce storing dual variables in SVM
-        if not self.classifier.store_dual_vars and \
-                self.classifier.is_kernel_linear():
+        # check if SVM has been trained in the dual
+        if self.classifier.kernel is None:
             raise ValueError(
-                "please retrain the classifier with `store_dual_vars=True`")
+                "Please retrain the SVM in the dual (kernel != None).")
 
         # indices of support vectors (at previous iteration)
         # used to check if warm_start can be used in the iterative solver
