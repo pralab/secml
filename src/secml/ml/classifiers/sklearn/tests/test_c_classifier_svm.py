@@ -12,6 +12,10 @@ from secml.figure import CFigure
 from secml.ml.kernels import *
 from secml.utils import fm
 
+from secml.data.loader import CDataLoaderMNIST
+from secml.ml.classifiers.multiclass import CClassifierMulticlassOVA
+from secml.ml.peval.metrics import CMetricAccuracy
+
 
 class TestCClassifierSVM(CClassifierTestCases):
 
@@ -349,6 +353,48 @@ class TestCClassifierSVM(CClassifierTestCases):
 
         # Mixed linear/nonlinear transformations without gradient
         self._test_preprocess(ds, clf, ['pca', 'unit-norm'], [{}, {}])
+
+    def test_multiclass(self):
+        """Test multiclass SVM on MNIST digits."""
+
+        self.logger.info("Testing multiclass SVM.")
+
+        digits = tuple(range(0, 10))
+        n_tr = 1000  # Number of training set samples
+        n_ts = 2000  # Number of test set samples
+
+        loader = CDataLoaderMNIST()
+        tr = loader.load('training', digits=digits, num_samples=n_tr)
+        ts = loader.load('testing', digits=digits, num_samples=n_ts)
+
+        # Normalize the features in `[0, 1]`
+        tr.X /= 255
+        ts.X /= 255
+
+        svm_params = {
+            'kernel': CKernelRBF(gamma=0.1),
+            'C': 10,
+            'class_weight': {0: 1, 1: 1},
+        }
+        classifiers = [
+            CClassifierMulticlassOVA(CClassifierSVM, **svm_params),
+            CClassifierSVM(**svm_params),
+        ]
+
+        grads = []
+        acc = []
+        for clf in classifiers:
+            # We can now fit the classifier
+            clf.fit(tr.X, tr.Y)
+            # Compute predictions on a test set
+            y_pred, scores = clf.predict(ts.X, return_decision_function=True)
+            # Evaluate the accuracy of the classifier
+            metric = CMetricAccuracy()
+            acc.append(metric.performance_score(y_true=ts.Y, y_pred=y_pred))
+            grads.append(clf.grad_f_x(ts.X[1, :], 1))
+
+        self.assertAlmostEqual(acc[0], acc[1])
+        self.assert_array_almost_equal(grads[0], grads[1])
 
 
 if __name__ == '__main__':
