@@ -203,32 +203,30 @@ class CClassifierSVM(CClassifier):
     def _fit_one_vs_all(self, x, y, svc_kernel):
         # ova (but we can also implement ovo - let's do separate functions)
         for k, c in enumerate(self.classes):
-            # TODO: class weights - balanced by default?
-            classifier = SVC(C=self.C, kernel=svc_kernel,
-                             class_weight=self.class_weight)
-            classifier.fit(x.get_data(), CArray(y == c).get_data())
+            svc = SVC(C=self.C, kernel=svc_kernel,
+                      class_weight=self.class_weight)
+            svc.fit(x.get_data(), CArray(y == c).get_data())
             if self.kernel is None:
-                self._w[k, :] = CArray(classifier.coef_.ravel())
+                self._w[k, :] = CArray(svc.coef_.ravel())
             else:
-                sv_idx = CArray(classifier.support_).ravel()
-                self._alpha[k, sv_idx] = CArray(classifier.dual_coef_)
-            self._b[k] = CArray(classifier.intercept_[0])[0]
+                sv_idx = CArray(svc.support_).ravel()
+                self._alpha[k, sv_idx] = CArray(svc.dual_coef_)
+            self._b[k] = CArray(svc.intercept_[0])[0]
         return
 
     def _fit_binary(self, x, y, svc_kernel):
-        classifier = SVC(C=self.C, kernel=svc_kernel,
-                         class_weight=self.class_weight)
+        svc = SVC(C=self.C, kernel=svc_kernel, class_weight=self.class_weight)
         if svc_kernel == 'precomputed':
             # training on sparse precomputed kernels is not supported
-            classifier.fit(x.tondarray(), y.get_data())
+            svc.fit(x.tondarray(), y.get_data())
         else:
-            classifier.fit(x.get_data(), y.get_data())
+            svc.fit(x.get_data(), y.get_data())
         if self.kernel is None:
-            self._w = CArray(classifier.coef_)
+            self._w = CArray(svc.coef_)
         else:
-            sv_idx = CArray(classifier.support_).ravel()
-            self._alpha[sv_idx] = CArray(classifier.dual_coef_)
-        self._b = CArray(classifier.intercept_[0])[0]
+            sv_idx = CArray(svc.support_).ravel()
+            self._alpha[sv_idx] = CArray(svc.dual_coef_)
+        self._b = CArray(svc.intercept_[0])[0]
 
     def _forward(self, x):
         """Compute decision function for SVMs, proportional to the distance of
@@ -293,7 +291,7 @@ class CClassifierSVM(CClassifier):
         kernel_params = self.kernel.get_params()
         kernel_params.pop('preprocess')  # detach preprocess and rv
         kernel_params.pop('rv')
-        kernel_params.pop('n_jobs')
+        kernel_params.pop('n_jobs')  # TODO: not accepted by kernel constructor
         kernel = CKernel.create(self.kernel.class_type, **kernel_params)
         z = z if z is not None else x
         return kernel.k(x, z)

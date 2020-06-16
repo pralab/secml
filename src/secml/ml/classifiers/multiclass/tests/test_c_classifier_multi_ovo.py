@@ -59,7 +59,7 @@ class TestCClassifierMultiOVO(CClassifierTestCases):
             self.assertEqual(clf.kernel.gamma, 20.0)
 
         # Restoring kernel
-        multiclass.set('kernel', CKernelRBF(gamma=50))
+        multiclass.set('kernel.gamma', 50)
 
         # Setting different parameter in single trained_classifiers
         multiclass.prepare(num_classes=6)

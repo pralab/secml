@@ -60,8 +60,8 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
             self.assertEqual(clf.C, 100.0)
             self.assertEqual(clf.kernel.gamma, 20.0)
 
-        # Restoring kernel
-        multiclass.set('kernel', CKernelRBF(gamma=50))
+        # Restoring gamma
+        multiclass.set('kernel.gamma', 50)
 
         # Setting different parameter in single trained_classifiers
         multiclass.prepare(num_classes=4)

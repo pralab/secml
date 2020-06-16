@@ -15,7 +15,7 @@ class TestCClassifierGradientSVMMixin(CClassifierGradientMixinTestCases):
         """Test `grad_tr_params` on a linear classifier."""
 
         for n in (None, CNormalizerMinMax((-10, 10))):
-            clf = CClassifierSVM(store_dual_vars=True, preprocess=n)
+            clf = CClassifierSVM(kernel='linear', preprocess=n)
             clf.fit(self.ds.X, self.ds.Y)
             self._test_grad_tr_params(clf)
 

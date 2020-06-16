@@ -23,7 +23,7 @@ class TestCExplainerInfluenceFunctions(CUnitTest):
         cls._metric = CMetricAccuracy()
 
     def test_explanation_svm(self):
-        self._clf = CClassifierSVM(store_dual_vars=True)
+        self._clf = CClassifierSVM(kernel='linear')  # train in the dual
         self._clf_idx = 'lin-svm'
         self._test_explanation_simple_clf()
 

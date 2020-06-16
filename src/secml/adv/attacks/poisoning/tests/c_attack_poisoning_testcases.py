@@ -221,7 +221,6 @@ class CAttackPoisoningTestCases(CUnitTest):
         # create the classifier
         self.classifier = self.clf_class(preprocess=normalizer,
                                          **self.clf_params)
-        self.classifier.store_dual_vars = True
         # fit the classifier
         self.classifier.fit(self.tr.X, self.tr.Y)
 
