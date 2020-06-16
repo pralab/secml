@@ -9,7 +9,6 @@
 from sklearn.svm import SVC
 
 from secml.array import CArray
-from secml.ml import CModule
 from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.ml.kernels import CKernel
