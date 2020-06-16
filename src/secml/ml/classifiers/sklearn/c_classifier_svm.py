@@ -252,7 +252,7 @@ class CClassifierSVM(CClassifier):
             sv = abs(self._alpha).sum(axis=0) > 0
             self.kernel.rv = self.kernel.rv[sv, :]
             self._alpha = self._alpha[:, sv]
-
+            self._sv_idx = CArray(sv.find(sv > 0)).ravel()  # store SV indices
         return self
 
     def _fit_one_vs_all(self, x, y, svc_kernel):
@@ -278,10 +278,7 @@ class CClassifierSVM(CClassifier):
             self._w = CArray(classifier.coef_)
         else:
             sv_idx = CArray(classifier.support_).ravel()
-            self._alpha__ = CArray(classifier.dual_coef_)
             self._alpha[sv_idx] = CArray(classifier.dual_coef_)
-            # we need to sort indices too to be consistent with alpha
-            self._sv_idx = sv_idx.sort()
         self._b = CArray(classifier.intercept_[0])[0]
 
     def _forward(self, x):
@@ -341,13 +338,16 @@ class CClassifierSVM(CClassifier):
         else:  # no margin SVs
             return None, None
 
-    def _Kss(self, xs):
-        """Compute kernel matrix between margin SVs."""
-        sv = self.kernel.rv  # store and recover current sv set
-        self.kernel.rv = xs
-        k = self.kernel._forward(xs)  # no preprocessing
-        self.kernel.rv = sv
-        return k
+    def _kernel_function(self, x, z=None):
+        """Compute kernel matrix between x and z, without preprocessing."""
+        # clone kernel removing rv and preprocessing
+        kernel_params = self.kernel.get_params()
+        kernel_params.pop('preprocess')  # detach preprocess and rv
+        kernel_params.pop('rv')
+        kernel_params.pop('n_jobs')
+        kernel = CKernel.create(self.kernel.class_type, **kernel_params)
+        z = z if z is not None else x
+        return kernel.k(x, z)
 
     def hessian_tr_params(self, x=None, y=None):
         """
@@ -357,7 +357,7 @@ class CClassifierSVM(CClassifier):
         s = xs.shape[0]
 
         H = CArray.ones(shape=(s + 1, s + 1))
-        H[:s, :s] = self._Kss(xs)
+        H[:s, :s] = self._kernel_function(xs)
         H[-1, -1] = 0
 
         return H
@@ -438,7 +438,7 @@ class CClassifierSVM(CClassifier):
 
         # compute the regularizer derivative w.r.t alpha
         xs, idx = self._sv_margin()
-        k = self._Kss(xs)
+        k = self._kernel_function(xs)
         d_reg = 2 * k.dot(self.alpha[idx].T)  # s * 1
 
         # add the regularizer to the gradient of the alphas
