@@ -1,40 +1,41 @@
 from secml.testing import CUnitTest
 
+from secml.core import CCreator
 from secml.core.attr_utils import extract_attr
+
+
+class Foo(CCreator):  # Toy class for testing
+    def __init__(self):
+        self.a = 1  # Public
+        self._b = 2  # Read-only
+        self._c = 3  # Read/Write
+        self._d = 4  # Protected (no read or write)
+
+    @property
+    def b(self):
+        return self._b
+
+    @property
+    def c(self):
+        return self._c
+
+    @c.setter
+    def c(self, val):
+        self._c = val
 
 
 class TestAttributeUtilities(CUnitTest):
     """Unit test for secml.core.attr_utils."""
 
+    def setUp(self):
+        self.test = Foo()
+
     def test_extract_attr(self):
-        # Toy class for testing
-        class Foo:
-            def __init__(self):
-                self.a = 5
-                self._b = 5
-                self._c = 5
-                self._d = 5
-
-            @property
-            def b(self):
-                pass
-
-            @property
-            def c(self):
-                pass
-
-            @c.setter
-            def c(self):
-                pass
-
-        f = Foo()
-
-        self.logger.info(
-            "Testing attributes extraction based on accessibility...")
+        """Test for `extract_attr`."""
 
         def check_attrs(code, expected):
             self.assertTrue(
-                set(attr for attr in extract_attr(f, code)) == expected)
+                set(attr for attr in extract_attr(self.test, code)) == expected)
 
         check_attrs('pub', {'a'})
         check_attrs('r', {'_b'})

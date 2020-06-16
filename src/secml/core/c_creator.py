@@ -267,16 +267,26 @@ class CCreator:
                         "of class '{:}'".format(class_type, cls.__module__))
 
     def get_params(self):
-        """Returns the dictionary of class parameters.
+        """Returns the dictionary of class hyperparameters.
 
-        A parameter is a PUBLIC or READ/WRITE attribute.
+        A hyperparameter is a PUBLIC or READ/WRITE attribute.
 
         """
         # We extract the PUBLIC (pub) and the READ/WRITE (rw) attributes
         # from the class dictionary, than we build a new dictionary using
         # as keys the attributes names without the accessibility prefix
-        return SubLevelsDict((as_public(k), getattr(self, as_public(k)))
-                             for k in extract_attr(self, 'pub+rw'))
+        params = SubLevelsDict((as_public(k), getattr(self, as_public(k)))
+                               for k in extract_attr(self, 'pub+rw'))
+
+        # Now look for any parameter inside the accessible attributes
+        for k in extract_attr(self, 'r'):
+            # Extract the contained object (if any)
+            k_attr = getattr(self, as_public(k))
+            if hasattr(k_attr, 'get_params') and len(k_attr.get_params()) > 0:
+                # as k_attr has one or more parameters, it's a parameter itself
+                params[as_public(k)] = k_attr
+
+        return params
 
     def set_params(self, params_dict, copy=False):
         """Set all parameters passed as a dictionary {key: value}.
