@@ -112,7 +112,12 @@ class CKernel(CModule, metaclass=ABCMeta):
         CArray([[1.]])
 
         """
-        self._rv = x.atleast_2d() if rv is None else rv.atleast_2d()
+        # apply pre-processing (if any) on rv
+        rv = x.atleast_2d() if rv is None else rv.atleast_2d()
+        if self.preprocess is not None:
+            rv = self._forward_preprocess(rv, caching=False)
+        # store preprocessed rv within the class
+        self.rv = rv
 
         kernel = self.forward(x, caching=False)
 
@@ -121,14 +126,3 @@ class CKernel(CModule, metaclass=ABCMeta):
             return kernel.item()
         else:
             return kernel
-
-    @deprecated("0.12", extra="use `.k` instead.")
-    def similarity(self, x, rv=None):
-        """Computes kernel. Wrapper of 'k' function.
-
-        See Also
-        --------
-        :meth:`.CKernel.k` : Main computation interface for kernels.
-
-        """
-        return self.k(x, rv)

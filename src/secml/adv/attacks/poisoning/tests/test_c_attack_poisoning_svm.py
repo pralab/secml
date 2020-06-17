@@ -4,7 +4,7 @@ from secml.ml.classifiers import CClassifierSVM
 from secml.ml.features.normalization import CNormalizerMinMax
 
 
-class TestCAttackPoisoningLinearSVM(CAttackPoisoningTestCases):
+class TestCAttackPoisoningSVMLinear(CAttackPoisoningTestCases):
     """Unit test for CAttackPoisoningLinearSVM."""
 
     def setUp(self):
@@ -36,7 +36,7 @@ class TestCAttackPoisoningLinearSVM(CAttackPoisoningTestCases):
         self._test_attack_effectiveness(normalizer=None)
 
 
-class TestCAttackPoisoningLinearRBF(CAttackPoisoningTestCases):
+class TestCAttackPoisoningSVMRBF(CAttackPoisoningTestCases):
     """Unit test for CAttackPoisoningRBFSVM."""
 
     def setUp(self):

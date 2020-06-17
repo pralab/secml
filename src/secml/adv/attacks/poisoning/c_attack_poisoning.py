@@ -422,7 +422,7 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
         y_ts = self._y_target if self._y_target is not None else self.val.Y
 
         # computing gradient of loss(y, f(x)) w.r.t. f
-        score = clf.predict(self.val.X, return_decision_function=True)[1]
+        _, score = clf.predict(self.val.X, return_decision_function=True)
 
         grad = CArray.zeros((xc.size,))
 

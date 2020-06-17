@@ -15,8 +15,7 @@ class TestCSecEval(CUnitTest):
 
     def setUp(self):
 
-        self.classifier = CClassifierSVM(
-            kernel='linear', C=1.0, grad_sampling=1.0)
+        self.classifier = CClassifierSVM(kernel='linear', C=1.0)
 
         self.lb = -2
         self.ub = +2

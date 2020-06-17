@@ -60,8 +60,8 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
             self.assertEqual(clf.C, 100.0)
             self.assertEqual(clf.kernel.gamma, 20.0)
 
-        # Restoring kernel
-        multiclass.set('kernel', CKernelRBF(gamma=50))
+        # Restoring gamma
+        multiclass.set('kernel.gamma', 50)
 
         # Setting different parameter in single trained_classifiers
         multiclass.prepare(num_classes=4)
@@ -164,7 +164,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
                 min_v - 5, max_v + 5)  # make sure the line is long enough
             # get the separating hyperplane
             yy = -(clf.w[0] * xx + clf.b) / clf.w[1]
-            img.sp.plot(xx, yy, linestyle, label=label)
+            img.sp.plot(xx, yy.ravel(), linestyle, label=label)
 
         fig = CFigure(height=7, width=8)
         fig.sp.title('{:} ({:})'.format(multiclass.__class__.__name__,

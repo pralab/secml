@@ -16,7 +16,8 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
 
     def params(self, clf):
         """Classifier parameters."""
-        return clf.alpha[clf.sv_margin_idx()].append(CArray(clf.b), axis=None)
+        _, i = clf._sv_margin()  # only alphas for margin SVs
+        return clf.alpha[i].append(CArray(clf.b), axis=None).todense().ravel()
 
     def l(self, x, y, clf):
         """Classifier loss."""
@@ -26,18 +27,19 @@ class CClassifierGradientTestSVM(CClassifierGradientTest):
     def train_obj(self, x, y, clf):
         """Classifier training objective function."""
         loss = self.l(x, y, clf)
-
-        xs, margin_sv_idx = clf.sv_margin()
-
+        xs, margin_sv_idx = clf._sv_margin()
         alpha_s = clf.alpha[margin_sv_idx]
+        p = clf.kernel.preprocess
+        clf.kernel.preprocess = None  # remove preproc as xs is already scaled
         reg = alpha_s.atleast_2d().dot(clf.kernel.k(xs, xs).dot(alpha_s.T))
-
+        clf.kernel.preprocess = p
         return clf.C * loss + reg
 
     def change_params(self, params, clf):
         """Return a deepcopy of the given classifier with the value
         of the parameters changed."""
         new_clf = clf.deepcopy()
-        new_clf._alpha[clf.sv_margin_idx()] = params[:-1]
+        _, i = clf._sv_margin()
+        new_clf._alpha[i] = params[:-1]
         new_clf._b = params[-1]
         return new_clf

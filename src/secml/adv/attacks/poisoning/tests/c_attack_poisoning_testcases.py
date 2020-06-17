@@ -221,7 +221,6 @@ class CAttackPoisoningTestCases(CUnitTest):
         # create the classifier
         self.classifier = self.clf_class(preprocess=normalizer,
                                          **self.clf_params)
-        self.classifier.store_dual_vars = True
         # fit the classifier
         self.classifier.fit(self.tr.X, self.tr.Y)
 
@@ -384,8 +383,12 @@ class CAttackPoisoningTestCases(CUnitTest):
         fig.tight_layout()
         exp_idx = "2d_pois_"
         exp_idx += self.clf_idx
-        if self.classifier.preprocess is not None:
-            exp_idx += "_norm"
+        if self.classifier.class_type == 'svm':
+            if self.classifier.kernel.preprocess is not None:
+                exp_idx += "_norm"
+        else:
+            if self.classifier.preprocess is not None:
+                exp_idx += "_norm"
         fig.savefig(exp_idx + '.pdf', file_format='pdf')
 
     #####################################################################
