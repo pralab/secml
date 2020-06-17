@@ -42,12 +42,16 @@ class CClassifierRejectThreshold(CClassifierReject):
 
     def __init__(self, clf, threshold, preprocess=None):
 
-        self.clf = clf
-        self.threshold = threshold
+        if not isinstance(clf, CClassifier):
+            raise ValueError(
+                "the inner classifier should be an instance of CClassifier")
 
-        if self.clf.preprocess is not None:
+        if clf.preprocess is not None:
             raise ValueError(
                 "the preprocessor should be passed to the outer classifier.")
+
+        self._clf = clf
+        self.threshold = threshold
 
         super(CClassifierRejectThreshold, self).__init__(preprocess=preprocess)
 
@@ -58,15 +62,6 @@ class CClassifierRejectThreshold(CClassifierReject):
     def clf(self):
         """Returns the inner classifier."""
         return self._clf
-
-    @clf.setter
-    def clf(self, value):
-        """Sets the inner classifier."""
-        if isinstance(value, CClassifier):
-            self._clf = value
-        else:
-            raise ValueError(
-                "the inner classifier should be an instance of CClassifier")
 
     @property
     def threshold(self):
