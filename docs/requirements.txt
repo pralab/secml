@@ -1,5 +1,5 @@
 sphinx >= 2.1.2, < 3
-sphinx_rtd_theme
+sphinx_rtd_theme >= 0.5
 m2r
 numpydoc
 matplotlib
