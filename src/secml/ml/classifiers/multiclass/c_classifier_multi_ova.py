@@ -50,6 +50,33 @@ def _fit_one_ova(
     return classifier_instance
 
 
+def _forward_one_ova(tr_class_idx, multi_ova, test_x, verbose):
+    """Perform forward on an OVA classifier.
+
+    Parameters
+    ----------
+    tr_class_idx : int
+        Index of the OVA classifier.
+    multi_ova : CClassifierMulticlassOVA
+        Instance of the multiclass OVA classifier.
+    test_x : CArray
+        Test data as 2D CArray.
+    verbose : int
+        Verbosity level of the logger.
+
+    """
+    # Resetting verbosity level. This is needed as objects
+    # change id  when passed to subprocesses and our logging
+    # level is stored per-object looking to id
+    multi_ova.verbose = verbose
+
+    multi_ova.logger.info(
+        "Forward for class: {:}".format(tr_class_idx))
+
+    # Perform forward on data for current class classifier
+    return multi_ova._binary_classifiers[tr_class_idx].forward(test_x)[:, 1]
+
+
 class CClassifierMulticlassOVA(CClassifierMulticlass,
                                CClassifierGradientMixin):
     """OVA (One-Vs-All) Multiclass Classifier.
@@ -149,9 +176,18 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
 
         """
         # Getting predicted scores for classifier associated with y
-        scores = CArray.ones(shape=(x.shape[0], self.n_classes))
-        for i in range(self.n_classes):  # TODO parfor
-            scores[:, i] = self._binary_classifiers[i].forward(x)[:, 1]
+        scores = CArray.empty(shape=(x.shape[0], self.n_classes))
+
+        # Discriminant function is now called for each different class
+        res = parfor2(_forward_one_ova,
+                      self.n_classes,
+                      self.n_jobs, self, x,
+                      self.verbose)
+
+        # Building results array
+        for i in range(self.n_classes):
+            scores[:, i] = CArray(res[i])
+
         return scores
 
     def _backward(self, w):
