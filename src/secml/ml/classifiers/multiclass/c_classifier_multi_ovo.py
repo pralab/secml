@@ -61,6 +61,33 @@ def _fit_one_ovo(bin_clf_idx, multi_ovo, dataset, verbose):
     return classifier_instance
 
 
+def _forward_one_ovo(clf_idx, multi_ovo, test_x, verbose):
+    """Perform forward on an OVO classifier.
+
+    Parameters
+    ----------
+    clf_idx : int
+        Index of the OVO classifier.
+    multi_ovo : CClassifierMulticlassOVO
+        Instance of the multiclass OVO classifier.
+    test_x : CArray
+        Test data as 2D CArray.
+    verbose : int
+        Verbosity level of the logger.
+
+    """
+    # Resetting verbosity level. This is needed as objects
+    # change id  when passed to subprocesses and our logging
+    # level is stored per-object looking to id
+    multi_ovo.verbose = verbose
+
+    multi_ovo.logger.info(
+        "Forward for classes: {:}".format(multi_ovo._clf_pair_idx[clf_idx]))
+
+    # Perform forward on data for current class classifier
+    return multi_ovo._binary_classifiers[clf_idx].forward(test_x)
+
+
 class CClassifierMulticlassOVO(CClassifierMulticlass,
                                CClassifierGradientMixin):
     """OVO (One-Vs-One) Multiclass Classifier.
@@ -203,15 +230,20 @@ class CClassifierMulticlassOVO(CClassifierMulticlass,
 
         """
         scores = CArray.zeros(shape=(x.shape[0], self.n_classes))
-        for i in range(self.num_classifiers):  # TODO parfor
-            # Taking the scores
-            scores_aux_pos = self._binary_classifiers[i].forward(x)[:, 1]
-            scores_aux_neg = self._binary_classifiers[i].forward(x)[:, 0]
+
+        # Discriminant function is now called for each different class
+        res = parfor2(_forward_one_ovo,
+                      self.num_classifiers,
+                      self.n_jobs, self, x,
+                      self.verbose)
+
+        # Building results array
+        for i in range(self.num_classifiers):
             # Adjusting the scores for the OVO scheme
             idx0 = self._clf_pair_idx[i][0]
             idx1 = self._clf_pair_idx[i][1]
-            scores[:, idx0] += scores_aux_pos
-            scores[:, idx1] += scores_aux_neg
+            scores[:, idx0] += res[i][:, 1]
+            scores[:, idx1] += res[i][:, 0]
 
         return scores / (self.n_classes - 1)
 

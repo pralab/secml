@@ -23,7 +23,8 @@ class TestCClassifierMultiOVO(CClassifierTestCases):
         svc = SVC(kernel='linear', class_weight='balanced')
         multiclass_sklearn = OneVsOneClassifier(svc)
         multiclass = CClassifierMulticlassOVO(classifier=CClassifierSVM,
-                                              class_weight='balanced')
+                                              class_weight='balanced',
+                                              n_jobs=2)
         multiclass.verbose = 2
 
         multiclass.fit(self.dataset.X, self.dataset.Y)
