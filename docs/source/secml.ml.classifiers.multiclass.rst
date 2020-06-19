@@ -22,3 +22,10 @@ CClassifierMulticlassOVA
    :undoc-members:
    :show-inheritance:
 
+CClassifierMulticlassOVO
+------------------------
+
+.. automodule:: secml.ml.classifiers.multiclass.c_classifier_multi_ovo
+   :members:
+   :undoc-members:
+   :show-inheritance:
