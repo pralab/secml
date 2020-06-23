@@ -36,6 +36,9 @@ class CClassifierSVM(CClassifier):
         Features preprocess to be applied to input data.
         Can be a CPreProcess subclass or a string with the type of the
         desired preprocessor. If None, input data is used as is.
+    n_jobs : int, optional
+        Number of parallel workers to use for the classifier.
+        Cannot be higher than processor's number of cores. Default is 1.
 
     Attributes
     ----------
@@ -56,10 +59,10 @@ class CClassifierSVM(CClassifier):
     _loss = CLossHinge()
 
     def __init__(self, C=1.0, kernel=None,
-                 class_weight=None, preprocess=None):
+                 class_weight=None, preprocess=None, n_jobs=1):
 
         # calling the superclass init
-        CClassifier.__init__(self, preprocess=preprocess)
+        CClassifier.__init__(self, preprocess=preprocess, n_jobs=n_jobs)
 
         # Classifier hyperparameters
         self.C = C
