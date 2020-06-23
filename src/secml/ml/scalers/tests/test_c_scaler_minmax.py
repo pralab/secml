@@ -1,7 +1,9 @@
 from secml.ml.scalers.tests import CScalerTestCases
+
 from sklearn.preprocessing import MinMaxScaler
+
+from secml.ml.scalers import CScalerMinMax
 from secml.array import CArray
-from secml.ml.scalers.c_scaler_minmax import CScalerMinMax
 
 
 class TestCScalerMinMax(CScalerTestCases):

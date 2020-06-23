@@ -1,6 +1,8 @@
 from secml.ml.scalers.tests import CScalerTestCases
+
 from sklearn.preprocessing import Normalizer
-from secml.ml.scalers.c_scaler_norm import CScalerNorm
+
+from secml.ml.scalers import CScalerNorm
 
 
 class TestCScalerNorm(CScalerTestCases):

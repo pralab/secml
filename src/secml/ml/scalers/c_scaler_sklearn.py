@@ -10,7 +10,6 @@ from secml.array import CArray
 from secml.ml.classifiers.sklearn.c_classifier_sklearn \
     import CWrapperSkLearnMixin
 from abc import ABCMeta, abstractmethod
-import numpy as np
 
 
 class CScalerSkLearn(CWrapperSkLearnMixin, CModule, metaclass=ABCMeta):
@@ -113,21 +112,3 @@ class CScalerSkLearn(CWrapperSkLearnMixin, CModule, metaclass=ABCMeta):
     def _backward(self, w):
         raise NotImplementedError()
 
-    @staticmethod
-    def _grad_calc(el, funct):
-        """Utility method to compute scaler gradient.
-
-        Parameters
-        ----------
-        el : `ndarray`
-            array of values for every feature used to calculate gradient.
-        funct :
-            single parameter function used to calculate gradient.
-
-        Returns
-        -------
-        CArray
-            Result of the function applied to the array.
-
-        """
-        return CArray(np.vectorize(funct)(el))

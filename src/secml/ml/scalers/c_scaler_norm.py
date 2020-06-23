@@ -5,9 +5,10 @@
 .. moduleauthor:: Marco Meloni <m.meloni42@studenti.unica.it>
 
 """
-from secml.array import CArray
 from sklearn.preprocessing import Normalizer
-from secml.ml.scalers.c_scaler_sklearn import CScalerSkLearn
+
+from secml.array import CArray
+from secml.ml.scalers import CScalerSkLearn
 from secml.core.constants import inf
 
 
