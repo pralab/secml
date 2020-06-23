@@ -359,8 +359,8 @@ class TestCClassifierSVM(CClassifierTestCases):
         self.logger.info("Testing multiclass SVM.")
 
         digits = tuple(range(0, 10))
-        n_tr = 1000  # Number of training set samples
-        n_ts = 2000  # Number of test set samples
+        n_tr = 100  # Number of training set samples
+        n_ts = 200  # Number of test set samples
 
         loader = CDataLoaderMNIST()
         tr = loader.load('training', digits=digits, num_samples=n_tr)
@@ -374,6 +374,7 @@ class TestCClassifierSVM(CClassifierTestCases):
             'kernel': CKernelRBF(gamma=0.1),
             'C': 10,
             'class_weight': {0: 1, 1: 1},
+            'n_jobs': 2
         }
         classifiers = [
             CClassifierMulticlassOVA(CClassifierSVM, **svm_params),
@@ -383,6 +384,7 @@ class TestCClassifierSVM(CClassifierTestCases):
         grads = []
         acc = []
         for clf in classifiers:
+            clf.verbose = 1
             # We can now fit the classifier
             clf.fit(tr.X, tr.Y)
             # Compute predictions on a test set
