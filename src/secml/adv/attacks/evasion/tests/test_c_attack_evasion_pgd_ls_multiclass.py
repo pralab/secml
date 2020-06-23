@@ -86,7 +86,7 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
         self.solver_params = {'eta': 1e-1, 'eta_min': 1.0}
 
         eva = CAttackEvasionPGDLS(classifier=self.multiclass,
-                                  surrogate_data=self.ds,
+                                  double_init_ds=self.ds,
                                   distance='l2', dmax=dmax, lb=lb, ub=ub,
                                   solver_params=self.solver_params,
                                   y_target=self.y_target)

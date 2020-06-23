@@ -38,9 +38,6 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         Dataset on which the the classifier has been trained on.
     val : CDataset
         Validation set.
-    surrogate_data : CDataset or None, optional
-        Dataset on which the the surrogate classifier has been trained on.
-        Is only required if the classifier is nonlinear.
     distance : {'l1' or 'l2'}, optional
         Norm to use for computing the distance of the adversarial example
         from the original sample. Default 'l2'.
@@ -71,7 +68,6 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
     def __init__(self, classifier,
                  training_data,
                  val,
-                 surrogate_data=None,
                  distance='l1',
                  dmax=0,
                  lb=0,
@@ -85,7 +81,6 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         CAttackPoisoning.__init__(self, classifier=classifier,
                                   training_data=training_data,
                                   val=val,
-                                  surrogate_data=surrogate_data,
                                   distance=distance,
                                   dmax=dmax,
                                   lb=lb,

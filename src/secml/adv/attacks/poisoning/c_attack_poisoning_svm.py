@@ -42,9 +42,6 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         Dataset on which the the classifier has been trained on.
     val : CDataset
         Validation set.
-    surrogate_data : CDataset or None, optional
-        Dataset on which the the surrogate classifier has been trained on.
-        Is only required if the classifier is nonlinear.
     distance : {'l1' or 'l2'}, optional
         Norm to use for computing the distance of the adversarial example
         from the original sample. Default 'l2'.
@@ -75,7 +72,6 @@ class CAttackPoisoningSVM(CAttackPoisoning):
     def __init__(self, classifier,
                  training_data,
                  val,
-                 surrogate_data=None,
                  distance='l1',
                  dmax=0,
                  lb=0,
@@ -89,7 +85,6 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         CAttackPoisoning.__init__(self, classifier=classifier,
                                   training_data=training_data,
                                   val=val,
-                                  surrogate_data=surrogate_data,
                                   distance=distance,
                                   dmax=dmax,
                                   lb=lb,
@@ -139,7 +134,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
 
         # index of the current poisoning point in the set self._xc
         # as this set is appended to the training set, idx is shifted
-        idx += self._surrogate_data.num_samples
+        idx += self.training_data.num_samples
 
         # k is the index of sv_idx corresponding to the training idx of xc
         k = clf.sv_idx.find(clf.sv_idx == idx)

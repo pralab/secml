@@ -140,7 +140,7 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf,
-            "surrogate_data": self._val_dts,
+            "double_init_ds": self._val_dts,
             "distance": 'l1',
             "dmax": 10,
             "lb": 0,

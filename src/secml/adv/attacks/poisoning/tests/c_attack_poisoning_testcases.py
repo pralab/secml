@@ -188,7 +188,6 @@ class CAttackPoisoningTestCases(CUnitTest):
         self._poisoning_params = {
             "classifier": self.classifier,
             "training_data": self.tr,
-            "surrogate_data": self.tr,
             "val": self.ts,
             "lb": self.lb,
             "ub": self.ub,

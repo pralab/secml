@@ -18,9 +18,6 @@ class CAttackMixin(CAttack):
     ----------
     classifier : CClassifier
         Target classifier (trained).
-    surrogate_data : CDataset or None, optional
-        Dataset on which the the surrogate classifier has been trained on.
-        Is only required if the classifier is nonlinear.
     distance : {'l1' or 'l2'}, optional
         Norm to use for computing the distance of the adversarial example
         from the original sample. Default 'l2'.
@@ -42,7 +39,6 @@ class CAttackMixin(CAttack):
     """
 
     def __init__(self, classifier,
-                 surrogate_data=None,
                  distance=None,
                  dmax=None,
                  lb=None,
@@ -63,11 +59,6 @@ class CAttackMixin(CAttack):
         self.distance = distance
         self.solver_type = solver_type
         self.solver_params = solver_params
-
-        # Surrogate data (can be None)
-        self._surrogate_data = surrogate_data
-        self._surrogate_labels = None
-        self._surrogate_scores = None
 
     ###########################################################################
     #                           READ-ONLY ATTRIBUTES
@@ -102,11 +93,6 @@ class CAttackMixin(CAttack):
     ###########################################################################
     #                           READ-WRITE ATTRIBUTES
     ###########################################################################
-
-    @property
-    def surrogate_data(self):
-        """Returns surrogate data"""
-        return self._surrogate_data
 
     @property
     def dmax(self):
@@ -175,17 +161,6 @@ class CAttackMixin(CAttack):
     ###########################################################################
     #                              METHODS
     ###########################################################################
-
-    def _set_solver_surrogate_predictions(self):
-        """Compute predictions on surrogate data using solver classifier."""
-        if self.surrogate_data is None:
-            raise ValueError("surrogate data is not defined")
-
-        # Compute the new predictions
-        y, score = self.classifier.predict(
-            self.surrogate_data.X, return_decision_function=True)
-        self._surrogate_labels = y
-        self._surrogate_scores = score
 
     def _solution_from_solver(self):
         """Retrieve solution from solver and set internal class parameters."""
