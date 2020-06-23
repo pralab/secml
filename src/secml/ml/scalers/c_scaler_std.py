@@ -6,7 +6,9 @@
 
 """
 from sklearn.preprocessing import StandardScaler
-from secml.ml.scalers.c_scaler_sklearn import CScalerSkLearn
+
+from secml.ml.scalers import CScalerSkLearn
+from secml.array import CArray
 
 
 class CScalerStd(CScalerSkLearn):
@@ -52,9 +54,8 @@ class CScalerStd(CScalerSkLearn):
 
     def _backward(self, w=None):
         self._check_is_fitted()
-        grad = CScalerSkLearn._grad_calc(self.sklearn_scaler.scale_,
-                                         self._grad_funct)
-        return w * grad if w is not None else grad
 
-    def _grad_funct(self, x):
-        return 0 if x == 0 else 1 / x
+        v = CArray(self.sklearn_scaler.scale_).deepcopy()
+        v[v != 0] = 1 / v[v != 0]  # avoids division by zero
+
+        return w * v if w is not None else v

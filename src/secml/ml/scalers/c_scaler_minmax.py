@@ -6,7 +6,9 @@
 
 """
 from sklearn.preprocessing import MinMaxScaler
-from secml.ml.scalers.c_scaler_sklearn import CScalerSkLearn
+
+from secml.ml.scalers import CScalerSkLearn
+from secml.array import CArray
 
 
 class CScalerMinMax(CScalerSkLearn):
@@ -46,9 +48,8 @@ class CScalerMinMax(CScalerSkLearn):
 
     def _backward(self, w=None):
         self._check_is_fitted()
-        grad = CScalerSkLearn._grad_calc(self.sklearn_scaler.data_range_,
-                                         self._grad_funct)
-        return w * grad if w is not None else grad
 
-    def _grad_funct(self, x):
-        return 0 if x == 0 else 1 / x
+        v = CArray(self.sklearn_scaler.data_range_).deepcopy()
+        v[v != 0] = 1 / v[v != 0]  # avoids division by zero
+
+        return w * v if w is not None else v

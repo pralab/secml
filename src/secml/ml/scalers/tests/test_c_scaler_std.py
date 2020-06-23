@@ -1,6 +1,8 @@
 from secml.ml.scalers.tests import CScalerTestCases
+
 from sklearn.preprocessing import StandardScaler
-from secml.ml.scalers.c_scaler_std import CScalerStd
+
+from secml.ml.scalers import CScalerStd
 
 
 class TestCScalerStd(CScalerTestCases):
