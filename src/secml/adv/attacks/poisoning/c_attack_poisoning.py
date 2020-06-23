@@ -30,9 +30,6 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
         Dataset on which the the classifier has been trained on.
     val : CDataset
         Validation set.
-    surrogate_data : CDataset or None, optional
-        Dataset on which the the surrogate classifier has been trained on.
-        Is only required if the classifier is nonlinear.
     distance : {'l1' or 'l2'}, optional
         Norm to use for computing the distance of the adversarial example
         from the original sample. Default 'l2'.
@@ -63,7 +60,6 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
     def __init__(self, classifier,
                  training_data,
                  val,
-                 surrogate_data=None,
                  distance='l2',
                  dmax=0,
                  lb=0,
@@ -76,7 +72,6 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
 
         super(CAttackPoisoning, self).__init__(
             classifier=classifier,
-            surrogate_data=surrogate_data,
             distance=distance,
             dmax=dmax,
             lb=lb,
@@ -264,10 +259,8 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
             else:
                 init_dataset = self.val
         else:
-            init_dataset = self.surrogate_data
+            init_dataset = self.training_data
 
-        if init_dataset is None:
-            raise ValueError("Surrogate data not set!")
         if (self._n_points is None or self._n_points == 0) and (
                 n_points is None or n_points == 0):
             raise ValueError("Number of poisoning points (n_points) not set!")
@@ -324,7 +317,7 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
             clf = self.classifier
 
         if tr is None:
-            tr = self.surrogate_data
+            tr = self.training_data
 
         tr = tr.append(CDataset(self._xc, self._yc))
 

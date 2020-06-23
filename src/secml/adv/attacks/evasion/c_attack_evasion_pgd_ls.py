@@ -46,11 +46,11 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
     ----------
     classifier : CClassifier
         Target classifier.
-    surrogate_data : CDataset or None, optional
+    double_init_ds : CDataset or None, optional
         Dataset used to initialize an alternative init point (double init).
     double_init : bool, optional
             If True (default), use double initialization point.
-            Needs surrogate_data not to be None.
+            Needs double_init_ds not to be None.
     distance : {'l1' or 'l2'}, optional
         Norm to use for computing the distance of the adversarial example
         from the original sample. Default 'l2'.
@@ -79,7 +79,7 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
     __class_type = 'e-pgd-ls'
 
     def __init__(self, classifier,
-                 surrogate_data=None,
+                 double_init_ds=None,
                  double_init=True,
                  distance='l1',
                  dmax=0,
@@ -100,20 +100,24 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
 
         self.double_init = double_init  # set double init
 
+        # Alternative init data (can be None)
+        self._double_init_ds = double_init_ds
+        self._double_init_labels = None
+        self._double_init_scores = None
+
         CAttackEvasion.__init__(self,
-            classifier=classifier,
-            y_target=y_target,
-            attack_classes=attack_classes)
+                                classifier=classifier,
+                                y_target=y_target,
+                                attack_classes=attack_classes)
 
         CAttackMixin.__init__(self,
-            classifier=classifier,
-            surrogate_data=surrogate_data,
-            distance=distance,
-            dmax=dmax,
-            lb=lb,
-            ub=ub,
-            solver_type='pgd-ls',
-            solver_params=solver_params)
+                              classifier=classifier,
+                              distance=distance,
+                              dmax=dmax,
+                              lb=lb,
+                              ub=ub,
+                              solver_type='pgd-ls',
+                              solver_params=solver_params)
 
     ###########################################################################
     #                           READ-WRITE ATTRIBUTES
@@ -136,6 +140,11 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
     @double_init.setter
     def double_init(self, value):
         self._double_init = bool(value)
+
+    @property
+    def double_init_ds(self):
+        """Returns the CDataset used for the double initialization"""
+        return self._double_init_ds
 
     ###########################################################################
     #                              PRIVATE METHODS
@@ -187,46 +196,9 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
         c = scores.nanargmax(axis=1).ravel()
 
         if issubclass(self.classifier.__class__, CClassifierReject):
-            c[c == self.surrogate_data.num_classes] = -1
+            c[c == self.classifier.n_classes - 1] = -1
 
         return k, c
-
-    def objective_function(self, x):
-        """Compute the objective function of the evasion attack.
-
-        The objective function is:
-
-        - for error-generic attack:
-            min f_obj(x) = f_{k|o (if the sample is rejected) }(x)
-            argmax_{(c != k) and (c != o)} f_c(x),
-            where k is the true class, o is the reject class and c is the
-            competing class, which is the class with the maximum score, and
-            can be neither k nor c
-
-        -for error-specific attack:
-            min -f_obj(x) =  -f_k(x) + argmax_{c != k} f_c(x),
-            where k is the target class and c is the competing class,
-            which is the class with the maximum score except for the
-            target class
-
-        Parameters
-        ----------
-        x : CArray
-            Array containing the data points (one or more than one).
-
-        Returns
-        -------
-        f_obj : CArray
-            Values of objective function at x.
-
-        """
-
-        y_pred, scores = self.classifier.predict(
-            x, return_decision_function=True)
-
-        f_obj = self._objective_function_pred_scores(y_pred, scores)
-
-        return f_obj
 
     def _objective_function_pred_scores(self, y_pred, scores):
         """
@@ -243,26 +215,6 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
         f_obj = f_k - scores[[smpls_idx, c.tolist()]]
 
         return f_obj if self.y_target is None else -f_obj
-
-    def objective_function_gradient(self, x):
-        """Compute the gradient of the evasion objective function.
-
-        Parameters
-        ----------
-        x : CArray
-            A single point.
-
-        """
-        y_pred, scores = self.classifier.predict(
-            x, return_decision_function=True)
-
-        k, c = self._find_k_c(y_pred, scores)
-
-        w = CArray.zeros(shape=(self.classifier.n_classes,))
-        w[k.item()] = 1
-        w[c.item()] = -1
-        grad = self.classifier.gradient(x, w)
-        return grad if self.y_target is None else -grad
 
     def _init_solver(self):
         """Create solver instance."""
@@ -296,35 +248,49 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
     # TODO: add probability as in c_attack_poisoning
     # (we could also move this directly in c_attack)
     def _get_point_with_min_f_obj(self, y_pred, scores):
-        """Returns the surrogate sample having the minimum value of objective function.
+        """Returns the alternative init sample having the minimum value 
+        of objective function.
 
         Parameters
         ----------
         y_pred : CArray
-            Predictions on surrogate data of the solver classifier.
+            Predictions on double init data of the solver classifier.
         scores : CArray
-            Predictions scores on surrogate data of the solver classifier.
+            Predictions scores on double init data of the solver classifier.
 
         Returns
         -------
         x : CArray
-            Surrogate data point with minimum value of objective function.
+            Alternative data point with minimum value of objective function.
 
         """
         f_objs = self._objective_function_pred_scores(y_pred, scores)
         k = f_objs.argmin()
-        return self._surrogate_data.X[k, :].ravel()
+        return self._double_init_ds.X[k, :].ravel()
+
+    def _set_solver_alternative_predictions(self):
+        """Compute predictions on double init data using solver classifier.
+        """
+        if self.double_init_ds is None:
+            raise ValueError("double_init_ds is not defined")
+
+        # Compute the new predictions
+        y, score = self.classifier.predict(
+            self.double_init_ds.X, return_decision_function=True)
+        self._double_init_labels = y
+        self._double_init_scores = score
 
     def _set_alternative_init(self):
         """Set the alternative init point."""
         self.logger.info("Computing an alternative init point...")
 
-        # Compute predictions on surrogate data if necessary
-        if self._surrogate_labels is None or self._surrogate_scores is None:
-            self._set_solver_surrogate_predictions()
+        # Compute predictions on double init data if necessary
+        if self._double_init_labels is None or \
+                self._double_init_scores is None:
+            self._set_solver_alternative_predictions()
 
-        y_pred = self._surrogate_labels
-        scores = self._surrogate_scores
+        y_pred = self._double_init_labels
+        scores = self._double_init_scores
 
         # for targeted evasion, this does not depend on the data label y0
         if self.y_target is not None:
@@ -334,20 +300,18 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
 
         # for indiscriminate evasion, this depends on y0
         # so, we compute xk for all classes
-        self._xk = CArray.zeros(shape=(self.surrogate_data.num_classes,
-                                       self.surrogate_data.num_features),
-                                sparse=self.surrogate_data.issparse,
-                                dtype=self.surrogate_data.X.dtype)
+        n_classes = self.classifier.n_classes - 1 \
+            if issubclass(self.classifier.__class__, CClassifierReject) \
+            else self.classifier.n_classes
+        self._xk = CArray.zeros(shape=(n_classes, self.classifier.n_features),
+                                sparse=self.double_init_ds.issparse,
+                                dtype=self.double_init_ds.X.dtype)
         y0 = self._y0  # Backup last y0
-        for i in range(self.surrogate_data.num_classes):
+        for i in range(n_classes):
             self._y0 = i
             self._xk[i, :] = self._get_point_with_min_f_obj(
                 y_pred, scores.deepcopy())
         self._y0 = y0  # Restore last y0
-
-    ###########################################################################
-    #                              PUBLIC METHODS
-    ###########################################################################
 
     def _run(self, x0, y0, x_init=None):
         """Perform evasion for a given dmax on a single pattern.
@@ -413,7 +377,8 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
 
         # otherwise, try to improve evasion sample
         # we run an evasion attempt using (as the init sample)
-        # the sample xk with the minimum objective function from surrogate data
+        # the sample xk with the minimum objective function from
+        # double init data
         if self._xk is None:
             # Choose the alternative init point if not already done
             self._set_alternative_init()
@@ -457,3 +422,64 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
                 self._solution_from_solver()
 
         return self._x_opt, self._f_opt
+
+    ###########################################################################
+    #                              PUBLIC METHODS
+    ###########################################################################
+
+    def objective_function(self, x):
+        """Compute the objective function of the evasion attack.
+
+        The objective function is:
+
+        - for error-generic attack:
+            min f_obj(x) = f_{k|o (if the sample is rejected) }(x)
+            argmax_{(c != k) and (c != o)} f_c(x),
+            where k is the true class, o is the reject class and c is the
+            competing class, which is the class with the maximum score, and
+            can be neither k nor c
+
+        -for error-specific attack:
+            min -f_obj(x) =  -f_k(x) + argmax_{c != k} f_c(x),
+            where k is the target class and c is the competing class,
+            which is the class with the maximum score except for the
+            target class
+
+        Parameters
+        ----------
+        x : CArray
+            Array containing the data points (one or more than one).
+
+        Returns
+        -------
+        f_obj : CArray
+            Values of objective function at x.
+
+        """
+
+        y_pred, scores = self.classifier.predict(
+            x, return_decision_function=True)
+
+        f_obj = self._objective_function_pred_scores(y_pred, scores)
+
+        return f_obj
+
+    def objective_function_gradient(self, x):
+        """Compute the gradient of the evasion objective function.
+
+        Parameters
+        ----------
+        x : CArray
+            A single point.
+
+        """
+        y_pred, scores = self.classifier.predict(
+            x, return_decision_function=True)
+
+        k, c = self._find_k_c(y_pred, scores)
+
+        w = CArray.zeros(shape=(self.classifier.n_classes,))
+        w[k.item()] = 1
+        w[c.item()] = -1
+        grad = self.classifier.gradient(x, w)
+        return grad if self.y_target is None else -grad

@@ -5,12 +5,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
-from secml import _NoValue
-from secml.adv.attacks import CAttack
 from secml.adv.attacks.evasion import CAttackEvasionPGDLS
-from secml.optim.function import CFunction
-from secml.optim.constraints import CConstraint
-from secml.optim.optimizers import COptimizer
 
 
 class CAttackEvasionPGDExp(CAttackEvasionPGDLS):
@@ -40,11 +35,11 @@ class CAttackEvasionPGDExp(CAttackEvasionPGDLS):
     ----------
     classifier : CClassifier
         Target classifier.
-    surrogate_data : CDataset or None, optional
+    double_init_ds : CDataset or None, optional
         Dataset used to initialize an alternative init point (double init).
     double_init : bool, optional
             If True (default), use double initialization point.
-            Needs surrogate_data not to be None.
+            Needs double_init_ds not to be None.
     distance : {'l1' or 'l2'}, optional
         Norm to use for computing the distance of the adversarial example
         from the original sample. Default 'l2'.
@@ -73,7 +68,7 @@ class CAttackEvasionPGDExp(CAttackEvasionPGDLS):
     __class_type = 'e-pgd-exp'
 
     def __init__(self, classifier,
-                 surrogate_data=None,
+                 double_init_ds=None,
                  double_init=True,
                  distance='l1',
                  dmax=0,
@@ -94,7 +89,7 @@ class CAttackEvasionPGDExp(CAttackEvasionPGDLS):
 
         super(CAttackEvasionPGDExp, self).__init__(
             classifier=classifier,
-            surrogate_data=surrogate_data,
+            double_init_ds=double_init_ds,
             double_init=double_init,
             distance=distance,
             dmax=dmax,

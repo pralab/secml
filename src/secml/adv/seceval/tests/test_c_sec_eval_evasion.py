@@ -64,7 +64,7 @@ class TestCSecEval(CUnitTest):
     def _attack_pgd_ls(self):
         params = {
             "classifier": self.classifier,
-            "surrogate_data": self.tr,
+            "double_init_ds": self.tr,
             "distance": 'l1',
             "lb": self.lb,
             "ub": self.ub,

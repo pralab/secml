@@ -54,7 +54,7 @@ class TestCAttackEvasionPGD(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf,
-            "surrogate_data": ds,
+            "double_init_ds": ds,
             "distance": 'l1',
             "dmax": 1.05,
             "lb": -1.05,
@@ -87,7 +87,7 @@ class TestCAttackEvasionPGD(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf,
-            "surrogate_data": ds,
+            "double_init_ds": ds,
             "distance": 'l2',
             "dmax": 1.05,
             "lb": -0.67,
@@ -120,7 +120,7 @@ class TestCAttackEvasionPGD(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf,
-            "surrogate_data": ds,
+            "double_init_ds": ds,
             "distance": 'l1',
             "dmax": 1.0,
             "lb": -1.0,
@@ -153,7 +153,7 @@ class TestCAttackEvasionPGD(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf,
-            "surrogate_data": ds,
+            "double_init_ds": ds,
             "distance": 'l2',
             "dmax": 1.25,
             "lb": -0.65,
@@ -186,7 +186,7 @@ class TestCAttackEvasionPGD(CAttackEvasionTestCases):
 
         evasion_params = {
             "classifier": clf_surr,
-            "surrogate_data": ds,
+            "double_init_ds": ds,
             "distance": 'l1',
             "dmax": 2.0,
             "lb": -1.5,
