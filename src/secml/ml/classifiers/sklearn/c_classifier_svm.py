@@ -12,6 +12,50 @@ from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.ml.kernels import CKernel
 from secml.ml.classifiers.loss import CLossHinge
+from secml.parallel import parfor2
+
+
+def _fit_one_ova(tr_class_idx, svm, x, y, svc_kernel, verbose):
+    """Fit a OVA classifier.
+
+    Parameters
+    ----------
+    tr_class_idx : int
+        Index of the label against which the classifier should be trained.
+    svm : CClassifierSVM
+        Instance of the multiclass SVM classifier.
+    x : CArray
+        Array to be used for training with shape (n_samples, n_features).
+    y : CArray
+        Array of shape (n_samples,) containing the class labels.
+    verbose : int
+        Verbosity level of the logger.
+
+    """
+    # Resetting verbosity level. This is needed as objects
+    # change id  when passed to subprocesses and our logging
+    # level is stored per-object looking to id
+    svm.verbose = verbose
+
+    svm.logger.info(
+        "Training against class: {:}".format(tr_class_idx))
+
+    # Binarize labels
+    y_ova = CArray(y == svm.classes[tr_class_idx])
+
+    # Training the one-vs-all classifier
+    svc = SVC(C=svm.C, kernel=svc_kernel, class_weight=svm.class_weight)
+    svc.fit(x.get_data(), y_ova.get_data())
+
+    # Assign output based on kernel type
+    w = CArray(svc.coef_.ravel()) if svm.kernel is None else None
+    sv_idx = CArray(svc.support_).ravel() if svm.kernel is not None else None
+    alpha = CArray(svc.dual_coef_) if svm.kernel is not None else None
+
+    # Intercept is always available
+    b = CArray(svc.intercept_[0])[0]
+
+    return w, sv_idx, alpha, b
 
 
 class CClassifierSVM(CClassifier):
@@ -204,17 +248,18 @@ class CClassifierSVM(CClassifier):
 
     def _fit_one_vs_all(self, x, y, svc_kernel):
         # ova (but we can also implement ovo - let's do separate functions)
-        for k, c in enumerate(self.classes):
-            svc = SVC(C=self.C, kernel=svc_kernel,
-                      class_weight=self.class_weight)
-            svc.fit(x.get_data(), CArray(y == c).get_data())
+        out = parfor2(_fit_one_ova,
+                      self.n_classes, self.n_jobs,
+                      self, x, y, svc_kernel, self.verbose)
+
+        # Building results
+        for i in range(self.n_classes):
+            out_i = out[i]
             if self.kernel is None:
-                self._w[k, :] = CArray(svc.coef_.ravel())
+                self._w[i, :] = out_i[0]
             else:
-                sv_idx = CArray(svc.support_).ravel()
-                self._alpha[k, sv_idx] = CArray(svc.dual_coef_)
-            self._b[k] = CArray(svc.intercept_[0])[0]
-        return
+                self._alpha[i, out_i[1]] = out_i[2]
+            self._b[i] = out_i[3]
 
     def _fit_binary(self, x, y, svc_kernel):
         svc = SVC(C=self.C, kernel=svc_kernel, class_weight=self.class_weight)
