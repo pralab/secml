@@ -27,9 +27,7 @@ class CClassifierRejectThreshold(CClassifierReject):
     ----------
     clf : CClassifier
         Classifier to which we would like to apply a reject threshold.
-        The classifier can also be already fitted. In this case, if a
-        preprocessor was used during fitting, the same preprocessor must be
-        passed to the outer classifier.
+        The classifier can also be already fitted.
     threshold : float
         Rejection threshold.
     preprocess : CPreProcess or str or None, optional
@@ -45,10 +43,6 @@ class CClassifierRejectThreshold(CClassifierReject):
         if not isinstance(clf, CClassifier):
             raise ValueError(
                 "the inner classifier should be an instance of CClassifier")
-
-        if clf.preprocess is not None:
-            raise ValueError(
-                "the preprocessor should be passed to the outer classifier.")
 
         self._clf = clf
         self.threshold = threshold
@@ -76,42 +70,12 @@ class CClassifierRejectThreshold(CClassifierReject):
     @property
     def classes(self):
         """Return the list of classes on which training has been performed."""
-        return self._clf.classes
+        return self._clf.classes.append([-1])
 
     @property
     def n_classes(self):
         """Number of classes of training dataset, plus the rejection class."""
         return self._clf.n_classes + 1
-
-    def fit(self, x, y):
-        """Trains the classifier.
-
-        If a preprocess has been specified,
-        input is normalized before training.
-
-        Parameters
-        ----------
-        x : CArray
-            Array to be used for training with shape (n_samples, n_features).
-        y : CArray
-            Array of shape (n_samples,) containing the class labels.
-        n_jobs : int, optional
-            Number of parallel workers to use for training the classifier.
-            Default 1. Cannot be higher than processor's number of cores.
-
-        Returns
-        -------
-        trained_cls : CClassifier
-            Instance of the classifier trained using input dataset.
-
-        """
-        self._n_features = x.shape[1]
-
-        # Transform data if a preprocess is defined
-        if self.preprocess is not None:
-            x = self.preprocess.fit_transform(x)
-
-        return self._fit(x, y)
 
     def _fit(self, x, y):
         """Private method that trains the One-Vs-All classifier.
