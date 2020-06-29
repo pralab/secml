@@ -25,7 +25,7 @@ of our repository. Then, set up the project locally by the following means:
       If omitted, the default branch will be installed.
 
 Contributions can be sent in the form of a merge request via our
-`GitLab issue tracker <https://gitlab.com/secml/secml/issues>`_.
+`GitLab issue tracker <https://gitlab.com/secml/secml/-/issues>`_.
 See `how to create a merge request <https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html>`_
 guide for more information.
 
