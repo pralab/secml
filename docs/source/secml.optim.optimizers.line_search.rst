@@ -22,3 +22,11 @@ CLineSearchBisect
    :undoc-members:
    :show-inheritance:
 
+CLineSearchBisectProj
+---------------------
+
+.. automodule:: secml.optim.optimizers.line_search.c_line_search_bisect_proj
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

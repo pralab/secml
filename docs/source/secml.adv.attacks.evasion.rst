@@ -30,6 +30,14 @@ CAttackEvasionPGDLS
    :undoc-members:
    :show-inheritance:
 
+CAttackEvasionPGDExp
+--------------------
+
+.. automodule:: secml.adv.attacks.evasion.c_attack_evasion_pgd_exp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 CAttackEvasionCleverhans
 ------------------------
 
