@@ -1,6 +1,6 @@
 """
-.. module:: CLineSearchBisect
-   :synopsis: Binary line search.
+.. module:: CLineSearchBisectProj
+   :synopsis: Binary line search including projections.
 
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
@@ -15,7 +15,7 @@ class CLineSearchBisectProj(CLineSearchBisect):
 
     Attributes
     ----------
-    class_type : 'bisect'
+    class_type : 'bisect-proj'
 
     """
     __class_type = 'bisect-proj'
