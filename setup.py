@@ -165,7 +165,7 @@ setup(
     url='https://secml.gitlab.io',
     download_url="https://pypi.python.org/pypi/secml#files",
     project_urls={
-        "Bug Tracker": "https://gitlab.com/secml/secml/issues",
+        "Bug Tracker": "https://gitlab.com/secml/secml/-/issues",
         "Source Code": "https://gitlab.com/secml/secml",
     },
     maintainer='Marco Melis',

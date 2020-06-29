@@ -30,7 +30,7 @@ It comes with a set of powerful features:
 
 **SecML is currently in development.**
 If you encounter any bugs, please report them using the 
-[GitLab issue tracker](https://gitlab.com/secml/secml/issues).
+[GitLab issue tracker](https://gitlab.com/secml/secml/-/issues).
 Also, have a look at our [ROADMAP](https://secml.gitlab.io/roadmap.html) 
 for an overview of the future development directions.
 

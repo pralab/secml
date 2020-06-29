@@ -8,7 +8,7 @@ https://secml.gitlab.io/developers/
 
 References
 ----------
-* [SecML Releases](https://gitlab.com/secml/secml/releases)
-* [Bugs and new features tracker](https://gitlab.com/secml/secml/issues)
+* [SecML Releases](https://gitlab.com/secml/secml/-/releases)
+* [Bugs and new features tracker](https://gitlab.com/secml/secml/-/issues)
 * [Coding Guidelines](http://secml.gitlab.io/developers/contributing.code.html#coding-guidelines)
 * [Creating Extensions](http://secml.gitlab.io/developers/contributing.extensions.html)
