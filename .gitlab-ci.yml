@@ -449,6 +449,7 @@ release:pypi:dry:
   image: ruby:2.4
   needs: []
   cache: {}
+  allow_failure: true
   before_script:
     - gem install gitlab-triage
     - export SSL_CERT_FILE=$CI_SERVER_TLS_CA_FILE
