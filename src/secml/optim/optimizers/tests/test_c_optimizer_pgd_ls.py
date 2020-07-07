@@ -37,6 +37,11 @@ class TestCOptimizerPGDLS(COptimizerTestCases):
         self._test_minimize(
             COptimizerPGDLS, 'rosenbrock', opt_params=opt_params)
 
+    def test_constr_bounds(self):
+        """Test for COptimizer.minimize() method behaviour
+        depending on constraint and bounds."""
+        self._test_constr_bounds(COptimizerPGDLS)
+
 
 if __name__ == '__main__':
     COptimizerTestCases.main()

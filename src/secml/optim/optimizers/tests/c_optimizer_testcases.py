@@ -1,10 +1,10 @@
 from secml.testing import CUnitTest
 
-from secml.array import CArray
 from secml.optim.function import CFunction
-from secml.optim.constraints import CConstraint
+from secml.optim.constraints import CConstraintBox, CConstraintL2
+from secml.array import CArray
 from secml.figure import CFigure
-import secml.utils.c_file_manager as fm
+from secml.utils import fm
 
 
 class COptimizerTestCases(CUnitTest):
@@ -250,3 +250,76 @@ class COptimizerTestCases(CUnitTest):
             fm.make_folder(test_img_fold_name)
 
         fig.savefig('{:}.pdf'.format(filename))
+
+    def _test_constr_bounds(self, opt_class):
+        """Test for COptimizer.minimize() method behaviour
+        depending on constraint and bounds.
+
+        3 cases will be tested against 'rosenbrock' function
+         - constraint radius 0 (no bounds)
+         - constraint radius 0 inside bounds
+         - constraint radius 0 outside bounds (should raise warning)
+
+        Parameters
+        ----------
+        opt_class : class
+            COptimizer.
+
+        """
+        fun_dict = self.test_funcs['rosenbrock']
+        fun = fun_dict['fun']
+
+        # Constraint radius 0 (no bounds)
+        opt_params = {'constr': CConstraintL2(center=CArray([0, 0]), radius=0)}
+
+        opt = opt_class(fun, **opt_params)
+        opt.verbose = 1
+
+        self.logger.info("Testing minimization of {:} using {:} "
+                         "and constr {:}".format(fun.__class__.__name__,
+                                                 opt.__class__.__name__,
+                                                 opt_params['constr']))
+
+        min_x = opt.minimize(fun_dict['x0'])
+
+        self.assertAlmostEqual(opt.f_opt, 1.0)
+        self.assert_array_almost_equal(min_x.todense().ravel(), CArray([0, 0]))
+
+        # Constraint radius 0 inside bounds
+        opt_params = {'constr': CConstraintL2(center=CArray([0, 0]), radius=0),
+                      'bounds': CConstraintBox(lb=-1, ub=1)}
+
+        opt = opt_class(fun, **opt_params)
+        opt.verbose = 1
+
+        self.logger.info("Testing minimization of {:} using {:}, constr {:} "
+                         "and bounds {:}".format(fun.__class__.__name__,
+                                                 opt.__class__.__name__,
+                                                 opt_params['constr'],
+                                                 opt_params['bounds']))
+
+        min_x = opt.minimize(fun_dict['x0'])
+
+        self.assertAlmostEqual(opt.f_opt, 1.0)
+        self.assert_array_almost_equal(min_x.todense().ravel(), CArray([0, 0]))
+
+        # Constraint radius 0 outside bounds (should raise warning)
+        opt_params = {'constr': CConstraintL2(center=CArray([0, 0]), radius=0),
+                      'bounds': CConstraintBox(lb=1, ub=2)}
+
+        opt = opt_class(fun, **opt_params)
+        opt.verbose = 1
+
+        self.logger.info("Testing minimization of {:} using {:}, constr {:} "
+                         "and bounds {:}".format(fun.__class__.__name__,
+                                                 opt.__class__.__name__,
+                                                 opt_params['constr'],
+                                                 opt_params['bounds']))
+
+        with self.logger.catch_warnings(record=True) as w:
+            min_x = opt.minimize(fun_dict['x0'])
+            self.assertIn(
+                'is outside of the given bounds', w[0].message.args[0])
+
+        self.assertAlmostEqual(opt.f_opt, 1.0)
+        self.assert_array_almost_equal(min_x.todense().ravel(), CArray([0, 0]))

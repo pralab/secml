@@ -135,8 +135,6 @@ class COptimizerPGDExp(COptimizer):
             max_iter=20,
             eta=eta, eta_min=eta_min, eta_max=eta_max)
 
-        # self._line_search.verbose = 2
-
     @staticmethod
     def _l1_projected_gradient(grad):
         """
@@ -296,13 +294,18 @@ class COptimizerPGDExp(COptimizer):
         if self.constr is not None and self.constr.radius == 0:
             # classify x0 and return
             x0 = self.constr.center
+            if self.bounds is not None and self.bounds.is_violated(x0):
+                import warnings
+                warnings.warn(
+                    "x0 " + str(x0) + " is outside of the given bounds.",
+                    category=RuntimeWarning)
             self._x_seq = CArray.zeros((1, x0.size),
                                        sparse=x0.issparse, dtype=x0.dtype)
             self._f_seq = CArray.zeros(1)
             self._x_seq[0, :] = x0
             self._f_seq[0] = self._fun.fun(x0, *args)
             self._x_opt = x0
-            return
+            return x0
 
         # if x is outside of the feasible domain, project it
         if self.bounds is not None and self.bounds.is_violated(x_init):
@@ -316,9 +319,6 @@ class COptimizerPGDExp(COptimizer):
             raise ValueError(
                 "x_init " + str(x_init) + " is outside of feasible domain.")
 
-        # eval fun at x
-        fx = self._fun.fun(x_init, *args)
-
         # initialize x_seq and f_seq
         self._x_seq = CArray.zeros(
             (self.max_iter, x_init.size), sparse=x_init.issparse)
@@ -328,11 +328,11 @@ class COptimizerPGDExp(COptimizer):
 
         # The first point is obviously the starting point,
         # and the constraint is not violated (false...)
-        x = x_init
+        x = x_init.deepcopy()
+        fx = self._fun.fun(x, *args)  # eval fun at x, for iteration 0
         self._x_seq[0, :] = x
         self._f_seq[0] = fx
 
-        # debugging information
         self.logger.debug('Iter.: ' + str(0) + ', f(x): ' + str(fx))
 
         for i in range(1, self.max_iter):

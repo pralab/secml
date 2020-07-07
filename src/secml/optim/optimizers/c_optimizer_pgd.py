@@ -137,16 +137,40 @@ class COptimizerPGD(COptimizer):
         self._f.reset_eval()
         self._fun.reset_eval()
 
-        x = x_init.deepcopy()
+        # constr.radius = 0, exit
+        if self.constr is not None and self.constr.radius == 0:
+            # classify x0 and return
+            x0 = self.constr.center
+            if self.bounds is not None and self.bounds.is_violated(x0):
+                import warnings
+                warnings.warn(
+                    "x0 " + str(x0) + " is outside of the given bounds.",
+                    category=RuntimeWarning)
+            self._x_seq = CArray.zeros((1, x0.size),
+                                       sparse=x0.issparse, dtype=x0.dtype)
+            self._f_seq = CArray.zeros(1)
+            self._x_seq[0, :] = x0
+            self._f_seq[0] = self._fun.fun(x0, *args)
+            self._x_opt = x0
+            return x0
 
-        if self.constr is not None and self.constr.is_violated(x):
-            x = self.constr.projection(x)
+        # if x is outside of the feasible domain, project it
+        if self.bounds is not None and self.bounds.is_violated(x_init):
+            x_init = self.bounds.projection(x_init)
 
-        if self.bounds is not None and self.bounds.is_violated(x):
-            x = self.bounds.projection(x)
+        if self.constr is not None and self.constr.is_violated(x_init):
+            x_init = self.constr.projection(x_init)
 
-        self._x_seq = CArray.zeros((self._max_iter, x.size))
+        if (self.bounds is not None and self.bounds.is_violated(x_init)) or \
+                (self.constr is not None and self.constr.is_violated(x_init)):
+            raise ValueError(
+                "x_init " + str(x_init) + " is outside of feasible domain.")
+
+        self._x_seq = CArray.zeros(
+            (self._max_iter, x_init.size), sparse=x_init.issparse)
         self._f_seq = CArray.zeros(self._max_iter)
+
+        x = x_init.deepcopy()
 
         i = 0
         for i in range(self._max_iter):
