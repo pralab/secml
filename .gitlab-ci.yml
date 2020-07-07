@@ -446,7 +446,7 @@ release:pypi:dry:
 
 
 .triage:
-  image: ruby:2.4
+  image: ruby:latest
   needs: []
   cache: {}
   allow_failure: true
