@@ -14,6 +14,7 @@ from secml.data.loader import CDLRandom
 from secml.data.splitter import CTrainTestSplit
 from secml.ml.classifiers import CClassifierPyTorch
 from secml.ml.features import CNormalizerMinMax
+from secml.ml.features.normalization import CNormalizerDNN
 
 
 class Net(nn.Module):
@@ -157,6 +158,24 @@ class TestCClassifierPyTorchBlobs(CClassifierPyTorchTestCases):
         clf_new = self._create_clf(
             self.n_features, self.n_classes, self.batch_size)
         self._test_get_set_state(self.clf, clf_new, self.ts)
+
+    def test_preprocess_dnn(self):
+        """Test using a `CNormalizerDNN` as preprocessor."""
+        # Create a new clf which will have the unittest's Net as preprocessor
+        # We use 3 as the number of features as it is the output size of
+        # the standard Net used in this unittest
+        new_clf = self._create_clf(3, self.n_classes, self.batch_size)
+        new_clf.preprocess = CNormalizerDNN(self.clf)
+
+        # Train the new classifier
+        new_clf.fit(self.tr.X, self.tr.Y)
+
+        # Test forward and backward
+        self._test_predict(new_clf, self.ts)
+        self._test_accuracy(new_clf, self.ts)
+
+        self._test_gradient_numerical(
+            new_clf, self.ts.X[0, :], th=1e-2, epsilon=1e-3)
 
 
 if __name__ == '__main__':

@@ -666,7 +666,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         self._cached_layer_output.backward(w)
 
         return self._from_tensor(self._cached_s.grad.data.view(
-            -1, self.n_features))
+            -1, reduce(lambda a, b: a * b, self.input_shape)))
 
     def save_model(self, filename):
         """
