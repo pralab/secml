@@ -36,7 +36,7 @@ for an overview of the future development directions.
 
 [![Status Alpha](https://img.shields.io/badge/status-alpha-yellow.svg)](.)
 [![Python 3.5 | 3.6 | 3.7](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7-brightgreen.svg)](.)
-[![Platform Linux | MacOS ](https://img.shields.io/badge/platform-linux%20%7C%20macos-lightgrey.svg)](.)
+[![Platform Linux | MacOS | Windows ](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](.)
 [![Apache License 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 
@@ -53,19 +53,24 @@ procedure.
 
 SecML can run under Python >= 3.5 with no additional configuration steps 
 required, as all its dependencies are available as wheel packages for 
-the primary macOS versions and Linux distributions.
+the primary macOS versions, Linux distributions and Windows.
 
 However, to support additional advanced features more packages can be necessary
 depending on the Operating System used:
 
- - Linux (Ubuntu >= 16.04 or equivalent dist)
-   - `python3-tk`, for running MatplotLib Tk-based backends;
-   - NVIDIA<sup>®</sup> CUDA<sup>®</sup> Toolkit for running `tf-gpu`
-     [extra component](#extra-components).
-     See the [TensorFlow Guide](https://www.tensorflow.org/install/gpu).
+ - Linux (Ubuntu 16.04 or later or equivalent distribution)
+   - `python3-tk` for running MatplotLib Tk-based backends;
+   - [NVIDIA<sup>®</sup> CUDA<sup>®</sup> Toolkit](
+        https://developer.nvidia.com/cuda-toolkit) for GPU support.
       
- - macOS (macOS >= 10.12 Sierra)
+ - macOS (10.12 Sierra or later)
    - Nothing to note.
+   
+ - Windows (7 or later)
+   - [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019](
+        https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads).
+   - [NVIDIA<sup>®</sup> CUDA<sup>®</sup> Toolkit](
+        https://developer.nvidia.com/cuda-toolkit) for GPU support.
 
 
 ### Installation process
@@ -111,12 +116,12 @@ of the `[extras]` section.
 ### Available extra components
  - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
    Will install: `torch >= 1.1`, `torchvision >= 0.2.2`  
-   *Warning (Windows only)*: the url to installation archives should be manually provided as 
+   *Windows only*: the url to installation archives should be manually provided as 
    `pip install secml[pytorch] -f https://download.pytorch.org/whl/torch_stable.html`.
  - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
    a Python library to benchmark vulnerability of machine learning systems to adversarial examples.  
    Will install: `tensorflow >= 1.14.*, < 2`, `cleverhans`
- - `tf-gpu` : Shortcut for installing `TensorFlow` package with GPU support.  
+ - `tf-gpu` : Shortcut for installing `TensorFlow` package with GPU support (Linux and Windows only).  
    Will install: `tensorflow-gpu >= 1.14.*, < 2`
 
 
