@@ -151,6 +151,7 @@ Topic :: Scientific/Engineering
 Operating System :: POSIX
 Operating System :: Unix
 Operating System :: MacOS
+Operating System :: Microsoft :: Windows
 """
 
 setup(
@@ -161,7 +162,7 @@ setup(
     long_description_content_type="text/markdown",
     license='Apache License 2.0',
     classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
-    platforms=["Linux", "Mac OS-X", "Unix"],
+    platforms=["Linux", "Mac OS-X", "Unix", "Windows"],
     url='https://secml.gitlab.io',
     download_url="https://pypi.python.org/pypi/secml#files",
     project_urls={
