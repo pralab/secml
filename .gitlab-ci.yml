@@ -369,10 +369,10 @@ release:gitlab-releases:
   script:
     - DIST_ZIP=$(find $CI_PROJECT_DIR/dist -iname \*.zip -exec basename {} \;)
     - echo $DIST_ZIP
-    - 'curl -s --request POST --header "PRIVATE-TOKEN: $API_ACCESS_TOKEN" --data name="$DIST_ZIP" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_ZIP?job=release:gitlab-releases" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
+    - 'curl -s --request POST --header "PRIVATE-TOKEN: $API_ACCESS_TOKEN" --data name="$DIST_ZIP" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_ZIP?job=release:gitlab-releases" --data link_type="package" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
     - DIST_WHL=$(find $CI_PROJECT_DIR/dist -iname \*.whl -exec basename {} \;)
     - echo $DIST_WHL
-    - 'curl -s --request POST --header "PRIVATE-TOKEN: $API_ACCESS_TOKEN" --data name="$DIST_WHL" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_WHL?job=release:gitlab-releases" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
+    - 'curl -s --request POST --header "PRIVATE-TOKEN: $API_ACCESS_TOKEN" --data name="$DIST_WHL" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_WHL?job=release:gitlab-releases" --data link_type="package" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
   artifacts:  # Keep the distribution package (default expire 0)
     name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
     paths:
