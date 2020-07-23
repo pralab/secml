@@ -12,3 +12,4 @@ Adversarial Machine Learning
    tutorials/08-ImageNet
    tutorials/09-Cleverhans
    tutorials/11-ImageNet_advanced
+   tutorials/12-DNR
