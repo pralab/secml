@@ -395,7 +395,7 @@ release:gitlab-repo:
     # Remove all files in target repository (excluding .git folder)
     - find gitlab-secml -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rv {} +
     # Copy al files in target repository (excluding .git folder and target repo folder)
-    - find . -mindepth 1 -maxdepth 1 -not -name .git -not -name .gitlab -not -name gitlab-secml -exec cp -r {} gitlab-secml/ \;
+    - find . -mindepth 1 -maxdepth 1 -not -name .git -not -name gitlab-secml -exec cp -r {} gitlab-secml/ \;
     # Commit and push
     - cd gitlab-secml
     - git add .  # .gitignore will properly exclude what should be excluded
