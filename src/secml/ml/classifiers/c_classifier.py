@@ -2,8 +2,8 @@
 .. module:: CClassifier
    :synopsis: Interface and common functions for classification
 
-.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
+.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
 from abc import ABCMeta, abstractmethod
@@ -11,17 +11,16 @@ from abc import ABCMeta, abstractmethod
 from secml.ml import CModule
 from secml.array import CArray
 from secml.data import CDataset
-from secml.ml.features import CPreProcess
+from secml.data.splitter import CDataSplitterKFold
 from secml.utils.mixed_utils import check_is_fitted
 from secml.core.exceptions import NotFittedError
-from secml.core.decorators import deprecated
 
 
 class CClassifier(CModule, metaclass=ABCMeta):
     """Abstract class that defines basic methods for Classifiers.
 
     A classifier assign a label (class) to new patterns using the
-    informations learned from training set.
+    information learned from training set.
 
     This interface implements a set of generic methods for training
     and classification that can be used for every algorithms. However,
@@ -34,19 +33,20 @@ class CClassifier(CModule, metaclass=ABCMeta):
         Can be a CPreProcess subclass or a string with the type of the
         desired preprocessor. If None, input data is used as is.
 
+    n_jobs : int, optional
+        Number of parallel workers to use for training the classifier.
+        Cannot be higher than processor's number of cores. Default is 1.
+
     """
     __super__ = 'CClassifier'
 
-    def __init__(self, preprocess=None):
+    def __init__(self, preprocess=None, n_jobs=1):
         # List of classes on which training has been performed
         self._classes = None
         # Number of features of the training dataset
         self._n_features = None
 
-        # TODO: CModule.__init__ should handle the call to create.
-        preprocess = preprocess if preprocess is None \
-            else CPreProcess.create(preprocess)
-        CModule.__init__(self, preprocess=preprocess)
+        CModule.__init__(self, preprocess=preprocess, n_jobs=n_jobs)
 
     @property
     def classes(self):
@@ -91,25 +91,27 @@ class CClassifier(CModule, metaclass=ABCMeta):
         check_is_fitted(self, ['classes', 'n_features'])
 
     @abstractmethod
-    def _fit(self, dataset):
+    def _fit(self, x, y):
         """Private method that trains the One-Vs-All classifier.
         Must be reimplemented by subclasses.
 
         Parameters
         ----------
-        dataset : CDataset
-            Training set. Must be a :class:`.CDataset` instance with
-            patterns data and corresponding labels.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray or None, optional
+            Array of shape (n_samples,) containing the class labels.
+            Can be None if not required by the algorithm.
 
         Returns
         -------
-        trained_cls : CClassifier
-            Instance of the classifier trained using input dataset.
+        CClassifier
+            Trained classifier.
 
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
-    def fit(self, dataset, n_jobs=1):
+    def fit(self, x, y):
         """Trains the classifier.
 
         If a preprocess has been specified,
@@ -119,39 +121,75 @@ class CClassifier(CModule, metaclass=ABCMeta):
 
         Parameters
         ----------
-        dataset : CDataset
-            Training set. Must be a :class:`.CDataset` instance with
-            patterns data and corresponding labels.
-        n_jobs : int
-            Number of parallel workers to use for training the classifier.
-            Default 1. Cannot be higher than processor's number of cores.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray or None, optional
+            Array of shape (n_samples,) containing the class labels.
+            Can be None if not required by the algorithm.
 
         Returns
         -------
-        trained_cls : CClassifier
-            Instance of the classifier trained using input dataset.
+        CClassifier
+            Trained classifier.
 
         """
-        if not isinstance(dataset, CDataset):
-            raise TypeError(
-                "training set should be provided as a CDataset object.")
+        x, y = self._check_input(x, y)
+        # storing classes and features
+        self._classes = y.unique()
+        self._n_features = x.shape[1]
+        return super(CClassifier, self).fit(x, y)
 
-        # Storing dataset classes
-        self._classes = dataset.classes
-        self._n_features = dataset.num_features
+    # TODO: add option to exclude xval or customize it.
+    def fit_forward(self, x, y=None, caching=False):
+        """Fit estimator using data and then execute forward on the data.
 
-        data_x = dataset.X
-        # Transform data if a preprocess is defined
-        if self.preprocess is not None:
-            data_x = self.preprocess.fit_transform(dataset.X)
+        To avoid returning over-fitted scores on the training set, this method
+        runs a 5-fold cross validation on training data and
+        returns the validation scores.
 
-        # Data is ready: fit the classifier
-        try:  # Try to use parallelization
-            self._fit(CDataset(data_x, dataset.Y), n_jobs=n_jobs)
-        except TypeError:  # Parallelization is probably not supported
-            self._fit(CDataset(data_x, dataset.Y))
+        Parameters
+        ----------
+        x : CArray
+            Array with shape (n_samples, n_features) to be transformed and
+            to be used for training.
+        y : CArray or None, optional
+            Array of shape (n_samples,) containing the class labels.
+            Can be None if not required by the algorithm.
+        caching: bool
+             True if preprocessed x should be cached for backward pass
 
-        return self
+        Returns
+        -------
+        CArray
+            Transformed input data.
+
+        See Also
+        --------
+        fit : fit the preprocessor.
+        forward : run forward function on input data.
+
+        """
+        kfold = CDataSplitterKFold(
+            num_folds=5, random_state=0).compute_indices(CDataset(x, y))
+
+        scores = CArray.zeros(shape=(x.shape[0], y.unique().size))
+
+        # TODO: samples can be first preprocessed and cached, if required.
+        #  then we can use _fit and _forward to work on the preprocessed data
+        for k in range(kfold.num_folds):
+            tr_idx = kfold.tr_idx[k]
+            ts_idx = kfold.ts_idx[k]
+            self.fit(x[tr_idx, :], y[tr_idx])
+            scores[ts_idx, :] = self.forward(x[ts_idx, :], caching=False)
+
+        # train on the full training set after computing the xval scores
+        self.fit(x, y)
+
+        # cache x if required
+        if caching is True:
+            self._forward_preprocess(x, caching=True)
+
+        return scores
 
     def decision_function(self, x, y=None):
         """Computes the decision function for each pattern in x.
@@ -261,7 +299,7 @@ class CClassifier(CModule, metaclass=ABCMeta):
         return (labels, scores) if return_decision_function is True else labels
 
     def estimate_parameters(self, dataset, parameters, splitter, metric,
-                            pick='first', perf_evaluator='xval', n_jobs=1):
+                            pick='first', perf_evaluator='xval'):
         """Estimate parameter that give better result respect a chose metric.
 
         Parameters
@@ -277,12 +315,12 @@ class CClassifier(CModule, metaclass=ABCMeta):
             A splitter type can be passed as string, in this case all
             default parameters will be used. For data splitters, num_folds
             is set to 3 by default.
-            See CDataSplitter docs for more informations.
+            See CDataSplitter docs for more information.
         metric : CMetric or str
             Object with the metric to use while evaluating the performance.
             A metric type can be passed as string, in this case all
             default parameters will be used.
-            See CMetric docs for more informations.
+            See CMetric docs for more information.
         pick : {'first', 'last', 'random'}, optional
             Defines which of the best parameters set pick.
             Usually, 'first' correspond to the smallest parameters while
@@ -290,9 +328,6 @@ class CClassifier(CModule, metaclass=ABCMeta):
             to the parameters dict passed as input.
         perf_evaluator : CPerfEvaluator or str, optional
             Performance Evaluator to use. Default 'xval'.
-        n_jobs : int, optional
-            Number of parallel workers to use for performance evaluation.
-            Default 1. Cannot be higher than processor's number of cores.
 
         Returns
         -------
@@ -311,7 +346,7 @@ class CClassifier(CModule, metaclass=ABCMeta):
 
         # Evaluate the best parameters for the classifier (self)
         best_params = perf_eval.evaluate_params(
-            self, dataset, parameters, pick=pick, n_jobs=n_jobs)[0]
+            self, dataset, parameters, pick=pick, n_jobs=self.n_jobs)[0]
 
         # Set the best parameters in classifier
         self.set_params(best_params)

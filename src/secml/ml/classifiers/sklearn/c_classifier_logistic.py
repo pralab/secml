@@ -9,7 +9,7 @@
 from sklearn.linear_model import LogisticRegression
 
 from secml.array import CArray
-from secml.ml.classifiers import CClassifierLinear
+from secml.ml.classifiers import CClassifierLinearMixin, CClassifierSkLearn
 from secml.ml.classifiers.loss import CLossLogistic
 from secml.ml.classifiers.regularizer import CRegularizerL2
 
@@ -17,7 +17,9 @@ from secml.ml.classifiers.gradients import \
     CClassifierGradientLogisticMixin
 
 
-class CClassifierLogistic(CClassifierLinear, CClassifierGradientLogisticMixin):
+class CClassifierLogistic(CClassifierLinearMixin,
+                          CClassifierSkLearn,
+                          CClassifierGradientLogisticMixin):
     """Logistic Regression (aka logit, MaxEnt) classifier.
 
     Parameters
@@ -50,90 +52,40 @@ class CClassifierLogistic(CClassifierLinear, CClassifierGradientLogisticMixin):
 
     def __init__(self, C=1.0, max_iter=100,
                  random_state=None, preprocess=None):
-
-        CClassifierLinear.__init__(self, preprocess=preprocess)
-
-        self.C = C
-        self.max_iter = max_iter
-        self.random_state = random_state
-
-    @property
-    def max_iter(self):
-        return self._max_iter
-
-    @property
-    def random_state(self):
-        return self._random_state
-
-    @max_iter.setter
-    def max_iter(self, value):
-        self._max_iter = int(value)
-
-    @random_state.setter
-    def random_state(self, value):
-        self._random_state = value
-
-    @property
-    def C(self):
-        """Penalty parameter C of the error term."""
-        return self._C
-
-    @C.setter
-    def C(self, value):
-        """Set the penalty parameter C of the error term.
-
-        Parameters
-        ----------
-        value : float
-            Penalty parameter C of the error term.
-
-        """
-        self._C = float(value)
-
-    def _init_clf(self):
-        self._sklearn_clf = LogisticRegression(
+        sklearn_model = LogisticRegression(
             penalty='l2',
             dual=False,
             tol=0.0001,
-            C=self._C,
+            C=C,
             fit_intercept=True,
             intercept_scaling=1.0,
             class_weight=None,
             solver='liblinear',
-            random_state=self._random_state,
-            max_iter=self._max_iter,
+            random_state=random_state,
+            max_iter=max_iter,
             multi_class='ovr',
             verbose=0,
-            warm_start=False,
-        )
+            warm_start=False)
 
-    def _fit(self, dataset):
-        """Trains the One-Vs-All Logistic classifier.
+        CClassifierSkLearn.__init__(self, sklearn_model, preprocess=preprocess)
 
-        The following is a private method computing one single
-        binary (2-classes) classifier of the OVA schema.
+    @property
+    def w(self):
+        if self.is_fitted():
+            return CArray(self._sklearn_model.coef_).ravel()
+        else:
+            return None
 
-        Representation of each classifier attribute for the multiclass
-        case is explained in corresponding property description.
+    @property
+    def b(self):
+        if self.is_fitted():
+            return CArray(self._sklearn_model.intercept_[0])[0]
+        else:
+            return None
 
-        Parameters
-        ----------
-        dataset : CDataset
-            Binary (2-classes) training set. Must be a :class:`.CDataset`
-            instance with patterns data and corresponding labels.
-
-        Returns
-        -------
-        trained_cls : classifier
-            Instance of the used solver trained using input dataset.
-
-        """
-        self._init_clf()
-
-        self._sklearn_clf.fit(dataset.X.get_data(), dataset.Y.tondarray())
-
-        self._w = CArray(
-            self._sklearn_clf.coef_, tosparse=dataset.issparse).ravel()
-        self._b = CArray(self._sklearn_clf.intercept_[0])[0]
-
-        return self
+    def _check_input(self, x, y=None):
+        """Check if y contains only two classes."""
+        x, y = CClassifierSkLearn._check_input(self, x, y)
+        if y is not None and y.unique().size != 2:
+            raise ValueError("The data (x,y) has more than two classes.")
+        return x, y

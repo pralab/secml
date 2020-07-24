@@ -5,7 +5,6 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
-import numpy as np
 
 from secml.array import CArray
 from secml.optim.optimizers import COptimizer
@@ -265,13 +264,18 @@ class COptimizerPGDLS(COptimizer):
         if self.constr is not None and self.constr.radius == 0:
             # classify x0 and return
             x0 = self.constr.center
+            if self.bounds is not None and self.bounds.is_violated(x0):
+                import warnings
+                warnings.warn(
+                    "x0 " + str(x0) + " is outside of the given bounds.",
+                    category=RuntimeWarning)
             self._x_seq = CArray.zeros((1, x0.size),
                                        sparse=x0.issparse, dtype=x0.dtype)
             self._f_seq = CArray.zeros(1)
             self._x_seq[0, :] = x0
             self._f_seq[0] = self._fun.fun(x0, *args)
             self._x_opt = x0
-            return
+            return x0
 
         # if x is outside of the feasible domain, project it
         if self.bounds is not None and self.bounds.is_violated(x_init):
@@ -294,12 +298,11 @@ class COptimizerPGDLS(COptimizer):
 
         # The first point is obviously the starting point,
         # and the constraint is not violated (false...)
-        x = x_init
+        x = x_init.deepcopy()
         fx = self._fun.fun(x, *args)  # eval fun at x, for iteration 0
         self._x_seq[0, :] = x
         self._f_seq[0] = fx
 
-        # debugging information
         self.logger.debug('Iter.: ' + str(0) + ', f(x): ' + str(fx))
 
         for i in range(1, self.max_iter):

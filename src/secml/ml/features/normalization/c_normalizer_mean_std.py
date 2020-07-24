@@ -238,14 +238,18 @@ class CNormalizerMeanStd(CNormalizerLinear):
         self._compute_w_and_b()
         return self
 
-    def _check_input(self, x):
+    def _check_input(self, x, y=None):
         """This function is redefined here to avoid calling fit
         before transform, for this normalizer, when default params are set.
         """
-        n_feats = x.atleast_2d().shape[1]
-        if self.w is None:
+        x, y = super(CNormalizerMeanStd, self)._check_input(x, y)
+        # if not trained but initialized with _mean
+        # extend the parameters mean and std to n_feats
+        if self.w is None and self._in_mean is not None:
+            n_feats = x.shape[1]
             if self._in_mean is not None:
                 self._expand_mean(n_feats)
             if self._in_std is not None:
                 self._expand_std(n_feats)
             self._compute_w_and_b()
+        return x, y

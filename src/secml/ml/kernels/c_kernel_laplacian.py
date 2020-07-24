@@ -25,6 +25,9 @@ class CKernelLaplacian(CKernel):
     ----------
     gamma : float
         Default is 1.0.
+    preprocess : CModule or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CModule subclass. If None, input data is used as is.
 
     Attributes
     ----------
@@ -46,11 +49,17 @@ class CKernelLaplacian(CKernel):
     """
     __class_type = 'laplacian'
 
-    def __init__(self, gamma=1.0):
+    def __init__(self, gamma=1.0, preprocess=None):
 
         # Using a float gamma to avoid dtype casting problems
         self.gamma = gamma
-        super(CKernelLaplacian, self).__init__()
+        super(CKernelLaplacian, self).__init__(preprocess=preprocess)
+
+    @property
+    def _grad_requires_forward(self):
+        """Returns True as kernel is cached in the forward pass and then
+        used by backward when computing the gradient."""
+        return True
 
     @property
     def gamma(self):
@@ -135,13 +144,3 @@ class CKernelLaplacian(CKernel):
 
         grad = self.gamma * k_grad * diff.sign()
         return grad if w is None else w.dot(grad)
-
-    def gradient(self, x, w=None):
-        """Compute gradient at x by doing a forward and a backward pass.
-
-        The gradient is pre-multiplied by w.
-
-        """
-        self._cached_kernel = None
-        self.forward(x)
-        return self.backward(w)

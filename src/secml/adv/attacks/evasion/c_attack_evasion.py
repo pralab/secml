@@ -10,46 +10,140 @@
 from abc import ABCMeta, abstractmethod
 
 from secml.adv.attacks import CAttack
+from secml.core.type_utils import is_int
+
 from secml.array import CArray
 from secml.data import CDataset
 
 
 class CAttackEvasion(CAttack, metaclass=ABCMeta):
-    """Interface for Evasion attacks.
+    """Interface class for evasion and poisoning attacks.
 
     Parameters
     ----------
     classifier : CClassifier
-        Target classifier.
-    surrogate_classifier : CClassifier
-        Surrogate classifier, assumed to be already trained.
-    surrogate_data : CDataset or None, optional
-        Dataset on which the the surrogate classifier has been trained on.
-        Is only required if the classifier is nonlinear.
+        Target classifier (trained).
     y_target : int or None, optional
-            If None an error-generic attack will be performed, else a
-            error-specific attack to have the samples misclassified as
-            belonging to the `y_target` class.
+        If None an error-generic attack will be performed, else a
+        error-specific attack to have the samples misclassified as
+        belonging to the `y_target` class.
+    attack_classes : 'all' or CArray, optional
+        Array with the classes that can be manipulated by the attacker or
+         'all' (default) if all classes can be manipulated.
 
     """
     __super__ = 'CAttackEvasion'
 
     def __init__(self, classifier,
-                 surrogate_classifier,
-                 surrogate_data=None,
-                 y_target=None):
+                 y_target=None,
+                 attack_classes='all'):
 
-        super(CAttackEvasion, self).__init__(
-            classifier=classifier,
-            surrogate_classifier=surrogate_classifier,
-            surrogate_data=surrogate_data,
-            y_target=y_target)
+        super(CAttackEvasion, self).__init__(classifier)
+
+        # classes that can be manipulated by the attacker
+        self.attack_classes = attack_classes
+        self.y_target = y_target
+
+    @property
+    def y_target(self):
+        return self._y_target
+
+    @y_target.setter
+    def y_target(self, value):
+        self._y_target = value
+
+    @property
+    def attack_classes(self):
+        return self._attack_classes
+
+    @attack_classes.setter
+    def attack_classes(self, values):
+        if not (values == 'all' or isinstance(values, CArray)):
+            raise ValueError("`attack_classes` can be 'all' or a CArray")
+        self._attack_classes = values
+
+    def is_attack_class(self, y):
+        """Returns True/False if the input class can be attacked.
+
+        Parameters
+        ----------
+        y : int or CArray
+            CArray or single label of the class to to be checked.
+
+        Returns
+        -------
+        bool or CArray
+            True if class y can be manipulated by the attacker,
+             False otherwise. If CArray, a True/False value for each
+             input label will be returned.
+
+        """
+        if is_int(y):
+            if self._attack_classes == 'all':
+                return True  # all classes can be manipulated
+            elif CArray(y == self._attack_classes).any():
+                return True  # y can be manipulated
+            else:
+                return False
+        elif isinstance(y, CArray):
+            v = CArray.zeros(shape=y.shape, dtype=bool)
+            if self.attack_classes == 'all':
+                v[:] = True  # all classes can be manipulated
+                return v
+            for i in range(self.attack_classes.size):
+                v[y == self.attack_classes[i]] = True  # y can be manipulated
+            return v
+        else:
+            raise TypeError("y can be an integer or a CArray")
 
     ###########################################################################
-    #                              PUBLIC METHODS
+    #                                METHODS
     ###########################################################################
 
-    def run(self, x, y, ds_init=None, *args, **kargs):
+    @abstractmethod
+    def _run(self, x, y, x_init=None):
+        """Optimize the (single) attack point x,y.
+
+        Parameters
+        ----------
+        x : CArray
+            Sample.
+        y : int or CArray
+            The true label of x.
+        x_init : CArray or None, optional
+            Initialization point. If None (default), it is set to x.
+
+        Returns
+        -------
+        x_adv : CArray
+                The adversarial example.
+        f_opt : float or None, optional
+                The value of the objective function at x_adv.
+
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def objective_function(self, x):
+        """Objective function.
+
+        Parameters
+        ----------
+        x : CArray or CDataset
+
+        Returns
+        -------
+        f_obj : float or CArray of floats
+
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def objective_function_gradient(self, x):
+        """Gradient of the objective function."""
+        raise NotImplementedError
+
+    def run(self, x, y, ds_init=None):
         """Runs evasion on a dataset.
 
         Parameters
@@ -80,16 +174,11 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
         # only consider samples that can be manipulated
         v = self.is_attack_class(y)
         idx = CArray(v.find(v)).ravel()
-        # print(v, idx)
 
         # number of modifiable samples
         n_mod_samples = idx.size
 
         adv_ds = CDataset(x.deepcopy(), y.deepcopy())
-
-        # If dataset is sparse, set the proper attribute
-        if x.issparse is True:
-            self._issparse = True
 
         # array in which the value of the optimization function are stored
         fs_opt = CArray.zeros(n_mod_samples, )
@@ -98,12 +187,11 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
             k = idx[i].item()  # idx of sample that can be modified
 
             xi = x[k, :] if x_init is None else x_init[k, :]
-            x_opt, f_opt = self._run(x[k, :], y[k], x_init=xi, *args, **kargs)
+            x_opt, f_opt = self._run(x[k, :], y[k], x_init=xi)
 
             self.logger.info(
-                "Point: {:}/{:}, dmax:{:}, f(x):{:}, eval:{:}/{:}".format(
-                    k, x.shape[0], self._dmax, f_opt,
-                    self.f_eval, self.grad_eval))
+                "Point: {:}/{:}, f(x):{:}".format(k, x.shape[0], f_opt))
+
             adv_ds.X[k, :] = x_opt
             fs_opt[i] = f_opt
 
@@ -112,41 +200,7 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
 
         y_pred = CArray(y_pred)
 
-        # Return the mean objective function value on the evasion points (
-        # computed from the outputs of the surrogate classifier)
+        # Return the mean objective function value on the evasion points
         f_obj = fs_opt.mean()
 
         return y_pred, scores, adv_ds, f_obj
-
-    def objective_function(self, x):
-        """Objective function.
-
-        Parameters
-        ----------
-        x : CArray
-            Array with points on which the objective function
-            should be computed.
-
-        Returns
-        -------
-        CArray
-            Value of the objective function on each point.
-
-        """
-        return self._objective_function(x)
-
-    @abstractmethod
-    def _run(self, x0, y0, x_init=None):
-        """Perform evasion on a single pattern.
-
-        Parameters
-        ----------
-        x0 : CArray
-            Initial sample.
-        y0 : int or CArray
-            The true label of x0.
-        x_init : CArray or None, optional
-            Initialization point. If None (default), it is set to x0.
-
-        """
-        raise NotImplementedError

@@ -122,6 +122,9 @@ class CUnitTest(unittest.TestCase):
         if desired is float:
             # To manage the built-in float as either np.float32 or np.float64
             desired = np.floating
+        elif desired is int:
+            # To manage the built-in int as either np.int32 or np.int64
+            desired = np.integer
         else:  # Convert built-in types to numpy dtypes for using issubdtype
             desired = np.dtype(desired).type
         if not np.issubdtype(actual, desired):

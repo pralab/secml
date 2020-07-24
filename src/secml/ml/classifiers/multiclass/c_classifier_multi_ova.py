@@ -45,9 +45,36 @@ def _fit_one_ova(
     # Setting verbosity level
     classifier_instance.verbose = multi_ova.verbose
     # Training one-vs-all classifier
-    classifier_instance.fit(train_ds)
+    classifier_instance.fit(train_ds.X, train_ds.Y)
 
     return classifier_instance
+
+
+def _forward_one_ova(tr_class_idx, multi_ova, test_x, verbose):
+    """Perform forward on an OVA classifier.
+
+    Parameters
+    ----------
+    tr_class_idx : int
+        Index of the OVA classifier.
+    multi_ova : CClassifierMulticlassOVA
+        Instance of the multiclass OVA classifier.
+    test_x : CArray
+        Test data as 2D CArray.
+    verbose : int
+        Verbosity level of the logger.
+
+    """
+    # Resetting verbosity level. This is needed as objects
+    # change id  when passed to subprocesses and our logging
+    # level is stored per-object looking to id
+    multi_ova.verbose = verbose
+
+    multi_ova.logger.info(
+        "Forward for class: {:}".format(tr_class_idx))
+
+    # Perform forward on data for current class classifier
+    return multi_ova._binary_classifiers[tr_class_idx].forward(test_x)[:, 1]
 
 
 class CClassifierMulticlassOVA(CClassifierMulticlass,
@@ -68,27 +95,26 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
     """
     __class_type = 'ova'
 
-    def __init__(self, classifier, preprocess=None, **clf_params):
+    def __init__(self, classifier, preprocess=None, n_jobs=1, **clf_params):
 
         super(CClassifierMulticlassOVA, self).__init__(
             classifier=classifier,
             preprocess=preprocess,
+            n_jobs=n_jobs,
             **clf_params
         )
 
-    def _fit(self, dataset, n_jobs=1):
+    def _fit(self, x, y):
         """Trains the classifier.
 
         A One-Vs-All classifier is trained for each dataset class.
 
         Parameters
         ----------
-        dataset : CDataset
-            Training set. Must be a :class:`.CDataset` instance with
-            patterns data and corresponding labels.
-        n_jobs : int
-            Number of parallel workers to use for training the classifier.
-            Default 1. Cannot be higher than processor's number of cores.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class labels.
 
         Returns
         -------
@@ -97,13 +123,13 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
 
         """
         # Preparing the binary classifiers
-        self.prepare(dataset.num_classes)
+        self.prepare(y.unique().size)
 
         # Fit a one-vs-all classifier for each class
         # Use the specified number of workers
         self._binary_classifiers = parfor2(_fit_one_ova,
                                            self.classes.size,
-                                           n_jobs, self, dataset,
+                                           self.n_jobs, self, CDataset(x, y),
                                            self.verbose)
 
         return self
@@ -140,9 +166,6 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
             (n_patterns, n_features).
-        y : int or None, optional
-            The label of the class wrt the function should be calculated.
-            If None, return the output for all classes.
 
         Returns
         -------
@@ -153,9 +176,18 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
 
         """
         # Getting predicted scores for classifier associated with y
-        scores = CArray.ones(shape=(x.shape[0], self.n_classes))
-        for i in range(self.n_classes):  # TODO parfor
-            scores[:, i] = self._binary_classifiers[i].forward(x)[:, 1]
+        scores = CArray.empty(shape=(x.shape[0], self.n_classes))
+
+        # Discriminant function is now called for each different class
+        res = parfor2(_forward_one_ova,
+                      self.n_classes,
+                      self.n_jobs, self, x,
+                      self.verbose)
+
+        # Building results array
+        for i in range(self.n_classes):
+            scores[:, i] = CArray(res[i])
+
         return scores
 
     def _backward(self, w):

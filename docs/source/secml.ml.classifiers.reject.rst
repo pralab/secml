@@ -22,3 +22,11 @@ CClassifierRejectThreshold
    :undoc-members:
    :show-inheritance:
 
+CClassifierDNR
+--------------------------
+
+.. automodule:: secml.ml.classifiers.reject.c_classifier_dnr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

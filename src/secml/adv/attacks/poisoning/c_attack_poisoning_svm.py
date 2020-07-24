@@ -37,16 +37,11 @@ class CAttackPoisoningSVM(CAttackPoisoning):
     Parameters
     ----------
     classifier : CClassifierSVM
-        Target classifier. If linear, requires `store_dual_vars = True`.
+        Target SVM, trained in the dual (i.e., with kernel not set to None).
     training_data : CDataset
         Dataset on which the the classifier has been trained on.
-    surrogate_classifier : CClassifier
-        Surrogate classifier, assumed to be already trained.
     val : CDataset
         Validation set.
-    surrogate_data : CDataset or None, optional
-        Dataset on which the the surrogate classifier has been trained on.
-        Is only required if the classifier is nonlinear.
     distance : {'l1' or 'l2'}, optional
         Norm to use for computing the distance of the adversarial example
         from the original sample. Default 'l2'.
@@ -60,9 +55,6 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         If None an error-generic attack will be performed, else a
         error-specific attack to have the samples misclassified as
         belonging to the `y_target` class.
-    attack_classes : 'all' or CArray, optional
-        Array with the classes that can be manipulated by the attacker or
-         'all' (default) if all classes can be manipulated.
     solver_type : str or None, optional
         Identifier of the solver to be used. Default 'pgd-ls'.
     solver_params : dict or None, optional
@@ -79,16 +71,12 @@ class CAttackPoisoningSVM(CAttackPoisoning):
 
     def __init__(self, classifier,
                  training_data,
-                 surrogate_classifier,
                  val,
-                 surrogate_data=None,
                  distance='l1',
                  dmax=0,
                  lb=0,
                  ub=1,
-                 discrete=False,
                  y_target=None,
-                 attack_classes='all',
                  solver_type='pgd-ls',
                  solver_params=None,
                  init_type='random',
@@ -96,26 +84,21 @@ class CAttackPoisoningSVM(CAttackPoisoning):
 
         CAttackPoisoning.__init__(self, classifier=classifier,
                                   training_data=training_data,
-                                  surrogate_classifier=surrogate_classifier,
                                   val=val,
-                                  surrogate_data=surrogate_data,
                                   distance=distance,
                                   dmax=dmax,
                                   lb=lb,
                                   ub=ub,
-                                  discrete=discrete,
                                   y_target=y_target,
-                                  attack_classes=attack_classes,
                                   solver_type=solver_type,
                                   solver_params=solver_params,
                                   init_type=init_type,
                                   random_seed=random_seed)
 
-        # enforce storing dual variables in SVM
-        if not self._surrogate_classifier.store_dual_vars and \
-                self._surrogate_classifier.is_kernel_linear():
+        # check if SVM has been trained in the dual
+        if self.classifier.kernel is None:
             raise ValueError(
-                "please retrain the classifier with `store_dual_vars=True`")
+                "Please retrain the SVM in the dual (kernel != None).")
 
         # indices of support vectors (at previous iteration)
         # used to check if warm_start can be used in the iterative solver
@@ -151,11 +134,13 @@ class CAttackPoisoningSVM(CAttackPoisoning):
 
         # index of the current poisoning point in the set self._xc
         # as this set is appended to the training set, idx is shifted
-        idx += self._surrogate_data.num_samples
+        idx += self.training_data.num_samples
 
+        # k is the index of sv_idx corresponding to the training idx of xc
         k = clf.sv_idx.find(clf.sv_idx == idx)
         if len(k) == 1:  # if not empty
-            return clf.alpha[k]
+            alpha_c = clf.alpha[k].todense().ravel()
+            return alpha_c
         return 0
 
     def alpha_xc(self, xc):
@@ -209,11 +194,14 @@ class CAttackPoisoningSVM(CAttackPoisoning):
             computed
         """
         # handle normalizer, if present
-        xc = xc if clf.preprocess is None else clf.preprocess.transform(xc)
-        xk = xk if clf.preprocess is None else clf.preprocess.transform(xk)
+        p = clf.kernel.preprocess
+        # xc = xc if p is None else p.forward(xc, caching=False)
+        xk = xk if p is None else p.forward(xk, caching=False)
 
+        rv = clf.kernel.rv
         clf.kernel.rv = xk
         dKkc = alpha_c * clf.kernel.gradient(xc)
+        clf.kernel.rv = rv
         return dKkc.T  # d * k
 
     def _gradient_fk_xc(self, xc, yc, clf, loss_grad, tr, k=None):
@@ -222,13 +210,9 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         computed on a set of points xk w.r.t. a single poisoning point xc
         """
 
-        svm = clf  # classifier is an SVM
-
         xc0 = xc.deepcopy()
-
         d = xc.size
         grad = CArray.zeros(shape=(d,))  # gradient in input space
-
         alpha_c = self._alpha_c(clf)
 
         if abs(alpha_c) == 0:  # < svm.C:  # this include alpha_c == 0
@@ -243,33 +227,36 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # this gradient component is the only one if margin SV set is empty
         # gt is the derivative of the loss computed on a validation
         # set w.r.t. xc
-        Kd_xc = self._Kd_xc(svm, alpha_c, xc, xk)
+        Kd_xc = self._Kd_xc(clf, alpha_c, xc, xk)
+        assert (clf.kernel.rv.shape[0] == clf.alpha.shape[1])
+
         gt = Kd_xc.dot(grad_loss_fk).ravel()  # gradient of the loss w.r.t. xc
 
-        xs, sv_idx = clf.sv_margin()  # these points are already normalized
+        xs, sv_idx = clf._sv_margin()  # these points are already normalized
 
         if xs is None:
             self.logger.debug("Warning: xs is empty "
                               "(all points are error vectors).")
-            return gt if svm.preprocess is None else \
-                svm.preprocess.gradient(xc0, w=gt)
+            return gt if clf.kernel.preprocess is None else \
+                clf.kernel.preprocess.gradient(xc0, w=gt)
 
         s = xs.shape[0]
 
         # derivative of the loss computed on a validation set w.r.t. the
         # classifier params
-        fd_params = svm.grad_f_params(xk)
-        # grad_loss_params = fd_params.dot(-grad_loss_fk)
+        fd_params = clf.grad_f_params(xk)
         grad_loss_params = fd_params.dot(grad_loss_fk)
 
         H = clf.hessian_tr_params()
         H += 1e-9 * CArray.eye(s + 1)
 
         # handle normalizer, if present
-        xc = xc if clf.preprocess is None else clf.preprocess.transform(xc)
+        # xc = xc if clf.preprocess is None else clf.kernel.transform(xc)
         G = CArray.zeros(shape=(gt.size, s + 1))
-        svm.kernel.rv = xs
-        G[:, :s] = svm.kernel.gradient(xc).T
+        rv = clf.kernel.rv
+        clf.kernel.rv = xs
+        G[:, :s] = clf.kernel.gradient(xc).T
+        clf.kernel.rv = rv
         G *= alpha_c
 
         # warm start is disabled if the set of SVs changes!
@@ -292,7 +279,7 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         gt += v
 
         # propagating gradient back to input space
-        if clf.preprocess is not None:
-            return clf.preprocess.gradient(xc0, w=gt)
+        if clf.kernel.preprocess is not None:
+            return clf.kernel.preprocess.gradient(xc0, w=gt)
 
         return gt

@@ -13,7 +13,7 @@ from secml.core.type_utils import is_tuple
 
 import os
 import matplotlib as mpl
-if os.environ.get('DISPLAY', '') == '':
+if os.name == 'posix' and os.environ.get('DISPLAY', '') == '':
     # If no display is available, use file-only backend
     mpl.use('Agg')
 

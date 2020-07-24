@@ -3,7 +3,6 @@
    :synopsis: Interface for kernel functions
 
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
-.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 .. moduleauthor:: Angelo Sotgiu <angelo.sotgiu@unica.it>
 
 """
@@ -26,16 +25,31 @@ class CKernel(CModule, metaclass=ABCMeta):
     A kernel must be positive semi-definite (PSD), even though non-PSD kernels
     can also be used to train classifiers (e.g., SVMs, but losing convexity).
 
+    Parameters
+    ----------
+    preprocess : CModule or None, optional
+        Features preprocess to be applied to input data.
+        Can be a CModule subclass. If None, input data is used as is.
+
     """
     __super__ = 'CKernel'
 
-    def __init__(self):
+    def __init__(self, preprocess=None):
         self._rv = None
         self._cached_kernel = None
-        super(CKernel, self).__init__()
+        super(CKernel, self).__init__(preprocess=preprocess)
+
+    def _clear_cache(self):
+        """Clears cached values within this class instance."""
+        self._cached_kernel = None
+        super(CKernel, self)._clear_cache()
 
     def _check_is_fitted(self):
-        pass
+        pass  # TODO: check rv
+
+    def _fit(self, x, y=None):
+        self.rv = x
+        return self
 
     @property
     def rv(self):
@@ -98,7 +112,12 @@ class CKernel(CModule, metaclass=ABCMeta):
         CArray([[1.]])
 
         """
-        self._rv = x.atleast_2d() if rv is None else rv.atleast_2d()
+        # apply pre-processing (if any) on rv
+        rv = x.atleast_2d() if rv is None else rv.atleast_2d()
+        if self.preprocess is not None:
+            rv = self._forward_preprocess(rv, caching=False)
+        # store preprocessed rv within the class
+        self.rv = rv
 
         kernel = self.forward(x, caching=False)
 
@@ -107,44 +126,3 @@ class CKernel(CModule, metaclass=ABCMeta):
             return kernel.item()
         else:
             return kernel
-
-    def forward(self, x, caching=True):
-        """Compute kernel between x and cached rv. If rv is None,
-        it is set to x and the kernel is computed between x and itself.
-
-        Parameters
-        ----------
-        x : CArray
-            Array of shape (n_x, n_features).
-
-        caching: bool
-            True if preprocessed input should be cached for backward pass.
-
-        Returns
-        -------
-        kernel : CArray
-            Kernel between x and rv.
-            Array of shape (n_x, n_rv).
-
-        """
-
-        # transform data using inner preprocess, if defined
-        x = self._preprocess_data(x, caching=caching).atleast_2d()
-
-        # cache relevance vectors
-        if self.rv is None:
-            self.rv = x
-
-        kernel = CArray(self._forward(x))
-        return kernel.todense()
-
-    @deprecated("0.12", extra="use `.k` instead.")
-    def similarity(self, x, rv=None):
-        """Computes kernel. Wrapper of 'k' function.
-
-        See Also
-        --------
-        :meth:`.CKernel.k` : Main computation interface for kernels.
-
-        """
-        return self.k(x, rv)

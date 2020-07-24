@@ -1,3 +1,71 @@
+## v0.13 (24/07/2020)
+- #814 Added new evasion attack `CAttackEvasionPGDExp`.
+- #780 Added new classifier `CClassifierDNR` implementing Deep Neural Rejection (DNR). See *Sotgiu et al. “Deep neural rejection against adversarial examples”, EURASIP J. on Info. Security (2020)*.
+- #47 Added new classifier `CClassifierMulticlassOVO` implementing One-vs-One multiclass classification scheme.
+- #765 Extended `CModule` to support trainable modules via `fit` and `fit_forward` functions.
+- #800 Security evaluation can now be run using Cleverhans attacks. The name of the parameter to check should be specified as `attack_params.<param_name>` as an input argument for the constructor of `CSecEval`.
+- #839 Experimental support of Windows operating system (version 7 or later).
+
+### Requirements (1 change)
+- #768 Removed temporary pin of Pillow to v6 which used to break torch and torchvision packages.
+
+### Added (4 changes)
+- [#100007](https://gitlab.com/secml/secml/-/issues/100007) Added new experimental package `ml.scalers` with a different implementation of `ml.features.normalization` classes directly based Scikit-Learn's scalers. Included classes are: `CScalerMinMax`, `CScalerStd`, `CScalerNorm`.
+- #770 Added new methods to convert a `CArray` to specific `scipy.sparse` array formats: `tocoo`, `tocsc`, `todia`, `todok`, `tolil`.
+- #812 `CAttackPoisoning` now exposes: `x0`, `xc`, `yc`, `objective_function` and `objective_function_gradient`.
+- #776 `n_jobs` is now a init parameter of `CModule` and subclasses and not passed via `fit` anymore.
+
+### Improved (12 changes)
+- #817 Added `CClassifierSVM` native support to OVA multiclass scheme, without replicating the kernel in each one-vs-all classifier.
+- #574 Added `_clear_cache` mechanism to `CModule` and classes that require caching data in the forward pass before backward (e.g., exponential kernels do that to avoid re-computing the kernel matrix in the backward pass).
+- #820 Add parallel execution of `forward` method for `CClassifierMulticlassOVA` and `CClassifierMulticlassOVO`.
+- #815 Simplified `CAttack` interface (now only requires implementing `run` as required by `CSecEval`).
+- #574 Modified kernel and classifier interfaces to allow their use as preprocessing modules.
+- #775 Improved efficiency in gradient computation of SVMs, by back-propagating the alpha values to the kernel.
+- #773 Improved efficiency in the computation of gradients of evasion attacks (`CAttackEvasionPGDLS`). Now gradient is called once rather than twice to compute the gradient of the objective function.
+- #801 `CSecEval` will now check that the `param_name` input argument can be found in the attack class used in the evaluation.
+- #695 `COptimizerPGD` now exits optimization if constraint radius is 0. `COptimizerPGD` , `COptimizerPGDLS` and `COptimizerPGDExp` will now raise a warning if the 0-radius constraint is defined outside the given bounds.
+- #828 `CClassifierSVM` now uses `n_jobs` parameter for parallel execution of training in case of multiclass datasets.
+- #767 Using `scipy.sparse` `.hstack` and `.vstack` instead of a custom implementation in `CSparse.concatenate`.
+- #772 Using `scipy.sparse` `.argmin` and `.argmax` instead of a custom implementation in `CSparse.argmin` and `CSparse.argmax`.
+
+### Changed (6 changes)
+- #817 Kernel is now used as preprocess in `CClassifierSVM`.
+- #817 Removed `store_dual_vars` and `kernel.setter` from `CClassifierSVM`. Now a linear SVM is trained in the primal (w,b) if `kernel=None`, otherwise it is trained in the dual (alpha and b), on the precomputed training kernel matrix.
+- #765 Unified `fit` interface from `fit(ds)` to `fit(x,y)` to be consistent across normalizers and classifiers.
+- #574 Removed redundant definitions of `gradient(x, w)` from `CKernelRBF`, `CKernelLaplacian`, `CKernelEuclidean`, `CClassifierDNN`, `CNormalizerUnitNorm`. The protected property `grad_requires_forward` now specifies if gradient has to compute an explicit forward pass or only propagate the input `x` through the pre-processing chain before calling `backward`.
+- #823 Removed `surrogate_data` parameter from `CAttackPoisoning` and renamed it to `double_init_ds` in `CAttackEvasion` subclasses.
+- #829 `CClassifierRejectThreshold` now returns wrapped classifier classes plus the reject class (-1).
+
+### Fixed (10 changes)
+- #816 Fixed stop condition of `COptimizerPGD` which was missing index `i`.
+- #825 Infer the number of attacked classifier classes directly from it (instead of inferring it from surrogate data) in `CAttackEvasionPGDLS` to fix a crash when the class index of data points is greater or equal than the number of alternative data points.
+- #810 Fixed `CClassifierPyTorch.backward` not working properly due to a miscalculation of the number of input features of the model when a `CNormalizeDNN` is used as preprocessor.
+- #803 Fixed checks on the inner classifier in `CClassifierRejectThreshold` which can be bypassed by using the clf attribute setter, now removed.
+- #818 Fixed `CCreator.set` not allowing to set writable attributes of level-0 readable-only attributes.
+- #819 Fixed `CCreator.get_params` not returning level-0 not-writable attributes having one or more writable attributes.
+- #785 Fixed constant override of matplotlib backend in `CFigure` on Windows systems.
+- #783 Fixed `model_zoo.load_model` improperly building download urls depending on the system default url separator.
+- #771 Fixed the following methods of `CSparse` to ensure they properly work independently from the sparse array format: `save`, `load`, `__pow__`, `round`, `nan_to_num`, `logical_and`, `unique`, `bincount`, `prod`, `all`, `any`, `min`, `max`.
+- #769 `CArray.tocsr()` now always returns a `scipy.sparse.csr_matrix` array as expected.
+
+### Removed & Deprecated (2 changes)
+- #540 Removed `discrete` and `surrogate_classifier` parameter from `CAttack`.
+- #777 Deprecated attribute `kernel` is now removed from `CClassifierSGD`, `CClassifierRidge` and `CClassifierLogistic` classifiers.
+
+### Documentation (10 changes)
+- #839 Windows is now displayed as a supported Operating System in README and setup.
+- #806 Documented pytorch extra component installation requirements under Windows.
+- #834 Temporarily pinned `numpydoc` to `< 1.1` to avoid compatibility issues of the newest version.
+- #807 Documentation is now built using Sphinx https://readthedocs.org/ theme v0.5 or higher.
+- #830 Fixed links to repository pages by adding a dash after project name.
+- #758 Added a direct link to the gitlab.com repository in README.
+- #788 Notebooks now include a warning about the required extra components (if any).
+- #787 Fixed argmin -> argmax typo in docstring of `CClassifierRejectThreshold.predict` method.
+- #789 Fixed notebook 4 not correctly generating a separate dataset for training the target classifiers.
+- #791 Fixed `random_state` not set for `CClassifierDecisionTree` in notebook 4.
+
+
 ## v0.12 (11/03/2020)
 - #726 Refactored kernel package (now `secml.ml.kernels`). Kernel classes are now inherited from `CModule`, which enables computing gradients more efficiently. This will enable us to use kernels as preprocessors in future releases.
 - #755 Package `secml.ml.model_zoo` has been moved to `secml.model_zoo`.

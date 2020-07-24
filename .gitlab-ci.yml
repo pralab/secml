@@ -9,6 +9,7 @@ variables:
 stages:
   - package
   - test
+  - sync
   - release
   - triage
 
@@ -168,7 +169,7 @@ test:py37:min:
 
 .test:notebooks:
   extends: .test
-  needs: ["package:docs"]  # Use [] after gitlab 12.6
+  needs: []
   rules:
     - if: '$RUN_TESTS'
       when: on_success
@@ -215,7 +216,7 @@ test:notebooks:py35:latest:
       when: on_success
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
-    - if: '$CI_COMMIT_REF_NAME == "develop" || $CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_REF_NAME == "stable" || $CI_COMMIT_REF_NAME =~ /^release-.*$/ || $CI_COMMIT_REF_NAME =~ /^.*-stable$/'
+    - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "stable" || $CI_COMMIT_BRANCH =~ /^release-.*$/ || $CI_COMMIT_BRANCH =~ /^.*-stable$/'
       changes:
       - src/secml/**/*
       - .gitlab-ci.yml
@@ -288,15 +289,8 @@ test:install:whl:extras:py37:
     policy: pull
 
 
-.release:
-  stage: release
-  image: ${CI_REGISTRY}/pralab/docker-helper-images/alpine-release:latest
-  only:
-    - tags
-  when: manual
-
-.release-ssh:
-  before_script: &release-ssh
+.upstream-ssh:
+  before_script: &upstream-ssh
     # Activate the ssh agent
     - eval $(ssh-agent -s)
 
@@ -304,7 +298,7 @@ test:install:whl:extras:py37:
     ## without extra base64 encoding.
     ## https://gitlab.com/gitlab-examples/ssh-private-key/issues/1#note_48526556
     ##
-    - echo "$SSH_RELEASE_KEY" | tr -d '\r' | ssh-add -
+    - echo "$SSH_UPSTREAM_KEY" | tr -d '\r' | ssh-add -
 
     # Create .ssh folder and set correct permissions
     - mkdir -p ~/.ssh
@@ -318,6 +312,54 @@ test:install:whl:extras:py37:
     - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
 
+
+.sync:
+  stage: sync
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/alpine-release:latest
+  dependencies: []  # We do not need artifacts for jobs in this stage
+
+sync:upstream-repo:
+  extends: .sync
+  before_script: *upstream-ssh
+  variables:
+    CI_UPSTREAM_REPO: secml/secml.git
+    CI_UPSTREAM_BRANCH: master
+  script:
+    # Validate access to ssh
+    - ssh -T git@gitlab.com
+    # Add upstream repository as new remote (workaround for fatal: remote upstream already exists.)
+    - git config remote.upstream.url >&- || git remote add upstream git@gitlab.com:$CI_UPSTREAM_REPO
+    # Fetch remote, merge local and push to upstream
+    - git fetch upstream $CI_UPSTREAM_BRANCH
+    # Checkout current HEAD as branch (delete branch first if exists))
+    - git branch -D $CI_COMMIT_BRANCH &>/dev/null || true
+    - git checkout -b $CI_COMMIT_BRANCH
+    # Checkout the upstream branch using unique name (delete branch first if exists)
+    - git branch -D up-$CI_UPSTREAM_BRANCH &>/dev/null || true
+    - git checkout -b up-$CI_UPSTREAM_BRANCH upstream/$CI_UPSTREAM_BRANCH
+    # Merge local branch into upstream (here any conflict will make the job fail)
+    - git merge $CI_COMMIT_BRANCH --no-edit
+    # Push to upstream
+    - git push upstream up-$CI_UPSTREAM_BRANCH:$CI_UPSTREAM_BRANCH
+  rules:
+    - if: '$RUN_SYNC'
+      when: on_success
+    - if: '$CI_MERGE_REQUEST_ID'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      when: on_success
+  allow_failure: true
+
+
+.release:
+  stage: release
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/alpine-release:latest
+  only:
+    - tags
+  when: manual
+
 release:gitlab-releases:
   extends: .release
   before_script:
@@ -327,10 +369,10 @@ release:gitlab-releases:
   script:
     - DIST_ZIP=$(find $CI_PROJECT_DIR/dist -iname \*.zip -exec basename {} \;)
     - echo $DIST_ZIP
-    - 'curl -s --request POST --header "PRIVATE-TOKEN: $API_ACCESS_TOKEN" --data name="$DIST_ZIP" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_ZIP?job=release:gitlab-releases" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
+    - 'curl -s --request POST --header "PRIVATE-TOKEN: $API_ACCESS_TOKEN" --data name="$DIST_ZIP" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_ZIP?job=release:gitlab-releases" --data link_type="package" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
     - DIST_WHL=$(find $CI_PROJECT_DIR/dist -iname \*.whl -exec basename {} \;)
     - echo $DIST_WHL
-    - 'curl -s --request POST --header "PRIVATE-TOKEN: $API_ACCESS_TOKEN" --data name="$DIST_WHL" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_WHL?job=release:gitlab-releases" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
+    - 'curl -s --request POST --header "PRIVATE-TOKEN: $API_ACCESS_TOKEN" --data name="$DIST_WHL" --data url="$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/dist/$DIST_WHL?job=release:gitlab-releases" --data link_type="package" $CI_PROJECT_DOMAIN/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links'
   artifacts:  # Keep the distribution package (default expire 0)
     name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}"
     paths:
@@ -339,23 +381,21 @@ release:gitlab-releases:
 
 release:gitlab-repo:
   extends: .release
-  before_script: *release-ssh
+  before_script: *upstream-ssh
   variables:
-    CI_REPO: secml/secml.git
+    CI_UPSTREAM_REPO: secml/secml.git
   dependencies: []  # We do not need artifacts in this job
   script:
     # Validate access to ssh
     - ssh -T git@gitlab.com
     # Use main TAG version (excluding e.g. "-rc1" suffix)
-    - CI_REPO_BRANCH=release-$(echo $CI_COMMIT_TAG | ( IFS="-$IFS" ; read a b && echo $a ))
+    - CI_UPSTREAM_BRANCH=release-$(echo $CI_COMMIT_TAG | ( IFS="-$IFS" ; read a b && echo $a ))
     # Clone gitlab.com repository
-    - git clone -b $CI_REPO_BRANCH git@gitlab.com:$CI_REPO gitlab-secml
+    - git clone -b $CI_UPSTREAM_BRANCH git@gitlab.com:$CI_UPSTREAM_REPO gitlab-secml
     # Remove all files in target repository (excluding .git folder)
     - find gitlab-secml -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rv {} +
     # Copy al files in target repository (excluding .git folder and target repo folder)
-    - find . -mindepth 1 -maxdepth 1 -not -name .git -not -name .gitlab -not -name gitlab-secml -exec cp -r {} gitlab-secml/ \;
-    # Remove unittests
-    - find gitlab-secml -mindepth 1 -type d -name tests -exec rm -rv {} +
+    - find . -mindepth 1 -maxdepth 1 -not -name .git -not -name gitlab-secml -exec cp -r {} gitlab-secml/ \;
     # Commit and push
     - cd gitlab-secml
     - git add .  # .gitignore will properly exclude what should be excluded
@@ -364,16 +404,16 @@ release:gitlab-repo:
 
 release:gitlab-pages:
   extends: .release
-  before_script: *release-ssh
+  before_script: *upstream-ssh
   variables:
     CI_PAGES_REPO: secml/secml.gitlab.io.git
     CI_PAGES_URL: secml.gitlab.io
-    CI_PAGES_REPO_BRANCH: master
+    CI_PAGES_BRANCH: master
   script:
     # Validate access to ssh
     - ssh -T git@gitlab.com
     # Clone gitlab.com-pages repository
-    - git clone -b $CI_PAGES_REPO_BRANCH git@gitlab.com:$CI_PAGES_REPO
+    - git clone -b $CI_PAGES_BRANCH git@gitlab.com:$CI_PAGES_REPO
     - cd $CI_PAGES_URL
     # Remove current release
     - rm -r src/*
@@ -406,8 +446,10 @@ release:pypi:dry:
 
 
 .triage:
-  image: ruby:2.4
+  image: ruby:latest
+  needs: []
   cache: {}
+  allow_failure: true
   before_script:
     - gem install gitlab-triage
     - export SSL_CERT_FILE=$CI_SERVER_TLS_CA_FILE
@@ -416,7 +458,7 @@ triage:run:
   stage: triage
   extends: .triage
   script:
-    - gitlab-triage --debug --host-url $CI_PROJECT_DOMAIN --token $API_ACCESS_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
+    - gitlab-triage -r $CI_PROJECT_DIR/.gitlab/triage_extra.rb --debug --host-url $CI_PROJECT_DOMAIN --token $API_ACCESS_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
   rules:
     - if: '$RUN_TRIAGE'
       when: always
@@ -425,7 +467,7 @@ triage:run:dry:
   stage: triage
   extends: .triage
   script:
-    - gitlab-triage --dry-run --debug --host-url $CI_PROJECT_DOMAIN --token $API_ACCESS_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
+    - gitlab-triage -r $CI_PROJECT_DIR/.gitlab/triage_extra.rb --dry-run --debug --host-url $CI_PROJECT_DOMAIN --token $API_ACCESS_TOKEN --source-id $CI_PROJECT_PATH --policies-file $CI_PROJECT_DIR/.gitlab/triage-policies.yml
   only:
     - web
   when: manual

@@ -84,7 +84,7 @@ class COptimizerPGD(COptimizer):
     #############################################
 
     def _return_best_solution(self, i):
-        """Search the best solution between the ones found so far.
+        """Return the best solution among the ones found up to iteration i.
 
         Parameters
         ----------
@@ -137,16 +137,40 @@ class COptimizerPGD(COptimizer):
         self._f.reset_eval()
         self._fun.reset_eval()
 
-        x = x_init.deepcopy()
+        # constr.radius = 0, exit
+        if self.constr is not None and self.constr.radius == 0:
+            # classify x0 and return
+            x0 = self.constr.center
+            if self.bounds is not None and self.bounds.is_violated(x0):
+                import warnings
+                warnings.warn(
+                    "x0 " + str(x0) + " is outside of the given bounds.",
+                    category=RuntimeWarning)
+            self._x_seq = CArray.zeros((1, x0.size),
+                                       sparse=x0.issparse, dtype=x0.dtype)
+            self._f_seq = CArray.zeros(1)
+            self._x_seq[0, :] = x0
+            self._f_seq[0] = self._fun.fun(x0, *args)
+            self._x_opt = x0
+            return x0
 
-        if self.constr is not None and self.constr.is_violated(x):
-            x = self.constr.projection(x)
+        # if x is outside of the feasible domain, project it
+        if self.bounds is not None and self.bounds.is_violated(x_init):
+            x_init = self.bounds.projection(x_init)
 
-        if self.bounds is not None and self.bounds.is_violated(x):
-            x = self.bounds.projection(x)
+        if self.constr is not None and self.constr.is_violated(x_init):
+            x_init = self.constr.projection(x_init)
 
-        self._x_seq = CArray.zeros((self._max_iter, x.size))
+        if (self.bounds is not None and self.bounds.is_violated(x_init)) or \
+                (self.constr is not None and self.constr.is_violated(x_init)):
+            raise ValueError(
+                "x_init " + str(x_init) + " is outside of feasible domain.")
+
+        self._x_seq = CArray.zeros(
+            (self._max_iter, x_init.size), sparse=x_init.issparse)
         self._f_seq = CArray.zeros(self._max_iter)
+
+        x = x_init.deepcopy()
 
         i = 0
         for i in range(self._max_iter):
@@ -159,18 +183,20 @@ class COptimizerPGD(COptimizer):
                     self._f_seq[i], self._f_seq[i - 1]))
                 return self._return_best_solution(i)
 
-            if i > 6 and self.f_seq[-3:].mean() < self.f_seq[-6:-3].mean():
+            if i > 10 and abs(self.f_seq[i - 5:i].mean() -
+                              self.f_seq[i - 10:i - 5].mean()) < self.eps:
                 self.logger.debug(
-                    "Decreasing function, exiting... {:}  {:}".format(
-                        self.f_seq[-3:].mean(), self.f_seq[-6:-3].mean()))
+                    "Flat region over 10 iterations, exiting... {:}  {:}".format(
+                        self.f_seq[i - 3:i].mean(),
+                        self.f_seq[i - 6:i - 3].mean()))
                 return self._return_best_solution(i)
 
             grad = self._fun.gradient(x, *args)
 
             # debugging information
             self.logger.debug(
-                'Iter.: ' + str(i) + ', x: ' + str(x) + ', f(x): ' +
-                str(self._f_seq[i]) + '|g(x)|_2: ' + str(grad.norm()))
+                'Iter.: ' + str(i) + ', f(x): ' +
+                str(self._f_seq[i].item()) + ', |df/dx|: ' + str(grad.norm()))
 
             # make a step into the deepest descent direction
             x -= self.eta * grad

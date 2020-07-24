@@ -117,6 +117,27 @@ class CDense(_CArrayInterface):
         """Return current CDense as a scipy.sparse.csr_matrix."""
         return scs.csr_matrix(self.tondarray())
 
+    def tocoo(self):
+        """Return current CDense as a scipy.sparse.coo_matrix."""
+        return scs.coo_matrix(self.tondarray())
+
+    def tocsc(self):
+        """Return current CDense as a scipy.sparse.csc_matrix."""
+        return scs.csc_matrix(self.tondarray())
+
+    def todia(self):
+        """Return current CDense as a scipy.sparse.dia_matrix."""
+        return scs.dia_matrix(self.tondarray())
+
+    def todok(self):
+        """Return current CDense as a scipy.sparse.dok_matrix."""
+        # dok_matrix does not support casting from 1-D ndarrays
+        return scs.dok_matrix(self.atleast_2d().tondarray())
+
+    def tolil(self):
+        """Return current CDense as a scipy.sparse.lil_matrix."""
+        return scs.lil_matrix(self.tondarray())
+
     def tolist(self):
         """Return current CDense as a list."""
         return self._data.tolist()
@@ -1716,7 +1737,7 @@ class CDense(_CArrayInterface):
     @classmethod
     def empty(cls, shape, dtype=float):
         """Return an (theoretically) empty array of desired shape.
-        See numpy.empty for more informations.
+        See numpy.empty for more information.
 
         Parameters
         ----------
@@ -1749,7 +1770,7 @@ class CDense(_CArrayInterface):
     @classmethod
     def zeros(cls, shape, dtype=float):
         """Return an array of desired shape with zeros.
-        See numpy.zeros for more informations.
+        See numpy.zeros for more information.
 
         Parameters
         ----------
@@ -1782,7 +1803,7 @@ class CDense(_CArrayInterface):
     @classmethod
     def ones(cls, shape, dtype=float):
         """Return an array of desired shape with ones.
-        See numpy.ones for more informations.
+        See numpy.ones for more information.
 
         Parameters
         ----------
@@ -1815,7 +1836,7 @@ class CDense(_CArrayInterface):
     @classmethod
     def eye(cls, n_rows, n_cols=None, k=0, dtype=float):
         """Return an array of desired dimension with ones on the diagonal and zeros elsewhere.
-        See numpy.eye for more informations.
+        See numpy.eye for more information.
 
         Parameters
         ----------

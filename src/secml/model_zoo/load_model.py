@@ -164,7 +164,8 @@ def load_model(model_id):
     # Download (if needed) model's script, check md5 and extract it
     if not fm.file_exist(model_path) or \
             model_info['model_md5'] != md5(model_path):
-        model_url = fm.join('models', model_info['model'] + '.py')
+        model_url_parts = ('models', model_info['model'] + '.py')
+        model_url = '/'.join(s.strip('/') for s in model_url_parts)
         out_dir = fm.abspath(model_path)
         # Download requested model from current version's branch first,
         # then from master branch
@@ -179,7 +180,8 @@ def load_model(model_id):
     # Download (if needed) state, check md5 and extract it
     if not fm.file_exist(state_path) or \
             model_info['state_md5'] != md5(state_path):
-        state_url = fm.join('models', model_info['state'] + '.gz')
+        state_url_parts = ('models', model_info['state'] + '.gz')
+        state_url = '/'.join(s.strip('/') for s in state_url_parts)
         out_dir = fm.abspath(state_path)
         # Download requested model state from current version's branch first,
         # then from master branch

@@ -36,13 +36,8 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         Target classifier.
     training_data : CDataset
         Dataset on which the the classifier has been trained on.
-    surrogate_classifier : CClassifier
-        Surrogate classifier, assumed to be already trained.
     val : CDataset
         Validation set.
-    surrogate_data : CDataset or None, optional
-        Dataset on which the the surrogate classifier has been trained on.
-        Is only required if the classifier is nonlinear.
     distance : {'l1' or 'l2'}, optional
         Norm to use for computing the distance of the adversarial example
         from the original sample. Default 'l2'.
@@ -56,9 +51,6 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         If None an error-generic attack will be performed, else a
         error-specific attack to have the samples misclassified as
         belonging to the `y_target` class.
-    attack_classes : 'all' or CArray, optional
-        Array with the classes that can be manipulated by the attacker or
-         'all' (default) if all classes can be manipulated.
     solver_type : str or None, optional
         Identifier of the solver to be used. Default 'pgd-ls'.
     solver_params : dict or None, optional
@@ -75,16 +67,12 @@ class CAttackPoisoningRidge(CAttackPoisoning):
 
     def __init__(self, classifier,
                  training_data,
-                 surrogate_classifier,
                  val,
-                 surrogate_data=None,
                  distance='l2',
                  dmax=0,
                  lb=0,
                  ub=1,
-                 discrete=False,
                  y_target=None,
-                 attack_classes='all',
                  solver_type='pgd-ls',
                  solver_params=None,
                  init_type=None,
@@ -92,16 +80,12 @@ class CAttackPoisoningRidge(CAttackPoisoning):
 
         CAttackPoisoning.__init__(self, classifier=classifier,
                                   training_data=training_data,
-                                  surrogate_classifier=surrogate_classifier,
                                   val=val,
-                                  surrogate_data=surrogate_data,
                                   distance=distance,
                                   dmax=dmax,
                                   lb=lb,
                                   ub=ub,
-                                  discrete=discrete,
                                   y_target=y_target,
-                                  attack_classes=attack_classes,
                                   solver_type=solver_type,
                                   solver_params=solver_params,
                                   init_type=init_type,

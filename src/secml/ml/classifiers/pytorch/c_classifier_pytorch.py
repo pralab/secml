@@ -95,11 +95,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             pretrained=pretrained,
             pretrained_classes=pretrained_classes,
             input_shape=input_shape,
-            softmax_outputs=softmax_outputs)
+            softmax_outputs=softmax_outputs, n_jobs=n_jobs)
 
         self._init_model()
-
-        self._n_jobs = n_jobs
         self._batch_size = batch_size
 
         if self._batch_size is None:
@@ -269,11 +267,6 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
     def _set_device(self):
         return torch.device("cuda" if use_cuda else "cpu")
-
-    def n_jobs(self):
-        """Returns the number of workers being used for loading
-        and processing the data."""
-        return self._n_jobs
 
     def get_params(self):
         """Returns the dictionary of class parameters."""
@@ -496,17 +489,24 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                                   transform=transform,
                                   num_workers=num_workers, ).get_loader()
 
-    def _fit(self, dataset):
-        """Fit PyTorch model."""
+    def _fit(self, x, y):
+        """Fit PyTorch model.
 
+        Parameters
+        ----------
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class labels.
+
+        """
         if any([self._optimizer is None,
                 self._loss is None]):
             raise ValueError("Optimizer and loss should both be defined "
                              "in order to fit the model.")
 
-        train_loader = self._data_loader(dataset.X, dataset.Y,
-                                         batch_size=self._batch_size,
-                                         num_workers=self._n_jobs - 1)
+        train_loader = self._data_loader(
+            x, y, batch_size=self._batch_size, num_workers=self.n_jobs - 1)
 
         for epoch in range(self._epochs):
             running_loss = 0.0
@@ -550,7 +550,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             Transformed input data.
 
         """
-        data_loader = self._data_loader(x, num_workers=self._n_jobs - 1,
+        data_loader = self._data_loader(x, num_workers=self.n_jobs - 1,
                                         batch_size=self._batch_size)
 
         # Switch to evaluation mode
@@ -666,7 +666,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         self._cached_layer_output.backward(w)
 
         return self._from_tensor(self._cached_s.grad.data.view(
-            -1, self.n_features))
+            -1, reduce(lambda a, b: a * b, self.input_shape)))
 
     def save_model(self, filename):
         """

@@ -8,11 +8,7 @@
 
 """
 from secml import _NoValue
-from secml.adv.attacks import CAttack
 from secml.adv.attacks.evasion import CAttackEvasionPGDLS
-from secml.optim.function import CFunction
-from secml.optim.constraints import CConstraint
-from secml.optim.optimizers import COptimizer
 
 
 class CAttackEvasionPGD(CAttackEvasionPGDLS):
@@ -42,11 +38,11 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
     ----------
     classifier : CClassifier
         Target classifier.
-    surrogate_classifier : CClassifier
-        Surrogate classifier, assumed to be already trained.
-    surrogate_data : CDataset or None, optional
-        Dataset on which the the surrogate classifier has been trained on.
-        Is only required if the classifier is nonlinear.
+    double_init_ds : CDataset or None, optional
+        Dataset used to initialize an alternative init point (double init).
+    double_init : bool, optional
+            If True (default), use double initialization point.
+            Needs double_init_ds not to be None.
     distance : {'l1' or 'l2'}, optional
         Norm to use for computing the distance of the adversarial example
         from the original sample. Default 'l2'.
@@ -69,14 +65,14 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
 
     Attributes
     ----------
-    class_type : 'e-pgd-ls'
+    class_type : 'e-pgd'
 
     """
     __class_type = 'e-pgd'
 
     def __init__(self, classifier,
-                 surrogate_classifier,
-                 surrogate_data=None,
+                 double_init_ds=None,
+                 double_init=True,
                  distance='l1',
                  dmax=0,
                  lb=0,
@@ -99,48 +95,16 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
         if discrete is not _NoValue:
             raise ValueError("`pgd` solver does not work in discrete space.")
 
-        CAttack.__init__(self, classifier=classifier,
-                         surrogate_classifier=surrogate_classifier,
-                         surrogate_data=surrogate_data,
-                         distance=distance,
-                         dmax=dmax,
-                         lb=lb,
-                         ub=ub,
-                         discrete=False,
-                         y_target=y_target,
-                         attack_classes=attack_classes,
-                         solver_type='pgd',
-                         solver_params=solver_params)
+        super(CAttackEvasionPGD, self).__init__(
+            classifier=classifier,
+            double_init_ds=double_init_ds,
+            double_init=double_init,
+            distance=distance,
+            dmax=dmax,
+            lb=lb,
+            ub=ub,
+            y_target=y_target,
+            attack_classes=attack_classes,
+            solver_params=solver_params)
 
-    # FIXME: THIS OVERRIDE IS REDUNDANT.
-    #  `discrete` must not be passed by default
-    def _init_solver(self):
-        """Create solver instance."""
-
-        if self._solver_clf is None or self.distance is None \
-                or self.discrete is None:
-            raise ValueError('Solver not set properly!')
-
-        # map attributes to fun, constr, box
-        fun = CFunction(fun=self._objective_function,
-                        gradient=self._objective_function_gradient,
-                        n_dim=self.n_dim)
-
-        constr = CConstraint.create(self._distance)
-        constr.center = self._x0
-        constr.radius = self.dmax
-
-        # only feature increments or decrements are allowed
-        lb = self._x0.todense() if self.lb == 'x0' else self.lb
-        ub = self._x0.todense() if self.ub == 'x0' else self.ub
-
-        bounds = CConstraint.create('box', lb=lb, ub=ub)
-
-        self._solver = COptimizer.create(
-            self._solver_type,
-            fun=fun, constr=constr,
-            bounds=bounds,
-            **self._solver_params)
-
-        # TODO: fix this verbose level propagation
-        self._solver.verbose = self.verbose
+        self.solver_type = 'pgd'

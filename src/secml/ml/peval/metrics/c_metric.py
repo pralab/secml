@@ -21,7 +21,7 @@ class CMetric(CCreator, metaclass=ABCMeta):
     Each metric can be use either y_true (true ground labels) or
     y_pred (predicted labels) or score (predicted scores) or
     other data as inputs. Check documentation of each metric
-    for more informations.
+    for more information.
 
     Attributes
     ----------
@@ -55,7 +55,7 @@ class CMetric(CCreator, metaclass=ABCMeta):
          - score (predicted scores)
          - or any other data
 
-        Check documentation of each metric for more informations.
+        Check documentation of each metric for more information.
 
         If not all the required data is passed, TypeError will be raised.
 

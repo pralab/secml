@@ -2,45 +2,87 @@
 .. module:: CClassifierSVM
    :synopsis: Support Vector Machine (SVM) classifier
 
-.. moduleauthor:: Marco Melis <marco.melis@unica.it>
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
 from sklearn.svm import SVC
 
 from secml.array import CArray
-from secml.ml.classifiers import CClassifierLinear
+from secml.ml.classifiers import CClassifier
 from secml.ml.classifiers.clf_utils import convert_binary_labels
 from secml.ml.kernels import CKernel
-from secml.ml.classifiers.gradients import CClassifierGradientSVMMixin
 from secml.ml.classifiers.loss import CLossHinge
-from secml.utils.mixed_utils import check_is_fitted
+from secml.parallel import parfor2
 
 
-class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
+def _fit_one_ova(tr_class_idx, svm, x, y, svc_kernel, verbose):
+    """Fit a OVA classifier.
+
+    Parameters
+    ----------
+    tr_class_idx : int
+        Index of the label against which the classifier should be trained.
+    svm : CClassifierSVM
+        Instance of the multiclass SVM classifier.
+    x : CArray
+        Array to be used for training with shape (n_samples, n_features).
+    y : CArray
+        Array of shape (n_samples,) containing the class labels.
+    verbose : int
+        Verbosity level of the logger.
+
+    """
+    # Resetting verbosity level. This is needed as objects
+    # change id  when passed to subprocesses and our logging
+    # level is stored per-object looking to id
+    svm.verbose = verbose
+
+    svm.logger.info(
+        "Training against class: {:}".format(tr_class_idx))
+
+    # Binarize labels
+    y_ova = CArray(y == svm.classes[tr_class_idx])
+
+    # Training the one-vs-all classifier
+    svc = SVC(C=svm.C, kernel=svc_kernel, class_weight=svm.class_weight)
+    svc.fit(x.get_data(), y_ova.get_data())
+
+    # Assign output based on kernel type
+    w = CArray(svc.coef_.ravel()) if svm.kernel is None else None
+    sv_idx = CArray(svc.support_).ravel() if svm.kernel is not None else None
+    alpha = CArray(svc.dual_coef_) if svm.kernel is not None else None
+
+    # Intercept is always available
+    b = CArray(svc.intercept_[0])[0]
+
+    return w, sv_idx, alpha, b
+
+
+class CClassifierSVM(CClassifier):
     """Support Vector Machine (SVM) classifier.
 
     Parameters
     ----------
+    C : float, optional
+        Penalty hyper-parameter C of the error term. Default 1.0.
     kernel : None or CKernel subclass, optional
         Instance of a CKernel subclass to be used for computing
         similarity between patterns. If None (default), a linear
-        SVM will be created.
-    C : float, optional
-        Penalty parameter C of the error term. Default 1.0.
+        SVM is trained in the primal; otherwise an SVM is trained in the dual,
+        using the precomputed kernel values.
     class_weight : {dict, 'balanced', None}, optional
         Set the parameter C of class i to `class_weight[i] * C`.
         If not given (default), all classes are supposed to have
         weight one. The 'balanced' mode uses the values of labels to
         automatically adjust weights inversely proportional to
         class frequencies as `n_samples / (n_classes * np.bincount(y))`.
-    preprocess : CPreProcess or str or None, optional
+    preprocess : CModule or str or None, optional
         Features preprocess to be applied to input data.
         Can be a CPreProcess subclass or a string with the type of the
         desired preprocessor. If None, input data is used as is.
-    grad_sampling : float
-        Percentage in (0.0, 1.0] of the alpha weights to be considered
-        when computing the classifier gradient.
+    n_jobs : int, optional
+        Number of parallel workers to use for the classifier.
+        Cannot be higher than processor's number of cores. Default is 1.
 
     Attributes
     ----------
@@ -54,82 +96,44 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
     See Also
     --------
     CKernel : Pairwise kernels and metrics.
-    CClassifierLinear : Common interface for linear classifiers.
 
     """
     __class_type = 'svm'
 
     _loss = CLossHinge()
 
-    def __init__(self, kernel=None, C=1.0, class_weight=None,
-                 preprocess=None, grad_sampling=1.0, store_dual_vars=None):
+    def __init__(self, C=1.0, kernel=None,
+                 class_weight=None, preprocess=None, n_jobs=1):
 
-        # Calling the superclass init
-        CClassifierLinear.__init__(self, preprocess=preprocess)
+        # calling the superclass init
+        CClassifier.__init__(self, preprocess=preprocess, n_jobs=n_jobs)
 
-        # Classifier parameters
+        # Classifier hyperparameters
         self.C = C
         self.class_weight = class_weight
-        # Number of samples for approx. gradient
-        self.grad_sampling = grad_sampling
-
-        # Flag that control storing of dual variables (depends on kernel)
-        self._store_dual_vars = store_dual_vars
-
-        # Setting up the kernel function
-        self.kernel = CKernel.create('linear') if kernel is None \
-            else CKernel.create(kernel)
 
         # After-training attributes
-        self._n_sv = None
-        self._sv_idx = None
+        self._w = None
+        self._b = None
         self._alpha = None
-        self._sv = None
+        self._sv_idx = None  # idx of SVs in TR data (only for binary SVM)
 
-        # slot for the computed kernel function (to speed up multiclass)
-        # DO NOT CLEAR
-        self._k = None
-
-    def is_kernel_linear(self):
-        """Return True if the kernel is None or linear."""
-        if self.kernel.class_type == 'linear':
-            return True
-        return False
-
-    def _check_is_fitted(self):
-        """Check if the classifier is trained (fitted).
-
-        Raises
-        ------
-        NotFittedError
-            If the classifier is not fitted.
-
-        """
-        if not self.is_kernel_linear() or self.store_dual_vars is True:
-            check_is_fitted(self, 'sv')  # Checking the SVs is enough
-        # SVM is a special case, is not set '_w' if kernel is not linear
-        # so we cannot call the superclass `_check_is_fitted`
-        if self.is_kernel_linear():
-            check_is_fitted(self, 'w')
-        # Then check the attributes of CClassifier
-        check_is_fitted(self, ['classes', 'n_features'])
+        self._kernel = None
+        if kernel is not None:
+            self._kernel = CKernel.create(kernel)
+            # set pre-processing chain as svm <- kernel <- preprocess
+            self._kernel.preprocess = self.preprocess
+            self._preprocess = self._kernel
 
     @property
-    def C(self):
-        """Penalty parameter C of the error term."""
-        return self._C
+    def sv_idx(self):
+        """Indices of Support Vectors within the training dataset."""
+        return self._sv_idx
 
-    @C.setter
-    def C(self, value):
-        """Set the penalty parameter C of the error term.
-
-        Parameters
-        ----------
-        value : float
-            Penalty parameter C of the error term.
-
-        """
-        self._C = float(value)
+    @property
+    def kernel(self):
+        """Kernel type (None or string)."""
+        return self._kernel
 
     @property
     def class_weight(self):
@@ -150,64 +154,19 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
              as `n_samples / (n_classes * np.bincount(y))`.
 
         """
+        # TODO we can have one weight per class but only for OVO
         if isinstance(value, dict) and len(value) != 2:
             raise ValueError("weight of positive (+1) and negative (0) "
                              "classes only must be specified.")
         self._class_weight = value
 
     @property
-    def kernel(self):
-        """Kernel function (None if a linear classifier)."""
-        return self._kernel
-
-    @kernel.setter
-    def kernel(self, kernel_obj):
-        """Setting up the Kernel function (None if a linear classifier)."""
-        self._kernel = kernel_obj
-        # Check store dual variables flag after kernel change
-        self.store_dual_vars = self.store_dual_vars
+    def w(self):
+        return self._w
 
     @property
-    def grad_sampling(self):
-        """Percentage of samples for approximate gradient."""
-        return self._grad_sampling
-
-    @grad_sampling.setter
-    def grad_sampling(self, value):
-        """Percentage of samples for approximate gradient."""
-        self._grad_sampling = value
-
-    @property
-    def store_dual_vars(self):
-        """Controls the store of dual space variables (SVs and alphas).
-
-        By default is None and dual variables are stored only if
-        kernel is not None. If set to True, dual variables are
-        stored even if kernel is None  (linear SVM). If kernel
-        is not None, cannot be set to False.
-
-        """
-        return self._store_dual_vars
-
-    @store_dual_vars.setter
-    def store_dual_vars(self, value):
-        """Controls the store of dual space variables (SVs and alphas).
-
-        Parameters
-        ----------
-        value : bool or None
-            By default is None and dual variables are stored only if
-            kernel is not None. If set to True, dual variables are
-            stored even if kernel is None (linear SVM). If kernel
-            is not None, cannot be set to False.
-
-        """
-        if value is not None:
-            if not self.is_kernel_linear() and value is False:
-                raise ValueError(
-                    "not linear SVM, dual variables are always stored. "
-                    "Set store_dual_vars to None or True.")
-        self._store_dual_vars = value
+    def b(self):
+        return self._b
 
     @property
     def alpha(self):
@@ -215,182 +174,106 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         return self._alpha
 
     @property
-    def n_sv(self):
-        """Return the number of support vectors.
+    def C(self):
+        """Penalty parameter C of the error term."""
+        return self._C
 
-        In the 1st and in the 2nd column is stored the number
-        of SVs for the negative and positive class respectively.
-
-        """
-        return self._n_sv
-
-    @property
-    def sv_idx(self):
-        """Indices of Support Vectors within the training dataset."""
-        return self._sv_idx
-
-    @property
-    def sv(self):
-        """Support Vectors."""
-        return self._sv
-
-    def sv_margin_idx(self, tol=1e-6):
-        """Indices of Margin Support Vectors.
+    @C.setter
+    def C(self, value):
+        """Set the penalty parameter C of the error term.
 
         Parameters
         ----------
-        tol : float
-            Alpha value threshold for considering a
-            Support Vector on the margin.
-
-        Returns
-        -------
-        indices : CArray
-            Flat array with the indices of the Margin Support Vectors.
+        value : float
+            Penalty parameter C of the error term.
 
         """
-        s = self.alpha.find(
-            (abs(self.alpha) >= tol) *
-            (abs(self.alpha) <= self.C - tol))
-        return CArray(s)
+        self._C = float(value)
 
-    def sv_margin(self, tol=1e-6):
-        """Margin Support Vectors.
-
-        Parameters
-        ----------
-        tol : float
-            Alpha value threshold for considering a
-            Support Vector on the margin.
-
-        Returns
-        -------
-        CArray or None
-            Margin support vector, 2D CArray.
-            If no margin support vector are found, return None.
-        indices : CArray or None
-            Flat array with the indices of the margin support vectors.
-            If no margin support vector are found, return None.
-
-        """
-        s = self.sv_margin_idx(tol=tol)
-
-        if s.size == 0:
-            return None, None
-
-        xs = self.sv[s, :].atleast_2d()
-        return xs, s
-
-    def sv_margin_y(self, tol=1e-6):
-        """Margin Support Vectors class (-1/+1).
-
-        Parameters
-        ----------
-        tol : float
-            Alpha value threshold for considering a
-            Support Vector on the margin.
-
-        Returns
-        -------
-        CArray
-            Flat CArray with the class (-1/+1) of the Margin Support Vectors.
-
-        """
-        ys = self.alpha.sign()
-        return ys[self.sv_margin_idx(tol=tol)]
-
-    def fit(self, dataset, n_jobs=1):
-        """Fit the SVM classifier.
-
-        We use :class:`sklearn.svm.SVC` for weights and Support Vectors
-        computation. The routine will set alpha, sv, sv_idx and b
-        parameters. For linear SVM (i.e. if kernel is None)
-        we also store the 'w' flat vector with each feature's weight.
-
-        If a preprocess has been specified, input is normalized
-        before computing the decision function.
-
-        Parameters
-        ----------
-        dataset : CDataset
-            Binary (2-classes) Training set. Must be a :class:`.CDataset`
-            instance with patterns data and corresponding labels.
-        n_jobs : int, optional
-            Number of parallel workers to use for training the classifier.
-            Default 1. Cannot be higher than processor's number of cores.
-
-        Returns
-        -------
-        trained_cls : CClassifierSVM
-            Instance of the SVM classifier trained using input dataset.
-
-        """
-        super(CClassifierSVM, self).fit(dataset, n_jobs=n_jobs)
-        # Cleaning up kernel matrix to free memory
-        self._k = None
-
-        return self
-
-    def _fit(self, dataset):
+    def _fit(self, x, y):
         """Trains the One-Vs-All SVM classifier.
 
         Parameters
         ----------
-        dataset : CDataset
-            Binary (2-classes) training set. Must be a :class:`.CDataset`
-            instance with patterns data and corresponding labels.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class
+            labels (2-classes only).
 
         Returns
         -------
-        trained_cls : CCLassifierSVM
-            Instance of the SVM classifier trained using input dataset.
+        CClassifierSVM
+            Trained classifier.
 
         """
         self.logger.info(
             "Training SVM with parameters: {:}".format(self.get_params()))
-        # Setting up classifier parameters
-        classifier = SVC(C=self.C, class_weight=self.class_weight,
-                         kernel='linear' if self.is_kernel_linear()
-                         else 'precomputed')
 
-        # Computing the kernel matrix
-        if not self.is_kernel_linear():
-            self._k = CArray(self.kernel.k(dataset.X))
+        # reset training
+        self._w = None
+        self._b = None
+        self._alpha = None
+        self._sv_idx = None
+
+        # shape of w or alpha
+        n_rows = self.n_classes if self.n_classes > 2 else 1
+        n_cols = x.shape[1]
+
+        # initialize params
+        if self.kernel is None:
+            # no kernel pre-processing, training in the primal
+            svc_kernel = 'linear'
+            self._w = CArray.zeros(shape=(n_rows, n_cols))
         else:
-            self._k = dataset.X
+            # inputs are kernel values, training in the dual
+            svc_kernel = 'precomputed'
+            self._alpha = CArray.zeros(shape=(n_rows, n_cols), sparse=True)
+        self._b = CArray.zeros(shape=(self.n_classes,))
 
-        # Training classifier using precomputed kernel
-        classifier.fit(self._k.get_data(), dataset.Y.tondarray())
+        if self.n_classes > 2:
+            # fit OVA
+            self._fit_one_vs_all(x, y, svc_kernel)
+        else:
+            # fit binary
+            self._fit_binary(x, y, svc_kernel)
 
-        # Intercept
-        self._b = CArray(classifier.intercept_[0])[0]
-        self.logger.debug("Classifier SVM bias: {:}".format(self._b))
+        # remove unused support vectors from kernel
+        if self.kernel is not None:  # trained in the dual
+            sv = abs(self._alpha).sum(axis=0) > 0
+            self.kernel.rv = self.kernel.rv[sv, :]
+            self._alpha = self._alpha[:, sv]
+            self._sv_idx = CArray(sv.find(sv > 0)).ravel()  # store SV indices
+        return self
 
-        # Updating SVM parameters
-        self._w = None  # Resetting `_w` to leave it None next cond is False
-        if self.is_kernel_linear():  # Linear SVM
-            self._w = CArray(
-                CArray(classifier.coef_, tosparse=dataset.issparse).ravel())
-            self.logger.debug(
-                "Classifier SVM linear weights: \n{:}".format(self._w))
+    def _fit_one_vs_all(self, x, y, svc_kernel):
+        # ova (but we can also implement ovo - let's do separate functions)
+        out = parfor2(_fit_one_ova,
+                      self.n_classes, self.n_jobs,
+                      self, x, y, svc_kernel, self.verbose)
 
-        if not self.is_kernel_linear() or self.store_dual_vars is True:
-            # Dual Space SVM or forced dual variables store
-            self._n_sv = CArray(classifier.n_support_)
-            self._sv_idx = CArray(classifier.support_).ravel()
-            # Compatibility fix for differences between sklearn versions
-            self._alpha = convert_binary_labels(dataset.Y[self.sv_idx]) * \
-                          abs(CArray(classifier.dual_coef_).todense().ravel())
-            self._sv = CArray(dataset.X[self.sv_idx, :])
-            self.logger.debug("Classifier SVM dual weights (alphas): "
-                              "\n{:}".format(self._alpha))
-        else:  # Resetting the dual parameters
-            self._n_sv = None
-            self._sv_idx = None
-            self._alpha = None
-            self._sv = None
+        # Building results
+        for i in range(self.n_classes):
+            out_i = out[i]
+            if self.kernel is None:
+                self._w[i, :] = out_i[0]
+            else:
+                self._alpha[i, out_i[1]] = out_i[2]
+            self._b[i] = out_i[3]
 
-        return classifier
+    def _fit_binary(self, x, y, svc_kernel):
+        svc = SVC(C=self.C, kernel=svc_kernel, class_weight=self.class_weight)
+        if svc_kernel == 'precomputed':
+            # training on sparse precomputed kernels is not supported
+            svc.fit(x.tondarray(), y.get_data())
+        else:
+            svc.fit(x.get_data(), y.get_data())
+        if self.kernel is None:
+            self._w = CArray(svc.coef_)
+        else:
+            sv_idx = CArray(svc.support_).ravel()
+            self._alpha[sv_idx] = CArray(svc.dual_coef_)
+        self._b = CArray(svc.intercept_[0])[0]
 
     def _forward(self, x):
         """Compute decision function for SVMs, proportional to the distance of
@@ -404,7 +287,7 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
         ----------
         x : CArray
             Array with new patterns to classify, 2-Dimensional of shape
-            (n_patterns, n_features).
+            (n_patterns, n_features) or (n_patterns, n_sv) if kernel is used.
 
         Returns
         -------
@@ -414,50 +297,145 @@ class CClassifierSVM(CClassifierLinear, CClassifierGradientSVMMixin):
             otherwise a (n_samples, n_classes) array.
 
         """
-
-        if self.is_kernel_linear():  # Scores are given by the linear model
-            return CClassifierLinear._forward(self, x)
-
-        k = CArray(self.kernel.k(x, self.sv)).dot(self.alpha.T)
-        score = CArray(k).todense().ravel() + self.b
-
-        scores = CArray.ones(shape=(x.shape[0], self.n_classes))
-        scores[:, 0] = -score.ravel().T
-        scores[:, 1] = score.ravel().T
-
+        v = self.w if self.kernel is None else self.alpha
+        score = CArray(x.dot(v.T)).todense() + self.b
+        if self.n_classes > 2:  # return current score matrix
+            scores = score
+        else:  # concatenate scores
+            scores = CArray.ones(shape=(x.shape[0], self.n_classes))
+            scores[:, 0] = -score.ravel().T
+            scores[:, 1] = score.ravel().T
         return scores
 
     def _backward(self, w):
-        """Compute the decision function gradient wrt x, and accumulate w."""
-
-        if self.is_kernel_linear():  # Simply return w for a linear SVM
-            gradient = self.w.ravel()
+        v = self.w if self.kernel is None else self.alpha
+        if self.n_classes > 2:
+            return w.dot(v)
         else:
-            # TODO: ADD OPTION FOR RANDOM SUBSAMPLING OF SVs
-            # Gradient in dual representation:
-            # \sum_i y_i alpha_i \diff{K(x,xi)}{x}
-            m = int(self.grad_sampling * self.n_sv.sum())  # floor
-            idx = CArray.randsample(self.alpha.size, m)  # adding randomness
+            return w[0] * -v + w[1] * v
 
-            self.kernel.rv = self.sv[idx, :]
-            gradient = self.kernel.gradient(self._cached_x).atleast_2d()
+    #  --------------- OTHER GRADIENTS ----------------
 
-            # Few shape check to ensure broadcasting works correctly
-            if gradient.shape != (idx.size, self.n_features):
-                raise ValueError("Gradient shape must be ({:}, {:})".format(
-                    idx.size, self.n_features))
+    def _sv_margin(self, tol=1e-6):
+        """Return the margin support vectors."""
+        if self.n_classes > 2:
+            raise ValueError("SVM is not binary!")
 
-            alpha_2d = self.alpha[idx].atleast_2d()
-            if gradient.issparse is True:  # To ensure the sparse dot is used
-                alpha_2d = alpha_2d.tosparse()
-            if alpha_2d.shape != (1, idx.size):
-                raise ValueError(
-                    "Alpha vector shape must be "
-                    "({:}, {:}) or ravel equivalent".format(1, idx.size))
-            gradient = alpha_2d.dot(gradient).ravel()
+        assert (self.kernel.rv.shape[0] == self.alpha.shape[1])
 
-        # Gradient sign depends on input label (0/1)
-        if w is not None:
-            return w[0] * -gradient + w[1] * gradient
-        else:
-            raise ValueError("w cannot be set as None.")
+        alpha = self.alpha.todense()
+        s = alpha.find(
+            (abs(alpha) >= tol) *
+            (abs(alpha) <= self.C - tol))
+        if len(s) > 0:
+            return self.kernel.rv[s, :], CArray(s)
+        else:  # no margin SVs
+            return None, None
+
+    def _kernel_function(self, x, z=None):
+        """Compute kernel matrix between x and z, without pre-processing."""
+        # clone kernel removing rv and pre-processing
+        kernel_params = self.kernel.get_params()
+        kernel_params.pop('preprocess')  # detach preprocess and rv
+        kernel_params.pop('rv')
+        kernel_params.pop('n_jobs')  # TODO: not accepted by kernel constructor
+        kernel = CKernel.create(self.kernel.class_type, **kernel_params)
+        z = z if z is not None else x
+        return kernel.k(x, z)
+
+    def hessian_tr_params(self, x=None, y=None):
+        """
+        Hessian of the training objective w.r.t. the classifier parameters.
+        """
+        xs, _ = self._sv_margin()  # these points are already normalized
+        s = xs.shape[0]
+
+        H = CArray.ones(shape=(s + 1, s + 1))
+        H[:s, :s] = self._kernel_function(xs)
+        H[-1, -1] = 0
+
+        return H
+
+    def grad_f_params(self, x, y=1):
+        """Derivative of the decision function w.r.t. alpha and b
+
+        Parameters
+        ----------
+        x : CArray
+            Samples on which the training objective is computed.
+        y : int
+            Index of the class wrt the gradient must be computed.
+
+        """
+        xs, _ = self._sv_margin()  # these points are already preprocessed
+
+        if xs is None:
+            self.logger.debug("Warning: sv_margin is empty "
+                              "(all points are error vectors).")
+            return None
+
+        s = xs.shape[0]  # margin support vector
+        k = x.shape[0]
+
+        Ksk_ext = CArray.ones(shape=(s + 1, k))
+
+        sv = self.kernel.rv  # store and recover current sv set
+        self.kernel.rv = xs
+        Ksk_ext[:s, :] = self.kernel.forward(x).T  # x and xs are preprocessed
+        self.kernel.rv = sv
+
+        return convert_binary_labels(y) * Ksk_ext  # (s + 1) * k
+
+    def grad_loss_params(self, x, y, loss=None):
+        """
+        Derivative of the loss w.r.t. the classifier parameters (alpha, b)
+
+        dL / d_params = dL / df * df / d_params
+
+        Parameters
+        ----------
+        x : CArray
+            Features of the dataset on which the loss is computed.
+        y : CArray
+            Labels of the training samples.
+        loss: None (default) or CLoss
+            If the loss is equal to None (default) the classifier loss is used
+            to compute the derivative.
+
+        """
+        if loss is None:
+            loss = self._loss
+
+        # compute the loss derivative w.r.t. alpha
+        f_params = self.grad_f_params(x)  # (s + 1) * n_samples
+        scores = self.decision_function(x)
+        dL_s = loss.dloss(y, score=scores).atleast_2d()
+        dL_params = dL_s * f_params  # (s + 1) * n_samples
+        grad = self.C * dL_params
+        return grad
+
+    def grad_tr_params(self, x, y):
+        """Derivative of the classifier training objective w.r.t.
+        the classifier parameters.
+
+        dL / d_params = dL / df * df / d_params + dReg / d_params
+
+        Parameters
+        ----------
+        x : CArray
+            Features of the dataset on which the loss is computed.
+        y : CArray
+            Features of the training samples
+
+        """
+        grad = self.grad_loss_params(x, y)  # (s+1) * n_samples
+
+        # compute the regularizer derivative w.r.t alpha
+        xs, idx = self._sv_margin()
+        k = self._kernel_function(xs)
+        d_reg = 2 * k.dot(self.alpha[idx].T)  # s * 1
+
+        # add the regularizer to the gradient of the alphas
+        s = idx.size
+        grad[:s, :] += d_reg
+        return grad  # (s+1) * n_samples

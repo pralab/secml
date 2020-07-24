@@ -18,7 +18,7 @@ class CClassifierRejectThreshold(CClassifierReject):
      based on a certain threshold.
 
     A classifier assign a label (class) to new patterns using the
-    informations learned from training set.
+    information learned from training set.
 
     The samples for which the higher score is under a certain threshold are
     rejected by the classifier.
@@ -27,9 +27,7 @@ class CClassifierRejectThreshold(CClassifierReject):
     ----------
     clf : CClassifier
         Classifier to which we would like to apply a reject threshold.
-        The classifier can also be already fitted. In this case, if a
-        preprocessor was used during fitting, the same preprocessor must be
-        passed to the outer classifier.
+        The classifier can also be already fitted.
     threshold : float
         Rejection threshold.
     preprocess : CPreProcess or str or None, optional
@@ -42,12 +40,12 @@ class CClassifierRejectThreshold(CClassifierReject):
 
     def __init__(self, clf, threshold, preprocess=None):
 
-        self.clf = clf
-        self.threshold = threshold
-
-        if self.clf.preprocess is not None:
+        if not isinstance(clf, CClassifier):
             raise ValueError(
-                "the preprocessor should be passed to the outer classifier.")
+                "the inner classifier should be an instance of CClassifier")
+
+        self._clf = clf
+        self.threshold = threshold
 
         super(CClassifierRejectThreshold, self).__init__(preprocess=preprocess)
 
@@ -58,15 +56,6 @@ class CClassifierRejectThreshold(CClassifierReject):
     def clf(self):
         """Returns the inner classifier."""
         return self._clf
-
-    @clf.setter
-    def clf(self, value):
-        """Sets the inner classifier."""
-        if isinstance(value, CClassifier):
-            self._clf = value
-        else:
-            raise ValueError(
-                "the inner classifier should be an instance of CClassifier")
 
     @property
     def threshold(self):
@@ -81,52 +70,23 @@ class CClassifierRejectThreshold(CClassifierReject):
     @property
     def classes(self):
         """Return the list of classes on which training has been performed."""
-        return self._clf.classes
+        return self._clf.classes.append([-1])
 
     @property
     def n_classes(self):
         """Number of classes of training dataset, plus the rejection class."""
         return self._clf.n_classes + 1
 
-    def fit(self, dataset, n_jobs=1):
-        """Trains the classifier.
-
-        If a preprocess has been specified,
-        input is normalized before training.
-
-        Parameters
-        ----------
-        dataset : CDataset
-            Training set. Must be a :class:`.CDataset` instance with
-            patterns data and corresponding labels.
-        n_jobs : int, optional
-            Number of parallel workers to use for training the classifier.
-            Default 1. Cannot be higher than processor's number of cores.
-
-        Returns
-        -------
-        trained_cls : CClassifier
-            Instance of the classifier trained using input dataset.
-
-        """
-        self._n_features = dataset.num_features
-
-        data_x = dataset.X
-        # Transform data if a preprocess is defined
-        if self.preprocess is not None:
-            data_x = self.preprocess.fit_transform(dataset.X)
-
-        return self._fit(CDataset(data_x, dataset.Y), n_jobs=n_jobs)
-
-    def _fit(self, dataset, n_jobs=1):
+    def _fit(self, x, y):
         """Private method that trains the One-Vs-All classifier.
         Must be reimplemented by subclasses.
 
         Parameters
         ----------
-        dataset : CDataset
-            Training set. Must be a :class:`.CDataset` instance with
-            patterns data and corresponding labels.
+        x : CArray
+            Array to be used for training with shape (n_samples, n_features).
+        y : CArray
+            Array of shape (n_samples,) containing the class labels.
         n_jobs : int, optional
             Number of parallel workers to use for training the classifier.
             Default 1. Cannot be higher than processor's number of cores.
@@ -137,7 +97,7 @@ class CClassifierRejectThreshold(CClassifierReject):
             Instance of the classifier trained using input dataset.
 
         """
-        self._clf.fit(dataset, n_jobs=n_jobs)
+        self._clf.fit(x, y)
         return self
 
     def _forward(self, x):
@@ -171,7 +131,7 @@ class CClassifierRejectThreshold(CClassifierReject):
 
         The predicted class is therefore:
 
-        .. math:: c = \\operatorname*{argmin}_k f_k(x)
+        .. math:: c = \\operatorname*{argmax}_k f_k(x)
 
         where :math:`c` correspond to the rejection class (i.e., :math:`c=-1`)
         only when the maximum taken over the other classes (excluding the

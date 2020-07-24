@@ -1,6 +1,6 @@
 """
 .. module:: Logger
-   :synopsis: Log and store code informations on disk.
+   :synopsis: Log and store code information on disk.
 
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
@@ -35,7 +35,7 @@ formatter = logging.Formatter(
 class CLog:
     """Manager for logging and logfiles.
 
-    Logger can be used to save important runtime code informations
+    Logger can be used to save important runtime code information
     to disk instead of built-in function 'print'. Along with any
     print-like formatted string, the logger stores full time stamp
     and calling class name.
@@ -327,14 +327,21 @@ class CLog:
         return CTimer.timed(log=self, msg=msg)
 
     @staticmethod
-    def catch_warnings():
+    def catch_warnings(record=False):
         """A context manager that copies and restores the warnings filter upon
         exiting the context.
 
         Wrapper of `warnings.catch_warnings`.
 
+        Parameters
+        ----------
+        record : bool, optional
+            If False (the default), the context manager returns None on entry.
+            If True, a list is returned that is progressively populated with
+            warning objects as seen by the context manager.
+
         """
-        return warnings.catch_warnings()
+        return warnings.catch_warnings(record=record)
 
     @staticmethod
     def filterwarnings(action, message="", category=Warning,
@@ -388,7 +395,7 @@ class CTimer:
 
     See Also
     --------
-    .CLog : CLog and store runtime informations on disk.
+    .CLog : CLog and store runtime information on disk.
 
     Examples
     --------
@@ -468,7 +475,7 @@ class CTimer:
 
         See Also
         --------
-        .CLog : CLog and store runtime informations on disk.
+        .CLog : CLog and store runtime information on disk.
 
         Examples
         --------

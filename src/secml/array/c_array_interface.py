@@ -85,6 +85,31 @@ class _CArrayInterface(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
+    def tocoo(self):
+        """Return a sparse scipy.sparse.coo_matrix representation of array."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def tocsc(self):
+        """Return a sparse scipy.sparse.csc_matrix representation of array."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def todia(self):
+        """Return a sparse scipy.sparse.dia_matrix representation of array."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def todok(self):
+        """Return a sparse scipy.sparse.dok_matrix representation of array."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def tolil(self):
+        """Return a sparse scipy.sparse.lil_matrix representation of array."""
+        raise NotImplementedError
+
+    @abstractmethod
     def tolist(self):
         """Return the array as a (possibly nested) list."""
         raise NotImplementedError

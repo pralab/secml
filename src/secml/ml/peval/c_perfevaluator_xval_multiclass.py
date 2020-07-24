@@ -56,7 +56,7 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
             test_dataset = dataset[self.splitter.ts_idx[split_idx], :]
 
             # Fit the estimator
-            estimator.fit(train_dataset)
+            estimator.fit(train_dataset.X, train_dataset.Y)
 
             # Get the classification performance of each binary estimator
             split_scores = []

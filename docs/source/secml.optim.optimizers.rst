@@ -20,6 +20,14 @@ COptimizer
    :undoc-members:
    :show-inheritance:
 
+COptimizerPGD
+-------------
+
+.. automodule:: secml.optim.optimizers.c_optimizer_pgd
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 COptimizerPGDLS
 ---------------
 
@@ -28,10 +36,10 @@ COptimizerPGDLS
    :undoc-members:
    :show-inheritance:
 
-COptimizerPGD
--------------
+COptimizerPGDExp
+----------------
 
-.. automodule:: secml.optim.optimizers.c_optimizer_pgd
+.. automodule:: secml.optim.optimizers.c_optimizer_pgd_exp
    :members:
    :undoc-members:
    :show-inheritance:

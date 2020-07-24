@@ -267,16 +267,26 @@ class CCreator:
                         "of class '{:}'".format(class_type, cls.__module__))
 
     def get_params(self):
-        """Returns the dictionary of class parameters.
+        """Returns the dictionary of class hyperparameters.
 
-        A parameter is a PUBLIC or READ/WRITE attribute.
+        A hyperparameter is a PUBLIC or READ/WRITE attribute.
 
         """
         # We extract the PUBLIC (pub) and the READ/WRITE (rw) attributes
         # from the class dictionary, than we build a new dictionary using
         # as keys the attributes names without the accessibility prefix
-        return SubLevelsDict((as_public(k), getattr(self, as_public(k)))
-                             for k in extract_attr(self, 'pub+rw'))
+        params = SubLevelsDict((as_public(k), getattr(self, as_public(k)))
+                               for k in extract_attr(self, 'pub+rw'))
+
+        # Now look for any parameter inside the accessible attributes
+        for k in extract_attr(self, 'r'):
+            # Extract the contained object (if any)
+            k_attr = getattr(self, as_public(k))
+            if hasattr(k_attr, 'get_params') and len(k_attr.get_params()) > 0:
+                # as k_attr has one or more parameters, it's a parameter itself
+                params[as_public(k)] = k_attr
+
+        return params
 
     def set_params(self, params_dict, copy=False):
         """Set all parameters passed as a dictionary {key: value}.
@@ -285,7 +295,7 @@ class CCreator:
         created by `.get_params`.
         Only parameters, i.e. PUBLIC or READ/WRITE attributes, can be set.
 
-        For more informations on the setting behaviour see `.CCreator.set`.
+        For more information on the setting behaviour see `.CCreator.set`.
 
         If possible, a reference to the parameter to set is assigned.
         Use `copy=True` to always make a deepcopy before set.
@@ -343,20 +353,24 @@ class CCreator:
         # Support for recursive setting, e.g. -> kernel.gamma
         param_name = param_name.split('.')
 
-        # Attributes to set in this function must be writable
-        # PUBLIC and READ/WRITE accessibility is checked
-        if not is_writable(self, param_name[0]):
-            raise AttributeError(
-                "can't set `{:}`, must be writable.".format(param_name[0]))
-
         attr0 = param_name[0]
         if hasattr(self, attr0):
-            # 1 level set or multiple sublevels set?
+            # Level 0 set or multiple sublevels set?
             if len(param_name) == 1:  # Set attribute directly
+                # Level 0 attribute must be writable
+                # PUBLIC and READ/WRITE accessibility is checked
+                if not is_writable(self, attr0):
+                    raise AttributeError(
+                        "can't set `{:}`, must be writable.".format(attr0))
                 setattr(self, attr0, copy_attr(param_value)
                         if copy is True else param_value)
                 return
             else:  # Start recursion on sublevels
+                # Level 0 attribute must be accessible (readable)
+                # PUBLIC, READ/WRITE and READ ONLY accessibility is checked
+                if not is_readable(self, attr0):
+                    raise AttributeError(
+                        "can't set `{:}`, must be accessible.".format(attr0))
                 sub_param_name = '.'.join(param_name[1:])
                 # Calling `.set` method of the next sublevel
                 getattr(self, attr0).set(sub_param_name, param_value, copy)
@@ -371,6 +385,11 @@ class CCreator:
                 attr = getattr(self, attr_name)
                 # If parameter is an attribute of current attribute set it
                 if hasattr(attr, attr0):
+                    # Attributes to set must be writable
+                    # PUBLIC and READ/WRITE accessibility is checked
+                    if not is_writable(attr, attr0):
+                        raise AttributeError(
+                            "can't set `{:}`, must be writable.".format(attr0))
                     setattr(attr, attr0, copy_attr(param_value)
                             if copy is True else param_value)
                     return

@@ -9,7 +9,7 @@
 import warnings
 from abc import ABCMeta, abstractmethod
 
-from secml.adv.attacks import CAttack
+from secml.adv.attacks import CAttack, CAttackMixin
 from secml.optim.optimizers import COptimizer
 from secml.array import CArray
 from secml.data import CDataset
@@ -19,7 +19,7 @@ from secml.optim.constraints import CConstraint
 from secml.optim.function import CFunction
 
 
-class CAttackPoisoning(CAttack, metaclass=ABCMeta):
+class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
     """Interface for poisoning attacks.
 
     Parameters
@@ -28,13 +28,8 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
         Target classifier.
     training_data : CDataset
         Dataset on which the the classifier has been trained on.
-    surrogate_classifier : CClassifier
-        Surrogate classifier, assumed to be already trained.
     val : CDataset
         Validation set.
-    surrogate_data : CDataset or None, optional
-        Dataset on which the the surrogate classifier has been trained on.
-        Is only required if the classifier is nonlinear.
     distance : {'l1' or 'l2'}, optional
         Norm to use for computing the distance of the adversarial example
         from the original sample. Default 'l2'.
@@ -48,9 +43,6 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
         If None an error-generic attack will be performed, else a
         error-specific attack to have the samples misclassified as
         belonging to the `y_target` class.
-    attack_classes : 'all' or CArray, optional
-        Array with the classes that can be manipulated by the attacker or
-         'all' (default) if all classes can be manipulated.
     solver_type : str or None, optional
         Identifier of the solver to be used. Default 'pgd-ls'.
     solver_params : dict or None, optional
@@ -67,37 +59,25 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
 
     def __init__(self, classifier,
                  training_data,
-                 surrogate_classifier,
                  val,
-                 surrogate_data=None,
                  distance='l2',
                  dmax=0,
                  lb=0,
                  ub=1,
-                 discrete=False,
                  y_target=None,
-                 attack_classes='all',
                  solver_type='pgd-ls',
                  solver_params=None,
                  init_type='random',
                  random_seed=None):
 
-        CAttack.__init__(self, classifier=classifier,
-                         surrogate_classifier=surrogate_classifier,
-                         surrogate_data=surrogate_data,
-                         distance=distance,
-                         dmax=dmax,
-                         lb=lb,
-                         ub=ub,
-                         discrete=discrete,
-                         y_target=y_target,
-                         attack_classes=attack_classes,
-                         solver_type=solver_type,
-                         solver_params=solver_params)
-
-        if discrete:
-            raise ValueError(
-                "Poisoning in discrete space is not implemented yet!")
+        super(CAttackPoisoning, self).__init__(
+            classifier=classifier,
+            distance=distance,
+            dmax=dmax,
+            lb=lb,
+            ub=ub,
+            solver_type=solver_type,
+            solver_params=solver_params)
 
         # fixme: validation loss should be optional and passed from outside
         if classifier.class_type == 'svm':
@@ -114,9 +94,12 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
 
         self._init_loss = self._attacker_loss
 
+        self.y_target = y_target
+
         # hashing xc to avoid re-training clf when xc does not change
         self._xc_hash = None
 
+        self._x0 = None  # set the initial poisoning sample feature
         self._xc = None  # set of poisoning points along with their labels yc
         self._yc = None
         self._idx = None  # index of the current point to be optimized
@@ -130,13 +113,19 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
 
         self.init_type = init_type
 
-        # this should be modified (we need eta to compute the perturbation
-        # if the attack is performed in a discrete space)
         self.eta = solver_params['eta']
 
         # this is used to speed up some poisoning algorithms by re-using
         # the solution obtained at a previous step of the optimization
         self._warm_start = None
+
+    @property
+    def y_target(self):
+        return self._y_target
+
+    @y_target.setter
+    def y_target(self, value):
+        self._y_target = value
 
     ###########################################################################
     #                          READ-WRITE ATTRIBUTES
@@ -193,6 +182,36 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
             return
         self._n_points = int(value)
 
+    @property
+    def x0(self):
+        """Returns the attacker's initial sample features"""
+        return self._x0
+
+    @x0.setter
+    def x0(self, value):
+        """Set the attacker's initial sample features"""
+        self._x0 = value
+
+    @property
+    def xc(self):
+        """Returns the attacker's sample features"""
+        return self._xc
+
+    @xc.setter
+    def xc(self, value):
+        """Set the attacker's sample features"""
+        self._xc = value
+
+    @property
+    def yc(self):
+        """Returns the attacker's sample label"""
+        return self._yc
+
+    @yc.setter
+    def yc(self, value):
+        """Set the attacker's sample label"""
+        self._yc = value
+
     ###########################################################################
     #                              PRIVATE METHODS
     ###########################################################################
@@ -211,22 +230,15 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
     def _init_solver(self):
         """Create solver instance."""
 
-        if self._solver_clf is None or self.discrete is None:
+        if self.classifier is None:
             raise ValueError('Solver not set properly!')
 
         # map attributes to fun, constr, box
-        fun = CFunction(fun=self._objective_function,
-                        gradient=self._objective_function_gradient,
+        fun = CFunction(fun=self.objective_function,
+                        gradient=self.objective_function_gradient,
                         n_dim=self._classifier.n_features)
 
         bounds, constr = self._constraint_creation()
-
-        # FIXME: many solvers do now work in discrete spaces.
-        #  this is a workaround to raise a proper error, but we should better
-        #  handle these problems
-        solver_params = self.solver_params
-        if self.discrete is True:
-            solver_params['discrete'] = True
 
         self._solver = COptimizer.create(
             self._solver_type,
@@ -247,10 +259,8 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
             else:
                 init_dataset = self.val
         else:
-            init_dataset = self.surrogate_data
+            init_dataset = self.training_data
 
-        if init_dataset is None:
-            raise ValueError("Surrogate data not set!")
         if (self._n_points is None or self._n_points == 0) and (
                 n_points is None or n_points == 0):
             raise ValueError("Number of poisoning points (n_points) not set!")
@@ -263,15 +273,11 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
 
         xc = init_dataset.X[idx, :].deepcopy()
 
-        if not self.discrete:
-            # if the attack is in a continuous space we add a
-            # little perturbation to the initial poisoning point
-            random_noise = CArray.rand(shape=xc.shape,
-                                       random_state=self.random_seed)
-            xc += 1e-3 * (2 * random_noise - 1)
-        else:
-            xc = self.add_discrete_perturbation(xc)
-
+        # if the attack is in a continuous space we add a
+        # little perturbation to the initial poisoning point
+        random_noise = CArray.rand(shape=xc.shape,
+                                   random_state=self.random_seed)
+        xc += 1e-3 * (2 * random_noise - 1)
         yc = CArray(init_dataset.Y[idx]).deepcopy()  # true labels
 
         # randomly pick yc from a different class
@@ -308,10 +314,10 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
             xc_hash_is_valid = True
 
         if clf is None:
-            clf = self._solver_clf
+            clf = self.classifier
 
         if tr is None:
-            tr = self.surrogate_data
+            tr = self.training_data
 
         tr = tr.append(CDataset(self._xc, self._yc))
 
@@ -329,7 +335,7 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
             if self.classifier.preprocess is not None:
                 self._poisoned_clf.retrain_normalizer = train_normalizer
 
-            self._poisoned_clf.fit(tr)
+            self._poisoned_clf.fit(tr.X, tr.Y)
 
         return self._poisoned_clf, tr
 
@@ -337,7 +343,7 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
     #                  OBJECTIVE FUNCTION & GRAD COMPUTATION
     ###########################################################################
 
-    def _objective_function(self, xc, acc=False):
+    def objective_function(self, xc, acc=False):
         """
         Parameters
         ----------
@@ -381,7 +387,7 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
 
         return obj
 
-    def _objective_function_gradient(self, xc, normalization=True):
+    def objective_function_gradient(self, xc, normalization=True):
         """
         Compute the loss derivative wrt the attack sample xc
 
@@ -409,7 +415,7 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
         y_ts = self._y_target if self._y_target is not None else self.val.Y
 
         # computing gradient of loss(y, f(x)) w.r.t. f
-        score = clf.predict(self.val.X, return_decision_function=True)[1]
+        _, score = clf.predict(self.val.X, return_decision_function=True)
 
         grad = CArray.zeros((xc.size,))
 
@@ -576,54 +582,6 @@ class CAttackPoisoning(CAttack, metaclass=ABCMeta):
             "Original classifier accuracy on test data {:}".format(acc))
 
         return y_pred, scores, CDataset(xc, yc), self._f_opt
-
-    def add_discrete_perturbation(self, xc):
-
-        # fixme: this should be a solver param
-        eta = self.eta
-
-        # for each poisoning point
-        for p_idx in range(xc.shape[0]):
-
-            c_xc = xc[p_idx, :]
-
-            # for each starting poisoning point
-            # add a perturbation large eta to a single feature of xc if the
-            # perturbation if possible (if at least one feature perturbed
-            # does not violate the constraints)
-            orig_xc = c_xc.deepcopy()
-            shuf_feat_ids = CArray.arange(c_xc.size)
-            shuf_feat_ids.shuffle()
-
-            for idx in shuf_feat_ids:
-
-                # update a randomly chosen feature of xc if does not
-                # violates any constraint
-                c_xc[idx] += eta
-
-                self._x0 = c_xc
-                bounds, constr = self._constraint_creation()
-                if bounds.is_violated(c_xc) or \
-                        bounds.is_violated(c_xc):
-                    c_xc = orig_xc.deepcopy()
-
-                    c_xc[idx] -= eta
-
-                    # update a randomly chosen feature of xc if does not
-                    # violates any constraint
-                    self._x0 = c_xc
-                    bounds, constr = self._constraint_creation()
-                    if bounds.is_violated(c_xc) or \
-                            bounds.is_violated(c_xc):
-                        c_xc = orig_xc.deepcopy()
-                    else:
-                        xc[p_idx, :] = c_xc
-                        break
-                else:
-                    xc[p_idx, :] = c_xc
-                    break
-
-        return xc
 
     def _loss_based_init_poisoning_points(self, n_points=None):
         """
