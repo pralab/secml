@@ -60,7 +60,7 @@ depending on the Operating System used:
 
  - Linux (Ubuntu 16.04 or later or equivalent distribution)
    - `python3-tk` for running MatplotLib Tk-based backends;
-   - [NVIDIA<sup>®</sup> CUDA<sup>®</sup> Toolkit](
+   - [NVIDIA® CUDA® Toolkit](
         https://developer.nvidia.com/cuda-toolkit) for GPU support.
       
  - macOS (10.12 Sierra or later)
@@ -69,7 +69,7 @@ depending on the Operating System used:
  - Windows (7 or later)
    - [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019](
         https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads).
-   - [NVIDIA<sup>®</sup> CUDA<sup>®</sup> Toolkit](
+   - [NVIDIA® CUDA® Toolkit](
         https://developer.nvidia.com/cuda-toolkit) for GPU support.
 
 
