@@ -1,3 +1,6 @@
+include:
+  - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
+  
 variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
     TORCH_HOME: "$CI_PROJECT_DIR/.cache/torch"
@@ -63,8 +66,6 @@ package:
     - python setup.py bdist_wheel --universal
     - twine check dist/*
   rules:
-    - if: '$CI_MERGE_REQUEST_ID'
-      when: never
     - if: '$RUN_TESTS'
       when: on_success
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
@@ -96,8 +97,6 @@ package:docs:
     - tox -e docs
     - mv docs/build/html/ public/
   rules:
-    - if: '$CI_MERGE_REQUEST_ID'
-      when: never
     - if: '$RUN_TESTS'
       when: on_success
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
@@ -137,7 +136,7 @@ package:docs:
   rules:
     - if: '$RUN_TESTS'
       when: on_success
-    - if: '$SKIP_TESTS || $CI_MERGE_REQUEST_ID'
+    - if: '$SKIP_TESTS'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: on_success
@@ -188,7 +187,7 @@ test:py35:latest:win:
       when: never
     - if: '$RUN_TESTS'
       when: on_success
-    - if: '$SKIP_TESTS || $CI_MERGE_REQUEST_ID'
+    - if: '$SKIP_TESTS'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: on_success
@@ -227,7 +226,7 @@ test:py35:latest:win:
   rules:
     - if: '$RUN_TESTS'
       when: on_success
-    - if: '$SKIP_TESTS || $CI_MERGE_REQUEST_ID'
+    - if: '$SKIP_TESTS'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: on_success
@@ -264,7 +263,7 @@ test:notebooks:py35:latest:
   rules:
     - if: '$RUN_TESTS'
       when: on_success
-    - if: '$SKIP_TESTS || $CI_MERGE_REQUEST_ID'
+    - if: '$SKIP_TESTS'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "tags" || $CI_PIPELINE_SOURCE == "web"'
       when: on_success
@@ -398,8 +397,6 @@ sync:upstream-repo:
   rules:
     - if: '$RUN_SYNC'
       when: on_success
-    - if: '$CI_MERGE_REQUEST_ID'
-      when: never
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
     - if: '$CI_COMMIT_BRANCH == "develop"'
