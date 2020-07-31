@@ -1,7 +1,9 @@
 include:
   - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
+  - template: 'Security/SAST.gitlab-ci.yml'
   
 variables:
+    SEARCH_MAX_DEPTH: 6
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
     TORCH_HOME: "$CI_PROJECT_DIR/.cache/torch"
     SECML_HOME_DIR: "$CI_PROJECT_DIR/secml-data"
