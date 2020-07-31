@@ -155,29 +155,39 @@ package:docs:
       - tox.ini
       when: on_success
 
+.test-report:
+  artifacts: &pytest-report
+    reports:
+      junit: pytest-report.xml
+    expire_in: 1 week
+
 test:py35:latest:
   extends: .test
   image: python:3.5
   script: tox -e py35
   cache: *test-cache-py35
+  artifacts: *pytest-report
 
 test:py35:min:
   extends: .test
   image: python:3.5
   script: tox -e py35-min
   cache: *test-cache-py35
+  artifacts: *pytest-report
 
 test:py36:min:
   extends: .test
   image: python:3.6
   script: tox -e py36-min
   cache: *test-cache-py36
+  artifacts: *pytest-report
 
 test:py37:min:
   extends: .test
   image: python:3.7
   script: tox -e py37-min
   cache: *test-cache-py37
+  artifacts: *pytest-report
 
 test:py35:latest:win:
   extends:
@@ -220,6 +230,7 @@ test:py35:latest:win:
   script: tox -e py35
   allow_failure: true
   cache: *test-cache-py35-win
+  artifacts: *pytest-report
 
 
 .test:notebooks:
