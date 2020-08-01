@@ -1,5 +1,6 @@
 include:
   - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
+  - template: 'Jobs/Code-Quality.gitlab-ci.yml'
   - template: 'Security/SAST.gitlab-ci.yml'
   
 variables:
