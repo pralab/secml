@@ -10,7 +10,7 @@ class TestCMetrics(CUnitTest):
 
     def test_accuracy(self):
 
-        self.logger.info("Testing accuracy score...")
+        self.logger.info("Testing accuracy metric...")
         peval = CMetric.create('accuracy')
 
         y_true = CArray([0, 1, 2, 3])
@@ -28,7 +28,7 @@ class TestCMetrics(CUnitTest):
 
     def test_precision(self):
 
-        self.logger.info("Testing precision score...")
+        self.logger.info("Testing precision metric...")
         peval = CMetric.create('precision')
 
         true = CArray([0, 0, 0, 0, 1, 1, 1, 1])
@@ -41,7 +41,7 @@ class TestCMetrics(CUnitTest):
 
     def test_recall(self):
 
-        self.logger.info("Testing recall score...")
+        self.logger.info("Testing recall metric...")
         peval = CMetric.create('recall')
 
         true = CArray([0, 0, 0, 0, 1, 1, 1, 1])
@@ -54,7 +54,7 @@ class TestCMetrics(CUnitTest):
 
     def test_f1(self):
 
-        self.logger.info("Testing f1 score...")
+        self.logger.info("Testing F1 score metric...")
         peval = CMetric.create('f1')
 
         true = CArray([0, 0, 0, 0, 1, 1, 1, 1])
@@ -68,7 +68,7 @@ class TestCMetrics(CUnitTest):
 
     def test_mae(self):
 
-        self.logger.info("Testing mae score...")
+        self.logger.info("Testing MAE metric...")
         peval = CMetric.create('mae')
 
         true = CArray([3, -0.5, 2, 7])
@@ -80,7 +80,7 @@ class TestCMetrics(CUnitTest):
 
     def test_mse(self):
 
-        self.logger.info("Testing mse score...")
+        self.logger.info("Testing MSE metric...")
         peval = CMetric.create('mse')
 
         true = CArray([3, -0.5, 2, 7])
@@ -90,49 +90,93 @@ class TestCMetrics(CUnitTest):
         self.assertEqual(0.375, res)
         self.assertTrue(is_float(res))
 
+    def _test_roc_metric(self, metric):
+        """Test for ROC-related metrics which get y_true and score_pred.
+
+        Parameters
+        ----------
+        metric : CMetric
+
+        Returns
+        -------
+        res : float
+
+        """
+        true = CArray([0, 0, 1, 0, 1, 1])
+        pred = CArray([0.1, 0.2, 0.3, 0.4, 0.75, 0.8])
+
+        res = metric.performance_score(y_true=true, score=pred)
+        self.assertTrue(is_float(res))
+
+        return res
+
     def test_tpratfpr(self):
 
-        self.logger.info("Testing tpr_at_fpr score...")
-        peval = CMetric.create('tpr-at-fpr', fpr=0.1)
+        self.logger.info("Testing TPR @ FPR metric...")
+        metric = CMetric.create('tpr-at-fpr', fpr=0.1)
 
-        true = CArray([0, 0, 1, 1])
-        pred = CArray([0.1, 0.4, 0.35, 0.8])
+        res = self._test_roc_metric(metric)
 
-        res = peval.performance_score(y_true=true, score=pred)
-        self.assertEqual(0.5, res)
-        self.assertTrue(is_float(res))
+        self.assertAlmostEqual(0.67, res, places=2)
+
+    def test_fnratfpr(self):
+
+        self.logger.info("Testing FNR @ FPR metric...")
+        metric = CMetric.create('fnr-at-fpr', fpr=0.1)
+
+        res = self._test_roc_metric(metric)
+
+        self.assertAlmostEqual(0.33, res, places=2)
+
+    def test_thatfpr(self):
+
+        self.logger.info("Testing TH @ FPR metric...")
+        metric = CMetric.create('th-at-fpr', fpr=0.1)
+
+        res = self._test_roc_metric(metric)
+
+        self.assertEqual(0.645, res)
+
+    def test_tpratth(self):
+
+        self.logger.info("Testing TPR @ TH metric...")
+        metric = CMetric.create('tpr-at-th', th=0.76)
+
+        res = self._test_roc_metric(metric)
+
+        self.assertAlmostEqual(0.33, res, places=2)
+
+    def test_fnratth(self):
+
+        self.logger.info("Testing FNR @ TH metric...")
+        metric = CMetric.create('fnr-at-th', th=0.76)
+
+        res = self._test_roc_metric(metric)
+
+        self.assertAlmostEqual(0.67, res, places=2)
 
     def test_auc(self):
 
-        self.logger.info("Testing auc score...")
-        peval = CMetric.create('auc')
+        self.logger.info("Testing AUC metric...")
+        metric = CMetric.create('auc')
 
-        true = CArray([0, 0, 1, 1])
-        pred = CArray([0.1, 0.4, 0.35, 0.8])
+        res = self._test_roc_metric(metric)
 
-        res = peval.performance_score(y_true=true, score=pred)
-        self.assertEqual(0.75, res)
-        self.assertTrue(is_float(res))
+        self.assertAlmostEqual(0.89, res, places=2)
 
-        self.logger.info("Testing auc_wmw score...")
-        peval = CMetric.create('auc-wmw')
+        self.logger.info("Testing AUC-WMW metric...")
+        metric = CMetric.create('auc-wmw')
 
-        true = CArray([0, 0, 1, 1])
-        pred = CArray([0.1, 0.4, 0.35, 0.8])
+        res = self._test_roc_metric(metric)
 
-        res = peval.performance_score(y_true=true, score=pred)
-        self.assertEqual(0.75, res)
-        self.assertTrue(is_float(res))
+        self.assertAlmostEqual(0.89, res, places=2)
 
-        self.logger.info("Testing pauc score...")
-        peval = CMetric.create('pauc', fpr=1.0, n_points=500)
+        self.logger.info("Testing pAUC metric...")
+        metric = CMetric.create('pauc', fpr=1.0, n_points=500)
 
-        true = CArray([0, 0, 1, 1])
-        pred = CArray([0.1, 0.4, 0.35, 0.8])
+        res = self._test_roc_metric(metric)
 
-        res = peval.performance_score(y_true=true, score=pred)
-        self.assertEqual(0.75, res)
-        self.assertTrue(is_float(res))
+        self.assertAlmostEqual(0.89, res, places=2)
 
 
 if __name__ == '__main__':
