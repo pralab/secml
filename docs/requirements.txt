@@ -7,3 +7,4 @@ ipython
 pandoc
 nbsphinx
 nbsphinx-link
+pygments>=2.4.1
