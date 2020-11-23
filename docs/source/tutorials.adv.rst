@@ -13,4 +13,4 @@ Adversarial Machine Learning
    tutorials/09-Cleverhans
    tutorials/11-ImageNet_advanced
    tutorials/12-DNR
-   tutorials/14-RObustBench
+   tutorials/14-RobustBench
