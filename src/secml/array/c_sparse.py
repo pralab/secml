@@ -1782,6 +1782,9 @@ class CSparse(_CArrayInterface):
             return self.__class__(scs.diags(
                 self.tondarray(), offsets=[k], format='csr', dtype=self.dtype))
         else:
+            if (k > 0 and k > self.shape[1] - 1) or \
+                    (k < 0 and abs(k) > self.shape[0] - 1):
+                raise ValueError("k exceeds matrix dimensions")
             return CDense(self.tocsr().diagonal(k=k))
 
     def dot(self, array):
