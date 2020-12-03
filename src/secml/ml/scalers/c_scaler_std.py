@@ -36,7 +36,8 @@ class CScalerStd(CScalerSkLearn):
 
     def __init__(self, copy=True, with_mean=True, with_std=True,
                  preprocess=None):
-        scaler = StandardScaler(copy, with_mean, with_std)
+        scaler = StandardScaler(
+            copy=copy, with_mean=with_mean, with_std=with_std)
 
         super(CScalerStd, self).__init__(
             sklearn_scaler=scaler, preprocess=preprocess)
