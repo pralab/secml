@@ -251,7 +251,7 @@ test:py35:latest:win:
 
 .test:notebooks:
   extends: .test
-  needs: []
+  needs: ["package"]
   rules:
     - if: '$RUN_TESTS'
       when: on_success
