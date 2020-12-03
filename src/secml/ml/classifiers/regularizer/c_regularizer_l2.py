@@ -17,7 +17,7 @@ class CRegularizerL2(CRegularizer):
 
     .. math::
 
-       R(w) := \\frac {1}{2} \sum_{i=1}^{n} w_i^2
+       R(w) := \\frac {1}{2} \\sum_{i=1}^{n} w_i^2
 
     Attributes
     ----------
