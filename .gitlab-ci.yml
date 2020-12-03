@@ -177,11 +177,25 @@ test:py35:min:
   cache: *test-cache-py35
   artifacts: *pytest-report
 
+test:py36:latest:
+  extends: .test
+  image: python:3.6
+  script: tox -e py36
+  cache: *test-cache-py36
+  artifacts: *pytest-report
+
 test:py36:min:
   extends: .test
   image: python:3.6
   script: tox -e py36-min
   cache: *test-cache-py36
+  artifacts: *pytest-report
+
+test:py37:latest:
+  extends: .test
+  image: python:3.7
+  script: tox -e py37
+  cache: *test-cache-py37
   artifacts: *pytest-report
 
 test:py37:min:

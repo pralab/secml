@@ -423,8 +423,9 @@ class CSparse(_CArrayInterface):
         # Check index for all other cases
         idx = self._check_index(idx)
 
-        # Ready for scipy
-        return self.__class__(self._data.__getitem__(idx))
+        # Ready for scipy. We cast the result of scipy's getitem as the
+        # original dtype is not kept sometimes (especially for empty arrays)
+        return self.__class__(self._data.__getitem__(idx), dtype=self.dtype)
 
     def __setitem__(self, idx, value):
         """Redefinition of the get (brackets) operator."""
@@ -1782,6 +1783,9 @@ class CSparse(_CArrayInterface):
             return self.__class__(scs.diags(
                 self.tondarray(), offsets=[k], format='csr', dtype=self.dtype))
         else:
+            if (k > 0 and k > self.shape[1] - 1) or \
+                    (k < 0 and abs(k) > self.shape[0] - 1):
+                raise ValueError("k exceeds matrix dimensions")
             return CDense(self.tocsr().diagonal(k=k))
 
     def dot(self, array):

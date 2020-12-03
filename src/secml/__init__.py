@@ -134,6 +134,11 @@ def global_filterwarnings():
     except ImportError:
         pass
 
+    # TODO: check after upgrading to tensorflow 2 (related to numpy v0.19)
+    warnings.filterwarnings(
+        "ignore", category=DeprecationWarning,
+        message=r"tostring\(\) is deprecated\. Use tobytes\(\) instead\.")
+
 
 # Call the filterwarnings method to make it active project-wide
 global_filterwarnings()
