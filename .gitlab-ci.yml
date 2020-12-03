@@ -127,6 +127,10 @@ package:docs:
       - "$CI_PROJECT_DIR/.cache/pip"
       - "$CI_PROJECT_DIR/secml-data"
     policy: pull
+    
+    
+code_quality:
+  interruptible: true
 
 
 .test:
