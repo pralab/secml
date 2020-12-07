@@ -1663,12 +1663,12 @@ class CArray(_CArrayInterface):
 
         """
         # TODO: CMatrix should return a 2-D, CVector a 1-D and so on...
-        if arrayformat is 'dense':
+        if arrayformat == 'dense':
             if cols is None:
                 cols = CArray([])
             return cls(CDense.load(datafile, dtype=dtype, startrow=startrow,
                                    skipend=skipend, cols=cols._data))
-        elif arrayformat is 'sparse':
+        elif arrayformat == 'sparse':
             return cls(CSparse.load(datafile, dtype=dtype))
         else:
             raise ValueError("Supported arrayformat are 'dense' and 'sparse'.")
