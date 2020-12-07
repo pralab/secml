@@ -214,6 +214,19 @@ test:py37:min:
   cache: *test-cache-py37
   artifacts: *pytest-report
 
+test:py38:latest:
+  extends: .test
+  image: python:3.8
+  script: tox -e py38
+  cache: *test-cache-py38
+  artifacts: *pytest-report
+
+test:py38:min:
+  extends: .test
+  image: python:3.8
+  script: tox -e py38-min
+  cache: *test-cache-py38
+
 test:py35:latest:win:
   extends:
     - .test
@@ -256,12 +269,6 @@ test:py35:latest:win:
   allow_failure: true
   cache: *test-cache-py35-win
   artifacts: *pytest-report
-
-test:py38:min:
-  extends: .test
-  image: python:3.8
-  script: tox -e py38-min
-  cache: *test-cache-py38
 
 
 .test:notebooks:
