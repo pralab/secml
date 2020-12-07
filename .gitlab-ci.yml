@@ -3,7 +3,7 @@ include:
   - template: 'Jobs/Code-Quality.gitlab-ci.yml'
   - template: 'Security/SAST.gitlab-ci.yml'
   - template: 'Security/Secret-Detection.gitlab-ci.yml'
-  
+
 variables:
     SEARCH_MAX_DEPTH: 6
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
@@ -132,8 +132,8 @@ package:docs:
       - "$CI_PROJECT_DIR/.cache/pip"
       - "$CI_PROJECT_DIR/secml-data"
     policy: pull
-    
-    
+
+
 code_quality:
   interruptible: true
 
