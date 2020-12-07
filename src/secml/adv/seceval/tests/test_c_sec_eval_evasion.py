@@ -1,6 +1,3 @@
-from cleverhans.attacks import FastGradientMethod
-
-from secml.adv.attacks import CAttackEvasionCleverhans
 from secml.adv.attacks.evasion import CAttackEvasionPGDLS
 from secml.adv.seceval import CSecEval
 from secml.array import CArray
@@ -50,6 +47,10 @@ class TestCSecEval(CUnitTest):
             self.attack_classes = CArray([1])
 
             for create_fn in (self._attack_pgd_ls, self._attack_cleverhans):
+                try:
+                    import cleverhans
+                except ImportError:
+                    continue
                 self.attack_ds.append(self.ts)
                 attack, param_name, param_values = create_fn()
                 # set sec eval object
@@ -86,6 +87,10 @@ class TestCSecEval(CUnitTest):
         return attack, param_name, param_values
 
     def _attack_cleverhans(self):
+
+        from cleverhans.attacks import FastGradientMethod
+        from secml.adv.attacks import CAttackEvasionCleverhans
+
         attack_params = {'eps': 0.1,
                          'clip_max': self.ub,
                          'clip_min': self.lb,
