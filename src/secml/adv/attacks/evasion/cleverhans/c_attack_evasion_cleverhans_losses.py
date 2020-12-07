@@ -106,11 +106,11 @@ class CAttackEvasionCleverhansLossesMixin(object):
 
             c_weight = self._clvrh_attack.initial_const
 
-        if self._clvrh_attack.decision_rule is 'L1':
+        if self._clvrh_attack.decision_rule == 'L1':
             d = ((self._x0 - x).abs()).sum(axis=1).ravel()
-        elif self._clvrh_attack.decision_rule is 'L2':
+        elif self._clvrh_attack.decision_rule == 'L2':
             d = ((self._x0 - x) ** 2).sum(axis=1).ravel()
-        elif self._clvrh_attack.decision_rule is 'END':
+        elif self._clvrh_attack.decision_rule == 'END':
             l1dist = ((self._x0 - x).abs()).sum(axis=1).ravel()
             l2dist = ((self._x0 - x) ** 2).sum(axis=1).ravel()
             d = self._clvrh_attack.beta * l1dist + l2dist

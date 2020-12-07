@@ -33,7 +33,7 @@ class CDense(_CArrayInterface):
         data = self._buffer_to_builtin(data)
         obj = np.array(data, dtype=dtype, copy=copy, ndmin=1)
         # numpy created an object array, maybe input is malformed?!
-        if obj.dtype.char is 'O':
+        if obj.dtype.char == 'O':
             raise TypeError("Array is malformed, check input data.")
         # We do not currently support arrays with ndim > 2
         if obj.ndim > 2:
@@ -1098,7 +1098,7 @@ class CDense(_CArrayInterface):
 
     def argsort(self, axis=-1, kind='quicksort', order=None):
         # Fast argsort only available for flat arrays
-        if self.ndim == 1 or kind is not 'quicksort':
+        if self.ndim == 1 or kind != 'quicksort':
             return self.__class__(sorted(
                 range(self.size), key=lambda x: self.__getitem__((0, x))))
         else:
