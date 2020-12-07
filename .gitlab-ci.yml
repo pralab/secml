@@ -393,8 +393,15 @@ test:install:whl:extras:py37:
     policy: pull
 
 test:install:whl:extras:py38:
-  extends: .test:install:whl:extras
+  extends: .test:install:whl
   image: python:3.8
+  script:
+    - DIST_WHL=$(find $CI_PROJECT_DIR/dist -iname \*.whl -exec basename {} \;)
+    - echo $DIST_WHL
+    - pip install ${CI_PROJECT_DIR}/dist/${DIST_WHL}[pytorch]
+  after_script:
+    - python -c "import secml"
+    - python -c "from secml.ml.classifiers import CClassifierPyTorch"
   cache:
     <<: *test-cache-py38
     policy: pull
