@@ -47,10 +47,13 @@ class TestCSecEval(CUnitTest):
             self.attack_classes = CArray([1])
 
             for create_fn in (self._attack_pgd_ls, self._attack_cleverhans):
+                # TODO: REFACTOR THESE UNITTESTS REMOVING THE FOR LOOP
+
                 try:
                     import cleverhans
                 except ImportError:
                     continue
+
                 self.attack_ds.append(self.ts)
                 attack, param_name, param_values = create_fn()
                 # set sec eval object
@@ -97,10 +100,10 @@ class TestCSecEval(CUnitTest):
                          'ord': 1}
 
         attack = CAttackEvasionCleverhans(
-            classifier = self.classifier,
-            surrogate_data = self.tr,
-            y_target = self.y_target,
-            clvh_attack_class = FastGradientMethod,
+            classifier=self.classifier,
+            surrogate_data=self.tr,
+            y_target=self.y_target,
+            clvh_attack_class=FastGradientMethod,
             ** attack_params)
 
         param_name = 'attack_params.eps'
