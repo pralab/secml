@@ -35,7 +35,7 @@ Also, have a look at our [ROADMAP](https://secml.gitlab.io/roadmap.html)
 for an overview of the future development directions.
 
 [![Status Alpha](https://img.shields.io/badge/status-alpha-yellow.svg)](.)
-[![Python 3.5 | 3.6 | 3.7](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7-brightgreen.svg)](.)
+[![Python 3.5 | 3.6 | 3.7 | 3.8](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7%20%7C%203.8-brightgreen.svg)](.)
 [![Platform Linux | MacOS | Windows ](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](.)
 [![Apache License 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
@@ -115,14 +115,16 @@ of the `[extras]` section.
 
 ### Available extra components
  - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
-   Will install: `torch >= 1.4`, `torchvision >= 0.5`  
+   Installs: `torch >= 1.4`, `torchvision >= 0.5`  
    *Windows only*: the url to installation archives should be manually provided as 
    `pip install secml[pytorch] -f https://download.pytorch.org/whl/torch_stable.html`.
  - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
    a Python library to benchmark vulnerability of machine learning systems to adversarial examples.  
-   Will install: `tensorflow >= 1.14.*, < 2`, `cleverhans`
+   Installs: `tensorflow >= 1.14.*, < 2`, `cleverhans`  
+   *Warning*: not available for `python >= 3.8`
  - `tf-gpu` : Shortcut for installing `TensorFlow` package with GPU support (Linux and Windows only).  
-   Will install: `tensorflow-gpu >= 1.14.*, < 2`
+   Installs: `tensorflow-gpu >= 1.14.*, < 2`  
+   *Warning*: not available for `python >= 3.8`
 
 
 ## Usage Guide
