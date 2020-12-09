@@ -183,7 +183,7 @@ setup(
         'cleverhans': ["tensorflow>=1.14,<2", "cleverhans"],
         'tf-gpu': ["tensorflow-gpu>=1.14,<2"],
         'unittests': ['pytest>=5,<5.1',
-                      'pytest-cov>=2.8', 'coverage<5',
+                      'pytest-cov>=2.9', 'coverage<5',
                       'jupyter', 'nbval', 'requests-mock']
     },
     zip_safe=False
