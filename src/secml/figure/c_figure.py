@@ -271,7 +271,7 @@ class CFigure(CCreator):
     def savefig(self, fname, dpi=None, facecolor='w', edgecolor='w',
                 orientation='portrait', papertype=None, file_format=None,
                 transparent=False, bbox_inches=None, bbox_extra_artists=None,
-                pad_inches=0.1, frameon=None):
+                pad_inches=0.1):
         """Save figure to disk.
         
         Parameters
@@ -314,15 +314,11 @@ class CFigure(CCreator):
             bbox is calculated.
         pad_inches : scalar
             Amount of padding around the figure when bbox_inches is 'tight'.
-        frameon : bool, optional
-            If True, the figure patch will be colored, if False, the figure
-            background will be transparent. If not provided, the rcParam
-            'savefig.frameon' will be used.
 
         """
         self._fig.savefig(fname, dpi=dpi, facecolor=facecolor,
                           edgecolor=edgecolor, orientation=orientation,
                           papertype=papertype, format=file_format,
-                          transparent=transparent, frameon=frameon,
+                          transparent=transparent,
                           bbox_inches=bbox_inches, pad_inches=pad_inches,
                           bbox_extra_artists=bbox_extra_artists)
