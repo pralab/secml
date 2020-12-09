@@ -179,7 +179,7 @@ setup(
     python_requires='>=3.5, <3.9',
     install_requires=REQ_PKGS,
     extras_require={
-        'pytorch': ["torch>=1.4", "torchvision>=0.5"],
+        'pytorch': ["torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
         'cleverhans': ["tensorflow>=1.14,<2", "cleverhans"],
         'tf-gpu': ["tensorflow-gpu>=1.14,<2"],
         'unittests': ['pytest>=5,<5.1',
