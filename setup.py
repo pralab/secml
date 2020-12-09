@@ -145,6 +145,7 @@ Programming Language :: Python :: 3
 Programming Language :: Python :: 3.5
 Programming Language :: Python :: 3.6
 Programming Language :: Python :: 3.7
+Programming Language :: Python :: 3.8
 Programming Language :: Python :: Implementation :: PyPy
 Topic :: Software Development
 Topic :: Scientific/Engineering
@@ -175,14 +176,14 @@ setup(
         "*.tests", "*.tests.*", "tests.*", "tests"]),
     package_dir={'': 'src'},
     include_package_data=True,
-    python_requires='>=3.5.*, <4',
+    python_requires='>=3.5, <3.9',
     install_requires=REQ_PKGS,
     extras_require={
-        'pytorch': ["torch>=1.1,<1.5", "torchvision>=0.2.2,<0.6"],
+        'pytorch': ["torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
         'cleverhans': ["tensorflow>=1.14,<2", "cleverhans"],
         'tf-gpu': ["tensorflow-gpu>=1.14,<2"],
         'unittests': ['pytest>=5,<5.1',
-                      'pytest-cov>=2.8', 'coverage<5',
+                      'pytest-cov>=2.9', 'coverage<5',
                       'jupyter', 'nbval', 'requests-mock']
     },
     zip_safe=False
