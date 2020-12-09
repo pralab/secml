@@ -115,7 +115,7 @@ of the `[extras]` section.
 
 ### Available extra components
  - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
-   Will install: `torch >= 1.4`, `torchvision >= 0.2.2`  
+   Will install: `torch >= 1.4`, `torchvision >= 0.5`  
    *Windows only*: the url to installation archives should be manually provided as 
    `pip install secml[pytorch] -f https://download.pytorch.org/whl/torch_stable.html`.
  - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
