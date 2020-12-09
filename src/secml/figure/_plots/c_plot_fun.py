@@ -142,7 +142,7 @@ class CPlotFunction(CPlot):
                 some_y = CArray.linspace(
                     grid_points_val_reshaped.min(),
                     grid_points_val_reshaped.max(), 20)
-                self.colorbar(ch, cmap=cmap, ticks=some_y)
+                self.colorbar(ch, ticks=some_y)
 
         if plot_levels is True:
             self.contour(
