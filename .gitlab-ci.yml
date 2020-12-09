@@ -226,6 +226,7 @@ test:py38:min:
   image: python:3.8
   script: tox -e py38-min
   cache: *test-cache-py38
+  artifacts: *pytest-report
 
 test:py35:latest:win:
   extends:
