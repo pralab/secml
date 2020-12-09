@@ -35,31 +35,6 @@ stages:
       - $TORCH_HOME
       - $SECML_HOME_DIR
 
-.test-cache-py35:
-  cache: &test-cache-py35
-    key: "test-cache-py35"
-    <<: *test-cache
-
-.test-cache-py35-win:
-  cache: &test-cache-py35-win
-    key: "test-cache-py35-win"
-    <<: *test-cache
-
-.test-cache-py36:
-  cache: &test-cache-py36
-    key: "test-cache-py36"
-    <<: *test-cache
-
-.test-cache-py37:
-  cache: &test-cache-py37
-    key: "test-cache-py37"
-    <<: *test-cache
-
-.test-cache-py38:
-  cache: &test-cache-py38
-    key: "test-cache-py38"
-    <<: *test-cache
-
 
 .package:
   stage: package
@@ -176,56 +151,72 @@ test:py35:latest:
   extends: .test
   image: python:3.5
   script: tox -e py35
-  cache: *test-cache-py35
+  cache: &test-cache-py35
+    key: "test-cache-py35"
+    <<: *test-cache
   artifacts: *pytest-report
 
 test:py35:min:
   extends: .test
   image: python:3.5
   script: tox -e py35-min
-  cache: *test-cache-py35
+  cache: &test-cache-py35-min
+    key: "test-cache-py35-min"
+    <<: *test-cache
   artifacts: *pytest-report
 
 test:py36:latest:
   extends: .test
   image: python:3.6
   script: tox -e py36
-  cache: *test-cache-py36
+  cache: &test-cache-py36
+    key: "test-cache-py36"
+    <<: *test-cache
   artifacts: *pytest-report
 
 test:py36:min:
   extends: .test
   image: python:3.6
   script: tox -e py36-min
-  cache: *test-cache-py36
+  cache: &test-cache-py36-min
+    key: "test-cache-py36-min"
+    <<: *test-cache
   artifacts: *pytest-report
 
 test:py37:latest:
   extends: .test
   image: python:3.7
   script: tox -e py37
-  cache: *test-cache-py37
+  cache: &test-cache-py37
+    key: "test-cache-py37"
+    <<: *test-cache
   artifacts: *pytest-report
 
 test:py37:min:
   extends: .test
   image: python:3.7
   script: tox -e py37-min
-  cache: *test-cache-py37
+  cache: &test-cache-py37-min
+    key: "test-cache-py37-min"
+    <<: *test-cache
   artifacts: *pytest-report
 
 test:py38:latest:
   extends: .test
   image: python:3.8
   script: tox -e py38
-  cache: *test-cache-py38
+  cache: &test-cache-py38
+    key: "test-cache-py38"
+    <<: *test-cache
   artifacts: *pytest-report
 
 test:py38:min:
   extends: .test
   image: python:3.8
   script: tox -e py38-min
-  cache: *test-cache-py38
+  cache: &test-cache-py38-min
+    key: "test-cache-py38-min"
+    <<: *test-cache
   artifacts: *pytest-report
 
 test:py35:latest:win:
@@ -268,7 +259,9 @@ test:py35:latest:win:
     - pip install tox
   script: tox -e py35
   allow_failure: true
-  cache: *test-cache-py35-win
+  cache: &test-cache-py35-win
+    key: "test-cache-py35-win"
+    <<: *test-cache
   artifacts: *pytest-report
 
 
