@@ -1,10 +1,15 @@
+from secml.ml.classifiers.reject.tests import CClassifierRejectTestCases
+
+try:
+    import torch
+except ImportError:
+    CClassifierRejectTestCases.importskip("torch")
+else:
+    from torch import nn, optim
+
 from collections import OrderedDict
 
-import torch
-from torch import nn, optim
-
 from secml.ml import CClassifierPyTorch
-from secml.ml.classifiers.reject.tests import CClassifierRejectTestCases
 from secml.ml.classifiers.reject import CClassifierDNR
 from secml.ml.peval.metrics import CMetric
 from secml.data.loader import CDataLoaderMNIST
