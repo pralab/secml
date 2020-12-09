@@ -269,9 +269,8 @@ class CFigure(CCreator):
         return self._fig.suptitle(label, **kwargs)
 
     def savefig(self, fname, dpi=None, facecolor='w', edgecolor='w',
-                orientation='portrait', papertype=None, file_format=None,
-                transparent=False, bbox_inches=None, bbox_extra_artists=None,
-                pad_inches=0.1):
+                orientation='portrait', file_format=None, transparent=False,
+                bbox_inches=None, bbox_extra_artists=None, pad_inches=0.1):
         """Save figure to disk.
         
         Parameters
@@ -291,10 +290,6 @@ class CFigure(CCreator):
             The colors of the figure rectangle. Default 'w' (white).
         orientation: [ 'landscape' | 'portrait' ], optional
             not supported on all backends; currently only on postscript output
-        papertype : str, optional
-            One of 'letter', 'legal', 'executive', 'ledger',
-            'a0' through 'a10', 'b0' through 'b10'.
-            Only supported for postscript output.
         file_format : str, optional
             One of the file extensions supported by the active backend. Most
             backends support png, pdf, ps, eps and svg.
@@ -318,7 +313,6 @@ class CFigure(CCreator):
         """
         self._fig.savefig(fname, dpi=dpi, facecolor=facecolor,
                           edgecolor=edgecolor, orientation=orientation,
-                          papertype=papertype, format=file_format,
-                          transparent=transparent,
+                          format=file_format, transparent=transparent,
                           bbox_inches=bbox_inches, pad_inches=pad_inches,
                           bbox_extra_artists=bbox_extra_artists)
