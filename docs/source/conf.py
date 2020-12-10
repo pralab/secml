@@ -82,7 +82,7 @@ img_latex_preamble = r'\\usepackage{amsmath}'
 intersphinx_mapping = {
     'python': ('https://docs.python.org/{.major}'.format(
         sys.version_info), None),
-    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/reference', None),
     'sklearn': ("https://scikit-learn.org/stable/", None),
     'matplotlib': ('https://matplotlib.org/', None),
