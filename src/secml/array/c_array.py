@@ -68,6 +68,13 @@ class CArray(_CArrayInterface):
 
     Data will be stored in dense form by default.
 
+    This structure supports N-Dimensional input, in form of an array-like
+    object (list, list of lists, numpy.ndarray, scipy.sparse), as well as
+    built-in scalars and strings. 0-Dimensional input (e.g., scalars) is
+    stored as a 1-Dimensional array. For 3-Dimensional and higher data,
+    the input is automatically reshaped to 2 dimensions, and the original
+    shape is stored in the `input_shape` attribute.
+
     Parameters
     ----------
     data : array_like or any built-in datatype
@@ -83,6 +90,7 @@ class CArray(_CArrayInterface):
         or dtype is different, a copy will be made anyway.
     shape : int or sequence of ints, optional
         Shape of the new array, e.g., '(2, 3)' or '2'.
+        This is applied after storing `input_shape`.
     tosparse : bool, optional
         If True, input data will be converted to sparse format.
         Otherwise (default), if input is not a CArray, a dense
@@ -96,7 +104,7 @@ class CArray(_CArrayInterface):
     CArray([[1 2]
      [3 4]])
 
-    >>> print(CArray(True))
+    >>> print(CArray(True))  # 0-Dimensional inputs gets stored as 1-Dim
     CArray([ True])
 
     >>> print(CArray([1,0,3,4], tosparse=True))  # doctest: +NORMALIZE_WHITESPACE
@@ -108,6 +116,15 @@ class CArray(_CArrayInterface):
     CArray([[1.]
      [2.]
      [3.]])
+
+    >>> arr = CArray([[[1,2],[3, 4]], [[5, 6],[7, 8]]])  # N-Dimensional input
+    >>> print(arr)
+    CArray([[1 2 3 4]
+     [5 6 7 8]])
+    >>> print(arr.shape)  # N-Dimensional inputs gets reshaped to 2-Dims
+    (2, 4)
+    >>> print(arr.input_shape)  # Represents the shape of the original input
+    (2, 2, 2)
 
     """
     __slots__ = '_data'  # CArray has only one slot for the buffer
@@ -146,6 +163,11 @@ class CArray(_CArrayInterface):
     def shape(self):
         """Shape of stored data, tuple of ints."""
         return self._data.shape
+
+    @property
+    def input_shape(self):
+        """Original shape of input data, tuple of ints."""
+        return self._data.input_shape
 
     @property
     def size(self):

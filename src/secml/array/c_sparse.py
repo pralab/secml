@@ -89,13 +89,36 @@ class CSparse(_CArrayInterface):
         # Not implemented operators return NotImplemented
         if data is NotImplemented:
             raise TypeError("operator not implemented")
-        data = self._buffer_to_builtin(data)
+        if isinstance(data, CDense):
+            self._input_shape = data.input_shape  # Propagate original shape
+            data = data.tondarray()  # np.ndarray from CDense
+        elif isinstance(data, self.__class__):
+            self._input_shape = data.input_shape  # Propagate original shape
+            data = data.tocsr()  # scs.csr_matrix from CSparse
+        else:  # Other inputs... just need to initialize the input shape
+            self._input_shape = None
         # Reshaping is not supported for csr_matrix so we need few hacks
         # We don't use shape when creating the buffer, but we reshape later
         # Scipy >= 1.4, shape must be two dimensional
         newshape = _shape_atleast_2d(shape)
-        # For special scipy init input shape should be passed to `csr_matrix`
-        shape = None if not is_tuple(data) else newshape
+        if not is_tuple(data):
+            shape = None  # This is the shape passed to scs.csr_matrix()
+            if not scs.issparse(data):  # ndarray, list of lists
+                data = np.array(data, ndmin=1)  # Common dense format
+                # Store the shape of input data (if not previously propagated)
+                # before any further reshaping
+                if self.input_shape is None:
+                    self._input_shape = data.shape
+                # If input data has > 2 dims, reshape to 2 dims
+                if data.ndim > 2:
+                    data = data.reshape(data.shape[0], -1)
+            else:  # For sparse arrays we directly store shape (always ndim=2)
+                # ... but again only if not previously propagated
+                if self.input_shape is None:
+                    self._input_shape = data.shape
+        else:  # For special scipy init, shape should be passed to `csr_matrix`
+            shape = newshape
+            self._input_shape = data  # data is also the input shape
         self._data = scs.csr_matrix(data, shape, dtype, copy)
         # Now we reshape the array if needed (not available for scs.csr_matrix)
         if newshape is not None and newshape != self.shape:
@@ -108,6 +131,11 @@ class CSparse(_CArrayInterface):
     @property
     def shape(self):
         return self._data.shape
+
+    @property
+    def input_shape(self):
+        """Original shape of input data, tuple of ints."""
+        return self._input_shape
 
     @property
     def size(self):
@@ -290,7 +318,9 @@ class CSparse(_CArrayInterface):
 
     def todense(self, order=None):
         """Return data as CDense."""
-        return CDense(self.tondarray(order))
+        obj = CDense(self.tondarray(order))
+        obj._input_shape = self.input_shape
+        return obj
 
     def _tocoo_or_tocsr(self):
         """Return data as coo_matrix if data is not as csr_matrix,
@@ -1026,13 +1056,16 @@ class CSparse(_CArrayInterface):
         this returns a DEEP COPY of current array.
 
         """
-        return self.__class__(self._data.copy())
+        out = self.__class__(self._data.copy())
+        out._input_shape = self.input_shape
+        return out
 
     def __deepcopy__(self, memo):
         """Called when copy.deepcopy(CSparse) is called."""
-        y = self.__class__(self._data.copy())
-        memo[id(self)] = y
-        return y
+        out = self.__class__(self._data.copy())
+        out._input_shape = self.input_shape
+        memo[id(self)] = out
+        return out
 
     # ----------------------------- #
     # # # # # # SAVE/LOAD # # # # # #

@@ -30,16 +30,24 @@ class CDense(_CArrayInterface):
             raise TypeError("operator not implemented")
         data = [[]] if data is None else data
         # Light casting! We need the contained ndarray
-        data = self._buffer_to_builtin(data)
+        if isinstance(data, self.__class__):
+            self._input_shape = data.input_shape  # Propagate original shape
+            data = data.tondarray()  # np.ndarray from CDense
+        else:  # Other inputs... just need to initialize the input shape
+            self._input_shape = None
         obj = np.array(data, dtype=dtype, copy=copy, ndmin=1)
         # numpy created an object array, maybe input is malformed?!
         if obj.dtype.char == 'O':
             raise TypeError("Array is malformed, check input data.")
-        # We do not currently support arrays with ndim > 2
-        if obj.ndim > 2:
-            raise TypeError('expected dimension <= 2 array or matrix')
         self._data = obj
-        # Reshape created array if necessary
+        # Store the shape of input data (if not previously propagated)
+        # before any further reshaping
+        if self.input_shape is None:
+            self._input_shape = obj.shape
+        # If input data has > 2 dims, reshape to 2 dims
+        if self.ndim > 2:
+            self._data = self._data.reshape(self._data.shape[0], -1)
+        # Reshape the created array if necessary
         if shape is not None and shape != self.shape:
             self._data = self.reshape(shape)._data
 
@@ -50,6 +58,11 @@ class CDense(_CArrayInterface):
     @property
     def shape(self):
         return self._data.shape
+
+    @property
+    def input_shape(self):
+        """Original shape of input data, tuple of ints."""
+        return self._input_shape
 
     @property
     def size(self):
@@ -962,10 +975,14 @@ class CDense(_CArrayInterface):
 
     def __copy__(self):
         """As numpy does, we return a deepcopy instead of a shallow copy."""
-        return self.__class__(deepcopy(self._data))
+        out = self.__class__(deepcopy(self._data))
+        out._input_shape = self.input_shape
+        return out
 
     def __deepcopy__(self, memo):
-        return self.__class__(deepcopy(self._data, memo))
+        out = self.__class__(deepcopy(self._data, memo))
+        out._input_shape = self.input_shape
+        return out
 
     # ----------------------------- #
     # # # # # # SAVE/LOAD # # # # # #

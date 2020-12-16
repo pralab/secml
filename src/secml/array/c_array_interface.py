@@ -30,6 +30,12 @@ class _CArrayInterface(metaclass=ABCMeta):
 
     @property
     @abstractmethod
+    def input_shape(self):
+        """Original shape of input data, tuple of ints."""
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
     def size(self):
         """Size (number of elements) of array."""
         raise NotImplementedError
