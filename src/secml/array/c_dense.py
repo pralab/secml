@@ -15,7 +15,7 @@ from copy import deepcopy
 from secml.array.c_array_interface import _CArrayInterface
 
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
-    is_list, is_slice, is_scalar, is_int, is_bool
+    is_list, is_slice, is_scalar, is_int, is_bool, is_tuple
 from secml.core.constants import inf
 from secml.array.array_utils import is_vector_index
 
@@ -109,38 +109,123 @@ class CDense(_CArrayInterface):
     # # # # # # CASTING # # # # # #
     # ----------------------------#
 
-    def tondarray(self):
-        """Return a np.ndarray view of current CDense."""
+    def tondarray(self, shape=None):
+        """Return a np.ndarray view of current CDense.
+
+        Parameters
+        ----------
+        shape : int or tuple of ints, optional
+            The new shape for the output data.
+            Reshape is performed after casting.
+
+        """
+        if shape is not None:
+            return self._data.reshape(shape)
         return self._data
 
-    def tocsr(self):
-        """Return current CDense as a scipy.sparse.csr_matrix."""
-        return scs.csr_matrix(self.tondarray())
+    def _toscs(self, scs_format, shape=None):
+        """Return data as input scipy.scs format.
 
-    def tocoo(self):
-        """Return current CDense as a scipy.sparse.coo_matrix."""
-        return scs.coo_matrix(self.tondarray())
+        Parameters
+        ----------
+        scs_format : str
+            Scipy sparse format.
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
 
-    def tocsc(self):
-        """Return current CDense as a scipy.sparse.csc_matrix."""
-        return scs.csc_matrix(self.tondarray())
+        """
+        out = scs.coo_matrix(self.tondarray())
+        if shape is not None:
+            if not is_tuple(shape) or len(shape) != 2:
+                # TODO: ERROR IS PROPERLY RAISED IN SCIPY > 1.4
+                raise ValueError('matrix shape must be two-dimensional')
+            out = out.reshape(shape)
+        return getattr(out, 'to{:}'.format(scs_format))()
 
-    def todia(self):
-        """Return current CDense as a scipy.sparse.dia_matrix."""
-        return scs.dia_matrix(self.tondarray())
+    def tocsr(self, shape=None):
+        """Return current CDense as a scipy.sparse.csr_matrix.
 
-    def todok(self):
-        """Return current CDense as a scipy.sparse.dok_matrix."""
-        # dok_matrix does not support casting from 1-D ndarrays
-        return scs.dok_matrix(self.atleast_2d().tondarray())
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
 
-    def tolil(self):
-        """Return current CDense as a scipy.sparse.lil_matrix."""
-        return scs.lil_matrix(self.tondarray())
+        """
+        return self._toscs('csr', shape=shape)
 
-    def tolist(self):
-        """Return current CDense as a list."""
-        return self._data.tolist()
+    def tocoo(self, shape=None):
+        """Return current CDense as a scipy.sparse.coo_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('coo', shape=shape)
+
+    def tocsc(self, shape=None):
+        """Return current CDense as a scipy.sparse.csc_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('csc', shape=shape)
+
+    def todia(self, shape=None):
+        """Return current CDense as a scipy.sparse.dia_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('dia', shape=shape)
+
+    def todok(self, shape=None):
+        """Return current CDense as a scipy.sparse.dok_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('dok', shape=shape)
+
+    def tolil(self, shape=None):
+        """Return current CDense as a scipy.sparse.lil_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('lil', shape=shape)
+
+    def tolist(self, shape=None):
+        """Return current CDense as a list.
+
+        Parameters
+        ----------
+        shape : int or tuple of ints, optional
+            The new shape for the output data. The array is converted to
+            ndarray first, then reshaping is performed.
+
+        """
+        return self.tondarray(shape=shape).tolist()
 
     def _buffer_to_builtin(self, data):
         """Convert data buffer to built-in arrays"""
