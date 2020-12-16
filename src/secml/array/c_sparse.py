@@ -164,37 +164,129 @@ class CSparse(_CArrayInterface):
     # # # # # # CASTING # # # # # #
     # ----------------------------#
 
-    def tondarray(self, order=None):
-        """Convert csr_matrix to ndarray."""
-        return self._data.toarray(order)
+    def tondarray(self, order=None, shape=None):
+        """Convert csr_matrix to ndarray.
 
-    def tocsr(self):
-        """Return data as csr_matrix."""
-        return self._data.tocsr()
+        Parameters
+        ----------
+        order : {'C', 'F'}, optional
+            Whether to store multidimensional data in C (row-major) or
+            Fortran (column-major) order in memory. The default is 'None',
+            indicating the NumPy default of C-ordered.
+        shape : int or tuple of ints, optional
+            The new shape for the output data.
+            Reshape is performed after casting.
 
-    def tocoo(self):
-        """Return data as coo_matrix."""
-        return self._data.tocoo()
+        """
+        out = self._data.toarray(order)
+        if shape is not None:
+            return out.reshape(shape)
+        return out
 
-    def tocsc(self):
-        """Return data as csc_matrix."""
-        return self._data.tocsc()
+    def _toscs(self, scs_format, shape=None):
+        """Return data as input scipy.scs format.
 
-    def todia(self):
-        """Return data as dia_matrix."""
-        return self._data.todia()
+        Parameters
+        ----------
+        scs_format : str
+            Scipy sparse format.
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
 
-    def todok(self):
-        """Return data as dok_matrix."""
-        return self._data.todok()
+        """
+        out = getattr(self._data, 'to{:}'.format(scs_format))()
+        if shape is not None:
+            if not is_tuple(shape) or len(shape) != 2:
+                # TODO: ERROR IS PROPERLY RAISED IN SCIPY > 1.4
+                raise ValueError('matrix shape must be two-dimensional')
+            # output of scipy.reshape not necessarily of the same format
+            return getattr(out.reshape(shape), 'to{:}'.format(scs_format))()
+        return out
 
-    def tolil(self):
-        """Return data as lil_matrix."""
-        return self._data.tolil()
+    def tocsr(self, shape=None):
+        """Return data as csr_matrix.
 
-    def tolist(self):
-        """Return data as list."""
-        return self.todense().tolist()
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('csr', shape=shape)
+
+    def tocoo(self, shape=None):
+        """Return data as coo_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('coo', shape=shape)
+
+    def tocsc(self, shape=None):
+        """Return data as csc_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('csc', shape=shape)
+
+    def todia(self, shape=None):
+        """Return data as dia_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('dia', shape=shape)
+
+    def todok(self, shape=None):
+        """Return data as dok_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('dok', shape=shape)
+
+    def tolil(self, shape=None):
+        """Return data as lil_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('lil', shape=shape)
+
+    def tolist(self, shape=None):
+        """Return data as list.
+
+        Parameters
+        ----------
+        shape : int or tuple of ints, optional
+            The new shape for the output data. The array is converted to
+            ndarray first, then reshaping is performed.
+
+        """
+        return self.todense().tolist(shape=shape)
 
     def todense(self, order=None):
         """Return data as CDense."""
