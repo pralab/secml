@@ -305,6 +305,42 @@ test:notebooks:py35:latest:
   cache: *test-cache-py35
 
 
+test:zoo:
+  stage: test
+  needs: ["package"]
+  allow_failure: true
+  variables:
+    SECML_ZOO_BRANCH: master
+    PIP_CACHE_DIR: $PIP_CACHE_DIR
+    TORCH_HOME: $TORCH_HOME
+    SECML_HOME_DIR: $SECML_HOME_DIR
+  trigger:
+    project: secml/secml-zoo
+    branch: $SECML_ZOO_BRANCH
+    strategy: depend
+  rules:
+    - if: '$CI_SERVER_HOST != "gitlab.com"'
+      when: never
+    - if: '$RUN_TESTS'
+      when: on_success
+    - if: '$SKIP_TESTS'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "tags"'
+      when: never
+    - changes:
+      - src/secml/VERSION
+      when: never
+    - changes:
+      - src/secml/**/*
+      - .gitlab-ci.yml
+      - requirements.txt
+      - setup.py
+      - tox.ini
+      when: on_success
+
+
 .test:install:
   stage: test
   needs: ["package"]
