@@ -257,7 +257,7 @@ test:py35:latest:win:
     # The https://download.pytorch.org/ certificates chain is not recognized by default as trusted
     - Import-Certificate -FilePath ".gitlab\dl-pytorch-chain.p7b" -CertStoreLocation Cert:\LocalMachine\Root
     - pip install tox
-  script: tox -e py35
+  script: tox -e py35-win
   allow_failure: true
   cache: &test-cache-py35-win
     key: "test-cache-py35-win"
