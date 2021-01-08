@@ -35,7 +35,7 @@ Also, have a look at our [ROADMAP](https://secml.gitlab.io/roadmap.html)
 for an overview of the future development directions.
 
 [![Status Alpha](https://img.shields.io/badge/status-alpha-yellow.svg)](.)
-[![Python 3.5 | 3.6 | 3.7 | 3.8](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7%20%7C%203.8-brightgreen.svg)](.)
+[![Python 3.6 | 3.7 | 3.8](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-brightgreen.svg)](.)
 [![Platform Linux | MacOS | Windows ](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](.)
 [![Apache License 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
@@ -51,7 +51,7 @@ the configuration procedure.
 
 ### Operating System requirements
 
-SecML can run under Python >= 3.5 with no additional configuration steps 
+SecML can run under Python >= 3.6 with no additional configuration steps 
 required, as all its dependencies are available as wheel packages for 
 the principal macOS versions, Linux distributions and Windows.
 
