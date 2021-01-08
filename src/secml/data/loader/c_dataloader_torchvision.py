@@ -10,6 +10,7 @@ from secml.data import CDataset
 from secml.data.loader import CDataLoader
 
 from secml.settings import SECML_DS_DIR
+from secml.utils import fm
 
 
 class CDataLoaderTorchDataset(CDataLoader):
@@ -23,7 +24,7 @@ class CDataLoaderTorchDataset(CDataLoader):
     """
 
     def __init__(self, tv_dataset_class, **kwargs):
-        root = kwargs.pop('root', SECML_DS_DIR)
+        root = kwargs.pop('root', fm.join(SECML_DS_DIR, 'pytorch'))
         self._tv_dataset = tv_dataset_class(root=root, **kwargs)
         self._class_to_idx = self._tv_dataset.class_to_idx
 
