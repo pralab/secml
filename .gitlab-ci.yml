@@ -43,7 +43,7 @@ stages:
 
 package:
   extends: .package
-  image: ${CI_REGISTRY}/pralab/docker-helper-images/python35-setuptools:latest
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/python36-setuptools:latest
   before_script:
     - echo $CI_PROJECT_DIR
   script:
@@ -74,7 +74,7 @@ package:
 
 package:docs:
   extends: .package
-  image: ${CI_REGISTRY}/pralab/docker-helper-images/python35-sphinx:latest
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/python36-sphinx:latest
   script:
     - echo $CI_PROJECT_DIR
     - python -V
@@ -103,7 +103,7 @@ package:docs:
       - public
     expire_in: 1 day
   cache:
-    key: "test-cache-py35"
+    key: "test-cache-py36"
     paths:
       - "$CI_PROJECT_DIR/.cache/pip"
       - "$CI_PROJECT_DIR/secml-data"
@@ -147,24 +147,6 @@ code_quality:
     reports:
       junit: pytest-report.xml
     expire_in: 1 week
-
-test:py35:latest:
-  extends: .test
-  image: python:3.5
-  script: tox -e py35
-  cache: &test-cache-py35
-    key: "test-cache-py35"
-    <<: *test-cache
-  artifacts: *pytest-report
-
-test:py35:min:
-  extends: .test
-  image: python:3.5
-  script: tox -e py35-min
-  cache: &test-cache-py35-min
-    key: "test-cache-py35-min"
-    <<: *test-cache
-  artifacts: *pytest-report
 
 test:py36:latest:
   extends: .test
@@ -220,11 +202,11 @@ test:py38:min:
     <<: *test-cache
   artifacts: *pytest-report
 
-test:py35:latest:win:
+test:py36:latest:win:
   extends:
     - .test
     - .shared_windows_runners
-  image: python:3.5
+  image: python:3.6
   rules:
     - if: '$CI_SERVER_HOST != "gitlab.com"'
       when: never
@@ -249,29 +231,27 @@ test:py35:latest:win:
   before_script:
     - echo $CI_PROJECT_DIR
     - choco install vcredist2017 -y
-    - choco install python -y --version=3.5.4
+    - choco install python -y --version=3.6.8
     # Path is not updated by default by choco
-    - $env:Path += ";C:\Python35;C:\Python35\Scripts"
+    - $env:Path += ";C:\Python36;C:\Python36\Scripts"
     - python -V
     # If matplotlib cannot find the following registry item tries to read the "WINDIR" env key (caps) and crashes
     - New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Fonts" -Value "C:\Windows\Fonts" -PropertyType "String"
     # The https://download.pytorch.org/ certificates chain is not recognized by default as trusted
     - Import-Certificate -FilePath ".gitlab\dl-pytorch-chain.p7b" -CertStoreLocation Cert:\LocalMachine\Root
     - pip install tox
-  script: tox -e py35-win
+  script: tox -e py36-win
   allow_failure: true
-  cache: &test-cache-py35-win
-    key: "test-cache-py35-win"
+  cache: &test-cache-py36-win
+    key: "test-cache-py36-win"
     <<: *test-cache
   artifacts: *pytest-report
 
-test:py35:latest:noextras:
+test:py36:latest:noextras:
   extends: .test
-  image: python:3.5
-  script: tox -e py35-nopytorch-nocleverhans
-  cache: &test-cache-py35
-    key: "test-cache-py35"
-    <<: *test-cache
+  image: python:3.6
+  script: tox -e py36-nopytorch-nocleverhans
+  cache: *test-cache-py36
   artifacts: *pytest-report
 
 
@@ -299,11 +279,11 @@ test:py35:latest:noextras:
       - tox.ini
       when: on_success
 
-test:notebooks:py35:latest:
+test:notebooks:py36:latest:
   extends: .test:notebooks
-  image: python:3.5
+  image: python:3.6
   script: tox -e latest-notebooks
-  cache: *test-cache-py35
+  cache: *test-cache-py36
 
 
 test:zoo:
@@ -392,13 +372,6 @@ test:zoo:
     - python -c "from secml.ml.classifiers import CClassifierPyTorch"
     - python -c "from secml.adv.attacks.evasion import CAttackEvasionCleverhans"
 
-test:install:whl:py35:
-  extends: .test:install:whl
-  image: python:3.5
-  cache:
-    <<: *test-cache-py35
-    policy: pull
-
 test:install:whl:py36:
   extends: .test:install:whl
   image: python:3.6
@@ -418,13 +391,6 @@ test:install:whl:py38:
   image: python:3.8
   cache:
     <<: *test-cache-py38
-    policy: pull
-
-test:install:whl:extras:py35:
-  extends: .test:install:whl:extras
-  image: python:3.5
-  cache:
-    <<: *test-cache-py35
     policy: pull
 
 test:install:whl:extras:py36:
@@ -591,7 +557,7 @@ release:gitlab-pages:
 
 release:pypi:
   extends: .release
-  image: ${CI_REGISTRY}/pralab/docker-helper-images/python35-setuptools:latest
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/python36-setuptools:latest
   variables:
     TWINE_REPOSITORY_URL: "https://upload.pypi.org/legacy/"
     TWINE_USERNAME: __token__
