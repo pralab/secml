@@ -139,6 +139,11 @@ def global_filterwarnings():
         "ignore", category=DeprecationWarning,
         message=r"tostring\(\) is deprecated\. Use tobytes\(\) instead\.")
 
+    # TODO: warning raised by torchvision mnist loader first time you download
+    warnings.filterwarnings(
+        "ignore", category=UserWarning, module="torchvision.datasets.mnist",
+        message=r"The given NumPy array is not writeable")
+
 
 # Call the filterwarnings method to make it active project-wide
 global_filterwarnings()
