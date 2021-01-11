@@ -144,6 +144,10 @@ def global_filterwarnings():
         "ignore", category=UserWarning, module="torchvision.datasets.mnist",
         message=r"The given NumPy array is not writeable")
 
+    # TODO: cures https://github.com/pytorch/pytorch/issues/47038
+    warnings.filterwarnings(
+        "ignore", category=UserWarning, message=r"CUDA initialization")
+
 
 # Call the filterwarnings method to make it active project-wide
 global_filterwarnings()
