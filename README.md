@@ -13,7 +13,7 @@ It comes with a set of powerful features:
 - **Dense/Sparse data support.** We provide full, transparent support for both
   dense (through `numpy` library) and sparse data (through `scipy` library)
   in a single data structure.
-- **Visualize your results.** We provide visualization and plotting framework,
+- **Visualize your results.** We provide a visualization and plotting framework,
   based on the widely-known library [matplotlib](https://matplotlib.org/).
 - **Explain your results.** Explainable ML methods to interpret model decisions
   via influential features and prototypes.
@@ -42,18 +42,18 @@ for an overview of the future development directions.
 
 ## Installation Guide
 
-We recommend instaling SecML in a specific environment along with its dependencies.
+We recommend installing SecML in a specific environment along with its dependencies.
 
 Common frameworks to create and manage envs are [virtualenv](https://virtualenv.pypa.io) 
-and [conda](https://conda.io). Both alternatives provide convenient user guides on 
-how to properly setup the envs, so this guide will not cover the configuration 
-procedure.
+and [conda](https://conda.io). Both alternatives provide convenient user 
+guides on how to correctly set up the envs, so this guide will not cover 
+the configuration procedure.
 
 ### Operating System requirements
 
 SecML can run under Python >= 3.5 with no additional configuration steps 
 required, as all its dependencies are available as wheel packages for 
-the primary macOS versions, Linux distributions and Windows.
+the principal macOS versions, Linux distributions and Windows.
 
 However, to support additional advanced features more packages can be necessary
 depending on the Operating System used:
@@ -78,7 +78,7 @@ depending on the Operating System used:
 Before starting the installation process try to obtain the latest version
 of the `pip` manager by calling: `pip install -U pip`
 
-The setup process is managed by the Python package `setuptools`.
+The Python package `setuptools` manages the setup process.
 Be sure to obtain the latest version by calling: `pip install -U setuptools`
 
 Once the environment is set up, SecML can installed and run by multiple means:
@@ -98,7 +98,7 @@ SecML should now be importable in python via: `import secml`.
 To update a current installation using any of the previous methods, 
 add the `-U` parameter after the `pip install` directive.
 Please see our [Update Guides](https://secml.gitlab.io/update.html) for specific
-upgrade intructions depending on the source and target version.
+upgrade instructions depending on the source and target version.
 
 
 ## Extra Components
@@ -133,7 +133,7 @@ SecML is based on [numpy](http://www.numpy.org/), [scipy](https://www.scipy.org/
 [scikit-learn](https://scikit-learn.org/) and [pytorch](https://pytorch.org/), 
 widely-used packages for scientific computing and machine learning with Python.
 
-As a result, most of the interfaces of the library should be pretty familiar 
+As a result, most of the library interfaces should be pretty familiar 
 to frequent users of those packages.
 
 The primary data class is the `secml.array.CArray`, multi-dimensional
