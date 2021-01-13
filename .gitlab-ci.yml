@@ -5,13 +5,14 @@ include:
   - template: 'Security/Secret-Detection.gitlab-ci.yml'
 
 variables:
-    SEARCH_MAX_DEPTH: 6
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-    TORCH_HOME: "$CI_PROJECT_DIR/.cache/torch"
-    SECML_HOME_DIR: "$CI_PROJECT_DIR/secml-data"
-    TOX_WORKDIR: "$CI_PROJECT_DIR/.tox"
-    TOX_TESTENV_PASSENV: "PIP_CACHE_DIR TORCH_HOME SECML_HOME_DIR"
-    TOX_USEDEVELOP: "False"
+  SEARCH_MAX_DEPTH: 6
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PIP_FIND_LINKS_TORCH: "https://download.pytorch.org/whl/cpu/torch_stable.html"
+  TORCH_HOME: "$CI_PROJECT_DIR/.cache/torch"
+  SECML_HOME_DIR: "$CI_PROJECT_DIR/secml-data"
+  TOX_WORKDIR: "$CI_PROJECT_DIR/.tox"
+  TOX_TESTENV_PASSENV: "PIP_CACHE_DIR PIP_FIND_LINKS_TORCH TORCH_HOME SECML_HOME_DIR"
+  TOX_USEDEVELOP: "False"
 
 stages:
   - package
@@ -380,6 +381,8 @@ test:zoo:
 
 .test:install:whl:extras:
   extends: .test:install:whl
+  variables:
+    PIP_FIND_LINKS: $PIP_FIND_LINKS_TORCH
   script:
     - DIST_WHL=$(find $CI_PROJECT_DIR/dist -iname \*.whl -exec basename {} \;)
     - echo $DIST_WHL
@@ -439,7 +442,7 @@ test:install:whl:extras:py37:
     policy: pull
 
 test:install:whl:extras:py38:
-  extends: .test:install:whl
+  extends: .test:install:whl:extras
   image: python:3.8
   script:
     - DIST_WHL=$(find $CI_PROJECT_DIR/dist -iname \*.whl -exec basename {} \;)
