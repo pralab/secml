@@ -6,3 +6,5 @@ joblib >= 0.14
 Pillow >= 6.2.1
 requests
 python-dateutil
+# Temporary pin to fix #894
+pyzmq < 21
