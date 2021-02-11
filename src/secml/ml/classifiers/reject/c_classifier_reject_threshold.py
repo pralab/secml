@@ -6,6 +6,8 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+import math
+
 from secml import _NoValue
 from secml.array import CArray
 from secml.data import CDataset
@@ -199,3 +201,31 @@ class CClassifierRejectThreshold(CClassifierReject):
         # the derivative w.r.t. the rejection class is zero, thus we can just
         # call the clf gradient by removing the last element from w.
         return self.clf.gradient(self._cached_x, w[:-1])
+
+    def compute_threshold(self, rej_percent, ds):
+        """Compute the threshold that must be set in the classifier to have
+        rej_percent rejection rate (accordingly to an estimation on a
+        validation set).
+
+        Parameters
+        ----------
+        rej_percent : float
+            Max percentage of rejected samples.
+        ds : CDataset
+            Dataset on which the threshold is estimated.
+
+        Returns
+        -------
+        threshold : float
+            The estimated reject threshold
+            
+        """
+        if not self.is_fitted():
+            raise NotFittedError("The classifier must be fitted")
+        scores = self.predict(ds.X, return_decision_function=True)[1]
+        max_scores = scores[:, :-1].max(axis=1).ravel()
+        max_scores.sort(inplace=True)
+        rej_num = math.floor(rej_percent * ds.num_samples)
+        threshold = max_scores[rej_num - 1].item()
+        self.logger.info("Chosen threshold: {:}".format(threshold))
+        return threshold
