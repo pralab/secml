@@ -42,6 +42,22 @@ resource_rules:
           comment: |
             /label ~"#{ milestone.title }"
             #{ unlabel_no_milestone_labels }
+      - name: PublicLink
+        conditions:
+          date:
+            attribute: updated_at
+            condition: newer_than
+            interval_type: days
+            interval: 5
+          labels:
+            - public
+          forbidden_labels:
+            - public-linked
+        actions:
+          labels:
+            - public-linked
+          comment: |
+            ~"public" issue: https://gitlab.com/secml/secml/-/issues/#{ resource[:iid] }
 
   merge_requests:
     rules:
