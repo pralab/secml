@@ -513,6 +513,7 @@ release:gitlab-releases:
     paths:
       - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
       - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
+    expire_in: never
 
 release:gitlab-repo:
   extends: .release
