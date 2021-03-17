@@ -46,3 +46,14 @@ CAttackEvasionCleverhans
    :undoc-members:
    :show-inheritance:
 
+secml.adv.attacks.evasion.foolbox
+---------------------------------
+
+.. automodule:: secml.adv.attacks.evasion.foolbox
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. toctree::
+
+   secml.adv.attacks.evasion.foolbox

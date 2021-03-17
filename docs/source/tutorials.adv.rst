@@ -13,3 +13,4 @@ Adversarial Machine Learning
    tutorials/12-DNR
    tutorials/09-Cleverhans
    tutorials/14-RobustBench
+   tutorials/15-Foolbox

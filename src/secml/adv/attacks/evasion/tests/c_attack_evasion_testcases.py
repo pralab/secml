@@ -301,9 +301,14 @@ class CAttackEvasionTestCases(CUnitTest):
 
         fig.sp.plot_ds(ds)
         fig.sp.plot_fun(
-            func=evas.classifier.decision_function,
+            func=evas.objective_function,
             grid_limits=grid_limits, colorbar=False,
-            n_grid_points=50, levels=[th], y=1)
+            n_grid_points=50, plot_levels=False)
+
+        fig.sp.plot_decision_regions(
+            clf=evas.classifier, plot_background=False,
+            grid_limits=grid_limits,
+            n_grid_points=50)
 
         fig.sp.plot_constraint(self._box(evas),
                                n_grid_points=20,
