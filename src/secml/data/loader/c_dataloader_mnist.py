@@ -15,17 +15,20 @@ from secml.data.loader import CDataLoader
 from secml.data import CDataset, CDatasetHeader
 from secml.array import CArray
 from secml.utils import fm
-from secml.utils.download_utils import dl_file, md5
+from secml.utils.download_utils import dl_file_gitlab, md5
 from secml.settings import SECML_DS_DIR
 
 
-TRAIN_DATA_URL = 'http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz'
+MODEL_ZOO_REPO_URL = 'https://gitlab.com/secml/secml-zoo'
+MNIST_REPO_PATH = 'datasets/MNIST'
+
+TRAIN_DATA_FILE = 'train-images-idx3-ubyte.gz'
 TRAIN_DATA_MD5 = '6bbc9ace898e44ae57da46a324031adb'
-TRAIN_LABELS_URL = 'http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz'
+TRAIN_LABELS_FILE = 'train-labels-idx1-ubyte.gz'
 TRAIN_LABELS_MD5 = 'a25bea736e30d166cdddb491f175f624'
-TEST_DATA_URL = 'http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz'
+TEST_DATA_FILE = 't10k-images-idx3-ubyte.gz'
 TEST_DATA_MD5 = '2646ac647ad5339dbf082846283269ea'
-TEST_LABELS_URL = 'http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz'
+TEST_LABELS_FILE = 't10k-labels-idx1-ubyte.gz'
 TEST_LABELS_MD5 = '27ae3e4e09519cfbb04c329615203637'
 
 MNIST_PATH = fm.join(SECML_DS_DIR, 'mnist')
@@ -60,17 +63,20 @@ class CDataLoaderMNIST(CDataLoader):
             # For each file check if already downloaded and extracted
             if not fm.file_exist(self.train_data_path) or \
                     md5(self.train_data_path) != TRAIN_DATA_MD5:
-                self._get_data(TRAIN_DATA_URL, MNIST_PATH, self.train_data_path)
+                self._get_data(TRAIN_DATA_FILE, MNIST_PATH,
+                               self.train_data_path, TRAIN_DATA_MD5)
             if not fm.file_exist(self.train_labels_path) or \
                     md5(self.train_labels_path) != TRAIN_LABELS_MD5:
-                self._get_data(
-                    TRAIN_LABELS_URL, MNIST_PATH, self.train_labels_path)
+                self._get_data(TRAIN_LABELS_FILE, MNIST_PATH,
+                               self.train_labels_path, TRAIN_LABELS_MD5)
             if not fm.file_exist(self.test_data_path) or \
                     md5(self.test_data_path) != TEST_DATA_MD5:
-                self._get_data(TEST_DATA_URL, MNIST_PATH, self.test_data_path)
+                self._get_data(TEST_DATA_FILE, MNIST_PATH,
+                               self.test_data_path, TEST_DATA_MD5)
             if not fm.file_exist(self.test_labels_path) or \
                     md5(self.test_labels_path) != TEST_LABELS_MD5:
-                self._get_data(TEST_LABELS_URL, MNIST_PATH, self.test_labels_path)
+                self._get_data(TEST_LABELS_FILE, MNIST_PATH,
+                               self.test_labels_path, TEST_LABELS_MD5)
 
     def load(self, ds, digits=tuple(range(0, 10)), num_samples=None):
         """Load all images of specified format inside given path.
@@ -173,24 +179,31 @@ class CDataLoaderMNIST(CDataLoader):
 
         return CDataset(images, labels, header=header)
 
-    def _get_data(self, file_url, dl_folder, output_path):
+    def _get_data(self, file_name, dl_folder, output_path, md5sum):
         """Download input datafile, unzip and store in output_path.
 
         Parameters
         ----------
-        file_url : str
-            URL of the file to download.
+        file_name : str
+            Name of the file to download.
         dl_folder : str
             Path to the folder where to store the downloaded file.
         output_path : str
             Full path of output file.
+        md5sum : str
+            Expected MD5 of the downloaded file (after unpacking).
 
         """
         # Download file and unpack
-        fh = dl_file(file_url, dl_folder)
+        fh = dl_file_gitlab(MODEL_ZOO_REPO_URL,
+                            fm.join(MNIST_REPO_PATH, file_name), dl_folder)
         with gzip.open(fh, 'rb') as infile:
             with open(output_path, 'wb') as outfile:
                 for line in infile:
                     outfile.write(line)
         # Remove download zipped file
         fm.remove_file(fh)
+        # Check the hash of the downloaded file (unpacked)
+        if md5(output_path) != md5sum:
+            raise RuntimeError('Something wrong happened while '
+                               'downloading the dataset. Please try again.')
