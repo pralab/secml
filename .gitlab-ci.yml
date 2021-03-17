@@ -254,7 +254,7 @@ test:py36:latest:win:
 test:py36:latest:noextras:
   extends: .test
   image: python:3.6
-  script: tox -e py36-nopytorch-nocleverhans
+  script: tox -e py36-nopytorch-nocleverhans-nofoolbox
   cache: *test-cache-py36
   artifacts: *pytest-report
 
@@ -370,11 +370,12 @@ test:zoo:
   script:
     - DIST_WHL=$(find $CI_PROJECT_DIR/dist -iname \*.whl -exec basename {} \;)
     - echo $DIST_WHL
-    - pip install ${CI_PROJECT_DIR}/dist/${DIST_WHL}[pytorch,cleverhans]
+    - pip install ${CI_PROJECT_DIR}/dist/${DIST_WHL}[pytorch,cleverhans,foolbox]
   after_script:
     - python -c "import secml"
     - python -c "from secml.ml.classifiers import CClassifierPyTorch"
     - python -c "from secml.adv.attacks.evasion import CAttackEvasionCleverhans"
+    - python -c "from secml.adv.attacks.evasion import CAttackEvasionFoolbox"
 
 test:install:whl:py36:
   extends: .test:install:whl
