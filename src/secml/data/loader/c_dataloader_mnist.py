@@ -20,7 +20,7 @@ from secml.settings import SECML_DS_DIR
 
 
 MODEL_ZOO_REPO_URL = 'https://gitlab.com/secml/secml-zoo'
-MNIST_REPO_PATH = 'datasets/MNIST'
+MNIST_REPO_PATH = 'datasets/MNIST/'
 
 TRAIN_DATA_FILE = 'train-images-idx3-ubyte.gz'
 TRAIN_DATA_MD5 = '6bbc9ace898e44ae57da46a324031adb'
@@ -195,8 +195,8 @@ class CDataLoaderMNIST(CDataLoader):
 
         """
         # Download file and unpack
-        fh = dl_file_gitlab(MODEL_ZOO_REPO_URL,
-                            fm.join(MNIST_REPO_PATH, file_name), dl_folder)
+        fh = dl_file_gitlab(
+            MODEL_ZOO_REPO_URL, MNIST_REPO_PATH + file_name, dl_folder)
         with gzip.open(fh, 'rb') as infile:
             with open(output_path, 'wb') as outfile:
                 for line in infile:
