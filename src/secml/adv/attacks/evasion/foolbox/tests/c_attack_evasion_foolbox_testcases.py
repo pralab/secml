@@ -115,7 +115,7 @@ class CAttackEvasionFoolboxTestCases(CAttackEvasionTestCases):
 
     def _check_adv_example(self, secml_attack, fb_attack):
         x0_tensor = as_tensor(self.x0.atleast_2d())
-        y0_tensor = as_tensor(self.y0.ravel())
+        y0_tensor = as_tensor(self.y0.ravel(), tensor_type=torch.LongTensor)
 
         y_target = secml_attack.y_target
 

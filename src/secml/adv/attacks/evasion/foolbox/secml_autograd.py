@@ -47,14 +47,15 @@ class SecmlAutogradFunction(torch.autograd.Function):
         return grad_input, None, None, None
 
 
-def as_tensor(x, requires_grad=False):
+def as_tensor(x, requires_grad=False, tensor_type=None):
     x = torch.from_numpy(x.tondarray().copy()).view(x.input_shape)
+    x = x.type(x.dtype if tensor_type is None else tensor_type)
     x.requires_grad = requires_grad
     return x
 
 
-def as_carray(x):
-    return CArray(x.cpu().detach().numpy())
+def as_carray(x, dtype=None):
+    return CArray(x.cpu().detach().numpy()).astype(dtype)
 
 
 class SecmlLayer(nn.Module):
