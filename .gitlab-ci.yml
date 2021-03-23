@@ -111,7 +111,13 @@ package:docs:
 
 
 code_quality:
-  interruptible: true
+  interruptible: true  
+  rules:
+    - if: '$CODE_QUALITY_DISABLED'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "stable" || $CI_COMMIT_BRANCH =~ /^release-.*$/ || $CI_COMMIT_BRANCH =~ /^.*-stable$/'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
   variables:
     REPORT_FORMAT: html
   artifacts:
