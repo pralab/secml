@@ -1,3 +1,55 @@
+## v0.14 (23/03/2021)
+- #795 Added new package `adv.attacks.evasion.foolbox` with a wrapper for [Foolbox](https://foolbox.readthedocs.io/en/stable/).
+- #623 `secml` is now tested for compatibility with Python 3.8.
+- #861 N-Dimensional input is now accepted by `CArray`.
+- #853 Added new notebook tutorial with an application on Android Malware Detection.
+- #859 Add a new tutorial notebook containing example usage and attack against RobustBench models.
+- #845 Static Application Security Testing (SAST) using [bandit](https://github.com/PyCQA/bandit) is now executed during testing process.
+
+### Requirements (5 changes)
+- #623 `secml` is now tested for compatibility with Python 3.8.
+- #623 The following dependencies are now required: `scipy >= 1.3.2`, `scikit-learn >= 0.22`, `matplotlib >= 3`.
+- #623 The `pytorch` extra component now installs: `torch >= 1.4`, `torchvision >= 0.5`.
+- #623 The `cleverhans` extra component is now available on Python < 3.8 only, due to `tensorflow 1` compatibility.
+- #822 Dropped official support of Python 3.5, which reached End Of Life on 13 Sep 2020. SecML may still be usable in the near future on Python 3.5 but we stopped running dedicated tests on this interpreter.
+
+### Added (3 changes)
+- #795 Added new package `adv.attacks.evasion.foolbox` with a wrapper for [Foolbox](https://foolbox.readthedocs.io/en/stable/).
+- #880 Added new `shape` parameter to the following `CArray` methods: `get_data`, `tondarray`, `tocsr`, `tocoo`, `tocsc`, `todia`, `todok`, `tolil`, `tolist`. The reshaping operation is performed after casting the array to the desired output data format.
+- #855 Added new ROC-related performance metrics: `CMetricFNRatFPR`, `CMetricTHatFPR`, `CMetricTPRatTH`, `CMetricFNRatTH`.
+
+### Improved (3 changes)
+- #861 N-Dimensional input is now accepted by `CArray`. If the number of dimensions of input data is higher than 2, the data is reshaped to 2 dims, and the original shape is stored in the new attribute `input_shape`.
+- #910 The MNIST dataset loader `CDataLoaderMNIST` now downloads the files from our model-zoo mirror (https://gitlab.com/secml/secml-zoo/-/tree/datasets/MNIST).
+- #886 Torch datasets now stored by `CDataLoaderTorchDataset` in a "pytorch" subfolder of `SECML_DS_DIR` to avoid naming collisions.
+
+### Fixed (8 changes)
+- #897 Fixed crash in `CAttackPoisoning` when `y_target != None` due to missing broadcasting to expected shape.
+- #873 Use equality instead of identity to compare literals (fixing related SyntaxWarning in Python 3.8).
+- #867 Now calling `StandardScaler`, `CScalerNorm`, `CScalerMinMax` arguments using keywords to fix scikit futurewarning in version 0.23 or later.
+- #870 Filtering "DeprecationWarning: tostring() is deprecated. Use tobytes() instead." raised by tensorflow 1.15 if numpy 1.19 is installed.
+- #868 Correctly escaping latex commands in docstrings to avoid "DeprecationWarning: invalid escape sequence \\s".
+- #871 Fixed `ValueError: k exceeds matrix dimensions` not raised by scipy v1.5 if a `k` outside the array dimensions is used to extract a diagonal.
+- #872 Fixed scipy 1.5 not always keeping the dtype of the original array during getitem (especially if the result is an empty array).
+- #888 Filter warning raised by torchvision mnist loader first time you download.
+
+### Removed & Deprecated (2 changes)
+- #875 Removed parameter `frameon` from `CFigure.savefig` as it is deprecated in matplotlib >= 3.1.
+- #875 Removed parameter `papertype` from `CFigure.savefig` as it is deprecated in matplotlib >= 3.3.
+
+### Documentation (10 changes)
+- #853 Added new notebook tutorial with an application on Android Malware Detection.
+- #859 Add a new tutorial notebook containing example usage and attack against RobustBench models.
+- #898 Added "Open in Colab" button to all tutorial notebooks.
+- #899 Added "Edit on Gitlab" button to doc pages.
+- #900 Moved notebook 11 "Evasion Attacks on ImageNet (Computer Vision)" to "Applications" section.
+- #905 Changed image used by notebook 8, as the previous one is no more available.
+- #903 Updated roadmap page in documentation.
+- #890 Fixed multiple typos and improved language in the README.
+- #878 Updated intersphinx mapping for numpy's documentation.
+- #850 Fixed `MNIST` typo in notebook 10.
+
+
 ## v0.13 (24/07/2020)
 - #814 Added new evasion attack `CAttackEvasionPGDExp`.
 - #780 Added new classifier `CClassifierDNR` implementing Deep Neural Rejection (DNR). See *Sotgiu et al. “Deep neural rejection against adversarial examples”, EURASIP J. on Info. Security (2020)*.

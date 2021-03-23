@@ -119,7 +119,7 @@ class CConstraintL1(CConstraint):
         Solves the optimisation problem (using the algorithm from [1]):
 
             min_w 0.5 * || w - v ||_2^2 ,
-            s.t. \sum_i w_i = s, w_i >= 0
+            s.t. \\sum_i w_i = s, w_i >= 0
 
         Parameters
         ----------

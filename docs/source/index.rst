@@ -9,6 +9,7 @@
    tutorials.ml
    tutorials.adv
    tutorials/10-Explanation
+   tutorials.app
 
 .. toctree::
    :hidden:

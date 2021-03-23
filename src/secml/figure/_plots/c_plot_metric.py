@@ -316,7 +316,7 @@ class CPlotMetric(CPlot):
         plt.setp(self._sp.get_xticklabels(), rotation=45,
                  ha="right", rotation_mode="anchor")
 
-        fmt = '%.2f' if normalize else 'd'
+        fmt = '.2f' if normalize else 'd'
 
         if colorbar is True:
             from mpl_toolkits.axes_grid1 import make_axes_locatable

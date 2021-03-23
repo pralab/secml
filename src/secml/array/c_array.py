@@ -68,6 +68,13 @@ class CArray(_CArrayInterface):
 
     Data will be stored in dense form by default.
 
+    This structure supports N-Dimensional input, in form of an array-like
+    object (list, list of lists, numpy.ndarray, scipy.sparse), as well as
+    built-in scalars and strings. 0-Dimensional input (e.g., scalars) is
+    stored as a 1-Dimensional array. For 3-Dimensional and higher data,
+    the input is automatically reshaped to 2 dimensions, and the original
+    shape is stored in the `input_shape` attribute.
+
     Parameters
     ----------
     data : array_like or any built-in datatype
@@ -83,6 +90,7 @@ class CArray(_CArrayInterface):
         or dtype is different, a copy will be made anyway.
     shape : int or sequence of ints, optional
         Shape of the new array, e.g., '(2, 3)' or '2'.
+        This is applied after storing `input_shape`.
     tosparse : bool, optional
         If True, input data will be converted to sparse format.
         Otherwise (default), if input is not a CArray, a dense
@@ -96,7 +104,7 @@ class CArray(_CArrayInterface):
     CArray([[1 2]
      [3 4]])
 
-    >>> print(CArray(True))
+    >>> print(CArray(True))  # 0-Dimensional inputs gets stored as 1-Dim
     CArray([ True])
 
     >>> print(CArray([1,0,3,4], tosparse=True))  # doctest: +NORMALIZE_WHITESPACE
@@ -108,6 +116,15 @@ class CArray(_CArrayInterface):
     CArray([[1.]
      [2.]
      [3.]])
+
+    >>> arr = CArray([[[1,2],[3, 4]], [[5, 6],[7, 8]]])  # N-Dimensional input
+    >>> print(arr)
+    CArray([[1 2 3 4]
+     [5 6 7 8]])
+    >>> print(arr.shape)  # N-Dimensional inputs gets reshaped to 2-Dims
+    (2, 4)
+    >>> print(arr.input_shape)  # Represents the shape of the original input
+    (2, 2, 2)
 
     """
     __slots__ = '_data'  # CArray has only one slot for the buffer
@@ -146,6 +163,11 @@ class CArray(_CArrayInterface):
     def shape(self):
         """Shape of stored data, tuple of ints."""
         return self._data.shape
+
+    @property
+    def input_shape(self):
+        """Original shape of input data, tuple of ints."""
+        return self._data.input_shape
 
     @property
     def size(self):
@@ -308,25 +330,44 @@ class CArray(_CArrayInterface):
     # # # # # # CASTING # # # # # #
     # ----------------------------#
 
-    def get_data(self):
+    def get_data(self, shape=None):
         """Return stored data as a standard array type.
+
+        Parameters
+        ----------
+        shape : int or tuple of ints, optional
+            Desired shape for output data. Reshape is performed after casting.
+            If the array is dense and 'shape' is tuple of length 1,
+            resulting array will have shape (n,).
+            If the array is sparse, only tuples of 2 ints are
+            supported (2-Dimensional shape).
 
         Returns
         -------
-        np.ndarray or scipy.sparse.csr_matrix
-            If array is dense, a np.ndarray is returned.
-            If array is sparse, a scipy.sparse.csr_matrix is returned.
+        numpy.ndarray or scipy.sparse.csr_matrix
+            If array is dense, a :class:`numpy.ndarray` is returned.
+            If array is sparse, a :class:`scipy.sparse.csr_matrix` is returned.
 
         See Also
         --------
-        tondarray : returns a np.ndarray, regardless of array format.
+        tondarray : returns a numpy.ndarray, regardless of array format.
         tocsr : returns a scipy.sparse.csr_matrix, regardless of array format.
 
         """
-        return self.tondarray() if self.isdense is True else self.tocsr()
+        if self.isdense is True:
+            return self.tondarray(shape=shape)
+        else:
+            return self.tocsr(shape=shape)
 
-    def tondarray(self):
-        """Return a dense numpy.ndarray representation of array.
+    def tondarray(self, shape=None):
+        """Return a dense :class:`numpy.ndarray` representation of the array.
+
+        Parameters
+        ----------
+        shape : int or tuple of ints, optional
+            Desired shape for output data. Reshape is performed after casting.
+            If an integer or a tuple of length 1, resulting array
+            will have shape (n,).
 
         Returns
         -------
@@ -347,15 +388,35 @@ class CArray(_CArrayInterface):
         >>> array = CArray([[1,2],[0,4]],tosparse=True).tondarray()
         >>> array
         array([[1, 2],
-               [0, 4]], dtype=int64)
+               [0, 4]])
         >>> type(array)
         <class 'numpy.ndarray'>
 
-        """
-        return self._data.tondarray()
+        >>> print(CArray([[1,2],[0,4]]).tondarray(shape=(4, )))
+        [1 2 0 4]
 
-    def tocsr(self):
-        """Return a sparse scipy.sparse.csr_matrix representation of array.
+        >>> print(CArray([[1,2],[0,4]]).tondarray(shape=(1, 4)))
+        [[1 2 0 4]]
+
+        >>> # N-Dimensional shape
+        >>> print(CArray([[1,2,3,4],[0,4,5,6]]).tondarray(shape=(2, 2, 2)))
+        [[[1 2]
+          [3 4]]
+        <BLANKLINE>
+         [[0 4]
+          [5 6]]]
+
+        """
+        return self._data.tondarray(shape=shape)
+
+    def tocsr(self, shape=None):
+        """Return the array as a sparse :class:`scipy.sparse.csr_matrix`.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            Desired shape for output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
 
         Returns
         -------
@@ -383,11 +444,25 @@ class CArray(_CArrayInterface):
         >>> type(array)
         <class 'scipy.sparse.csr.csr_matrix'>
 
-        """
-        return self._data.tocsr()
+        >>> array = CArray([[1,2],[0,4]]).tocsr(shape=(1, 4))
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 0)	1
+          (0, 1)	2
+          (0, 3)	4
+        >>> type(array)
+        <class 'scipy.sparse.csr.csr_matrix'>
 
-    def tocoo(self):
-        """Return a sparse scipy.sparse.coo_matrix representation of array.
+        """
+        return self._data.tocsr(shape=shape)
+
+    def tocoo(self, shape=None):
+        """Return the array as a sparse :class:`scipy.sparse.coo_matrix`.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            Desired shape for output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
 
         Returns
         -------
@@ -415,11 +490,25 @@ class CArray(_CArrayInterface):
         >>> type(array)
         <class 'scipy.sparse.coo.coo_matrix'>
 
-        """
-        return self._data.tocoo()
+        >>> array = CArray([[1,2],[0,4]]).tocoo(shape=(1, 4))
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 0)	1
+          (0, 1)	2
+          (0, 3)	4
+        >>> type(array)
+        <class 'scipy.sparse.coo.coo_matrix'>
 
-    def tocsc(self):
-        """Return a sparse scipy.sparse.csc_matrix representation of array.
+        """
+        return self._data.tocoo(shape=shape)
+
+    def tocsc(self, shape=None):
+        """Return the array as a sparse :class:`scipy.sparse.csc_matrix`.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            Desired shape for output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
 
         Returns
         -------
@@ -447,11 +536,25 @@ class CArray(_CArrayInterface):
         >>> type(array)
         <class 'scipy.sparse.csc.csc_matrix'>
 
-        """
-        return self._data.tocsc()
+        >>> array = CArray([[1,2],[0,4]]).tocsc(shape=(1, 4))
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 0)	1
+          (0, 1)	2
+          (0, 3)	4
+        >>> type(array)
+        <class 'scipy.sparse.csc.csc_matrix'>
 
-    def todia(self):
-        """Return a sparse scipy.sparse.dia_matrix representation of array.
+        """
+        return self._data.tocsc(shape=shape)
+
+    def todia(self, shape=None):
+        """Return the array as a sparse :class:`scipy.sparse.dia_matrix`.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            Desired shape for output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
 
         Returns
         -------
@@ -479,11 +582,25 @@ class CArray(_CArrayInterface):
         >>> type(array)
         <class 'scipy.sparse.dia.dia_matrix'>
 
-        """
-        return self._data.todia()
+        >>> array = CArray([[1,2],[0,4]]).todia(shape=(1, 4))
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 0)	1
+          (0, 1)	2
+          (0, 3)	4
+        >>> type(array)
+        <class 'scipy.sparse.dia.dia_matrix'>
 
-    def todok(self):
-        """Return a sparse scipy.sparse.dok_matrix representation of array.
+        """
+        return self._data.todia(shape=shape)
+
+    def todok(self, shape=None):
+        """Return the array as a sparse :class:`scipy.sparse.dok_matrix`.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            Desired shape for output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
 
         Returns
         -------
@@ -497,25 +614,39 @@ class CArray(_CArrayInterface):
 
         >>> array = CArray([[1,2],[0,4]], tosparse=True).todok()
         >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
-          (0, 1)	2
           (0, 0)	1
+          (0, 1)	2
           (1, 1)	4
         >>> type(array)
         <class 'scipy.sparse.dok.dok_matrix'>
 
         >>> array = CArray([1,2,3]).todok()
         >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
-          (0, 1)	2
           (0, 0)	1
+          (0, 1)	2
           (0, 2)	3
         >>> type(array)
         <class 'scipy.sparse.dok.dok_matrix'>
 
-        """
-        return self._data.todok()
+        >>> array = CArray([[1,2],[0,4]]).todok(shape=(1, 4))
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 0)	1
+          (0, 1)	2
+          (0, 3)	4
+        >>> type(array)
+        <class 'scipy.sparse.dok.dok_matrix'>
 
-    def tolil(self):
-        """Return a sparse scipy.sparse.lil_matrix representation of array.
+        """
+        return self._data.todok(shape=shape)
+
+    def tolil(self, shape=None):
+        """Return the array as a sparse :class:`scipy.sparse.lil_matrix`.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            Desired shape for output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
 
         Returns
         -------
@@ -543,14 +674,29 @@ class CArray(_CArrayInterface):
         >>> type(array)
         <class 'scipy.sparse.lil.lil_matrix'>
 
-        """
-        return self._data.tolil()
+        >>> array = CArray([[1,2],[0,4]]).tolil(shape=(1, 4))
+        >>> print(array)  # doctest: +NORMALIZE_WHITESPACE
+          (0, 0)	1
+          (0, 1)	2
+          (0, 3)	4
+        >>> type(array)
+        <class 'scipy.sparse.lil.lil_matrix'>
 
-    def tolist(self):
-        """Return the array as a (possibly nested) list.
+        """
+        return self._data.tolil(shape=shape)
+
+    def tolist(self, shape=None):
+        """Return the array as a (possibly nested) ``list``.
 
         Return a copy of the array data as a (nested) Python list.
         Data items are converted to the nearest compatible Python type.
+
+        Parameters
+        ----------
+        shape : int or tuple of ints, optional
+            Desired shape for output data. Reshape is performed after casting.
+            If an integer or a tuple of length 1, resulting list
+            will have size 'n'.
 
         Returns
         -------
@@ -573,8 +719,20 @@ class CArray(_CArrayInterface):
           (0, 1)	2
           (1, 1)	4)
 
+        >>> out = CArray([[1,2],[0,4]]).tolist(shape=(4, ))
+        >>> print(out)
+        [1, 2, 0, 4]
+        >>> type(out)
+        <class 'list'>
+
+        >>> out = CArray([[1,2],[0,4]]).tolist(shape=(1, 4))
+        >>> print(out)
+        [[1, 2, 0, 4]]
+        >>> type(out)
+        <class 'list'>
+
         """
-        return self._data.tolist()
+        return self._data.tolist(shape=shape)
 
     def todense(self, dtype=None, shape=None):
         """Converts array to dense format.
@@ -1663,12 +1821,12 @@ class CArray(_CArrayInterface):
 
         """
         # TODO: CMatrix should return a 2-D, CVector a 1-D and so on...
-        if arrayformat is 'dense':
+        if arrayformat == 'dense':
             if cols is None:
                 cols = CArray([])
             return cls(CDense.load(datafile, dtype=dtype, startrow=startrow,
                                    skipend=skipend, cols=cols._data))
-        elif arrayformat is 'sparse':
+        elif arrayformat == 'sparse':
             return cls(CSparse.load(datafile, dtype=dtype))
         else:
             raise ValueError("Supported arrayformat are 'dense' and 'sparse'.")

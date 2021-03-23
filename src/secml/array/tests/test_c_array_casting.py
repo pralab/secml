@@ -3,6 +3,8 @@ from secml.array.tests import CArrayTestCases
 import numpy as np
 import scipy.sparse as scs
 
+from secml.core.type_utils import is_int
+
 
 class TestCArrayCasting(CArrayTestCases):
     """Unit test for CArray CASTING methods."""
@@ -14,13 +16,24 @@ class TestCArrayCasting(CArrayTestCases):
         def _check_tondarray(array):
             self.logger.info("array:\n{:}".format(array))
 
-            ndarray = array.tondarray()
-            self.logger.info("array.tondarray():\n{:}".format(ndarray))
+            for shape in [None, array.size, (array.size,),
+                          (1, array.size), (array.size, 1),
+                          (1, 1, array.size)]:
 
-            self.assertIsInstance(ndarray, np.ndarray)
+                ndarray = array.tondarray(shape=shape)
+                self.logger.info(
+                    "array.tondarray(shape={:}):\n{:}".format(shape, ndarray))
 
-            self.assertEqual(array.size, ndarray.size)
-            self.assertEqual(array.shape, ndarray.shape)
+                self.assertIsInstance(ndarray, np.ndarray)
+
+                self.assertEqual(array.size, ndarray.size)
+
+                if shape is None:
+                    self.assertEqual(array.shape, ndarray.shape)
+                else:  # Reshape after casting
+                    if is_int(shape):  # Fake 1-dim shape
+                        shape = (shape, )
+                    self.assertEqual(shape, ndarray.shape)
 
         # Sparse arrays
         _check_tondarray(self.array_sparse)
@@ -67,19 +80,38 @@ class TestCArrayCasting(CArrayTestCases):
                     self.logger.info("array sparse format: {:}".format(
                         array._data._data.getformat()))
 
-                res = getattr(array, 'to{:}'.format(scs_format))()
-                self.logger.info(
-                    "array.to{:}():\n{:}".format(scs_format, res))
-                self.logger.info(
-                    "result sparse format: {:}".format(res.getformat()))
+                for shape in [None, (1, array.size), (array.size, 1)]:
 
-                self.assertIsInstance(res, scs_type)
+                    res = getattr(
+                        array, 'to{:}'.format(scs_format))(shape=shape)
+                    self.logger.info("array.to{:}(shape={:}):\n{:}"
+                                     "".format(scs_format, shape, res))
+                    self.logger.info(
+                        "result sparse format: {:}".format(res.getformat()))
 
-                # size returns the nnz for sparse arrays, DO NOT USE IT
-                self.assertEqual(array.size, res.shape[0] * res.shape[1])
+                    self.assertIsInstance(res, scs_type)
 
-                if array.isdense:  # flat dense arrays become 2D when sparse
-                    self.assertEqual(array.atleast_2d().shape, res.shape)
+                    # size returns the nnz for sparse arrays
+                    # DO NOT USE IT HERE
+                    self.assertEqual(array.size, res.shape[0] * res.shape[1])
+
+                    if shape is not None:
+                        self.assertEqual(shape, res.shape)
+                    else:  # Reshape after casting
+                        if array.isdense:  # flat dense arrays are 2D sparse
+                            self.assertEqual(
+                                array.atleast_2d().shape, res.shape)
+
+                # matrix shape must be two-dimensional
+                with self.assertRaises(ValueError):
+                    getattr(
+                        array, 'to{:}'.format(scs_format))(shape=array.size)
+                with self.assertRaises(ValueError):
+                    getattr(
+                        array, 'to{:}'.format(scs_format))(shape=(array.size,))
+                with self.assertRaises(ValueError):
+                    getattr(array, 'to{:}'.format(scs_format))(
+                        shape=(1, 1, array.size,))
 
             # Sparse arrays
             # Checking conversion from default sparse format (csr)
@@ -123,15 +155,28 @@ class TestCArrayCasting(CArrayTestCases):
         def _check_tolist(array):
             self.logger.info("array:\n{:}".format(array))
 
-            array_list = array.tolist()
-            self.logger.info("array.tolist():\n{:}".format(array_list))
+            for shape in [None, array.size, (array.size,),
+                          (1, array.size), (array.size, 1),
+                          (1, 1, array.size)]:
 
-            self.assertIsInstance(array_list, list)
+                array_list = array.tolist(shape=shape)
+                self.logger.info(
+                    "array.tolist(shape={:}):\n{:}".format(shape, array_list))
 
-            self.assertEqual(len(array_list), array.shape[0])
-            if array.ndim > 1:
-                for elem in array_list:
-                    self.assertEqual(len(elem), array.shape[1])
+                self.assertIsInstance(array_list, list)
+
+                if shape is None:
+                    self.assertEqual(len(array_list), array.shape[0])
+                    if array.ndim > 1:
+                        for elem in array_list:
+                            self.assertEqual(len(elem), array.shape[1])
+                else:  # Reshape after casting
+                    if is_int(shape):  # Fake 1-dim shape
+                        shape = (shape, )
+                    self.assertEqual(len(array_list), shape[0])
+                    if len(shape) > 1:
+                        for elem in array_list:
+                            self.assertEqual(len(elem), shape[1])
 
         # Sparse arrays
         _check_tolist(self.array_sparse)

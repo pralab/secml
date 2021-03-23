@@ -30,6 +30,12 @@ class _CArrayInterface(metaclass=ABCMeta):
 
     @property
     @abstractmethod
+    def input_shape(self):
+        """Original shape of input data, tuple of ints."""
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
     def size(self):
         """Size (number of elements) of array."""
         raise NotImplementedError
@@ -75,42 +81,42 @@ class _CArrayInterface(metaclass=ABCMeta):
     # ----------------------------#
 
     @abstractmethod
-    def tondarray(self):
+    def tondarray(self, shape=None):
         """Return a dense numpy.ndarray representation of array."""
         raise NotImplementedError
 
     @abstractmethod
-    def tocsr(self):
+    def tocsr(self, shape=None):
         """Return a sparse scipy.sparse.csr_matrix representation of array."""
         raise NotImplementedError
 
     @abstractmethod
-    def tocoo(self):
+    def tocoo(self, shape=None):
         """Return a sparse scipy.sparse.coo_matrix representation of array."""
         raise NotImplementedError
 
     @abstractmethod
-    def tocsc(self):
+    def tocsc(self, shape=None):
         """Return a sparse scipy.sparse.csc_matrix representation of array."""
         raise NotImplementedError
 
     @abstractmethod
-    def todia(self):
+    def todia(self, shape=None):
         """Return a sparse scipy.sparse.dia_matrix representation of array."""
         raise NotImplementedError
 
     @abstractmethod
-    def todok(self):
+    def todok(self, shape=None):
         """Return a sparse scipy.sparse.dok_matrix representation of array."""
         raise NotImplementedError
 
     @abstractmethod
-    def tolil(self):
+    def tolil(self, shape=None):
         """Return a sparse scipy.sparse.lil_matrix representation of array."""
         raise NotImplementedError
 
     @abstractmethod
-    def tolist(self):
+    def tolist(self, shape=None):
         """Return the array as a (possibly nested) list."""
         raise NotImplementedError
 

@@ -30,7 +30,7 @@ class CScalerMinMax(CScalerSkLearn):
     __class_type = 'minmax'
 
     def __init__(self, feature_range=(0, 1), copy=True, preprocess=None):
-        scaler = MinMaxScaler(feature_range, copy)
+        scaler = MinMaxScaler(feature_range=feature_range, copy=copy)
 
         super(CScalerMinMax, self).__init__(
             sklearn_scaler=scaler, preprocess=preprocess)
