@@ -118,7 +118,7 @@ of the `[extras]` section.
    Installs: `torch >= 1.4`, `torchvision >= 0.5`  
    *Windows only*: the url to installation archives should be manually provided as 
    `pip install secml[pytorch] -f https://download.pytorch.org/whl/torch_stable.html`.
- - `foolbox`: Wrapper for [Foolbox](https://foolbox.readthedocs.io/en/stable/),
+ - `foolbox` : Wrapper of [Foolbox](https://github.com/bethgelab/foolbox), 
    a Python toolbox to create adversarial examples that fool neural networks.   
    Installs: `foolbox >= 3.3.0`, `eagerpy >= 0.29.0`, `torch >= 1.4`, `torchvision >= 0.5`
  - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
