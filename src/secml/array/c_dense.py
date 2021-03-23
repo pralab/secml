@@ -15,7 +15,7 @@ from copy import deepcopy
 from secml.array.c_array_interface import _CArrayInterface
 
 from secml.core.type_utils import is_ndarray, is_list_of_lists, \
-    is_list, is_slice, is_scalar, is_int, is_bool
+    is_list, is_slice, is_scalar, is_int, is_bool, is_tuple
 from secml.core.constants import inf
 from secml.array.array_utils import is_vector_index
 
@@ -30,16 +30,24 @@ class CDense(_CArrayInterface):
             raise TypeError("operator not implemented")
         data = [[]] if data is None else data
         # Light casting! We need the contained ndarray
-        data = self._buffer_to_builtin(data)
+        if isinstance(data, self.__class__):
+            self._input_shape = data.input_shape  # Propagate original shape
+            data = data.tondarray()  # np.ndarray from CDense
+        else:  # Other inputs... just need to initialize the input shape
+            self._input_shape = None
         obj = np.array(data, dtype=dtype, copy=copy, ndmin=1)
         # numpy created an object array, maybe input is malformed?!
-        if obj.dtype.char is 'O':
+        if obj.dtype.char == 'O':
             raise TypeError("Array is malformed, check input data.")
-        # We do not currently support arrays with ndim > 2
-        if obj.ndim > 2:
-            raise TypeError('expected dimension <= 2 array or matrix')
         self._data = obj
-        # Reshape created array if necessary
+        # Store the shape of input data (if not previously propagated)
+        # before any further reshaping
+        if self.input_shape is None:
+            self._input_shape = obj.shape
+        # If input data has > 2 dims, reshape to 2 dims
+        if self.ndim > 2:
+            self._data = self._data.reshape(self._data.shape[0], -1)
+        # Reshape the created array if necessary
         if shape is not None and shape != self.shape:
             self._data = self.reshape(shape)._data
 
@@ -50,6 +58,11 @@ class CDense(_CArrayInterface):
     @property
     def shape(self):
         return self._data.shape
+
+    @property
+    def input_shape(self):
+        """Original shape of input data, tuple of ints."""
+        return self._input_shape
 
     @property
     def size(self):
@@ -109,38 +122,123 @@ class CDense(_CArrayInterface):
     # # # # # # CASTING # # # # # #
     # ----------------------------#
 
-    def tondarray(self):
-        """Return a np.ndarray view of current CDense."""
+    def tondarray(self, shape=None):
+        """Return a np.ndarray view of current CDense.
+
+        Parameters
+        ----------
+        shape : int or tuple of ints, optional
+            The new shape for the output data.
+            Reshape is performed after casting.
+
+        """
+        if shape is not None:
+            return self._data.reshape(shape)
         return self._data
 
-    def tocsr(self):
-        """Return current CDense as a scipy.sparse.csr_matrix."""
-        return scs.csr_matrix(self.tondarray())
+    def _toscs(self, scs_format, shape=None):
+        """Return data as input scipy.scs format.
 
-    def tocoo(self):
-        """Return current CDense as a scipy.sparse.coo_matrix."""
-        return scs.coo_matrix(self.tondarray())
+        Parameters
+        ----------
+        scs_format : str
+            Scipy sparse format.
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
 
-    def tocsc(self):
-        """Return current CDense as a scipy.sparse.csc_matrix."""
-        return scs.csc_matrix(self.tondarray())
+        """
+        out = scs.coo_matrix(self.tondarray())
+        if shape is not None:
+            if not is_tuple(shape) or len(shape) != 2:
+                # TODO: ERROR IS PROPERLY RAISED IN SCIPY > 1.4
+                raise ValueError('matrix shape must be two-dimensional')
+            out = out.reshape(shape)
+        return getattr(out, 'to{:}'.format(scs_format))()
 
-    def todia(self):
-        """Return current CDense as a scipy.sparse.dia_matrix."""
-        return scs.dia_matrix(self.tondarray())
+    def tocsr(self, shape=None):
+        """Return current CDense as a scipy.sparse.csr_matrix.
 
-    def todok(self):
-        """Return current CDense as a scipy.sparse.dok_matrix."""
-        # dok_matrix does not support casting from 1-D ndarrays
-        return scs.dok_matrix(self.atleast_2d().tondarray())
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
 
-    def tolil(self):
-        """Return current CDense as a scipy.sparse.lil_matrix."""
-        return scs.lil_matrix(self.tondarray())
+        """
+        return self._toscs('csr', shape=shape)
 
-    def tolist(self):
-        """Return current CDense as a list."""
-        return self._data.tolist()
+    def tocoo(self, shape=None):
+        """Return current CDense as a scipy.sparse.coo_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('coo', shape=shape)
+
+    def tocsc(self, shape=None):
+        """Return current CDense as a scipy.sparse.csc_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('csc', shape=shape)
+
+    def todia(self, shape=None):
+        """Return current CDense as a scipy.sparse.dia_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('dia', shape=shape)
+
+    def todok(self, shape=None):
+        """Return current CDense as a scipy.sparse.dok_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('dok', shape=shape)
+
+    def tolil(self, shape=None):
+        """Return current CDense as a scipy.sparse.lil_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('lil', shape=shape)
+
+    def tolist(self, shape=None):
+        """Return current CDense as a list.
+
+        Parameters
+        ----------
+        shape : int or tuple of ints, optional
+            The new shape for the output data. The array is converted to
+            ndarray first, then reshaping is performed.
+
+        """
+        return self.tondarray(shape=shape).tolist()
 
     def _buffer_to_builtin(self, data):
         """Convert data buffer to built-in arrays"""
@@ -877,10 +975,14 @@ class CDense(_CArrayInterface):
 
     def __copy__(self):
         """As numpy does, we return a deepcopy instead of a shallow copy."""
-        return self.__class__(deepcopy(self._data))
+        out = self.__class__(deepcopy(self._data))
+        out._input_shape = self.input_shape
+        return out
 
     def __deepcopy__(self, memo):
-        return self.__class__(deepcopy(self._data, memo))
+        out = self.__class__(deepcopy(self._data, memo))
+        out._input_shape = self.input_shape
+        return out
 
     # ----------------------------- #
     # # # # # # SAVE/LOAD # # # # # #
@@ -1098,7 +1200,7 @@ class CDense(_CArrayInterface):
 
     def argsort(self, axis=-1, kind='quicksort', order=None):
         # Fast argsort only available for flat arrays
-        if self.ndim == 1 or kind is not 'quicksort':
+        if self.ndim == 1 or kind != 'quicksort':
             return self.__class__(sorted(
                 range(self.size), key=lambda x: self.__getitem__((0, x))))
         else:

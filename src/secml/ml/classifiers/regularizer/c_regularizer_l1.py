@@ -18,7 +18,7 @@ class CRegularizerL1(CRegularizer):
 
     .. math::
 
-       R(w) := \sum_{i=1}^{n} |w_i|
+       R(w) := \\sum_{i=1}^{n} |w_i|
 
     Attributes
     ----------

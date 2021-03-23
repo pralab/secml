@@ -134,6 +134,20 @@ def global_filterwarnings():
     except ImportError:
         pass
 
+    # TODO: check after upgrading to tensorflow 2 (related to numpy v0.19)
+    warnings.filterwarnings(
+        "ignore", category=DeprecationWarning,
+        message=r"tostring\(\) is deprecated\. Use tobytes\(\) instead\.")
+
+    # TODO: warning raised by torchvision mnist loader first time you download
+    warnings.filterwarnings(
+        "ignore", category=UserWarning, module="torchvision.datasets.mnist",
+        message=r"The given NumPy array is not writeable")
+
+    # TODO: cures https://github.com/pytorch/pytorch/issues/47038
+    warnings.filterwarnings(
+        "ignore", category=UserWarning, message=r"CUDA initialization")
+
 
 # Call the filterwarnings method to make it active project-wide
 global_filterwarnings()

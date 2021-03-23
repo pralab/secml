@@ -89,13 +89,36 @@ class CSparse(_CArrayInterface):
         # Not implemented operators return NotImplemented
         if data is NotImplemented:
             raise TypeError("operator not implemented")
-        data = self._buffer_to_builtin(data)
+        if isinstance(data, CDense):
+            self._input_shape = data.input_shape  # Propagate original shape
+            data = data.tondarray()  # np.ndarray from CDense
+        elif isinstance(data, self.__class__):
+            self._input_shape = data.input_shape  # Propagate original shape
+            data = data.tocsr()  # scs.csr_matrix from CSparse
+        else:  # Other inputs... just need to initialize the input shape
+            self._input_shape = None
         # Reshaping is not supported for csr_matrix so we need few hacks
         # We don't use shape when creating the buffer, but we reshape later
         # Scipy >= 1.4, shape must be two dimensional
         newshape = _shape_atleast_2d(shape)
-        # For special scipy init input shape should be passed to `csr_matrix`
-        shape = None if not is_tuple(data) else newshape
+        if not is_tuple(data):
+            shape = None  # This is the shape passed to scs.csr_matrix()
+            if not scs.issparse(data):  # ndarray, list of lists
+                data = np.array(data, ndmin=1)  # Common dense format
+                # Store the shape of input data (if not previously propagated)
+                # before any further reshaping
+                if self.input_shape is None:
+                    self._input_shape = data.shape
+                # If input data has > 2 dims, reshape to 2 dims
+                if data.ndim > 2:
+                    data = data.reshape(data.shape[0], -1)
+            else:  # For sparse arrays we directly store shape (always ndim=2)
+                # ... but again only if not previously propagated
+                if self.input_shape is None:
+                    self._input_shape = data.shape
+        else:  # For special scipy init, shape should be passed to `csr_matrix`
+            shape = newshape
+            self._input_shape = data  # data is also the input shape
         self._data = scs.csr_matrix(data, shape, dtype, copy)
         # Now we reshape the array if needed (not available for scs.csr_matrix)
         if newshape is not None and newshape != self.shape:
@@ -108,6 +131,11 @@ class CSparse(_CArrayInterface):
     @property
     def shape(self):
         return self._data.shape
+
+    @property
+    def input_shape(self):
+        """Original shape of input data, tuple of ints."""
+        return self._input_shape
 
     @property
     def size(self):
@@ -164,41 +192,135 @@ class CSparse(_CArrayInterface):
     # # # # # # CASTING # # # # # #
     # ----------------------------#
 
-    def tondarray(self, order=None):
-        """Convert csr_matrix to ndarray."""
-        return self._data.toarray(order)
+    def tondarray(self, order=None, shape=None):
+        """Convert csr_matrix to ndarray.
 
-    def tocsr(self):
-        """Return data as csr_matrix."""
-        return self._data.tocsr()
+        Parameters
+        ----------
+        order : {'C', 'F'}, optional
+            Whether to store multidimensional data in C (row-major) or
+            Fortran (column-major) order in memory. The default is 'None',
+            indicating the NumPy default of C-ordered.
+        shape : int or tuple of ints, optional
+            The new shape for the output data.
+            Reshape is performed after casting.
 
-    def tocoo(self):
-        """Return data as coo_matrix."""
-        return self._data.tocoo()
+        """
+        out = self._data.toarray(order)
+        if shape is not None:
+            return out.reshape(shape)
+        return out
 
-    def tocsc(self):
-        """Return data as csc_matrix."""
-        return self._data.tocsc()
+    def _toscs(self, scs_format, shape=None):
+        """Return data as input scipy.scs format.
 
-    def todia(self):
-        """Return data as dia_matrix."""
-        return self._data.todia()
+        Parameters
+        ----------
+        scs_format : str
+            Scipy sparse format.
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
 
-    def todok(self):
-        """Return data as dok_matrix."""
-        return self._data.todok()
+        """
+        out = getattr(self._data, 'to{:}'.format(scs_format))()
+        if shape is not None:
+            if not is_tuple(shape) or len(shape) != 2:
+                # TODO: ERROR IS PROPERLY RAISED IN SCIPY > 1.4
+                raise ValueError('matrix shape must be two-dimensional')
+            # output of scipy.reshape not necessarily of the same format
+            return getattr(out.reshape(shape), 'to{:}'.format(scs_format))()
+        return out
 
-    def tolil(self):
-        """Return data as lil_matrix."""
-        return self._data.tolil()
+    def tocsr(self, shape=None):
+        """Return data as csr_matrix.
 
-    def tolist(self):
-        """Return data as list."""
-        return self.todense().tolist()
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('csr', shape=shape)
+
+    def tocoo(self, shape=None):
+        """Return data as coo_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('coo', shape=shape)
+
+    def tocsc(self, shape=None):
+        """Return data as csc_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('csc', shape=shape)
+
+    def todia(self, shape=None):
+        """Return data as dia_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('dia', shape=shape)
+
+    def todok(self, shape=None):
+        """Return data as dok_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('dok', shape=shape)
+
+    def tolil(self, shape=None):
+        """Return data as lil_matrix.
+
+        Parameters
+        ----------
+        shape : tuple of ints, optional
+            The new shape for the output data. Must be 2-Dimensional.
+            Reshape is performed after casting.
+
+        """
+        return self._toscs('lil', shape=shape)
+
+    def tolist(self, shape=None):
+        """Return data as list.
+
+        Parameters
+        ----------
+        shape : int or tuple of ints, optional
+            The new shape for the output data. The array is converted to
+            ndarray first, then reshaping is performed.
+
+        """
+        return self.todense().tolist(shape=shape)
 
     def todense(self, order=None):
         """Return data as CDense."""
-        return CDense(self.tondarray(order))
+        obj = CDense(self.tondarray(order))
+        obj._input_shape = self.input_shape
+        return obj
 
     def _tocoo_or_tocsr(self):
         """Return data as coo_matrix if data is not as csr_matrix,
@@ -423,8 +545,9 @@ class CSparse(_CArrayInterface):
         # Check index for all other cases
         idx = self._check_index(idx)
 
-        # Ready for scipy
-        return self.__class__(self._data.__getitem__(idx))
+        # Ready for scipy. We cast the result of scipy's getitem as the
+        # original dtype is not kept sometimes (especially for empty arrays)
+        return self.__class__(self._data.__getitem__(idx), dtype=self.dtype)
 
     def __setitem__(self, idx, value):
         """Redefinition of the get (brackets) operator."""
@@ -933,13 +1056,16 @@ class CSparse(_CArrayInterface):
         this returns a DEEP COPY of current array.
 
         """
-        return self.__class__(self._data.copy())
+        out = self.__class__(self._data.copy())
+        out._input_shape = self.input_shape
+        return out
 
     def __deepcopy__(self, memo):
         """Called when copy.deepcopy(CSparse) is called."""
-        y = self.__class__(self._data.copy())
-        memo[id(self)] = y
-        return y
+        out = self.__class__(self._data.copy())
+        out._input_shape = self.input_shape
+        memo[id(self)] = out
+        return out
 
     # ----------------------------- #
     # # # # # # SAVE/LOAD # # # # # #
@@ -1782,6 +1908,9 @@ class CSparse(_CArrayInterface):
             return self.__class__(scs.diags(
                 self.tondarray(), offsets=[k], format='csr', dtype=self.dtype))
         else:
+            if (k > 0 and k > self.shape[1] - 1) or \
+                    (k < 0 and abs(k) > self.shape[0] - 1):
+                raise ValueError("k exceeds matrix dimensions")
             return CDense(self.tocsr().diagonal(k=k))
 
     def dot(self, array):

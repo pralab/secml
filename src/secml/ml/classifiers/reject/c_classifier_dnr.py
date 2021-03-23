@@ -12,7 +12,6 @@ from secml.ml.classifiers import CClassifierDNN
 from secml.ml.features.normalization import CNormalizerDNN
 from secml.core.exceptions import NotFittedError
 from secml.core.attr_utils import add_readwrite
-import math
 
 
 class CClassifierDNR(CClassifierRejectThreshold):
@@ -223,33 +222,6 @@ class CClassifierDNR(CClassifierRejectThreshold):
             grad += self._layer_clfs[l].backward(
                 w=grad_combiner[i * n_classes: i * n_classes + n_classes])
         return grad
-
-    def compute_threshold(self, rej_percent, ds):
-        """Compute the threshold that must be set in the classifier to have
-        rej_percent rejection rate (accordingly to an estimation on a
-        validation set).
-
-        Parameters
-        ----------
-        rej_percent : float
-            Max percentage of rejected samples.
-        ds : CDataset
-            Dataset on which the threshold is estimated.
-
-        Returns
-        -------
-        threshold : float
-            The estimated reject threshold
-        """
-        if not self.is_fitted():
-            raise NotFittedError("The classifier must be fitted")
-        scores = self.predict(ds.X, return_decision_function=True)[1]
-        max_scores = scores[:, :-1].max(axis=1).ravel()
-        max_scores.sort(inplace=True)
-        rej_num = math.floor(rej_percent * ds.num_samples)
-        threshold = max_scores[rej_num - 1].item()
-        self.logger.info("Chosen threshold: {:}".format(threshold))
-        return threshold
 
     @property
     def _grad_requires_forward(self):

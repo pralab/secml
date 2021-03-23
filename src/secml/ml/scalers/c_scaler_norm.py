@@ -31,7 +31,7 @@ class CScalerNorm(CScalerSkLearn):
     __class_type = 'norm'
 
     def __init__(self, norm="l2", copy=True, preprocess=None):
-        scaler = Normalizer(norm, copy)
+        scaler = Normalizer(norm=norm, copy=copy)
 
         self._order = None
         self.norm = norm

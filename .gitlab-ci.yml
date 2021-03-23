@@ -1,10 +1,18 @@
+include:
+  - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
+  - template: 'Jobs/Code-Quality.gitlab-ci.yml'
+  - template: 'Security/SAST.gitlab-ci.yml'
+  - template: 'Security/Secret-Detection.gitlab-ci.yml'
+
 variables:
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-    TORCH_HOME: "$CI_PROJECT_DIR/.cache/torch"
-    SECML_HOME_DIR: "$CI_PROJECT_DIR/secml-data"
-    TOX_WORKDIR: "$CI_PROJECT_DIR/.tox"
-    TOX_TESTENV_PASSENV: "PIP_CACHE_DIR TORCH_HOME SECML_HOME_DIR"
-    TOX_USEDEVELOP: "False"
+  SEARCH_MAX_DEPTH: 6
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PIP_FIND_LINKS_TORCH: "https://download.pytorch.org/whl/cpu/torch_stable.html"
+  TORCH_HOME: "$CI_PROJECT_DIR/.cache/torch"
+  SECML_HOME_DIR: "$CI_PROJECT_DIR/secml-data"
+  TOX_WORKDIR: "$CI_PROJECT_DIR/.tox"
+  TOX_TESTENV_PASSENV: "PIP_CACHE_DIR PIP_FIND_LINKS_TORCH TORCH_HOME SECML_HOME_DIR"
+  TOX_USEDEVELOP: "False"
 
 stages:
   - package
@@ -14,27 +22,19 @@ stages:
   - triage
 
 
+.shared_windows_runners:
+  tags:
+  - shared-windows
+  - windows
+  - windows-1809
+
+
 .test-cache:
   cache: &test-cache
     paths:
       - $PIP_CACHE_DIR
       - $TORCH_HOME
       - $SECML_HOME_DIR
-
-.test-cache-py35:
-  cache: &test-cache-py35
-    key: "test-cache-py35"
-    <<: *test-cache
-
-.test-cache-py36:
-  cache: &test-cache-py36
-    key: "test-cache-py36"
-    <<: *test-cache
-
-.test-cache-py37:
-  cache: &test-cache-py37
-    key: "test-cache-py37"
-    <<: *test-cache
 
 
 .package:
@@ -43,7 +43,7 @@ stages:
 
 package:
   extends: .package
-  image: ${CI_REGISTRY}/pralab/docker-helper-images/python35-setuptools:latest
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/python36-setuptools:latest
   before_script:
     - echo $CI_PROJECT_DIR
   script:
@@ -51,8 +51,6 @@ package:
     - python setup.py bdist_wheel --universal
     - twine check dist/*
   rules:
-    - if: '$CI_MERGE_REQUEST_ID'
-      when: never
     - if: '$RUN_TESTS'
       when: on_success
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
@@ -76,7 +74,7 @@ package:
 
 package:docs:
   extends: .package
-  image: ${CI_REGISTRY}/pralab/docker-helper-images/python35-sphinx:latest
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/python36-sphinx:latest
   script:
     - echo $CI_PROJECT_DIR
     - python -V
@@ -84,8 +82,6 @@ package:docs:
     - tox -e docs
     - mv docs/build/html/ public/
   rules:
-    - if: '$CI_MERGE_REQUEST_ID'
-      when: never
     - if: '$RUN_TESTS'
       when: on_success
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
@@ -107,11 +103,19 @@ package:docs:
       - public
     expire_in: 1 day
   cache:
-    key: "test-cache-py35"
+    key: "test-cache-py36"
     paths:
       - "$CI_PROJECT_DIR/.cache/pip"
       - "$CI_PROJECT_DIR/secml-data"
     policy: pull
+
+
+code_quality:
+  interruptible: true
+  variables:
+    REPORT_FORMAT: html
+  artifacts:
+    paths: [gl-code-quality-report.html]
 
 
 .test:
@@ -125,7 +129,7 @@ package:docs:
   rules:
     - if: '$RUN_TESTS'
       when: on_success
-    - if: '$SKIP_TESTS || $CI_MERGE_REQUEST_ID'
+    - if: '$SKIP_TESTS'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: on_success
@@ -142,29 +146,117 @@ package:docs:
       - tox.ini
       when: on_success
 
-test:py35:latest:
-  extends: .test
-  image: python:3.5
-  script: tox -e py35
-  cache: *test-cache-py35
+.test-report:
+  artifacts: &pytest-report
+    reports:
+      junit: pytest-report.xml
+    expire_in: 1 week
 
-test:py35:min:
+test:py36:latest:
   extends: .test
-  image: python:3.5
-  script: tox -e py35-min
-  cache: *test-cache-py35
+  image: python:3.6
+  script: tox -e py36
+  cache: &test-cache-py36
+    key: "test-cache-py36"
+    <<: *test-cache
+  artifacts: *pytest-report
 
 test:py36:min:
   extends: .test
   image: python:3.6
   script: tox -e py36-min
-  cache: *test-cache-py36
+  cache: &test-cache-py36-min
+    key: "test-cache-py36-min"
+    <<: *test-cache
+  artifacts: *pytest-report
+
+test:py37:latest:
+  extends: .test
+  image: python:3.7
+  script: tox -e py37
+  cache: &test-cache-py37
+    key: "test-cache-py37"
+    <<: *test-cache
+  artifacts: *pytest-report
 
 test:py37:min:
   extends: .test
   image: python:3.7
   script: tox -e py37-min
-  cache: *test-cache-py37
+  cache: &test-cache-py37-min
+    key: "test-cache-py37-min"
+    <<: *test-cache
+  artifacts: *pytest-report
+
+test:py38:latest:
+  extends: .test
+  image: python:3.8
+  script: tox -e py38
+  cache: &test-cache-py38
+    key: "test-cache-py38"
+    <<: *test-cache
+  artifacts: *pytest-report
+
+test:py38:min:
+  extends: .test
+  image: python:3.8
+  script: tox -e py38-min
+  cache: &test-cache-py38-min
+    key: "test-cache-py38-min"
+    <<: *test-cache
+  artifacts: *pytest-report
+
+test:py36:latest:win:
+  extends:
+    - .test
+    - .shared_windows_runners
+  image: python:3.6
+  rules:
+    - if: '$CI_SERVER_HOST != "gitlab.com"'
+      when: never
+    - if: '$RUN_TESTS'
+      when: on_success
+    - if: '$SKIP_TESTS'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "tags"'
+      when: never
+    - changes:
+      - src/secml/VERSION
+      when: never
+    - changes:
+      - src/secml/**/*
+      - .gitlab-ci.yml
+      - requirements.txt
+      - setup.py
+      - tox.ini
+      when: on_success
+  before_script:
+    - echo $CI_PROJECT_DIR
+    - choco install vcredist2017 -y
+    - choco install python -y --version=3.6.8
+    # Path is not updated by default by choco
+    - $env:Path += ";C:\Python36;C:\Python36\Scripts"
+    - python -V
+    # If matplotlib cannot find the following registry item tries to read the "WINDIR" env key (caps) and crashes
+    - New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" -Name "Fonts" -Value "C:\Windows\Fonts" -PropertyType "String"
+    # The https://download.pytorch.org/ certificates chain is not recognized by default as trusted
+    - Import-Certificate -FilePath ".gitlab\dl-pytorch-chain.p7b" -CertStoreLocation Cert:\LocalMachine\Root
+    - pip install tox
+  script: tox -e py36-win
+  allow_failure: true
+  cache: &test-cache-py36-win
+    key: "test-cache-py36-win"
+    <<: *test-cache
+  artifacts: *pytest-report
+
+test:py36:latest:noextras:
+  extends: .test
+  image: python:3.6
+  script: tox -e py36-nopytorch-nocleverhans-nofoolbox
+  cache: *test-cache-py36
+  artifacts: *pytest-report
 
 
 .test:notebooks:
@@ -173,7 +265,7 @@ test:py37:min:
   rules:
     - if: '$RUN_TESTS'
       when: on_success
-    - if: '$SKIP_TESTS || $CI_MERGE_REQUEST_ID'
+    - if: '$SKIP_TESTS'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: on_success
@@ -191,11 +283,47 @@ test:py37:min:
       - tox.ini
       when: on_success
 
-test:notebooks:py35:latest:
+test:notebooks:py36:latest:
   extends: .test:notebooks
-  image: python:3.5
+  image: python:3.6
   script: tox -e latest-notebooks
-  cache: *test-cache-py35
+  cache: *test-cache-py36
+
+
+test:zoo:
+  stage: test
+  needs: ["package"]
+  allow_failure: true
+  variables:
+    SECML_ZOO_BRANCH: master
+    PIP_CACHE_DIR: $PIP_CACHE_DIR
+    TORCH_HOME: $TORCH_HOME
+    SECML_HOME_DIR: $SECML_HOME_DIR
+  trigger:
+    project: secml/secml-zoo
+    branch: $SECML_ZOO_BRANCH
+    strategy: depend
+  rules:
+    - if: '$CI_SERVER_HOST != "gitlab.com"'
+      when: never
+    - if: '$RUN_TESTS'
+      when: on_success
+    - if: '$SKIP_TESTS'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "tags"'
+      when: never
+    - changes:
+      - src/secml/VERSION
+      when: never
+    - changes:
+      - src/secml/**/*
+      - .gitlab-ci.yml
+      - requirements.txt
+      - setup.py
+      - tox.ini
+      when: on_success
 
 
 .test:install:
@@ -210,7 +338,7 @@ test:notebooks:py35:latest:
   rules:
     - if: '$RUN_TESTS'
       when: on_success
-    - if: '$SKIP_TESTS || $CI_MERGE_REQUEST_ID'
+    - if: '$SKIP_TESTS'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "tags" || $CI_PIPELINE_SOURCE == "web"'
       when: on_success
@@ -237,21 +365,17 @@ test:notebooks:py35:latest:
 
 .test:install:whl:extras:
   extends: .test:install:whl
+  variables:
+    PIP_FIND_LINKS: $PIP_FIND_LINKS_TORCH
   script:
     - DIST_WHL=$(find $CI_PROJECT_DIR/dist -iname \*.whl -exec basename {} \;)
     - echo $DIST_WHL
-    - pip install ${CI_PROJECT_DIR}/dist/${DIST_WHL}[pytorch,cleverhans]
+    - pip install ${CI_PROJECT_DIR}/dist/${DIST_WHL}[pytorch,cleverhans,foolbox]
   after_script:
     - python -c "import secml"
     - python -c "from secml.ml.classifiers import CClassifierPyTorch"
     - python -c "from secml.adv.attacks.evasion import CAttackEvasionCleverhans"
-
-test:install:whl:py35:
-  extends: .test:install:whl
-  image: python:3.5
-  cache:
-    <<: *test-cache-py35
-    policy: pull
+    - python -c "from secml.adv.attacks.evasion import CAttackEvasionFoolbox"
 
 test:install:whl:py36:
   extends: .test:install:whl
@@ -267,11 +391,11 @@ test:install:whl:py37:
     <<: *test-cache-py37
     policy: pull
 
-test:install:whl:extras:py35:
-  extends: .test:install:whl:extras
-  image: python:3.5
+test:install:whl:py38:
+  extends: .test:install:whl
+  image: python:3.8
   cache:
-    <<: *test-cache-py35
+    <<: *test-cache-py38
     policy: pull
 
 test:install:whl:extras:py36:
@@ -286,6 +410,21 @@ test:install:whl:extras:py37:
   image: python:3.7
   cache:
     <<: *test-cache-py37
+    policy: pull
+
+test:install:whl:extras:py38:
+  extends: .test:install:whl:extras
+  image: python:3.8
+  script:
+    - DIST_WHL=$(find $CI_PROJECT_DIR/dist -iname \*.whl -exec basename {} \;)
+    - echo $DIST_WHL
+    - pip install ${CI_PROJECT_DIR}/dist/${DIST_WHL}[pytorch,foolbox]
+  after_script:
+    - python -c "import secml"
+    - python -c "from secml.ml.classifiers import CClassifierPyTorch"
+    - python -c "from secml.adv.attacks.evasion import CAttackEvasionFoolbox"
+  cache:
+    <<: *test-cache-py38
     policy: pull
 
 
@@ -344,8 +483,6 @@ sync:upstream-repo:
   rules:
     - if: '$RUN_SYNC'
       when: on_success
-    - if: '$CI_MERGE_REQUEST_ID'
-      when: never
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
     - if: '$CI_COMMIT_BRANCH == "develop"'
@@ -378,6 +515,7 @@ release:gitlab-releases:
     paths:
       - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.zip
       - ${CI_PROJECT_DIR}/dist/${CI_PROJECT_NAME}-*.whl
+    expire_in: never
 
 release:gitlab-repo:
   extends: .release
@@ -426,7 +564,7 @@ release:gitlab-pages:
 
 release:pypi:
   extends: .release
-  image: ${CI_REGISTRY}/pralab/docker-helper-images/python35-setuptools:latest
+  image: ${CI_REGISTRY}/pralab/docker-helper-images/python36-setuptools:latest
   variables:
     TWINE_REPOSITORY_URL: "https://upload.pypi.org/legacy/"
     TWINE_USERNAME: __token__

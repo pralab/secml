@@ -119,3 +119,34 @@ CMetricTPRatFPR
    :undoc-members:
    :show-inheritance:
 
+CMetricFNRatFPR
+---------------
+
+.. automodule:: secml.ml.peval.metrics.c_metric_fnr_at_fpr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+CMetricTHatFPR
+--------------
+
+.. automodule:: secml.ml.peval.metrics.c_metric_th_at_fpr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+CMetricTPRatTH
+--------------
+
+.. automodule:: secml.ml.peval.metrics.c_metric_tpr_at_th
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+CMetricFNRatTH
+--------------
+
+.. automodule:: secml.ml.peval.metrics.c_metric_fnr_at_th
+   :members:
+   :undoc-members:
+   :show-inheritance:

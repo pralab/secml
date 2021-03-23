@@ -13,7 +13,7 @@ It comes with a set of powerful features:
 - **Dense/Sparse data support.** We provide full, transparent support for both
   dense (through `numpy` library) and sparse data (through `scipy` library)
   in a single data structure.
-- **Visualize your results.** We provide visualization and plotting framework,
+- **Visualize your results.** We provide a visualization and plotting framework,
   based on the widely-known library [matplotlib](https://matplotlib.org/).
 - **Explain your results.** Explainable ML methods to interpret model decisions
   via influential features and prototypes.
@@ -35,25 +35,25 @@ Also, have a look at our [ROADMAP](https://secml.gitlab.io/roadmap.html)
 for an overview of the future development directions.
 
 [![Status Alpha](https://img.shields.io/badge/status-alpha-yellow.svg)](.)
-[![Python 3.5 | 3.6 | 3.7](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7-brightgreen.svg)](.)
+[![Python 3.6 | 3.7 | 3.8](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-brightgreen.svg)](.)
 [![Platform Linux | MacOS | Windows ](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](.)
 [![Apache License 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 
 ## Installation Guide
 
-We recommend instaling SecML in a specific environment along with its dependencies.
+We recommend installing SecML in a specific environment along with its dependencies.
 
 Common frameworks to create and manage envs are [virtualenv](https://virtualenv.pypa.io) 
-and [conda](https://conda.io). Both alternatives provide convenient user guides on 
-how to properly setup the envs, so this guide will not cover the configuration 
-procedure.
+and [conda](https://conda.io). Both alternatives provide convenient user 
+guides on how to correctly set up the envs, so this guide will not cover 
+the configuration procedure.
 
 ### Operating System requirements
 
-SecML can run under Python >= 3.5 with no additional configuration steps 
+SecML can run under Python >= 3.6 with no additional configuration steps 
 required, as all its dependencies are available as wheel packages for 
-the primary macOS versions, Linux distributions and Windows.
+the principal macOS versions, Linux distributions and Windows.
 
 However, to support additional advanced features more packages can be necessary
 depending on the Operating System used:
@@ -78,7 +78,7 @@ depending on the Operating System used:
 Before starting the installation process try to obtain the latest version
 of the `pip` manager by calling: `pip install -U pip`
 
-The setup process is managed by the Python package `setuptools`.
+The Python package `setuptools` manages the setup process.
 Be sure to obtain the latest version by calling: `pip install -U setuptools`
 
 Once the environment is set up, SecML can installed and run by multiple means:
@@ -98,7 +98,7 @@ SecML should now be importable in python via: `import secml`.
 To update a current installation using any of the previous methods, 
 add the `-U` parameter after the `pip install` directive.
 Please see our [Update Guides](https://secml.gitlab.io/update.html) for specific
-upgrade intructions depending on the source and target version.
+upgrade instructions depending on the source and target version.
 
 
 ## Extra Components
@@ -115,14 +115,19 @@ of the `[extras]` section.
 
 ### Available extra components
  - `pytorch` : Neural Networks (NNs) through [PyTorch](https://pytorch.org/) deep learning platform.  
-   Will install: `torch >= 1.1`, `torchvision >= 0.2.2`  
+   Installs: `torch >= 1.4`, `torchvision >= 0.5`  
    *Windows only*: the url to installation archives should be manually provided as 
    `pip install secml[pytorch] -f https://download.pytorch.org/whl/torch_stable.html`.
+ - `foolbox` : Wrapper of [Foolbox](https://github.com/bethgelab/foolbox), 
+   a Python toolbox to create adversarial examples that fool neural networks.   
+   Installs: `foolbox >= 3.3.0`, `eagerpy >= 0.29.0`, `torch >= 1.4`, `torchvision >= 0.5`
  - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
    a Python library to benchmark vulnerability of machine learning systems to adversarial examples.  
-   Will install: `tensorflow >= 1.14.*, < 2`, `cleverhans`
+   Installs: `tensorflow >= 1.14.*, < 2`, `cleverhans`  
+   *Warning*: not available for `python >= 3.8`
  - `tf-gpu` : Shortcut for installing `TensorFlow` package with GPU support (Linux and Windows only).  
-   Will install: `tensorflow-gpu >= 1.14.*, < 2`
+   Installs: `tensorflow-gpu >= 1.14.*, < 2`  
+   *Warning*: not available for `python >= 3.8`
 
 
 ## Usage Guide
@@ -131,7 +136,7 @@ SecML is based on [numpy](http://www.numpy.org/), [scipy](https://www.scipy.org/
 [scikit-learn](https://scikit-learn.org/) and [pytorch](https://pytorch.org/), 
 widely-used packages for scientific computing and machine learning with Python.
 
-As a result, most of the interfaces of the library should be pretty familiar 
+As a result, most of the library interfaces should be pretty familiar 
 to frequent users of those packages.
 
 The primary data class is the `secml.array.CArray`, multi-dimensional
@@ -208,6 +213,9 @@ List of contributors:
 - `cleverhans` [Papernot, Nicolas, et al. "Technical Report on the CleverHans v2.1.0 
   Adversarial Examples Library." arXiv preprint arXiv:1610.00768 (2018).](
   https://arxiv.org/abs/1610.00768)
+- `foolbox`   [Rauber, Jonas, et. al. "Foolbox: A Python toolbox to benchmark the 
+  robustness of machine learning models", arXiv preprint arXiv:1707.04131 
+  (2017).](https://arxiv.org/abs/1707.04131)
 
 
 ## Acknowledgements

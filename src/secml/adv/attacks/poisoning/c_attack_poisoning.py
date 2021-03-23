@@ -370,10 +370,11 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
         self._xc[idx, :] = xc
         clf, tr = self._update_poisoned_clf()
 
-        # targeted attacks
-        y_ts = self._y_target if self._y_target is not None else self.val.Y
-
         y_pred, score = clf.predict(self.val.X, return_decision_function=True)
+
+        # targeted attacks
+        y_ts = CArray(self._y_target).repeat(score.shape[0]) \
+            if self._y_target is not None else self.val.Y
 
         # TODO: binary loss check
         if self._attacker_loss.class_type != 'softmax':
@@ -412,10 +413,11 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
         self._xc[idx, :] = xc
         clf, tr = self._update_poisoned_clf()
 
-        y_ts = self._y_target if self._y_target is not None else self.val.Y
-
         # computing gradient of loss(y, f(x)) w.r.t. f
         _, score = clf.predict(self.val.X, return_decision_function=True)
+
+        y_ts = CArray(self._y_target).repeat(score.shape[0]) \
+            if self._y_target is not None else self.val.Y
 
         grad = CArray.zeros((xc.size,))
 

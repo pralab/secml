@@ -10,6 +10,7 @@ Adversarial Machine Learning
    tutorials/06-MNIST_dataset
    tutorials/07-NeuralNetworks-MNIST
    tutorials/08-ImageNet
-   tutorials/09-Cleverhans
-   tutorials/11-ImageNet_advanced
    tutorials/12-DNR
+   tutorials/09-Cleverhans
+   tutorials/14-RobustBench
+   tutorials/15-Foolbox

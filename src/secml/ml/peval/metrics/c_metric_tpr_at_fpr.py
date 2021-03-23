@@ -17,11 +17,14 @@ class CMetricTPRatFPR(CMetric):
      - y_true (true ground labels)
      - score (estimated target values)
 
+    Parameters
+    ----------
+    fpr : float
+        Desired False Positive Rate in the interval [0,1]. Default 0.01 (1%)
+
     Attributes
     ----------
     class_type : 'tpr-at-fpr'
-    fpr : float
-        Desired False Positive Rate in the interval [0,1]. Default 0.01 (1%)
 
     Notes
     -----
@@ -33,7 +36,7 @@ class CMetricTPRatFPR(CMetric):
     >>> from secml.array import CArray
 
     >>> peval = CMetricTPRatFPR(fpr=0.5)
-    >>> print(peval.performance_score(CArray([0, 1, 0, 0]), score=CArray([0, 0, 0, 0])))
+    >>> peval.performance_score(CArray([0, 1, 0, 0]), score=CArray([0, 0, 0, 0]))
     0.5
 
     """
@@ -41,8 +44,6 @@ class CMetricTPRatFPR(CMetric):
     best_value = 1.0
 
     def __init__(self, fpr=0.01):
-
-        # False Positive Rate @ which True Positive Rate should be computed
         self.fpr = float(fpr)
 
     def _performance_score(self, y_true, score):
