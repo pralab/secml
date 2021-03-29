@@ -568,6 +568,22 @@ release:gitlab-pages:
     - git commit -m "Release $CI_COMMIT_TAG"
     - git push
 
+release:zoo:
+  stage: release
+  variables:
+    RELEASE: $CI_COMMIT_TAG
+    PIP_CACHE_DIR: $PIP_CACHE_DIR
+    TORCH_HOME: $TORCH_HOME
+    SECML_HOME_DIR: $SECML_HOME_DIR
+  trigger:
+    project: secml/secml-zoo
+    strategy: depend
+  rules:
+    - if: '$CI_SERVER_HOST != "gitlab.com"'
+      when: never
+    - if: $CI_COMMIT_TAG
+      when: manual
+
 release:pypi:
   extends: .release
   image: ${CI_REGISTRY}/pralab/docker-helper-images/python36-setuptools:latest
