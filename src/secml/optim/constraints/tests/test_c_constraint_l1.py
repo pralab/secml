@@ -140,14 +140,12 @@ class TestCConstraintL1(CConstraintTestCases):
         Subgradient should lie in the cone made up by the subgradients.
 
         """
-        c = CConstraintL1(center=0, radius=1)
-
         x0 = CArray([0, 1])
 
         p_min = CArray([1, 1])
         p_max = CArray([-1, 1])
 
-        gradient = c.gradient(x0)
+        gradient = self.c0.gradient(x0)
 
         # normalize the points
         norm_center = x0 / x0.norm(2)
