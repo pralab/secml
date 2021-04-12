@@ -26,8 +26,7 @@ class COptimizerPGDLS(COptimizer):
     The solution algorithm is based on a line-search exploring one feature
     (i.e., dimension) at a time (for l1-constrained problems), or all features
     (for l2-constrained problems). This solver also works for discrete
-    problems, where x is integer valued. In this case, exploration works
-    by manipulating one feature at a time.
+    problems where x and the grid discretization (eta) are integer valued.
 
     Differently from standard line searches, it explores a subset of
     `n_dimensions` at a time. In this sense, it is an extension of the

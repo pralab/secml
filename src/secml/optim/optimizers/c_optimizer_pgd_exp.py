@@ -25,8 +25,8 @@ class COptimizerPGDExp(COptimizerPGDLS):
 
     The solution algorithm is based on a line-search exploring one feature
     (i.e., dimension) at a time (for l1-constrained problems), or all features
-    (for l2-constrained problems).
-
+    (for l2-constrained problems). This solver also works for discrete
+    problems where x and the grid discretization (eta) are integer valued.
 
     Attributes
     ----------
