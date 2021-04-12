@@ -132,10 +132,11 @@ class COptimizerPGDLS(COptimizer):
         """
         abs_grad = abs(grad)
         grad_max = abs_grad.max()
-        argmax_pos = abs_grad == grad_max
-        # TODO: not sure if proj_grad should be always sparse
-        # (grad is not)
-        proj_grad = CArray.zeros(shape=grad.shape, sparse=grad.issparse)
+        # Get one of the features having grad_max value
+        argmax_pos = CArray(abs_grad == grad_max).nnz_indices[1][:1]
+        # TODO: not sure if proj_grad should be always sparse (grad is not)
+        proj_grad = CArray.zeros(
+            shape=grad.shape, sparse=grad.issparse, dtype=grad.dtype)
         proj_grad[argmax_pos] = grad[argmax_pos].sign()
         return proj_grad
 
