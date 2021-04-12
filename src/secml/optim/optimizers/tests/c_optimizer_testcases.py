@@ -9,6 +9,7 @@ from secml.utils import fm
 
 class COptimizerTestCases(CUnitTest):
     """Unittests interface for COptimizer."""
+    make_figures = False  # Set as True to produce figures
 
     def setUp(self):
 
@@ -56,7 +57,7 @@ class COptimizerTestCases(CUnitTest):
         poly = self._create_poly(d=n)
         self.test_funcs['poly-2'] = {
             'fun': poly,
-            'x0': CArray.ones((n,)) * 2,
+            'x0': CArray.ones((n,), dtype=int) * 2,
             'vmin': -10, 'vmax': 5,
             'grid_limits': [(-1, 1), (-1, 1)]
         }
@@ -161,7 +162,7 @@ class COptimizerTestCases(CUnitTest):
         self.logger.info("Found minimum: {:}".format(min_x))
         self.logger.info("Fun value @ minimum: {:}".format(opt.f_opt))
 
-        if fun.global_min_x().size == 2:
+        if self.make_figures and fun.global_min_x().size == 2:
             self._plot_optimization(opt, fun_dict['x0'], min_x,
                                     grid_limits=fun_dict['grid_limits'],
                                     method=minimize_params.get('method'),
@@ -180,8 +181,9 @@ class COptimizerTestCases(CUnitTest):
         # Check if solution has expected int dtype or not
         self.assertIsSubDtype(min_x.dtype, int if out_int is True else float)
 
+    @staticmethod
     def _plot_optimization(
-            self, solver, x_0, g_min, grid_limits,
+            solver, x_0, g_min, grid_limits,
             method=None, vmin=None, vmax=None, label=None):
         """Plots the optimization problem.
 
