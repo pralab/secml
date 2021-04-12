@@ -43,7 +43,7 @@ class CConstraintL1(CConstraint):
     @center.setter
     def center(self, value):
         """Center of the constraint."""
-        self._center = CArray(value)
+        self._center = value
 
     @property
     def radius(self):
