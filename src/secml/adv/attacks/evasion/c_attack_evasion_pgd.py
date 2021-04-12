@@ -7,7 +7,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from secml import _NoValue
 from secml.adv.attacks.evasion import CAttackEvasionPGDLS
 
 
@@ -77,7 +76,6 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
                  dmax=0,
                  lb=0,
                  ub=1,
-                 discrete=_NoValue,
                  y_target=None,
                  attack_classes='all',
                  solver_params=None):
@@ -90,10 +88,6 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
         # (targeted evasion) or an array of multiple points, one for each
         # class (indiscriminate evasion). See _get_point_with_min_f_obj()
         self._xk = None
-
-        # pgd solver does not accepts parameter `discrete`
-        if discrete is not _NoValue:
-            raise ValueError("`pgd` solver does not work in discrete space.")
 
         super(CAttackEvasionPGD, self).__init__(
             classifier=classifier,
