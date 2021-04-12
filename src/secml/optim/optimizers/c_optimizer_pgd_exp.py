@@ -7,11 +7,11 @@
 """
 
 from secml.array import CArray
-from secml.optim.optimizers import COptimizer
+from secml.optim.optimizers import COptimizerPGDLS
 from secml.optim.optimizers.line_search import CLineSearchBisectProj
 
 
-class COptimizerPGDExp(COptimizer):
+class COptimizerPGDExp(COptimizerPGDLS):
     """Solves the following problem:
 
     min  f(x)
@@ -43,77 +43,11 @@ class COptimizerPGDExp(COptimizer):
                  max_iter=1000,
                  eps=1e-4):
 
-        COptimizer.__init__(self, fun=fun,
-                            constr=constr, bounds=bounds)
-
-        # Read/write attributes
-        self.eta = eta
-        self.eta_min = eta_min
-        self.eta_max = eta_max
-        self.max_iter = max_iter
-        self.eps = eps
-        self.discrete = discrete
-
-        # Internal attributes
-        self._line_search = None
-
-    ###########################################################################
-    #                           READ-WRITE ATTRIBUTES
-    ###########################################################################
-
-    @property
-    def eta(self):
-        return self._eta
-
-    @eta.setter
-    def eta(self, value):
-        self._eta = value
-
-    @property
-    def eta_min(self):
-        return self._eta_min
-
-    @eta_min.setter
-    def eta_min(self, value):
-        self._eta_min = value
-
-    @property
-    def eta_max(self):
-        return self._eta_max
-
-    @eta_max.setter
-    def eta_max(self, value):
-        self._eta_max = value
-
-    @property
-    def max_iter(self):
-        """Returns the maximum number of descent iterations"""
-        return self._max_iter
-
-    @max_iter.setter
-    def max_iter(self, value):
-        """Set the maximum number of descent iterations"""
-        self._max_iter = int(value)
-
-    @property
-    def eps(self):
-        """Return tolerance value for stop criterion"""
-        return self._eps
-
-    @eps.setter
-    def eps(self, value):
-        """Set tolerance value for stop criterion"""
-        self._eps = float(value)
-
-    @property
-    def discrete(self):
-        """True if feature space is discrete, False if continuous."""
-        return self._discrete
-
-    @discrete.setter
-    def discrete(self, value):
-        """True if feature space is discrete, False if continuous."""
-        self._discrete = bool(value)
+        COptimizerPGDLS.__init__(
+            self, fun=fun, constr=constr, bounds=bounds,
+            discrete=discrete,
+            eta=eta, eta_min=eta_min, eta_max=eta_max,
+            max_iter=max_iter, eps=eps)
 
     ##########################################
     #                METHODS
@@ -134,50 +68,6 @@ class COptimizerPGDExp(COptimizer):
             bounds=self._bounds,
             max_iter=20,
             eta=eta, eta_min=eta_min, eta_max=eta_max)
-
-    @staticmethod
-    def _l1_projected_gradient(grad):
-        """
-        Find v that maximizes v'grad onto the unary-norm l1 ball.
-        This is the maximization of an inner product over the l1 ball,
-        and the optimal (sparse) direction v is found by setting
-        v = sign(grad) when abs(grad) is maximum and 0 elsewhere.
-        """
-        abs_grad = abs(grad)
-        grad_max = abs_grad.max()
-        argmax_pos = abs_grad == grad_max
-        # TODO: not sure if proj_grad should be always sparse
-        # (grad is not)
-        proj_grad = CArray.zeros(shape=grad.shape, sparse=grad.issparse)
-        proj_grad[argmax_pos] = grad[argmax_pos].sign()
-        return proj_grad
-
-    def _box_projected_gradient(self, x, grad):
-        """
-        Exclude from descent direction those features which,
-        if modified according to the given descent direction,
-        would violate the box constraint.
-
-        """
-        if self.bounds is None:
-            return grad  # all features are feasible
-
-        # x_lb and x_ub are feature manipulations that violate box
-        # (the first vector is potentially sparse, so it has to be
-        # the first argument of logical_and to avoid conversion to dense)
-        # FIXME: the following condition is error-prone.
-        #  Use (ad wrap in CArray) np.isclose with atol=1e-6, rtol=0
-        # FIXME: converting grad to dense as the sparse vs sparse logical_and
-        #  is too slow
-        x_lb = (x.round(6) == CArray(self.bounds.lb).round(6)).logical_and(
-            grad.todense() > 0).astype(bool)
-
-        x_ub = (x.round(6) == CArray(self.bounds.ub).round(6)).logical_and(
-            grad.todense() < 0).astype(bool)
-
-        # reset gradient for unfeasible features
-        grad[x_lb + x_ub] = 0
-        return grad
 
     def _xk(self, x, fx, *args):
         """Returns a new point after gradient descent."""
