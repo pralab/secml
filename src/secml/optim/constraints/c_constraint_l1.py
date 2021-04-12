@@ -178,10 +178,11 @@ class CConstraintL1(CConstraint):
         theta = (cssv[rho] - s) / (rho + 1.0)
 
         # compute the projection by thresholding v using theta
-        w = v
+        w = v.deepcopy()
         if w.issparse:
             p = CArray(w.nnz_data)
             p -= theta
+            w = w.astype(p)  # p dtype may change after subtraction
             w[w.nnz_indices] = p
         else:
             w -= theta
