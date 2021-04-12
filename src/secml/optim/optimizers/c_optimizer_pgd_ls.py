@@ -5,6 +5,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+import numpy as np
 
 from secml.array import CArray
 from secml.optim.optimizers import COptimizer
@@ -59,6 +60,7 @@ class COptimizerPGDLS(COptimizer):
 
         # Internal attributes
         self._line_search = None
+        self._dtype = None
 
     ###########################################################################
     #                           READ-WRITE ATTRIBUTES
@@ -185,7 +187,8 @@ class COptimizerPGDLS(COptimizer):
             # project z onto l1 constraint (via dual norm)
             grad = self._l1_projected_gradient(grad)
 
-        next_point = x - grad * self._line_search.eta
+        next_point = CArray(x - grad * self._line_search.eta,
+                            dtype=self._dtype, tosparse=x.issparse)
 
         if self.constr is not None and self.constr.is_violated(next_point):
             self.logger.debug("Line-search on distance constraint.")
@@ -248,36 +251,43 @@ class COptimizerPGDLS(COptimizer):
                 warnings.warn(
                     "x0 " + str(x0) + " is outside of the given bounds.",
                     category=RuntimeWarning)
-            self._x_seq = CArray.zeros((1, x0.size),
-                                       sparse=x0.issparse, dtype=x0.dtype)
+            self._x_seq = CArray.zeros(
+                (1, x0.size), sparse=x0.issparse, dtype=x0.dtype)
             self._f_seq = CArray.zeros(1)
             self._x_seq[0, :] = x0
             self._f_seq[0] = self._fun.fun(x0, *args)
             self._x_opt = x0
             return x0
 
+        x = x_init.deepcopy()  # TODO: IS DEEPCOPY REALLY NEEDED?
+
         # if x is outside of the feasible domain, project it
-        if self.bounds is not None and self.bounds.is_violated(x_init):
-            x_init = self.bounds.projection(x_init)
+        if self.bounds is not None and self.bounds.is_violated(x):
+            x = self.bounds.projection(x)
 
-        if self.constr is not None and self.constr.is_violated(x_init):
-            x_init = self.constr.projection(x_init)
+        if self.constr is not None and self.constr.is_violated(x):
+            x = self.constr.projection(x)
 
-        if (self.bounds is not None and self.bounds.is_violated(x_init)) or \
-                (self.constr is not None and self.constr.is_violated(x_init)):
+        if (self.bounds is not None and self.bounds.is_violated(x)) or \
+                (self.constr is not None and self.constr.is_violated(x)):
             raise ValueError(
-                "x_init " + str(x_init) + " is outside of feasible domain.")
+                "x_init " + str(x) + " is outside of feasible domain.")
+
+        # dtype depends on x and eta (the grid discretization)
+        if np.issubdtype(x_init.dtype, np.floating):
+            # x is float, res dtype should be float
+            self._dtype = x_init.dtype
+        else:  # x is int, res dtype depends on the grid discretization
+            self._dtype = self._line_search.eta.dtype
 
         # initialize x_seq and f_seq
-        self._x_seq = CArray.zeros(
-            (self.max_iter, x_init.size), sparse=x_init.issparse)
-        if self.discrete is True:
-            self._x_seq.astype(x_init.dtype)  # this may set x_seq to int
+        self._x_seq = CArray.zeros((self.max_iter, x_init.size),
+                                   sparse=x_init.issparse,
+                                   dtype=self._dtype)
         self._f_seq = CArray.zeros(self.max_iter)
 
         # The first point is obviously the starting point,
         # and the constraint is not violated (false...)
-        x = x_init.deepcopy()
         fx = self._fun.fun(x, *args)  # eval fun at x, for iteration 0
         self._x_seq[0, :] = x
         self._f_seq[0] = fx

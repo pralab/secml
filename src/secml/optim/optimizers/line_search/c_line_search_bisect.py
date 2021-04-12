@@ -43,6 +43,7 @@ class CLineSearchBisect(CLineSearch):
         self._fz = None  # cached value of fun at current z during line search
         self._fun_idx_max = None
         self._fun_idx_min = None
+        self._dtype = None
 
     @property
     def eta_max(self):
@@ -91,7 +92,7 @@ class CLineSearchBisect(CLineSearch):
 
     def _update_z(self, x, eta, d):
         """Update z and its cached score fz."""
-        z = x + eta * d
+        z = CArray(x + eta * d, dtype=self._dtype, tosparse=x.issparse)
         self._fz = self.fun.fun(z)
         return z
 
@@ -110,27 +111,15 @@ class CLineSearchBisect(CLineSearch):
     def _select_best_point(self, x, d, idx_min, idx_max, **kwargs):
         """Returns best point among x and the two points found by the search.
         In practice, if f(x + eta*d) increases on d, we return x."""
-
-        # dtype of x1 and x2 depends on x and eta (the grid discretization)
-        if np.issubdtype(x.dtype, np.floating):
-            # if x is float res dtype should be float
-            dtype = x.dtype
-        else:  # x is int, so the res dtype depends on the grid discretization
-            dtype = self.eta.dtype
-
         x1 = CArray(x + d * self.eta * idx_min,
-                    dtype=dtype, tosparse=x.issparse)
+                    dtype=self._dtype, tosparse=x.issparse)
         x2 = CArray(x + d * self.eta * idx_max,
-                    dtype=dtype, tosparse=x.issparse)
+                    dtype=self._dtype, tosparse=x.issparse)
 
-        self.logger.info("Select best point between: " +
-                         str(x + self.eta * d * idx_min) + ", " +
-                         str(x + self.eta * d * idx_max) + ", " +
-                         str(x))
-        self.logger.debug("f[a], f[b]: [" +
-                          str(self._fun_idx_min) + "," +
-                          str(self._fun_idx_max) + "]")
-        self.logger.debug("f[x] " + str(self._fx))
+        self.logger.info("Select best point between...")
+        self.logger.info("x (f: {:}) -> \n{:}".format(self._fx, x))
+        self.logger.info("x1 (f: {:}) -> \n{:}".format(self._fun_idx_min, x1))
+        self.logger.info("x2 (f: {:}) -> \n{:}".format(self._fun_idx_max, x2))
 
         f0 = self._fx
 
@@ -168,11 +157,11 @@ class CLineSearchBisect(CLineSearch):
         # else return best point among x1, x2 and x
         self.logger.debug("f0: {:}, f1: {:}, f2: {:}".format(f0, f1, f2))
 
-        if f2 <= f0 and f2 < f1:
+        if f2 <= f0 and f2 <= f1:
             self.logger.debug("Returning x2.")
             return x2, f2
 
-        if f1 <= f0 and f1 < f2:
+        if f1 <= f0 and f1 <= f2:
             self.logger.debug("Returning x1.")
             return x1, f1
 
@@ -196,10 +185,10 @@ class CLineSearchBisect(CLineSearch):
         delta = self.fun.fun(x + 0.1 * self.eta * d, **kwargs) - self._fz
 
         if delta <= 0:
-            # feasible point, decreasing / stationary score
+            # feasible point and decreasing / stationary score
             return True
 
-        # feasible point, increasing score
+        # feasible point but increasing score
         return False
 
     def _compute_eta_max(self, x, d, **kwargs):
@@ -297,7 +286,14 @@ class CLineSearchBisect(CLineSearch):
             The value `f(x')`.
 
         """
-        d = CArray(d, tosparse=d.issparse).ravel()
+        d = CArray(d).ravel()
+
+        # dtype depends on x and eta (the grid discretization)
+        if np.issubdtype(x.dtype, np.floating):
+            # if x is float res dtype should be float
+            self._dtype = x.dtype
+        else:  # x is int, so the res dtype depends on the grid discretization
+            self._dtype = self.eta.dtype
 
         self._n_iter = 0
 
@@ -317,25 +313,27 @@ class CLineSearchBisect(CLineSearch):
 
         # exponential search
         if self.eta_max is None:
-            self.logger.debug("Exponential search ")
+            self.logger.debug("Exponential search")
             eta_max = self._compute_eta_max(x, d, **kwargs)
             idx_max = (eta_max / self.eta).ceil().astype(int)
             idx_min = (idx_max / 2).astype(int)
             # this only searches within [eta, 2*eta]
             # the values fun_idx_min and fun_idx_max are already cached
         else:
-            self.logger.debug("Binary search ")
+            self.logger.debug("Binary search")
             idx_max = (self.eta_max / self.eta).ceil().astype(int)
             idx_min = 0
             self._fun_idx_min = self._fx
             self._fun_idx_max = None  # this has not been cached
 
-        self.logger.info("Running binary line search in: [" +
-                         str(x + self.eta * d * idx_min) + "," +
-                         str(x + self.eta * d * idx_max) + "]")
-        self.logger.debug("f[a], f[b]: [" +
-                          str(self._fun_idx_min) + "," +
-                          str(self._fun_idx_max) + "]")
+        x1 = CArray(x + d * self.eta * idx_min,
+                    dtype=self._dtype, tosparse=x.issparse)
+        x2 = CArray(x + d * self.eta * idx_max,
+                    dtype=self._dtype, tosparse=x.issparse)
+
+        self.logger.info("Running binary line search in...")
+        self.logger.info("x1 (f: {:}) -> \n{:}".format(self._fun_idx_min, x1))
+        self.logger.info("x2 (f: {:}) -> \n{:}".format(self._fun_idx_max, x2))
 
         while self._n_iter < self.max_iter:
 
