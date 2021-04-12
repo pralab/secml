@@ -41,7 +41,6 @@ class COptimizerPGDLS(COptimizer):
 
     def __init__(self, fun,
                  constr=None, bounds=None,
-                 discrete=False,
                  eta=1e-3,
                  eta_min=None,
                  eta_max=None,
@@ -57,7 +56,6 @@ class COptimizerPGDLS(COptimizer):
         self.eta_max = eta_max
         self.max_iter = max_iter
         self.eps = eps
-        self.discrete = discrete
 
         # Internal attributes
         self._line_search = None
@@ -110,29 +108,12 @@ class COptimizerPGDLS(COptimizer):
         """Set tolerance value for stop criterion"""
         self._eps = float(value)
 
-    @property
-    def discrete(self):
-        """True if feature space is discrete, False if continuous."""
-        return self._discrete
-
-    @discrete.setter
-    def discrete(self, value):
-        """True if feature space is discrete, False if continuous."""
-        self._discrete = bool(value)
-
     ##########################################
     #                METHODS
     ##########################################
 
-    def _init_line_search(
-            self, eta, eta_min, eta_max, discrete):
+    def _init_line_search(self, eta, eta_min, eta_max):
         """Initialize line-search optimizer"""
-
-        if discrete is True and self.constr is not None and \
-                self.constr.class_type == 'l2':
-            raise NotImplementedError(
-                "L2 constraint is not supported for discrete optimization")
-
         self._line_search = CLineSearchBisect(
             fun=self._fun,
             constr=self._constr,
@@ -200,8 +181,7 @@ class COptimizerPGDLS(COptimizer):
         # filter modifications that would violate bounds (to sparsify gradient)
         grad = self._box_projected_gradient(x, grad)
 
-        if self.discrete or (
-                self.constr is not None and self.constr.class_type == 'l1'):
+        if self.constr is not None and self.constr.class_type == 'l1':
             # project z onto l1 constraint (via dual norm)
             grad = self._l1_projected_gradient(grad)
 
@@ -257,8 +237,7 @@ class COptimizerPGDLS(COptimizer):
         # initialize line search (and re-assign fun to it)
         self._init_line_search(eta=self.eta,
                                eta_min=self.eta_min,
-                               eta_max=self.eta_max,
-                               discrete=self.discrete)
+                               eta_max=self.eta_max)
 
         # constr.radius = 0, exit
         if self.constr is not None and self.constr.radius == 0:
