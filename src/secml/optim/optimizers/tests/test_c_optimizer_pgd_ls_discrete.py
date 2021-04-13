@@ -54,7 +54,7 @@ class TestCOptimizerPGDLSDiscrete(COptimizerTestCases):
 
         self._test_minimize(COptimizerPGDLS, 'beale',
                             opt_params=opt_params,
-                            label='discrete')
+                            label='discrete-l1')
 
     def test_minimize_quad2d_no_bound(self):
         """Test for COptimizer.minimize() method on a quadratic function in
