@@ -1,5 +1,6 @@
 from secml.testing import CUnitTest
 
+import os
 import numpy as np
 
 from secml.array import CArray
@@ -20,7 +21,7 @@ if not fm.folder_exist(IMAGES_FOLDER):
 class CAttackEvasionTestCases(CUnitTest):
     """Unittests interface for CAttackEvasion."""
     images_folder = IMAGES_FOLDER
-    make_figures = False  # Set as True to produce figures
+    make_figures = os.getenv('MAKE_FIGURES', False)  # True to produce figures
 
     def _load_blobs(self, n_feats, n_clusters, sparse=False, seed=None):
         """Load Random Blobs dataset.

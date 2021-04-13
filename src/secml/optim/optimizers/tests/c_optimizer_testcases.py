@@ -1,5 +1,7 @@
 from secml.testing import CUnitTest
 
+import os
+
 from secml.optim.function import CFunction
 from secml.optim.constraints import CConstraintBox, CConstraintL2
 from secml.array import CArray
@@ -9,7 +11,7 @@ from secml.utils import fm
 
 class COptimizerTestCases(CUnitTest):
     """Unittests interface for COptimizer."""
-    make_figures = False  # Set as True to produce figures
+    make_figures = os.getenv('MAKE_FIGURES', False)  # True to produce figures
 
     def setUp(self):
 
