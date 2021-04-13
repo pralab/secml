@@ -18,6 +18,19 @@ class CLineSearch(CCreator, metaclass=ABCMeta):
     direction in the feasible domain, potentially subject to constraints.
     The search is normally stopped when the objective improves at a satisfying
     level, to keep the search fast.
+
+    Parameters
+    ----------
+    fun : CFunction
+        The function to use for the optimization.
+    constr : CConstraintL1 or CConstraintL2 or None, optional
+        A distance constraint. Default None.
+    bounds : CConstraintBox or None, optional
+        A box constraint. Default None.
+    eta : scalar, optional
+        Minimum resolution of the line-search grid. Default 1e-4.
+    max_iter : int, optional
+        Maximum number of iterations of the line search. Default 20.
     
     """
     __super__ = 'CLineSearch'

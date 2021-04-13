@@ -25,9 +25,12 @@ class COptimizer(CCreator, metaclass=ABCMeta):
     Parameters
     ----------
     fun : CFunction
-        The objective function to be optimized,
-        along with 1st-order (Jacobian) and 2nd-order (Hessian) derivatives
-        (if available).
+        The objective function to be optimized, along with 1st-order (Jacobian)
+        and 2nd-order (Hessian) derivatives (if available).
+    constr : CConstraintL1 or CConstraintL2 or None, optional
+        A distance constraint. Default None.
+    bounds : CConstraintBox or None, optional
+        A box constraint. Default None.
 
     """
     __super__ = 'COptimizer'

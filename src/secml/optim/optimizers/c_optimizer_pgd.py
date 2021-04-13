@@ -23,6 +23,22 @@ class COptimizerPGD(COptimizer):
 
     The solution algorithm is based on the classic gradient descent algorithm.
 
+    Parameters
+    ----------
+    fun : CFunction
+        The objective function to be optimized, along with 1st-order (Jacobian)
+        and 2nd-order (Hessian) derivatives (if available).
+    constr : CConstraintL1 or CConstraintL2 or None, optional
+        A distance constraint. Default None.
+    bounds : CConstraintBox or None, optional
+        A box constraint. Default None.
+    eta : scalar, optional
+        Step of the Projected Gradient Descent. Default 1e-3.
+    eps : scalar, optional
+        Tolerance of the stop criterion. Default 1e-4.
+    max_iter : int, optional
+        Maximum number of iterations. Default 200.
+
     Attributes
     ----------
     class_type : 'pgd'
