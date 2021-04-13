@@ -14,6 +14,25 @@ from secml.array import CArray
 class CLineSearchBisect(CLineSearch):
     """Binary line search.
 
+    Parameters
+    ----------
+    fun : CFunction
+        The function to use for the optimization.
+    constr : CConstraintL1 or CConstraintL2 or None, optional
+        A distance constraint. Default None.
+    bounds : CConstraintBox or None, optional
+        A box constraint. Default None.
+    eta : scalar, optional
+        Minimum resolution of the line-search grid. Default 1e-4.
+    eta_min : scalar or None, optional
+        Initial step of the line search. Gets multiplied or divided by 2
+        at each step until convergence. If None, will be set equal to eta.
+        Default 0.1.
+    eta_max : scalar or None, optional
+        Maximum step of the line search. Default None.
+    max_iter : int, optional
+        Maximum number of iterations of the line search. Default 20.
+
     Attributes
     ----------
     class_type : 'bisect'
