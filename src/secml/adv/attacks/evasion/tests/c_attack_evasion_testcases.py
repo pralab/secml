@@ -1,7 +1,9 @@
 from secml.testing import CUnitTest
 
-from numpy import *
+import os
+import numpy as np
 
+from secml.array import CArray
 from secml.data.loader import CDLRandomBlobs
 from secml.optim.constraints import \
     CConstraintBox, CConstraintL1, CConstraintL2
@@ -19,7 +21,7 @@ if not fm.folder_exist(IMAGES_FOLDER):
 class CAttackEvasionTestCases(CUnitTest):
     """Unittests interface for CAttackEvasion."""
     images_folder = IMAGES_FOLDER
-    make_figures = False  # Set as True to produce figures
+    make_figures = os.getenv('MAKE_FIGURES', False)  # True to produce figures
 
     def _load_blobs(self, n_feats, n_clusters, sparse=False, seed=None):
         """Load Random Blobs dataset.
@@ -71,6 +73,11 @@ class CAttackEvasionTestCases(CUnitTest):
         else:  # eta is a single value
             ds.X = (ds.X / eta).round() * eta
 
+        # It is likely that after the discretization there are duplicates
+        new_array = [tuple(row) for row in ds.X.tondarray()]
+        uniques, uniques_idx = np.unique(new_array, axis=0, return_index=True)
+        ds = ds[uniques_idx.tolist(), :]
+
         return ds
 
     def _prepare_linear_svm(self, sparse, seed):
@@ -92,6 +99,35 @@ class CAttackEvasionTestCases(CUnitTest):
         """
         ds = self._load_blobs(
             n_feats=2,  # Number of dataset features
+            n_clusters=2,  # Number of dataset clusters
+            sparse=sparse,
+            seed=seed
+        )
+
+        normalizer = CNormalizerMinMax(feature_range=(-1, 1))
+        clf = CClassifierSVM(C=1.0, preprocess=normalizer)
+
+        return ds, clf
+
+    def _prepare_linear_svm_10d(self, sparse, seed):
+        """Preparare the data required for attacking a LINEAR SVM.
+
+        - load a blob 10D dataset
+        - create a SVM (C=1) and a minmax preprocessor
+
+        Parameters
+        ----------
+        sparse : bool
+        seed : int or None
+
+        Returns
+        -------
+        ds : CDataset
+        clf : CClassifierSVM
+
+        """
+        ds = self._load_blobs(
+            n_feats=10,  # Number of dataset features
             n_clusters=2,  # Number of dataset clusters
             sparse=sparse,
             seed=seed

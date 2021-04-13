@@ -5,6 +5,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+import numpy as np
 
 from secml.array import CArray
 from secml.optim.optimizers import COptimizer
@@ -25,12 +26,33 @@ class COptimizerPGDLS(COptimizer):
     The solution algorithm is based on a line-search exploring one feature
     (i.e., dimension) at a time (for l1-constrained problems), or all features
     (for l2-constrained problems). This solver also works for discrete
-    problems, where x is integer valued. In this case, exploration works
-    by manipulating one feature at a time.
+    problems where x and the grid discretization (eta) are integer valued.
 
     Differently from standard line searches, it explores a subset of
     `n_dimensions` at a time. In this sense, it is an extension of the
     classical line-search approach.
+
+    Parameters
+    ----------
+    fun : CFunction
+        The objective function to be optimized, along with 1st-order (Jacobian)
+        and 2nd-order (Hessian) derivatives (if available).
+    constr : CConstraintL1 or CConstraintL2 or None, optional
+        A distance constraint. Default None.
+    bounds : CConstraintBox or None, optional
+        A box constraint. Default None.
+    eta : scalar, optional
+        Minimum resolution of the line-search grid. Default 1e-3.
+    eta_min : scalar or None, optional
+        Initial step of the line search. Gets multiplied or divided by 2
+        at each step until convergence. If None, will be set equal to eta.
+        Default None.
+    eta_max : scalar or None, optional
+        Maximum step of the line search. Default None.
+    max_iter : int, optional
+        Maximum number of iterations. Default 1000.
+    eps : scalar, optional
+        Tolerance of the stop criterion. Default 1e-4.
 
     Attributes
     ----------
@@ -41,7 +63,6 @@ class COptimizerPGDLS(COptimizer):
 
     def __init__(self, fun,
                  constr=None, bounds=None,
-                 discrete=False,
                  eta=1e-3,
                  eta_min=None,
                  eta_max=None,
@@ -57,10 +78,10 @@ class COptimizerPGDLS(COptimizer):
         self.eta_max = eta_max
         self.max_iter = max_iter
         self.eps = eps
-        self.discrete = discrete
 
         # Internal attributes
         self._line_search = None
+        self._dtype = None
 
     ###########################################################################
     #                           READ-WRITE ATTRIBUTES
@@ -110,29 +131,12 @@ class COptimizerPGDLS(COptimizer):
         """Set tolerance value for stop criterion"""
         self._eps = float(value)
 
-    @property
-    def discrete(self):
-        """True if feature space is discrete, False if continuous."""
-        return self._discrete
-
-    @discrete.setter
-    def discrete(self, value):
-        """True if feature space is discrete, False if continuous."""
-        self._discrete = bool(value)
-
     ##########################################
     #                METHODS
     ##########################################
 
-    def _init_line_search(
-            self, eta, eta_min, eta_max, discrete):
+    def _init_line_search(self, eta, eta_min, eta_max):
         """Initialize line-search optimizer"""
-
-        if discrete is True and self.constr is not None and \
-                self.constr.class_type == 'l2':
-            raise NotImplementedError(
-                "L2 constraint is not supported for discrete optimization")
-
         self._line_search = CLineSearchBisect(
             fun=self._fun,
             constr=self._constr,
@@ -150,10 +154,11 @@ class COptimizerPGDLS(COptimizer):
         """
         abs_grad = abs(grad)
         grad_max = abs_grad.max()
-        argmax_pos = abs_grad == grad_max
-        # TODO: not sure if proj_grad should be always sparse
-        # (grad is not)
-        proj_grad = CArray.zeros(shape=grad.shape, sparse=grad.issparse)
+        # Get one of the features having grad_max value
+        argmax_pos = CArray(abs_grad == grad_max).nnz_indices[1][:1]
+        # TODO: not sure if proj_grad should be always sparse (grad is not)
+        proj_grad = CArray.zeros(
+            shape=grad.shape, sparse=grad.issparse, dtype=grad.dtype)
         proj_grad[argmax_pos] = grad[argmax_pos].sign()
         return proj_grad
 
@@ -200,12 +205,12 @@ class COptimizerPGDLS(COptimizer):
         # filter modifications that would violate bounds (to sparsify gradient)
         grad = self._box_projected_gradient(x, grad)
 
-        if self.discrete or (
-                self.constr is not None and self.constr.class_type == 'l1'):
+        if self.constr is not None and self.constr.class_type == 'l1':
             # project z onto l1 constraint (via dual norm)
             grad = self._l1_projected_gradient(grad)
 
-        next_point = x - grad * self._line_search.eta
+        next_point = CArray(x - grad * self._line_search.eta,
+                            dtype=self._dtype, tosparse=x.issparse)
 
         if self.constr is not None and self.constr.is_violated(next_point):
             self.logger.debug("Line-search on distance constraint.")
@@ -257,8 +262,7 @@ class COptimizerPGDLS(COptimizer):
         # initialize line search (and re-assign fun to it)
         self._init_line_search(eta=self.eta,
                                eta_min=self.eta_min,
-                               eta_max=self.eta_max,
-                               discrete=self.discrete)
+                               eta_max=self.eta_max)
 
         # constr.radius = 0, exit
         if self.constr is not None and self.constr.radius == 0:
@@ -269,36 +273,43 @@ class COptimizerPGDLS(COptimizer):
                 warnings.warn(
                     "x0 " + str(x0) + " is outside of the given bounds.",
                     category=RuntimeWarning)
-            self._x_seq = CArray.zeros((1, x0.size),
-                                       sparse=x0.issparse, dtype=x0.dtype)
+            self._x_seq = CArray.zeros(
+                (1, x0.size), sparse=x0.issparse, dtype=x0.dtype)
             self._f_seq = CArray.zeros(1)
             self._x_seq[0, :] = x0
             self._f_seq[0] = self._fun.fun(x0, *args)
             self._x_opt = x0
             return x0
 
+        x = x_init.deepcopy()  # TODO: IS DEEPCOPY REALLY NEEDED?
+
         # if x is outside of the feasible domain, project it
-        if self.bounds is not None and self.bounds.is_violated(x_init):
-            x_init = self.bounds.projection(x_init)
+        if self.bounds is not None and self.bounds.is_violated(x):
+            x = self.bounds.projection(x)
 
-        if self.constr is not None and self.constr.is_violated(x_init):
-            x_init = self.constr.projection(x_init)
+        if self.constr is not None and self.constr.is_violated(x):
+            x = self.constr.projection(x)
 
-        if (self.bounds is not None and self.bounds.is_violated(x_init)) or \
-                (self.constr is not None and self.constr.is_violated(x_init)):
+        if (self.bounds is not None and self.bounds.is_violated(x)) or \
+                (self.constr is not None and self.constr.is_violated(x)):
             raise ValueError(
-                "x_init " + str(x_init) + " is outside of feasible domain.")
+                "x_init " + str(x) + " is outside of feasible domain.")
+
+        # dtype depends on x and eta (the grid discretization)
+        if np.issubdtype(x_init.dtype, np.floating):
+            # x is float, res dtype should be float
+            self._dtype = x_init.dtype
+        else:  # x is int, res dtype depends on the grid discretization
+            self._dtype = self._line_search.eta.dtype
 
         # initialize x_seq and f_seq
-        self._x_seq = CArray.zeros(
-            (self.max_iter, x_init.size), sparse=x_init.issparse)
-        if self.discrete is True:
-            self._x_seq.astype(x_init.dtype)  # this may set x_seq to int
+        self._x_seq = CArray.zeros((self.max_iter, x_init.size),
+                                   sparse=x_init.issparse,
+                                   dtype=self._dtype)
         self._f_seq = CArray.zeros(self.max_iter)
 
         # The first point is obviously the starting point,
         # and the constraint is not violated (false...)
-        x = x_init.deepcopy()
         fx = self._fun.fun(x, *args)  # eval fun at x, for iteration 0
         self._x_seq[0, :] = x
         self._f_seq[0] = fx
