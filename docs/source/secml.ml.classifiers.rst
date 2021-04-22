@@ -9,6 +9,7 @@ secml.ml.classifiers
 .. toctree::
 
    secml.ml.classifiers.multiclass
+   secml.ml.classifiers.secure
    secml.ml.classifiers.reject
    secml.ml.classifiers.loss
    secml.ml.classifiers.regularizer
