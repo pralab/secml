@@ -180,7 +180,7 @@ class CConstraintTestCases(CUnitTest):
             check_projection(c, p_out, p_out_expected)
             check_projection(c, p_out.astype(int), p_out_expected)
 
-    def _test_plot(self, c, *points):
+    def _test_plot(self, c, *points, label=''):
         """Visualize the constraint.
 
         Parameters
@@ -189,6 +189,8 @@ class CConstraintTestCases(CUnitTest):
         *points : CArray
             A series of point to plot. Each point will be plotted before
             and after cosntraint projection.
+        label : str, optional
+            Additional suffix for image filename.
 
         """
         self.logger.info("Plotting constrain {:}".format(c.class_type))
@@ -213,7 +215,12 @@ class CConstraintTestCases(CUnitTest):
                 "Plotting point (color {:}): {:}".format(colors[p_i], p_proj))
             fig.sp.scatter(*p_proj, c=colors[p_i], zorder=10)
 
-        filename = "test_constraint_{:}.pdf".format(c.class_type)
+        if label:
+            filename = \
+                "test_constraint_{:}_{:}.pdf".format(c.class_type, label)
+        else:
+            filename = \
+                "test_constraint_{:}.pdf".format(c.class_type)
 
         fig.savefig(fm.join(fm.abspath(__file__), filename))
 

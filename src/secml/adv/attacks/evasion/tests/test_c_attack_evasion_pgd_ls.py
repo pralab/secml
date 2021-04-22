@@ -79,6 +79,88 @@ class TestCAttackEvasionPGDLS(CAttackEvasionTestCases):
 
         self._plot_2d_evasion(evas, ds, x0, 'pgd_ls_linear_L1.pdf')
 
+    def test_linear_l1_discrete(self):
+        """Test evasion of a linear classifier using L1 distance (discrete)."""
+
+        eta = 0.5
+        sparse = True
+        seed = 10
+
+        ds, clf = self._prepare_linear_svm(sparse, seed)
+
+        ds = self._discretize_data(ds, eta)
+
+        evasion_params = {
+            "classifier": clf,
+            "double_init_ds": ds,
+            "distance": 'l1',
+            "dmax": 2,
+            "lb": -1,
+            "ub": 1,
+            "attack_classes": CArray([1]),
+            "y_target": 0,
+            "solver_params": {
+                "eta": eta
+            }
+        }
+
+        evas, x0, y0 = self._set_evasion(ds, evasion_params)
+
+        # Expected final optimal point
+        expected_x = CArray([0.5, -1])
+        expected_y = 0
+
+        self._run_evasion(evas, x0, y0, expected_x, expected_y)
+
+        self._plot_2d_evasion(evas, ds, x0, 'pgd_ls_linear_L1_discrete.pdf')
+
+    def test_linear_l1_discrete_10d(self):
+        """Test evasion of a linear classifier (10 features)
+        using L1 distance (discrete).
+        In this test we set few features to the same value to cover a
+        special case of the l1 projection, where there are multiple
+        features with the same max value. The optimizer should change
+        one of them at each iteration.
+        """
+
+        eta = 0.5
+        sparse = True
+        seed = 10
+
+        ds, clf = self._prepare_linear_svm_10d(sparse, seed)
+
+        ds = self._discretize_data(ds, eta)
+
+        evasion_params = {
+            "classifier": clf,
+            "double_init_ds": ds,
+            "distance": 'l1',
+            "dmax": 5,
+            "lb": -2,
+            "ub": 2,
+            "attack_classes": CArray([1]),
+            "y_target": 0,
+            "solver_params": {
+                "eta": eta,
+                "eta_min": None,
+                "eta_max": None
+            }
+        }
+
+        evas, x0, y0 = self._set_evasion(ds, evasion_params)
+
+        # Set few features to the same max value
+        w_new = clf.w.deepcopy()
+        w_new[CArray.randint(
+            clf.w.size, shape=3, random_state=seed)] = clf.w.max()
+        clf._w = w_new
+
+        # Expected final optimal point
+        expected_x = CArray([-2., -1.5, 2, 0, -0.5, 0, 0.5, -0.5, 1, 0.5])
+        expected_y = 0
+
+        self._run_evasion(evas, x0, y0, expected_x, expected_y)
+
     def test_linear_l2(self):
         """Test evasion of a linear classifier using L2 distance."""
 

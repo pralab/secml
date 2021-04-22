@@ -1,3 +1,19 @@
+## v0.14.1 (22/04/2021)
+- This version brings fixes for a few issues with the optimizers and related classes, along with improvements to documentation for all attacks, optimizers, and related classes.
+
+### Fixed (3 changes)
+- #923 Fixed `COptimizerPGDLS` and `COptimizerPGDLS` not working properly if the classifier's gradient has multiple components with the same (max) value.
+- #919 Fixed `CConstraintL1` crashing when projecting sparse data using default center value (scalar 0).
+- #920 Fixed inconsistent results between dense and sparse data for `CConstraintL1` projection caused by type casting.
+
+### Removed & Deprecated (1 change)
+- #922 Removed unnecessary parameter `discrete` from `COptimizerPGDLS` and `COptimizerPGDExp`.
+
+### Documentation (2 changes)
+- #100017 Improved documentation of `CAttackEvasion`, `COptimizer`, `CLineSearch`, and corresponding subclasses.
+- #918 Installing the latest stable version of RobustBench instead of the master version.
+
+
 ## v0.14 (23/03/2021)
 - #795 Added new package `adv.attacks.evasion.foolbox` with a wrapper for [Foolbox](https://foolbox.readthedocs.io/en/stable/).
 - #623 `secml` is now tested for compatibility with Python 3.8.
