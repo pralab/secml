@@ -5,6 +5,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+import numpy as np
 
 from secml.array import CArray
 from secml.optim.optimizers.line_search import CLineSearchBisect
@@ -12,6 +13,25 @@ from secml.optim.optimizers.line_search import CLineSearchBisect
 
 class CLineSearchBisectProj(CLineSearchBisect):
     """Binary line search including projections.
+
+    Parameters
+    ----------
+    fun : CFunction
+        The function to use for the optimization.
+    constr : CConstraintL1 or CConstraintL2 or None, optional
+        A distance constraint. Default None.
+    bounds : CConstraintBox or None, optional
+        A box constraint. Default None.
+    eta : scalar, optional
+        Minimum resolution of the line-search grid. Default 1e-4.
+    eta_min : scalar or None, optional
+        Initial step of the line search. Gets multiplied or divided by 2
+        at each step until convergence. If None, will be set equal to eta.
+        Default 0.1.
+    eta_max : scalar or None, optional
+        Maximum step of the line search. Default None.
+    max_iter : int, optional
+        Maximum number of iterations of the line search. Default 20.
 
     Attributes
     ----------
@@ -30,10 +50,11 @@ class CLineSearchBisectProj(CLineSearchBisect):
 
         self._best_score = None
         self._best_eta = None
+        self._dtype = None
 
     def _update_z(self, x, eta, d, projection=False):
         """Update z and its cached score fz."""
-        z = x + eta * d
+        z = CArray(x + eta * d, dtype=self._dtype, tosparse=x.issparse)
         if projection:
             z = self.bounds.projection(z) if self.bounds is not None else z
             z = self.constr.projection(z) if self.constr is not None else z
@@ -59,7 +80,8 @@ class CLineSearchBisectProj(CLineSearchBisect):
         """Returns best point among x and the two points found by the search.
         In practice, if f(x + eta*d) increases on d, we return x."""
 
-        v = x + d * self._best_eta
+        v = CArray(x + d * self._best_eta,
+                   dtype=self._dtype, tosparse=x.issparse)
         if self.bounds is not None:
             v = self.bounds.projection(v) if self.bounds is not None else v
         if self.constr is not None:
@@ -67,13 +89,15 @@ class CLineSearchBisectProj(CLineSearchBisect):
         if self._is_feasible(v):
             return v, self._best_score
 
-        x1 = CArray(x + d * self.eta * idx_min)
+        x1 = CArray(x + d * self.eta * idx_min,
+                    dtype=self._dtype, tosparse=x.issparse)
         if self.bounds is not None:
             x1 = self.bounds.projection(x1) if self.bounds is not None else x1
         if self.constr is not None:
             x1 = self.constr.projection(x1) if self.constr is not None else x1
 
-        x2 = CArray(x + d * self.eta * idx_max)
+        x2 = CArray(x + d * self.eta * idx_max,
+                    dtype=self._dtype, tosparse=x.issparse)
         if self.bounds is not None:
             x2 = self.bounds.projection(x2) if self.bounds is not None else x2
         if self.constr is not None:
@@ -186,6 +210,8 @@ class CLineSearchBisectProj(CLineSearchBisect):
         # this helps getting closer to the violated constraint
         t = CArray(eta / self.eta).round()
 
+        # FIXME: MANY UNUSED VARIABLES IN THE FOLLOWING
+
         # update z and fz
         z = self._update_z(x, eta, d, projection=True)
 
@@ -263,7 +289,14 @@ class CLineSearchBisectProj(CLineSearchBisect):
             The value `f(x')`.
 
         """
-        d = CArray(d, tosparse=d.issparse).ravel()
+        d = CArray(d).ravel()
+
+        # dtype depends on x and eta (the grid discretization)
+        if np.issubdtype(x.dtype, np.floating):
+            # if x is float res dtype should be float
+            self._dtype = x.dtype
+        else:  # x is int, so the res dtype depends on the grid discretization
+            self._dtype = self.eta.dtype
 
         self._n_iter = 0
 
