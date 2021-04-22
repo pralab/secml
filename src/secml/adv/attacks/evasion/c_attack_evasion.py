@@ -29,7 +29,7 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
         belonging to the `y_target` class.
     attack_classes : 'all' or CArray, optional
         Array with the classes that can be manipulated by the attacker or
-         'all' (default) if all classes can be manipulated.
+        'all' (default) if all classes can be manipulated.
 
     """
     __super__ = 'CAttackEvasion'
@@ -199,6 +199,8 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
             adv_ds.X, return_decision_function=True)
 
         y_pred = CArray(y_pred)
+
+        self.logger.info("y_pred after attack:\n{:}".format(y_pred))
 
         # Return the mean objective function value on the evasion points
         f_obj = fs_opt.mean()
