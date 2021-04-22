@@ -7,7 +7,6 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
-from secml import _NoValue
 from secml.adv.attacks.evasion import CAttackEvasionPGDLS
 
 
@@ -41,8 +40,8 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
     double_init_ds : CDataset or None, optional
         Dataset used to initialize an alternative init point (double init).
     double_init : bool, optional
-            If True (default), use double initialization point.
-            Needs double_init_ds not to be None.
+        If True (default), use double initialization point.
+        Needs double_init_ds not to be None.
     distance : {'l1' or 'l2'}, optional
         Norm to use for computing the distance of the adversarial example
         from the original sample. Default 'l2'.
@@ -58,10 +57,11 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
         belonging to the `y_target` class.
     attack_classes : 'all' or CArray, optional
         Array with the classes that can be manipulated by the attacker or
-         'all' (default) if all classes can be manipulated.
+        'all' (default) if all classes can be manipulated.
     solver_params : dict or None, optional
-        Parameters for the solver. Default None, meaning that default
-        parameters will be used.
+        Parameters for the solver.
+        Default None, meaning that default parameters will be used.
+        See :class:`COptimizerPGD` for more information.
 
     Attributes
     ----------
@@ -77,7 +77,6 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
                  dmax=0,
                  lb=0,
                  ub=1,
-                 discrete=_NoValue,
                  y_target=None,
                  attack_classes='all',
                  solver_params=None):
@@ -90,10 +89,6 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
         # (targeted evasion) or an array of multiple points, one for each
         # class (indiscriminate evasion). See _get_point_with_min_f_obj()
         self._xk = None
-
-        # pgd solver does not accepts parameter `discrete`
-        if discrete is not _NoValue:
-            raise ValueError("`pgd` solver does not work in discrete space.")
 
         super(CAttackEvasionPGD, self).__init__(
             classifier=classifier,

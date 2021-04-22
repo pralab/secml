@@ -38,8 +38,8 @@ class CAttackEvasionPGDExp(CAttackEvasionPGDLS):
     double_init_ds : CDataset or None, optional
         Dataset used to initialize an alternative init point (double init).
     double_init : bool, optional
-            If True (default), use double initialization point.
-            Needs double_init_ds not to be None.
+        If True (default), use double initialization point.
+        Needs double_init_ds not to be None.
     distance : {'l1' or 'l2'}, optional
         Norm to use for computing the distance of the adversarial example
         from the original sample. Default 'l2'.
@@ -55,10 +55,11 @@ class CAttackEvasionPGDExp(CAttackEvasionPGDLS):
         belonging to the `y_target` class.
     attack_classes : 'all' or CArray, optional
         Array with the classes that can be manipulated by the attacker or
-         'all' (default) if all classes can be manipulated.
+        'all' (default) if all classes can be manipulated.
     solver_params : dict or None, optional
-        Parameters for the solver. Default None, meaning that default
-        parameters will be used.
+        Parameters for the solver.
+        Default None, meaning that default parameters will be used.
+        See :class:`COptimizerPGDExp` for more information.
 
     Attributes
     ----------
