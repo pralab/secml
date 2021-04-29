@@ -283,7 +283,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             merge_dicts(super(CClassifierPyTorch, self).get_params(),
                         loss_params, optim_params))
 
-    def get_state(self, return_optimizer=True):
+    def get_state(self, return_optimizer=True, **kwargs):
         """Returns the object state dictionary.
 
         Parameters
@@ -291,6 +291,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         return_optimizer : bool, optional
             If True (default), state of `optimizer` and `optimizer_scheduler`,
             if defined, will be included in the state dictionary.
+        **kwargs
+            Arguments to be passed to `get_state` calls in the hierarchy.
 
         Returns
         -------
@@ -301,7 +303,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         from copy import deepcopy
 
         # State of the wrapping classifier
-        state = super(CClassifierPyTorch, self).get_state()
+        state = super(CClassifierPyTorch, self).get_state(**kwargs)
 
         # Map model to CPU before saving
         self._model.to(torch.device('cpu'))

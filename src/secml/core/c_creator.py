@@ -399,8 +399,13 @@ class CCreator:
             "'{:}', or any of its attributes, has attribute '{:}'"
             "".format(self.__class__.__name__, attr0))
 
-    def get_state(self):
+    def get_state(self, **kwargs):
         """Returns the object state dictionary.
+
+        Parameters
+        ----------
+        **kwargs
+            Arguments to be passed to `get_state` calls in the hierarchy.
 
         Returns
         -------
@@ -418,7 +423,7 @@ class CCreator:
         # Use list(state) as state size will change during iteration
         for attr in list(state):
             if isinstance(state[attr], CCreator):
-                state_deep = state[attr].get_state()
+                state_deep = state[attr].get_state(**kwargs)
                 # Replace `attr` with its attributes's state
                 for attr_deep in state_deep:
                     attr_full_key = attr + '.' + attr_deep
@@ -580,13 +585,15 @@ class CCreator:
                 err_str += ", '{:}'".format(loaded_obj.__super__)
             raise TypeError(err_str + " or 'CCreator'.")
 
-    def save_state(self, path):
+    def save_state(self, path, **kwargs):
         """Store the object state to file.
 
         Parameters
         ----------
         path : str
             Path of the file where to store object state.
+        **kwargs
+            Arguments to be passed to `get_state` calls in the hierarchy.
 
         Returns
         -------
@@ -598,7 +605,7 @@ class CCreator:
         get_state : Returns the object state dictionary.
 
         """
-        return pck.save(path, self.get_state())
+        return pck.save(path, self.get_state(**kwargs))
 
     def load_state(self, path):
         """Sets the object state from file.
