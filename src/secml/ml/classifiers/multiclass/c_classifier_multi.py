@@ -208,10 +208,7 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
 
                     # Check if enough binary classifiers are available
                     if len(param_value) != self.num_classifiers:
-                        raise ValueError(
-                            "{0} binary classifier instances needed."
-                            " Use .prepare(num_classes={0}) first"
-                            "".format(len(param_value)))
+                        self.prepare(len(param_value))
                     # Update attribute (different value) in each binary clf
                     for clf_idx, clf in enumerate(self._binary_classifiers):
                         clf.set_state(
