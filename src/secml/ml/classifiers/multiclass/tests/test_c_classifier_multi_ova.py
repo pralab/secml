@@ -337,12 +337,7 @@ class TestCClassifierMultiOVA(CClassifierTestCases):
             class_weight='balanced',
             preprocess=pre_post)
 
-        # Restore state but not enough binary classifiers
-        with self.assertRaises(ValueError):
-            multi_post.set_state(state)
-
         # Restore state
-        multi_post.prepare(num_classes=4)
         multi_post.set_state(state)
 
         for clf_idx, clf in enumerate(multi_post._binary_classifiers):
