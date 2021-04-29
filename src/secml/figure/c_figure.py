@@ -104,7 +104,7 @@ class CFigure(CCreator):
         """Returns the number of created subplots."""
         return len(self._sp_data)
 
-    def get_state(self):
+    def get_state(self, **kwargs):
         raise NotImplementedError
 
     def set_state(self, state_dict, copy=False):
@@ -113,7 +113,7 @@ class CFigure(CCreator):
     def load_state(self, path):
         raise NotImplementedError
 
-    def save_state(self, path):
+    def save_state(self, path, **kwargs):
         raise NotImplementedError
 
     def subplot(self, n_rows=1, n_cols=1, grid_slot=1, **kwargs):

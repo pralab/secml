@@ -201,6 +201,29 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
 
+    def test_get_set_state(self):
+        """Test for `.get_state` and `.set_state` methods."""
+        x = self.ds.X[0, :]
+        self.norm.out_layer = None
+        out_norm = self.norm.transform(x)
+
+        self.logger.info(
+            "Normalized sample before restoring state:\n{:}".format(out_norm))
+        state = self.norm.get_state(return_optimizer=False)
+
+        model = mlp(input_dims=20, hidden_dims=(40,), output_dims=3)
+        net = CClassifierPyTorch(model=model, pretrained=True)
+        norm_new = CNormalizerDNN(net)
+
+        # Restore state
+        norm_new.set_state(state)
+
+        post_out_norm = self.norm.transform(x)
+        self.logger.info(
+            "Normalized sample after restoring state:\n{:}".format(post_out_norm))
+
+        self.assert_array_equal(out_norm, post_out_norm)
+
 
 if __name__ == '__main__':
     CPreProcessTestCases.main()
