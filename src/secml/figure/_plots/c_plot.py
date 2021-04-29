@@ -108,7 +108,7 @@ class CPlot(CCreator):
     def get_params(self):
         raise NotImplementedError
 
-    def get_state(self):
+    def get_state(self, **kwargs):
         raise NotImplementedError
 
     def set_state(self, state_dict, copy=False):
@@ -117,7 +117,7 @@ class CPlot(CCreator):
     def load_state(self, path):
         raise NotImplementedError
 
-    def save_state(self, path):
+    def save_state(self, path, **kwargs):
         raise NotImplementedError
 
     def get_lines(self):

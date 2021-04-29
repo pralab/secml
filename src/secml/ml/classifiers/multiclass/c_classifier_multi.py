@@ -122,8 +122,13 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
         raise ValueError(
             "cannot set unknown parameter '{:}'".format(param_name))
 
-    def get_state(self):
+    def get_state(self, **kwargs):
         """Returns the object state dictionary.
+
+        Parameters
+        ----------
+        **kwargs
+            Arguments to be passed to `get_state` calls in the hierarchy.
 
         Returns
         -------
@@ -135,12 +140,12 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
         """
         # Reference state for the binary classifiers
         clf_ref_state = {}
-        for attr in self._binary_classifiers[0].get_state():
+        for attr in self._binary_classifiers[0].get_state(**kwargs):
             clf_ref_state[attr] = []
 
         # Populate with the values from each binary classifier
         for clf_idx, clf in enumerate(self._binary_classifiers):
-            clf_state = clf.get_state()
+            clf_state = clf.get_state(**kwargs)
             for attr in clf_ref_state:
                 clf_ref_state[attr].append(clf_state[attr])
 
@@ -153,7 +158,7 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
             del clf_ref_state[attr]
 
         # State of the main multiclass classifier
-        multi_clf_state = super(CClassifierMulticlass, self).get_state()
+        multi_clf_state = super(CClassifierMulticlass, self).get_state(**kwargs)
 
         return merge_dicts(multi_clf_state, clf_ref_state)
 
@@ -208,10 +213,7 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
 
                     # Check if enough binary classifiers are available
                     if len(param_value) != self.num_classifiers:
-                        raise ValueError(
-                            "{0} binary classifier instances needed."
-                            " Use .prepare(num_classes={0}) first"
-                            "".format(len(param_value)))
+                        self.prepare(len(param_value))
                     # Update attribute (different value) in each binary clf
                     for clf_idx, clf in enumerate(self._binary_classifiers):
                         clf.set_state(
