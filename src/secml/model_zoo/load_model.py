@@ -10,13 +10,14 @@ import re
 from datetime import datetime, timedelta
 
 import secml
-from secml.settings import SECML_LOGS_PATH, SECML_STORE_LOGS
+from secml.settings import SECML_LOGS_PATH, SECML_STORE_LOGS, _parse_env
 from secml.utils import fm, CLog
 from secml.utils.download_utils import dl_file_gitlab, md5
 
 from secml.settings import SECML_MODELS_DIR
 
-MODEL_ZOO_REPO_URL = 'https://gitlab.com/secml/secml-zoo'
+ZOO_REPO_URL = 'https://gitlab.com/secml/secml-zoo'
+ZOO_REPO_BRANCH = _parse_env('SECML_ZOO_BRANCH', default='_noValue')
 MODELS_DICT_FILE = 'models_dict.json'
 MODELS_DICT_PATH = fm.join(SECML_MODELS_DIR, MODELS_DICT_FILE)
 
@@ -49,14 +50,18 @@ def _dl_data_versioned(file_path, output_dir, md5_digest=None):
     try:
         # Try downloading from the branch corresponding to current version
         min_version = re.search(r'^\d+.\d+', secml.__version__).group(0)
-        dl_file_gitlab(MODEL_ZOO_REPO_URL, file_path, output_dir,
-                       branch='v' + min_version, md5_digest=md5_digest)
+        branch = 'v' + min_version if ZOO_REPO_BRANCH is '_noValue' \
+            else ZOO_REPO_BRANCH
+        dl_file_gitlab(ZOO_REPO_URL, file_path, output_dir,
+                       branch=branch, md5_digest=md5_digest)
 
     except Exception as e:  # Try looking into 'master' branch...
         _logger.debug(e)
         _logger.debug("Looking in the `master` branch...")
-        dl_file_gitlab(MODEL_ZOO_REPO_URL, file_path, output_dir,
-                       branch='master', md5_digest=md5_digest)
+        branch = \
+            'master' if ZOO_REPO_BRANCH is '_noValue' else ZOO_REPO_BRANCH
+        dl_file_gitlab(ZOO_REPO_URL, file_path, output_dir,
+                       branch=branch, md5_digest=md5_digest)
 
 
 def _get_models_dict():
