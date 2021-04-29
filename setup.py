@@ -179,7 +179,7 @@ setup(
     install_requires=REQ_PKGS,
     extras_require={
         'pytorch': ["torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
-        'cleverhans': ["tensorflow>=1.14,<2", "cleverhans"],
+        'cleverhans': ["tensorflow>=1.14,<2", "cleverhans<3.1"],
         'tf-gpu': ["tensorflow-gpu>=1.14,<2"],
         'foolbox': ["foolbox>=3.3.0", "torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
         'unittests': ['pytest>=5,<5.1',
