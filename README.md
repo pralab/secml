@@ -123,7 +123,7 @@ of the `[extras]` section.
    Installs: `foolbox >= 3.3.0`, `eagerpy >= 0.29.0`, `torch >= 1.4`, `torchvision >= 0.5`
  - `cleverhans` : Wrapper of [CleverHans](https://github.com/tensorflow/cleverhans), 
    a Python library to benchmark vulnerability of machine learning systems to adversarial examples.  
-   Installs: `tensorflow >= 1.14.*, < 2`, `cleverhans`  
+   Installs: `tensorflow >= 1.14.*, < 2`, `cleverhans < 3.1`  
    *Warning*: not available for `python >= 3.8`
  - `tf-gpu` : Shortcut for installing `TensorFlow` package with GPU support (Linux and Windows only).  
    Installs: `tensorflow-gpu >= 1.14.*, < 2`  
