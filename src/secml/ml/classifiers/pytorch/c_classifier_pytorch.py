@@ -350,7 +350,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         """Sets the object state using input dictionary."""
         # TODO: DEEPCOPY FOR torch.load_state_dict?
 
-        self._model.load_state_dict(state_dict.pop('model'))
+        if 'model' in state_dict:
+            self._model.load_state_dict(state_dict.pop('model'))
 
         if 'optimizer' in state_dict:
             if self._optimizer is None:
