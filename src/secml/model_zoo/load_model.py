@@ -50,7 +50,7 @@ def _dl_data_versioned(file_path, output_dir, md5_digest=None):
     try:
         # Try downloading from the branch corresponding to current version
         min_version = re.search(r'^\d+.\d+', secml.__version__).group(0)
-        branch = 'v' + min_version if ZOO_REPO_BRANCH is '_noValue' \
+        branch = 'v' + min_version if ZOO_REPO_BRANCH == '_noValue' \
             else ZOO_REPO_BRANCH
         dl_file_gitlab(ZOO_REPO_URL, file_path, output_dir,
                        branch=branch, md5_digest=md5_digest)
@@ -59,7 +59,7 @@ def _dl_data_versioned(file_path, output_dir, md5_digest=None):
         _logger.debug(e)
         _logger.debug("Looking in the `master` branch...")
         branch = \
-            'master' if ZOO_REPO_BRANCH is '_noValue' else ZOO_REPO_BRANCH
+            'master' if ZOO_REPO_BRANCH == '_noValue' else ZOO_REPO_BRANCH
         dl_file_gitlab(ZOO_REPO_URL, file_path, output_dir,
                        branch=branch, md5_digest=md5_digest)
 
