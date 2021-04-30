@@ -184,7 +184,7 @@ setup(
         'foolbox': ["foolbox>=3.3.0", "torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
         'unittests': ['pytest>=5',
                       'pytest-cov>=2.9', 'coverage',
-                      'jupyter', 'nbval', 'requests-mock<1.9']
+                      'jupyter', 'nbval', 'requests-mock']
     },
     zip_safe=False
 )
