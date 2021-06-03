@@ -172,6 +172,10 @@ class COptimizerPGDLS(COptimizer):
         if self.bounds is None:
             return grad  # all features are feasible
 
+        # Few operations in this method are slower for sparse data, use dense
+        issparse = grad.issparse
+        grad = grad.todense()
+
         # x_lb and x_ub are feature manipulations that violate box
         # (the first vector is potentially sparse, so it has to be
         # the first argument of logical_and to avoid conversion to dense)
@@ -180,13 +184,17 @@ class COptimizerPGDLS(COptimizer):
         # FIXME: converting grad to dense as the sparse vs sparse logical_and
         #  is too slow
         x_lb = (x.round(6) == CArray(self.bounds.lb).round(6)).logical_and(
-            grad.todense() > 0).astype(bool)
+            grad > 0).astype(bool)
 
         x_ub = (x.round(6) == CArray(self.bounds.ub).round(6)).logical_and(
-            grad.todense() < 0).astype(bool)
+            grad < 0).astype(bool)
 
         # reset gradient for unfeasible features
         grad[x_lb + x_ub] = 0
+
+        if issparse:  # Convert back to sparse if needed
+            grad = grad.tosparse()
+
         return grad
 
     def _xk(self, x, fx, *args):
