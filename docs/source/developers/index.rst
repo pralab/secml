@@ -2,7 +2,7 @@
 Contributing
 ############
 
-**Your contribution to the development of SecML is foundamental!**
+**Your contribution to the development of SecML is fundamental!**
 
 There are many ways to contribute to the SecML project. The most valuable
 contributions for us are bug reports, which help finding and fixing possible
