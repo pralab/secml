@@ -15,4 +15,3 @@ except ImportError:
     pass  # pytorch is an extra component
 else:
     from .c_dataloader_pytorch import CDataLoaderPyTorch
-    from .c_dataloader_torchvision import CDataLoaderTorchDataset
