@@ -1,13 +1,12 @@
-<!---
-Please read this!
 
-Before opening a new issue, make sure to search for keywords in the issues
-filtered by the "bug" label.
+---
+name: Bug report
+about: Create a report to help this project
+title: Bug report
+labels: bug
+assignees: ''
 
-- https://pragit.diee.unica.it/secml/secml/issues?label_name%5B%5D=bug
-
-and verify the issue you're about to submit isn't a duplicate.
---->
+---
 
 (Summarize the bug encountered concisely)
 
@@ -29,4 +28,3 @@ logs, and code as it's very hard to read otherwise.)
 
 (Propose a possible fix for the reported problem)
 
-/label ~bug
