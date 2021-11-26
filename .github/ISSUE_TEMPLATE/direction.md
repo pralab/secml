@@ -22,5 +22,3 @@ After all issues in this list have been completed, direction issue can be closed
 (List of related issues but not part of the direction itself)
 
 #ID1, #ID2, ...
-
-/label ~direction 
