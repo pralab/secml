@@ -1,8 +1,8 @@
 ---
 name: Direction
-about: Create a direction feature issue
+about: Create a direction feature issue (collection of issues)
 title: Direction
-labels: enhancement
+labels: collection
 assignees: ''
 
 ---
