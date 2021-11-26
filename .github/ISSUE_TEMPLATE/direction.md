@@ -2,7 +2,7 @@
 name: Direction
 about: Create a direction feature issue (collection of issues)
 title: Direction
-labels: collection
+labels: direction
 assignees: ''
 
 ---
