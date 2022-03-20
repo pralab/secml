@@ -134,8 +134,8 @@ class CSecEval(CCreator):
         Parameters
         ----------
         dataset : CDataset
-            Dataset that contain samples that will be manipulated
-            from the attacker while his attack power increase
+            Dataset that will be used to evaluate the performances of  
+            the classifier under attack.
         kwargs
             Additional keyword arguments for the `CAttack.run` method.
 
