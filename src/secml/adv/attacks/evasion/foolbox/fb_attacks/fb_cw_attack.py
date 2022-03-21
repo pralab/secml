@@ -203,7 +203,7 @@ class _L2CarliniWagnerAttack(fb.attacks.L2CarliniWagnerAttack):
 
             # create a new optimizer find the delta that minimizes the loss
             delta = ep.zeros_like(x_attack)
-            optimizer = AdamOptimizer(delta)
+            optimizer = AdamOptimizer(delta, self.stepsize)
 
             # tracks whether adv with the current consts was found
             found_advs = np.full((N,), fill_value=False)
@@ -213,7 +213,7 @@ class _L2CarliniWagnerAttack(fb.attacks.L2CarliniWagnerAttack):
 
             for step in range(self.steps):
                 loss, (perturbed, logits), gradient = loss_aux_and_grad(delta, consts_)
-                delta += optimizer(gradient, self.stepsize)
+                delta -= optimizer(gradient)
 
                 if self.abort_early and step % (np.ceil(self.steps / 10)) == 0:
                     # after each tenth of the overall steps, check progress
