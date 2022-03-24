@@ -102,7 +102,8 @@ class CFoolboxDeepfool(DeepfoolLoss, CAttackEvasionFoolbox):
         # always the same length as the number of steps
         num_effective_steps = self.x_seq.shape[0]
         if num_effective_steps < self.attack.steps:
-            added_vals = CArray.zeros((self.attack.steps - num_effective_steps, *self.x_seq.shape[1:]))
+            added_vals = CArray.zeros((self.attack.steps - num_effective_steps,
+                                       *self.x_seq.shape[1:]))
             added_vals += self.x_seq[-1, :]
             self._x_seq = self._x_seq.append(added_vals, axis=0)
         self.num_effective_steps = num_effective_steps  # keep in case we need it
