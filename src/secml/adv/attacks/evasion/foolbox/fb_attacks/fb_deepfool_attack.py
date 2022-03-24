@@ -13,6 +13,7 @@ from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import \
 from secml.adv.attacks.evasion.foolbox.losses.deepfool_loss import \
     DeepfoolLoss
 from secml.adv.attacks.evasion.foolbox.secml_autograd import as_tensor
+from secml.array import CArray
 
 CELOSS = 'crossentropy'
 LOGITLOSS = 'logits'
@@ -97,8 +98,18 @@ class CFoolboxDeepfool(DeepfoolLoss, CAttackEvasionFoolbox):
         self._x0 = as_tensor(x)
         self._y0 = as_tensor(y)
         out, _ = super(CFoolboxDeepfool, self)._run(x, y, x_init)
+        # fix the shape of the x_seq path in order to have
+        # always the same length as the number of steps
+        num_effective_steps = self.x_seq.shape[0]
+        if num_effective_steps < self.attack.steps:
+            added_vals = CArray.zeros((self.attack.steps - num_effective_steps,
+                                       *self.x_seq.shape[1:]))
+            added_vals += self.x_seq[-1, :]
+            self._x_seq = self._x_seq.append(added_vals, axis=0)
+        self.num_effective_steps = num_effective_steps  # keep in case we need it
         self._f_seq = self.objective_function(self.x_seq)
         f_opt = self.objective_function(out)
+
         return out, f_opt
 
 

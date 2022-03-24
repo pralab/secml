@@ -79,6 +79,8 @@ class CFoolboxFGM(CELoss, CAttackEvasionFoolbox):
         out, _ = super(CFoolboxFGM, self)._run(x, y, x_init)
         self._f_seq = self.objective_function(out)
         f_opt = self._f_seq[-1]
+        # add last point of the path
+        self._x_seq = self._x_seq.append(out, axis=0)
         return out, f_opt
 
 

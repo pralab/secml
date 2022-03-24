@@ -1,4 +1,5 @@
 import torch
+from secml.adv.attacks.evasion.foolbox.secml_autograd import as_tensor, as_carray
 from torch.nn import CrossEntropyLoss
 
 
@@ -10,8 +11,10 @@ class DeepfoolLoss:
             loss_fn = self.ce_diff
 
         losses_all_pts = torch.empty(x.shape[0])
+        grads_all_pts = torch.empty(x.shape)
         for pt in range(x.shape[0]):
-            diffs_and_grads = [loss_fn(x[pt, :], k) for k in range(1, self.candidates)]
+            x_pt = x[pt, :].detach()
+            diffs_and_grads = [loss_fn(x_pt, k) for k in range(1, self.candidates)]
             diffs = [l[0] for l in diffs_and_grads]
             grads = [l[1] for l in diffs_and_grads]
             losses = torch.stack(diffs, dim=1)
@@ -22,12 +25,13 @@ class DeepfoolLoss:
             # calculate the distances
             distances = self.get_distances(losses, grads)
             assert distances.shape == (1, self.candidates - 1)
-
             # determine the best directions
             best = distances.argmin(dim=-1)
             losses = losses[0, best]
+            grads = grads[0, best]
             losses_all_pts[pt] = losses
-        return losses_all_pts
+            grads_all_pts[pt, ...] = grads
+        return losses_all_pts, grads_all_pts
 
     def logits_diff(self, x, k):
         x.requires_grad = True
@@ -63,3 +67,25 @@ class DeepfoolLoss:
             return abs(losses) / ((grads.view(grads.shape[0], -1)).abs().sum(dim=-1) + 1e-8)
         else:
             raise NotImplementedError
+
+
+
+    def objective_function_gradient(self, x):
+        """
+        Deepfool uses the gradient to find the closest class.
+        For this reason, if we need the gradient, the function
+        attempts to run the backward twice, which can be avoided
+        if we take care of saving the gradient at the first
+        pass.
+        """
+        x_t = as_tensor(x).detach()
+        x_t.requires_grad_()
+        loss, gradient = self._adv_objective_function(x_t)
+        return as_carray(gradient)
+
+    def objective_function(self, x):
+        """
+        Accordingly, we should also return only the first
+        returned value of the function.
+        """
+        return as_carray(self._adv_objective_function(as_tensor(x))[0])

@@ -34,6 +34,9 @@ class TestCAttackEvasionFoolboxDeepfoolL2Logits(CAttackEvasionFoolboxTestCases):
     def test_shapes(self):
         self._test_shapes()
 
+    def test_obj_fun_and_grad(self):
+        self._check_obj_function_and_grad()
+
 
 class TestCAttackEvasionFoolboxDeepfoolLInfLogits(CAttackEvasionFoolboxTestCases):
     """Unit test for CAttackEvasionFoolboxDeepfoolLInf with difference of logits loss."""
@@ -58,6 +61,9 @@ class TestCAttackEvasionFoolboxDeepfoolLInfLogits(CAttackEvasionFoolboxTestCases
 
     def test_shapes(self):
         self._test_shapes()
+
+    def test_obj_fun_and_grad(self):
+        self._check_obj_function_and_grad()
 
 
 class TestCAttackEvasionFoolboxDeepfoolL2CELoss(CAttackEvasionFoolboxTestCases):
@@ -84,6 +90,8 @@ class TestCAttackEvasionFoolboxDeepfoolL2CELoss(CAttackEvasionFoolboxTestCases):
     def test_shapes(self):
         self._test_shapes()
 
+    def test_obj_fun_and_grad(self):
+        self._check_obj_function_and_grad()
 
 class TestCAttackEvasionFoolboxDeepfoolLInfCELoss(CAttackEvasionFoolboxTestCases):
     """Unit test for CAttackEvasionFoolboxDeepfoolLInf with difference of cross-entropies."""
@@ -108,3 +116,6 @@ class TestCAttackEvasionFoolboxDeepfoolLInfCELoss(CAttackEvasionFoolboxTestCases
 
     def test_shapes(self):
         self._test_shapes()
+
+    def test_obj_fun_and_grad(self):
+        self._check_obj_function_and_grad()

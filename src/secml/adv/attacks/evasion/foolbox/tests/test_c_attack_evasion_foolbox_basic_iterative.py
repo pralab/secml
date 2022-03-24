@@ -40,6 +40,9 @@ class TestCAttackEvasionFoolboxBasicIterativeL1(CAttackEvasionFoolboxTestCases):
     def test_shapes(self):
         self._test_shapes()
 
+    def test_obj_fun_and_grad(self):
+        self._check_obj_function_and_grad()
+
 
 class TestCAttackEvasionFoolboxBasicIterativeL2(CAttackEvasionFoolboxTestCases):
     """Unit test for CAttackEvasionFoolboxBasicIterativeL2"""
@@ -69,6 +72,9 @@ class TestCAttackEvasionFoolboxBasicIterativeL2(CAttackEvasionFoolboxTestCases):
 
     def test_shapes(self):
         self._test_shapes()
+
+    def test_obj_fun_and_grad(self):
+        self._check_obj_function_and_grad()
 
 
 class TestCAttackEvasionFoolboxBasicIterativeLinf(CAttackEvasionFoolboxTestCases):
@@ -100,3 +106,6 @@ class TestCAttackEvasionFoolboxBasicIterativeLinf(CAttackEvasionFoolboxTestCases
 
     def test_shapes(self):
         self._test_shapes()
+
+    def test_obj_fun_and_grad(self):
+        self._check_obj_function_and_grad()

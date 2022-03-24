@@ -40,6 +40,9 @@ class TestCAttackEvasionFoolboxPGDL1(CAttackEvasionFoolboxTestCases):
     def test_shapes(self):
         self._test_shapes()
 
+    def test_obj_fun_and_grad(self):
+        self._check_obj_function_and_grad()
+
 
 class TestCAttackEvasionFoolboxPGDL2(CAttackEvasionFoolboxTestCases):
     """Unit test for CAttackEvasionFoolboxPGDL2"""
@@ -71,6 +74,9 @@ class TestCAttackEvasionFoolboxPGDL2(CAttackEvasionFoolboxTestCases):
     def test_shapes(self):
         self._test_shapes()
 
+    def test_obj_fun_and_grad(self):
+        self._check_obj_function_and_grad()
+
 
 class TestCAttackEvasionFoolboxPGDLinf(CAttackEvasionFoolboxTestCases):
     """Unit test for CAttackEvasionFoolboxPGDLinf"""
@@ -101,3 +107,6 @@ class TestCAttackEvasionFoolboxPGDLinf(CAttackEvasionFoolboxTestCases):
 
     def test_shapes(self):
         self._test_shapes()
+
+    def test_obj_fun_and_grad(self):
+        self._check_obj_function_and_grad()
