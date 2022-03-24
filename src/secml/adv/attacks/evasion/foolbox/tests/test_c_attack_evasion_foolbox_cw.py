@@ -37,3 +37,6 @@ class TestCAttackEvasionFoolboxCW(CAttackEvasionFoolboxTestCases):
 
     def test_shapes(self):
         self._test_shapes()
+
+    def test_obj_fun_and_grad(self):
+        self._check_obj_function_and_grad()

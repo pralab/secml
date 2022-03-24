@@ -128,3 +128,17 @@ class CAttackEvasionFoolboxTestCases(CAttackEvasionTestCases):
         _, adv_fb, _ = fb_attack(secml_attack.f_model, x0_tensor, criterion, epsilons=secml_attack.epsilon)
         adv_fb = CArray(adv_fb.numpy())
         return adv_ds, adv_fb
+
+    def _check_obj_function_and_grad(self):
+        for is_targeted, check in zip((True, False), (self.has_targeted, self.has_untargeted)):
+            if check is True:
+                evas = self._setup_attack(targeted=is_targeted)
+                # some attacks require to run the attack before computing
+                # the loss function
+                _ = evas.run(self.x0, self.y0)
+                obj_function = evas.objective_function(self.x0)
+                obj_function_grad = evas.objective_function_gradient(self.x0)
+                self.assertEqual(obj_function.shape, (self.x0.shape[0],))
+                self.assertEqual(obj_function_grad.shape, self.x0.shape)
+        return
+

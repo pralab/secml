@@ -33,6 +33,9 @@ class TestCAttackEvasionFoolboxFGML1(CAttackEvasionFoolboxTestCases):
     def test_shapes(self):
         self._test_shapes()
 
+    def test_obj_fun_and_grad(self):
+        self._check_obj_function_and_grad()
+
 
 class TestCAttackEvasionFoolboxFGML2(CAttackEvasionFoolboxTestCases):
     """Unit test for CAttackEvasionFoolboxFGML2"""
@@ -57,6 +60,9 @@ class TestCAttackEvasionFoolboxFGML2(CAttackEvasionFoolboxTestCases):
     def test_shapes(self):
         self._test_shapes()
 
+    def test_obj_fun_and_grad(self):
+        self._check_obj_function_and_grad()
+
 
 class TestCAttackEvasionFoolboxFGMLinf(CAttackEvasionFoolboxTestCases):
     """Unit test for CAttackEvasionFoolboxFGMLinf"""
@@ -80,3 +86,6 @@ class TestCAttackEvasionFoolboxFGMLinf(CAttackEvasionFoolboxTestCases):
 
     def test_shapes(self):
         self._test_shapes()
+
+    def test_obj_fun_and_grad(self):
+        self._check_obj_function_and_grad()
