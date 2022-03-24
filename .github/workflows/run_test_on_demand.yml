@@ -2,9 +2,9 @@ name: run tests on demand on multiple platforms
 
 on:
   push:
-    branches:
-     - '!master'
-     - '!develop'
+    branches-ignore:
+     - 'master'
+     - 'develop'
 
 jobs:
   build:
