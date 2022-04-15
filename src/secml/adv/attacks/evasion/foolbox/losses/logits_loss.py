@@ -3,7 +3,7 @@ import torch
 class LogitsLoss:
 
     def _adv_objective_function(self, x):
-        if self._x0 is None:
+        if self._y0 is None:
             raise Exception('Attack not run yet')
         z_predicted = self._pytorch_model_wrapper(x)
         y_target = torch.zeros((z_predicted.shape))
