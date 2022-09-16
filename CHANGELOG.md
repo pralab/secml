@@ -1,3 +1,10 @@
+## v0.15.1 (16/09/2021)
+- #11 Fixed install instructions in tutorial notebooks
+- #8 Fixed bug with foolbox CW Attack
+
+## v0.15 (26/11/2021)
+- Migration to www.github.com
+
 ## v0.14.1 (22/04/2021)
 - This version brings fixes for a few issues with the optimizers and related classes, along with improvements to documentation for all attacks, optimizers, and related classes.
 
