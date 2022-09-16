@@ -1,3 +1,7 @@
+## v0.15.2 (16/09/2021)
+- #13 Fixed bug in ridge classifier default parameter
+- #13 Fixed bug in influence function due to deprecation of pinv2 function
+
 ## v0.15.1 (16/09/2021)
 - #11 Fixed install instructions in tutorial notebooks
 - #8 Fixed bug with foolbox CW Attack

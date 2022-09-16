@@ -94,7 +94,7 @@ class CExplainerInfluenceFunctions(CExplainerGradient):
             # compute hessian inverse
             det = linalg.det(H.tondarray())
             if abs(det) < 1e-6:
-                self._inv_H = CArray(linalg.pinv2(H.tondarray()))
+                self._inv_H = CArray(linalg.pinv(H.tondarray()))
             else:
                 self._inv_H = CArray(linalg.inv(H.tondarray()))
 

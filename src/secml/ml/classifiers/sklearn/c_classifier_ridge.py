@@ -56,7 +56,7 @@ class CClassifierRidge(CClassifierLinearMixin, CClassifierSkLearn,
     _loss = CLossSquare()
     _reg = CRegularizerL2()
 
-    def __init__(self, alpha=1.0, max_iter=1e5, class_weight=None, tol=1e-4,
+    def __init__(self, alpha=1.0, max_iter=int(1e5), class_weight=None, tol=1e-4,
                  fit_intercept=True, preprocess=None):
         # create instance of sklearn model
         sklearn_model = RidgeClassifier(alpha=alpha,
