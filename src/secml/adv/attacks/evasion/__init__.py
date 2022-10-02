@@ -5,8 +5,9 @@ from .c_attack_evasion_pgd import CAttackEvasionPGD
 
 try:
     import cleverhans
+    import tensorflow
 except ImportError:
-    pass  # cleverhans is an extra component
+    pass  # cleverhans is an extra component and requires tensorflow
 else:
     from .cleverhans.c_attack_evasion_cleverhans import \
         CAttackEvasionCleverhans
