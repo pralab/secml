@@ -39,10 +39,10 @@ class CAttackMixin(CAttack):
     """
 
     def __init__(self, classifier,
-                 distance=None,
-                 dmax=None,
-                 lb=None,
-                 ub=None,
+                 distance='l2',
+                 dmax=1,
+                 lb=0,
+                 ub=1,
                  solver_type=None,
                  solver_params=None):
 
