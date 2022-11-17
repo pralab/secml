@@ -1,3 +1,6 @@
+## v0.15.4 (02/10/2022)
+- #16 Fixed bug in influence function due to deprecation of pinv2 function.
+
 ## v0.15.3 (02/10/2022)
 - Fixed bug with cleverhans import and tensorflow requirement.
 

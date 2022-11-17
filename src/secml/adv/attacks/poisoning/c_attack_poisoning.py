@@ -595,7 +595,7 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
         from scipy import linalg
         det = linalg.det(H.tondarray())
         if abs(det) < 1e-6:
-            H_inv = CArray(linalg.pinv2(H.tondarray()))
+            H_inv = CArray(linalg.pinv(H.tondarray()))
         else:
             H_inv = CArray(linalg.inv(H.tondarray()))
         grad_mat = - CArray(G.dot(H_inv))  # d * (d + 1)
