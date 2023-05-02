@@ -170,8 +170,8 @@ setup(
         "Bug Tracker": "https://gitlab.com/secml/secml/-/issues",
         "Source Code": "https://gitlab.com/secml/secml",
     },
-    maintainer='Marco Melis',
-    maintainer_email='marco.melis@unica.it',
+    maintainer='Maura Pintor, Luca Demetrio',
+    maintainer_email='maura.pintor@unica.it, luca.demetrio@unige.it',
     packages=find_packages('src', exclude=[
         "*.tests", "*.tests.*", "tests.*", "tests"]),
     package_dir={'': 'src'},
