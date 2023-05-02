@@ -146,6 +146,7 @@ Programming Language :: Python :: 3.6
 Programming Language :: Python :: 3.7
 Programming Language :: Python :: 3.8
 Programming Language :: Python :: 3.9
+Programming Language :: Python :: 3.10
 Programming Language :: Python :: Implementation :: PyPy
 Topic :: Software Development
 Topic :: Scientific/Engineering
@@ -167,8 +168,8 @@ setup(
     url='https://secml.gitlab.io',
     download_url="https://pypi.python.org/pypi/secml#files",
     project_urls={
-        "Bug Tracker": "https://gitlab.com/secml/secml/-/issues",
-        "Source Code": "https://gitlab.com/secml/secml",
+        "Bug Tracker": "https://github.com/pralab/secml/issues",
+        "Source Code": "https://github.com/pralab/secml",
     },
     maintainer='Maura Pintor, Luca Demetrio',
     maintainer_email='maura.pintor@unica.it, luca.demetrio@unige.it',
