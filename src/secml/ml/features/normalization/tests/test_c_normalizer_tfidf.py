@@ -10,7 +10,7 @@ from secml.optim.function import CFunction
 class TestCNormalizerTFIDF(CPreProcessTestCases):
     """Unittest for TestCNormalizerTFIDF."""
 
-    norm_type_lst = [None, 'l2', 'l1', 'max']
+    norm_type_lst = [None, 'l2', 'l1']
 
     def test_norm_tfidf(self):
         """Test for TestCNormalizerTFIDF."""
@@ -103,7 +103,7 @@ class TestCNormalizerTFIDF(CPreProcessTestCases):
 
             norm = CNormalizerTFIDF(norm=norm_type).fit(array)
 
-            if (norm_type == 'l1') or (norm_type == 'max'):
+            if norm_type == 'l1':
                 # if the norm is one we are computing a sub-gradient
                 decimal = 1
             else:

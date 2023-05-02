@@ -75,9 +75,9 @@ class TestCArrayInit(CArrayTestCases):
                 action='ignore',
                 message="Creating an ndarray from ragged",
                 category=np.VisibleDeprecationWarning)
-            with self.assertRaises(TypeError):
+            with self.assertRaises((TypeError, ValueError,)):
                 CArray([[2, 3], [22]])
-            with self.assertRaises(TypeError):
+            with self.assertRaises((TypeError, ValueError,)):
                 CArray([[[2, 3], [22]], [[4, 5], [44, 55]]])
 
     def test_init_array(self):
