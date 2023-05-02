@@ -165,7 +165,7 @@ setup(
     license='Apache License 2.0',
     classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
     platforms=["Linux", "Mac OS-X", "Unix", "Windows"],
-    url='https://secml.gitlab.io',
+    url='https://secml.readthedocs.io',
     download_url="https://pypi.python.org/pypi/secml#files",
     project_urls={
         "Bug Tracker": "https://github.com/pralab/secml/issues",
@@ -177,7 +177,7 @@ setup(
         "*.tests", "*.tests.*", "tests.*", "tests"]),
     package_dir={'': 'src'},
     include_package_data=True,
-    python_requires='>=3.5, <3.10',
+    python_requires='>=3.5, <3.11',
     install_requires=REQ_PKGS,
     extras_require={
         'pytorch': ["torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],

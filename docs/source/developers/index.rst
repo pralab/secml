@@ -31,7 +31,7 @@ Bug report
 
 Please ensure the bug has not been already reported. If you're unable to find
 an open issue addressing a specific problem, open a
-`new issue <https://gitlab.com/secml/secml/-/issues/new>`_.
+`new issue <https://github.com/pralab/secml/issues/new/choose>`_.
 
 Be sure to include a clear title and description, as much relevant information
 as possible and, if applicable, a code sample or an executable test case
@@ -41,6 +41,6 @@ Feature request
 ---------------
 
 Suggestions and feedback are always welcome. We ask to open an
-`new issue <https://gitlab.com/secml/secml/-/issues/new>`_ for this purpose.
+`new issue <https://github.com/pralab/secml/issues/new/choose>`_ for this purpose.
 Of course, you are free to contribute yourself to the code. See:
 `Code Contributions <contributing.code.html>`_.
