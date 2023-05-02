@@ -69,13 +69,13 @@ class CAttackPoisoningRidge(CAttackPoisoning):
                  training_data,
                  val,
                  distance='l2',
-                 dmax=0,
+                 dmax=1,
                  lb=0,
                  ub=1,
                  y_target=None,
                  solver_type='pgd-ls',
                  solver_params=None,
-                 init_type=None,
+                 init_type='random',
                  random_seed=None):
 
         CAttackPoisoning.__init__(self, classifier=classifier,
