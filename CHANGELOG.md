@@ -2,6 +2,7 @@
 - [#18](https://github.com/pralab/secml/issues/18) added support for python 3.10
 - [#9](https://github.com/pralab/secml/issues/9) fixed import errors
 - [#19](https://github.com/pralab/secml/issues/19) removed gitlab old files 
+- Dropped tests for macOS due to PyTorch issues
 
 ## v0.15.4 (02/10/2022)
 - #16 Fixed bug in influence function due to deprecation of pinv2 function.
