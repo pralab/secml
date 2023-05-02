@@ -6,8 +6,7 @@ We provide details on how to implement new library modules, extending our
 abstract interfaces.
 
 Remember to check out
-`latest version <https://gitlab.com/secml/secml/-/releases>`_ and
-`roadmap <https://secml.gitlab.io/roadmap.html>`_ before developing new code.
+`latest version <https://github.com/pralab/secml/releases>`_ before developing new code.
 
 Abstract Base Classes
 =====================
