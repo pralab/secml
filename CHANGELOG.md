@@ -1,4 +1,4 @@
-## v0.15.5 (02/05/2023)
+## v0.15.6 (02/05/2023)
 - [#18](https://github.com/pralab/secml/issues/18) added support for python 3.10
 - [#9](https://github.com/pralab/secml/issues/9) fixed import errors
 - [#19](https://github.com/pralab/secml/issues/19) removed gitlab old files 
