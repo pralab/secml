@@ -304,10 +304,12 @@ The best way for reaching us is by opening issues. However, if you wish to conta
 ## Acknowledgements
 SecML has been partially developed with the support of European Union’s 
 [ALOHA project](https://www.aloha-h2020.eu/) Horizon 2020 Research and 
-Innovation programme, grant agreement No. 780788.
+Innovation programme, grant agreement No. 780788, and Horizon Europe [ELSA – European Lighthouse on Secure and Safe AI](https://elsa-ai.eu), grant agreement No. 101070617.
 
 
 ## Copyright
 SecML has been developed by [PRALab - Pattern Recognition and Applications lab](
 https://pralab.diee.unica.it) and [Pluribus One s.r.l.](https://www.pluribus-one.it/) 
 under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). All rights reserved.
+
+
