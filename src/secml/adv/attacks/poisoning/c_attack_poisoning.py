@@ -61,7 +61,7 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
                  training_data,
                  val,
                  distance='l2',
-                 dmax=0,
+                 dmax=1,
                  lb=0,
                  ub=1,
                  y_target=None,
