@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import numpy as np
 import numpy.matlib
 from numpy.linalg import inv, pinv
@@ -14,15 +15,24 @@ from copy import deepcopy
 
 from secml.array.c_array_interface import _CArrayInterface
 
-from secml.core.type_utils import is_ndarray, is_list_of_lists, \
-    is_list, is_slice, is_scalar, is_int, is_bool, is_tuple
+from secml.core.type_utils import (
+    is_ndarray,
+    is_list_of_lists,
+    is_list,
+    is_slice,
+    is_scalar,
+    is_int,
+    is_bool,
+    is_tuple,
+)
 from secml.core.constants import inf
 from secml.array.array_utils import is_vector_index
 
 
 class CDense(_CArrayInterface):
     """Dense array. Encapsulation for np.ndarray."""
-    __slots__ = '_data'  # CDense has only one slot for the ndarray
+
+    __slots__ = "_data"  # CDense has only one slot for the ndarray
 
     def __init__(self, data=None, dtype=None, copy=False, shape=None):
         # Not implemented operators return NotImplemented
@@ -35,9 +45,9 @@ class CDense(_CArrayInterface):
             data = data.tondarray()  # np.ndarray from CDense
         else:  # Other inputs... just need to initialize the input shape
             self._input_shape = None
-        obj = np.array(data, dtype=dtype, copy=copy, ndmin=1)
+        obj = np.asarray(data, dtype=dtype)
         # numpy created an object array, maybe input is malformed?!
-        if obj.dtype.char == 'O':
+        if obj.dtype.char == "O":
             raise TypeError("Array is malformed, check input data.")
         self._data = obj
         # Store the shape of input data (if not previously propagated)
@@ -152,9 +162,9 @@ class CDense(_CArrayInterface):
         if shape is not None:
             if not is_tuple(shape) or len(shape) != 2:
                 # TODO: ERROR IS PROPERLY RAISED IN SCIPY > 1.4
-                raise ValueError('matrix shape must be two-dimensional')
+                raise ValueError("matrix shape must be two-dimensional")
             out = out.reshape(shape)
-        return getattr(out, 'to{:}'.format(scs_format))()
+        return getattr(out, "to{:}".format(scs_format))()
 
     def tocsr(self, shape=None):
         """Return current CDense as a scipy.sparse.csr_matrix.
@@ -166,7 +176,7 @@ class CDense(_CArrayInterface):
             Reshape is performed after casting.
 
         """
-        return self._toscs('csr', shape=shape)
+        return self._toscs("csr", shape=shape)
 
     def tocoo(self, shape=None):
         """Return current CDense as a scipy.sparse.coo_matrix.
@@ -178,7 +188,7 @@ class CDense(_CArrayInterface):
             Reshape is performed after casting.
 
         """
-        return self._toscs('coo', shape=shape)
+        return self._toscs("coo", shape=shape)
 
     def tocsc(self, shape=None):
         """Return current CDense as a scipy.sparse.csc_matrix.
@@ -190,7 +200,7 @@ class CDense(_CArrayInterface):
             Reshape is performed after casting.
 
         """
-        return self._toscs('csc', shape=shape)
+        return self._toscs("csc", shape=shape)
 
     def todia(self, shape=None):
         """Return current CDense as a scipy.sparse.dia_matrix.
@@ -202,7 +212,7 @@ class CDense(_CArrayInterface):
             Reshape is performed after casting.
 
         """
-        return self._toscs('dia', shape=shape)
+        return self._toscs("dia", shape=shape)
 
     def todok(self, shape=None):
         """Return current CDense as a scipy.sparse.dok_matrix.
@@ -214,7 +224,7 @@ class CDense(_CArrayInterface):
             Reshape is performed after casting.
 
         """
-        return self._toscs('dok', shape=shape)
+        return self._toscs("dok", shape=shape)
 
     def tolil(self, shape=None):
         """Return current CDense as a scipy.sparse.lil_matrix.
@@ -226,7 +236,7 @@ class CDense(_CArrayInterface):
             Reshape is performed after casting.
 
         """
-        return self._toscs('lil', shape=shape)
+        return self._toscs("lil", shape=shape)
 
     def tolist(self, shape=None):
         """Return current CDense as a list.
@@ -274,7 +284,7 @@ class CDense(_CArrayInterface):
 
         """
         if isinstance(idx, CDense):
-            if idx.dtype.kind == 'b':  # boolean mask
+            if idx.dtype.kind == "b":  # boolean mask
                 # Numpy requires a mask with the same dims of target array
                 if self.ndim == 1 and idx.ndim == 2:
                     idx = idx.ravel().tondarray()
@@ -286,7 +296,8 @@ class CDense(_CArrayInterface):
                 # Check the shape of the boolean mask
                 if idx.shape != self.shape:
                     raise IndexError(
-                        "boolean mask must have shape {:}".format(self.shape))
+                        "boolean mask must have shape {:}".format(self.shape)
+                    )
 
             elif self.ndim == 1:
                 # Converting to ndarray
@@ -301,7 +312,8 @@ class CDense(_CArrayInterface):
             else:
                 raise IndexError(
                     "vector-like indexing is only applicable to flat arrays "
-                    "or arrays with shape[0] == 1.")
+                    "or arrays with shape[0] == 1."
+                )
 
         elif is_int(idx) or is_bool(idx):
             if self.ndim == 1:
@@ -320,7 +332,8 @@ class CDense(_CArrayInterface):
             else:
                 raise IndexError(
                     "vector-like indexing is only applicable to flat arrays "
-                    "or arrays with shape[0] == 1.")
+                    "or arrays with shape[0] == 1."
+                )
 
         elif is_list(idx):
             # Empty lists are converted to float by numpy,
@@ -345,7 +358,8 @@ class CDense(_CArrayInterface):
             else:
                 raise IndexError(
                     "vector-like indexing is only applicable to flat arrays "
-                    "or arrays with shape[0] == 1.")
+                    "or arrays with shape[0] == 1."
+                )
 
         elif is_slice(idx):
             if self.ndim == 1:
@@ -361,10 +375,10 @@ class CDense(_CArrayInterface):
             else:
                 raise IndexError(
                     "vector-like indexing is only applicable to flat arrays "
-                    "or arrays with shape[0] == 1.")
+                    "or arrays with shape[0] == 1."
+                )
 
         elif isinstance(idx, tuple):
-
             # Tuple will be now transformed to be managed directly by numpy
 
             if self.ndim == 1:
@@ -377,7 +391,8 @@ class CDense(_CArrayInterface):
 
                 if not is_vector_index(idx_0):
                     raise IndexError(
-                        "{:} is not a valid index for axis 0".format(idx_0))
+                        "{:} is not a valid index for axis 0".format(idx_0)
+                    )
 
                 # First index is ok, work on the 2nd
                 idx_list = [idx[1]]
@@ -422,8 +437,9 @@ class CDense(_CArrayInterface):
                     idx_list[e_i] = e
 
                 else:
-                    raise TypeError("{:} should not be used for "
-                                    "CDense indexing.".format(type(e)))
+                    raise TypeError(
+                        "{:} should not be used for " "CDense indexing.".format(type(e))
+                    )
 
             # Converting back to tuple
             idx = tuple(idx_list)
@@ -434,8 +450,9 @@ class CDense(_CArrayInterface):
 
         else:
             # No other object is accepted for CDense indexing
-            raise TypeError("{:} should not be used for "
-                            "CDense indexing.".format(type(idx)))
+            raise TypeError(
+                "{:} should not be used for " "CDense indexing.".format(type(idx))
+            )
 
         return idx
 
@@ -457,11 +474,16 @@ class CDense(_CArrayInterface):
 
         for elem_idx, elem in enumerate(idx):
             # boolean arrays in tuple (cross-indices) must be 1-Dimensional
-            if elem is not None and elem.dtype.kind == 'b' and \
-                    elem.size != self.shape[elem_idx]:
+            if (
+                elem is not None
+                and elem.dtype.kind == "b"
+                and elem.size != self.shape[elem_idx]
+            ):
                 raise IndexError(
-                    "boolean index array for axis {:} must have "
-                    "size {:}.".format(elem_idx, self.shape[elem_idx]))
+                    "boolean index array for axis {:} must have " "size {:}.".format(
+                        elem_idx, self.shape[elem_idx]
+                    )
+                )
 
     def _check_index_slice(self, elem_idx, elem):
         """Check slice index bounds.
@@ -483,19 +505,25 @@ class CDense(_CArrayInterface):
             # elem.start and self.shape[elem_idx] have same module
             # but opposite sign. Slices behave differently for
             # negatives and positives
-            trig = abs(elem.start) == self.shape[elem_idx] and \
-                elem.start != self.shape[elem_idx]
+            trig = (
+                abs(elem.start) == self.shape[elem_idx]
+                and elem.start != self.shape[elem_idx]
+            )
             if abs(elem.start) > self.shape[elem_idx] + trig - 1:
                 raise IndexError(
                     "start element of index {:}, slice({:}, {:}, {:}),"
-                    " is out of bounds.".format(elem_idx, elem.start,
-                                                elem.step, elem.stop))
+                    " is out of bounds.".format(
+                        elem_idx, elem.start, elem.step, elem.stop
+                    )
+                )
         if elem.stop is not None:
             if elem.stop > self.shape[elem_idx]:
                 raise IndexError(
                     "stop element of index {:}, slice({:}, {:}, {:}), "
-                    "is out of bounds.".format(elem_idx, elem.start,
-                                               elem.step, elem.stop))
+                    "is out of bounds.".format(
+                        elem_idx, elem.start, elem.step, elem.stop
+                    )
+                )
 
     def __getitem__(self, idx):
         """Redefinition of the get operation."""
@@ -503,8 +531,8 @@ class CDense(_CArrayInterface):
             # Natively supported for multi-dimensional (not flat) arrays
             # The list of lists must be passed as a tuple
             return self.__class__(
-                np.ndarray.__getitem__(
-                    self.atleast_2d().tondarray(), tuple(idx)))
+                np.ndarray.__getitem__(self.atleast_2d().tondarray(), tuple(idx))
+            )
 
         # Check index for all other cases
         idx = self._check_index(idx)
@@ -522,14 +550,14 @@ class CDense(_CArrayInterface):
                 value = value.ravel()
             value = value.tondarray()
         elif not (is_scalar(value) or is_bool(value)):
-            raise TypeError("{:} cannot be used for setting "
-                            "a CDense.".format(type(value)))
+            raise TypeError(
+                "{:} cannot be used for setting " "a CDense.".format(type(value))
+            )
 
         if is_list_of_lists(idx):
             # Natively supported for multi-dimensional (not flat) arrays
             # The list of lists must be passed as a tuple
-            np.ndarray.__setitem__(
-                self.atleast_2d().tondarray(), tuple(idx), value)
+            np.ndarray.__setitem__(self.atleast_2d().tondarray(), tuple(idx), value)
             return
 
         # Check index for all other cases
@@ -560,7 +588,8 @@ class CDense(_CArrayInterface):
         """
         if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
-                np.add(self.tondarray(), self._buffer_to_builtin(other)))
+                np.add(self.tondarray(), self._buffer_to_builtin(other))
+            )
         else:
             return NotImplemented
 
@@ -602,7 +631,8 @@ class CDense(_CArrayInterface):
         """
         if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
-                np.subtract(self.tondarray(), self._buffer_to_builtin(other)))
+                np.subtract(self.tondarray(), self._buffer_to_builtin(other))
+            )
         else:
             return NotImplemented
 
@@ -644,7 +674,8 @@ class CDense(_CArrayInterface):
         """
         if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
-                np.multiply(self.tondarray(), self._buffer_to_builtin(other)))
+                np.multiply(self.tondarray(), self._buffer_to_builtin(other))
+            )
         else:
             return NotImplemented
 
@@ -686,8 +717,8 @@ class CDense(_CArrayInterface):
         """
         if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
             return self.__class__(
-                np.true_divide(self.tondarray(),
-                               self._buffer_to_builtin(other)))
+                np.true_divide(self.tondarray(), self._buffer_to_builtin(other))
+            )
         else:
             return NotImplemented
 
@@ -794,7 +825,8 @@ class CDense(_CArrayInterface):
         """
         if is_scalar(power) or is_bool(power) or isinstance(power, CDense):
             return self.__class__(
-                self.tondarray().__pow__(self._buffer_to_builtin(power)))
+                self.tondarray().__pow__(self._buffer_to_builtin(power))
+            )
         else:
             return NotImplemented
 
@@ -834,8 +866,7 @@ class CDense(_CArrayInterface):
 
         """
         if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
-            return self.__class__(
-                self.tondarray() == self._buffer_to_builtin(other))
+            return self.__class__(self.tondarray() == self._buffer_to_builtin(other))
         else:
             return NotImplemented
 
@@ -856,8 +887,7 @@ class CDense(_CArrayInterface):
 
         """
         if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
-            return self.__class__(
-                self.tondarray() < self._buffer_to_builtin(other))
+            return self.__class__(self.tondarray() < self._buffer_to_builtin(other))
         else:
             return NotImplemented
 
@@ -878,8 +908,7 @@ class CDense(_CArrayInterface):
 
         """
         if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
-            return self.__class__(
-                self.tondarray() <= self._buffer_to_builtin(other))
+            return self.__class__(self.tondarray() <= self._buffer_to_builtin(other))
         else:
             return NotImplemented
 
@@ -900,8 +929,7 @@ class CDense(_CArrayInterface):
 
         """
         if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
-            return self.__class__(
-                self.tondarray() > self._buffer_to_builtin(other))
+            return self.__class__(self.tondarray() > self._buffer_to_builtin(other))
         else:
             return NotImplemented
 
@@ -922,8 +950,7 @@ class CDense(_CArrayInterface):
 
         """
         if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
-            return self.__class__(
-                self.tondarray() >= self._buffer_to_builtin(other))
+            return self.__class__(self.tondarray() >= self._buffer_to_builtin(other))
         else:
             return NotImplemented
 
@@ -944,8 +971,7 @@ class CDense(_CArrayInterface):
 
         """
         if is_scalar(other) or is_bool(other) or isinstance(other, CDense):
-            return self.__class__(
-                self.tondarray() != self._buffer_to_builtin(other))
+            return self.__class__(self.tondarray() != self._buffer_to_builtin(other))
         else:
             return NotImplemented
 
@@ -964,10 +990,10 @@ class CDense(_CArrayInterface):
                 yield self[row_id, column_id]
 
     def __str__(self):
-        return str(self._data).replace('array', 'CDense', 1)
+        return str(self._data).replace("array", "CDense", 1)
 
     def __repr__(self):
-        return repr(self._data).replace('array', 'CDense', 1)
+        return repr(self._data).replace("array", "CDense", 1)
 
     # ------------------------------ #
     # # # # # # COPY UTILS # # # # # #
@@ -1014,26 +1040,37 @@ class CDense(_CArrayInterface):
 
         """
         if not isinstance(self.dtype, np.dtype):
-            fmt = '%s'
+            fmt = "%s"
         elif np.issubdtype(self.dtype, np.character):
-            fmt = '%s'
+            fmt = "%s"
         elif np.issubdtype(self.dtype, np.integer):
-            fmt = '%d'
+            fmt = "%d"
         elif np.issubdtype(self.dtype, np.floating):
-            fmt = '%f'
+            fmt = "%f"
         else:  # Everything else will be stored as standard str
-            fmt = '%s'
+            fmt = "%s"
 
         # We now check if input file already exists
         import os
-        if isinstance(datafile, str) and os.path.isfile(
-                datafile) is True and overwrite is False:
-            raise IOError("File {:} already exists. Specify overwrite=True "
-                          "or delete the file.".format(datafile))
+
+        if (
+            isinstance(datafile, str)
+            and os.path.isfile(datafile) is True
+            and overwrite is False
+        ):
+            raise IOError(
+                "File {:} already exists. Specify overwrite=True "
+                "or delete the file.".format(datafile)
+            )
 
         try:
-            np.savetxt(datafile, self.atleast_2d().tondarray(),
-                       delimiter=' ', fmt=fmt, encoding='utf-8')
+            np.savetxt(
+                datafile,
+                self.atleast_2d().tondarray(),
+                delimiter=" ",
+                fmt=fmt,
+                encoding="utf-8",
+            )
         except IOError as e:  # Prevent stopping after standard IOError
             print(e)
 
@@ -1068,14 +1105,20 @@ class CDense(_CArrayInterface):
         if isinstance(cols, cls):
             cols = tuple(cols.astype(int).tolist())
         try:
-            return cls(np.atleast_2d(np.genfromtxt(datafile,
-                                                   dtype=dtype,
-                                                   delimiter=' ',
-                                                   skip_header=startrow,
-                                                   skip_footer=skipend,
-                                                   usecols=cols,
-                                                   loose=False,
-                                                   encoding='utf-8')))
+            return cls(
+                np.atleast_2d(
+                    np.genfromtxt(
+                        datafile,
+                        dtype=dtype,
+                        delimiter=" ",
+                        skip_header=startrow,
+                        skip_footer=skipend,
+                        usecols=cols,
+                        loose=False,
+                        encoding="utf-8",
+                    )
+                )
+            )
         except IOError as e:  # Handling standard IOError
             raise IOError(e)
         except (IndexError, StopIteration):  # Something wrong with indexing
@@ -1093,7 +1136,8 @@ class CDense(_CArrayInterface):
         """Transpose array data"""
         if len(self.shape) == 1:  # We consider flat arrays as 1 x N
             return self.__class__(
-                np.transpose(self.reshape((1, self.shape[0])).tondarray()))
+                np.transpose(self.reshape((1, self.shape[0])).tondarray())
+            )
         else:
             return self.__class__(np.transpose(self.tondarray()))
 
@@ -1110,7 +1154,7 @@ class CDense(_CArrayInterface):
         # All other not-empty arrays
         return self.__class__(np.atleast_2d(self.tondarray()))
 
-    def reshape(self, newshape, order='C'):
+    def reshape(self, newshape, order="C"):
         """Reshape the matrix using input shape (int or tuple of ints).
 
         Parameters
@@ -1141,12 +1185,11 @@ class CDense(_CArrayInterface):
         if is_scalar(newshape):  # Compatibility between N and (N, )
             newshape = (newshape,)
         # Compute size of of output array
-        out_size = newshape[0] if \
-            len(newshape) == 1 else newshape[0] * newshape[1]
+        out_size = newshape[0] if len(newshape) == 1 else newshape[0] * newshape[1]
         if out_size > self.size:  # Append missing elements
             old_array = self.ravel().append(
-                self.__class__.ones(out_size - self.size,
-                                    dtype=self.dtype) * constant)
+                self.__class__.ones(out_size - self.size, dtype=self.dtype) * constant
+            )
         else:  # Caching old array
             old_array = self
 
@@ -1167,8 +1210,7 @@ class CDense(_CArrayInterface):
 
     def round(self, decimals=0):
         """Return a copy of your array rounded"""
-        return self.__class__(
-            np.around(self.tondarray(), decimals=decimals))
+        return self.__class__(np.around(self.tondarray(), decimals=decimals))
 
     def ceil(self):
         """Return the ceiling of the input, element-wise."""
@@ -1180,10 +1222,9 @@ class CDense(_CArrayInterface):
 
     def clip(self, c_min, c_max):
         """Clip (limit) the values in an array."""
-        return self.__class__(
-            np.clip(self.tondarray(), a_min=c_min, a_max=c_max))
+        return self.__class__(np.clip(self.tondarray(), a_min=c_min, a_max=c_max))
 
-    def sort(self, axis=-1, kind='quicksort', inplace=False, order=None):
+    def sort(self, axis=-1, kind="quicksort", inplace=False, order=None):
         """Sort array."""
         if inplace is True:
             self.atleast_2d()._data.sort(axis=axis, kind=kind, order=order)
@@ -1191,21 +1232,24 @@ class CDense(_CArrayInterface):
             return self
         elif inplace is False:
             out_sort = self.__class__(
-                np.sort(self.atleast_2d().tondarray(),
-                        axis=axis, kind=kind, order=order))
+                np.sort(
+                    self.atleast_2d().tondarray(), axis=axis, kind=kind, order=order
+                )
+            )
             return out_sort.ravel() if self.ndim < 2 else out_sort
         else:
-            raise ValueError("`{:}` is not a valid value for "
-                             "the `inplace` parameter", inplace)
+            raise ValueError(
+                "`{:}` is not a valid value for " "the `inplace` parameter", inplace
+            )
 
-    def argsort(self, axis=-1, kind='quicksort', order=None):
+    def argsort(self, axis=-1, kind="quicksort", order=None):
         # Fast argsort only available for flat arrays
-        if self.ndim == 1 or kind != 'quicksort':
-            return self.__class__(sorted(
-                range(self.size), key=lambda x: self.__getitem__((0, x))))
-        else:
+        if self.ndim == 1 or kind != "quicksort":
             return self.__class__(
-                np.argsort(self.tondarray(), axis, kind, order))
+                sorted(range(self.size), key=lambda x: self.__getitem__((0, x)))
+            )
+        else:
+            return self.__class__(np.argsort(self.tondarray(), axis, kind, order))
 
     def shuffle(self):
         """Wrapper for numpy.random.shuffle. In-place operation."""
@@ -1224,10 +1268,16 @@ class CDense(_CArrayInterface):
 
     def append(self, array, axis=None):
         """Wrapper for append."""
-        out = self.__class__(np.append(self.atleast_2d().tondarray(),
-                                       array.atleast_2d().tondarray(), axis))
-        return out.ravel() if axis is None or (
-                self.ndim <= 1 and array.ndim <= 1 and axis == 1) else out
+        out = self.__class__(
+            np.append(
+                self.atleast_2d().tondarray(), array.atleast_2d().tondarray(), axis
+            )
+        )
+        return (
+            out.ravel()
+            if axis is None or (self.ndim <= 1 and array.ndim <= 1 and axis == 1)
+            else out
+        )
 
     def repmat(self, m, n):
         """Wrapper for repmat
@@ -1290,8 +1340,7 @@ class CDense(_CArrayInterface):
 
         """
         repeats = self._buffer_to_builtin(repeats)
-        return self.__class__(
-            np.repeat(self.tondarray(), repeats=repeats, axis=axis))
+        return self.__class__(np.repeat(self.tondarray(), repeats=repeats, axis=axis))
 
     # ---------- #
     # COMPARISON #
@@ -1299,13 +1348,11 @@ class CDense(_CArrayInterface):
 
     def logical_and(self, array):
         """Element-wise logical & (and) with respect to input CDense."""
-        return self.__class__(
-            np.logical_and(self.tondarray(), array.tondarray()))
+        return self.__class__(np.logical_and(self.tondarray(), array.tondarray()))
 
     def logical_or(self, array):
         """Element-wise logical | (or) with respect to input CDense."""
-        return self.__class__(
-            np.logical_or(self.tondarray(), array.tondarray()))
+        return self.__class__(np.logical_or(self.tondarray(), array.tondarray()))
 
     def logical_not(self):
         """Element-wise logical ! (not) of array elements."""
@@ -1390,8 +1437,7 @@ class CDense(_CArrayInterface):
             pos = bisect_left(array.tolist(), e, 0, array.size)
             if pos == 0:  # workaround of zero-based python indexing
                 return 0
-            elif pos == array.size or \
-                    abs(e - array[pos - 1]) < abs(e - array[pos]):
+            elif pos == array.size or abs(e - array[pos - 1]) < abs(e - array[pos]):
                 return pos - 1
             else:
                 return pos
@@ -1425,11 +1471,9 @@ class CDense(_CArrayInterface):
         res = np.count_nonzero(self.tondarray(), axis=axis)
         return self.__class__(res) if axis is not None else res
 
-    def unique(self, return_index=False,
-               return_inverse=False, return_counts=False):
+    def unique(self, return_index=False, return_inverse=False, return_counts=False):
         """Wrapper for unique."""
-        out = np.unique(
-            self.tondarray(), return_index, return_inverse, return_counts)
+        out = np.unique(self.tondarray(), return_index, return_inverse, return_counts)
         if not any([return_index, return_inverse, return_counts]):
             return self.__class__(out)
         else:  # unique returned multiple elements
@@ -1443,25 +1487,31 @@ class CDense(_CArrayInterface):
 
     def bincount(self, minlength=0):
         """Count the number of occurrences of each non-negative int."""
-        return self.__class__(
-            np.bincount(self.tondarray(), minlength=minlength))
+        return self.__class__(np.bincount(self.tondarray(), minlength=minlength))
 
     def norm(self, order=None, axis=None, keepdims=False):
         """Wrapper for numpy norm."""
-        if (self.ndim < 2 or axis is not None) and order == 'fro':
+        if (self.ndim < 2 or axis is not None) and order == "fro":
             # 'fro' is a matrix norm
             raise ValueError("Invalid norm order {:}.".format(order))
 
         if self.size == 0:
             # Special handle as few norms raise error for empty arrays
-            if self.ndim == 2 and axis is None and order not in (
-                    None, 'fro', inf, -inf, 1, -1, 2, -2):
+            if (
+                self.ndim == 2
+                and axis is None
+                and order not in (None, "fro", inf, -inf, 1, -1, 2, -2)
+            ):
                 raise ValueError("Invalid norm order {:}.".format(order))
             return self.__class__([0.0])
 
         out = np.linalg.norm(
-            self.atleast_2d().tondarray().astype(float) if axis is not None
-            else self.tondarray().astype(float), order, axis)
+            self.atleast_2d().tondarray().astype(float)
+            if axis is not None
+            else self.tondarray().astype(float),
+            order,
+            axis,
+        )
 
         # Always return a CDense of floats
         out = self.__class__(out).astype(float)
@@ -1486,125 +1536,180 @@ class CDense(_CArrayInterface):
         if self.size == 0:
             out = self.__class__([[0.0]])
         else:
-            out = np.sum(
-                self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
+            out = np.sum(self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
+        return (
+            self.__class__(out).ravel()
+            if self.ndim <= 1 or keepdims is False
+            else self.__class__(out)
+        )
 
     def cumsum(self, axis=None, dtype=None):
         """Wrapper for numpy cumsum"""
         out = np.cumsum(self.atleast_2d().tondarray(), axis=axis, dtype=dtype)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 else self.__class__(out)
+        return self.__class__(out).ravel() if self.ndim <= 1 else self.__class__(out)
 
     def prod(self, axis=None, dtype=None, keepdims=True):
         """Return the product of array elements over a given axis."""
         if self.size == 0:
             out = self.__class__([[1.0]], dtype=dtype)
         else:
-            out = np.prod(self.atleast_2d().tondarray(),
-                          axis=axis, dtype=dtype, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
+            out = np.prod(
+                self.atleast_2d().tondarray(), axis=axis, dtype=dtype, keepdims=keepdims
+            )
+        return (
+            self.__class__(out).ravel()
+            if self.ndim <= 1 or keepdims is False
+            else self.__class__(out)
+        )
 
     def all(self, axis=None, keepdims=True):
         """Wrapper for numpy all."""
-        out = np.all(self.atleast_2d().tondarray(), axis=axis,
-                     keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
+        out = np.all(self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
+        return (
+            self.__class__(out).ravel()
+            if self.ndim <= 1 or keepdims is False
+            else self.__class__(out)
+        )
 
     def any(self, axis=None, keepdims=True):
         """Wrapper for numpy any."""
-        out = np.any(self.atleast_2d().tondarray(), axis=axis,
-                     keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
+        out = np.any(self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
+        return (
+            self.__class__(out).ravel()
+            if self.ndim <= 1 or keepdims is False
+            else self.__class__(out)
+        )
 
     def max(self, axis=None, keepdims=True):
         """Wrapper for numpy max."""
-        out = np.amax(
-            self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
+        out = np.amax(self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
+        return (
+            self.__class__(out).ravel()
+            if self.ndim <= 1 or keepdims is False
+            else self.__class__(out)
+        )
 
     def min(self, axis=None, keepdims=True):
         """Wrapper for numpy min."""
-        out = np.amin(
-            self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
+        out = np.amin(self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
+        return (
+            self.__class__(out).ravel()
+            if self.ndim <= 1 or keepdims is False
+            else self.__class__(out)
+        )
 
     def argmin(self, axis=None):
         """Wrapper for numpy argmin"""
-        out_min = self.__class__(np.argmin(
-            self.tondarray() if axis is None else
-            self.atleast_2d().tondarray(), axis=axis))
+        out_min = self.__class__(
+            np.argmin(
+                self.tondarray() if axis is None else self.atleast_2d().tondarray(),
+                axis=axis,
+            )
+        )
 
-        return out_min if axis is None or self.ndim <= 1 else \
-            (out_min.atleast_2d() if axis == 0 else out_min.atleast_2d().T)
+        return (
+            out_min
+            if axis is None or self.ndim <= 1
+            else (out_min.atleast_2d() if axis == 0 else out_min.atleast_2d().T)
+        )
 
     def argmax(self, axis=None):
         """Wrapper for numpy argmax"""
-        out_max = self.__class__(np.argmax(
-            self.tondarray() if axis is None else
-            self.atleast_2d().tondarray(), axis=axis))
+        out_max = self.__class__(
+            np.argmax(
+                self.tondarray() if axis is None else self.atleast_2d().tondarray(),
+                axis=axis,
+            )
+        )
 
-        return out_max if axis is None or self.ndim <= 1 else \
-            (out_max.atleast_2d() if axis == 0 else out_max.atleast_2d().T)
+        return (
+            out_max
+            if axis is None or self.ndim <= 1
+            else (out_max.atleast_2d() if axis == 0 else out_max.atleast_2d().T)
+        )
 
     def nanmax(self, axis=None, keepdims=True):
         """Wrapper for numpy nanmax."""
-        out = np.nanmax(
-            self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
+        out = np.nanmax(self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
+        return (
+            self.__class__(out).ravel()
+            if self.ndim <= 1 or keepdims is False
+            else self.__class__(out)
+        )
 
     def nanmin(self, axis=None, keepdims=True):
         """Wrapper for numpy nanmin."""
-        out = np.nanmin(
-            self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
+        out = np.nanmin(self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
+        return (
+            self.__class__(out).ravel()
+            if self.ndim <= 1 or keepdims is False
+            else self.__class__(out)
+        )
 
     def nanargmin(self, axis=None):
         """Wrapper for numpy nanargmin"""
         out_min = self.__class__(
-            np.nanargmin(self.tondarray() if axis is None else
-                         self.atleast_2d().tondarray(), axis=axis))
+            np.nanargmin(
+                self.tondarray() if axis is None else self.atleast_2d().tondarray(),
+                axis=axis,
+            )
+        )
 
-        return out_min if axis is None or self.ndim <= 1 else \
-            (out_min.atleast_2d() if axis == 0 else out_min.atleast_2d().T)
+        return (
+            out_min
+            if axis is None or self.ndim <= 1
+            else (out_min.atleast_2d() if axis == 0 else out_min.atleast_2d().T)
+        )
 
     def nanargmax(self, axis=None):
         """Wrapper for numpy nanargmax"""
         out_max = self.__class__(
-            np.nanargmax(self.tondarray() if axis is None else
-                         self.atleast_2d().tondarray(), axis=axis))
+            np.nanargmax(
+                self.tondarray() if axis is None else self.atleast_2d().tondarray(),
+                axis=axis,
+            )
+        )
 
-        return out_max if axis is None or self.ndim <= 1 else \
-            (out_max.atleast_2d() if axis == 0 else out_max.atleast_2d().T)
+        return (
+            out_max
+            if axis is None or self.ndim <= 1
+            else (out_max.atleast_2d() if axis == 0 else out_max.atleast_2d().T)
+        )
 
     def mean(self, axis=None, dtype=None, keepdims=True):
         """Wrapper for mean"""
-        out = np.mean(self.atleast_2d().tondarray(),
-                      axis=axis, dtype=dtype, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
+        out = np.mean(
+            self.atleast_2d().tondarray(), axis=axis, dtype=dtype, keepdims=keepdims
+        )
+        return (
+            self.__class__(out).ravel()
+            if self.ndim <= 1 or keepdims is False
+            else self.__class__(out)
+        )
 
     def median(self, axis=None, keepdims=True):
         """Wrapper for median"""
-        out = np.median(
-            self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
+        out = np.median(self.atleast_2d().tondarray(), axis=axis, keepdims=keepdims)
+        return (
+            self.__class__(out).ravel()
+            if self.ndim <= 1 or keepdims is False
+            else self.__class__(out)
+        )
 
     def std(self, axis=None, ddof=0, keepdims=True):
         """Wrapper for mean"""
-        out = np.std(self.atleast_2d().tondarray(),
-                     axis=axis, dtype=np.float64, ddof=ddof, keepdims=keepdims)
-        return self.__class__(out).ravel() if \
-            self.ndim <= 1 or keepdims is False else self.__class__(out)
+        out = np.std(
+            self.atleast_2d().tondarray(),
+            axis=axis,
+            dtype=np.float64,
+            ddof=ddof,
+            keepdims=keepdims,
+        )
+        return (
+            self.__class__(out).ravel()
+            if self.ndim <= 1 or keepdims is False
+            else self.__class__(out)
+        )
 
     def sha1(self):
         """Calculate the sha1 hexadecimal hash of array.
@@ -1616,12 +1721,13 @@ class CDense(_CArrayInterface):
 
         """
         import hashlib
+
         x = self.tondarray()
 
-        h = hashlib.new('sha1')
+        h = hashlib.new("sha1")
 
         # Hash by taking into account shape and data
-        h.update(hex(hash(x.shape)).encode('utf-8'))
+        h.update(hex(hash(x.shape)).encode("utf-8"))
         # The returned sha1 could be different for same data
         # but different memory order. Use C order to be consistent
         h.update(np.ascontiguousarray(x))
@@ -1734,8 +1840,7 @@ class CDense(_CArrayInterface):
             input exponents.
 
         """
-        return self.__class__(
-            np.power(self.tondarray(), self._buffer_to_builtin(exp)))
+        return self.__class__(np.power(self.tondarray(), self._buffer_to_builtin(exp)))
 
     def normpdf(self, mu=0.0, sigma=1.0):
         """Return normal distribution function value with mean
@@ -1755,8 +1860,8 @@ class CDense(_CArrayInterface):
 
         """
         from scipy.stats import norm
-        return self.__class__(
-            norm.pdf(self.tondarray(), float(mu), float(sigma)))
+
+        return self.__class__(norm.pdf(self.tondarray(), float(mu), float(sigma)))
 
     # ----- #
     # MIXED #
@@ -1768,19 +1873,21 @@ class CDense(_CArrayInterface):
 
     def diag(self, k=0):
         """Extract a diagonal or construct a diagonal array."""
-        if self.ndim > 1 and (k > 0 and k > self.shape[1] - 1) or \
-                (k < 0 and abs(k) > self.shape[0] - 1):
+        if (
+            self.ndim > 1
+            and (k > 0 and k > self.shape[1] - 1)
+            or (k < 0 and abs(k) > self.shape[0] - 1)
+        ):
             raise ValueError("k exceeds matrix dimensions")
         return self.__class__(np.diag(self.tondarray(), k=k))
 
     def dot(self, array):
-
         if len(self.shape) + len(array.shape) != 2:  # Matrix multiplication
             # Reshaping flat vectors to 1 x N (row vectors)
-            array1 = self.reshape((1, self.shape[0])) if \
-                len(self.shape) == 1 else self
-            array2 = array.reshape((1, array.shape[0])) if \
-                len(array.shape) == 1 else array
+            array1 = self.reshape((1, self.shape[0])) if len(self.shape) == 1 else self
+            array2 = (
+                array.reshape((1, array.shape[0])) if len(array.shape) == 1 else array
+            )
 
         else:  # Inner product between flat arrays
             array1 = self
@@ -1819,10 +1926,15 @@ class CDense(_CArrayInterface):
         results are nonsense.
 
         """
-        return self.__class__(np.interp(self.tondarray(),
-                                        x_data.ravel().tondarray(),
-                                        y_data.ravel().tondarray(),
-                                        return_left, return_right))
+        return self.__class__(
+            np.interp(
+                self.tondarray(),
+                x_data.ravel().tondarray(),
+                y_data.ravel().tondarray(),
+                return_left,
+                return_right,
+            )
+        )
 
     def inv(self):
         """Compute the (multiplicative) inverse of a square matrix."""
@@ -2119,13 +2231,19 @@ class CDense(_CArrayInterface):
 
         """
         # Flat arrays are transformed to 2-Dims before concatenating
-        conc_array = cls(np.ma.concatenate(
-            (array1.atleast_2d().tondarray(),
-             array2.atleast_2d().tondarray()), axis=axis))
+        conc_array = cls(
+            np.ma.concatenate(
+                (array1.atleast_2d().tondarray(), array2.atleast_2d().tondarray()),
+                axis=axis,
+            )
+        )
         # Return flat only if both array1/array2 are flat
         # and we are concatenating horizontally
-        return conc_array.ravel() if \
-            array1.ndim <= 1 and array2.ndim <= 1 and axis == 1 else conc_array
+        return (
+            conc_array.ravel()
+            if array1.ndim <= 1 and array2.ndim <= 1 and axis == 1
+            else conc_array
+        )
 
     @classmethod
     def comblist(cls, list_of_list, dtype=float):
@@ -2179,7 +2297,7 @@ class CDense(_CArrayInterface):
         return cls(out[out[:, 0].argsort()])
 
     @classmethod
-    def meshgrid(cls, xi, indexing='xy'):
+    def meshgrid(cls, xi, indexing="xy"):
         """Return coordinate matrices from coordinate vectors.
 
         Make N-D coordinate arrays for vectorized evaluations of N-D
