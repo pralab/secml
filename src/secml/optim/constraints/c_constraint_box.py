@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import numpy as np
 from secml.optim.constraints import CConstraint
 from secml.array import CArray
@@ -28,7 +29,8 @@ class CConstraintBox(CConstraint):
     class_type : 'box'
 
     """
-    __class_type = 'box'
+
+    __class_type = "box"
 
     def __init__(self, lb=None, ub=None):
 
@@ -64,9 +66,11 @@ class CConstraintBox(CConstraint):
 
         if isinstance(self.lb, CArray) and isinstance(self.ub, CArray):
             if lb_array.size != ub_array.size:
-                raise ValueError("`ub` and `lb` must have the same size if "
-                                 "both `CArray`. Currently {:} and {:}"
-                                 "".format(ub_array.size, lb_array.size))
+                raise ValueError(
+                    "`ub` and `lb` must have the same size if "
+                    "both `CArray`. Currently {:} and {:}"
+                    "".format(ub_array.size, lb_array.size)
+                )
 
         if (lb_array > ub_array).any():
             raise ValueError("`lb` must be lower or equal than `ub`")
@@ -88,16 +92,20 @@ class CConstraintBox(CConstraint):
     def center(self):
         """Center of the constraint."""
         if self._check_inf() is True:
-            raise ValueError("cannot compute `center` as at least one value "
-                             "in the bounds is +/- `inf`")
+            raise ValueError(
+                "cannot compute `center` as at least one value "
+                "in the bounds is +/- `inf`"
+            )
         return CArray(0.5 * (self.ub + self.lb)).ravel()
 
     @property
     def radius(self):
         """Radius of the constraint."""
         if self._check_inf() is True:
-            raise ValueError("cannot compute `radius` as at least one value "
-                             "in the bounds is +/- `inf`")
+            raise ValueError(
+                "cannot compute `radius` as at least one value "
+                "in the bounds is +/- `inf`"
+            )
         return CArray(0.5 * (self.ub - self.lb)).ravel()
 
     def set_center_radius(self, c, r):
@@ -185,8 +193,7 @@ class CConstraintBox(CConstraint):
 
         """
         # if x is sparse, and center and radius are not (sparse) vectors
-        if x.issparse and self.center.size != x.size and \
-                self.radius.size != x.size:
+        if x.issparse and self.center.size != x.size and self.radius.size != x.size:
             return self._constraint_sparse(x)
 
         return float((abs(x - self.center) - self.radius).max())
@@ -242,8 +249,9 @@ class CConstraintBox(CConstraint):
 
         """
         # If bound is float, ensure x is float
-        if np.issubdtype(CArray(self.ub).dtype, np.floating) or \
-                np.issubdtype(CArray(self.ub).dtype, np.floating):
+        if np.issubdtype(CArray(self.ub).dtype, np.floating) or np.issubdtype(
+            CArray(self.ub).dtype, np.floating
+        ):
             x = x.astype(float)
 
         if isinstance(self.ub, CArray):

@@ -39,9 +39,7 @@ class TestCClassifierPyTorchDNN(CClassifierPyTorchTestCases):
         ds = CDLRandom(n_samples=30, n_features=3 * 224 * 224).load()
 
         # Split in training and test
-        splitter = CTrainTestSplit(train_size=10,
-                                   test_size=20,
-                                   random_state=0)
+        splitter = CTrainTestSplit(train_size=10, test_size=20, random_state=0)
         tr, ts = splitter.split(ds)
 
         nmz = CNormalizerMinMax()
@@ -56,17 +54,18 @@ class TestCClassifierPyTorchDNN(CClassifierPyTorchTestCases):
         torch.manual_seed(0)
         net = torchvision.models.resnet18(pretrained=True)
         criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(net.parameters(),
-                              lr=0.001, momentum=0.9)
+        optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
-        return CClassifierPyTorch(model=net,
-                                  loss=criterion,
-                                  optimizer=optimizer,
-                                  epochs=10,
-                                  batch_size=20,
-                                  input_shape=(3, 224, 224),
-                                  pretrained=True,
-                                  random_state=0)
+        return CClassifierPyTorch(
+            model=net,
+            loss=criterion,
+            optimizer=optimizer,
+            epochs=10,
+            batch_size=20,
+            input_shape=(3, 224, 224),
+            pretrained=True,
+            random_state=0,
+        )
 
     def test_accuracy(self):
         """Compare classification accuracy of original and wrapped models."""
@@ -86,9 +85,11 @@ class TestCClassifierPyTorchDNN(CClassifierPyTorchTestCases):
 
         # check if the scores are equal
         self.assert_array_almost_equal(
-            wrapper_model_scores, pytorch_net_scores,
+            wrapper_model_scores,
+            pytorch_net_scores,
             err_msg="The scores of the pytorch network "
-                    "and the wrapped one  not equal")
+            "and the wrapped one  not equal",
+        )
 
     def test_layer_names(self):
         """Check behavior of `.layer_names` property."""
@@ -106,14 +107,14 @@ class TestCClassifierPyTorchDNN(CClassifierPyTorchTestCases):
         """Test for extracting output at specific layer."""
         x = self.ts.X[0, :]
         self._test_out_at_layer(self.clf, x, "layer4:1:relu")
-        self._test_out_at_layer(self.clf, x, 'bn1')
-        self._test_out_at_layer(self.clf, x, 'fc')
+        self._test_out_at_layer(self.clf, x, "bn1")
+        self._test_out_at_layer(self.clf, x, "fc")
         self._test_out_at_layer(self.clf, x, None)
 
     def test_grad(self):
         """Test for `.gradient` method."""
         # TODO: ADD TEST OF GRADIENT METHOD
-        self._test_grad_atlayer(self.clf, self.ts.X[0, :], ['fc', None])
+        self._test_grad_atlayer(self.clf, self.ts.X[0, :], ["fc", None])
 
     def test_softmax_outputs(self):
         """Check behavior of `softmax_outputs` parameter."""
@@ -132,5 +133,5 @@ class TestCClassifierPyTorchDNN(CClassifierPyTorchTestCases):
         self._test_get_set_state(self.clf, clf_new, self.ts)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CClassifierPyTorchTestCases.main()

@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientLinearMixin
 

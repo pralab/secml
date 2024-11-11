@@ -14,26 +14,32 @@ class TestCArrayUtilsShapeAlteration(CArrayTestCases):
         target_dense = self.array_dense.get_data().transpose()
 
         self.assertFalse(
-            (target_sparse != self.array_sparse.transpose().get_data()).todense().any())
+            (target_sparse != self.array_sparse.transpose().get_data()).todense().any()
+        )
         self.assertFalse(
-            (target_dense != self.array_dense.transpose().get_data()).any())
+            (target_dense != self.array_dense.transpose().get_data()).any()
+        )
 
         target_sparse = self.array_sparse.get_data().T
         target_dense = self.array_dense.get_data().T
 
         self.assertFalse(
-            (target_sparse != self.array_sparse.transpose().get_data()).todense().any())
+            (target_sparse != self.array_sparse.transpose().get_data()).todense().any()
+        )
         self.assertFalse(
-            (target_dense != self.array_dense.transpose().get_data()).any())
+            (target_dense != self.array_dense.transpose().get_data()).any()
+        )
 
         dense_flat = CArray([1, 2, 3])
         self.logger.info("We have a flat vector {:}".format(dense_flat))
         dense_flat_transposed = dense_flat.T
-        self.logger.info("We transposed the vector: {:}. Shape {:}"
-                         "".format(dense_flat_transposed,
-                                   dense_flat_transposed.shape))
-        self.assertEqual(len(dense_flat_transposed.shape), 2,
-                         "Array still flat after transposing!")
+        self.logger.info(
+            "We transposed the vector: {:}. Shape {:}"
+            "".format(dense_flat_transposed, dense_flat_transposed.shape)
+        )
+        self.assertEqual(
+            len(dense_flat_transposed.shape), 2, "Array still flat after transposing!"
+        )
 
     def test_ravel(self):
         """Test for CArray.ravel() method."""
@@ -51,7 +57,7 @@ class TestCArrayUtilsShapeAlteration(CArrayTestCases):
 
             if array.isdense:
                 self.assertEqual(array_ravel.ndim, 1)
-                self.assertEqual(array_ravel.shape, (array.size, ))
+                self.assertEqual(array_ravel.shape, (array.size,))
             if array.issparse:
                 self.assertEqual(array_ravel.shape[0], 1)
                 self.assertEqual(array_ravel.shape, (1, array.size))
@@ -108,8 +114,9 @@ class TestCArrayUtilsShapeAlteration(CArrayTestCases):
                 self.assertFalse((array_original != array).any())
 
             else:
-                self.assertIsInstance(array_flatten,
-                                      (bool, float, np.bool_, int, np.integer))
+                self.assertIsInstance(
+                    array_flatten, (bool, float, np.bool_, int, np.integer)
+                )
 
         _check_flatten(self.array_dense)
         _check_flatten(self.array_sparse)
@@ -144,12 +151,11 @@ class TestCArrayUtilsShapeAlteration(CArrayTestCases):
             self.logger.info("Array:\n{:}".format(array))
 
             res = array.reshape(newshape=shape)
-            self.logger.info(
-                "array.reshape(newshape={:}):\n{:}".format(shape, res))
+            self.logger.info("array.reshape(newshape={:}):\n{:}".format(shape, res))
 
             # Transforming input shape to appropriate tuple
             if not isinstance(shape, tuple):
-                shape = (shape, )
+                shape = (shape,)
             if array.issparse:
                 if len(shape) == 1:
                     shape = (1, shape[0])
@@ -158,8 +164,7 @@ class TestCArrayUtilsShapeAlteration(CArrayTestCases):
             self.assertEqual(res.shape, shape)
 
             # We now go to check if original array elements are preserved
-            self.assertFalse(
-                (CArray(array.ravel()) != CArray(res.ravel())).any())
+            self.assertFalse((CArray(array.ravel()) != CArray(res.ravel())).any())
 
         _check_reshape(self.array_dense, (2, 6))
         _check_reshape(self.array_dense, 12)
@@ -242,7 +247,8 @@ class TestCArrayUtilsShapeAlteration(CArrayTestCases):
                 res = array.resize(newshape=shape, constant=constant)
                 self.logger.info(
                     "array.resize(newshape={:}, constant={:}):"
-                    "\n{:}".format(shape, constant, res))
+                    "\n{:}".format(shape, constant, res)
+                )
 
                 if not isinstance(shape, tuple):
                     self.assertEqual(res.ndim, 1)
@@ -252,10 +258,10 @@ class TestCArrayUtilsShapeAlteration(CArrayTestCases):
                 self.assertEqual(res.dtype, array.dtype)
 
                 # We now go to check if original array elements are preserved
-                array_size = array.shape[0] * \
-                    (array.shape[1] if len(array.shape) > 1 else 1)
-                res_size = res.shape[0] * \
-                    (res.shape[1] if len(res.shape) > 1 else 1)
+                array_size = array.shape[0] * (
+                    array.shape[1] if len(array.shape) > 1 else 1
+                )
+                res_size = res.shape[0] * (res.shape[1] if len(res.shape) > 1 else 1)
 
                 if res_size == 0:
                     self.assertFalse((res != CArray([])).any())
@@ -272,8 +278,7 @@ class TestCArrayUtilsShapeAlteration(CArrayTestCases):
 
                 self.assertFalse((array_ravel != res_ravel).any())
                 if res_added is not None:
-                    self.assertFalse(
-                        (res_added != array.dtype.type(constant)).any())
+                    self.assertFalse((res_added != array.dtype.type(constant)).any())
 
         _check_resize(self.array_dense, (2, 6))
         _check_resize(self.array_dense, (2, 4))
@@ -314,7 +319,7 @@ class TestCArrayUtilsShapeAlteration(CArrayTestCases):
         _check_resize(self.single_bool_flat_dense, (2, 4))
         _check_resize(self.single_bool_flat_dense, 0)
         _check_resize(self.single_bool_flat_dense, 5)
-        _check_resize(self.single_bool_dense,(1, 1))
+        _check_resize(self.single_bool_dense, (1, 1))
         _check_resize(self.single_bool_dense, (2, 4))
         _check_resize(self.single_bool_dense, 0)
         _check_resize(self.single_bool_dense, 5)
@@ -330,7 +335,7 @@ class TestCArrayUtilsShapeAlteration(CArrayTestCases):
 
         with self.assertRaises(NotImplementedError):
             self.array_sparse.resize((2, 6))
-    
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     CArrayTestCases.main()

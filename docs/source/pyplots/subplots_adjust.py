@@ -5,7 +5,7 @@ n = 5
 fig = CFigure()
 
 x = CArray.arange(100)
-y = 3. * CArray.sin(x * 2. * 3.14 / 100.)
+y = 3.0 * CArray.sin(x * 2.0 * 3.14 / 100.0)
 
 for i in range(n):
     temp = 510 + i

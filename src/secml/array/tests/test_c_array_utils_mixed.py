@@ -51,30 +51,34 @@ class TestCArrayUtilsMixed(CArrayTestCases):
         # SPARSE
         data = self.array_sparse
         data[2, :] *= -1
-        _check_sign(data, CArray([[1, 0, 0, 1], [1, 1, 0, 0], [-1, -1, 0, 0]],
-                                 tosparse=True))
-        _check_sign(CArray([[4, 0, -6]], tosparse=True),
-                    CArray([[1, 0, -1]], tosparse=True))
-        _check_sign(CArray([[4, 0, -6]], tosparse=True).T,
-                    CArray([[1], [0], [-1]], tosparse=True))
+        _check_sign(
+            data, CArray([[1, 0, 0, 1], [1, 1, 0, 0], [-1, -1, 0, 0]], tosparse=True)
+        )
+        _check_sign(
+            CArray([[4, 0, -6]], tosparse=True), CArray([[1, 0, -1]], tosparse=True)
+        )
+        _check_sign(
+            CArray([[4, 0, -6]], tosparse=True).T,
+            CArray([[1], [0], [-1]], tosparse=True),
+        )
         _check_sign(CArray([4], tosparse=True), CArray([1], tosparse=True))
         _check_sign(CArray([0], tosparse=True), CArray([0], tosparse=True))
         _check_sign(CArray([-4], tosparse=True), CArray([-1], tosparse=True))
 
         # BOOL
-        _check_sign(self.array_dense_bool,
-                    CArray([[1, 0, 1, 1], [0, 0, 0, 0], [1, 1, 1, 1]]))
-        _check_sign(self.array_sparse_bool,
-                    CArray([[1, 0, 1, 1], [0, 0, 0, 0], [1, 1, 1, 1]],
-                           tosparse=True))
+        _check_sign(
+            self.array_dense_bool, CArray([[1, 0, 1, 1], [0, 0, 0, 0], [1, 1, 1, 1]])
+        )
+        _check_sign(
+            self.array_sparse_bool,
+            CArray([[1, 0, 1, 1], [0, 0, 0, 0], [1, 1, 1, 1]], tosparse=True),
+        )
         _check_sign(CArray([True]), CArray([1]))
         _check_sign(CArray([False]), CArray([0]))
         _check_sign(CArray([[True]]), CArray([[1]]))
         _check_sign(CArray([[False]]), CArray([[0]]))
-        _check_sign(CArray([[True]], tosparse=True),
-                    CArray([[1]], tosparse=True))
-        _check_sign(CArray([[False]], tosparse=True),
-                    CArray([[0]], tosparse=True))
+        _check_sign(CArray([[True]], tosparse=True), CArray([[1]], tosparse=True))
+        _check_sign(CArray([[False]], tosparse=True), CArray([[0]], tosparse=True))
 
     def test_diag(self):
         """Test for CArray.diag() method."""
@@ -121,8 +125,7 @@ class TestCArrayUtilsMixed(CArrayTestCases):
         def create_diag(array, k, out):
 
             diag = array.diag(k=k)
-            self.logger.info(
-                "Array created using k={:} is:\n{:}".format(k, diag))
+            self.logger.info("Array created using k={:} is:\n{:}".format(k, diag))
             self.assertEqual(array.isdense, diag.isdense)
             self.assertEqual(array.issparse, diag.issparse)
             self.assertTrue((diag == out).all())
@@ -132,8 +135,7 @@ class TestCArrayUtilsMixed(CArrayTestCases):
         out_diag = CArray([[4, 0, 0], [0, 0, 0], [0, 0, 6]])
         create_diag(self.row_flat_dense, k=0, out=out_diag)
 
-        out_diag = CArray([[0, 4, 0, 0], [0, 0, 0, 0],
-                           [0, 0, 0, 6], [0, 0, 0, 0]])
+        out_diag = CArray([[0, 4, 0, 0], [0, 0, 0, 0], [0, 0, 0, 6], [0, 0, 0, 0]])
         create_diag(self.row_flat_dense, k=1, out=out_diag)
 
         self.logger.info("Array is:\n{:}".format(self.row_dense))
@@ -141,8 +143,7 @@ class TestCArrayUtilsMixed(CArrayTestCases):
         out_diag = CArray([[4, 0, 0], [0, 0, 0], [0, 0, 6]])
         create_diag(self.row_dense, k=0, out=out_diag)
 
-        out_diag = CArray([[0, 4, 0, 0], [0, 0, 0, 0],
-                           [0, 0, 0, 6], [0, 0, 0, 0]])
+        out_diag = CArray([[0, 4, 0, 0], [0, 0, 0, 0], [0, 0, 0, 6], [0, 0, 0, 0]])
         create_diag(self.row_dense, k=1, out=out_diag)
 
         self.logger.info("Array is:\n{:}".format(self.row_sparse))
@@ -150,8 +151,7 @@ class TestCArrayUtilsMixed(CArrayTestCases):
         out_diag = CArray([[4, 0, 0], [0, 0, 0], [0, 0, 6]])
         create_diag(self.row_sparse, k=0, out=out_diag)
 
-        out_diag = CArray([[0, 4, 0, 0], [0, 0, 0, 0],
-                           [0, 0, 0, 6], [0, 0, 0, 0]])
+        out_diag = CArray([[0, 4, 0, 0], [0, 0, 0, 0], [0, 0, 0, 6], [0, 0, 0, 0]])
         create_diag(self.row_sparse, k=1, out=out_diag)
 
         self.logger.info("Testing diagonal array creation from single val...")
@@ -180,7 +180,7 @@ class TestCArrayUtilsMixed(CArrayTestCases):
             self.empty_sparse.diag()
 
     def test_dot(self):
-        """"Test for CArray.dot() method."""
+        """ "Test for CArray.dot() method."""
         self.logger.info("Test for CArray.dot() method.")
         s_vs_s = self.array_sparse.dot(self.array_sparse.T)
         s_vs_d = self.array_sparse.dot(self.array_dense.T)
@@ -194,14 +194,15 @@ class TestCArrayUtilsMixed(CArrayTestCases):
         self.assertIsInstance(d_vs_s._data, CDense)
 
         # Check if we have the same output in all cases
-        self.assertTrue(
-            self._test_multiple_eq([s_vs_s, s_vs_d, d_vs_d, d_vs_s]))
+        self.assertTrue(self._test_multiple_eq([s_vs_s, s_vs_d, d_vs_d, d_vs_s]))
 
         # Test inner product between vector-like arrays
         def _check_dot_vector_like(array1, array2, expected):
             dot_res = array1.dot(array2)
-            self.logger.info("We made a dot between {:} and {:}, "
-                             "result: {:}.".format(array1, array2, dot_res))
+            self.logger.info(
+                "We made a dot between {:} and {:}, "
+                "result: {:}.".format(array1, array2, dot_res)
+            )
             self.assertEqual(dot_res, expected)
 
         _check_dot_vector_like(self.row_flat_dense, self.column_dense, 52)
@@ -212,17 +213,22 @@ class TestCArrayUtilsMixed(CArrayTestCases):
         _check_dot_vector_like(self.row_sparse, self.column_sparse, 52)
 
         dense_flat_outer = self.column_dense.dot(self.row_flat_dense)
-        self.logger.info("We made a dot between {:} and {:}, "
-                         "result: {:}.".format(self.column_dense,
-                                               self.row_flat_dense,
-                                               dense_flat_outer))
-        self.assertEqual(len(dense_flat_outer.shape), 2,
-                         "Dot result column.dot(row) is not a matrix!")
+        self.logger.info(
+            "We made a dot between {:} and {:}, "
+            "result: {:}.".format(
+                self.column_dense, self.row_flat_dense, dense_flat_outer
+            )
+        )
+        self.assertEqual(
+            len(dense_flat_outer.shape),
+            2,
+            "Dot result column.dot(row) is not a matrix!",
+        )
 
         # Test between flats
         dot_res_flats = CArray([10, 20]).dot(CArray([1, 0]))
         self.assertEqual(dot_res_flats, 10)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CArrayTestCases.main()

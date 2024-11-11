@@ -30,8 +30,7 @@ class CFunctionTestCases(CUnitTest):
         res_expected : scalar
 
         """
-        self.logger.info(
-            "Checking value of {:} @ {:}".format(fun.class_type, x))
+        self.logger.info("Checking value of {:} @ {:}".format(fun.class_type, x))
 
         res = fun.fun(x)
 
@@ -41,8 +40,9 @@ class CFunctionTestCases(CUnitTest):
         self.assertTrue(is_scalar(res))
         self.assertAlmostEqual(res_expected, res, places=4)
 
-    def _test_2D(self, fun, grid_limits=None, levels=None,
-                 vmin=None, vmax=None, fun_args=()):
+    def _test_2D(
+        self, fun, grid_limits=None, levels=None, vmin=None, vmax=None, fun_args=()
+    ):
         """2D plot of the function.
 
         Parameters
@@ -59,11 +59,21 @@ class CFunctionTestCases(CUnitTest):
         self.logger.info("Plotting 2D of {:}".format(fun_name))
 
         fig = CFigure(width=7)
-        fig.sp.plot_fun(func=fun.fun, plot_levels=True,
-                        grid_limits=grid_limits, levels=levels,
-                        n_grid_points=50, n_colors=200,
-                        vmin=vmin, vmax=vmax, func_args=fun_args)
+        fig.sp.plot_fun(
+            func=fun.fun,
+            plot_levels=True,
+            grid_limits=grid_limits,
+            levels=levels,
+            n_grid_points=50,
+            n_colors=200,
+            vmin=vmin,
+            vmax=vmax,
+            func_args=fun_args,
+        )
 
         fig.sp.title(fun_name)
-        fig.savefig(fm.join(fm.abspath(__file__),
-                            'test_function_{:}.pdf'.format(fun.class_type)))
+        fig.savefig(
+            fm.join(
+                fm.abspath(__file__), "test_function_{:}.pdf".format(fun.class_type)
+            )
+        )

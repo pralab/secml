@@ -32,8 +32,8 @@ class TestCArrayUtilsAppendMerge(CArrayTestCases):
             if array1.issparse:  # result will be sparse, so always 2d
                 a1_comp = a1_comp.atleast_2d()
                 a2_comp = a2_comp.atleast_2d()
-            self.assert_array_equal(append_res[:array1.size], a1_comp)
-            self.assert_array_equal(append_res[array1.size:], a2_comp)
+            self.assert_array_equal(append_res[: array1.size], a1_comp)
+            self.assert_array_equal(append_res[array1.size :], a2_comp)
 
             array1_shape0 = array1.atleast_2d().shape[0]
             array1_shape1 = array1.atleast_2d().shape[1]
@@ -44,15 +44,13 @@ class TestCArrayUtilsAppendMerge(CArrayTestCases):
             append_res = array1.append(array2, axis=0)
             self.logger.info("a1.append(a2, axis=0): {:}".format(append_res))
             self.assertEqual(array1_shape1, append_res.shape[1])
-            self.assertEqual(
-                array1_shape0 + array2_shape0, append_res.shape[0])
+            self.assertEqual(array1_shape0 + array2_shape0, append_res.shape[0])
             self.assert_array_equal(append_res[array1_shape0:, :], array2)
 
             # check append on axis 1 (horizontal)
             append_res = array1.append(array2, axis=1)
             self.logger.info("a1.append(a2, axis=1): {:}".format(append_res))
-            self.assertEqual(
-                array1_shape1 + array2_shape1, append_res.shape[1])
+            self.assertEqual(array1_shape1 + array2_shape1, append_res.shape[1])
             self.assertEqual(array1_shape0, append_res.shape[0])
             self.assert_array_equal(append_res[:, array1_shape1:], array2)
 
@@ -65,11 +63,10 @@ class TestCArrayUtilsAppendMerge(CArrayTestCases):
         empty_sparse = CArray([], tosparse=True)
         empty_dense = CArray([], tosparse=False)
         self.assertTrue(
-            (empty_sparse.append(empty_dense, axis=None) == empty_dense).all())
-        self.assertTrue(
-            (empty_sparse.append(empty_dense, axis=0) == empty_dense).all())
-        self.assertTrue(
-            (empty_sparse.append(empty_dense, axis=1) == empty_dense).all())
+            (empty_sparse.append(empty_dense, axis=None) == empty_dense).all()
+        )
+        self.assertTrue((empty_sparse.append(empty_dense, axis=0) == empty_dense).all())
+        self.assertTrue((empty_sparse.append(empty_dense, axis=1) == empty_dense).all())
 
     def test_repeat(self):
         """Test for CArray.repeat() method."""
@@ -101,8 +98,10 @@ class TestCArrayUtilsAppendMerge(CArrayTestCases):
                         continue
 
                     res = array.repeat(repeats=repeats, axis=axis)
-                    self.logger.info("array.repeat({:}, axis={:}):"
-                                     "\n{:}".format(repeats, axis, res))
+                    self.logger.info(
+                        "array.repeat({:}, axis={:}):"
+                        "\n{:}".format(repeats, axis, res)
+                    )
 
                     self.assertIsInstance(res, CArray)
                     self.assertEqual(res.isdense, array.isdense)
@@ -115,21 +114,19 @@ class TestCArrayUtilsAppendMerge(CArrayTestCases):
                             repeats_mul = array.size * repeats
                         else:
                             repeats_mul = repeats.sum()
-                        self.assertEqual(res.shape, (repeats_mul, ))
+                        self.assertEqual(res.shape, (repeats_mul,))
                     elif axis == 0:
                         if is_scalar(repeats):
                             repeats_mul = array.shape[0] * repeats
                         else:
                             repeats_mul = repeats.sum()
-                        self.assertEqual(
-                            res.shape, (repeats_mul, array.shape[1]))
+                        self.assertEqual(res.shape, (repeats_mul, array.shape[1]))
                     elif axis == 1:
                         if is_scalar(repeats):
                             repeats_mul = array.shape[1] * repeats
                         else:
                             repeats_mul = repeats.sum()
-                        self.assertEqual(
-                            res.shape, (array.shape[0], repeats_mul))
+                        self.assertEqual(res.shape, (array.shape[0], repeats_mul))
 
                     if is_scalar(repeats):
                         repeats_size = array.size * repeats
@@ -146,8 +143,7 @@ class TestCArrayUtilsAppendMerge(CArrayTestCases):
 
                     if not is_scalar(repeats):
                         repeats = repeats.tondarray()
-                    np_res = array.tondarray().repeat(
-                        repeats=repeats, axis=axis)
+                    np_res = array.tondarray().repeat(repeats=repeats, axis=axis)
                     self.assertFalse((res.tondarray() != np_res).any())
 
         # array_dense = CArray([[1, 0, 0, 5], [2, 4, 0, 0], [3, 6, 0, 0]]
@@ -191,12 +187,17 @@ class TestCArrayUtilsAppendMerge(CArrayTestCases):
             np_repeated_array = np.matlib.repmat(np_array, 1, 2)
             self.assertTrue((rep_array.tondarray() == np_repeated_array).all())
 
-        for array in [self.row_flat_dense, self.row_sparse,
-                      self.array_dense, self.array_sparse,
-                      self.empty_sparse, self.empty_dense,
-                      self.empty_flat_dense]:
+        for array in [
+            self.row_flat_dense,
+            self.row_sparse,
+            self.array_dense,
+            self.array_sparse,
+            self.empty_sparse,
+            self.empty_dense,
+            self.empty_flat_dense,
+        ]:
             _check_repmat(array)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CArrayTestCases.main()

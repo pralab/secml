@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.optim.constraints import CConstraint
 
@@ -26,7 +27,8 @@ class CConstraintL1(CConstraint):
     class_type : 'l1'
 
     """
-    __class_type = 'l1'
+
+    __class_type = "l1"
 
     def __init__(self, center=0, radius=1):
 
@@ -168,7 +170,7 @@ class CConstraintL1(CConstraint):
 
         # get the number of > 0 components of the optimal solution
         # (only considering non-null elements in v
-        j = CArray.arange(1, cssv.size+1)
+        j = CArray.arange(1, cssv.size + 1)
         if u.issparse:
             rho = (j * u_nnz > (cssv - s)).sum() - 1
         else:

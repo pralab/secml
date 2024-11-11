@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from multiprocessing import Lock
 
 from secml.data.loader import CDataLoader
@@ -40,7 +41,8 @@ class CDataLoaderLFW(CDataLoader):
     class_type : 'lfw'
 
     """
-    __class_type = 'lfw'
+
+    __class_type = "lfw"
     __lock = Lock()  # Lock to prevent multiple parallel download/extraction
 
     def __init__(self):
@@ -70,9 +72,14 @@ class CDataLoaderLFW(CDataLoader):
         """
         with CDataLoaderLFW.__lock:
             lfw_people = fetch_lfw_people(
-                data_home=SECML_DS_DIR, funneled=funneled, resize=1,
-                min_faces_per_person=min_faces_per_person, color=color,
-                slice_=None, download_if_missing=True)
+                data_home=SECML_DS_DIR,
+                funneled=funneled,
+                resize=1,
+                min_faces_per_person=min_faces_per_person,
+                color=color,
+                slice_=None,
+                download_if_missing=True,
+            )
 
         x = CArray(lfw_people.data)
         y = CArray(lfw_people.target)
@@ -96,6 +103,6 @@ class CDataLoaderLFW(CDataLoader):
         Does not delete the downloaded database archive.
 
         """
-        jl_tmp_folder = fm.join(SECML_DS_DIR, 'lfw_home', 'joblib')
+        jl_tmp_folder = fm.join(SECML_DS_DIR, "lfw_home", "joblib")
         if fm.folder_exist(jl_tmp_folder):
             fm.remove_folder(jl_tmp_folder, force=True)

@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 
 from secml.core import CCreator
@@ -14,7 +15,8 @@ from secml.array import CArray
 
 class CLoss(CCreator, metaclass=ABCMeta):
     """Interface for loss functions."""
-    __super__ = 'CLoss'
+
+    __super__ = "CLoss"
 
     @property
     @abstractmethod
@@ -68,7 +70,8 @@ class CLoss(CCreator, metaclass=ABCMeta):
 
 class CLossRegression(CLoss):
     """Interface for loss functions suitable for regression problems."""
-    suitable_for = 'regression'
+
+    suitable_for = "regression"
 
     @abstractmethod
     def loss(self, y_true, score):
@@ -113,7 +116,8 @@ class CLossRegression(CLoss):
 
 class CLossClassification(CLoss):
     """Interface for loss functions suitable for classification problems."""
-    suitable_for = 'classification'
+
+    suitable_for = "classification"
 
     @abstractmethod
     def loss(self, y_true, score, pos_label=None):
@@ -194,7 +198,8 @@ def _check_binary_score(score, pos_label=1):
         if score.shape[1] > 2:
             raise ValueError(
                 "only 2 classes are supported. "
-                "`score` has shape[1] = {:}".format(score.shape[1]))
+                "`score` has shape[1] = {:}".format(score.shape[1])
+            )
         else:
             score = score[:, pos_label].ravel()
 

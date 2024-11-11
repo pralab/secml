@@ -5,7 +5,7 @@ class TestCKernelHistIntersect(CCKernelTestCases):
     """Unit test for CKernelHistIntersect."""
 
     def setUp(self):
-        self._set_up('hist-intersect')
+        self._set_up("hist-intersect")
 
     def test_similarity_shape(self):
         """Test shape of kernel."""
@@ -20,5 +20,5 @@ class TestCKernelHistIntersect(CCKernelTestCases):
         self._test_gradient_w()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CCKernelTestCases.main()

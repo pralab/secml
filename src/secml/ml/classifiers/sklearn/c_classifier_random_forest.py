@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.ml.classifiers import CClassifierSkLearn
 
 from sklearn.ensemble import RandomForestClassifier
@@ -48,19 +49,25 @@ class CClassifierRandomForest(CClassifierSkLearn):
     class_type : 'random-forest'
 
     """
-    __class_type = 'random-forest'
 
-    def __init__(self, n_estimators=10, criterion='gini',
-                 max_depth=None, min_samples_split=2,
-                 random_state=None, preprocess=None):
+    __class_type = "random-forest"
+
+    def __init__(
+        self,
+        n_estimators=10,
+        criterion="gini",
+        max_depth=None,
+        min_samples_split=2,
+        random_state=None,
+        preprocess=None,
+    ):
 
         rf = RandomForestClassifier(
             n_estimators=n_estimators,
             criterion=criterion,
             max_depth=max_depth,
             min_samples_split=min_samples_split,
-            random_state=random_state
+            random_state=random_state,
         )
 
-        CClassifierSkLearn.__init__(self, sklearn_model=rf,
-                                    preprocess=preprocess)
+        CClassifierSkLearn.__init__(self, sklearn_model=rf, preprocess=preprocess)

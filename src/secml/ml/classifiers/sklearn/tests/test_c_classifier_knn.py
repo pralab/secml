@@ -11,9 +11,15 @@ class TestCClassifierKNN(CClassifierTestCases):
 
     def setUp(self):
 
-        ds = CDLRandom(n_samples=100, n_classes=3, n_features=2,
-                       n_redundant=0, n_informative=2, n_clusters_per_class=1,
-                       random_state=10000).load()
+        ds = CDLRandom(
+            n_samples=100,
+            n_classes=3,
+            n_features=2,
+            n_redundant=0,
+            n_informative=2,
+            n_clusters_per_class=1,
+            random_state=10000,
+        ).load()
 
         self.dataset = ds[:50, :]
         self.test = ds[50:, :]
@@ -23,17 +29,16 @@ class TestCClassifierKNN(CClassifierTestCases):
         self.knn.fit(self.dataset.X, self.dataset.Y)
 
     def test_plot(self):
-        ds = CDLRandomBlobs(n_samples=100, centers=3, n_features=2,
-                            random_state=1).load()
+        ds = CDLRandomBlobs(
+            n_samples=100, centers=3, n_features=2, random_state=1
+        ).load()
         fig = self._test_plot(self.knn, ds, levels=[0.5])
-        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
-                            'test_c_classifier_knn.pdf'))
+        fig.savefig(fm.join(fm.abspath(__file__), "figs", "test_c_classifier_knn.pdf"))
 
     def test_classification(self):
         self.logger.info("Check the classification method... ")
 
-        lab_cl, score = self.knn.predict(
-            self.test.X, return_decision_function=True)
+        lab_cl, score = self.knn.predict(self.test.X, return_decision_function=True)
 
         acc = CMetricAccuracy().performance_score(self.test.Y, lab_cl)
 
@@ -53,20 +58,21 @@ class TestCClassifierKNN(CClassifierTestCases):
             dist, index_n, corresp = self.knn.kneighbors(single_sample)
         self.logger.info("Sample to evaluate: {:}".format(single_sample))
         self.logger.info("")
-        self.logger.info("Closest: {:}, index {:}, distance {:}"
-                         "".format(corresp[dist.argmin(), :],
-                                   index_n[dist.argmin()],
-                                   dist.min()))
+        self.logger.info(
+            "Closest: {:}, index {:}, distance {:}"
+            "".format(corresp[dist.argmin(), :], index_n[dist.argmin()], dist.min())
+        )
 
         self.logger.info("Checking KNN classifier on multiple samples...")
         num_samp = 2
         with self.timer():
-            dist, index_n, corresp = self.knn.kneighbors(
-                array_samples, num_samp)
+            dist, index_n, corresp = self.knn.kneighbors(array_samples, num_samp)
         for i in range(10):
             self.logger.info("Sample to evaluate: {:}".format(single_sample))
-            self.logger.info("Closest: {:}, index {:}, distance {:}"
-                             "".format(corresp[i, :], index_n[i], dist[i, :]))
+            self.logger.info(
+                "Closest: {:}, index {:}, distance {:}"
+                "".format(corresp[i, :], index_n[i], dist[i, :])
+            )
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
@@ -79,14 +85,13 @@ class TestCClassifierKNN(CClassifierTestCases):
         """Test classifier with preprocessors inside."""
         knn = CClassifierKNN(n_neighbors=3)
         # All linear transformations
-        self._test_preprocess(self.dataset, knn,
-                              ['min-max', 'mean-std'],
-                              [{'feature_range': (-1, 1)}, {}])
+        self._test_preprocess(
+            self.dataset, knn, ["min-max", "mean-std"], [{"feature_range": (-1, 1)}, {}]
+        )
 
         # Mixed linear/nonlinear transformations
-        self._test_preprocess(self.dataset, knn,
-                              ['pca', 'unit-norm'], [{}, {}])
+        self._test_preprocess(self.dataset, knn, ["pca", "unit-norm"], [{}, {}])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CClassifierTestCases.main()

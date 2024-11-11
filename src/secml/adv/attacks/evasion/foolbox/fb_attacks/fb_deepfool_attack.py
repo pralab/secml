@@ -8,16 +8,16 @@
 
 from foolbox.attacks.deepfool import L2DeepFoolAttack, LinfDeepFoolAttack
 
-from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import \
-    CAttackEvasionFoolbox
-from secml.adv.attacks.evasion.foolbox.losses.deepfool_loss import \
-    DeepfoolLoss
+from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import (
+    CAttackEvasionFoolbox,
+)
+from secml.adv.attacks.evasion.foolbox.losses.deepfool_loss import DeepfoolLoss
 from secml.adv.attacks.evasion.foolbox.secml_autograd import as_tensor
 from secml.array import CArray
 
-CELOSS = 'crossentropy'
-LOGITLOSS = 'logits'
-DISTANCES = ['l2', 'linf']
+CELOSS = "crossentropy"
+LOGITLOSS = "logits"
+DISTANCES = ["l2", "linf"]
 
 
 class CFoolboxDeepfool(DeepfoolLoss, CAttackEvasionFoolbox):
@@ -61,33 +61,48 @@ class CFoolboxDeepfool(DeepfoolLoss, CAttackEvasionFoolbox):
         "DeepFool: a simple and accurate method to fool deep neural
         networks", https://arxiv.org/abs/1511.04599
     """
-    __class_type = 'e-foolbox-deepfool'
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0,
-                 epsilons=0.2, distance='l2', steps=50,
-                 candidates=10, overshoot=0.02, loss="logits"):
+    __class_type = "e-foolbox-deepfool"
+
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=0.2,
+        distance="l2",
+        steps=50,
+        candidates=10,
+        overshoot=0.02,
+        loss="logits",
+    ):
         if y_target != None:
             raise ValueError(
                 "Unsupported criterion. Deepfool only "
-                "supports the untargeted version.")
-        if distance == 'l2':
+                "supports the untargeted version."
+            )
+        if distance == "l2":
             attack = L2DeepFoolAttack
-        elif distance == 'linf':
+        elif distance == "linf":
             attack = LinfDeepFoolAttack
         else:
             raise ValueError(
-                'Distance {} is not supported for this attack. Only {} '
-                'are supported'.format(
-                    distance, DISTANCES
-                ))
+                "Distance {} is not supported for this attack. Only {} "
+                "are supported".format(distance, DISTANCES)
+            )
         super(CFoolboxDeepfool, self).__init__(
-            classifier, y_target,
-            lb=lb, ub=ub,
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
             fb_attack_class=attack,
-            epsilons=epsilons, steps=steps,
+            epsilons=epsilons,
+            steps=steps,
             candidates=candidates,
             overshoot=overshoot,
-            loss=loss)
+            loss=loss,
+        )
         self._x0 = None
         self._y0 = None
         self.distance = distance
@@ -102,8 +117,9 @@ class CFoolboxDeepfool(DeepfoolLoss, CAttackEvasionFoolbox):
         # always the same length as the number of steps
         num_effective_steps = self.x_seq.shape[0]
         if num_effective_steps < self.attack.steps:
-            added_vals = CArray.zeros((self.attack.steps - num_effective_steps,
-                                       *self.x_seq.shape[1:]))
+            added_vals = CArray.zeros(
+                (self.attack.steps - num_effective_steps, *self.x_seq.shape[1:])
+            )
             added_vals += self.x_seq[-1, :]
             self._x_seq = self._x_seq.append(added_vals, axis=0)
         self.num_effective_steps = num_effective_steps  # keep in case we need it
@@ -114,32 +130,58 @@ class CFoolboxDeepfool(DeepfoolLoss, CAttackEvasionFoolbox):
 
 
 class CFoolboxDeepfoolL2(CFoolboxDeepfool):
-    __class_type = 'e-foolbox-deepfool-l2'
+    __class_type = "e-foolbox-deepfool-l2"
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0,
-                 epsilons=0.2, steps=50, candidates=10, overshoot=0.02,
-                 loss="logits"):
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=0.2,
+        steps=50,
+        candidates=10,
+        overshoot=0.02,
+        loss="logits",
+    ):
         super(CFoolboxDeepfoolL2, self).__init__(
-            classifier, y_target,
-            lb=lb, ub=ub,
-            distance='l2',
-            epsilons=epsilons, steps=steps,
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            distance="l2",
+            epsilons=epsilons,
+            steps=steps,
             candidates=candidates,
             overshoot=overshoot,
-            loss=loss)
+            loss=loss,
+        )
 
 
 class CFoolboxDeepfoolLinf(CFoolboxDeepfool):
-    __class_type = 'e-foolbox-deepfool-linf'
+    __class_type = "e-foolbox-deepfool-linf"
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0,
-                 epsilons=0.2, steps=50, candidates=10, overshoot=0.02,
-                 loss="logits"):
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=0.2,
+        steps=50,
+        candidates=10,
+        overshoot=0.02,
+        loss="logits",
+    ):
         super(CFoolboxDeepfoolLinf, self).__init__(
-            classifier, y_target,
-            lb=lb, ub=ub,
-            distance='linf',
-            epsilons=epsilons, steps=steps,
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            distance="linf",
+            epsilons=epsilons,
+            steps=steps,
             candidates=candidates,
             overshoot=overshoot,
-            loss=loss)
+            loss=loss,
+        )

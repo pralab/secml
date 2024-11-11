@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 from secml.array import CArray
@@ -28,7 +29,8 @@ class CLDA(CReducer):
     class_type : 'lda'
 
     """
-    __class_type = 'lda'
+
+    __class_type = "lda"
 
     def __init__(self, n_components=None, preprocess=None):
         """Linear Discriminant Analysis (LDA)
@@ -73,7 +75,7 @@ class CLDA(CReducer):
     @property
     def eigenvec(self):
         """Eigenvectors estimated from the training data.
-           Is a matrix of shape:  n_eigenvectors * n_features."""
+        Is a matrix of shape:  n_eigenvectors * n_features."""
         return self._eigenvec
 
     @property
@@ -100,7 +102,7 @@ class CLDA(CReducer):
             If the preprocessor is not fitted.
 
         """
-        check_is_fitted(self, ['_lda', 'mean'])
+        check_is_fitted(self, ["_lda", "mean"])
 
     def _fit(self, x, y):
         """Fit the LDA using input data.
@@ -137,11 +139,13 @@ class CLDA(CReducer):
         self._classes = targets.unique()
 
         if self.n_components is None:
-            self.n_components = (self._classes.size - 1)
+            self.n_components = self._classes.size - 1
         else:
             if self.n_components > (self.classes.size - 1):
-                raise ValueError("Maximum number of components is {:}"
-                                 "".format(self.classes.size - 1))
+                raise ValueError(
+                    "Maximum number of components is {:}"
+                    "".format(self.classes.size - 1)
+                )
 
         self._lda = LinearDiscriminantAnalysis(n_components=self.n_components)
         self._lda.fit(data_carray.tondarray(), targets.tondarray())
@@ -184,8 +188,10 @@ class CLDA(CReducer):
         """
         data_carray = CArray(x).todense().atleast_2d()
         if data_carray.shape[1] != self.mean.size:
-            raise ValueError("array to transform must have {:} features "
-                             "(columns).".format(self.mean.size))
+            raise ValueError(
+                "array to transform must have {:} features "
+                "(columns).".format(self.mean.size)
+            )
 
         out = CArray(self._lda.transform(data_carray.tondarray()))
         return out.atleast_2d() if x.ndim >= 2 else out

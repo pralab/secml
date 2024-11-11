@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from scipy.stats import multivariate_normal
 from secml.array import CArray
 from secml.core import CCreator
@@ -45,8 +46,7 @@ class CDistributionGaussian(CCreator):
         cov = self.cov
         if isinstance(cov, CArray):
             cov = cov.tondarray()
-        return CArray(multivariate_normal.pdf(data.tondarray(),
-                                              self.mean, cov))
+        return CArray(multivariate_normal.pdf(data.tondarray(), self.mean, cov))
 
     def logpdf(self, data):
         """Log of the probability density function.
@@ -65,5 +65,4 @@ class CDistributionGaussian(CCreator):
         cov = self.cov
         if isinstance(cov, CArray):
             cov = cov.tondarray()
-        return CArray(multivariate_normal.logpdf(data.tondarray(),
-                                                 self.mean, cov))
+        return CArray(multivariate_normal.logpdf(data.tondarray(), self.mean, cov))

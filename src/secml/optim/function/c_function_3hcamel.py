@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.optim.function import CFunction
 from secml.array import CArray
 
@@ -27,13 +28,15 @@ class CFunctionThreeHumpCamel(CFunction):
     class_type : '3h-camel'
 
     """
-    __class_type = '3h-camel'
+
+    __class_type = "3h-camel"
 
     def __init__(self):
 
         # Passing data to CFunction
         super(CFunctionThreeHumpCamel, self).__init__(
-            fun=self._fun, n_dim=2, gradient=self._grad)
+            fun=self._fun, n_dim=2, gradient=self._grad
+        )
 
     def _fun(self, x):
         """Apply Three-Hump Camel function to point x.
@@ -52,12 +55,12 @@ class CFunctionThreeHumpCamel(CFunction):
         x = x.atleast_2d()
         if x.shape[1] != 2:
             raise ValueError(
-                "Three-Hump Camel function available for 2 dimensions only")
+                "Three-Hump Camel function available for 2 dimensions only"
+            )
 
         # Split into 2 parts
         f1 = 2 * x[0].item() ** 2 - 1.05 * x[0].item() ** 4
-        f2 = x[0].item() ** 6 / 6 + \
-             x[0].item() * x[1].item() + x[1].item() ** 2
+        f2 = x[0].item() ** 6 / 6 + x[0].item() * x[1].item() + x[1].item() ** 2
 
         return f1 + f2
 
@@ -65,8 +68,10 @@ class CFunctionThreeHumpCamel(CFunction):
         """Three-Hump Camel function gradient wrt. point x."""
         x = x.atleast_2d()
         if x.shape[1] != 2:
-            raise ValueError("Gradient of Three-Hump Camel function "
-                             "only available for 2 dimensions")
+            raise ValueError(
+                "Gradient of Three-Hump Camel function "
+                "only available for 2 dimensions"
+            )
         # Computing gradient of each dimension
         grad1_1 = 4 * x[0] - 4.2 * x[0] ** 3
         grad1_2 = x[0] ** 5 + x[1]
@@ -90,7 +95,7 @@ class CFunctionThreeHumpCamel(CFunction):
             Value of the global minimum of the function.
 
         """
-        return 0.
+        return 0.0
 
     @staticmethod
     def global_min_x():
@@ -104,4 +109,4 @@ class CFunctionThreeHumpCamel(CFunction):
             The global minimum point of the function.
 
         """
-        return CArray([0., 0.])
+        return CArray([0.0, 0.0])

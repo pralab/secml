@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.data.splitter import CDataSplitter
 
@@ -60,13 +61,16 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
     [CArray(1,)(dense: [1]), CArray(1,)(dense: [0]), CArray(1,)(dense: [1])]
 
     """
-    __class_type = 'open-world-kfold'
 
-    def __init__(self, num_folds=3, n_train_samples=5,
-                 n_train_classes=None, random_state=None):
+    __class_type = "open-world-kfold"
+
+    def __init__(
+        self, num_folds=3, n_train_samples=5, n_train_classes=None, random_state=None
+    ):
 
         super(CDataSplitterOpenWorldKFold, self).__init__(
-            num_folds=num_folds, random_state=random_state)
+            num_folds=num_folds, random_state=random_state
+        )
 
         self.n_train_samples = n_train_samples
         self.n_train_classes = n_train_classes
@@ -99,8 +103,11 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
 
         # If no custom number of training classes is selected,
         # use half of the classes
-        n_train_classes = int(dataset.num_classes / 2) \
-            if self.n_train_classes is None else int(self.n_train_classes)
+        n_train_classes = (
+            int(dataset.num_classes / 2)
+            if self.n_train_classes is None
+            else int(self.n_train_classes)
+        )
 
         for fold in range(self.num_folds):
 
@@ -113,9 +120,9 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
             # only 'n_train_classes' random classes will be trained...
             # but now we randsample all classes to backup in case one or
             # more classes will be skipped for n_train_samples
-            all_tr_classes = CArray.randsample(dataset.classes,
-                                               dataset.num_classes,
-                                               random_state=random_state)
+            all_tr_classes = CArray.randsample(
+                dataset.classes, dataset.num_classes, random_state=random_state
+            )
 
             # Placeholder for indices of chosen training classes' samples
             train_samples_idx = CArray([], dtype=int)
@@ -125,22 +132,25 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
                 if train_classes.size >= n_train_classes:
                     break  # we reached the desired number of training classes
                 # Vector with indices of current client's samples
-                client_samples_idx = CArray(
-                    dataset.Y.find(dataset.Y == train_class))
+                client_samples_idx = CArray(dataset.Y.find(dataset.Y == train_class))
                 # Check if we have at least n_train_samples + 1 samples for
                 # current client
                 if client_samples_idx.size < self.n_train_samples + 1:
-                    self.logger.warning("skipping class {:} for training set. "
-                                        "{:} samples is less than {:}."
-                                        "".format(train_class,
-                                                  client_samples_idx.size,
-                                                  self.n_train_samples + 1))
+                    self.logger.warning(
+                        "skipping class {:} for training set. "
+                        "{:} samples is less than {:}."
+                        "".format(
+                            train_class,
+                            client_samples_idx.size,
+                            self.n_train_samples + 1,
+                        )
+                    )
                     continue
 
                 # Random subselection of training samples
-                random_samples = CArray.randsample(client_samples_idx,
-                                                   self.n_train_samples,
-                                                   random_state=random_state)
+                random_samples = CArray.randsample(
+                    client_samples_idx, self.n_train_samples, random_state=random_state
+                )
                 # Appending to vector of indices for training set a random
                 # subselection of samples
                 train_samples_idx = train_samples_idx.append(random_samples)
@@ -155,8 +165,12 @@ class CDataSplitterOpenWorldKFold(CDataSplitter):
 
             # All other samples go to test
             test_samples_idx = CArray(
-                [idx for idx in range(dataset.num_samples)
-                 if idx not in train_samples_idx])
+                [
+                    idx
+                    for idx in range(dataset.num_samples)
+                    if idx not in train_samples_idx
+                ]
+            )
 
             self._tr_idx += [train_samples_idx]
             self._ts_idx += [test_samples_idx]

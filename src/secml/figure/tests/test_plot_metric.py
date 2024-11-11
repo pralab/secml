@@ -13,8 +13,12 @@ class TestCPlotClassifier(CUnitTest):
         y_pred = CArray([0, 0, 2, 2, 0, 2])
         fig = CFigure()
         fig.sp.plot_confusion_matrix(
-            y_true, y_pred, labels=['one', 'two', 'three'],
-            colorbar=True, normalize=False)
+            y_true,
+            y_pred,
+            labels=["one", "two", "three"],
+            colorbar=True,
+            normalize=False,
+        )
         fig.show()
 
         # Test for normalize=True
@@ -22,10 +26,14 @@ class TestCPlotClassifier(CUnitTest):
         y_pred = CArray([0, 0, 2, 2, 0, 2]).astype(float)
         fig = CFigure()
         fig.sp.plot_confusion_matrix(
-            y_true, y_pred, labels=['one', 'two', 'three'],
-            colorbar=True, normalize=True)
+            y_true,
+            y_pred,
+            labels=["one", "two", "three"],
+            colorbar=True,
+            normalize=True,
+        )
         fig.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

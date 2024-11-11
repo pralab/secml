@@ -5,14 +5,34 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import numpy as np
 from scipy.sparse import issparse
 
-__all__ = ['is_bool', 'is_int', 'is_intlike', 'is_float', 'is_floatlike',
-           'is_scalar', 'is_scalarlike', 'is_inf', 'is_posinf', 'is_neginf',
-           'is_nan', 'is_list', 'is_list_of_lists',
-           'is_ndarray', 'is_scsarray', 'is_slice', 'is_str', 'is_bytes',
-           'is_tuple', 'is_set', 'is_dict', 'to_builtin']
+__all__ = [
+    "is_bool",
+    "is_int",
+    "is_intlike",
+    "is_float",
+    "is_floatlike",
+    "is_scalar",
+    "is_scalarlike",
+    "is_inf",
+    "is_posinf",
+    "is_neginf",
+    "is_nan",
+    "is_list",
+    "is_list_of_lists",
+    "is_ndarray",
+    "is_scsarray",
+    "is_slice",
+    "is_str",
+    "is_bytes",
+    "is_tuple",
+    "is_set",
+    "is_dict",
+    "to_builtin",
+]
 
 
 def is_bool(x):
@@ -48,8 +68,9 @@ def is_intlike(x):
 
     if is_int(x):
         return True  # built-in or numpy integers
-    elif (is_list(x) and len(x) == 1 and is_int(x[0])) or \
-            (is_ndarray(x) and x.size == 1 and x.dtype.kind in ('i', 'u')):
+    elif (is_list(x) and len(x) == 1 and is_int(x[0])) or (
+        is_ndarray(x) and x.size == 1 and x.dtype.kind in ("i", "u")
+    ):
         return True
     else:
         return False
@@ -79,8 +100,9 @@ def is_floatlike(x):
     """
     if is_float(x):
         return True  # built-in or numpy floats
-    elif (is_list(x) and len(x) == 1 and is_float(x[0])) or \
-            (is_ndarray(x) and x.size == 1 and x.dtype.kind in ('f')):
+    elif (is_list(x) and len(x) == 1 and is_float(x[0])) or (
+        is_ndarray(x) and x.size == 1 and x.dtype.kind in ("f")
+    ):
         return True
     else:
         return False

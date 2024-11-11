@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 import scipy.sparse as scs
 from scipy.sparse.linalg import inv, norm
 import numpy as np
@@ -14,8 +15,16 @@ from secml.array.c_array_interface import _CArrayInterface
 
 from secml.array.c_dense import CDense
 
-from secml.core.type_utils import is_ndarray, is_list_of_lists, \
-    is_list, is_tuple, is_slice, is_scalar, is_int, is_bool
+from secml.core.type_utils import (
+    is_ndarray,
+    is_list_of_lists,
+    is_list,
+    is_tuple,
+    is_slice,
+    is_scalar,
+    is_int,
+    is_bool,
+)
 from secml.core.constants import inf
 
 
@@ -82,7 +91,8 @@ def _shape_atleast_2d(shape):
 
 class CSparse(_CArrayInterface):
     """Sparse array. Encapsulation for scipy.sparse.csr_matrix."""
-    __slots__ = '_data'  # CSparse has only one slot for the scs.csr_matrix
+
+    __slots__ = "_data"  # CSparse has only one slot for the scs.csr_matrix
 
     def __init__(self, data=None, dtype=None, copy=False, shape=None):
         """Sparse matrix initialization."""
@@ -223,13 +233,13 @@ class CSparse(_CArrayInterface):
             Reshape is performed after casting.
 
         """
-        out = getattr(self._data, 'to{:}'.format(scs_format))()
+        out = getattr(self._data, "to{:}".format(scs_format))()
         if shape is not None:
             if not is_tuple(shape) or len(shape) != 2:
                 # TODO: ERROR IS PROPERLY RAISED IN SCIPY > 1.4
-                raise ValueError('matrix shape must be two-dimensional')
+                raise ValueError("matrix shape must be two-dimensional")
             # output of scipy.reshape not necessarily of the same format
-            return getattr(out.reshape(shape), 'to{:}'.format(scs_format))()
+            return getattr(out.reshape(shape), "to{:}".format(scs_format))()
         return out
 
     def tocsr(self, shape=None):
@@ -242,7 +252,7 @@ class CSparse(_CArrayInterface):
             Reshape is performed after casting.
 
         """
-        return self._toscs('csr', shape=shape)
+        return self._toscs("csr", shape=shape)
 
     def tocoo(self, shape=None):
         """Return data as coo_matrix.
@@ -254,7 +264,7 @@ class CSparse(_CArrayInterface):
             Reshape is performed after casting.
 
         """
-        return self._toscs('coo', shape=shape)
+        return self._toscs("coo", shape=shape)
 
     def tocsc(self, shape=None):
         """Return data as csc_matrix.
@@ -266,7 +276,7 @@ class CSparse(_CArrayInterface):
             Reshape is performed after casting.
 
         """
-        return self._toscs('csc', shape=shape)
+        return self._toscs("csc", shape=shape)
 
     def todia(self, shape=None):
         """Return data as dia_matrix.
@@ -278,7 +288,7 @@ class CSparse(_CArrayInterface):
             Reshape is performed after casting.
 
         """
-        return self._toscs('dia', shape=shape)
+        return self._toscs("dia", shape=shape)
 
     def todok(self, shape=None):
         """Return data as dok_matrix.
@@ -290,7 +300,7 @@ class CSparse(_CArrayInterface):
             Reshape is performed after casting.
 
         """
-        return self._toscs('dok', shape=shape)
+        return self._toscs("dok", shape=shape)
 
     def tolil(self, shape=None):
         """Return data as lil_matrix.
@@ -302,7 +312,7 @@ class CSparse(_CArrayInterface):
             Reshape is performed after casting.
 
         """
-        return self._toscs('lil', shape=shape)
+        return self._toscs("lil", shape=shape)
 
     def tolist(self, shape=None):
         """Return data as list.
@@ -325,7 +335,7 @@ class CSparse(_CArrayInterface):
     def _tocoo_or_tocsr(self):
         """Return data as coo_matrix if data is not as csr_matrix,
         return csr_matrix otherwise."""
-        if self._data.getformat() != 'csr':
+        if self._data.getformat() != "csr":
             return self.tocoo()
         return self.tocsr()
 
@@ -365,7 +375,7 @@ class CSparse(_CArrayInterface):
         if isinstance(idx, CDense) or isinstance(idx, CSparse):
 
             # Boolean mask
-            if idx.dtype.kind == 'b':
+            if idx.dtype.kind == "b":
 
                 # Boolean masks must be 2-Dimensional
                 if idx.ndim == 1:
@@ -378,14 +388,17 @@ class CSparse(_CArrayInterface):
                 # Check the shape of the boolean mask
                 if idx.shape != self.shape:
                     raise IndexError(
-                        "boolean mask must have shape {:}".format(self.shape))
+                        "boolean mask must have shape {:}".format(self.shape)
+                    )
 
                 return idx
 
             # Check if array is vector-like
             if self.shape[0] != 1:
-                raise IndexError("vector-like indexing is only applicable "
-                                 "to arrays with shape[0] == 1.")
+                raise IndexError(
+                    "vector-like indexing is only applicable "
+                    "to arrays with shape[0] == 1."
+                )
 
             # Fake 2D index. Use ndarrays to mimic Matlab-like indexing
             idx = (np.asarray([0]), idx.tondarray())
@@ -395,8 +408,10 @@ class CSparse(_CArrayInterface):
 
         elif is_list_of_lists(idx):
             if len(idx) != 2:
-                raise IndexError("for list of lists indexing, indices "
-                                 "for each dimension must be provided.")
+                raise IndexError(
+                    "for list of lists indexing, indices "
+                    "for each dimension must be provided."
+                )
             # List of lists must be passed as a tuple
             return tuple(idx)
 
@@ -404,8 +419,10 @@ class CSparse(_CArrayInterface):
         elif is_int(idx) or is_bool(idx):
             # Check if array is vector-like
             if self.shape[0] != 1:
-                raise IndexError("vector-like indexing is only applicable "
-                                 "to arrays with shape[0] == 1.")
+                raise IndexError(
+                    "vector-like indexing is only applicable "
+                    "to arrays with shape[0] == 1."
+                )
 
             # Fake 2D index. Use ndarrays to mimic Matlab-like indexing
             idx = (np.asarray([0]), np.asarray([idx]))
@@ -419,8 +436,10 @@ class CSparse(_CArrayInterface):
         elif is_list(idx):
             # Check if array is vector-like
             if self.shape[0] != 1:
-                raise IndexError("vector-like indexing is only applicable "
-                                 "to arrays with shape[0] == 1.")
+                raise IndexError(
+                    "vector-like indexing is only applicable "
+                    "to arrays with shape[0] == 1."
+                )
 
             # Empty lists are converted to float by numpy,
             # special handling needed
@@ -441,8 +460,10 @@ class CSparse(_CArrayInterface):
         elif is_slice(idx):
             # Check if array is vector-like
             if self.shape[0] != 1:
-                raise IndexError("vector-like indexing is only applicable "
-                                 "to arrays with shape[0] == 1.")
+                raise IndexError(
+                    "vector-like indexing is only applicable "
+                    "to arrays with shape[0] == 1."
+                )
 
             # Fake index for row. Slice for columns is fine
             idx = (0, idx)
@@ -499,8 +520,10 @@ class CSparse(_CArrayInterface):
                         self._data = self._data.tocsc()
 
                 else:
-                    raise TypeError("{:} should not be used for "
-                                    "CSparse indexing.".format(type(e)))
+                    raise TypeError(
+                        "{:} should not be used for "
+                        "CSparse indexing.".format(type(e))
+                    )
 
             # Converting back to tuple
             idx = tuple(idx_list)
@@ -511,8 +534,9 @@ class CSparse(_CArrayInterface):
 
         else:
             # No other object is accepted for CSparse indexing
-            raise TypeError("{:} should not be used for "
-                            "CSparse indexing.".format(type(idx)))
+            raise TypeError(
+                "{:} should not be used for " "CSparse indexing.".format(type(idx))
+            )
 
         return idx
 
@@ -534,11 +558,15 @@ class CSparse(_CArrayInterface):
 
         for elem_idx, elem in enumerate(idx):
             # boolean arrays in tuple (cross-indices) must be 1-Dimensional
-            if elem is not None and elem.dtype.kind == 'b' and \
-                            elem.size != self.shape[elem_idx]:
+            if (
+                elem is not None
+                and elem.dtype.kind == "b"
+                and elem.size != self.shape[elem_idx]
+            ):
                 raise IndexError(
                     "boolean index array for axis {:} must have "
-                    "size {:}.".format(elem_idx, self.shape[elem_idx]))
+                    "size {:}.".format(elem_idx, self.shape[elem_idx])
+                )
 
     def __getitem__(self, idx):
         """Redefinition of the get (brackets) operator."""
@@ -566,8 +594,9 @@ class CSparse(_CArrayInterface):
         elif isinstance(value, CSparse):
             value = value.tocsr()
         elif not (is_scalar(value) or is_bool(value)):
-            raise TypeError("{:} cannot be used for setting "
-                            "a CSparse.".format(type(value)))
+            raise TypeError(
+                "{:} cannot be used for setting " "a CSparse.".format(type(value))
+            )
 
         # Check index for all other cases
         idx = self._check_index(idx)
@@ -635,7 +664,8 @@ class CSparse(_CArrayInterface):
                 return self.deepcopy()
             raise NotImplementedError(
                 "adding a nonzero scalar or a boolean True to a "
-                "sparse array is not supported. Convert to dense if needed.")
+                "sparse array is not supported. Convert to dense if needed."
+            )
         elif isinstance(other, CSparse):  # Sparse + Sparse = Sparse
             # Scipy does not support broadcast natively
             other = self._broadcast_other(other)
@@ -644,7 +674,8 @@ class CSparse(_CArrayInterface):
             if other.size == 1:  # scalar-like
                 raise NotImplementedError(
                     "adding an array of size one to a sparse array "
-                    "is not supported. Convert to dense if needed.")
+                    "is not supported. Convert to dense if needed."
+                )
             else:  # direct operation or broadcast
                 return CDense(self._data.__add__(other.tondarray()))
         else:
@@ -674,7 +705,8 @@ class CSparse(_CArrayInterface):
                 return self.deepcopy()
             raise NotImplementedError(
                 "subtracting a nonzero scalar or a boolean True from a "
-                "sparse array is not supported. Convert to dense if needed.")
+                "sparse array is not supported. Convert to dense if needed."
+            )
         elif isinstance(other, CSparse):  # Sparse - Sparse = Sparse
             # Scipy does not support broadcast natively
             other = self._broadcast_other(other)
@@ -683,7 +715,8 @@ class CSparse(_CArrayInterface):
             if other.size == 1:  # scalar-like
                 raise NotImplementedError(
                     "subtracting an array of size one from a sparse array "
-                    "is not supported. Convert to dense if needed.")
+                    "is not supported. Convert to dense if needed."
+                )
             else:  # direct operation or broadcast
                 return CDense(self._data.__sub__(other.tondarray()))
         else:
@@ -696,7 +729,8 @@ class CSparse(_CArrayInterface):
                 return -self.deepcopy()
             raise NotImplementedError(
                 "subtracting a sparse array from a nonzero scalar or from "
-                "a boolean True is not supported. Convert to dense if needed.")
+                "a boolean True is not supported. Convert to dense if needed."
+            )
         else:
             return NotImplemented
 
@@ -716,10 +750,10 @@ class CSparse(_CArrayInterface):
             Array after product.
 
         """
-        if is_scalar(other) or is_bool(other) or \
-                isinstance(other, (CSparse, CDense)):  # Always Sparse
-            return self.__class__(
-                self._data.multiply(self._buffer_to_builtin(other)))
+        if (
+            is_scalar(other) or is_bool(other) or isinstance(other, (CSparse, CDense))
+        ):  # Always Sparse
+            return self.__class__(self._data.multiply(self._buffer_to_builtin(other)))
         else:
             return NotImplemented
 
@@ -772,7 +806,8 @@ class CSparse(_CArrayInterface):
     def __rtruediv__(self, other):
         """Element-wise (inverse) true division."""
         raise NotImplementedError(
-            "dividing a scalar by a sparse array is not supported")
+            "dividing a scalar by a sparse array is not supported"
+        )
 
     def __floordiv__(self, other):
         """Element-wise floor division (integral part of the quotient).
@@ -800,7 +835,8 @@ class CSparse(_CArrayInterface):
     def __rfloordiv__(self, other):
         """Element-wise (inverse) floor division."""
         raise NotImplementedError(
-            "dividing a scalar by a sparse array is not supported")
+            "dividing a scalar by a sparse array is not supported"
+        )
 
     def __abs__(self):
         """Returns array elements without sign.
@@ -842,18 +878,19 @@ class CSparse(_CArrayInterface):
             if power == 0:
                 raise NotImplementedError(
                     "using zero or a boolean False as power is not supported "
-                    "for sparse arrays. Convert to dense if needed.")
+                    "for sparse arrays. Convert to dense if needed."
+                )
             x = self.tocsr()  # self.__class__ expects a csr
             # indices/indptr must passed as copies (pow creates new data)
-            return self.__class__((pow(x.data, power), x.indices, x.indptr),
-                                  shape=x.shape, copy=True)
+            return self.__class__(
+                (pow(x.data, power), x.indices, x.indptr), shape=x.shape, copy=True
+            )
         else:
             return NotImplemented
 
     def __rpow__(self, power):
         """Element-wise (inverse) power."""
-        raise NotImplementedError(
-            "using a sparse array as a power is not supported")
+        raise NotImplementedError("using a sparse array as a power is not supported")
 
     def __eq__(self, other):
         """Element-wise == operator.
@@ -1102,8 +1139,10 @@ class CSparse(_CArrayInterface):
         import os
 
         if os.path.isfile(datafile) is True and overwrite is False:
-            raise IOError("File {:} already exists. Specify overwrite=True "
-                          "or delete the file.".format(datafile))
+            raise IOError(
+                "File {:} already exists. Specify overwrite=True "
+                "or delete the file.".format(datafile)
+            )
 
         x = self.tocsr()  # Load expects a csr_matrix
 
@@ -1111,14 +1150,14 @@ class CSparse(_CArrayInterface):
         data_cndarray = CDense(x.data).reshape((1, x.data.shape[0]))
         # Converting explicitly to int as in 64 bit machines the
         # following arrays are stored with dtype == np.int32
-        indices_cndarray = \
+        indices_cndarray = (
             CDense(x.indices).reshape((1, x.indices.shape[0])).astype(int)
-        indptr_cndarray = \
-            CDense(x.indptr).reshape((1, x.indptr.shape[0])).astype(int)
+        )
+        indptr_cndarray = CDense(x.indptr).reshape((1, x.indptr.shape[0])).astype(int)
 
         # Error handling is managed by CDense.save()
         # file will be closed exiting from context
-        with open(datafile, mode='wt+', encoding='utf-8') as fhandle:
+        with open(datafile, mode="wt+", encoding="utf-8") as fhandle:
             data_cndarray.save(fhandle)
             indices_cndarray.save(fhandle)
             indptr_cndarray.save(fhandle)
@@ -1146,18 +1185,26 @@ class CSparse(_CArrayInterface):
 
         """
         # CDense.load() will manage IO errors
-        imported_data = CDense.load(
-            datafile, dtype=dtype, startrow=0, skipend=3).ravel().tondarray()
+        imported_data = (
+            CDense.load(datafile, dtype=dtype, startrow=0, skipend=3)
+            .ravel()
+            .tondarray()
+        )
         # Indices are always integers
-        imported_indices = CDense.load(
-            datafile, dtype=int, startrow=1, skipend=2).ravel().tondarray()
-        imported_indptr = CDense.load(
-            datafile, dtype=int, startrow=2, skipend=1).ravel().tondarray()
-        shape_ndarray = CDense.load(
-            datafile, dtype=int, startrow=3, skipend=0).ravel().tondarray()
+        imported_indices = (
+            CDense.load(datafile, dtype=int, startrow=1, skipend=2).ravel().tondarray()
+        )
+        imported_indptr = (
+            CDense.load(datafile, dtype=int, startrow=2, skipend=1).ravel().tondarray()
+        )
+        shape_ndarray = (
+            CDense.load(datafile, dtype=int, startrow=3, skipend=0).ravel().tondarray()
+        )
 
-        return cls((imported_data, imported_indices, imported_indptr),
-                   shape=(shape_ndarray[0], shape_ndarray[1]))
+        return cls(
+            (imported_data, imported_indices, imported_indptr),
+            shape=(shape_ndarray[0], shape_ndarray[1]),
+        )
 
     # ----------------------------- #
     # # # # # # UTILITIES # # # # # #
@@ -1184,7 +1231,7 @@ class CSparse(_CArrayInterface):
         """
         return self.__class__(self)
 
-    def reshape(self, newshape, order='C', copy=False):
+    def reshape(self, newshape, order="C", copy=False):
         """Reshape the matrix using input shape (int or tuple of ints).
 
         Parameters
@@ -1205,8 +1252,7 @@ class CSparse(_CArrayInterface):
         """
         # Scipy >= 1.4, shape must be two dimensional
         newshape = _shape_atleast_2d(newshape)
-        return self.__class__(
-            self.tocsr().reshape(newshape, order=order, copy=copy))
+        return self.__class__(self.tocsr().reshape(newshape, order=order, copy=copy))
 
     def resize(self, newshape, constant=0):
         """Return a new array with the specified shape."""
@@ -1232,8 +1278,7 @@ class CSparse(_CArrayInterface):
         data = np.round(x.data, decimals=decimals)
         # Round does not allocate new memory (data.flags.OWNDATA = False)
         # and indices/indptr must passed as copies
-        return self.__class__(
-            (data, x.indices, x.indptr), shape=self.shape, copy=True)
+        return self.__class__((data, x.indices, x.indptr), shape=self.shape, copy=True)
 
     def ceil(self):
         """Return the ceiling of the input, element-wise."""
@@ -1250,9 +1295,9 @@ class CSparse(_CArrayInterface):
     def eliminate_zeros(self):
         self._data.eliminate_zeros()
 
-    def sort(self, axis=-1, kind='quicksort', inplace=False):
+    def sort(self, axis=-1, kind="quicksort", inplace=False):
         """Sort array."""
-        if kind != 'quicksort':
+        if kind != "quicksort":
             raise ValueError("only `quicksort` algorithm is supported")
 
         tosort = self if inplace is True else self.deepcopy()
@@ -1272,14 +1317,14 @@ class CSparse(_CArrayInterface):
 
         return tosort
 
-    def argsort(self, axis=-1, kind='quicksort'):
+    def argsort(self, axis=-1, kind="quicksort"):
         """Returns the indices that would sort an array.
 
         If possible is better if you use sort function axis=-1 order based
         on last axis (which in sparse matrix is 1 horizontal).
 
         """
-        if kind != 'quicksort':
+        if kind != "quicksort":
             raise ValueError("only `quicksort` algorithm is supported")
 
         # for all element of chosen axis
@@ -1295,7 +1340,8 @@ class CSparse(_CArrayInterface):
                 axis_elem_num = array.shape[1]  # order for column
             else:
                 raise ValueError(
-                    "wrong axis parameter in argsort function for sparse data")
+                    "wrong axis parameter in argsort function for sparse data"
+                )
 
         index_matrix = CDense().zeros(array.shape, dtype=int)
 
@@ -1308,8 +1354,9 @@ class CSparse(_CArrayInterface):
                 axis_element = array[:, i]  # order for column
 
             # argsort of current axis element
-            sorted_data_idx = CDense(
-                axis_element.todense()).argsort(axis=axis, kind='quicksort')
+            sorted_data_idx = CDense(axis_element.todense()).argsort(
+                axis=axis, kind="quicksort"
+            )
 
             if axis == 1 or axis == -1 or axis is None:
                 index_matrix[i, :] = sorted_data_idx[0, :]  # order for row
@@ -1346,7 +1393,7 @@ class CSparse(_CArrayInterface):
         blocks = [rows for _ in range(m)]
         if len(blocks) == 0:  # To manage the m = 0 case
             blocks = [[]]
-        return self.__class__(scs.bmat(blocks, format='csr', dtype=self.dtype))
+        return self.__class__(scs.bmat(blocks, format="csr", dtype=self.dtype))
 
     def repeat(self, repeats, axis=None):
         """Repeat elements of an array."""
@@ -1376,8 +1423,7 @@ class CSparse(_CArrayInterface):
 
         """
         if self.shape != array.shape:
-            raise ValueError(
-                "array to compare must have shape {:}".format(self.shape))
+            raise ValueError("array to compare must have shape {:}".format(self.shape))
 
         # This create an empty sparse matrix (basically full of zeros)
         and_result = self.__class__(self.shape, dtype=bool)
@@ -1385,8 +1431,7 @@ class CSparse(_CArrayInterface):
         # Ensure we have the expected type
         # Use 'coo' for fast conversion (if not a 'csr')
         x = self._tocoo_or_tocsr()
-        x_array = array.tocoo() if \
-            array._data.getformat() != 'csr' else array.tocsr()
+        x_array = array.tocoo() if array._data.getformat() != "csr" else array.tocsr()
 
         # Iterate over non-zero elements
         # This also works for any explicitly stored zero
@@ -1395,9 +1440,9 @@ class CSparse(_CArrayInterface):
             this_elem_row = self.nnz_indices[0][e_i]
             this_elem_col = self.nnz_indices[1][e_i]
             # Check if the 2nd array has an element in the same position
-            y_same_bool = \
-                (CDense(array.nnz_indices[0]) == this_elem_row).logical_and(
-                    CDense(array.nnz_indices[1]) == this_elem_col)
+            y_same_bool = (CDense(array.nnz_indices[0]) == this_elem_row).logical_and(
+                CDense(array.nnz_indices[1]) == this_elem_col
+            )
             if y_same_bool.any():  # Found a corresponding element
                 # Now extract the value to compare from second array
                 same_position_val = int(x_array.data[y_same_bool.tondarray()])
@@ -1427,8 +1472,7 @@ class CSparse(_CArrayInterface):
 
         """
         if self.shape != array.shape:
-            raise ValueError(
-                "array to compare must have shape {:}".format(self.shape))
+            raise ValueError("array to compare must have shape {:}".format(self.shape))
 
         # All non-zero elements will be replaced with True, otherwise False
         out = self.astype(bool)
@@ -1459,13 +1503,11 @@ class CSparse(_CArrayInterface):
 
     def maximum(self, array):
         """Element-wise maximum."""
-        return self.__class__(
-            self._data.maximum(self._buffer_to_builtin(array)))
+        return self.__class__(self._data.maximum(self._buffer_to_builtin(array)))
 
     def minimum(self, array):
         """Element-wise minimum."""
-        return self.__class__(
-            self._data.minimum(self._buffer_to_builtin(array)))
+        return self.__class__(self._data.minimum(self._buffer_to_builtin(array)))
 
     # ------ #
     # SEARCH #
@@ -1482,7 +1524,8 @@ class CSparse(_CArrayInterface):
 
     def binary_search(self, value):
         raise NotImplementedError(
-            "`binary_search` is not implemented for sparse arrays!")
+            "`binary_search` is not implemented for sparse arrays!"
+        )
 
     # ------------- #
     # DATA ANALYSIS #
@@ -1510,23 +1553,23 @@ class CSparse(_CArrayInterface):
         res = self.tocsr().getnnz(axis=axis)
         return CDense(res) if axis is not None else res
 
-    def unique(self, return_index=False,
-               return_inverse=False, return_counts=False):
+    def unique(self, return_index=False, return_inverse=False, return_counts=False):
         """Return unique array elements in dense format."""
         # Let's compute the number of zeros (will be used multiple times)
         n_zeros = self.size - self.nnz
         unique_items = [0] if n_zeros > 0 else []  # We have at least a zero?
         # Appending nonzero elements
-        out = np.unique(self.tocsr().data,
-                        return_index=return_index,
-                        return_inverse=return_inverse,
-                        return_counts=return_counts)
+        out = np.unique(
+            self.tocsr().data,
+            return_index=return_index,
+            return_inverse=return_inverse,
+            return_counts=return_counts,
+        )
         if not any([return_index, return_inverse, return_counts]):
             # Return unique elements with correct dtype
             return CDense(unique_items + out.tolist()).astype(self.dtype)
         else:  # np.unique returned a tuple
-            unique_items = CDense(
-                unique_items + out[0].tolist()).astype(self.dtype)
+            unique_items = CDense(unique_items + out[0].tolist()).astype(self.dtype)
 
         # If any extra parameter has been specified, output will be a tuple
         outputs = [unique_items]
@@ -1546,20 +1589,22 @@ class CSparse(_CArrayInterface):
                 for i in range(flat_a.size):
                     # If a element is missing for indices[1]
                     # (nz column indices), means there is a zero there!
-                    if i + 1 > len(flat_a.nnz_indices[1]) or \
-                                    flat_a.nnz_indices[1][i] != i:
+                    if (
+                        i + 1 > len(flat_a.nnz_indices[1])
+                        or flat_a.nnz_indices[1][i] != i
+                    ):
                         unique_index = CDense([i])
                         break
 
             # Let's get the indices of the nz elements (columns indices)
             unique_index = unique_index.append(
-                CDense(flat_a.nnz_indices[1], dtype=int)[CDense(out[1])])
+                CDense(flat_a.nnz_indices[1], dtype=int)[CDense(out[1])]
+            )
             # Add result to the list of returned items
             outputs.append(unique_index)
 
         if return_inverse is True:
-            raise NotImplementedError(
-                "`return_inverse` is currently not supported")
+            raise NotImplementedError("`return_inverse` is currently not supported")
 
         if return_counts is True:
             # Let's check the number of extra parameters (to parse out)
@@ -1570,14 +1615,15 @@ class CSparse(_CArrayInterface):
 
             # size of the out tuple depends on the number of extra params
             unique_counts = CDense(
-                counts_zeros + out[min(3, num_params)].tolist(), dtype=int)
+                counts_zeros + out[min(3, num_params)].tolist(), dtype=int
+            )
             # Add result to the list of returned items
             outputs.append(unique_counts)
 
         return tuple(outputs)
 
     def bincount(self, minlength=0):
-        """Count the number of occurrences of each value in array 
+        """Count the number of occurrences of each value in array
         of non-negative ints."""
         # Use 'coo' for fast conversion (if not a 'csr')
         x = self._tocoo_or_tocsr()
@@ -1597,7 +1643,7 @@ class CSparse(_CArrayInterface):
 
         if self.size == 0:
             # Special handle as few norms raise error for empty arrays
-            if order == 'fro':
+            if order == "fro":
                 raise ValueError("Invalid norm order {:}.".format(order))
             return self.__class__([0.0])
 
@@ -1609,7 +1655,7 @@ class CSparse(_CArrayInterface):
             # Scipy does not supports negative norms along axis
             raise NotImplementedError
 
-        if axis is not None and order == 'fro':
+        if axis is not None and order == "fro":
             # 'fro' is a matrix norm
             raise ValueError("Invalid norm order {:}.".format(order))
 
@@ -1618,8 +1664,7 @@ class CSparse(_CArrayInterface):
             if axis is None and order in (2, -2):
                 # Return an error consistent with scipy
                 raise NotImplementedError
-            if axis is None and order not in (
-                    None, 'fro', inf, -inf, 1, -1):
+            if axis is None and order not in (None, "fro", inf, -inf, 1, -1):
                 raise ValueError("Invalid norm order {:}.".format(order))
             return self.__class__([0.0])
 
@@ -1636,8 +1681,7 @@ class CSparse(_CArrayInterface):
             out_sum = CDense([[0.0]])
         else:
             out_sum = CDense(self._data.sum(axis))
-        return \
-            out_sum.ravel() if axis is None or keepdims is False else out_sum
+        return out_sum.ravel() if axis is None or keepdims is False else out_sum
 
     def cumsum(self, axis=None, dtype=None):
         """Return the cumulative sum of the array elements."""
@@ -1681,16 +1725,17 @@ class CSparse(_CArrayInterface):
         """Return True if all array elements are boolean True."""
         if axis is not None or keepdims is not True:
             raise NotImplementedError(
-                "`axis` and `keepdims` are currently not supported")
+                "`axis` and `keepdims` are currently not supported"
+            )
         # Use 'coo' for fast conversion (if not a 'csr')
-        return bool(
-            self.size == self.nnz and self._tocoo_or_tocsr().data.all())
+        return bool(self.size == self.nnz and self._tocoo_or_tocsr().data.all())
 
     def any(self, axis=None, keepdims=True):
         """Return True if any array element is boolean True."""
         if axis is not None or keepdims is not True:
             raise NotImplementedError(
-                "`axis` and `keepdims` are currently not supported")
+                "`axis` and `keepdims` are currently not supported"
+            )
         # Use 'coo' for fast conversion (if not a 'csr')
         return bool(self._tocoo_or_tocsr().data.any())
 
@@ -1789,11 +1834,12 @@ class CSparse(_CArrayInterface):
 
         centered_array = self - array_mean.repmat(
             [1 if array_mean.shape[0] == self.shape[0] else self.shape[0]][0],
-            [1 if array_mean.shape[1] == self.shape[1] else self.shape[1]][0])
+            [1 if array_mean.shape[1] == self.shape[1] else self.shape[1]][0],
+        )
         # n is array size for axis == None or
         # the number of rows/columns of specified axis
         n = self.size if axis is None else self.shape[axis]
-        variance = (1.0 / (n - ddof)) * (centered_array ** 2)
+        variance = (1.0 / (n - ddof)) * (centered_array**2)
 
         return CDense(variance.sum(axis=axis, keepdims=keepdims).sqrt())
 
@@ -1807,12 +1853,13 @@ class CSparse(_CArrayInterface):
 
         """
         import hashlib
+
         x = self.tocsr()
 
-        h = hashlib.new('sha1')
+        h = hashlib.new("sha1")
 
         # Hash by taking into account shape and sparse matrix internals
-        h.update(hex(hash(x.shape)).encode('utf-8'))
+        h.update(hex(hash(x.shape)).encode("utf-8"))
         # The returned sha1 could be different for same data
         # but different memory order. Use C order to be consistent
         h.update(np.ascontiguousarray(x.indices))
@@ -1867,8 +1914,7 @@ class CSparse(_CArrayInterface):
 
     def log10(self):
         """Base 10 logarithm, element-wise."""
-        raise NotImplementedError(
-            "`log10` is not available for sparse arrays!")
+        raise NotImplementedError("`log10` is not available for sparse arrays!")
 
     def pow(self, exp):
         """Array elements raised to powers from input exponent, element-wise.
@@ -1891,8 +1937,7 @@ class CSparse(_CArrayInterface):
 
     def normpdf(self, mu=0.0, sigma=1.0):
         """Return normal distribution function."""
-        raise NotImplementedError(
-            "`normpdf` is not available for sparse arrays!")
+        raise NotImplementedError("`normpdf` is not available for sparse arrays!")
 
     # ----- #
     # MIXED #
@@ -1905,11 +1950,13 @@ class CSparse(_CArrayInterface):
     def diag(self, k=0):
         """Extract a diagonal or construct a diagonal array."""
         if self.shape[0] == 1:
-            return self.__class__(scs.diags(
-                self.tondarray(), offsets=[k], format='csr', dtype=self.dtype))
+            return self.__class__(
+                scs.diags(self.tondarray(), offsets=[k], format="csr", dtype=self.dtype)
+            )
         else:
-            if (k > 0 and k > self.shape[1] - 1) or \
-                    (k < 0 and abs(k) > self.shape[0] - 1):
+            if (k > 0 and k > self.shape[1] - 1) or (
+                k < 0 and abs(k) > self.shape[0] - 1
+            ):
                 raise ValueError("k exceeds matrix dimensions")
             return CDense(self.tocsr().diagonal(k=k))
 
@@ -1921,8 +1968,7 @@ class CSparse(_CArrayInterface):
 
     def interp(self, x_data, y_data, return_left=None, return_right=None):
         """One-dimensional linear interpolation."""
-        raise NotImplementedError(
-            "`interp` is not available for sparse arrays!")
+        raise NotImplementedError("`interp` is not available for sparse arrays!")
 
     def inv(self):
         """Compute the (multiplicative) inverse of a square matrix."""
@@ -1974,7 +2020,7 @@ class CSparse(_CArrayInterface):
         zeros elsewhere.
 
         """
-        return cls(scs.eye(n_rows, n_cols, k=k, dtype=dtype, format='csr'))
+        return cls(scs.eye(n_rows, n_cols, k=k, dtype=dtype, format="csr"))
 
     @classmethod
     def rand(cls, shape, random_state=None, density=0.01):
@@ -1987,7 +2033,7 @@ class CSparse(_CArrayInterface):
 
         """
         n_rows, n_cols = shape  # Unpacking the shape
-        return cls(scs.rand(n_rows, n_cols, density=density, format='csr'))
+        return cls(scs.rand(n_rows, n_cols, density=density, format="csr"))
 
     @classmethod
     def randn(cls, shape, random_state=None):
@@ -2022,8 +2068,7 @@ class CSparse(_CArrayInterface):
     def concatenate(cls, array1, array2, axis=1):
         """Concatenate a sequence of arrays along the given axis."""
         if not isinstance(array1, cls) or not isinstance(array2, cls):
-            raise TypeError(
-                "both arrays to concatenate must be {:}".format(cls))
+            raise TypeError("both arrays to concatenate must be {:}".format(cls))
 
         if axis is None:  # both arrays should be ravelled
             array1 = array1.ravel()
@@ -2043,6 +2088,6 @@ class CSparse(_CArrayInterface):
         raise NotImplementedError
 
     @classmethod
-    def meshgrid(cls, xi, indexing='xy'):
+    def meshgrid(cls, xi, indexing="xy"):
         """Return coordinate matrices from coordinate vectors."""
         raise NotImplementedError

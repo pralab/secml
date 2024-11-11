@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from sklearn.model_selection import ShuffleSplit
 
 from secml.array import CArray
@@ -77,13 +78,14 @@ class CDataSplitterShuffle(CDataSplitter):
     [CArray(3,)(dense: [2 1 0]), CArray(3,)(dense: [2 0 1]), CArray(3,)(dense: [0 2 1])]
 
     """
-    __class_type = 'shuffle'
 
-    def __init__(self,  num_folds=3, train_size=None,
-                 test_size=None, random_state=None):
+    __class_type = "shuffle"
+
+    def __init__(self, num_folds=3, train_size=None, test_size=None, random_state=None):
 
         super(CDataSplitterShuffle, self).__init__(
-            num_folds=num_folds, random_state=random_state)
+            num_folds=num_folds, random_state=random_state
+        )
 
         self.train_size = train_size
         self.test_size = test_size
@@ -106,14 +108,15 @@ class CDataSplitterShuffle(CDataSplitter):
         self._tr_idx = []
         self._ts_idx = []
 
-        sk_splitter = ShuffleSplit(n_splits=self.num_folds,
-                                   train_size=self.train_size,
-                                   test_size=self.test_size,
-                                   random_state=self.random_state)
+        sk_splitter = ShuffleSplit(
+            n_splits=self.num_folds,
+            train_size=self.train_size,
+            test_size=self.test_size,
+            random_state=self.random_state,
+        )
 
         # We take sklearn indices (iterators) and map to list of CArrays
-        for train_index, test_index in \
-                sk_splitter.split(dataset.X.get_data()):
+        for train_index, test_index in sk_splitter.split(dataset.X.get_data()):
             train_index = CArray(train_index)
             test_index = CArray(test_index)
             self._tr_idx.append(train_index)

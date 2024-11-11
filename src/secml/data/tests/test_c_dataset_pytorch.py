@@ -18,13 +18,17 @@ class TestCDatasetPyTorch(CUnitTest):
         self.n_classes = 3
         self.n_features = 5
 
-
-        self.ds = CDLRandom(n_classes=self.n_classes,
-                            n_features=self.n_features,
-                            n_informative=self.n_features,
-                            n_redundant=0).load()
-        self.logger.info("num_samples: {}, num_classes: {:}".format(
-            self.ds.num_samples, self.ds.num_classes))
+        self.ds = CDLRandom(
+            n_classes=self.n_classes,
+            n_features=self.n_features,
+            n_informative=self.n_features,
+            n_redundant=0,
+        ).load()
+        self.logger.info(
+            "num_samples: {}, num_classes: {:}".format(
+                self.ds.num_samples, self.ds.num_classes
+            )
+        )
 
     def test_convert(self):
         """Test converting a CDataset into a CDatasetPyTorch."""
@@ -93,5 +97,5 @@ class TestCDatasetPyTorch(CUnitTest):
             torch_ds[[2, 3]]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

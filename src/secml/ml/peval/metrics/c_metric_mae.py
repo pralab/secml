@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import sklearn.metrics as skm
 
 from secml.array import CArray
@@ -35,7 +36,8 @@ class CMetricMAE(CMetric):
     0.25
 
     """
-    __class_type = 'mae'
+
+    __class_type = "mae"
     best_value = 0.0
 
     def _performance_score(self, y_true, score):
@@ -54,5 +56,4 @@ class CMetricMAE(CMetric):
             Returns metric value as float.
 
         """
-        return float(skm.mean_absolute_error(y_true.tondarray(),
-                                             score.tondarray()))
+        return float(skm.mean_absolute_error(y_true.tondarray(), score.tondarray()))

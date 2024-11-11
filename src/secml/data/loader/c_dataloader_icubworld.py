@@ -6,6 +6,7 @@
 .. moduleauthor:: Angelo Sotgiu
 
 """
+
 from multiprocessing import Lock
 import zipfile
 import os
@@ -24,14 +25,15 @@ from secml.utils import fm
 from secml.utils.download_utils import dl_file, md5
 
 # Folder where all iCubWorld dataset will be stored
-ICUBWORLD_PATH = fm.join(settings.SECML_DS_DIR, 'iCubWorld')
+ICUBWORLD_PATH = fm.join(settings.SECML_DS_DIR, "iCubWorld")
 
 # iCubWorld28
-ICUBWORLD28_URL = \
-    'https://data.mendeley.com/datasets/3n2vh9rdxd/1/files/' \
-    '9e3a79ef-18d9-4c37-b76c-0c34ead60544/iCubWorld28_128x128.zip?dl=1'
-ICUBWORLD28_MD5 = 'd4fcdd02bdb0054688a213611a7a8ae7'
-ICUBWORLD28_PATH = fm.join(ICUBWORLD_PATH, 'iCubWorld28')
+ICUBWORLD28_URL = (
+    "https://data.mendeley.com/datasets/3n2vh9rdxd/1/files/"
+    "9e3a79ef-18d9-4c37-b76c-0c34ead60544/iCubWorld28_128x128.zip?dl=1"
+)
+ICUBWORLD28_MD5 = "d4fcdd02bdb0054688a213611a7a8ae7"
+ICUBWORLD28_PATH = fm.join(ICUBWORLD_PATH, "iCubWorld28")
 
 
 # TODO: iCubWorld 1.0
@@ -72,22 +74,31 @@ class CDataLoaderICubWorld28(CDataLoaderICubWorld):
     class_type : 'icubworld28'
 
     """
-    __class_type = 'icubworld28'
+
+    __class_type = "icubworld28"
     __lock = Lock()  # Lock to prevent multiple parallel download/extraction
 
     def __init__(self):
 
-        self._train_path = fm.join(ICUBWORLD28_PATH, 'train')
-        self._test_path = fm.join(ICUBWORLD28_PATH, 'test')
+        self._train_path = fm.join(ICUBWORLD28_PATH, "train")
+        self._test_path = fm.join(ICUBWORLD28_PATH, "test")
 
         with CDataLoaderICubWorld28.__lock:
             # Download (if needed) data and extract it
-            if not fm.folder_exist(self._train_path) \
-                    or not fm.folder_exist(self._test_path):
+            if not fm.folder_exist(self._train_path) or not fm.folder_exist(
+                self._test_path
+            ):
                 self._get_data(ICUBWORLD28_URL, ICUBWORLD28_PATH)
 
-    def load(self, ds_type, day='day4', icub7=False,
-             resize_shape=(128, 128), crop_shape=None, normalize=True):
+    def load(
+        self,
+        ds_type,
+        day="day4",
+        icub7=False,
+        resize_shape=(128, 128),
+        crop_shape=None,
+        normalize=True,
+    ):
         """Load the dataset.
 
         The pre-cropped version of the images is loaded, with size 128 x 128.
@@ -122,9 +133,9 @@ class CDataLoaderICubWorld28(CDataLoaderICubWorld):
             Output dataset.
 
         """
-        if ds_type == 'train':
+        if ds_type == "train":
             data_path = self._train_path
-        elif ds_type == 'test':
+        elif ds_type == "test":
             data_path = self._test_path
         else:
             raise ValueError("use ds_type = {'train', 'test'}.")
@@ -135,7 +146,9 @@ class CDataLoaderICubWorld28(CDataLoaderICubWorld):
 
         self.logger.info(
             "Loading iCubWorld{:} {:} {:} dataset from {:}".format(
-                '7' if icub7 else '28', day, ds_type, day_path))
+                "7" if icub7 else "28", day, ds_type, day_path
+            )
+        )
 
         icub7 = 3 if icub7 is True else icub7  # Use the 3rd sub-obj by default
 
@@ -164,7 +177,7 @@ class CDataLoaderICubWorld28(CDataLoaderICubWorld):
                     if crop_shape is not None:
                         img = crop_img(img, crop_shape)
 
-                    img = CArray(img.getdata(), dtype='uint8').ravel()
+                    img = CArray(img.getdata(), dtype="uint8").ravel()
                     x = x.append(img, axis=0) if x is not None else img
 
                     y_orig.append(sub_obj)  # Label is given by sub-obj name
@@ -194,7 +207,7 @@ class CDataLoaderICubWorld28(CDataLoaderICubWorld):
             Path to the folder where to store the downloaded file.
 
         """
-        f_dl = fm.join(dl_folder, 'iCubWorld28_128x128.zip?dl=1')
+        f_dl = fm.join(dl_folder, "iCubWorld28_128x128.zip?dl=1")
         if not fm.file_exist(f_dl) or md5(f_dl) != ICUBWORLD28_MD5:
             # Generate the full path to the downloaded file
             f_dl = dl_file(file_url, dl_folder, md5_digest=ICUBWORLD28_MD5)
@@ -202,23 +215,24 @@ class CDataLoaderICubWorld28(CDataLoaderICubWorld):
         self.logger.info("Extracting files...")
 
         # Extract the content of downloaded file
-        zipfile.ZipFile(f_dl, 'r').extractall(dl_folder)
+        zipfile.ZipFile(f_dl, "r").extractall(dl_folder)
         # Remove downloaded file
         fm.remove_file(f_dl)
 
         # iCubWorld28 zip file contains a macosx private folder, clean it up
-        if fm.folder_exist(fm.join(ICUBWORLD28_PATH, '__MACOSX')):
-            fm.remove_folder(fm.join(ICUBWORLD28_PATH, '__MACOSX'), force=True)
+        if fm.folder_exist(fm.join(ICUBWORLD28_PATH, "__MACOSX")):
+            fm.remove_folder(fm.join(ICUBWORLD28_PATH, "__MACOSX"), force=True)
 
         # iCubWorld28 zip file contains a macosx private files, clean it up
         for dirpath, dirnames, filenames in os.walk(ICUBWORLD28_PATH):
             for file in filenames:
-                if fnmatch(file, '.DS_Store'):
+                if fnmatch(file, ".DS_Store"):
                     fm.remove_file(fm.join(dirpath, file))
 
         # Now move all data to an upper folder if needed
-        if not fm.folder_exist(self._train_path) \
-                or not fm.folder_exist(self._test_path):
+        if not fm.folder_exist(self._train_path) or not fm.folder_exist(
+            self._test_path
+        ):
             sub_d = fm.join(dl_folder, fm.listdir(dl_folder)[0])
             for e in fm.listdir(sub_d):
                 e_full = fm.join(sub_d, e)  # Full path to current element
@@ -231,8 +245,9 @@ class CDataLoaderICubWorld28(CDataLoaderICubWorld):
                     pass
 
             # Check that the main dataset file is now in the correct folder
-            if not fm.folder_exist(self._train_path) \
-                    or not fm.folder_exist(self._test_path):
+            if not fm.folder_exist(self._train_path) or not fm.folder_exist(
+                self._test_path
+            ):
                 raise RuntimeError("dataset main file not available!")
 
             # The subdirectory can now be removed

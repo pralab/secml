@@ -11,7 +11,7 @@ class TestCMetrics(CUnitTest):
     def test_accuracy(self):
 
         self.logger.info("Testing accuracy metric...")
-        peval = CMetric.create('accuracy')
+        peval = CMetric.create("accuracy")
 
         y_true = CArray([0, 1, 2, 3])
         y_pred = CArray([0, 2, 1, 3])
@@ -29,7 +29,7 @@ class TestCMetrics(CUnitTest):
     def test_precision(self):
 
         self.logger.info("Testing precision metric...")
-        peval = CMetric.create('precision')
+        peval = CMetric.create("precision")
 
         true = CArray([0, 0, 0, 0, 1, 1, 1, 1])
         pred = CArray([1, 0, 0, 0, 1, 1, 0, 0])
@@ -42,7 +42,7 @@ class TestCMetrics(CUnitTest):
     def test_recall(self):
 
         self.logger.info("Testing recall metric...")
-        peval = CMetric.create('recall')
+        peval = CMetric.create("recall")
 
         true = CArray([0, 0, 0, 0, 1, 1, 1, 1])
         pred = CArray([1, 0, 0, 0, 1, 1, 0, 0])
@@ -55,7 +55,7 @@ class TestCMetrics(CUnitTest):
     def test_f1(self):
 
         self.logger.info("Testing F1 score metric...")
-        peval = CMetric.create('f1')
+        peval = CMetric.create("f1")
 
         true = CArray([0, 0, 0, 0, 1, 1, 1, 1])
         pred = CArray([1, 0, 0, 0, 1, 1, 0, 0])
@@ -69,7 +69,7 @@ class TestCMetrics(CUnitTest):
     def test_mae(self):
 
         self.logger.info("Testing MAE metric...")
-        peval = CMetric.create('mae')
+        peval = CMetric.create("mae")
 
         true = CArray([3, -0.5, 2, 7])
         pred = CArray([2.5, 0.0, 2, 8])
@@ -81,7 +81,7 @@ class TestCMetrics(CUnitTest):
     def test_mse(self):
 
         self.logger.info("Testing MSE metric...")
-        peval = CMetric.create('mse')
+        peval = CMetric.create("mse")
 
         true = CArray([3, -0.5, 2, 7])
         pred = CArray([2.5, 0.0, 2, 8])
@@ -113,7 +113,7 @@ class TestCMetrics(CUnitTest):
     def test_tpratfpr(self):
 
         self.logger.info("Testing TPR @ FPR metric...")
-        metric = CMetric.create('tpr-at-fpr', fpr=0.1)
+        metric = CMetric.create("tpr-at-fpr", fpr=0.1)
 
         res = self._test_roc_metric(metric)
 
@@ -122,7 +122,7 @@ class TestCMetrics(CUnitTest):
     def test_fnratfpr(self):
 
         self.logger.info("Testing FNR @ FPR metric...")
-        metric = CMetric.create('fnr-at-fpr', fpr=0.1)
+        metric = CMetric.create("fnr-at-fpr", fpr=0.1)
 
         res = self._test_roc_metric(metric)
 
@@ -131,7 +131,7 @@ class TestCMetrics(CUnitTest):
     def test_thatfpr(self):
 
         self.logger.info("Testing TH @ FPR metric...")
-        metric = CMetric.create('th-at-fpr', fpr=0.1)
+        metric = CMetric.create("th-at-fpr", fpr=0.1)
 
         res = self._test_roc_metric(metric)
 
@@ -140,7 +140,7 @@ class TestCMetrics(CUnitTest):
     def test_tpratth(self):
 
         self.logger.info("Testing TPR @ TH metric...")
-        metric = CMetric.create('tpr-at-th', th=0.76)
+        metric = CMetric.create("tpr-at-th", th=0.76)
 
         res = self._test_roc_metric(metric)
 
@@ -149,7 +149,7 @@ class TestCMetrics(CUnitTest):
     def test_fnratth(self):
 
         self.logger.info("Testing FNR @ TH metric...")
-        metric = CMetric.create('fnr-at-th', th=0.76)
+        metric = CMetric.create("fnr-at-th", th=0.76)
 
         res = self._test_roc_metric(metric)
 
@@ -158,26 +158,26 @@ class TestCMetrics(CUnitTest):
     def test_auc(self):
 
         self.logger.info("Testing AUC metric...")
-        metric = CMetric.create('auc')
+        metric = CMetric.create("auc")
 
         res = self._test_roc_metric(metric)
 
         self.assertAlmostEqual(0.89, res, places=2)
 
         self.logger.info("Testing AUC-WMW metric...")
-        metric = CMetric.create('auc-wmw')
+        metric = CMetric.create("auc-wmw")
 
         res = self._test_roc_metric(metric)
 
         self.assertAlmostEqual(0.89, res, places=2)
 
         self.logger.info("Testing pAUC metric...")
-        metric = CMetric.create('pauc', fpr=1.0, n_points=500)
+        metric = CMetric.create("pauc", fpr=1.0, n_points=500)
 
         res = self._test_roc_metric(metric)
 
         self.assertAlmostEqual(0.89, res, places=2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

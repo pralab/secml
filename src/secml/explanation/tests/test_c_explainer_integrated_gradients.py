@@ -22,7 +22,8 @@ class TestCExplainerIntegratedGradients(CUnitTest):
         cls.ds = CDLDigits().load()
 
         cls.clf = CClassifierMulticlassOVA(
-            CClassifierSVM, kernel=CKernelRBF(gamma=1e-3))
+            CClassifierSVM, kernel=CKernelRBF(gamma=1e-3)
+        )
 
         # Training classifier
         cls.clf.fit(cls.ds.X, cls.ds.Y)
@@ -43,7 +44,8 @@ class TestCExplainerIntegratedGradients(CUnitTest):
         x_pred, x_score = self.clf.predict(x, return_decision_function=True)
 
         self.logger.info(
-            "Predicted class {:}, scores:\n{:}".format(x_pred.item(), x_score))
+            "Predicted class {:}, scores:\n{:}".format(x_pred.item(), x_score)
+        )
         self.logger.info("Candidates: {:}".format(x_score.argsort()[::-1]))
 
         ref_img = None  # Use default reference image
@@ -61,8 +63,8 @@ class TestCExplainerIntegratedGradients(CUnitTest):
         fig = CFigure(height=1.5, width=12)
 
         # Plotting original image
-        fig.subplot(1, self.ds.num_classes+1, 1)
-        fig.sp.imshow(x.reshape((8, 8)), cmap='gray')
+        fig.subplot(1, self.ds.num_classes + 1, 1)
+        fig.sp.imshow(x.reshape((8, 8)), cmap="gray")
         fig.sp.title("Origin c{:}".format(y_true))
         fig.sp.yticks([])
         fig.sp.xticks([])
@@ -71,9 +73,10 @@ class TestCExplainerIntegratedGradients(CUnitTest):
 
         # Plotting attributions
         for c in self.ds.classes:
-            fig.subplot(1, self.ds.num_classes+1, 2+c)
-            fig.sp.imshow(attr[c, :].reshape((8, 8)),
-                          cmap='seismic', vmin=-1*th, vmax=th)
+            fig.subplot(1, self.ds.num_classes + 1, 2 + c)
+            fig.sp.imshow(
+                attr[c, :].reshape((8, 8)), cmap="seismic", vmin=-1 * th, vmax=th
+            )
             fig.sp.title("Attr c{:}".format(c))
             fig.sp.yticks([])
             fig.sp.xticks([])
@@ -96,5 +99,5 @@ class TestCExplainerIntegratedGradients(CUnitTest):
         self.assertEqual(ret[10].shape, sample.shape)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

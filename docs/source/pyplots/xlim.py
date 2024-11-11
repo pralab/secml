@@ -6,7 +6,7 @@ C, S = X.cos(), X.sin()
 
 fig = CFigure(fontsize=14)
 
-fig.sp.plot(X, C, color='red', alpha=0.5, linewidth=1.0, linestyle='-')
+fig.sp.plot(X, C, color="red", alpha=0.5, linewidth=1.0, linestyle="-")
 fig.sp.plot(X, S)
 
 fig.sp.xlim(-3, 3)

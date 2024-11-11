@@ -21,16 +21,23 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
     def setUp(self):
 
         import numpy as np
+
         np.random.seed(12345678)
 
         # generate synthetic data
-        self.ds = CDLRandom(n_classes=3, n_features=2, n_redundant=0,
-                            n_clusters_per_class=1, class_sep=1,
-                            random_state=0).load()
+        self.ds = CDLRandom(
+            n_classes=3,
+            n_features=2,
+            n_redundant=0,
+            n_clusters_per_class=1,
+            class_sep=1,
+            random_state=0,
+        ).load()
 
         # Add a new class modifying one of the existing clusters
-        self.ds.Y[(self.ds.X[:, 0] > 0).logical_and(
-            self.ds.X[:, 1] > 1).ravel()] = self.ds.num_classes
+        self.ds.Y[(self.ds.X[:, 0] > 0).logical_and(self.ds.X[:, 1] > 1).ravel()] = (
+            self.ds.num_classes
+        )
 
         # self.kernel = None
         self.kernel = CKernelRBF(gamma=10)
@@ -40,15 +47,19 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
         self.ds.X = self.normalizer.fit_transform(self.ds.X)
 
         self.multiclass = CClassifierMulticlassOVA(
-            classifier=CClassifierSVM, class_weight='balanced',
-            preprocess=None, kernel=self.kernel)
+            classifier=CClassifierSVM,
+            class_weight="balanced",
+            preprocess=None,
+            kernel=self.kernel,
+        )
         self.multiclass.verbose = 0
 
         # Training and classification
         self.multiclass.fit(self.ds.X, self.ds.Y)
 
         self.y_pred, self.score_pred = self.multiclass.predict(
-            self.ds.X, return_decision_function=True)
+            self.ds.X, return_decision_function=True
+        )
 
     def test_indiscriminate(self):
         """Test indiscriminate evasion."""
@@ -63,8 +74,9 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
         """Test targeted evasion."""
 
         self.y_target = 2
-        self.logger.info("Test target evasion "
-                         "(with target class {:}) ".format(self.y_target))
+        self.logger.info(
+            "Test target evasion " "(with target class {:}) ".format(self.y_target)
+        )
 
         expected_x = CArray([0.9347, 0.3976])
         self._test_evasion_multiclass(expected_x)
@@ -83,13 +95,18 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
 
         dmax = 2
 
-        self.solver_params = {'eta': 1e-1, 'eta_min': 1.0}
+        self.solver_params = {"eta": 1e-1, "eta_min": 1.0}
 
-        eva = CAttackEvasionPGDLS(classifier=self.multiclass,
-                                  double_init_ds=self.ds,
-                                  distance='l2', dmax=dmax, lb=lb, ub=ub,
-                                  solver_params=self.solver_params,
-                                  y_target=self.y_target)
+        eva = CAttackEvasionPGDLS(
+            classifier=self.multiclass,
+            double_init_ds=self.ds,
+            distance="l2",
+            dmax=dmax,
+            lb=lb,
+            ub=ub,
+            solver_params=self.solver_params,
+            y_target=self.y_target,
+        )
 
         eva.verbose = 0  # 2
 
@@ -120,8 +137,7 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
 
             eva.dmax = d
             x, f_opt = eva._run(x0=x0, y0=y0, x_init=x)
-            y_pred, score = self.multiclass.predict(
-                x, return_decision_function=True)
+            y_pred, score = self.multiclass.predict(x, return_decision_function=True)
             f_seq = f_seq.append(f_opt)
             # not considering all iterations, just values at dmax
             # for all iterations, you should bring eva.x_seq and eva.f_seq
@@ -137,7 +153,8 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
 
         # Compare optimal point with expected
         self.assert_array_almost_equal(
-            eva.x_opt.todense().ravel(), expected_x, decimal=4)
+            eva.x_opt.todense().ravel(), expected_x, decimal=4
+        )
 
         self._make_plots(x_seq, dmax, eva, x0, scores, f_seq)
 
@@ -163,54 +180,87 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
         fig.subplot(2, 2, 1)
         fig = self._plot_decision_function(fig, plot_background=True)
 
-        fig.sp.plot_path(x_seq, path_style='-',
-                         start_style='o', start_facecolor='w',
-                         start_edgewidth=2, final_style='o',
-                         final_facecolor='k', final_edgewidth=2)
+        fig.sp.plot_path(
+            x_seq,
+            path_style="-",
+            start_style="o",
+            start_facecolor="w",
+            start_edgewidth=2,
+            final_style="o",
+            final_facecolor="k",
+            final_edgewidth=2,
+        )
 
         # plot distance constraint
-        fig.sp.plot_fun(func=self._rescaled_distance,
-                        multipoint=True,
-                        plot_background=False,
-                        n_grid_points=20, levels_color='k',
-                        grid_limits=ds_bounds,
-                        levels=[0], colorbar=False,
-                        levels_linewidth=2.0, levels_style=':',
-                        alpha_levels=.4, c=x0, r=dmax)
+        fig.sp.plot_fun(
+            func=self._rescaled_distance,
+            multipoint=True,
+            plot_background=False,
+            n_grid_points=20,
+            levels_color="k",
+            grid_limits=ds_bounds,
+            levels=[0],
+            colorbar=False,
+            levels_linewidth=2.0,
+            levels_style=":",
+            alpha_levels=0.4,
+            c=x0,
+            r=dmax,
+        )
 
-        fig.sp.grid(linestyle='--', alpha=.5, zorder=0)
+        fig.sp.grid(linestyle="--", alpha=0.5, zorder=0)
 
         # Plotting multiclass evasion objective function
         fig.subplot(2, 2, 2)
 
         fig = self._plot_decision_function(fig)
 
-        fig.sp.plot_fgrads(eva.objective_function_gradient,
-                           grid_limits=ds_bounds, n_grid_points=20,
-                           color='k', alpha=.5)
+        fig.sp.plot_fgrads(
+            eva.objective_function_gradient,
+            grid_limits=ds_bounds,
+            n_grid_points=20,
+            color="k",
+            alpha=0.5,
+        )
 
-        fig.sp.plot_path(x_seq, path_style='-',
-                         start_style='o', start_facecolor='w',
-                         start_edgewidth=2, final_style='o',
-                         final_facecolor='k', final_edgewidth=2)
+        fig.sp.plot_path(
+            x_seq,
+            path_style="-",
+            start_style="o",
+            start_facecolor="w",
+            start_edgewidth=2,
+            final_style="o",
+            final_facecolor="k",
+            final_edgewidth=2,
+        )
 
         # plot distance constraint
-        fig.sp.plot_fun(func=self._rescaled_distance,
-                        multipoint=True,
-                        plot_background=False,
-                        n_grid_points=20, levels_color='w',
-                        grid_limits=ds_bounds,
-                        levels=[0], colorbar=False,
-                        levels_style=':', levels_linewidth=2.0,
-                        alpha_levels=.5, c=x0, r=dmax)
+        fig.sp.plot_fun(
+            func=self._rescaled_distance,
+            multipoint=True,
+            plot_background=False,
+            n_grid_points=20,
+            levels_color="w",
+            grid_limits=ds_bounds,
+            levels=[0],
+            colorbar=False,
+            levels_style=":",
+            levels_linewidth=2.0,
+            alpha_levels=0.5,
+            c=x0,
+            r=dmax,
+        )
 
-        fig.sp.plot_fun(lambda z: eva.objective_function(z),
-                        multipoint=True,
-                        grid_limits=ds_bounds,
-                        colorbar=False, n_grid_points=20,
-                        plot_levels=False)
+        fig.sp.plot_fun(
+            lambda z: eva.objective_function(z),
+            multipoint=True,
+            grid_limits=ds_bounds,
+            colorbar=False,
+            n_grid_points=20,
+            plot_levels=False,
+        )
 
-        fig.sp.grid(linestyle='--', alpha=.5, zorder=0)
+        fig.sp.grid(linestyle="--", alpha=0.5, zorder=0)
 
         fig.subplot(2, 2, 3)
         if self.y_target is not None:
@@ -233,12 +283,15 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
 
         fig.tight_layout()
 
-        k_name = self.kernel.class_type if self.kernel is not None else 'lin'
-        fig.savefig(fm.join(
-            self.images_folder,
-            "pgd_ls_multiclass_{:}c_kernel-{:}_target-{:}.pdf".format(
-                self.ds.num_classes, k_name, self.y_target)
-        ))
+        k_name = self.kernel.class_type if self.kernel is not None else "lin"
+        fig.savefig(
+            fm.join(
+                self.images_folder,
+                "pgd_ls_multiclass_{:}c_kernel-{:}_target-{:}.pdf".format(
+                    self.ds.num_classes, k_name, self.y_target
+                ),
+            )
+        )
 
     def _rescaled_distance(self, x, c, r):
         """Rescale distance for plot."""
@@ -251,49 +304,73 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
     def _get_style(self):
         """Define the style vector for the different classes."""
         if self.ds.num_classes == 3:
-            styles = [('b', 'o', '-'), ('g', 'p', '--'), ('r', 's', '-.')]
+            styles = [("b", "o", "-"), ("g", "p", "--"), ("r", "s", "-.")]
         elif self.ds.num_classes == 4:
-            styles = [('saddlebrown', 'o', '-'), ('g', 'p', '--'),
-                      ('y', 's', '-.'), ('gray', 'D', '--')]
+            styles = [
+                ("saddlebrown", "o", "-"),
+                ("g", "p", "--"),
+                ("y", "s", "-."),
+                ("gray", "D", "--"),
+            ]
         else:
-            styles = [('saddlebrown', 'o', '-'), ('g', 'p', '--'),
-                      ('y', 's', '-.'), ('gray', 'D', '--'),
-                      ('c', '-.'), ('m', '-'), ('y', '-.')]
+            styles = [
+                ("saddlebrown", "o", "-"),
+                ("g", "p", "--"),
+                ("y", "s", "-."),
+                ("gray", "D", "--"),
+                ("c", "-."),
+                ("m", "-"),
+                ("y", "-."),
+            ]
 
         return styles
 
     def _plot_decision_function(self, fig, plot_background=False):
         """Plot the decision function of a multiclass classifier."""
-        fig.sp.title('{:} ({:})'.format(self.multiclass.__class__.__name__,
-                                        self.multiclass.classifier.__name__))
+        fig.sp.title(
+            "{:} ({:})".format(
+                self.multiclass.__class__.__name__, self.multiclass.classifier.__name__
+            )
+        )
 
         x_bounds, y_bounds = self.ds.get_bounds()
 
         styles = self._get_style()
 
         for c_idx, c in enumerate(self.ds.classes):
-            fig.sp.scatter(self.ds.X[self.ds.Y == c, 0],
-                           self.ds.X[self.ds.Y == c, 1],
-                           s=20, c=styles[c_idx][0], edgecolors='k',
-                           facecolors='none', linewidths=1,
-                           label='c {:}'.format(c))
+            fig.sp.scatter(
+                self.ds.X[self.ds.Y == c, 0],
+                self.ds.X[self.ds.Y == c, 1],
+                s=20,
+                c=styles[c_idx][0],
+                edgecolors="k",
+                facecolors="none",
+                linewidths=1,
+                label="c {:}".format(c),
+            )
 
         # Plotting multiclass decision function
         fig.sp.plot_fun(
             lambda x: self.multiclass.predict(x),
-            multipoint=True, cmap='Set2',
+            multipoint=True,
+            cmap="Set2",
             grid_limits=self.ds.get_bounds(offset=5),
-            colorbar=False, n_grid_points=300,
-            plot_levels=True, plot_background=plot_background,
-            levels=[-1, 0, 1, 2], levels_color='gray', levels_style='--')
+            colorbar=False,
+            n_grid_points=300,
+            plot_levels=True,
+            plot_background=plot_background,
+            levels=[-1, 0, 1, 2],
+            levels_color="gray",
+            levels_style="--",
+        )
 
-        fig.sp.xlim(x_bounds[0] - .05, x_bounds[1] + .05)
-        fig.sp.ylim(y_bounds[0] - .05, y_bounds[1] + .05)
+        fig.sp.xlim(x_bounds[0] - 0.05, x_bounds[1] + 0.05)
+        fig.sp.ylim(y_bounds[0] - 0.05, y_bounds[1] + 0.05)
 
-        fig.sp.legend(loc=9, ncol=5, mode="expand", handletextpad=.1)
+        fig.sp.legend(loc=9, ncol=5, mode="expand", handletextpad=0.1)
 
         return fig
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CAttackEvasionTestCases.main()

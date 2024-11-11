@@ -5,6 +5,7 @@
 .. moduleauthor:: Angelo Sotgiu <angelo.sotgiu@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.ml import CClassifier
 from secml.ml.classifiers.reject import CClassifierRejectThreshold
@@ -49,7 +50,8 @@ class CClassifierDNR(CClassifierRejectThreshold):
         Number of parallel workers to use for training the classifier.
         Cannot be higher than processor's number of cores. Default is 1.
     """
-    __class_type = 'dnr'
+
+    __class_type = "dnr"
 
     def __init__(self, combiner, layer_clf, dnn, layers, threshold, n_jobs=1):
 
@@ -62,14 +64,17 @@ class CClassifierDNR(CClassifierRejectThreshold):
             raise TypeError("`layers` must be a list")
         if isinstance(layer_clf, dict):
             if not sorted(layers) == sorted(layer_clf.keys()):
-                raise ValueError("`layer_clf` dict must contain `layers` "
-                                 "values as keys")
+                raise ValueError(
+                    "`layer_clf` dict must contain `layers` " "values as keys"
+                )
             if not all(isinstance(c, CClassifier) for c in layer_clf.values()):
-                raise TypeError("`layer_clf` dict must contain `CClassifier` "
-                                "instances as values")
+                raise TypeError(
+                    "`layer_clf` dict must contain `CClassifier` " "instances as values"
+                )
         elif not isinstance(layer_clf, CClassifier):
-            raise TypeError("`layer_clf` must be an instance of either"
-                            "`CClassifier` or `dict`")
+            raise TypeError(
+                "`layer_clf` must be an instance of either" "`CClassifier` or `dict`"
+            )
 
         self._layers = layers
         self._layer_clfs = {}
@@ -133,12 +138,11 @@ class CClassifierDNR(CClassifierRejectThreshold):
         """
         n_classes = y.unique().size
         # array that contains concatenate scores of layer classifiers
-        concat_scores = CArray.zeros(
-            shape=(x.shape[0], n_classes * len(self._layers)))
+        concat_scores = CArray.zeros(shape=(x.shape[0], n_classes * len(self._layers)))
 
         for i, layer in enumerate(self._layers):
             scores = self._layer_clfs[layer].fit_forward(x, y)
-            concat_scores[:, i * n_classes: n_classes + i * n_classes] = scores
+            concat_scores[:, i * n_classes : n_classes + i * n_classes] = scores
         return concat_scores
 
     def _get_layer_clfs_scores(self, x):
@@ -161,16 +165,15 @@ class CClassifierDNR(CClassifierRejectThreshold):
         caching = self._cached_x is not None
         n_classes = self.n_classes - 1
         # array that contains concatenate scores of layer classifiers
-        concat_scores = CArray.zeros(
-            shape=(x.shape[0], n_classes * len(self._layers)))
+        concat_scores = CArray.zeros(shape=(x.shape[0], n_classes * len(self._layers)))
 
         for i, l in enumerate(self._layers):
             scores = self._layer_clfs[l].forward(x, caching=caching)
-            concat_scores[:, i * n_classes: n_classes + i * n_classes] = scores
+            concat_scores[:, i * n_classes : n_classes + i * n_classes] = scores
         return concat_scores
 
     def _forward(self, x):
-        """"Private method that computes the decision function.
+        """ "Private method that computes the decision function.
 
         Parameters
         ----------
@@ -220,7 +223,8 @@ class CClassifierDNR(CClassifierRejectThreshold):
         for i, l in enumerate(self._layers):
             # backward pass to layer clfs of their respective w
             grad += self._layer_clfs[l].backward(
-                w=grad_combiner[i * n_classes: i * n_classes + n_classes])
+                w=grad_combiner[i * n_classes : i * n_classes + n_classes]
+            )
         return grad
 
     @property

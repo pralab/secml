@@ -97,41 +97,40 @@ class CConstraintTestCases(CUnitTest):
         def check_constraint(cons, point, expect):
             res = cons.constraint(point)
 
-            self.logger.info(
-                ".constraint({:}): {:}".format(point, res))
+            self.logger.info(".constraint({:}): {:}".format(point, res))
 
             self.assertIsInstance(res, float)
 
-            if expect == 'equal':
+            if expect == "equal":
                 self.assertEqual(0, res)
-            elif expect == 'less':
+            elif expect == "less":
                 self.assertLess(res, 0)
-            elif expect == 'greater':
+            elif expect == "greater":
                 self.assertGreater(res, 0)
             else:
-                raise ValueError(
-                    "values {'equal', 'less', 'greater'} for `expect`")
+                raise ValueError("values {'equal', 'less', 'greater'} for `expect`")
 
         if p_in is None and p_out is None and p_on is None:
             raise ValueError("pass at least one point")
 
         if p_in is not None:
             # This point is INSIDE, constraint should be LESS then 0
-            check_constraint(c, p_in, 'less')
-            check_constraint(c, p_in.astype(int), 'less')
+            check_constraint(c, p_in, "less")
+            check_constraint(c, p_in.astype(int), "less")
 
         if p_out is not None:
             # This point is OUTSIDE, constraint should be GREATER then 0
-            check_constraint(c, p_out, 'greater')
-            check_constraint(c, p_out.astype(int), 'greater')
+            check_constraint(c, p_out, "greater")
+            check_constraint(c, p_out.astype(int), "greater")
 
         if p_on is not None:
             # This point is ON, constraint should be EQUAL to 0
-            check_constraint(c, p_on, 'equal')
-            check_constraint(c, p_on.astype(int), 'equal')
+            check_constraint(c, p_on, "equal")
+            check_constraint(c, p_on.astype(int), "equal")
 
-    def _test_projection(self, c, p_in=None, p_out=None,
-                         p_on=None, p_out_expected=None):
+    def _test_projection(
+        self, c, p_in=None, p_out=None, p_on=None, p_out_expected=None
+    ):
         """Test for CConstraint.projection().
 
         Parameters
@@ -180,7 +179,7 @@ class CConstraintTestCases(CUnitTest):
             check_projection(c, p_out, p_out_expected)
             check_projection(c, p_out.astype(int), p_out_expected)
 
-    def _test_plot(self, c, *points, label=''):
+    def _test_plot(self, c, *points, label=""):
         """Visualize the constraint.
 
         Parameters
@@ -199,28 +198,28 @@ class CConstraintTestCases(CUnitTest):
 
         fig = CFigure(height=6, width=6)
 
-        fig.sp.plot_fun(func=c.constraint,
-                        grid_limits=grid_limits,
-                        n_grid_points=40,
-                        levels=[0],
-                        levels_linewidth=1.5)
+        fig.sp.plot_fun(
+            func=c.constraint,
+            grid_limits=grid_limits,
+            n_grid_points=40,
+            levels=[0],
+            levels_linewidth=1.5,
+        )
 
-        colors = ['g', 'r', 'c', 'm', 'y', 'k', 'w']
+        colors = ["g", "r", "c", "m", "y", "k", "w"]
         for p_i, p in enumerate(points):
-            self.logger.info(
-                "Plotting point (color {:}): {:}".format(colors[p_i], p))
+            self.logger.info("Plotting point (color {:}): {:}".format(colors[p_i], p))
             fig.sp.scatter(*p, c=colors[p_i], zorder=10)
             p_proj = c.projection(p)
             self.logger.info(
-                "Plotting point (color {:}): {:}".format(colors[p_i], p_proj))
+                "Plotting point (color {:}): {:}".format(colors[p_i], p_proj)
+            )
             fig.sp.scatter(*p_proj, c=colors[p_i], zorder=10)
 
         if label:
-            filename = \
-                "test_constraint_{:}_{:}.pdf".format(c.class_type, label)
+            filename = "test_constraint_{:}_{:}.pdf".format(c.class_type, label)
         else:
-            filename = \
-                "test_constraint_{:}.pdf".format(c.class_type)
+            filename = "test_constraint_{:}.pdf".format(c.class_type)
 
         fig.savefig(fm.join(fm.abspath(__file__), filename))
 

@@ -89,8 +89,11 @@ class _CAttackPoisoningLinTest(CCreator):
 
         idx, clf, tr = self._clf_poisoning(xc)
 
-        y_ts = self.pois_obj._y_target if self.pois_obj._y_target is not \
-                                          None else self.pois_obj.val.Y
+        y_ts = (
+            self.pois_obj._y_target
+            if self.pois_obj._y_target is not None
+            else self.pois_obj.val.Y
+        )
 
         # computing gradient of loss(y, f(x)) w.r.t. f
         score = clf.decision_function(self.pois_obj.val.X)
@@ -108,9 +111,9 @@ class _CAttackPoisoningLinTest(CCreator):
 
         """
         idx, clf, loss_grad, tr = self._preparation_for_grad_computation(xc)
-        self.pois_obj._gradient_fk_xc(self.pois_obj._xc[idx, :],
-                                      self.pois_obj._yc[idx],
-                                      clf, loss_grad, tr)
+        self.pois_obj._gradient_fk_xc(
+            self.pois_obj._xc[idx, :], self.pois_obj._yc[idx], clf, loss_grad, tr
+        )
         grads = self.pois_obj._d_params_xc
         return grads
 
@@ -144,7 +147,7 @@ class _CAttackPoisoningLinTest(CCreator):
 
 class CAttackPoisoningTestCases(CUnitTest):
     def _dataset_creation(self):
-        """Creates a blob dataset. """
+        """Creates a blob dataset."""
         self.n_features = 2  # Number of dataset features
 
         self.seed = 42
@@ -159,14 +162,15 @@ class CAttackPoisoningTestCases(CUnitTest):
             centers=[(-1, -1), (+1, +1)],
             center_box=(-2, 2),
             cluster_std=0.8,
-            random_state=self.seed)
+            random_state=self.seed,
+        )
 
-        self.logger.info(
-            "Loading `random_blobs` with seed: {:}".format(self.seed))
+        self.logger.info("Loading `random_blobs` with seed: {:}".format(self.seed))
 
         dataset = loader.load()
-        splitter = CDataSplitterShuffle(num_folds=1, train_size=self.n_tr,
-                                        random_state=3)
+        splitter = CDataSplitterShuffle(
+            num_folds=1, train_size=self.n_tr, random_state=3
+        )
         splitter.compute_indices(dataset)
         self.tr = dataset[splitter.tr_idx[0], :]
         self.ts = dataset[splitter.ts_idx[0], :]
@@ -178,12 +182,14 @@ class CAttackPoisoningTestCases(CUnitTest):
         self.lb = -1
         self.ub = 1
 
-        self.grid_limits = [(self.lb - 0.1, self.ub + 0.1),
-                            (self.lb - 0.1, self.ub + 0.1)]
+        self.grid_limits = [
+            (self.lb - 0.1, self.ub + 0.1),
+            (self.lb - 0.1, self.ub + 0.1),
+        ]
 
     def _create_poisoning_object(self):
-        self.solver_type = 'pgd-ls'
-        self.solver_params = {'eta': 0.05, 'eta_min': 0.05, 'eps': 1e-9}
+        self.solver_type = "pgd-ls"
+        self.solver_params = {"eta": 0.05, "eta_min": 0.05, "eps": 1e-9}
 
         self._poisoning_params = {
             "classifier": self.classifier,
@@ -193,7 +199,7 @@ class CAttackPoisoningTestCases(CUnitTest):
             "ub": self.ub,
             "solver_type": self.solver_type,
             "solver_params": self.solver_params,
-            'random_seed': self.seed
+            "random_seed": self.seed,
         }
 
         self.poisoning = self.pois_class(**self._poisoning_params)
@@ -201,7 +207,7 @@ class CAttackPoisoningTestCases(CUnitTest):
         self.poisoning.n_points = 1  # 1
         self.xc, self.yc = self.poisoning._rnd_init_poisoning_points()
 
-        self.logger.info('yc: ' + str(self.yc))
+        self.logger.info("yc: " + str(self.yc))
 
     def _set_up(self, poisoning_class, clf_idx, clf_class, clf_params):
 
@@ -213,13 +219,12 @@ class CAttackPoisoningTestCases(CUnitTest):
         self.clf_params = clf_params
 
     def _test_init(self, normalizer=None):
-        """Creates the classifier and fit it. """
+        """Creates the classifier and fit it."""
 
         self._dataset_creation()
 
         # create the classifier
-        self.classifier = self.clf_class(preprocess=normalizer,
-                                         **self.clf_params)
+        self.classifier = self.clf_class(preprocess=normalizer, **self.clf_params)
         # fit the classifier
         self.classifier.fit(self.tr.X, self.tr.Y)
 
@@ -237,11 +242,11 @@ class CAttackPoisoningTestCases(CUnitTest):
         self.logger.info("Fun Eval: " + str(self.poisoning.f_eval))
         self.logger.info("Grad Eval: " + str(self.poisoning.grad_eval))
 
-        metric = CMetric.create('accuracy')
-        y_pred, scores = self.classifier.predict(self.ts.X,
-                                                 return_decision_function=True)
-        orig_acc = metric.performance_score(y_true=self.ts.Y,
-                                            y_pred=y_pred)
+        metric = CMetric.create("accuracy")
+        y_pred, scores = self.classifier.predict(
+            self.ts.X, return_decision_function=True
+        )
+        orig_acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
         self.logger.info("Error on testing data: " + str(1 - orig_acc))
 
         tr = self.tr.append(CDataset(xc, self.yc))
@@ -249,12 +254,9 @@ class CAttackPoisoningTestCases(CUnitTest):
         pois_clf = self.classifier.deepcopy()
 
         pois_clf.fit(tr.X, tr.Y)
-        y_pred, scores = pois_clf.predict(self.ts.X,
-                                          return_decision_function=True)
-        pois_acc = metric.performance_score(y_true=self.ts.Y,
-                                            y_pred=y_pred)
-        self.logger.info(
-            "Error on testing data (poisoned): " + str(1 - pois_acc))
+        y_pred, scores = pois_clf.predict(self.ts.X, return_decision_function=True)
+        pois_acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
+        self.logger.info("Error on testing data (poisoned): " + str(1 - pois_acc))
 
         return pois_clf, xc
 
@@ -265,8 +267,10 @@ class CAttackPoisoningTestCases(CUnitTest):
         after the attack. Finally, raises an error if the one computed on
         the poisoning point is not the highest.
         """
-        self.logger.info("Test if the value of the attacker objective "
-                         "function increases after the attack")
+        self.logger.info(
+            "Test if the value of the attacker objective "
+            "function increases after the attack"
+        )
 
         self._test_init(normalizer)
         self._create_poisoning_object()
@@ -277,36 +281,40 @@ class CAttackPoisoningTestCases(CUnitTest):
         fobj_x0 = self.poisoning.objective_function(xc=x0)
         fobj_xc = self.poisoning.objective_function(xc=xc)
 
-        self.logger.info(
-            "Objective function before the attack {:}".format(fobj_x0))
-        self.logger.info(
-            "Objective function after the attack {:}".format(fobj_xc))
+        self.logger.info("Objective function before the attack {:}".format(fobj_x0))
+        self.logger.info("Objective function after the attack {:}".format(fobj_xc))
 
-        self.assertLess(fobj_x0, fobj_xc,
-                        "The attack does not increase the objective "
-                        "function of the attacker. The fobj on the "
-                        "original poisoning point is {:} while "
-                        "on the optimized poisoning point is {:}.".format(
-                            fobj_x0, fobj_xc))
+        self.assertLess(
+            fobj_x0,
+            fobj_xc,
+            "The attack does not increase the objective "
+            "function of the attacker. The fobj on the "
+            "original poisoning point is {:} while "
+            "on the optimized poisoning point is {:}.".format(fobj_x0, fobj_xc),
+        )
 
         if self.plot_creation:
             self._create_2D_plots(normalizer)
 
     def _test_clf_accuracy(self, normalizer):
         """Checks the accuracy of the classifier considered into the
-        test. """
+        test."""
 
         self._test_init(normalizer)
 
-        metric = CMetric.create('accuracy')
-        y_pred, scores = self.classifier.predict(self.ts.X,
-                                                 return_decision_function=True)
+        metric = CMetric.create("accuracy")
+        y_pred, scores = self.classifier.predict(
+            self.ts.X, return_decision_function=True
+        )
         acc = metric.performance_score(y_true=self.ts.Y, y_pred=y_pred)
         self.logger.info("Error on testing data: " + str(1 - acc))
         self.assertGreater(
-            acc, 0.70, "The trained classifier have an accuracy that "
-                       "is too low to evaluate if the poisoning against "
-                       "this classifier works")
+            acc,
+            0.70,
+            "The trained classifier have an accuracy that "
+            "is too low to evaluate if the poisoning against "
+            "this classifier works",
+        )
 
     #####################################################################
     #                        PLOT FUNCTIONALITIES
@@ -325,15 +333,18 @@ class CAttackPoisoningTestCases(CUnitTest):
         """Plot poisoning objective function"""
         fig.sp.plot_fun(
             func=func,
-            grid_limits=self.grid_limits, plot_levels=False,
-            n_grid_points=10, colorbar=True, **func_kwargs)
+            grid_limits=self.grid_limits,
+            plot_levels=False,
+            n_grid_points=10,
+            colorbar=True,
+            **func_kwargs
+        )
 
     def _plot_obj_grads(self, fig, func, **func_kwargs):
         """Plot poisoning attacker objective function gradient"""
         fig.sp.plot_fgrads(
-            func,
-            grid_limits=self.grid_limits,
-            n_grid_points=20, **func_kwargs)
+            func, grid_limits=self.grid_limits, n_grid_points=20, **func_kwargs
+        )
 
     def _create_2D_plots(self, normalizer):
 
@@ -351,44 +362,48 @@ class CAttackPoisoningTestCases(CUnitTest):
         box = self._create_box()
 
         fig.subplot(n_rows, n_cols, grid_slot=1)
-        fig.sp.title('Attacker objective and gradients')
+        fig.sp.title("Attacker objective and gradients")
         self._plot_func(fig, self.poisoning.objective_function)
-        self._plot_obj_grads(
-            fig, self.poisoning.objective_function_gradient)
+        self._plot_obj_grads(fig, self.poisoning.objective_function_gradient)
         fig.sp.plot_ds(self.tr)
-        fig.sp.plot_decision_regions(self.clf_orig, plot_background=False,
-                                     grid_limits=self.grid_limits,
-                                     n_grid_points=10, )
+        fig.sp.plot_decision_regions(
+            self.clf_orig,
+            plot_background=False,
+            grid_limits=self.grid_limits,
+            n_grid_points=10,
+        )
 
-        fig.sp.plot_constraint(box, grid_limits=self.grid_limits,
-                               n_grid_points=10)
-        fig.sp.plot_path(self.poisoning.x_seq,
-                         start_facecolor='r' if self.yc == 1 else 'b')
+        fig.sp.plot_constraint(box, grid_limits=self.grid_limits, n_grid_points=10)
+        fig.sp.plot_path(
+            self.poisoning.x_seq, start_facecolor="r" if self.yc == 1 else "b"
+        )
 
         fig.subplot(n_rows, n_cols, grid_slot=2)
-        fig.sp.title('Classification error on val')
-        self._plot_func(fig, self.poisoning.objective_function,
-                        acc=True)
+        fig.sp.title("Classification error on val")
+        self._plot_func(fig, self.poisoning.objective_function, acc=True)
         fig.sp.plot_ds(self.tr)
-        fig.sp.plot_decision_regions(pois_clf, plot_background=False,
-                                     grid_limits=self.grid_limits,
-                                     n_grid_points=10, )
+        fig.sp.plot_decision_regions(
+            pois_clf,
+            plot_background=False,
+            grid_limits=self.grid_limits,
+            n_grid_points=10,
+        )
 
-        fig.sp.plot_constraint(box, grid_limits=self.grid_limits,
-                               n_grid_points=10)
-        fig.sp.plot_path(self.poisoning.x_seq,
-                         start_facecolor='r' if self.yc == 1 else 'b')
+        fig.sp.plot_constraint(box, grid_limits=self.grid_limits, n_grid_points=10)
+        fig.sp.plot_path(
+            self.poisoning.x_seq, start_facecolor="r" if self.yc == 1 else "b"
+        )
 
         fig.tight_layout()
         exp_idx = "2d_pois_"
         exp_idx += self.clf_idx
-        if self.classifier.class_type == 'svm':
+        if self.classifier.class_type == "svm":
             if self.classifier.kernel.preprocess is not None:
                 exp_idx += "_norm"
         else:
             if self.classifier.preprocess is not None:
                 exp_idx += "_norm"
-        fig.savefig(exp_idx + '.pdf', file_format='pdf')
+        fig.savefig(exp_idx + ".pdf", file_format="pdf")
 
     #####################################################################
     # FUNCTIONS TO CHECK THE POISONING GRADIENT OF CLASSIFIERS
@@ -400,23 +415,23 @@ class CAttackPoisoningTestCases(CUnitTest):
         box = self._create_box()
 
         self._plot_func(fig, param_fun)
-        self._plot_obj_grads(
-            fig, grad_fun)
+        self._plot_obj_grads(fig, grad_fun)
 
         fig.sp.plot_ds(self.tr)
-        fig.sp.plot_decision_regions(clf, plot_background=False,
-                                     grid_limits=self.grid_limits,
-                                     n_grid_points=10, )
-        fig.sp.plot_constraint(box, grid_limits=self.grid_limits,
-                               n_grid_points=10)
+        fig.sp.plot_decision_regions(
+            clf,
+            plot_background=False,
+            grid_limits=self.grid_limits,
+            n_grid_points=10,
+        )
+        fig.sp.plot_constraint(box, grid_limits=self.grid_limits, n_grid_points=10)
 
     def _create_params_grad_plot(self, normalizer):
         """
         Show the gradient of the classifier parameters w.r.t the poisoning
         point
         """
-        self.logger.info("Create 2-dimensional plot of the poisoning "
-                         "gradient")
+        self.logger.info("Create 2-dimensional plot of the poisoning " "gradient")
 
         self._test_init(normalizer)
 
@@ -432,29 +447,29 @@ class CAttackPoisoningTestCases(CUnitTest):
             fig.title(self.clf_idx)
 
             fig.subplot(n_rows, n_cols, grid_slot=1)
-            fig.sp.title('w1 wrt xc')
-            self._plot_param_sub(fig, debug_pois_obj.w1,
-                                 debug_pois_obj.gradient_w1_xc,
-                                 pois_clf)
+            fig.sp.title("w1 wrt xc")
+            self._plot_param_sub(
+                fig, debug_pois_obj.w1, debug_pois_obj.gradient_w1_xc, pois_clf
+            )
 
             fig.subplot(n_rows, n_cols, grid_slot=2)
-            fig.sp.title('w2 wrt xc')
-            self._plot_param_sub(fig, debug_pois_obj.w2,
-                                 debug_pois_obj.gradient_w2_xc,
-                                 pois_clf)
+            fig.sp.title("w2 wrt xc")
+            self._plot_param_sub(
+                fig, debug_pois_obj.w2, debug_pois_obj.gradient_w2_xc, pois_clf
+            )
 
             fig.subplot(n_rows, n_cols, grid_slot=3)
-            fig.sp.title('b wrt xc')
-            self._plot_param_sub(fig, debug_pois_obj.b,
-                                 debug_pois_obj.gradient_b_xc,
-                                 pois_clf)
+            fig.sp.title("b wrt xc")
+            self._plot_param_sub(
+                fig, debug_pois_obj.b, debug_pois_obj.gradient_b_xc, pois_clf
+            )
 
             fig.tight_layout()
             exp_idx = "2d_grad_pois_"
             exp_idx += self.clf_idx
             if self.classifier.preprocess is not None:
                 exp_idx += "_norm"
-            fig.savefig(exp_idx + '.pdf', file_format='pdf')
+            fig.savefig(exp_idx + ".pdf", file_format="pdf")
 
     def _single_param_grad_check(self, xc, f_param, df_param, param_name):
         """
@@ -471,15 +486,15 @@ class CAttackPoisoningTestCases(CUnitTest):
         """
 
         # Compare analytical gradient with its numerical approximation
-        check_grad_val = CFunction(
-            f_param, df_param).check_grad(xc, epsilon=100)
-        self.logger.info("Gradient difference between analytical {:} "
-                         "gradient and numerical gradient: %s".format(
-            param_name),
-            str(check_grad_val))
-        self.assertLess(check_grad_val, 1,
-                        "poisoning gradient is wrong {:}".format(
-                            check_grad_val))
+        check_grad_val = CFunction(f_param, df_param).check_grad(xc, epsilon=100)
+        self.logger.info(
+            "Gradient difference between analytical {:} "
+            "gradient and numerical gradient: %s".format(param_name),
+            str(check_grad_val),
+        )
+        self.assertLess(
+            check_grad_val, 1, "poisoning gradient is wrong {:}".format(check_grad_val)
+        )
 
     def _test_single_poisoning_grad_check(self, normalizer):
 
@@ -491,19 +506,19 @@ class CAttackPoisoningTestCases(CUnitTest):
 
         debug_pois_obj = _CAttackPoisoningLinTest(self.poisoning)
 
-        self._single_param_grad_check(xc, debug_pois_obj.w1,
-                                      debug_pois_obj.gradient_w1_xc,
-                                      param_name='w1')
-        self._single_param_grad_check(xc, debug_pois_obj.w2,
-                                      debug_pois_obj.gradient_w2_xc,
-                                      param_name='w2')
-        self._single_param_grad_check(xc, debug_pois_obj.b,
-                                      debug_pois_obj.gradient_b_xc,
-                                      param_name='b')
+        self._single_param_grad_check(
+            xc, debug_pois_obj.w1, debug_pois_obj.gradient_w1_xc, param_name="w1"
+        )
+        self._single_param_grad_check(
+            xc, debug_pois_obj.w2, debug_pois_obj.gradient_w2_xc, param_name="w2"
+        )
+        self._single_param_grad_check(
+            xc, debug_pois_obj.b, debug_pois_obj.gradient_b_xc, param_name="b"
+        )
 
         if self.plot_creation is True:
             self._create_params_grad_plot(normalizer)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

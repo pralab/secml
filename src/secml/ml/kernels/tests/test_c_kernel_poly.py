@@ -5,7 +5,7 @@ class TestCKernelPoly(CCKernelTestCases):
     """Unit test for CKernelPoly."""
 
     def setUp(self):
-        self._set_up('poly')
+        self._set_up("poly")
 
     def test_similarity_shape(self):
         """Test shape of kernel."""
@@ -20,5 +20,5 @@ class TestCKernelPoly(CCKernelTestCases):
         self._test_gradient_w()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CCKernelTestCases.main()

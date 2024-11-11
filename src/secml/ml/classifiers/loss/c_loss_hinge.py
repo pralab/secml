@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.ml.classifiers.loss import CLossClassification
 from secml.ml.classifiers.loss.c_loss import _check_binary_score
 from secml.ml.classifiers.clf_utils import convert_binary_labels
@@ -34,7 +35,8 @@ class CLossHinge(CLossClassification):
     suitable_for : 'classification'
 
     """
-    __class_type = 'hinge'
+
+    __class_type = "hinge"
 
     def loss(self, y_true, score, pos_label=1):
         """Computes the value of the hinge loss function.
@@ -127,7 +129,8 @@ class CLossHingeSquared(CLossClassification):
     suitable_for : 'classification'
 
     """
-    __class_type = 'hinge-squared'
+
+    __class_type = "hinge-squared"
 
     def loss(self, y_true, score, pos_label=1):
         """Computes the value of the squared hinge loss function.
@@ -161,7 +164,7 @@ class CLossHingeSquared(CLossClassification):
         h = 1.0 - y_true * score
         h[h < 0] = 0.0
 
-        return h ** 2
+        return h**2
 
     def dloss(self, y_true, score, pos_label=1):
         """Computes the derivative of the squared hinge loss function with respect to `score`.

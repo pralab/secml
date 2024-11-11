@@ -46,14 +46,14 @@ class TestCClassifierPyTorchBlobs(CClassifierPyTorchTestCases):
 
         # Load dataset and split tr/ts
         cls.tr, cls.ts = cls._create_tr_ts(
-            cls.n_tr, cls.n_ts, cls.n_classes, cls.n_features)
+            cls.n_tr, cls.n_ts, cls.n_classes, cls.n_features
+        )
 
         # Model and classifier parameters
         cls.batch_size = 20
 
         # Create the PyTorch model and our classifier
-        cls.clf = cls._create_clf(
-            cls.n_features, cls.n_classes, cls.batch_size)
+        cls.clf = cls._create_clf(cls.n_features, cls.n_classes, cls.batch_size)
 
         # Train the classifier
         cls.clf.fit(cls.tr.X, cls.tr.Y)
@@ -62,16 +62,18 @@ class TestCClassifierPyTorchBlobs(CClassifierPyTorchTestCases):
     def _create_tr_ts(n_tr, n_ts, n_classes, n_features):
         """Create BLOBS training and test sets."""
         # generate synthetic data
-        ds = CDLRandom(n_samples=n_tr + n_ts,
-                       n_classes=n_classes,
-                       n_features=n_features,
-                       n_redundant=0, n_clusters_per_class=1,
-                       class_sep=1, random_state=0).load()
+        ds = CDLRandom(
+            n_samples=n_tr + n_ts,
+            n_classes=n_classes,
+            n_features=n_features,
+            n_redundant=0,
+            n_clusters_per_class=1,
+            class_sep=1,
+            random_state=0,
+        ).load()
 
         # Split in training and test
-        splitter = CTrainTestSplit(train_size=n_tr,
-                                   test_size=n_ts,
-                                   random_state=0)
+        splitter = CTrainTestSplit(train_size=n_tr, test_size=n_ts, random_state=0)
         tr, ts = splitter.split(ds)
 
         nmz = CNormalizerMinMax()
@@ -95,16 +97,19 @@ class TestCClassifierPyTorchBlobs(CClassifierPyTorchTestCases):
         net = Net(n_features=n_features, n_classes=n_classes)
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9)
-        optimizer_scheduler = \
-            torch.optim.lr_scheduler.MultiStepLR(optimizer, [5, 8], gamma=0.1)
+        optimizer_scheduler = torch.optim.lr_scheduler.MultiStepLR(
+            optimizer, [5, 8], gamma=0.1
+        )
 
-        return CClassifierPyTorch(model=net,
-                                  loss=criterion,
-                                  optimizer=optimizer,
-                                  optimizer_scheduler=optimizer_scheduler,
-                                  epochs=10,
-                                  batch_size=batch_size,
-                                  random_state=0)
+        return CClassifierPyTorch(
+            model=net,
+            loss=criterion,
+            optimizer=optimizer,
+            optimizer_scheduler=optimizer_scheduler,
+            epochs=10,
+            batch_size=batch_size,
+            random_state=0,
+        )
 
     def test_classification(self):
         """Test for `.decision_function` and `.predict` methods."""
@@ -133,30 +138,26 @@ class TestCClassifierPyTorchBlobs(CClassifierPyTorchTestCases):
 
     def test_grad(self):
         """Test for `.gradient` method."""
-        self._test_gradient_numerical(
-            self.clf, self.ts.X[0, :], th=1e-2, epsilon=1e-3)
+        self._test_gradient_numerical(self.clf, self.ts.X[0, :], th=1e-2, epsilon=1e-3)
         self._test_grad_atlayer(
-            self.clf, self.ts.X[0, :], layer_names=["fc1", 'fc2', None])
+            self.clf, self.ts.X[0, :], layer_names=["fc1", "fc2", None]
+        )
 
     def test_softmax_outputs(self):
         """Check behavior of `softmax_outputs` parameter."""
-        self._test_softmax_outputs(
-            self.clf, self.ts.X[0, :])
-        self._test_gradient_numerical(
-            self.clf, self.ts.X[0, :], th=1e-2, epsilon=1e-3)
+        self._test_softmax_outputs(self.clf, self.ts.X[0, :])
+        self._test_gradient_numerical(self.clf, self.ts.X[0, :], th=1e-2, epsilon=1e-3)
 
     def test_save_load_model(self):
         """Test for `.save_model` and `.load_model` methods."""
         # Create a second target classifier
-        clf_new = self._create_clf(
-            self.n_features, self.n_classes, self.batch_size)
+        clf_new = self._create_clf(self.n_features, self.n_classes, self.batch_size)
         self._test_save_load_model(self.clf, clf_new, self.ts)
 
     def test_get_set_state(self):
         """Test for `.get_state` and `.set_state` methods."""
         # Create a second target classifier
-        clf_new = self._create_clf(
-            self.n_features, self.n_classes, self.batch_size)
+        clf_new = self._create_clf(self.n_features, self.n_classes, self.batch_size)
         self._test_get_set_state(self.clf, clf_new, self.ts)
 
     def test_preprocess_dnn(self):
@@ -174,9 +175,8 @@ class TestCClassifierPyTorchBlobs(CClassifierPyTorchTestCases):
         self._test_predict(new_clf, self.ts)
         self._test_accuracy(new_clf, self.ts)
 
-        self._test_gradient_numerical(
-            new_clf, self.ts.X[0, :], th=1e-2, epsilon=1e-3)
+        self._test_gradient_numerical(new_clf, self.ts.X[0, :], th=1e-2, epsilon=1e-3)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CClassifierPyTorchTestCases.main()

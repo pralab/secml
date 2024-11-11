@@ -5,6 +5,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from sklearn.metrics import confusion_matrix
 from secml.array import CArray
 from secml.ml.peval.metrics import CMetric
@@ -30,5 +31,4 @@ class CMetricConfusionMatrix(CMetric):
         """
         y_true = CArray(y_true)
         y_pred = CArray(y_pred)
-        return CArray(confusion_matrix(y_true.tondarray(),
-                                       y_pred.tondarray()))
+        return CArray(confusion_matrix(y_true.tondarray(), y_pred.tondarray()))

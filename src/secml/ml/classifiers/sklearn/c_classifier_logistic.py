@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from sklearn.linear_model import LogisticRegression
 
 from secml.array import CArray
@@ -13,13 +14,12 @@ from secml.ml.classifiers import CClassifierLinearMixin, CClassifierSkLearn
 from secml.ml.classifiers.loss import CLossLogistic
 from secml.ml.classifiers.regularizer import CRegularizerL2
 
-from secml.ml.classifiers.gradients import \
-    CClassifierGradientLogisticMixin
+from secml.ml.classifiers.gradients import CClassifierGradientLogisticMixin
 
 
-class CClassifierLogistic(CClassifierLinearMixin,
-                          CClassifierSkLearn,
-                          CClassifierGradientLogisticMixin):
+class CClassifierLogistic(
+    CClassifierLinearMixin, CClassifierSkLearn, CClassifierGradientLogisticMixin
+):
     """Logistic Regression (aka logit, MaxEnt) classifier.
 
     Parameters
@@ -45,27 +45,28 @@ class CClassifierLogistic(CClassifierLinearMixin,
     class_type : 'logistic'
 
     """
-    __class_type = 'logistic'
+
+    __class_type = "logistic"
 
     _loss = CLossLogistic()
     _reg = CRegularizerL2()
 
-    def __init__(self, C=1.0, max_iter=100,
-                 random_state=None, preprocess=None):
+    def __init__(self, C=1.0, max_iter=100, random_state=None, preprocess=None):
         sklearn_model = LogisticRegression(
-            penalty='l2',
+            penalty="l2",
             dual=False,
             tol=0.0001,
             C=C,
             fit_intercept=True,
             intercept_scaling=1.0,
             class_weight=None,
-            solver='liblinear',
+            solver="liblinear",
             random_state=random_state,
             max_iter=max_iter,
-            multi_class='ovr',
+            multi_class="ovr",
             verbose=0,
-            warm_start=False)
+            warm_start=False,
+        )
 
         CClassifierSkLearn.__init__(self, sklearn_model, preprocess=preprocess)
 

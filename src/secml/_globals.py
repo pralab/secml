@@ -12,15 +12,13 @@ will still work correctly after numpy is reloaded::
 
 """
 
-__all__ = [
-        '_NoValue'
-    ]
+__all__ = ["_NoValue"]
 
 
 # Disallow reloading this module so as to preserve the identities of the
 # classes defined here.
-if '_is_loaded' in globals():
-    raise RuntimeError('Reloading secml._globals is not allowed')
+if "_is_loaded" in globals():
+    raise RuntimeError("Reloading secml._globals is not allowed")
 _is_loaded = True
 
 
@@ -33,6 +31,7 @@ class _NoValueType:
     Inspired by np._globals module implementation.
 
     """
+
     __instance = None
 
     def __new__(cls):

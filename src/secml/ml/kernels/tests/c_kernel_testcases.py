@@ -10,10 +10,14 @@ from secml.optim.function import CFunction
 class CCKernelTestCases(CUnitTest):
     def _set_up(self, kernel_name):
 
-        self.d_dense = CDLRandom(n_samples=10, n_features=5,
-                                 n_redundant=0, n_informative=3,
-                                 n_clusters_per_class=1,
-                                 random_state=100).load()
+        self.d_dense = CDLRandom(
+            n_samples=10,
+            n_features=5,
+            n_redundant=0,
+            n_informative=3,
+            n_clusters_per_class=1,
+            random_state=100,
+        ).load()
 
         self.p1_dense = self.d_dense.X[0, :]
         self.p2_dense = self.d_dense.X[1, :]
@@ -35,17 +39,22 @@ class CCKernelTestCases(CUnitTest):
     def _cmp_kernel(self, k_fun, a1, a2):
         k = k_fun(a1, a2)
         if isinstance(k, CArray):
-            self.logger.info("k shape with inputs {:} {:} is: {:}"
-                             "".format(a1.shape, a2.shape, k.shape))
-            self.assertEqual(k.shape, (CArray(a1).atleast_2d().shape[0],
-                                       CArray(a2).atleast_2d().shape[0]))
+            self.logger.info(
+                "k shape with inputs {:} {:} is: {:}"
+                "".format(a1.shape, a2.shape, k.shape)
+            )
+            self.assertEqual(
+                k.shape,
+                (CArray(a1).atleast_2d().shape[0], CArray(a2).atleast_2d().shape[0]),
+            )
         else:
             self.assertTrue(is_scalar(k))
 
     def _test_similarity_shape(self):
         """Test shape of kernel."""
         self.logger.info(
-            "Testing shape of " + self.kernel.class_type + " kernel output.")
+            "Testing shape of " + self.kernel.class_type + " kernel output."
+        )
 
         x_vect = CArray.rand(shape=(1, 10)).ravel()
         x_mat = CArray.rand(shape=(10, 10))
@@ -64,7 +73,8 @@ class CCKernelTestCases(CUnitTest):
     def _test_similarity_shape_sparse(self):
         """Test shape of kernel."""
         self.logger.info(
-            "Testing shape of " + self.kernel.class_type + " kernel output.")
+            "Testing shape of " + self.kernel.class_type + " kernel output."
+        )
 
         x_vect = CArray.rand(shape=(1, 10)).ravel().tosparse()
         x_mat = CArray.rand(shape=(10, 10)).tosparse()
@@ -85,8 +95,9 @@ class CCKernelTestCases(CUnitTest):
 
         if not self._has_gradient():
             self.logger.info(
-                "Gradient is not implemented for %s. "
-                "Skipping gradient dense tests.", self.kernel.class_type)
+                "Gradient is not implemented for %s. " "Skipping gradient dense tests.",
+                self.kernel.class_type,
+            )
             return
 
         # we invert the order of input patterns as we compute the kernel
@@ -112,11 +123,10 @@ class CCKernelTestCases(CUnitTest):
             self.kernel.rv = self.d_dense.X[i, :]
             grad = self.kernel.gradient(self.p2_dense)
             if grad.norm() >= 1e-10:
-                grad_error = CFunction(
-                    kern_f_for_test, kern_grad_for_test).check_grad(
-                    self.p2_dense, 1e-8, self.d_dense.X[i, :], self.kernel)
-                self.logger.info("Gradient approx. error: {:}"
-                                 "".format(grad_error))
+                grad_error = CFunction(kern_f_for_test, kern_grad_for_test).check_grad(
+                    self.p2_dense, 1e-8, self.d_dense.X[i, :], self.kernel
+                )
+                self.logger.info("Gradient approx. error: {:}" "".format(grad_error))
                 self.assertTrue(grad_error < 1e-4)
 
     def _test_gradient_sparse(self):
@@ -125,7 +135,9 @@ class CCKernelTestCases(CUnitTest):
         if not self._has_gradient():
             self.logger.info(
                 "Gradient is not implemented for %s. "
-                "Skipping gradient sparse tests.", self.kernel.class_type)
+                "Skipping gradient sparse tests.",
+                self.kernel.class_type,
+            )
             return
 
         self.logger.info("Testing gradient with sparse data.")
@@ -133,20 +145,17 @@ class CCKernelTestCases(CUnitTest):
 
         self.kernel.rv = self.d_sparse.X
         k_grad = self.kernel.gradient(self.p2_dense)
-        self.logger.info(
-            "sparse/dense ->.isdense: {:}".format(k_grad.isdense))
+        self.logger.info("sparse/dense ->.isdense: {:}".format(k_grad.isdense))
         self.assertTrue(k_grad.isdense)
 
         self.kernel.rv = self.d_dense.X
         k_grad = self.kernel.gradient(self.p2_sparse)
-        self.logger.info(
-            "dense/sparse ->.issparse: {:}".format(k_grad.issparse))
+        self.logger.info("dense/sparse ->.issparse: {:}".format(k_grad.issparse))
         self.assertTrue(k_grad.issparse)
 
         self.kernel.rv = self.d_sparse.X
         k_grad = self.kernel.gradient(self.p2_sparse)
-        self.logger.info(
-            "sparse/sparse ->.issparse: {:}".format(k_grad.issparse))
+        self.logger.info("sparse/sparse ->.issparse: {:}".format(k_grad.issparse))
         self.assertTrue(k_grad.issparse)
 
     def _test_gradient_multiple_points(self):
@@ -154,8 +163,9 @@ class CCKernelTestCases(CUnitTest):
 
         if not self._has_gradient():
             self.logger.info(
-                "Gradient is not implemented for %s. "
-                "Skipping multiple-point tests.", self.kernel.class_type)
+                "Gradient is not implemented for %s. " "Skipping multiple-point tests.",
+                self.kernel.class_type,
+            )
             return
 
         # check if gradient computed on multiple points is the same as
@@ -183,8 +193,9 @@ class CCKernelTestCases(CUnitTest):
 
         if not self._has_gradient():
             self.logger.info(
-                "Gradient is not implemented for %s. "
-                "Skipping multiple-point tests.", self.kernel.class_type)
+                "Gradient is not implemented for %s. " "Skipping multiple-point tests.",
+                self.kernel.class_type,
+            )
             return
 
         # check if gradient computed on multiple points is the same as
@@ -212,8 +223,9 @@ class CCKernelTestCases(CUnitTest):
 
         if not self._has_gradient():
             self.logger.info(
-                "Gradient is not implemented for %s. "
-                "Skipping multiple-point tests.", self.kernel.class_type)
+                "Gradient is not implemented for %s. " "Skipping multiple-point tests.",
+                self.kernel.class_type,
+            )
             return
 
         # check if the gradient computed when passing w is the same as the
@@ -239,5 +251,5 @@ class CCKernelTestCases(CUnitTest):
         self.assert_array_almost_equal(grad_1, grad_2, decimal=10)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 import inspect
 import sys
 
@@ -79,9 +80,11 @@ class CPlot(CCreator):
             c_methods = inspect.getmembers(c_info[1], pred)
             for method in c_methods:  # For each method (name, unbound method)
                 # Skip special methods and already added methods
-                if not method[0].startswith('__') and \
-                        method[0] not in methods_list and \
-                        not hasattr(self, method[0]):
+                if (
+                    not method[0].startswith("__")
+                    and method[0] not in methods_list
+                    and not hasattr(self, method[0])
+                ):
                     methods_list.append(method)
         # Add methods to CPlot. Use __get__ to bound method to CPlot instance
         for method in methods_list:
@@ -95,10 +98,10 @@ class CPlot(CCreator):
     def _set_lines_params(self, kwargs):
         """Add lines-related parameters to input dictionary."""
         # Parameters are updated/added only if not yet specified
-        if 'linewidth' not in kwargs:
-            kwargs['linewidth'] = self._params['lines.linewidth']
-        if 'markersize' not in kwargs:
-            kwargs['markersize'] = self._params['lines.markersize']
+        if "linewidth" not in kwargs:
+            kwargs["linewidth"] = self._params["lines.linewidth"]
+        if "markersize" not in kwargs:
+            kwargs["markersize"] = self._params["lines.markersize"]
 
         return kwargs
 
@@ -309,8 +312,8 @@ class CPlot(CCreator):
             :include-source:
 
         """
-        if 'subsx' in kwargs and isinstance(kwargs['subsx'], CArray):
-                kwargs['subsx'] = kwargs['subsx'].tondarray()
+        if "subsx" in kwargs and isinstance(kwargs["subsx"], CArray):
+            kwargs["subsx"] = kwargs["subsx"].tondarray()
         # Set other lines-related parameters
         kwargs = self._set_lines_params(kwargs)
         # Convert sequences inside tuple to ndarray
@@ -354,8 +357,8 @@ class CPlot(CCreator):
             :include-source:
 
         """
-        if 'subsy' in kwargs and isinstance(kwargs['subsy'], CArray):
-                kwargs['subsy'] = kwargs['subsy'].tondarray()
+        if "subsy" in kwargs and isinstance(kwargs["subsy"], CArray):
+            kwargs["subsy"] = kwargs["subsy"].tondarray()
         # Set other lines-related parameters
         kwargs = self._set_lines_params(kwargs)
         # Convert sequences inside tuple to ndarray
@@ -393,10 +396,10 @@ class CPlot(CCreator):
         .plot : Plot with standard axis.
 
         """
-        if 'subsx' in kwargs and isinstance(kwargs['subsx'], CArray):
-                kwargs['subsx'] = kwargs['subsx'].tondarray()
-        if 'subsy' in kwargs and isinstance(kwargs['subsy'], CArray):
-                kwargs['subsy'] = kwargs['subsy'].tondarray()
+        if "subsx" in kwargs and isinstance(kwargs["subsx"], CArray):
+            kwargs["subsx"] = kwargs["subsx"].tondarray()
+        if "subsy" in kwargs and isinstance(kwargs["subsy"], CArray):
+            kwargs["subsy"] = kwargs["subsy"].tondarray()
         # Set other lines-related parameters
         kwargs = self._set_lines_params(kwargs)
         # Convert sequences inside tuple to ndarray
@@ -406,7 +409,7 @@ class CPlot(CCreator):
         else:
             self._sp.loglog(x, y, *args, **kwargs)
 
-    def scatter(self, x, y, s=20, c='b', *args, **kwargs):
+    def scatter(self, x, y, s=20, c="b", *args, **kwargs):
         """Scatter plot of x vs y.
 
         Parameters
@@ -454,8 +457,8 @@ class CPlot(CCreator):
             :include-source:
 
         """
-        if 'linewidths' not in kwargs:
-            kwargs['linewidths'] = self._params['lines.linewidth']
+        if "linewidths" not in kwargs:
+            kwargs["linewidths"] = self._params["lines.linewidth"]
         # Convert sequences inside tuple to ndarray
         if not isinstance(c, str):
             x, y, c = tuple_sequence_tondarray((x, y, c))
@@ -543,8 +546,8 @@ class CPlot(CCreator):
             :include-source:
 
         """
-        if 'linewidths' not in kwargs:
-            kwargs['linewidths'] = self._params['lines.linewidth']
+        if "linewidths" not in kwargs:
+            kwargs["linewidths"] = self._params["lines.linewidth"]
         # Convert sequences inside tuple to ndarray
         x, y, z = tuple_sequence_tondarray((x, y, z))
         return self._sp.contour(x, y, z, *args, **kwargs)
@@ -679,8 +682,8 @@ class CPlot(CCreator):
             :include-source:
 
         """
-        if 'fontsize' not in kwargs:
-            kwargs['fontsize'] = self._params['font.size']
+        if "fontsize" not in kwargs:
+            kwargs["fontsize"] = self._params["font.size"]
         return self._sp.clabel(contour, *args, **kwargs)
 
     def colorbar(self, mappable, ticks=None, *args, **kwargs):
@@ -773,10 +776,11 @@ class CPlot(CCreator):
         """
         ticks = ticks.tolist() if isinstance(ticks, CArray) else ticks
         from matplotlib.pyplot import colorbar
+
         cbar = colorbar(mappable, ticks=ticks, *args, **kwargs)
-        if 'fontsize' not in kwargs:
-            kwargs['fontsize'] = self._params['font.size']
-        cbar.ax.tick_params(labelsize=kwargs['fontsize'])
+        if "fontsize" not in kwargs:
+            kwargs["fontsize"] = self._params["font.size"]
+        cbar.ax.tick_params(labelsize=kwargs["fontsize"])
         return cbar
 
     def errorbar(self, x, y, xerr=None, yerr=None, *args, **kwargs):
@@ -897,11 +901,12 @@ class CPlot(CCreator):
             :include-source:
 
         """
-        if 'linewidth' not in kwargs:
-            kwargs['linewidth'] = self._params['lines.linewidth']
+        if "linewidth" not in kwargs:
+            kwargs["linewidth"] = self._params["lines.linewidth"]
         # Convert sequences inside tuple to ndarray
         left, height, width, bottom = tuple_sequence_tondarray(
-            (left, height, width, bottom))
+            (left, height, width, bottom)
+        )
         return self._sp.bar(left, height, width, bottom, *args, **kwargs)
 
     def barh(self, bottom, width, height=0.8, left=None, *args, **kwargs):
@@ -953,11 +958,12 @@ class CPlot(CCreator):
         bar_list : list of bar type objects
 
         """
-        if 'linewidth' not in kwargs:
-            kwargs['linewidth'] = self._params['lines.linewidth']
+        if "linewidth" not in kwargs:
+            kwargs["linewidth"] = self._params["lines.linewidth"]
         # Convert sequences inside tuple to ndarray
         bottom, width, height, left = tuple_sequence_tondarray(
-            (bottom, width, height, left))
+            (bottom, width, height, left)
+        )
         return self._sp.barh(bottom, width, height, left, *args, **kwargs)
 
     def hist(self, x, *args, **kwargs):
@@ -1078,21 +1084,41 @@ class CPlot(CCreator):
             :include-source:
 
         """
-        if 'linewidth' not in kwargs:
-            kwargs['linewidth'] = self._params['lines.linewidth']
+        if "linewidth" not in kwargs:
+            kwargs["linewidth"] = self._params["lines.linewidth"]
         x = list(xi.tondarray() if isinstance(xi, CArray) else xi for xi in x)
         n, bins, patches = self._sp.hist(x, *args, **kwargs)
         if isinstance(n, list):
             n = list(CArray(ni) for ni in n)
         return n, CArray(bins), patches
 
-    def boxplot(self, x, notch=False, sym=None, vert=True, whis=1.5,
-                positions=None, widths=None, patch_artist=False,
-                bootstrap=None, usermedians=None, conf_intervals=None,
-                meanline=False, showmeans=False, showcaps=True,
-                showbox=True, showfliers=True, boxprops=None, labels=None,
-                flierprops=None, medianprops=None, meanprops=None,
-                capprops=None, whiskerprops=None, manage_xticks=True):
+    def boxplot(
+        self,
+        x,
+        notch=False,
+        sym=None,
+        vert=True,
+        whis=1.5,
+        positions=None,
+        widths=None,
+        patch_artist=False,
+        bootstrap=None,
+        usermedians=None,
+        conf_intervals=None,
+        meanline=False,
+        showmeans=False,
+        showcaps=True,
+        showbox=True,
+        showfliers=True,
+        boxprops=None,
+        labels=None,
+        flierprops=None,
+        medianprops=None,
+        meanprops=None,
+        capprops=None,
+        whiskerprops=None,
+        manage_xticks=True,
+    ):
         """Make a box and whisker plot.
 
         Make a box and whisker plot for each column of *x* or each
@@ -1209,30 +1235,49 @@ class CPlot(CCreator):
 
         """
         if isinstance(x, CArray):
-            x = (x, )
+            x = (x,)
         x = tuple_sequence_tondarray(tuple(x))
         if usermedians is not None:
             if isinstance(usermedians, CArray):
-                usermedians = (usermedians, )
+                usermedians = (usermedians,)
             usermedians = tuple_sequence_tondarray(tuple(usermedians))
         if conf_intervals is not None:
             if isinstance(conf_intervals, CArray):
-                conf_intervals = (conf_intervals, )
+                conf_intervals = (conf_intervals,)
             conf_intervals = tuple_sequence_tondarray(tuple(conf_intervals))
         if isinstance(positions, CArray):
             positions = positions.tondarray()
 
-        self._sp.boxplot(x, notch, sym, vert, whis,
-                         positions, widths, patch_artist,
-                         bootstrap, usermedians, conf_intervals,
-                         meanline, showmeans, showcaps,
-                         showbox, showfliers, boxprops,
-                         labels, flierprops, medianprops,
-                         meanprops, capprops, whiskerprops,
-                         manage_xticks)
+        self._sp.boxplot(
+            x,
+            notch,
+            sym,
+            vert,
+            whis,
+            positions,
+            widths,
+            patch_artist,
+            bootstrap,
+            usermedians,
+            conf_intervals,
+            meanline,
+            showmeans,
+            showcaps,
+            showbox,
+            showfliers,
+            boxprops,
+            labels,
+            flierprops,
+            medianprops,
+            meanprops,
+            capprops,
+            whiskerprops,
+            manage_xticks,
+        )
 
-    def fill_between(self, x, y1, y2=0, where=None,
-                     interpolate=False, step=None, **kwargs):
+    def fill_between(
+        self, x, y1, y2=0, where=None, interpolate=False, step=None, **kwargs
+    ):
         """Fill the area between two horizontal curves.
 
         The curves are defined by the points (x, y1) and (x, y2).
@@ -1286,8 +1331,9 @@ class CPlot(CCreator):
 
         """
         x, y1, y2, where = tuple_sequence_tondarray((x, y1, y2, where))
-        self._sp.fill_between(x, y1, y2=y2, where=where,
-                              interpolate=interpolate, step=step, **kwargs)
+        self._sp.fill_between(
+            x, y1, y2=y2, where=where, interpolate=interpolate, step=step, **kwargs
+        )
 
     def xlim(self, bottom=None, top=None):
         """Set axes x limits.
@@ -1326,7 +1372,7 @@ class CPlot(CCreator):
         self._ylim = (bottom, top)
         self._sp.set_ylim(bottom, top)
 
-    def xscale(self, scale_type, nonposx='mask', basex=10, **kwargs):
+    def xscale(self, scale_type, nonposx="mask", basex=10, **kwargs):
         """Set scale for x axis.
 
         Parameters
@@ -1342,7 +1388,7 @@ class CPlot(CCreator):
         """
         self._sp.set_xscale(scale_type, nonposx=nonposx, basex=basex, **kwargs)
 
-    def yscale(self, scale_type, nonposy='mask', basey=10, **kwargs):
+    def yscale(self, scale_type, nonposy="mask", basey=10, **kwargs):
         """Set scale for y axis.
 
         Parameters
@@ -1374,8 +1420,8 @@ class CPlot(CCreator):
             :include-source:
 
         """
-        if 'fontsize' not in kwargs:
-            kwargs['fontsize'] = self._params['font.size']
+        if "fontsize" not in kwargs:
+            kwargs["fontsize"] = self._params["font.size"]
         self._xlabel = label
         self._sp.set_xlabel(label, *args, **kwargs)
 
@@ -1394,8 +1440,8 @@ class CPlot(CCreator):
         .xlabel : Set a label for the x axis.
 
         """
-        if 'fontsize' not in kwargs:
-            kwargs['fontsize'] = self._params['font.size']
+        if "fontsize" not in kwargs:
+            kwargs["fontsize"] = self._params["font.size"]
         self._ylabel = label
         self._sp.set_ylabel(label, *args, **kwargs)
 
@@ -1521,7 +1567,7 @@ class CPlot(CCreator):
         """
         self._sp.tick_params(*args, **kwargs)
 
-    def grid(self, grid_on=True, axis='both', **kwargs):
+    def grid(self, grid_on=True, axis="both", **kwargs):
         """Draw grid for current plot.
 
         Parameters
@@ -1633,8 +1679,8 @@ class CPlot(CCreator):
                   'large', 'x-large', 'xx-large' or an absolute font size, e.g., 12
 
         """
-        if 'fontsize' not in kwargs:
-            kwargs['fontsize'] = self._params['font.size']
+        if "fontsize" not in kwargs:
+            kwargs["fontsize"] = self._params["font.size"]
         return self._sp.text(*args, **kwargs)
 
     def legend(self, *args, **kwargs):
@@ -1765,8 +1811,8 @@ class CPlot(CCreator):
             :include-source:
 
         """
-        if 'fontsize' not in kwargs:
-            kwargs['fontsize'] = self._params['font.size']
+        if "fontsize" not in kwargs:
+            kwargs["fontsize"] = self._params["font.size"]
         self.show_legend = True
         return self._sp.legend(*args, **kwargs)
 
@@ -1776,15 +1822,26 @@ class CPlot(CCreator):
 
     def title(self, text, *args, **kwargs):
         """Set a title for subplot."""
-        if 'fontsize' not in kwargs:
-            kwargs['fontsize'] = self._params['font.size']
+        if "fontsize" not in kwargs:
+            kwargs["fontsize"] = self._params["font.size"]
         return self._sp.set_title(text, *args, **kwargs)
 
-    def plot_path(self, path, path_style='-', path_width=1.5, path_color='k',
-                  straight=False, start_style='h', start_facecolor='r',
-                  start_edgecolor='k', start_edgewidth=1,
-                  final_style='*', final_facecolor='g',
-                  final_edgecolor='k', final_edgewidth=1):
+    def plot_path(
+        self,
+        path,
+        path_style="-",
+        path_width=1.5,
+        path_color="k",
+        straight=False,
+        start_style="h",
+        start_facecolor="r",
+        start_edgecolor="k",
+        start_edgewidth=1,
+        final_style="*",
+        final_facecolor="g",
+        final_edgecolor="k",
+        final_edgewidth=1,
+    ):
         """Plot a path traversed by a point.
 
         By default, path is drawn in solid black, start point
@@ -1828,25 +1885,41 @@ class CPlot(CCreator):
         """
         path_2d = CArray(path).atleast_2d()
         if path_2d.shape[1] != 2:
-            raise ValueError("cannot plot a {:}-Dimensional path."
-                             "".format(path_2d.shape[1]))
+            raise ValueError(
+                "cannot plot a {:}-Dimensional path." "".format(path_2d.shape[1])
+            )
         # Plotting full path, then the start and the end points
         if straight is False:
-            self.plot(path_2d[:, 0], path_2d[:, 1],
-                      linestyle=path_style,
-                      color=path_color,
-                      linewidth=path_width)
+            self.plot(
+                path_2d[:, 0],
+                path_2d[:, 1],
+                linestyle=path_style,
+                color=path_color,
+                linewidth=path_width,
+            )
         else:
-            self.plot(path_2d[[0, -1], 0], path_2d[[0, -1], 1],
-                      linestyle=path_style, color=path_color)
-        self.plot(path_2d[0, 0], path_2d[0, 1], marker=start_style,
-                  markerfacecolor=start_facecolor,
-                  markeredgecolor=start_edgecolor,
-                  markeredgewidth=start_edgewidth)
-        self.plot(path_2d[-1, 0], path_2d[-1, 1], marker=final_style,
-                  markerfacecolor=final_facecolor,
-                  markeredgecolor=final_edgecolor,
-                  markeredgewidth=final_edgewidth)
+            self.plot(
+                path_2d[[0, -1], 0],
+                path_2d[[0, -1], 1],
+                linestyle=path_style,
+                color=path_color,
+            )
+        self.plot(
+            path_2d[0, 0],
+            path_2d[0, 1],
+            marker=start_style,
+            markerfacecolor=start_facecolor,
+            markeredgecolor=start_edgecolor,
+            markeredgewidth=start_edgewidth,
+        )
+        self.plot(
+            path_2d[-1, 0],
+            path_2d[-1, 1],
+            marker=final_style,
+            markerfacecolor=final_facecolor,
+            markeredgecolor=final_edgecolor,
+            markeredgewidth=final_edgewidth,
+        )
 
     def imshow(self, img, *args, **kwargs):
         """Plot image.
@@ -1873,8 +1946,9 @@ class CPlot(CCreator):
         """
         return self._sp.matshow(array.tondarray(), *args, **kwargs)
 
-    def quiver(self, U, V, X=None, Y=None,
-               color='k', linestyle='-', linewidth=1.0, alpha=1.0):
+    def quiver(
+        self, U, V, X=None, Y=None, color="k", linestyle="-", linewidth=1.0, alpha=1.0
+    ):
         """A quiver plot displays velocity vectors as arrows
         with components (u,v) at the points (x,y).
 
@@ -1907,11 +1981,22 @@ class CPlot(CCreator):
 
         """
         if X is None:
-            self._sp.quiver(U.tondarray(), V.tondarray(),
-                            color=color, linestyle=linestyle,
-                            linewidth=linewidth, alpha=alpha)
+            self._sp.quiver(
+                U.tondarray(),
+                V.tondarray(),
+                color=color,
+                linestyle=linestyle,
+                linewidth=linewidth,
+                alpha=alpha,
+            )
         else:
-            self._sp.quiver(X.tondarray(), Y.tondarray(),
-                            U.tondarray(), V.tondarray(),
-                            color=color, linestyle=linestyle,
-                            linewidth=linewidth, alpha=alpha)
+            self._sp.quiver(
+                X.tondarray(),
+                Y.tondarray(),
+                U.tondarray(),
+                V.tondarray(),
+                color=color,
+                linestyle=linestyle,
+                linewidth=linewidth,
+                alpha=alpha,
+            )

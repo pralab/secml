@@ -6,9 +6,10 @@
 .. moduleauthor:: Angelo Sotgiu
 
 """
+
 from PIL import Image
 
-__all__ = ['resize_img', 'crop_img']
+__all__ = ["resize_img", "crop_img"]
 
 
 def resize_img(img, shape):
@@ -78,10 +79,9 @@ def crop_img(img, crop):
     w, h = img.size
 
     if crop[1] >= w or crop[0] >= h:
-        raise ValueError(
-            "crop dimensions cannot be higher than {:}".format(img.size))
+        raise ValueError("crop dimensions cannot be higher than {:}".format(img.size))
 
-    x1 = int(round((w - crop[1]) / 2.))
-    y1 = int(round((h - crop[0]) / 2.))
+    x1 = int(round((w - crop[1]) / 2.0))
+    y1 = int(round((h - crop[0]) / 2.0))
 
     return img.crop((x1, y1, x1 + crop[1], y1 + crop[0]))

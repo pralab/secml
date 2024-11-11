@@ -7,6 +7,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.adv.attacks import CAttackMixin
 from secml.adv.attacks.evasion import CAttackEvasion
 from secml.optim.optimizers import COptimizer
@@ -34,7 +35,7 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
     It can also be used on sparse, high-dimensional feature spaces, using an
     L1 constraint on the manipulation of samples to preserve sparsity,
     as we did for crafting adversarial Android malware in:
-    
+
      - https://arxiv.org/abs/1704.08996, IEEE TDSC 2017.
 
     For more on evasion attacks, see also:
@@ -77,18 +78,22 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
     class_type : 'e-pgd-ls'
 
     """
-    __class_type = 'e-pgd-ls'
 
-    def __init__(self, classifier,
-                 double_init_ds=None,
-                 double_init=True,
-                 distance='l1',
-                 dmax=0,
-                 lb=0,
-                 ub=1,
-                 y_target=None,
-                 attack_classes='all',
-                 solver_params=None):
+    __class_type = "e-pgd-ls"
+
+    def __init__(
+        self,
+        classifier,
+        double_init_ds=None,
+        double_init=True,
+        distance="l1",
+        dmax=0,
+        lb=0,
+        ub=1,
+        y_target=None,
+        attack_classes="all",
+        solver_params=None,
+    ):
 
         # INTERNALS
         self._x0 = None
@@ -106,19 +111,23 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
         self._double_init_labels = None
         self._double_init_scores = None
 
-        CAttackEvasion.__init__(self,
-                                classifier=classifier,
-                                y_target=y_target,
-                                attack_classes=attack_classes)
+        CAttackEvasion.__init__(
+            self,
+            classifier=classifier,
+            y_target=y_target,
+            attack_classes=attack_classes,
+        )
 
-        CAttackMixin.__init__(self,
-                              classifier=classifier,
-                              distance=distance,
-                              dmax=dmax,
-                              lb=lb,
-                              ub=ub,
-                              solver_type='pgd-ls',
-                              solver_params=solver_params)
+        CAttackMixin.__init__(
+            self,
+            classifier=classifier,
+            distance=distance,
+            dmax=dmax,
+            lb=lb,
+            ub=ub,
+            solver_type="pgd-ls",
+            solver_params=solver_params,
+        )
 
     ###########################################################################
     #                           READ-WRITE ATTRIBUTES
@@ -177,8 +186,7 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
             # the successive choice of the competing classes
             scores[[smpls_idx, k.tolist()]] = nan
 
-            if issubclass(
-                    self.classifier.__class__, CClassifierReject):
+            if issubclass(self.classifier.__class__, CClassifierReject):
                 # set to nan the score of the reject classes to exclude it by
                 # the successive choice of the competing classes
                 scores[:, -1] = nan
@@ -220,28 +228,32 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
     def _init_solver(self):
         """Create solver instance."""
         if self.classifier is None or self.distance is None:
-            raise ValueError('Solver not set properly!')
+            raise ValueError("Solver not set properly!")
 
         # map attributes to fun, constr, box
-        fun = CFunction(fun=self.objective_function,
-                        gradient=self.objective_function_gradient,
-                        n_dim=self.classifier.n_features)
+        fun = CFunction(
+            fun=self.objective_function,
+            gradient=self.objective_function_gradient,
+            n_dim=self.classifier.n_features,
+        )
 
         constr = CConstraint.create(self._distance)
         constr.center = self._x0
         constr.radius = self.dmax
 
         # only feature increments or decrements are allowed
-        lb = self._x0.todense() if self.lb == 'x0' else self.lb
-        ub = self._x0.todense() if self.ub == 'x0' else self.ub
+        lb = self._x0.todense() if self.lb == "x0" else self.lb
+        ub = self._x0.todense() if self.ub == "x0" else self.ub
 
-        bounds = CConstraint.create('box', lb=lb, ub=ub)
+        bounds = CConstraint.create("box", lb=lb, ub=ub)
 
         self._solver = COptimizer.create(
             self._solver_type,
-            fun=fun, constr=constr,
+            fun=fun,
+            constr=constr,
             bounds=bounds,
-            **self._solver_params)
+            **self._solver_params
+        )
 
         # TODO: fix this verbose level propagation
         self._solver.verbose = self.verbose
@@ -249,7 +261,7 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
     # TODO: add probability as in c_attack_poisoning
     # (we could also move this directly in c_attack)
     def _get_point_with_min_f_obj(self, y_pred, scores):
-        """Returns the alternative init sample having the minimum value 
+        """Returns the alternative init sample having the minimum value
         of objective function.
 
         Parameters
@@ -270,14 +282,14 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
         return self._double_init_ds.X[k, :].ravel()
 
     def _set_solver_alternative_predictions(self):
-        """Compute predictions on double init data using solver classifier.
-        """
+        """Compute predictions on double init data using solver classifier."""
         if self.double_init_ds is None:
             raise ValueError("double_init_ds is not defined")
 
         # Compute the new predictions
         y, score = self.classifier.predict(
-            self.double_init_ds.X, return_decision_function=True)
+            self.double_init_ds.X, return_decision_function=True
+        )
         self._double_init_labels = y
         self._double_init_scores = score
 
@@ -286,8 +298,7 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
         self.logger.info("Computing an alternative init point...")
 
         # Compute predictions on double init data if necessary
-        if self._double_init_labels is None or \
-                self._double_init_scores is None:
+        if self._double_init_labels is None or self._double_init_scores is None:
             self._set_solver_alternative_predictions()
 
         y_pred = self._double_init_labels
@@ -295,23 +306,25 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
 
         # for targeted evasion, this does not depend on the data label y0
         if self.y_target is not None:
-            self._xk = self._get_point_with_min_f_obj(
-                y_pred, scores.deepcopy())
+            self._xk = self._get_point_with_min_f_obj(y_pred, scores.deepcopy())
             return
 
         # for indiscriminate evasion, this depends on y0
         # so, we compute xk for all classes
-        n_classes = self.classifier.n_classes - 1 \
-            if issubclass(self.classifier.__class__, CClassifierReject) \
+        n_classes = (
+            self.classifier.n_classes - 1
+            if issubclass(self.classifier.__class__, CClassifierReject)
             else self.classifier.n_classes
-        self._xk = CArray.zeros(shape=(n_classes, self.classifier.n_features),
-                                sparse=self.double_init_ds.issparse,
-                                dtype=self.double_init_ds.X.dtype)
+        )
+        self._xk = CArray.zeros(
+            shape=(n_classes, self.classifier.n_features),
+            sparse=self.double_init_ds.issparse,
+            dtype=self.double_init_ds.X.dtype,
+        )
         y0 = self._y0  # Backup last y0
         for i in range(n_classes):
             self._y0 = i
-            self._xk[i, :] = self._get_point_with_min_f_obj(
-                y_pred, scores.deepcopy())
+            self._xk[i, :] = self._get_point_with_min_f_obj(y_pred, scores.deepcopy())
         self._y0 = y0  # Restore last y0
 
     def _run(self, x0, y0, x_init=None):
@@ -458,8 +471,7 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
 
         """
 
-        y_pred, scores = self.classifier.predict(
-            x, return_decision_function=True)
+        y_pred, scores = self.classifier.predict(x, return_decision_function=True)
 
         f_obj = self._objective_function_pred_scores(y_pred, scores)
 
@@ -474,8 +486,7 @@ class CAttackEvasionPGDLS(CAttackEvasion, CAttackMixin):
             A single point.
 
         """
-        y_pred, scores = self.classifier.predict(
-            x, return_decision_function=True)
+        y_pred, scores = self.classifier.predict(x, return_decision_function=True)
 
         k, c = self._find_k_c(y_pred, scores)
 

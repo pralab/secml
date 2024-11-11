@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.ml.classifiers.loss import CLossRegression, CLossClassification
 from secml.ml.classifiers.loss.c_loss import _check_binary_score
 from secml.ml.classifiers.clf_utils import convert_binary_labels
@@ -26,7 +27,8 @@ class CLossSquare(CLossClassification):
     suitable_for : 'classification'
 
     """
-    __class_type = 'square'
+
+    __class_type = "square"
 
     def loss(self, y_true, score, pos_label=1):
         """Computes the value of the squared epsilon-insensitive loss function.
@@ -104,7 +106,8 @@ class CLossQuadratic(CLossRegression):
     suitable_for : 'regression'
 
     """
-    __class_type = 'quadratic'
+
+    __class_type = "quadratic"
 
     def loss(self, y_true, score):
         """Computes the value of the quadratic loss function.

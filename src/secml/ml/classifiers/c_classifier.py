@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 
 from secml.ml import CModule
@@ -38,7 +39,8 @@ class CClassifier(CModule, metaclass=ABCMeta):
         Cannot be higher than processor's number of cores. Default is 1.
 
     """
-    __super__ = 'CClassifier'
+
+    __super__ = "CClassifier"
 
     def __init__(self, preprocess=None, n_jobs=1):
         # List of classes on which training has been performed
@@ -88,7 +90,7 @@ class CClassifier(CModule, metaclass=ABCMeta):
             If the classifier is not fitted.
 
         """
-        check_is_fitted(self, ['classes', 'n_features'])
+        check_is_fitted(self, ["classes", "n_features"])
 
     @abstractmethod
     def _fit(self, x, y):
@@ -169,8 +171,9 @@ class CClassifier(CModule, metaclass=ABCMeta):
         forward : run forward function on input data.
 
         """
-        kfold = CDataSplitterKFold(
-            num_folds=5, random_state=0).compute_indices(CDataset(x, y))
+        kfold = CDataSplitterKFold(num_folds=5, random_state=0).compute_indices(
+            CDataset(x, y)
+        )
 
         scores = CArray.zeros(shape=(x.shape[0], y.unique().size))
 
@@ -232,8 +235,7 @@ class CClassifier(CModule, metaclass=ABCMeta):
 
         """
         if y < 0 or y >= self.n_classes:
-            raise ValueError(
-                "class label {:} is out of range".format(y))
+            raise ValueError("class label {:} is out of range".format(y))
 
     def grad_f_x(self, x, y):
         """Computes the gradient of the classifier's decision function wrt x.
@@ -256,8 +258,9 @@ class CClassifier(CModule, metaclass=ABCMeta):
 
         # check that x is a single point
         if CArray(x).is_vector_like is False:
-            raise ValueError("Classifier gradient can be computed only on"
-                             " a single input sample.")
+            raise ValueError(
+                "Classifier gradient can be computed only on" " a single input sample."
+            )
 
         w = CArray.zeros(self.n_classes)
         w[y] = 1  # one-hot encoding of y
@@ -298,8 +301,9 @@ class CClassifier(CModule, metaclass=ABCMeta):
 
         return (labels, scores) if return_decision_function is True else labels
 
-    def estimate_parameters(self, dataset, parameters, splitter, metric,
-                            pick='first', perf_evaluator='xval'):
+    def estimate_parameters(
+        self, dataset, parameters, splitter, metric, pick="first", perf_evaluator="xval"
+    ):
         """Estimate parameter that give better result respect a chose metric.
 
         Parameters
@@ -346,7 +350,8 @@ class CClassifier(CModule, metaclass=ABCMeta):
 
         # Evaluate the best parameters for the classifier (self)
         best_params = perf_eval.evaluate_params(
-            self, dataset, parameters, pick=pick, n_jobs=self.n_jobs)[0]
+            self, dataset, parameters, pick=pick, n_jobs=self.n_jobs
+        )[0]
 
         # Set the best parameters in classifier
         self.set_params(best_params)

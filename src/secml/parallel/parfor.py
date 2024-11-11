@@ -7,7 +7,7 @@ def parfor(task, processes, args):
 
     Applies a function *task* to each argument in *args*,
     using a pool of concurrent processes.
-    
+
     Parameters
     ----------
     task : function
@@ -18,7 +18,7 @@ def parfor(task, processes, args):
         all processor's cores will be used.
     args : any
         Iterable object, where each element is an argument for task.
-    
+
     Returns
     -------
     out : iterable
@@ -62,13 +62,15 @@ def parfor2(task, n_reps, processes, *args):
     # Don't try to spawn more processes than available CPUs
     num_cores = min(cpu_count(), processes)
 
-    return Parallel(n_jobs=num_cores, backend='multiprocessing')(
-        delayed(task)(i, *args) for i in range(n_reps))
+    return Parallel(n_jobs=num_cores, backend="multiprocessing")(
+        delayed(task)(i, *args) for i in range(n_reps)
+    )
 
 
 if __name__ == "__main__":
 
     from math import factorial
+
     arguments = range(10)
     res = [factorial(z) for z in arguments]
     parres = parfor(factorial, 2, arguments)
@@ -78,7 +80,7 @@ if __name__ == "__main__":
         print("Repetition {:} started...".format(idx))
         list_of_scalars_pow = []
         for obj_idx, obj in enumerate(list_of_scalars):
-            list_of_scalars_pow.append(list_of_scalars[obj_idx]**idx)
+            list_of_scalars_pow.append(list_of_scalars[obj_idx] ** idx)
         print("Repetition {:} ended...".format(idx))
         return list_of_scalars_pow
 

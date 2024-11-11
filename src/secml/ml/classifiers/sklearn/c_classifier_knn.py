@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 """
+
 from sklearn import neighbors
 
 from secml.array import CArray
@@ -55,21 +56,34 @@ class CClassifierKNN(CClassifierSkLearn):
     class_type : 'knn'
 
     """
-    __class_type = 'knn'
 
-    def __init__(self, n_neighbors=5, weights='uniform',
-                 algorithm='auto', leaf_size=30, p=2,
-                 metric='minkowski', metric_params=None,
-                 preprocess=None):
+    __class_type = "knn"
+
+    def __init__(
+        self,
+        n_neighbors=5,
+        weights="uniform",
+        algorithm="auto",
+        leaf_size=30,
+        p=2,
+        metric="minkowski",
+        metric_params=None,
+        preprocess=None,
+    ):
 
         self._tr = None
 
         knn = neighbors.KNeighborsClassifier(
-            n_neighbors=n_neighbors, weights=weights, algorithm=algorithm, p=p,
-            leaf_size=leaf_size, metric=metric, metric_params=metric_params)
+            n_neighbors=n_neighbors,
+            weights=weights,
+            algorithm=algorithm,
+            p=p,
+            leaf_size=leaf_size,
+            metric=metric,
+            metric_params=metric_params,
+        )
 
-        CClassifierSkLearn.__init__(self, sklearn_model=knn,
-                                    preprocess=preprocess)
+        CClassifierSkLearn.__init__(self, sklearn_model=knn, preprocess=preprocess)
 
     @property
     def tr(self):
@@ -100,11 +114,11 @@ class CClassifierKNN(CClassifierSkLearn):
     def kneighbors(self, x, num_samples=None):
         """
         Find the training samples nearest to x
-        
+
          Parameters
         ----------
         x : CArray
-            The query point or points. 
+            The query point or points.
         num_samples: int or None
             Number of neighbors to get. if None, use n_neighbors
 
@@ -121,7 +135,8 @@ class CClassifierKNN(CClassifierSkLearn):
             num_samples = self._sklearn_model.n_neighbors
 
         dist, index_point = self._sklearn_model.kneighbors(
-            x.get_data(), num_samples, return_distance=True)
+            x.get_data(), num_samples, return_distance=True
+        )
 
         index_point = CArray(index_point, dtype=int).ravel()
 

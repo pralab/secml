@@ -44,8 +44,7 @@ class TestCDataLoaderSvmLight(CUnitTest):
         self.logger.info("Patterns saved:\n{:}".format(self.patterns))
         self.logger.info("Labels saved:\n{:}".format(self.labels))
 
-        CDataLoaderSvmLight.dump(
-            CDataset(self.patterns, self.labels), test_file)
+        CDataLoaderSvmLight.dump(CDataset(self.patterns, self.labels), test_file)
 
         new_dataset = CDataLoaderSvmLight().load(test_file)
 
@@ -53,13 +52,11 @@ class TestCDataLoaderSvmLight(CUnitTest):
         self.assertFalse((new_dataset.Y != self.labels).any())
 
         # load data but now remove all zero features (colums)
-        new_dataset = CDataLoaderSvmLight().load(
-            test_file, remove_all_zero=True)
+        new_dataset = CDataLoaderSvmLight().load(test_file, remove_all_zero=True)
 
         self.logger.info("Patterns loaded:\n{:}".format(new_dataset.X))
         self.logger.info("Labels loaded:\n{:}".format(new_dataset.Y))
-        self.logger.info(
-            "Mapping back:\n{:}".format(new_dataset.header.idx_mapping))
+        self.logger.info("Mapping back:\n{:}".format(new_dataset.header.idx_mapping))
 
         self.assertTrue(new_dataset.X.issparse)
         self.assertTrue(new_dataset.Y.isdense)
@@ -83,5 +80,5 @@ class TestCDataLoaderSvmLight(CUnitTest):
                 raise e
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

@@ -5,13 +5,13 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from collections.abc import MutableMapping
 
-__all__ = ['load_dict', 'merge_dicts', 'invert_dict',
-           'LastInDict', 'SubLevelsDict']
+__all__ = ["load_dict", "merge_dicts", "invert_dict", "LastInDict", "SubLevelsDict"]
 
 
-def load_dict(file_path, values_dtype=str, encoding='ascii'):
+def load_dict(file_path, values_dtype=str, encoding="ascii"):
     """Load dictionary from textfile.
 
     Each file's line should be <key: value>
@@ -33,10 +33,10 @@ def load_dict(file_path, values_dtype=str, encoding='ascii'):
 
     """
     new_dict = {}
-    with open(file_path, mode='rt', encoding=encoding) as df:
+    with open(file_path, mode="rt", encoding=encoding) as df:
         for key_line in df:
             # a line is 'key: value'
-            key_line_split = key_line.split(':')
+            key_line_split = key_line.split(":")
             try:
                 # Removing any space from key value before setting
                 new_dict[key_line_split[0]] = values_dtype(key_line_split[1].strip())
@@ -101,7 +101,10 @@ def invert_dict(d):
     {1: ['k2', 'k3'], 2: ['k1', 'k2'], 3: 'k2'}
 
     """
-    def tolist(x): return [x] if not isinstance(x, (list, tuple)) else list(x)
+
+    def tolist(x):
+        return [x] if not isinstance(x, (list, tuple)) else list(x)
+
     new_d = {}
     for k in d.items():
         for v in tolist(k[1]):
@@ -138,6 +141,7 @@ class LastInDict(MutableMapping):
     102030
 
     """
+
     def __init__(self):
         self._data = dict()
         self._rw_lastin_key = None
@@ -200,12 +204,13 @@ class SubLevelsDict(MutableMapping):
     10
 
     """
+
     def __init__(self, data):
         self._data = dict(data)
 
     def __setitem__(self, key, value):
         # Support for recursion, e.g. -> attr1.attr2
-        key = key.split('.')
+        key = key.split(".")
 
         # Setting a key element works like in dictionaries
         if len(key) == 1:
@@ -223,11 +228,11 @@ class SubLevelsDict(MutableMapping):
         if hasattr(data, key[-1]):
             setattr(data, key[-1], value)
         else:
-            raise AttributeError("'{:}' not found.".format('.'.join(key)))
+            raise AttributeError("'{:}' not found.".format(".".join(key)))
 
     def __getitem__(self, key):
         # Support for recursion, e.g. -> attr1.attr2
-        key = key.split('.')
+        key = key.split(".")
         # The first element of key is a key of the dictionary
         data = self._data[key[0]]
         # Now get the desired subattributes recursively,
@@ -238,7 +243,7 @@ class SubLevelsDict(MutableMapping):
         return data
 
     def __delitem__(self, key):
-        if len(key.split('.')) != 1:
+        if len(key.split(".")) != 1:
             raise ValueError("only first-level attributes can be removed.")
         del self._data[key]
 
@@ -247,7 +252,7 @@ class SubLevelsDict(MutableMapping):
 
     def __contains__(self, key):
         # Support for recursion, e.g. -> attr1.attr2
-        key = key.split('.')
+        key = key.split(".")
 
         # Check the first element, is a key of the dictionary
         if key[0] not in self._data:

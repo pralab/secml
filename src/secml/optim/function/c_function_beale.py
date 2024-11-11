@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.optim.function.c_function import CFunction
 from secml.array import CArray
 
@@ -28,13 +29,15 @@ class CFunctionBeale(CFunction):
     class_type : 'beale'
 
     """
-    __class_type = 'beale'
+
+    __class_type = "beale"
 
     def __init__(self):
 
         # Passing data to CFunction
         super(CFunctionBeale, self).__init__(
-            fun=self._fun, n_dim=2, gradient=self._grad)
+            fun=self._fun, n_dim=2, gradient=self._grad
+        )
 
     def _fun(self, x):
         """Apply Beale function to point x.
@@ -52,8 +55,7 @@ class CFunctionBeale(CFunction):
         """
         x = x.atleast_2d()
         if x.shape[1] != 2:
-            raise ValueError(
-                "Beale function available for 2 dimensions only")
+            raise ValueError("Beale function available for 2 dimensions only")
 
         # Split into 3 parts
         f1 = (1.5 - x[0].item() + x[0].item() * x[1].item()) ** 2
@@ -66,16 +68,16 @@ class CFunctionBeale(CFunction):
         """Beale function gradient wrt. point x."""
         x = x.atleast_2d()
         if x.shape[1] != 2:
-            raise ValueError("Gradient of Beale function "
-                             "only available for 2 dimensions")
+            raise ValueError(
+                "Gradient of Beale function " "only available for 2 dimensions"
+            )
         # Computing gradient of each dimension
         grad1_1 = 2 * (1.5 - x[0] + x[0] * x[1]) * (-1 + x[1])
         grad1_2 = 2 * (2.25 - x[0] + x[0] * x[1] ** 2) * (-1 + x[1] ** 2)
         grad1_3 = 2 * (2.625 - x[0] + x[0] * x[1] ** 3) * (-1 + x[1] ** 3)
         grad2_1 = 2 * (1.5 - x[0] + x[0] * x[1]) * x[0]
         grad2_2 = 2 * (2.25 - x[0] + x[0] * x[1] ** 2) * (2 * x[0] * x[1])
-        grad2_3 = 2 * (2.625 - x[0] + x[0] * x[1] ** 3) * \
-            (3 * x[0] * x[1] ** 2)
+        grad2_3 = 2 * (2.625 - x[0] + x[0] * x[1] ** 3) * (3 * x[0] * x[1] ** 2)
 
         grad1 = grad1_1 + grad1_2 + grad1_3
         grad2 = grad2_1 + grad2_2 + grad2_3
@@ -94,7 +96,7 @@ class CFunctionBeale(CFunction):
             Value of the global minimum of the function.
 
         """
-        return 0.
+        return 0.0
 
     @staticmethod
     def global_min_x():
@@ -108,4 +110,4 @@ class CFunctionBeale(CFunction):
             The global minimum point of the function.
 
         """
-        return CArray([3., 0.5])
+        return CArray([3.0, 0.5])

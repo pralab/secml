@@ -22,24 +22,28 @@ class TestCClassifierSVM(CClassifierTestCases):
     def setUp(self):
 
         # generate synthetic data
-        self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
-                                 n_clusters_per_class=1, random_state=1).load()
+        self.dataset = CDLRandom(
+            n_features=2,
+            n_redundant=0,
+            n_informative=1,
+            n_clusters_per_class=1,
+            random_state=1,
+        ).load()
 
         self.dataset_sparse = self.dataset.tosparse()
 
         kernel_types = (None, CKernelLinear, CKernelRBF, CKernelPoly)
-        self.svms = [CClassifierSVM(
-            kernel=kernel() if kernel is not None else None)
-            for kernel in kernel_types]
-        self.logger.info(
-            "Testing SVM with kernel functions: %s", str(kernel_types))
+        self.svms = [
+            CClassifierSVM(kernel=kernel() if kernel is not None else None)
+            for kernel in kernel_types
+        ]
+        self.logger.info("Testing SVM with kernel functions: %s", str(kernel_types))
 
         for svm in self.svms:  # Enabling debug output for each classifier
             svm.verbose = 2
 
         self.logger.info("." * 50)
-        self.logger.info("Number of Patterns: %s",
-                         str(self.dataset.num_samples))
+        self.logger.info("Number of Patterns: %s", str(self.dataset.num_samples))
         self.logger.info("Features: %s", str(self.dataset.num_features))
 
     def test_attributes(self):
@@ -47,12 +51,12 @@ class TestCClassifierSVM(CClassifierTestCases):
         self.logger.info("Testing SVM attributes setting")
 
         for svm in self.svms:
-            svm.set('C', 10)
+            svm.set("C", 10)
             self.assertEqual(svm.C, 10)
-            svm.set('class_weight', {-1: 1, 1: 50})
+            svm.set("class_weight", {-1: 1, 1: 50})
             # set gamma for poly and rbf and check if it is set properly
-            if hasattr(svm.kernel, 'gamma'):
-                svm.set('gamma', 100)
+            if hasattr(svm.kernel, "gamma"):
+                svm.set("gamma", 100)
                 self.assertEqual(svm.kernel.gamma, 100)
 
     def test_linear_svm(self):
@@ -71,10 +75,11 @@ class TestCClassifierSVM(CClassifierTestCases):
         kernel_linear_svm.fit(self.dataset.X, self.dataset.Y)
 
         linear_svm_pred_y, linear_svm_pred_score = linear_svm.predict(
-            self.dataset.X, return_decision_function=True)
-        kernel_linear_svm_pred_y, \
-        kernel_linear_svm_pred_score = kernel_linear_svm.predict(
-            self.dataset.X, return_decision_function=True)
+            self.dataset.X, return_decision_function=True
+        )
+        kernel_linear_svm_pred_y, kernel_linear_svm_pred_score = (
+            kernel_linear_svm.predict(self.dataset.X, return_decision_function=True)
+        )
 
         # check prediction
         self.assert_array_equal(linear_svm_pred_y, kernel_linear_svm_pred_y)
@@ -83,15 +88,19 @@ class TestCClassifierSVM(CClassifierTestCases):
         linear_svm.fit(self.dataset_sparse.X, self.dataset_sparse.Y)
         kernel_linear_svm.fit(self.dataset_sparse.X, self.dataset_sparse.Y)
 
-        self.assertTrue(linear_svm.w.issparse,
-                        "Weights vector is not sparse even "
-                        "if training data is sparse")
+        self.assertTrue(
+            linear_svm.w.issparse,
+            "Weights vector is not sparse even " "if training data is sparse",
+        )
 
         linear_svm_pred_y, linear_svm_pred_score = linear_svm.predict(
-            self.dataset_sparse.X, return_decision_function=True)
-        kernel_linear_svm_pred_y, \
-        kernel_linear_svm_pred_score = kernel_linear_svm.predict(
-            self.dataset_sparse.X, return_decision_function=True)
+            self.dataset_sparse.X, return_decision_function=True
+        )
+        kernel_linear_svm_pred_y, kernel_linear_svm_pred_score = (
+            kernel_linear_svm.predict(
+                self.dataset_sparse.X, return_decision_function=True
+            )
+        )
 
         # check prediction
         self.assert_array_equal(linear_svm_pred_y, kernel_linear_svm_pred_y)
@@ -101,17 +110,17 @@ class TestCClassifierSVM(CClassifierTestCases):
         self.logger.info("Testing SVM predict accuracy")
 
         for svm in self.svms:
-            self.logger.info(
-                "SVM with kernel: %s", svm.kernel.__class__)
+            self.logger.info("SVM with kernel: %s", svm.kernel.__class__)
 
             # Training and predicting using our SVM
             svm.fit(self.dataset.X, self.dataset.Y)
 
             pred_y, pred_score = svm.predict(
-                self.dataset.X, return_decision_function=True)
+                self.dataset.X, return_decision_function=True
+            )
 
             # Training and predicting an SKlearn SVC
-            k = svm.kernel.class_type if svm.kernel is not None else 'linear'
+            k = svm.kernel.class_type if svm.kernel is not None else "linear"
             sklearn_svm = SVC(kernel=k)
 
             # Setting similarity function parameters into SVC too
@@ -123,11 +132,11 @@ class TestCClassifierSVM(CClassifierTestCases):
                         p_dict[p] = svm.kernel.get_params()[p]
                 sklearn_svm.set_params(**p_dict)
 
-            sklearn_svm.fit(self.dataset.X.get_data(),
-                            np.ravel(self.dataset.Y.get_data()))
+            sklearn_svm.fit(
+                self.dataset.X.get_data(), np.ravel(self.dataset.Y.get_data())
+            )
             sklearn_pred_y = sklearn_svm.predict(self.dataset.X.get_data())
-            sklearn_score = sklearn_svm.decision_function(
-                self.dataset.X.get_data())
+            sklearn_score = sklearn_svm.decision_function(self.dataset.X.get_data())
 
             # Test if sklearn pred_y are equal to our predicted labels
             self.assert_array_equal(pred_y, sklearn_pred_y)
@@ -137,10 +146,12 @@ class TestCClassifierSVM(CClassifierTestCases):
             self.assert_allclose(pred_score[:, 1].ravel(), sklearn_score)
 
             # EVALUATE PERFORMANCE
-            accuracy = skm.accuracy_score(
-                self.dataset.Y.get_data(), sklearn_pred_y)
-            self.logger.info("Prediction accuracy for kernel %s is %f ",
-                             svm.kernel.__class__, accuracy)
+            accuracy = skm.accuracy_score(self.dataset.Y.get_data(), sklearn_pred_y)
+            self.logger.info(
+                "Prediction accuracy for kernel %s is %f ",
+                svm.kernel.__class__,
+                accuracy,
+            )
 
     def test_shape(self):
         """Test shape of SVM parameters, scores etc."""
@@ -154,13 +165,13 @@ class TestCClassifierSVM(CClassifierTestCases):
 
         for svm in self.svms:
 
-            self.logger.info(
-                "SVM with similarity function: %s", svm.kernel.__class__)
+            self.logger.info("SVM with similarity function: %s", svm.kernel.__class__)
 
             # Training and predicting using our SVM
             svm.fit(self.dataset.X, self.dataset.Y)
             pred_y, pred_score = svm.predict(
-                self.dataset.X, return_decision_function=True)
+                self.dataset.X, return_decision_function=True
+            )
             # chose random one pattern
             pattern = CArray(random.choice(self.dataset.X.get_data()))
             gradient = svm.grad_f_x(pattern, y=1)
@@ -178,46 +189,49 @@ class TestCClassifierSVM(CClassifierTestCases):
         self.logger.info("Testing SVM on sparse data")
 
         def _check_sparsedata(y, score, y_sparse, score_sparse):
-            self.assertFalse((y != y_sparse).any(),
-                             "Predicted labels on sparse data are different.")
+            self.assertFalse(
+                (y != y_sparse).any(), "Predicted labels on sparse data are different."
+            )
             # Rounding scores to prevent false positives in assert
             score_rounded = score[:, 1].ravel().round(3)
             score_sparse_rounded = score_sparse[:, 1].ravel().round(3)
-            self.assertFalse((score_rounded != score_sparse_rounded).any(),
-                             "Predicted Scores on sparse data are different.")
+            self.assertFalse(
+                (score_rounded != score_sparse_rounded).any(),
+                "Predicted Scores on sparse data are different.",
+            )
 
         for svm in self.svms:
-            self.logger.info(
-                "SVM with similarity function: %s", svm.kernel.__class__)
+            self.logger.info("SVM with similarity function: %s", svm.kernel.__class__)
 
             # Training and predicting on dense data for reference
             svm.fit(self.dataset.X, self.dataset.Y)
             pred_y, pred_score = svm.predict(
-                self.dataset.X, return_decision_function=True)
+                self.dataset.X, return_decision_function=True
+            )
 
             # Training and predicting on sparse data
             svm.fit(self.dataset_sparse.X, self.dataset_sparse.Y)
             pred_y_sparse, pred_score_sparse = svm.predict(
-                self.dataset_sparse.X, return_decision_function=True)
+                self.dataset_sparse.X, return_decision_function=True
+            )
 
-            _check_sparsedata(pred_y, pred_score, pred_y_sparse,
-                              pred_score_sparse)
+            _check_sparsedata(pred_y, pred_score, pred_y_sparse, pred_score_sparse)
 
             # Training on sparse and predicting on dense
             svm.fit(self.dataset_sparse.X, self.dataset_sparse.Y)
             pred_y_sparse, pred_score_sparse = svm.predict(
-                self.dataset.X, return_decision_function=True)
+                self.dataset.X, return_decision_function=True
+            )
 
-            _check_sparsedata(pred_y, pred_score, pred_y_sparse,
-                              pred_score_sparse)
+            _check_sparsedata(pred_y, pred_score, pred_y_sparse, pred_score_sparse)
 
             # Training on dense and predicting on sparse
             svm.fit(self.dataset.X, self.dataset.Y)
             pred_y_sparse, pred_score_sparse = svm.predict(
-                self.dataset_sparse.X, return_decision_function=True)
+                self.dataset_sparse.X, return_decision_function=True
+            )
 
-            _check_sparsedata(pred_y, pred_score, pred_y_sparse,
-                              pred_score_sparse)
+            _check_sparsedata(pred_y, pred_score, pred_y_sparse, pred_score_sparse)
 
     def test_margin(self):
         self.logger.info("Testing margin separation of SVM...")
@@ -228,8 +242,9 @@ class TestCClassifierSVM(CClassifierTestCases):
         rng = np.random.RandomState(0)
         n_samples_1 = 1000
         n_samples_2 = 100
-        X = np.r_[1.5 * rng.randn(n_samples_1, 2),
-                  0.5 * rng.randn(n_samples_2, 2) + [2, 2]]
+        X = np.r_[
+            1.5 * rng.randn(n_samples_1, 2), 0.5 * rng.randn(n_samples_2, 2) + [2, 2]
+        ]
         y = [0] * (n_samples_1) + [1] * (n_samples_2)
 
         dataset = CDataset(X, y)
@@ -252,13 +267,12 @@ class TestCClassifierSVM(CClassifierTestCases):
         wyy = wa * xx - wclf.b / ww[1]
 
         fig = CFigure(linewidth=1)
-        fig.sp.plot(xx, yy.ravel(), 'k-', label='no weights')
-        fig.sp.plot(xx, wyy.ravel(), 'k--', label='with weights')
+        fig.sp.plot(xx, yy.ravel(), "k-", label="no weights")
+        fig.sp.plot(xx, wyy.ravel(), "k--", label="with weights")
         fig.sp.scatter(X[:, 0].ravel(), X[:, 1].ravel(), c=y)
         fig.sp.legend()
 
-        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
-                            'test_c_classifier_svm.pdf'))
+        fig.savefig(fm.join(fm.abspath(__file__), "figs", "test_c_classifier_svm.pdf"))
 
     def test_store_dual_vars(self):
         """Test of parameters that control storing of dual space variables."""
@@ -270,12 +284,12 @@ class TestCClassifierSVM(CClassifierTestCases):
         self.assertIsNone(svm.alpha)
 
         self.logger.info("Linear SVM in dual space")
-        svm = CClassifierSVM(kernel='linear')
+        svm = CClassifierSVM(kernel="linear")
         svm.fit(self.dataset.X, self.dataset.Y)
         self.assertIsNotNone(svm.alpha)
 
         self.logger.info("Nonlinear SVM in dual space")
-        svm = CClassifierSVM(kernel='rbf')
+        svm = CClassifierSVM(kernel="rbf")
         svm.fit(self.dataset.X, self.dataset.Y)
         self.assertIsNotNone(svm.alpha)
 
@@ -294,15 +308,15 @@ class TestCClassifierSVM(CClassifierTestCases):
         self.logger.info("Testing SVM.gradient() method")
 
         import random
+
         for svm in self.svms:
 
-            self.logger.info(
-                "Computing gradient for SVM with kernel: %s", svm.kernel)
+            self.logger.info("Computing gradient for SVM with kernel: %s", svm.kernel)
 
-            if hasattr(svm.kernel, 'gamma'):  # set gamma for poly and rbf
-                svm.set('gamma', 1e-5)
-            if hasattr(svm.kernel, 'degree'):  # set degree for poly
-                svm.set('degree', 3)
+            if hasattr(svm.kernel, "gamma"):  # set gamma for poly and rbf
+                svm.set("gamma", 1e-5)
+            if hasattr(svm.kernel, "degree"):  # set degree for poly
+                svm.set("degree", 3)
 
             samps = random.sample(range(self.dataset.num_samples), 5)
 
@@ -334,8 +348,7 @@ class TestCClassifierSVM(CClassifierTestCases):
 
             # Compare dense gradients with sparse gradients
             for grad_i, grad in enumerate(grads_d):
-                self.assert_array_almost_equal(
-                    grad.atleast_2d(), grads_s[grad_i])
+                self.assert_array_almost_equal(grad.atleast_2d(), grads_s[grad_i])
 
     def test_preprocess(self):
         """Test classifier with preprocessors inside."""
@@ -343,15 +356,15 @@ class TestCClassifierSVM(CClassifierTestCases):
         clf = CClassifierSVM()
 
         # All linear transformations with gradient implemented
-        self._test_preprocess(ds, clf,
-                              ['min-max', 'mean-std'],
-                              [{'feature_range': (-1, 1)}, {}])
-        self._test_preprocess_grad(ds, clf,
-                                   ['min-max', 'mean-std'],
-                                   [{'feature_range': (-1, 1)}, {}])
+        self._test_preprocess(
+            ds, clf, ["min-max", "mean-std"], [{"feature_range": (-1, 1)}, {}]
+        )
+        self._test_preprocess_grad(
+            ds, clf, ["min-max", "mean-std"], [{"feature_range": (-1, 1)}, {}]
+        )
 
         # Mixed linear/nonlinear transformations without gradient
-        self._test_preprocess(ds, clf, ['pca', 'unit-norm'], [{}, {}])
+        self._test_preprocess(ds, clf, ["pca", "unit-norm"], [{}, {}])
 
     def test_multiclass(self):
         """Test multiclass SVM on MNIST digits."""
@@ -363,18 +376,18 @@ class TestCClassifierSVM(CClassifierTestCases):
         n_ts = 200  # Number of test set samples
 
         loader = CDataLoaderMNIST()
-        tr = loader.load('training', digits=digits, num_samples=n_tr)
-        ts = loader.load('testing', digits=digits, num_samples=n_ts)
+        tr = loader.load("training", digits=digits, num_samples=n_tr)
+        ts = loader.load("testing", digits=digits, num_samples=n_ts)
 
         # Normalize the features in `[0, 1]`
         tr.X /= 255
         ts.X /= 255
 
         svm_params = {
-            'kernel': CKernelRBF(gamma=0.1),
-            'C': 10,
-            'class_weight': {0: 1, 1: 1},
-            'n_jobs': 2
+            "kernel": CKernelRBF(gamma=0.1),
+            "C": 10,
+            "class_weight": {0: 1, 1: 1},
+            "n_jobs": 2,
         }
         classifiers = [
             CClassifierMulticlassOVA(CClassifierSVM, **svm_params),
@@ -398,5 +411,5 @@ class TestCClassifierSVM(CClassifierTestCases):
         self.assert_array_almost_equal(grads[0], grads[1])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CClassifierTestCases.main()

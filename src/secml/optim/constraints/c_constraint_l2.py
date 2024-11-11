@@ -5,6 +5,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from secml.optim.constraints import CConstraint
 from secml.array import CArray
 
@@ -25,7 +26,8 @@ class CConstraintL2(CConstraint):
     class_type : 'l2'
 
     """
-    __class_type = 'l2'
+
+    __class_type = "l2"
 
     def __init__(self, center=0, radius=1):
         # Setting the value of the center (array or scalar)
@@ -89,7 +91,7 @@ class CConstraintL2(CConstraint):
         # define tolerance and project onto radius-tol
         # to ensure that numerical errors do not violate the projection
         tol = 1e-6
-        sub = (self._radius-tol) * (x - self.center)
+        sub = (self._radius - tol) * (x - self.center)
         sub_l2 = (x - self.center).norm(order=2)
         if sub_l2 != 0:  # Avoid division by 0
             sub /= sub_l2

@@ -1,4 +1,6 @@
-from secml.adv.attacks.evasion.foolbox.tests.c_attack_evasion_foolbox_testcases import CAttackEvasionFoolboxTestCases
+from secml.adv.attacks.evasion.foolbox.tests.c_attack_evasion_foolbox_testcases import (
+    CAttackEvasionFoolboxTestCases,
+)
 
 try:
     import foolbox
@@ -6,8 +8,11 @@ try:
 except ImportError:
     CAttackEvasionFoolboxTestCases.importskip("foolbox")
 
-from secml.adv.attacks.evasion.foolbox.fb_attacks.fb_pgd_attack \
-    import CFoolboxPGDL1, CFoolboxPGDL2, CFoolboxPGDLinf
+from secml.adv.attacks.evasion.foolbox.fb_attacks.fb_pgd_attack import (
+    CFoolboxPGDL1,
+    CFoolboxPGDL2,
+    CFoolboxPGDLinf,
+)
 
 
 class TestCAttackEvasionFoolboxPGDL1(CAttackEvasionFoolboxTestCases):
@@ -19,8 +24,12 @@ class TestCAttackEvasionFoolboxPGDL1(CAttackEvasionFoolboxTestCases):
         super(TestCAttackEvasionFoolboxPGDL1, self).setUp()
         self.attack_class = CFoolboxPGDL1
 
-        self.attack_params = {'rel_stepsize': 0.025, 'steps': self.default_steps, 'abs_stepsize': 0.1,
-                              'random_start': False}
+        self.attack_params = {
+            "rel_stepsize": 0.025,
+            "steps": self.default_steps,
+            "abs_stepsize": 0.1,
+            "random_start": False,
+        }
 
         self.has_targeted = True
         self.has_untargeted = True
@@ -53,8 +62,12 @@ class TestCAttackEvasionFoolboxPGDL2(CAttackEvasionFoolboxTestCases):
         super(TestCAttackEvasionFoolboxPGDL2, self).setUp()
         self.attack_class = CFoolboxPGDL2
 
-        self.attack_params = {'rel_stepsize': 0.025, 'steps': self.default_steps, 'abs_stepsize': 0.1,
-                              'random_start': False}
+        self.attack_params = {
+            "rel_stepsize": 0.025,
+            "steps": self.default_steps,
+            "abs_stepsize": 0.1,
+            "random_start": False,
+        }
 
         self.has_targeted = True
         self.has_untargeted = True
@@ -87,8 +100,12 @@ class TestCAttackEvasionFoolboxPGDLinf(CAttackEvasionFoolboxTestCases):
         super(TestCAttackEvasionFoolboxPGDLinf, self).setUp()
         self.attack_class = CFoolboxPGDLinf
 
-        self.attack_params = {'rel_stepsize': 0.025, 'steps': self.default_steps, 'abs_stepsize': 0.1,
-                              'random_start': False}
+        self.attack_params = {
+            "rel_stepsize": 0.025,
+            "steps": self.default_steps,
+            "abs_stepsize": 0.1,
+            "random_start": False,
+        }
 
         self.has_targeted = True
         self.has_untargeted = True

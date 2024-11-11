@@ -33,8 +33,7 @@ class CClassifierPyTorchTestCases(CClassifierTestCases):
         self.assertTrue(clf.is_fitted())
 
         pred = clf.decision_function(ts.X)
-        label_torch, y_torch = \
-            clf.predict(ts.X, return_decision_function=True)
+        label_torch, y_torch = clf.predict(ts.X, return_decision_function=True)
 
         self.logger.info("Decision Function:\n{}".format(pred))
         self.logger.info("Classify:\n{}".format(y_torch))
@@ -52,8 +51,7 @@ class CClassifierPyTorchTestCases(CClassifierTestCases):
         """
         self.assertTrue(clf.is_fitted())
 
-        label_torch, y_torch = \
-            clf.predict(ts.X, return_decision_function=True)
+        label_torch, y_torch = clf.predict(ts.X, return_decision_function=True)
 
         acc_torch = CMetricAccuracy().performance_score(ts.Y, label_torch)
 
@@ -104,8 +102,7 @@ class CClassifierPyTorchTestCases(CClassifierTestCases):
         softmax_output = clf.softmax_outputs
 
         if softmax_output is True:
-            self.logger.info(
-                "Deactivate softmax-scaling to easily compare outputs")
+            self.logger.info("Deactivate softmax-scaling to easily compare outputs")
             clf.softmax_outputs = False
 
         layer = layer_name
@@ -116,12 +113,17 @@ class CClassifierPyTorchTestCases(CClassifierTestCases):
 
         if layer is None:
             self.assertTrue(
-                (clf.get_layer_output(x, layer=layer) -
-                 clf.decision_function(x)).sum() == 0)
+                (clf.get_layer_output(x, layer=layer) - clf.decision_function(x)).sum()
+                == 0
+            )
             last_layer_name = clf.layer_names[-1]
             self.assertTrue(
-                (clf.get_layer_output(x, layer=last_layer_name) -
-                 clf.decision_function(x)).sum() == 0)
+                (
+                    clf.get_layer_output(x, layer=last_layer_name)
+                    - clf.decision_function(x)
+                ).sum()
+                == 0
+            )
 
         # Restore original value of softmax_outputs parameter
         clf.softmax_outputs = softmax_output
@@ -168,16 +170,17 @@ class CClassifierPyTorchTestCases(CClassifierTestCases):
         self.logger.info("Testing assignment on optimizer")
         clf_copy.lr = 10
         self.logger.debug("params: {}".format(clf_copy.get_params()))
-        self.assertTrue(clf_copy.get_params()['optimizer']['lr'] == 10)
+        self.assertTrue(clf_copy.get_params()["optimizer"]["lr"] == 10)
         self.assertTrue(clf_copy.lr == 10)
 
         self.logger.info("Testing assignment on model layer")
         clf_copy.fc2 = torch.nn.Linear(
-            clf_copy._model.fc2.in_features,
-            clf_copy._model.fc2.out_features)
+            clf_copy._model.fc2.in_features, clf_copy._model.fc2.out_features
+        )
 
-        self.assertEqual(clf_copy.predict(tr[0, :].X).size,
-                         clf.predict(tr[0, :].X).size)
+        self.assertEqual(
+            clf_copy.predict(tr[0, :].X).size, clf.predict(tr[0, :].X).size
+        )
 
         clf_copy.fit(tr.X, tr.Y)
         self.assertNotEqual(id(clf._optimizer), id(clf_copy._optimizer))
@@ -186,9 +189,11 @@ class CClassifierPyTorchTestCases(CClassifierTestCases):
         self.assertTrue(clf_copy._model.fc2.in_features == 20)
         self.assertTrue(clf_copy._model.fc2.out_features == 20)
         self.logger.debug(
-            "Copy of the model modified. Last layer should have dims 20x20")
-        self.logger.debug("Last layer of copied model: {}".format(
-            clf_copy._model._modules['fc2']))
+            "Copy of the model modified. Last layer should have dims 20x20"
+        )
+        self.logger.debug(
+            "Last layer of copied model: {}".format(clf_copy._model._modules["fc2"])
+        )
 
     def _test_softmax_outputs(self, clf, x):
         """Check behavior of `softmax_outputs` parameter.
@@ -213,7 +218,7 @@ class CClassifierPyTorchTestCases(CClassifierTestCases):
         self.assert_approx_equal(preds.sum(), 1.0)
 
         # test gradient
-        w_in = CArray.zeros(shape=(clf.n_classes, ))
+        w_in = CArray.zeros(shape=(clf.n_classes,))
         w_in[1] = 1
 
         grad = clf.gradient(x, w=w_in)
@@ -238,8 +243,7 @@ class CClassifierPyTorchTestCases(CClassifierTestCases):
         self.assertTrue(clf.is_fitted())
 
         pred_y = clf.predict(ts.X)
-        self.logger.info(
-            "Predictions of the original clf:\n{:}".format(pred_y))
+        self.logger.info("Predictions of the original clf:\n{:}".format(pred_y))
 
         state_path = fm.join(tempfile.gettempdir(), "state.tar")
 
@@ -255,8 +259,7 @@ class CClassifierPyTorchTestCases(CClassifierTestCases):
         del clf_new._optimizer_scheduler
 
         pred_y_post = clf_new.predict(ts.X)
-        self.logger.info(
-            "Predictions of the restored model:\n{:}".format(pred_y_post))
+        self.logger.info("Predictions of the restored model:\n{:}".format(pred_y_post))
 
         self.assert_array_equal(pred_y, pred_y_post)
 
@@ -276,15 +279,13 @@ class CClassifierPyTorchTestCases(CClassifierTestCases):
         self.assertTrue(clf.is_fitted())
 
         pred_y = clf.predict(ts.X)
-        self.logger.info(
-            "Predictions before restoring state:\n{:}".format(pred_y))
+        self.logger.info("Predictions before restoring state:\n{:}".format(pred_y))
         state = clf.get_state(return_optimizer=False)
 
         # Restore state
         clf_new.set_state(state)
 
         pred_y_post = clf_new.predict(ts.X)
-        self.logger.info(
-            "Predictions after restoring state:\n{:}".format(pred_y_post))
+        self.logger.info("Predictions after restoring state:\n{:}".format(pred_y_post))
 
         self.assert_array_equal(pred_y, pred_y_post)

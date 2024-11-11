@@ -13,14 +13,16 @@ class TestCLossCrossEntropy(CUnitTest):
     """Unittests for CLossCrossEntropy and softmax."""
 
     def setUp(self):
-        self.ds = CDLRandom(n_classes=3, n_samples=50, random_state=0,
-                            n_informative=3).load()
+        self.ds = CDLRandom(
+            n_classes=3, n_samples=50, random_state=0, n_informative=3
+        ).load()
 
         self.logger.info("Fit an SVM and classify dataset...")
         self.ova = CClassifierMulticlassOVA(CClassifierSVM)
         self.ova.fit(self.ds.X, self.ds.Y)
         self.labels, self.scores = self.ova.predict(
-            self.ds.X, return_decision_function=True)
+            self.ds.X, return_decision_function=True
+        )
 
     def test_in_out(self):
         """Unittest for input and output to CCrossEntropy"""
@@ -38,18 +40,23 @@ class TestCLossCrossEntropy(CUnitTest):
         loss_mean = loss.mean()
         self.logger.info(
             "{:}.loss(y_true, scores).mean():\n{:}".format(
-                loss_class.__class__.__name__, loss_mean))
+                loss_class.__class__.__name__, loss_mean
+            )
+        )
         _check_loss(loss, self.ds.Y.size)
 
         loss = loss_class.loss(self.ds.Y[0], self.scores[0, :])
         loss_mean = loss.mean()
         self.logger.info(
             "{:}.loss(y_true[0], scores[0,:]).mean():\n{:}".format(
-                loss_class.__class__.__name__, loss_mean))
+                loss_class.__class__.__name__, loss_mean
+            )
+        )
         _check_loss(loss, 1)
 
     def test_grad(self):
         """Compare analytical gradients with its numerical approximation."""
+
         def _loss_wrapper(scores, loss, true_labels):
             return loss.loss(true_labels, scores)
 
@@ -69,7 +76,8 @@ class TestCLossCrossEntropy(CUnitTest):
             self.logger.info("GRAD: {:}".format(grad))
 
             approx = CFunction(_loss_wrapper).approx_fprime(
-                score, eps, loss_class, y_true)
+                score, eps, loss_class, y_true
+            )
             self.logger.info("APPROX (FULL): {:}".format(approx))
 
             pos_label = pos_label if pos_label is not None else y_true.item()
@@ -79,12 +87,15 @@ class TestCLossCrossEntropy(CUnitTest):
 
             check_grad_val = (grad - approx).norm()
 
-            self.logger.info("Gradient difference between analytical svm "
-                             "gradient and numerical gradient: %s",
-                             str(check_grad_val))
-            self.assertLess(check_grad_val, 1e-4,
-                            "the gradient is wrong {:}".format(check_grad_val))
+            self.logger.info(
+                "Gradient difference between analytical svm "
+                "gradient and numerical gradient: %s",
+                str(check_grad_val),
+            )
+            self.assertLess(
+                check_grad_val, 1e-4, "the gradient is wrong {:}".format(check_grad_val)
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

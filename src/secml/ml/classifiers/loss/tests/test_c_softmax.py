@@ -11,14 +11,16 @@ class TestCSoftmax(CUnitTest):
     """Unittests for CSoftmax."""
 
     def setUp(self):
-        self.ds = CDLRandom(n_classes=3, n_samples=50, random_state=0,
-                            n_informative=3).load()
+        self.ds = CDLRandom(
+            n_classes=3, n_samples=50, random_state=0, n_informative=3
+        ).load()
 
         self.logger.info("Fit an SVM and classify dataset...")
         self.ova = CClassifierMulticlassOVA(CClassifierSVM)
         self.ova.fit(self.ds.X, self.ds.Y)
         self.labels, self.scores = self.ova.predict(
-            self.ds.X, return_decision_function=True)
+            self.ds.X, return_decision_function=True
+        )
 
     def test_softmax(self):
         """Unittests for softmax function."""
@@ -44,7 +46,7 @@ class TestCSoftmax(CUnitTest):
 
     def test_softmax_gradient(self):
         """Unittests for softmax gradient:
-           Compare analytical gradients with its numerical approximation."""
+        Compare analytical gradients with its numerical approximation."""
 
         self.softmax = CSoftmax()
 
@@ -76,19 +78,21 @@ class TestCSoftmax(CUnitTest):
 
             self.logger.info("ANALITICAL GRAD: {:}".format(grad))
 
-            approx = CFunction(_sigma_pos_label).approx_fprime(
-                score, 1e-5, pos_label)
+            approx = CFunction(_sigma_pos_label).approx_fprime(score, 1e-5, pos_label)
 
             self.logger.info("NUMERICAL GRADIENT: {:}".format(approx))
 
             check_grad_val = (grad - approx).norm()
 
-            self.logger.info("The norm of the difference bettween the "
-                             "analytical and the numerical gradient is: %s",
-                             str(check_grad_val))
-            self.assertLess(check_grad_val, 1e-4,
-                            "the gradient is wrong {:}".format(check_grad_val))
+            self.logger.info(
+                "The norm of the difference bettween the "
+                "analytical and the numerical gradient is: %s",
+                str(check_grad_val),
+            )
+            self.assertLess(
+                check_grad_val, 1e-4, "the gradient is wrong {:}".format(check_grad_val)
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

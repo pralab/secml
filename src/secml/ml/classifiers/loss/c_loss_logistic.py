@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.ml.classifiers.loss import CLossClassification
 from secml.ml.classifiers.loss.c_loss import _check_binary_score
 from secml.ml.classifiers.clf_utils import convert_binary_labels
@@ -21,7 +22,8 @@ class CLossLogistic(CLossClassification):
     suitable_for : 'classification'
 
     """
-    __class_type = 'log'
+
+    __class_type = "log"
 
     def loss(self, y_true, score, pos_label=1, bound=10):
         """Computes the value of the logistic loss function.
@@ -56,7 +58,7 @@ class CLossLogistic(CLossClassification):
         score = _check_binary_score(score, pos_label)
 
         # log(1 + exp(-y*s)) / log(2)
-        v = CArray(- y_true * score).astype(float)
+        v = CArray(-y_true * score).astype(float)
 
         if bound is None:
             v = (1.0 + v.exp()).log()
@@ -103,7 +105,7 @@ class CLossLogistic(CLossClassification):
         # d/df log ( 1+ exp(-yf)) / log(2)  =
         #     1/ log(2) * ( 1+ exp(-yf)) exp(-yf) -y
 
-        v = CArray(- y_true * score).astype(float)
+        v = CArray(-y_true * score).astype(float)
 
         if bound is None:
             h = -y_true * v.exp() / (1.0 + v.exp())
@@ -112,7 +114,8 @@ class CLossLogistic(CLossClassification):
             # linear approximation avoids numerical overflows
             # when -yf >> 1 : loss ~= -yf, and grad = -y
             h = -y_true.astype(float)
-            h[v < bound] = h[v < bound] * v[v < bound].exp() / \
-                                                    (1.0 + v[v < bound].exp())
+            h[v < bound] = (
+                h[v < bound] * v[v < bound].exp() / (1.0 + v[v < bound].exp())
+            )
 
         return h / CArray([2]).log()

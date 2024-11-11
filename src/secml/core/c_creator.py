@@ -5,13 +5,21 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from importlib import import_module
 from inspect import isclass, getmembers
 from functools import wraps
 
 from secml.settings import SECML_STORE_LOGS, SECML_LOGS_PATH
-from secml.core.attr_utils import is_writable, is_readable, \
-    extract_attr, as_public, has_protected, as_protected, get_private
+from secml.core.attr_utils import (
+    is_writable,
+    is_readable,
+    extract_attr,
+    as_public,
+    has_protected,
+    as_protected,
+    get_private,
+)
 from secml.core.type_utils import is_str
 import secml.utils.pickle_utils as pck
 from secml.utils.list_utils import find_duplicates
@@ -31,27 +39,34 @@ class CCreator:
         Can be None to explicitly NOT support `.create()` and `.load()`.
 
     """
+
     __class_type = None  # Must be re-defined to support `.create()`
-    __super__ = None  # Name of the superclass (if `.create()` or `.load()` should be available)
+    __super__ = (
+        None  # Name of the superclass (if `.create()` or `.load()` should be available)
+    )
 
     # Ancestor logger, level 'WARNING' by default
     _logger = CLog(
         add_stream=True,
-        file_handler=SECML_LOGS_PATH if SECML_STORE_LOGS is True else None)
+        file_handler=SECML_LOGS_PATH if SECML_STORE_LOGS is True else None,
+    )
 
     @property
     def class_type(self):
         """Defines class type."""
         try:  # Convert the private attribute to public property
-            return get_private(self.__class__, 'class_type')
+            return get_private(self.__class__, "class_type")
         except AttributeError:
-            raise AttributeError("'class_type' not defined for '{:}'"
-                                 "".format(self.__class__.__name__))
+            raise AttributeError(
+                "'class_type' not defined for '{:}'" "".format(self.__class__.__name__)
+            )
 
     @property
     def logger(self):
         """Logger for current object."""
-        return self._logger.get_child(self.__class__.__name__ + '.' + str(hex(id(self))))
+        return self._logger.get_child(
+            self.__class__.__name__ + "." + str(hex(id(self)))
+        )
 
     @property
     def verbose(self):
@@ -69,7 +84,7 @@ class CCreator:
     @verbose.setter
     def verbose(self, level):
         """Sets verbosity level of logger."""
-        verbosity_lvls = {0: 'WARNING', 1: 'INFO', 2: 'DEBUG'}
+        verbosity_lvls = {0: "WARNING", 1: "INFO", 2: "DEBUG"}
         if level not in verbosity_lvls:
             raise ValueError("Verbosity level {:} not supported.".format(level))
         self.logger.set_level(verbosity_lvls[level])
@@ -92,6 +107,7 @@ class CCreator:
             If None, "Entering timed block `method_name`..." will printed.
 
         """
+
         def wrapper(fun):
             @wraps(fun)  # To make wrapped_fun work as fun_timed
             def wrapped_fun(self, *args, **kwargs):
@@ -100,8 +116,11 @@ class CCreator:
                 @wraps(fun)  # To make fun_timed work as fun
                 def fun_timed(*fun_args, **fun_wargs):
                     return fun(*fun_args, **fun_wargs)
+
                 return fun_timed(self, *args, **kwargs)
+
             return wrapped_fun
+
         return wrapper
 
     @classmethod
@@ -142,8 +161,9 @@ class CCreator:
 
         # We accept strings and class instances only
         if isclass(class_item):  # Returns false for instances
-            raise TypeError("creator only accepts a class type "
-                            "as string or a class instance.")
+            raise TypeError(
+                "creator only accepts a class type " "as string or a class instance."
+            )
 
         # CCreator cannot be created!
         if class_item.__class__ == CCreator:
@@ -152,11 +172,14 @@ class CCreator:
         # If a class instance is passed, it's returned as is
         if not is_str(class_item):
             if not isinstance(class_item, cls):
-                raise TypeError("input instance should be a {:} "
-                                "subclass.".format(cls.__name__))
+                raise TypeError(
+                    "input instance should be a {:} " "subclass.".format(cls.__name__)
+                )
             if len(args) + len(kwargs) != 0:
-                raise TypeError("optional arguments are not allowed "
-                                "when a class instance is passed.")
+                raise TypeError(
+                    "optional arguments are not allowed "
+                    "when a class instance is passed."
+                )
             return class_item
 
         # Get all the subclasses of the superclass
@@ -170,12 +193,13 @@ class CCreator:
 
         # Everything seems fine now, look for desired class type
         for class_data in subclasses:
-            if get_private(class_data[1], 'class_type', None) == class_item:
+            if get_private(class_data[1], "class_type", None) == class_item:
                 return class_data[1](*args, **kwargs)
 
-        raise NameError("no class of type `{:}` is a subclass of '{:}' "
-                        "from module '{:}'".format(
-                            class_item, cls.__name__, cls.__module__))
+        raise NameError(
+            "no class of type `{:}` is a subclass of '{:}' "
+            "from module '{:}'".format(class_item, cls.__name__, cls.__module__)
+        )
 
     @classmethod
     def get_subclasses(cls):
@@ -189,6 +213,7 @@ class CCreator:
             each class is a "subclass" of itself.
 
         """
+
         def get_subclasses(sup_cls):
             subcls_list = []
             for subclass in sup_cls.__subclasses__():
@@ -260,11 +285,13 @@ class CCreator:
 
         # Look for desired class type
         for class_data in subclasses:
-            if get_private(class_data[1], 'class_type', None) == class_type:
+            if get_private(class_data[1], "class_type", None) == class_type:
                 return class_data[1]
 
-        raise NameError("no class of type `{:}` found within the package "
-                        "of class '{:}'".format(class_type, cls.__module__))
+        raise NameError(
+            "no class of type `{:}` found within the package "
+            "of class '{:}'".format(class_type, cls.__module__)
+        )
 
     def get_params(self):
         """Returns the dictionary of class hyperparameters.
@@ -275,14 +302,16 @@ class CCreator:
         # We extract the PUBLIC (pub) and the READ/WRITE (rw) attributes
         # from the class dictionary, than we build a new dictionary using
         # as keys the attributes names without the accessibility prefix
-        params = SubLevelsDict((as_public(k), getattr(self, as_public(k)))
-                               for k in extract_attr(self, 'pub+rw'))
+        params = SubLevelsDict(
+            (as_public(k), getattr(self, as_public(k)))
+            for k in extract_attr(self, "pub+rw")
+        )
 
         # Now look for any parameter inside the accessible attributes
-        for k in extract_attr(self, 'r'):
+        for k in extract_attr(self, "r"):
             # Extract the contained object (if any)
             k_attr = getattr(self, as_public(k))
-            if hasattr(k_attr, 'get_params') and len(k_attr.get_params()) > 0:
+            if hasattr(k_attr, "get_params") and len(k_attr.get_params()) > 0:
                 # as k_attr has one or more parameters, it's a parameter itself
                 params[as_public(k)] = k_attr
 
@@ -346,12 +375,14 @@ class CCreator:
             extracted, a deepcopy of the parameter value is done first.
 
         """
+
         def copy_attr(attr_tocopy):
             from copy import deepcopy
+
             return deepcopy(attr_tocopy)
 
         # Support for recursive setting, e.g. -> kernel.gamma
-        param_name = param_name.split('.')
+        param_name = param_name.split(".")
 
         attr0 = param_name[0]
         if hasattr(self, attr0):
@@ -361,17 +392,20 @@ class CCreator:
                 # PUBLIC and READ/WRITE accessibility is checked
                 if not is_writable(self, attr0):
                     raise AttributeError(
-                        "can't set `{:}`, must be writable.".format(attr0))
-                setattr(self, attr0, copy_attr(param_value)
-                        if copy is True else param_value)
+                        "can't set `{:}`, must be writable.".format(attr0)
+                    )
+                setattr(
+                    self, attr0, copy_attr(param_value) if copy is True else param_value
+                )
                 return
             else:  # Start recursion on sublevels
                 # Level 0 attribute must be accessible (readable)
                 # PUBLIC, READ/WRITE and READ ONLY accessibility is checked
                 if not is_readable(self, attr0):
                     raise AttributeError(
-                        "can't set `{:}`, must be accessible.".format(attr0))
-                sub_param_name = '.'.join(param_name[1:])
+                        "can't set `{:}`, must be accessible.".format(attr0)
+                    )
+                sub_param_name = ".".join(param_name[1:])
                 # Calling `.set` method of the next sublevel
                 getattr(self, attr0).set(sub_param_name, param_value, copy)
                 return
@@ -389,15 +423,20 @@ class CCreator:
                     # PUBLIC and READ/WRITE accessibility is checked
                     if not is_writable(attr, attr0):
                         raise AttributeError(
-                            "can't set `{:}`, must be writable.".format(attr0))
-                    setattr(attr, attr0, copy_attr(param_value)
-                            if copy is True else param_value)
+                            "can't set `{:}`, must be writable.".format(attr0)
+                        )
+                    setattr(
+                        attr,
+                        attr0,
+                        copy_attr(param_value) if copy is True else param_value,
+                    )
                     return
 
         # Attribute not found, raise AttributeError
         raise AttributeError(
             "'{:}', or any of its attributes, has attribute '{:}'"
-            "".format(self.__class__.__name__, attr0))
+            "".format(self.__class__.__name__, attr0)
+        )
 
     def get_state(self, **kwargs):
         """Returns the object state dictionary.
@@ -416,8 +455,10 @@ class CCreator:
         # We extract the PUBLIC (pub), READ/WRITE (rw) and READ ONLY (r)
         # attributes from the class dictionary, than we build a new dictionary
         # using as keys the attributes names without the accessibility prefix
-        state = dict((as_public(k), getattr(self, as_public(k)))
-                     for k in extract_attr(self, 'pub+rw+r'))
+        state = dict(
+            (as_public(k), getattr(self, as_public(k)))
+            for k in extract_attr(self, "pub+rw+r")
+        )
 
         # Get the state of the deeper objects
         # Use list(state) as state size will change during iteration
@@ -426,7 +467,7 @@ class CCreator:
                 state_deep = state[attr].get_state(**kwargs)
                 # Replace `attr` with its attributes's state
                 for attr_deep in state_deep:
-                    attr_full_key = attr + '.' + attr_deep
+                    attr_full_key = attr + "." + attr_deep
                     state[attr_full_key] = state_deep[attr_deep]
                 del state[attr]
 
@@ -451,8 +492,10 @@ class CCreator:
             extracted, a deepcopy of the attribute is done first.
 
         """
+
         def copy_attr(attr_tocopy):
             from copy import deepcopy
+
             return deepcopy(attr_tocopy)
 
         for param_name in state_dict:
@@ -461,13 +504,14 @@ class CCreator:
             param_value = state_dict[param_name]
 
             # Support for recursive setting, e.g. -> kernel.gamma
-            param_name = param_name.split('.', 1)
+            param_name = param_name.split(".", 1)
 
             # Attributes to set in this function must be readable
             # PUBLIC, READ/WRITE and READ ONLY accessibility is checked
             if not is_readable(self, param_name[0]):
                 raise AttributeError(
-                    "can't set `{:}`, must be readable.".format(param_name[0]))
+                    "can't set `{:}`, must be readable.".format(param_name[0])
+                )
 
             attr0 = param_name[0]
             if hasattr(self, attr0):
@@ -481,19 +525,22 @@ class CCreator:
                         # If exists, set the protected attribute
                         if has_protected(self, attr0):
                             attr0 = as_protected(attr0)
-                        setattr(self, attr0, copy_attr(param_value)
-                                if copy is True else param_value)
+                        setattr(
+                            self,
+                            attr0,
+                            copy_attr(param_value) if copy is True else param_value,
+                        )
                         continue  # Attribute set, go to next one
                 else:  # Start recursion on sublevels
                     # Call `.set_state` for the next level of current attribute
-                    getattr(self, attr0).set_state(
-                        {param_name[1]: param_value}, copy)
+                    getattr(self, attr0).set_state({param_name[1]: param_value}, copy)
                     continue  # Attribute set, go to next one
 
             # Attribute not found, raise AttributeError
             raise AttributeError(
                 "'{:}', or any of its attributes, has attribute '{:}'"
-                "".format(self.__class__.__name__, attr0))
+                "".format(self.__class__.__name__, attr0)
+            )
 
     def copy(self):
         """Returns a shallow copy of current class.
@@ -504,11 +551,13 @@ class CCreator:
 
         """
         from copy import copy
+
         return copy(self)
 
     def __copy__(self, *args, **kwargs):
         """Called when copy.copy(object) is called."""
         from copy import copy
+
         new_obj = self.__new__(self.__class__)
         for attr in self.__dict__:
             new_obj.__dict__[attr] = copy(self.__dict__[attr])
@@ -523,6 +572,7 @@ class CCreator:
 
         """
         from copy import deepcopy
+
         return deepcopy(self)
 
     def __deepcopy__(self, memo, *args, **kwargs):
@@ -532,6 +582,7 @@ class CCreator:
 
         """
         from copy import deepcopy
+
         new_obj = self.__new__(self.__class__)
         for attr in self.__dict__:
             new_obj.__dict__[attr] = deepcopy(self.__dict__[attr], memo)
@@ -575,12 +626,16 @@ class CCreator:
 
         """
         loaded_obj = pck.load(path)
-        if loaded_obj.__class__ == cls or cls == CCreator or \
-                (has_super(loaded_obj) and cls.__name__ == loaded_obj.__super__):
+        if (
+            loaded_obj.__class__ == cls
+            or cls == CCreator
+            or (has_super(loaded_obj) and cls.__name__ == loaded_obj.__super__)
+        ):
             return loaded_obj
         else:
             err_str = "'{0}' can be loaded from: '{0}'".format(
-                loaded_obj.__class__.__name__)
+                loaded_obj.__class__.__name__
+            )
             if has_super(loaded_obj):
                 err_str += ", '{:}'".format(loaded_obj.__super__)
             raise TypeError(err_str + " or 'CCreator'.")
@@ -626,12 +681,12 @@ class CCreator:
     def __repr__(self):
         """Defines print behaviour."""
         out_repr = self.__class__.__name__ + "{"
-        for k in extract_attr(self, 'pub+rw+r'):
+        for k in extract_attr(self, "pub+rw+r"):
             pub_attr_name = as_public(k)
             out_repr += "'{:}': ".format(pub_attr_name)
             out_repr += repr(getattr(self, pub_attr_name))
             out_repr += ", "
-        return out_repr.rstrip(', ') + "}"
+        return out_repr.rstrip(", ") + "}"
 
 
 def has_super(cls):
@@ -646,7 +701,7 @@ def has_super(cls):
         Any class or class isntance.
 
     """
-    return hasattr(cls, '__super__') and cls.__super__ is not None
+    return hasattr(cls, "__super__") and cls.__super__ is not None
 
 
 def import_package_classes(cls):
@@ -663,8 +718,8 @@ def import_package_classes(cls):
     package_name = cls.__module__
     # Leaving out the last part of __module__ string as is `cls` filename
     # But only if module is not the main (a single file)
-    if package_name != '__main__':
-        package_name = package_name.rpartition('.')[0]
+    if package_name != "__main__":
+        package_name = package_name.rpartition(".")[0]
     # Import the entire package
     package = import_module(package_name)
     # Get the classes only from the package
@@ -685,11 +740,10 @@ def import_class_types(classes):
     # Get all class types from the input list of classes (to check duplicates)
     # Leaving out the classes not defining a class_type
     class_types = map(
-        lambda class_file: get_private(class_file[1], 'class_type', None),
-        classes)
+        lambda class_file: get_private(class_file[1], "class_type", None), classes
+    )
     # skipping non string class_types -> classes not supporting creator
-    return [class_type for class_type in
-            class_types if isinstance(class_type, str)]
+    return [class_type for class_type in class_types if isinstance(class_type, str)]
 
 
 def _check_class_types_duplicates(class_types, classes):
@@ -697,8 +751,11 @@ def _check_class_types_duplicates(class_types, classes):
     duplicates = find_duplicates(class_types)
     if len(duplicates) != 0:  # Return the list of classes with duplicate type
         duplicates_classes = [
-            (class_tuple[0], get_private(class_tuple[1], 'class_type'))
-            for class_tuple in classes if
-            get_private(class_tuple[1], 'class_type', None) in duplicates]
-        raise ValueError("following classes have the same class type. Fix "
-                         "before continue. {:}".format(duplicates_classes))
+            (class_tuple[0], get_private(class_tuple[1], "class_type"))
+            for class_tuple in classes
+            if get_private(class_tuple[1], "class_type", None) in duplicates
+        ]
+        raise ValueError(
+            "following classes have the same class type. Fix "
+            "before continue. {:}".format(duplicates_classes)
+        )

@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from itertools import combinations
 
 from secml.ml.classifiers.multiclass import CClassifierMulticlass
@@ -45,8 +46,8 @@ def _fit_one_ovo(bin_clf_idx, multi_ovo, dataset, verbose):
     vs_class_idx = multi_ovo._clf_pair_idx[bin_clf_idx][1]
 
     multi_ovo.logger.info(
-        "Training class {:} against class: {:}".format(
-            tr_class_idx, vs_class_idx))
+        "Training class {:} against class: {:}".format(tr_class_idx, vs_class_idx)
+    )
 
     # Create the training dataset
     train_ds = multi_ovo.binarize_subset(tr_class_idx, vs_class_idx, dataset)
@@ -82,14 +83,14 @@ def _forward_one_ovo(clf_idx, multi_ovo, test_x, verbose):
     multi_ovo.verbose = verbose
 
     multi_ovo.logger.info(
-        "Forward for classes: {:}".format(multi_ovo._clf_pair_idx[clf_idx]))
+        "Forward for classes: {:}".format(multi_ovo._clf_pair_idx[clf_idx])
+    )
 
     # Perform forward on data for current class classifier
     return multi_ovo._binary_classifiers[clf_idx].forward(test_x)
 
 
-class CClassifierMulticlassOVO(CClassifierMulticlass,
-                               CClassifierGradientMixin):
+class CClassifierMulticlassOVO(CClassifierMulticlass, CClassifierGradientMixin):
     """OVO (One-Vs-One) Multiclass Classifier.
 
     Parameters
@@ -104,14 +105,13 @@ class CClassifierMulticlassOVO(CClassifierMulticlass,
     class_type : 'ovo'
 
     """
-    __class_type = 'ovo'
+
+    __class_type = "ovo"
 
     def __init__(self, classifier, preprocess=None, **clf_params):
 
         super(CClassifierMulticlassOVO, self).__init__(
-            classifier=classifier,
-            preprocess=preprocess,
-            **clf_params
+            classifier=classifier, preprocess=preprocess, **clf_params
         )
 
         # List with the binary classifiers classes pairs
@@ -151,10 +151,14 @@ class CClassifierMulticlassOVO(CClassifierMulticlass,
 
         # Fit a one-vs-one classifier
         # Use the specified number of workers
-        self._binary_classifiers = parfor2(_fit_one_ovo,
-                                           self.num_classifiers,
-                                           self.n_jobs, self, CDataset(x, y),
-                                           self.verbose)
+        self._binary_classifiers = parfor2(
+            _fit_one_ovo,
+            self.num_classifiers,
+            self.n_jobs,
+            self,
+            CDataset(x, y),
+            self.verbose,
+        )
 
         return self
 
@@ -187,7 +191,8 @@ class CClassifierMulticlassOVO(CClassifierMulticlass,
 
         # Using get_labels_ovr to avoid redundant functions
         return CDataset(
-            subset.X, subset.get_labels_ovr(tr_class), header=dataset.header)
+            subset.X, subset.get_labels_ovr(tr_class), header=dataset.header
+        )
 
     @staticmethod
     def binarize_dataset(class_idx, dataset):
@@ -232,10 +237,9 @@ class CClassifierMulticlassOVO(CClassifierMulticlass,
         scores = CArray.zeros(shape=(x.shape[0], self.n_classes))
 
         # Discriminant function is now called for each different class
-        res = parfor2(_forward_one_ovo,
-                      self.num_classifiers,
-                      self.n_jobs, self, x,
-                      self.verbose)
+        res = parfor2(
+            _forward_one_ovo, self.num_classifiers, self.n_jobs, self, x, self.verbose
+        )
 
         # Building results array
         for i in range(self.num_classifiers):
@@ -250,7 +254,7 @@ class CClassifierMulticlassOVO(CClassifierMulticlass,
     def _backward(self, w):
         """Implement gradient of decision function wrt x."""
         if w is None:
-            raise ValueError('Pre-multiplying vector w cannot be None.')
+            raise ValueError("Pre-multiplying vector w cannot be None.")
 
         grad = None  # To accumulate grads
         for i in range(self.num_classifiers):  # TODO parfor
@@ -260,12 +264,14 @@ class CClassifierMulticlassOVO(CClassifierMulticlass,
             idx1 = self._clf_pair_idx[i][1]
 
             w_pos = CArray([1, 0])
-            grad_pos = w[idx0] * \
-                self._binary_classifiers[i].gradient(self._cached_x, w_pos)
+            grad_pos = w[idx0] * self._binary_classifiers[i].gradient(
+                self._cached_x, w_pos
+            )
 
             w_neg = CArray([0, 1])
-            grad_neg = w[idx1] * \
-                self._binary_classifiers[i].gradient(self._cached_x, w_neg)
+            grad_neg = w[idx1] * self._binary_classifiers[i].gradient(
+                self._cached_x, w_neg
+            )
 
             # Adjusting the scores for the OVO scheme
             grad = grad_pos if grad is None else grad + grad_pos

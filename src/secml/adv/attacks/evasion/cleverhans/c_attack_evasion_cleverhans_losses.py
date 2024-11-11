@@ -6,6 +6,7 @@
 .. moduleauthor:: Maura Pintor <maura.pintor@unica.it>
 
 """
+
 import numpy as np
 
 from secml.array import CArray
@@ -17,9 +18,8 @@ class CAttackEvasionCleverhansLossesMixin(object):
     Cleverhans attacks."""
 
     def _objective_function_cw(self, x):
-        if self._stored_vars is not None and \
-                'const' in self._stored_vars:
-            stored_const = self._stored_vars['const'][0]
+        if self._stored_vars is not None and "const" in self._stored_vars:
+            stored_const = self._stored_vars["const"][0]
             if self._x0.shape[0] == 1:
                 # use same const for all points
                 c_weight = stored_const.item()
@@ -29,19 +29,21 @@ class CAttackEvasionCleverhansLossesMixin(object):
                 for i, c in enumerate(stored_const):
                     c_weight[i] = c
         else:
-            self.logger.warning('Constant value not stored during run. Using '
-                                'initial_const value. For computing the loss '
-                                'with the actual value of const set '
-                                '`store_var_list=["const"]` in '
-                                'CAttackEvasionCleverhans.__init__().')
+            self.logger.warning(
+                "Constant value not stored during run. Using "
+                "initial_const value. For computing the loss "
+                "with the actual value of const set "
+                '`store_var_list=["const"]` in '
+                "CAttackEvasionCleverhans.__init__()."
+            )
 
             c_weight = self._clvrh_attack.initial_const
 
         l2dist = ((self._x0 - x) ** 2).sum(axis=1).ravel()
         z_labels, z_predicted = self.classifier.predict(
-            x, return_decision_function=True)
-        y_target = CArray.zeros(shape=(1, self._n_classes),
-                                dtype=np.float32)
+            x, return_decision_function=True
+        )
+        y_target = CArray.zeros(shape=(1, self._n_classes), dtype=np.float32)
         # destination point label
         if self.y_target is not None:
             y_target[0, self.y_target] = 1
@@ -49,8 +51,9 @@ class CAttackEvasionCleverhansLossesMixin(object):
             y_target[0, self._y0] = 1
 
         z_target = (z_predicted * y_target).sum(axis=1).ravel()
-        z_other = ((z_predicted * (1 - y_target) +
-                    (z_predicted.min(axis=1) - 1) * y_target)).max(axis=1)
+        z_other = (
+            (z_predicted * (1 - y_target) + (z_predicted.min(axis=1) - 1) * y_target)
+        ).max(axis=1)
         z_other = z_other.ravel()
 
         # The following differs from the exact definition given in Carlini
@@ -65,17 +68,18 @@ class CAttackEvasionCleverhansLossesMixin(object):
 
         if self.y_target is not None:
             # if targeted, optimize for making the target class most likely
-            loss = CArray.maximum(z_other - z_target + self.confidence,
-                                  CArray.zeros(x.shape[0]))
+            loss = CArray.maximum(
+                z_other - z_target + self.confidence, CArray.zeros(x.shape[0])
+            )
         else:
             # if untargeted, optimize for making any other class most likely
-            loss = CArray.maximum(z_target - z_other + self.confidence,
-                                  CArray.zeros(x.shape[0]))
+            loss = CArray.maximum(
+                z_target - z_other + self.confidence, CArray.zeros(x.shape[0])
+            )
         return c_weight * loss + l2dist
 
     def _objective_function_cross_entropy(self, x):
-        preds, scores = self.classifier.predict(
-            x, return_decision_function=True)
+        preds, scores = self.classifier.predict(x, return_decision_function=True)
         if self.y_target is None:
             target = self._y0
         else:
@@ -86,9 +90,8 @@ class CAttackEvasionCleverhansLossesMixin(object):
 
     def _objective_function_elastic_net(self, x):
 
-        if self._stored_vars is not None and \
-                'const' in self._stored_vars:
-            stored_const = self._stored_vars['const'][0]
+        if self._stored_vars is not None and "const" in self._stored_vars:
+            stored_const = self._stored_vars["const"][0]
             if self._x0.shape[0] == 1:
                 # use same const for all points
                 c_weight = stored_const.item()
@@ -98,19 +101,21 @@ class CAttackEvasionCleverhansLossesMixin(object):
                 for i, c in enumerate(stored_const):
                     c_weight[i] = c
         else:
-            self.logger.warning('Constant value not stored during run. Using '
-                             'initial_const value. For computing the loss '
-                             'with the actual value of const set '
-                             '`store_var_list=["const"]` in '
-                             'CAttackEvasionCleverhans.__init__().')
+            self.logger.warning(
+                "Constant value not stored during run. Using "
+                "initial_const value. For computing the loss "
+                "with the actual value of const set "
+                '`store_var_list=["const"]` in '
+                "CAttackEvasionCleverhans.__init__()."
+            )
 
             c_weight = self._clvrh_attack.initial_const
 
-        if self._clvrh_attack.decision_rule == 'L1':
+        if self._clvrh_attack.decision_rule == "L1":
             d = ((self._x0 - x).abs()).sum(axis=1).ravel()
-        elif self._clvrh_attack.decision_rule == 'L2':
+        elif self._clvrh_attack.decision_rule == "L2":
             d = ((self._x0 - x) ** 2).sum(axis=1).ravel()
-        elif self._clvrh_attack.decision_rule == 'END':
+        elif self._clvrh_attack.decision_rule == "END":
             l1dist = ((self._x0 - x).abs()).sum(axis=1).ravel()
             l2dist = ((self._x0 - x) ** 2).sum(axis=1).ravel()
             d = self._clvrh_attack.beta * l1dist + l2dist
@@ -118,9 +123,9 @@ class CAttackEvasionCleverhansLossesMixin(object):
             raise ValueError("The decision rule only supports `EN`, `L1`, `L2`.")
 
         z_labels, z_predicted = self.classifier.predict(
-            x, return_decision_function=True)
-        y_target = CArray.zeros(shape=(1, self._n_classes),
-                                dtype=np.float32)
+            x, return_decision_function=True
+        )
+        y_target = CArray.zeros(shape=(1, self._n_classes), dtype=np.float32)
         # destination point label
         if self.y_target is not None:
             y_target[0, self.y_target] = 1
@@ -128,8 +133,9 @@ class CAttackEvasionCleverhansLossesMixin(object):
             y_target[0, self._y0] = 1
 
         z_target = (z_predicted * y_target).sum(axis=1).ravel()
-        z_other = ((z_predicted * (1 - y_target) +
-                    (z_predicted.min(axis=1) - 1) * y_target)).max(axis=1)
+        z_other = (
+            (z_predicted * (1 - y_target) + (z_predicted.min(axis=1) - 1) * y_target)
+        ).max(axis=1)
         z_other = z_other.ravel()
 
         # The following differs from the exact definition given in Carlini
@@ -143,12 +149,14 @@ class CAttackEvasionCleverhansLossesMixin(object):
 
         if self.y_target is not None:
             # if targeted, optimize for making the target class most likely
-            loss = CArray.maximum(z_other - z_target + self.confidence,
-                                  CArray.zeros(x.shape[0]))
+            loss = CArray.maximum(
+                z_other - z_target + self.confidence, CArray.zeros(x.shape[0])
+            )
         else:
             # if untargeted, optimize for making any other class most likely
-            loss = CArray.maximum(z_target - z_other + self.confidence,
-                                  CArray.zeros(x.shape[0]))
+            loss = CArray.maximum(
+                z_target - z_other + self.confidence, CArray.zeros(x.shape[0])
+            )
 
         return d + loss * c_weight
 

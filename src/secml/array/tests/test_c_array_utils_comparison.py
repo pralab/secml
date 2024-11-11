@@ -15,8 +15,7 @@ class TestCArrayUtilsComparison(CArrayTestCases):
             self.logger.info("a2: \n{:}".format(array2))
 
             logical_and_res = array1.logical_and(array2)
-            self.logger.info(
-                "a1.logical_and(a2): \n{:}".format(logical_and_res))
+            self.logger.info("a1.logical_and(a2): \n{:}".format(logical_and_res))
 
             self.assert_array_equal(logical_and_res, expected)
 
@@ -24,51 +23,78 @@ class TestCArrayUtilsComparison(CArrayTestCases):
                 # If a sparse array is involved, result must be sparse
                 self.assertTrue(logical_and_res.issparse)
 
-        _logical_and(self.array_sparse, self.array_dense,
-                     self.array_sparse.astype(bool))
-        _logical_and(self.row_sparse, self.row_dense,
-                     self.row_sparse.astype(bool))
-        _logical_and(self.column_sparse, self.column_dense,
-                     self.column_sparse.astype(bool))
-        _logical_and(self.array_dense, self.array_sparse,
-                     self.array_dense.astype(bool))
-        _logical_and(self.row_dense, self.row_sparse,
-                     self.row_dense.astype(bool))
-        _logical_and(self.column_dense, self.column_sparse,
-                     self.column_dense.astype(bool))
+        _logical_and(
+            self.array_sparse, self.array_dense, self.array_sparse.astype(bool)
+        )
+        _logical_and(self.row_sparse, self.row_dense, self.row_sparse.astype(bool))
+        _logical_and(
+            self.column_sparse, self.column_dense, self.column_sparse.astype(bool)
+        )
+        _logical_and(self.array_dense, self.array_sparse, self.array_dense.astype(bool))
+        _logical_and(self.row_dense, self.row_sparse, self.row_dense.astype(bool))
+        _logical_and(
+            self.column_dense, self.column_sparse, self.column_dense.astype(bool)
+        )
 
         # Should work independently of sparse format
         self.array_sparse._data._data = self.array_sparse._data.todok()
-        _logical_and(self.array_sparse, self.array_dense,
-                     self.array_sparse.astype(bool))
+        _logical_and(
+            self.array_sparse, self.array_dense, self.array_sparse.astype(bool)
+        )
         self.array_sparse._data._data = self.array_sparse._data.tocsr()
 
-        _logical_and(self.array_sparse, self.array_sparse_nozero,
-                     self.array_sparse.astype(bool))
-        _logical_and(self.array_dense, self.array_dense_nozero,
-                     self.array_dense.astype(bool))
-        _logical_and(self.array_sparse, self.array_sparse_allzero,
-                     self.array_sparse_allzero.astype(bool))
-        _logical_and(self.array_dense, self.array_dense_allzero,
-                     self.array_dense_allzero.astype(bool))
-        _logical_and(self.array_sparse_allzero, self.array_sparse_allzero,
-                     self.array_sparse_allzero.astype(bool))
-        _logical_and(self.array_dense_allzero, self.array_dense_allzero,
-                     self.array_dense_allzero.astype(bool))
+        _logical_and(
+            self.array_sparse, self.array_sparse_nozero, self.array_sparse.astype(bool)
+        )
+        _logical_and(
+            self.array_dense, self.array_dense_nozero, self.array_dense.astype(bool)
+        )
+        _logical_and(
+            self.array_sparse,
+            self.array_sparse_allzero,
+            self.array_sparse_allzero.astype(bool),
+        )
+        _logical_and(
+            self.array_dense,
+            self.array_dense_allzero,
+            self.array_dense_allzero.astype(bool),
+        )
+        _logical_and(
+            self.array_sparse_allzero,
+            self.array_sparse_allzero,
+            self.array_sparse_allzero.astype(bool),
+        )
+        _logical_and(
+            self.array_dense_allzero,
+            self.array_dense_allzero,
+            self.array_dense_allzero.astype(bool),
+        )
 
-        _logical_and(self.array_sparse_bool, self.array_sparse_bool_true,
-                     self.array_sparse_bool.astype(bool))
-        _logical_and(self.array_dense_bool, self.array_dense_bool_true,
-                     self.array_dense_bool.astype(bool))
-        _logical_and(self.array_sparse_bool_false,
-                     self.array_sparse_bool_false,
-                     self.array_sparse_bool_false.astype(bool))
-        _logical_and(self.array_dense_bool_false, self.array_dense_bool_false,
-                     self.array_dense_bool_false.astype(bool))
+        _logical_and(
+            self.array_sparse_bool,
+            self.array_sparse_bool_true,
+            self.array_sparse_bool.astype(bool),
+        )
+        _logical_and(
+            self.array_dense_bool,
+            self.array_dense_bool_true,
+            self.array_dense_bool.astype(bool),
+        )
+        _logical_and(
+            self.array_sparse_bool_false,
+            self.array_sparse_bool_false,
+            self.array_sparse_bool_false.astype(bool),
+        )
+        _logical_and(
+            self.array_dense_bool_false,
+            self.array_dense_bool_false,
+            self.array_dense_bool_false.astype(bool),
+        )
 
         _logical_and(self.empty_sparse, self.empty_sparse, self.empty_sparse)
-        _logical_and(self.empty_flat_dense, self.empty_flat_dense,
-                     self.empty_flat_dense)
+        _logical_and(
+            self.empty_flat_dense, self.empty_flat_dense, self.empty_flat_dense
+        )
 
     def test_logical_or(self):
         """Test for CArray.logical_or() method."""
@@ -83,44 +109,67 @@ class TestCArrayUtilsComparison(CArrayTestCases):
 
             self.assert_array_equal(logical_or_res, expected)
 
-        _logical_or(self.array_sparse, self.array_dense,
-                    self.array_sparse.astype(bool))
-        _logical_or(self.row_sparse, self.row_dense,
-                    self.row_sparse.astype(bool))
-        _logical_or(self.column_sparse, self.column_dense,
-                    self.column_sparse.astype(bool))
-        _logical_or(self.array_dense, self.array_sparse,
-                    self.array_dense.astype(bool))
-        _logical_or(self.row_dense, self.row_sparse,
-                    self.row_dense.astype(bool))
-        _logical_or(self.column_dense, self.column_sparse,
-                    self.column_dense.astype(bool))
+        _logical_or(self.array_sparse, self.array_dense, self.array_sparse.astype(bool))
+        _logical_or(self.row_sparse, self.row_dense, self.row_sparse.astype(bool))
+        _logical_or(
+            self.column_sparse, self.column_dense, self.column_sparse.astype(bool)
+        )
+        _logical_or(self.array_dense, self.array_sparse, self.array_dense.astype(bool))
+        _logical_or(self.row_dense, self.row_sparse, self.row_dense.astype(bool))
+        _logical_or(
+            self.column_dense, self.column_sparse, self.column_dense.astype(bool)
+        )
 
-        _logical_or(self.array_sparse, self.array_sparse_nozero,
-                    self.array_sparse_nozero.astype(bool))
-        _logical_or(self.array_dense, self.array_dense_nozero,
-                    self.array_dense_nozero.astype(bool))
-        _logical_or(self.array_sparse, self.array_sparse_allzero,
-                    self.array_sparse.astype(bool))
-        _logical_or(self.array_dense, self.array_dense_allzero,
-                    self.array_sparse.astype(bool))
-        _logical_or(self.array_sparse_allzero, self.array_sparse_allzero,
-                    self.array_sparse_allzero.astype(bool))
-        _logical_or(self.array_dense_allzero, self.array_dense_allzero,
-                    self.array_dense_allzero.astype(bool))
+        _logical_or(
+            self.array_sparse,
+            self.array_sparse_nozero,
+            self.array_sparse_nozero.astype(bool),
+        )
+        _logical_or(
+            self.array_dense,
+            self.array_dense_nozero,
+            self.array_dense_nozero.astype(bool),
+        )
+        _logical_or(
+            self.array_sparse, self.array_sparse_allzero, self.array_sparse.astype(bool)
+        )
+        _logical_or(
+            self.array_dense, self.array_dense_allzero, self.array_sparse.astype(bool)
+        )
+        _logical_or(
+            self.array_sparse_allzero,
+            self.array_sparse_allzero,
+            self.array_sparse_allzero.astype(bool),
+        )
+        _logical_or(
+            self.array_dense_allzero,
+            self.array_dense_allzero,
+            self.array_dense_allzero.astype(bool),
+        )
 
-        _logical_or(self.array_sparse_bool, self.array_sparse_bool_true,
-                    self.array_sparse_bool_true.astype(bool))
-        _logical_or(self.array_dense_bool, self.array_dense_bool_true,
-                    self.array_dense_bool_true.astype(bool))
-        _logical_or(self.array_sparse_bool_false, self.array_sparse_bool_false,
-                    self.array_sparse_bool_false.astype(bool))
-        _logical_or(self.array_dense_bool_false, self.array_dense_bool_false,
-                    self.array_dense_bool_false.astype(bool))
+        _logical_or(
+            self.array_sparse_bool,
+            self.array_sparse_bool_true,
+            self.array_sparse_bool_true.astype(bool),
+        )
+        _logical_or(
+            self.array_dense_bool,
+            self.array_dense_bool_true,
+            self.array_dense_bool_true.astype(bool),
+        )
+        _logical_or(
+            self.array_sparse_bool_false,
+            self.array_sparse_bool_false,
+            self.array_sparse_bool_false.astype(bool),
+        )
+        _logical_or(
+            self.array_dense_bool_false,
+            self.array_dense_bool_false,
+            self.array_dense_bool_false.astype(bool),
+        )
 
         _logical_or(self.empty_sparse, self.empty_sparse, self.empty_sparse)
-        _logical_or(self.empty_flat_dense, self.empty_flat_dense,
-                    self.empty_flat_dense)
+        _logical_or(self.empty_flat_dense, self.empty_flat_dense, self.empty_flat_dense)
 
     def test_logical_not(self):
         """Test for CArray.logical_not() method."""
@@ -134,14 +183,10 @@ class TestCArrayUtilsComparison(CArrayTestCases):
 
             self.assert_array_equal(logical_not_res, expected)
 
-        _logical_not(self.array_sparse_nozero,
-                     self.array_sparse_allzero.astype(bool))
-        _logical_not(self.array_dense_nozero,
-                     self.array_dense_allzero.astype(bool))
-        _logical_not(self.array_sparse_allzero,
-                     self.array_sparse_nozero.astype(bool))
-        _logical_not(self.array_dense_allzero,
-                     self.array_dense_nozero.astype(bool))
+        _logical_not(self.array_sparse_nozero, self.array_sparse_allzero.astype(bool))
+        _logical_not(self.array_dense_nozero, self.array_dense_allzero.astype(bool))
+        _logical_not(self.array_sparse_allzero, self.array_sparse_nozero.astype(bool))
+        _logical_not(self.array_dense_allzero, self.array_dense_nozero.astype(bool))
 
         _logical_not(self.array_sparse_bool_false, self.array_sparse_bool_true)
         _logical_not(self.array_dense_bool_false, self.array_sparse_bool_true)
@@ -312,5 +357,5 @@ class TestCArrayUtilsComparison(CArrayTestCases):
         self.assertFalse((e_min != CArray([])).any())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CArrayTestCases.main()

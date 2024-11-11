@@ -11,8 +11,9 @@ class TestCPlot(CUnitTest):
 
     def setUp(self):
         self.clf = CClassifierSVM()
-        self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
-                                 n_clusters_per_class=1).load()
+        self.dataset = CDLRandom(
+            n_features=2, n_redundant=0, n_informative=1, n_clusters_per_class=1
+        ).load()
         self.dataset.X = CNormalizerMinMax().fit_transform(self.dataset.X)
         self.clf.fit(self.dataset.X, self.dataset.Y)
 
@@ -34,5 +35,5 @@ class TestCPlot(CUnitTest):
         fig.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

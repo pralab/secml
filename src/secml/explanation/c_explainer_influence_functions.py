@@ -6,6 +6,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggiodemontis@unica.it>
 
 """
+
 from scipy import linalg
 
 from secml.array import CArray
@@ -27,15 +28,16 @@ class CExplainerInfluenceFunctions(CExplainerGradient):
         Instance of the classifier to explain. Must provide the `hessian`.
     tr_ds : CDataset
         Training dataset of the classifier to explain.
-    
+
     Attributes
     ----------
     class_type : 'influence-functions'
-    
-    """
-    __class_type = 'influence-functions'
 
-    def __init__(self, clf, tr_ds, outer_loss_idx='log'):
+    """
+
+    __class_type = "influence-functions"
+
+    def __init__(self, clf, tr_ds, outer_loss_idx="log"):
 
         super(CExplainerInfluenceFunctions, self).__init__(clf=clf)
 
@@ -102,9 +104,13 @@ class CExplainerInfluenceFunctions(CExplainerGradient):
 
         if self._grad_inner_loss_params is None:
             self._grad_inner_loss_params = self.grad_inner_loss_params(
-                self.tr_ds.X, self.tr_ds.Y)
+                self.tr_ds.X, self.tr_ds.Y
+            )
 
-        v = self.grad_outer_loss_params(x, y).T.dot(self._inv_H).dot(
-            self._grad_inner_loss_params)
+        v = (
+            self.grad_outer_loss_params(x, y)
+            .T.dot(self._inv_H)
+            .dot(self._grad_inner_loss_params)
+        )
 
         return (v, H) if return_grad is True else v

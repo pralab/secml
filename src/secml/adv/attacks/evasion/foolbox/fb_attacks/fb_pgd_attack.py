@@ -8,14 +8,19 @@
 
 """
 
-from foolbox.attacks.projected_gradient_descent import L1ProjectedGradientDescentAttack, \
-    L2ProjectedGradientDescentAttack, LinfProjectedGradientDescentAttack
+from foolbox.attacks.projected_gradient_descent import (
+    L1ProjectedGradientDescentAttack,
+    L2ProjectedGradientDescentAttack,
+    LinfProjectedGradientDescentAttack,
+)
 
-from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import CAttackEvasionFoolbox
+from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import (
+    CAttackEvasionFoolbox,
+)
 from secml.adv.attacks.evasion.foolbox.losses.ce_loss import CELoss
 from secml.adv.attacks.evasion.foolbox.secml_autograd import as_tensor
 
-DISTANCES = ['l1', 'l2', 'linf']
+DISTANCES = ["l1", "l2", "linf"]
 
 
 class CFoolboxPGD(CELoss, CAttackEvasionFoolbox):
@@ -57,32 +62,48 @@ class CFoolboxPGD(CELoss, CAttackEvasionFoolbox):
         adversarial attacks",
         https://arxiv.org/abs/1706.06083
     """
-    __class_type = 'e-foolbox-pgd'
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0,
-                 epsilons=0.2, distance='l2',
-                 rel_stepsize=0.025, abs_stepsize=None, steps=50,
-                 random_start=True):
+    __class_type = "e-foolbox-pgd"
 
-        if distance == 'l1':
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=0.2,
+        distance="l2",
+        rel_stepsize=0.025,
+        abs_stepsize=None,
+        steps=50,
+        random_start=True,
+    ):
+
+        if distance == "l1":
             attack = L1ProjectedGradientDescentAttack
-        elif distance == 'l2':
+        elif distance == "l2":
             attack = L2ProjectedGradientDescentAttack
-        elif distance == 'linf':
+        elif distance == "linf":
             attack = LinfProjectedGradientDescentAttack
         else:
-            raise ValueError('Distance {} is not supported for this attack. Only {} are supported'.format(
-                distance, DISTANCES
-            ))
+            raise ValueError(
+                "Distance {} is not supported for this attack. Only {} are supported".format(
+                    distance, DISTANCES
+                )
+            )
 
-        super(CFoolboxPGD, self).__init__(classifier, y_target,
-                                          lb=lb, ub=ub,
-                                          fb_attack_class=attack,
-                                          epsilons=epsilons,
-                                          rel_stepsize=rel_stepsize,
-                                          abs_stepsize=abs_stepsize,
-                                          steps=steps,
-                                          random_start=random_start)
+        super(CFoolboxPGD, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            fb_attack_class=attack,
+            epsilons=epsilons,
+            rel_stepsize=rel_stepsize,
+            abs_stepsize=abs_stepsize,
+            steps=steps,
+            random_start=random_start,
+        )
         self._x0 = None
         self._y0 = None
         self.distance = distance
@@ -97,45 +118,87 @@ class CFoolboxPGD(CELoss, CAttackEvasionFoolbox):
 
 
 class CFoolboxPGDL1(CFoolboxPGD):
-    __class_type = 'e-foolbox-pgd-l1'
+    __class_type = "e-foolbox-pgd-l1"
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0, epsilons=0.2,
-                 rel_stepsize=0.025, abs_stepsize=None, steps=50, random_start=True):
-        super(CFoolboxPGDL1, self).__init__(classifier, y_target,
-                                            lb=lb, ub=ub,
-                                            distance='l1',
-                                            epsilons=epsilons,
-                                            rel_stepsize=rel_stepsize,
-                                            abs_stepsize=abs_stepsize,
-                                            steps=steps,
-                                            random_start=random_start)
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=0.2,
+        rel_stepsize=0.025,
+        abs_stepsize=None,
+        steps=50,
+        random_start=True,
+    ):
+        super(CFoolboxPGDL1, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            distance="l1",
+            epsilons=epsilons,
+            rel_stepsize=rel_stepsize,
+            abs_stepsize=abs_stepsize,
+            steps=steps,
+            random_start=random_start,
+        )
 
 
 class CFoolboxPGDL2(CFoolboxPGD):
-    __class_type = 'e-foolbox-pgd-l2'
+    __class_type = "e-foolbox-pgd-l2"
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0, epsilons=0.2,
-                 rel_stepsize=0.025, abs_stepsize=None, steps=50, random_start=True):
-        super(CFoolboxPGDL2, self).__init__(classifier, y_target,
-                                            lb=lb, ub=ub,
-                                            distance='l2',
-                                            epsilons=epsilons,
-                                            rel_stepsize=rel_stepsize,
-                                            abs_stepsize=abs_stepsize,
-                                            steps=steps,
-                                            random_start=random_start)
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=0.2,
+        rel_stepsize=0.025,
+        abs_stepsize=None,
+        steps=50,
+        random_start=True,
+    ):
+        super(CFoolboxPGDL2, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            distance="l2",
+            epsilons=epsilons,
+            rel_stepsize=rel_stepsize,
+            abs_stepsize=abs_stepsize,
+            steps=steps,
+            random_start=random_start,
+        )
 
 
 class CFoolboxPGDLinf(CFoolboxPGD):
-    __class_type = 'e-foolbox-pgd-linf'
+    __class_type = "e-foolbox-pgd-linf"
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0, epsilons=0.2,
-                 rel_stepsize=0.025, abs_stepsize=None, steps=50, random_start=True):
-        super(CFoolboxPGDLinf, self).__init__(classifier, y_target,
-                                              lb=lb, ub=ub,
-                                              distance='linf',
-                                              epsilons=epsilons,
-                                              rel_stepsize=rel_stepsize,
-                                              abs_stepsize=abs_stepsize,
-                                              steps=steps,
-                                              random_start=random_start)
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=0.2,
+        rel_stepsize=0.025,
+        abs_stepsize=None,
+        steps=50,
+        random_start=True,
+    ):
+        super(CFoolboxPGDLinf, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            distance="linf",
+            epsilons=epsilons,
+            rel_stepsize=rel_stepsize,
+            abs_stepsize=abs_stepsize,
+            steps=steps,
+            random_start=random_start,
+        )

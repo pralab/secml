@@ -68,8 +68,7 @@ class CClassifierTestCases(CUnitTest):
             Classifier scores computed on a single point.
 
         """
-        self.logger.info(
-            "Test for decision_function() and predict() methods.")
+        self.logger.info("Test for decision_function() and predict() methods.")
 
         if ds.issparse:
             self.logger.info("Testing on sparse data...")
@@ -93,21 +92,18 @@ class CClassifierTestCases(CUnitTest):
         for y in range(ds.num_classes):
             df.append(clf.decision_function(x, y=y))
             df_priv.append(clf._forward(x_norm)[:, y].ravel())
+            self.logger.info("decision_function(x, y={:}): {:}".format(y, df[y]))
             self.logger.info(
-                "decision_function(x, y={:}): {:}".format(y, df[y]))
-            self.logger.info(
-                "_decision_function(x_norm, y={:}): {:}".format(y, df_priv[y]))
+                "_decision_function(x_norm, y={:}): {:}".format(y, df_priv[y])
+            )
             self._check_df_scores(df_priv[y], ds.num_samples)
             self._check_df_scores(df[y], ds.num_samples)
             self.assertFalse((df[y] != df_priv[y]).any())
 
         # Testing predict on multiple points
-        labels, scores = clf.predict(
-            x, return_decision_function=True)
-        self.logger.info(
-            "predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
-        self._check_classify_scores(
-            labels, scores, ds.num_samples, clf.n_classes)
+        labels, scores = clf.predict(x, return_decision_function=True)
+        self.logger.info("predict(x):\nlabels: {:}\nscores: {:}".format(labels, scores))
+        self._check_classify_scores(labels, scores, ds.num_samples, clf.n_classes)
 
         # Comparing output of decision_function and predict
         for y in range(ds.num_classes):
@@ -118,20 +114,18 @@ class CClassifierTestCases(CUnitTest):
         for y in range(ds.num_classes):
             df.append(clf.decision_function(p, y=y))
             df_priv.append(clf._forward(p_norm)[:, y].ravel())
-            self.logger.info(
-                "decision_function(p, y={:}): {:}".format(y, df[y]))
+            self.logger.info("decision_function(p, y={:}): {:}".format(y, df[y]))
             self._check_df_scores(df[y], 1)
             self.logger.info(
-                "_decision_function(p_norm, y={:}): {:}".format(y, df_priv[y]))
+                "_decision_function(p_norm, y={:}): {:}".format(y, df_priv[y])
+            )
             self._check_df_scores(df_priv[y], 1)
             self.assertFalse((df[y] != df_priv[y]).any())
 
         self.logger.info("Testing predict on single point")
 
-        labels, scores = clf.predict(
-            p, return_decision_function=True)
-        self.logger.info(
-            "predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
+        labels, scores = clf.predict(p, return_decision_function=True)
+        self.logger.info("predict(p):\nlabels: {:}\nscores: {:}".format(labels, scores))
         self._check_classify_scores(labels, scores, 1, clf.n_classes)
 
         # Comparing output of decision_function and predict
@@ -149,21 +143,22 @@ class CClassifierTestCases(CUnitTest):
 
         fig.subplot(1, 2, 1)
         fig.sp.plot_ds(ds)
-        fig.sp.plot_decision_regions(
-            clf, n_grid_points=50, grid_limits=ds.get_bounds())
+        fig.sp.plot_decision_regions(clf, n_grid_points=50, grid_limits=ds.get_bounds())
         fig.sp.title("Decision regions")
 
         fig.subplot(1, 2, 2)
         fig.sp.plot_ds(ds)
-        fig.sp.plot_fun(clf.decision_function, grid_limits=ds.get_bounds(),
-                        levels=levels, y=1)
+        fig.sp.plot_fun(
+            clf.decision_function, grid_limits=ds.get_bounds(), levels=levels, y=1
+        )
         fig.sp.title("Discriminant function for y=1")
 
         return fig
 
     # TODO: consider moving at the CModule level!
-    def _test_gradient_numerical(self, clf, x, extra_classes=None,
-                                 th=1e-3, epsilon=eps, **grad_kwargs):
+    def _test_gradient_numerical(
+        self, clf, x, extra_classes=None, th=1e-3, epsilon=eps, **grad_kwargs
+    ):
         """Test for clf.grad_f_x comparing to numerical gradient.
 
         Parameters
@@ -185,7 +180,7 @@ class CClassifierTestCases(CUnitTest):
             A list with the gradients computed wrt each class.
 
         """
-        if 'y' in grad_kwargs:
+        if "y" in grad_kwargs:
             raise ValueError("`y` cannot be passed to this unittest.")
 
         if extra_classes is not None:
@@ -195,7 +190,7 @@ class CClassifierTestCases(CUnitTest):
 
         grads = []
         for c in classes:
-            grad_kwargs['y'] = c  # Appending class to test_f_x
+            grad_kwargs["y"] = c  # Appending class to test_f_x
 
             # Analytical gradient
             gradient = clf.grad_f_x(x, **grad_kwargs)
@@ -205,17 +200,17 @@ class CClassifierTestCases(CUnitTest):
             self.assertEqual(x.size, gradient.size)
 
             # Numerical gradient
-            num_gradient = CFunction(
-                clf.decision_function).approx_fprime(x.todense(), epsilon, y=c)
+            num_gradient = CFunction(clf.decision_function).approx_fprime(
+                x.todense(), epsilon, y=c
+            )
 
             # Compute the norm of the difference
             error = (gradient - num_gradient).norm()
 
+            self.logger.info("Analytic grad wrt. class {:}:\n{:}".format(c, gradient))
             self.logger.info(
-                "Analytic grad wrt. class {:}:\n{:}".format(c, gradient))
-            self.logger.info(
-                "Numeric gradient wrt. class {:}:\n{:}".format(
-                    c, num_gradient))
+                "Numeric gradient wrt. class {:}:\n{:}".format(c, num_gradient)
+            )
 
             self.logger.info("norm(grad - num_grad): {:}".format(error))
             self.assertLess(error, th)
@@ -231,8 +226,7 @@ class CClassifierTestCases(CUnitTest):
         chain = None
         pre_list = []
         for i, pre_id in enumerate(pre_id_list):
-            chain = CPreProcess.create(
-                pre_id, preprocess=chain, **kwargs_list[i])
+            chain = CPreProcess.create(pre_id, preprocess=chain, **kwargs_list[i])
             pre_list.append(CPreProcess.create(pre_id, **kwargs_list[i]))
 
         return chain, pre_list
@@ -295,11 +289,14 @@ class CClassifierTestCases(CUnitTest):
 
         """
         pre, data_pre, clf_pre, clf = self._create_preprocess_test(
-            ds, clf, pre_id_list, kwargs_list)
+            ds, clf, pre_id_list, kwargs_list
+        )
 
         self.logger.info(
             "Testing {:} with preprocessor inside:\n{:}".format(
-                clf.__class__.__name__, clf_pre))
+                clf.__class__.__name__, clf_pre
+            )
+        )
 
         y1, score1 = clf_pre.predict(ds.X, return_decision_function=True)
         y2, score2 = clf.predict(data_pre, return_decision_function=True)
@@ -311,9 +308,18 @@ class CClassifierTestCases(CUnitTest):
         # equal to the number of dataset features (so before preprocessing)
         self.assertEqual(ds.num_features, clf_pre.n_features)
 
-    def _test_preprocess_grad(self, ds, clf, pre_id_list, kwargs_list,
-                              extra_classes=None, check_numerical=True,
-                              th=1e-3, epsilon=eps, **grad_kwargs):
+    def _test_preprocess_grad(
+        self,
+        ds,
+        clf,
+        pre_id_list,
+        kwargs_list,
+        extra_classes=None,
+        check_numerical=True,
+        th=1e-3,
+        epsilon=eps,
+        **grad_kwargs
+    ):
         """Test if clf gradient with preprocessor inside is equal to the
         gradient of the clf trained on pre-transformed data.
         Also compare the gradient of the clf with preprocessor
@@ -343,12 +349,14 @@ class CClassifierTestCases(CUnitTest):
 
         """
         pre, data_pre, clf_pre, clf = self._create_preprocess_test(
-            ds, clf, pre_id_list, kwargs_list)
+            ds, clf, pre_id_list, kwargs_list
+        )
 
-        self.logger.info("Testing clf gradient with preprocessor "
-                         "inside:\n{:}".format(clf_pre))
+        self.logger.info(
+            "Testing clf gradient with preprocessor " "inside:\n{:}".format(clf_pre)
+        )
 
-        if 'y' in grad_kwargs:
+        if "y" in grad_kwargs:
             raise ValueError("`y` cannot be passed to this unittest.")
 
         if extra_classes is not None:
@@ -357,8 +365,7 @@ class CClassifierTestCases(CUnitTest):
             classes = clf.classes
 
         for c in classes:
-            self.logger.info(
-                "Testing grad wrt. class {:}".format(c))
+            self.logger.info("Testing grad wrt. class {:}".format(c))
 
             # Grad of clf without preprocessor inside (using transformed data)
             v_pre = data_pre[0, :]
@@ -386,8 +393,13 @@ class CClassifierTestCases(CUnitTest):
         if check_numerical is True:
             # Comparison with numerical gradient
             self._test_gradient_numerical(
-                clf_pre, ds.X[0, :], extra_classes=extra_classes,
-                th=th, epsilon=epsilon, **grad_kwargs)
+                clf_pre,
+                ds.X[0, :],
+                extra_classes=extra_classes,
+                th=th,
+                epsilon=epsilon,
+                **grad_kwargs
+            )
 
     def _test_sparse_linear(self, ds, clf):
         """Test linear classifier operations on sparse data.
@@ -401,8 +413,9 @@ class CClassifierTestCases(CUnitTest):
         clf : CClassifier
 
         """
-        self.logger.info("Testing {:} operations on sparse data.".format(
-            clf.__class__.__name__))
+        self.logger.info(
+            "Testing {:} operations on sparse data.".format(clf.__class__.__name__)
+        )
 
         ds_sparse = ds.tosparse()
 
@@ -416,10 +429,8 @@ class CClassifierTestCases(CUnitTest):
         x = ds.X[0, :]
         x_sparse = ds_sparse.X[0, :]
 
-        y, s = clf.predict(
-            x, return_decision_function=True)
-        y_sparse, s_sparse = clf.predict(
-            x_sparse, return_decision_function=True)
+        y, s = clf.predict(x, return_decision_function=True)
+        y_sparse, s_sparse = clf.predict(x_sparse, return_decision_function=True)
 
         self.assert_array_equal(y, y_sparse)
         self.assert_array_equal(s, s_sparse)
@@ -432,5 +443,5 @@ class CClassifierTestCases(CUnitTest):
         # self.assertTrue(grad.issparse)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import tarfile
 from multiprocessing import Lock
 import pickle
@@ -20,14 +21,14 @@ from secml.utils.download_utils import dl_file, md5
 from secml.settings import SECML_DS_DIR
 
 
-CIFAR10_URL_PYTHON = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
-CIFAR10_MD5 = 'c58f30108f718f92721af3b95e74349a'
-CIFAR100_URL_PYTHON = 'https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz'
-CIFAR100_MD5 = 'eb9058c3a382ffc7106e4002c42a8d85'
+CIFAR10_URL_PYTHON = "https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz"
+CIFAR10_MD5 = "c58f30108f718f92721af3b95e74349a"
+CIFAR100_URL_PYTHON = "https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz"
+CIFAR100_MD5 = "eb9058c3a382ffc7106e4002c42a8d85"
 
-CIFAR_PATH = fm.join(SECML_DS_DIR, 'cifar')
-CIFAR10_PATH = fm.join(CIFAR_PATH, 'cifar-10-batches-py')
-CIFAR100_PATH = fm.join(CIFAR_PATH, 'cifar-100-python')
+CIFAR_PATH = fm.join(SECML_DS_DIR, "cifar")
+CIFAR10_PATH = fm.join(CIFAR_PATH, "cifar-10-batches-py")
+CIFAR100_PATH = fm.join(CIFAR_PATH, "cifar-100-python")
 
 
 class CDataLoaderCIFAR(CDataLoader, metaclass=ABCMeta):
@@ -36,20 +37,23 @@ class CDataLoaderCIFAR(CDataLoader, metaclass=ABCMeta):
     Available at: https://www.cs.toronto.edu/~kriz/cifar.html
 
     """
+
     __lock = Lock()  # Lock to prevent multiple parallel download/extraction
 
     def __init__(self):
 
         # Extract the name of the data file from the url
-        self.data_file = self.data_url.split('/')[-1]
+        self.data_file = self.data_url.split("/")[-1]
 
         # Path to the downloaded dataset file
         data_file_path = fm.join(CIFAR_PATH, self.data_file)
 
         with CDataLoaderCIFAR.__lock:
             # Download (if needed) data and extract it
-            if not fm.file_exist(data_file_path) or \
-                    md5(data_file_path) != self.data_md5:
+            if (
+                not fm.file_exist(data_file_path)
+                or md5(data_file_path) != self.data_md5
+            ):
                 self._get_data(self.data_url, CIFAR_PATH)
             elif not fm.folder_exist(self.data_path):
                 # Downloaded datafile seems valid, extract only
@@ -126,8 +130,15 @@ class CDataLoaderCIFAR(CDataLoader, metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    def _load(self, train_files, test_files, meta_file,
-              labels_key, class_names_key, val_size=0):
+    def _load(
+        self,
+        train_files,
+        test_files,
+        meta_file,
+        labels_key,
+        class_names_key,
+        val_size=0,
+    ):
         """Load all images of the dataset.
 
         Adapted from: http://dataset-loading.readthedocs.io/en/latest/_modules/dataset_loading/cifar.html
@@ -159,20 +170,20 @@ class CDataLoaderCIFAR(CDataLoader, metaclass=ABCMeta):
 
         """
         self.logger.info(
-            "Loading {:} dataset from {:}...".format(self.class_type,
-                                                     self.data_path))
+            "Loading {:} dataset from {:}...".format(self.class_type, self.data_path)
+        )
 
         def load_files(batches_list):
             # Function that loads the data into memory
             data = None
             labels = None
             for batch in batches_list:
-                with open(batch, 'rb') as bf:
-                    mydict = pickle.load(bf, encoding='bytes')
+                with open(batch, "rb") as bf:
+                    mydict = pickle.load(bf, encoding="bytes")
 
                 # The labels have different names in the two datasets
-                new_data = np.array(mydict[b'data'], dtype='uint8')
-                newlabels = np.array(mydict[labels_key], dtype='int32')
+                new_data = np.array(mydict[b"data"], dtype="uint8")
+                newlabels = np.array(mydict[labels_key], dtype="int32")
                 if data is not None:
                     data = np.vstack([data, new_data])
                     labels = np.hstack([labels, newlabels])
@@ -184,18 +195,22 @@ class CDataLoaderCIFAR(CDataLoader, metaclass=ABCMeta):
 
         # Load training and test sets
         train_data, train_labels = load_files(
-            [fm.join(self.data_path, f) for f in train_files])
+            [fm.join(self.data_path, f) for f in train_files]
+        )
         test_data, test_labels = load_files(
-            [fm.join(self.data_path, f) for f in test_files])
+            [fm.join(self.data_path, f) for f in test_files]
+        )
 
         val_data = None
         val_labels = None
         # Populate the validation set if needed
         if val_size > 0:
             train_data, val_data = np.split(
-                train_data, [train_data.shape[0] - val_size])
+                train_data, [train_data.shape[0] - val_size]
+            )
             train_labels, val_labels = np.split(
-                train_labels, [train_labels.shape[0] - val_size])
+                train_labels, [train_labels.shape[0] - val_size]
+            )
 
         # Load the class names from the meta file
         class_names = self._load_class_names(meta_file, class_names_key)
@@ -211,7 +226,7 @@ class CDataLoaderCIFAR(CDataLoader, metaclass=ABCMeta):
         if val_size > 0:
             val = CDataset(val_data, val_labels, header=header)
             # Also return the validation dataset
-            out_datasets += (val, )
+            out_datasets += (val,)
 
         return out_datasets
 
@@ -234,11 +249,11 @@ class CDataLoaderCIFAR(CDataLoader, metaclass=ABCMeta):
         meta_file_url = fm.join(self.data_path, meta_file)
 
         # Load the class-names from the pickled file.
-        with open(meta_file_url, 'rb') as mf:
-            raw = pickle.load(mf, encoding='bytes')[class_names_key]
+        with open(meta_file_url, "rb") as mf:
+            raw = pickle.load(mf, encoding="bytes")[class_names_key]
 
         # Convert from binary strings.
-        names = {i: x.decode('utf-8') for i, x in enumerate(raw)}
+        names = {i: x.decode("utf-8") for i, x in enumerate(raw)}
 
         return names
 
@@ -256,14 +271,14 @@ class CDataLoaderCIFAR(CDataLoader, metaclass=ABCMeta):
 
         """
         # Generate the full path to the downloaded file
-        f = fm.join(dl_folder, self.data_url.split('/')[-1])
+        f = fm.join(dl_folder, self.data_url.split("/")[-1])
 
         if extract_only is False:
             f_dl = dl_file(file_url, dl_folder, md5_digest=self.data_md5)
             if f != f_dl:
                 raise ValueError("Unexpected filename {:}".format(f_dl))
 
-        tarfile.open(name=f, mode='r:gz').extractall(dl_folder)
+        tarfile.open(name=f, mode="r:gz").extractall(dl_folder)
 
 
 class CDataLoaderCIFAR10(CDataLoaderCIFAR):
@@ -280,7 +295,8 @@ class CDataLoaderCIFAR10(CDataLoaderCIFAR):
     class_type : 'CIFAR-10'
 
     """
-    __class_type = 'CIFAR-10'
+
+    __class_type = "CIFAR-10"
 
     @property
     def data_url(self):
@@ -323,14 +339,16 @@ class CDataLoaderCIFAR10(CDataLoaderCIFAR):
         # The CIFAR-10 dataset has 5 different batches for train data
         # and one single batch for test data
         # The metafile is called `batches.meta` and the labels `labels`
-        train_files = ['data_batch_' + str(i) for i in range(1, 6)]
-        test_files = ['test_batch']
-        meta_file = 'batches.meta'
-        labels_key = b'labels'
-        class_names_key = b'label_names'
+        train_files = ["data_batch_" + str(i) for i in range(1, 6)]
+        test_files = ["test_batch"]
+        meta_file = "batches.meta"
+        labels_key = b"labels"
+        class_names_key = b"label_names"
 
-        return self._load(train_files, test_files, meta_file,
-                          labels_key, class_names_key, val_size)
+        return self._load(
+            train_files, test_files, meta_file, labels_key, class_names_key, val_size
+        )
+
     load.__doc__ += CDataLoaderCIFAR.load.__doc__
 
 
@@ -352,7 +370,8 @@ class CDataLoaderCIFAR100(CDataLoaderCIFAR):
     class_type : 'CIFAR-100'
 
     """
-    __class_type = 'CIFAR-100'
+
+    __class_type = "CIFAR-100"
 
     @property
     def data_url(self):
@@ -394,12 +413,14 @@ class CDataLoaderCIFAR100(CDataLoaderCIFAR):
         """Load all images of the dataset."""
         # The CIFAR-100 dataset has a single file for train/test
         # The metafile is called `meta` and the labels `fine_labels`
-        train_files = ['train']
-        test_files = ['test']
-        meta_file = 'meta'
-        labels_key = b'fine_labels'
-        class_names_key = b'fine_label_names'
+        train_files = ["train"]
+        test_files = ["test"]
+        meta_file = "meta"
+        labels_key = b"fine_labels"
+        class_names_key = b"fine_label_names"
 
-        return self._load(train_files, test_files, meta_file,
-                          labels_key, class_names_key, val_size)
+        return self._load(
+            train_files, test_files, meta_file, labels_key, class_names_key, val_size
+        )
+
     load.__doc__ = CDataLoaderCIFAR.load.__doc__

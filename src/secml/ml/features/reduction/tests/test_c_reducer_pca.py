@@ -14,15 +14,15 @@ class TestCPca(CPreProcessTestCases):
         # Few test cases involve an all-zero column,
         # so PCA will trigger a 0/0 warning
         self.logger.filterwarnings(
-            action='ignore',
-            message='invalid value encountered in true_divide',
-            category=RuntimeWarning
-            )
+            action="ignore",
+            message="invalid value encountered in true_divide",
+            category=RuntimeWarning,
+        )
         self.logger.filterwarnings(
-            action='ignore',
-            message='invalid value encountered in divide',
-            category=RuntimeWarning
-            )
+            action="ignore",
+            message="invalid value encountered in divide",
+            category=RuntimeWarning,
+        )
 
         def sklearn_comp(array):
             self.logger.info("Original array is:\n{:}".format(array))
@@ -54,16 +54,17 @@ class TestCPca(CPreProcessTestCases):
         """Test a chain of preprocessors."""
         x_chain = self._test_chain(
             self.array_dense,
-            ['min-max', 'unit-norm', 'pca'],
-            [{'feature_range': (-5, 5)}, {}, {}]
+            ["min-max", "unit-norm", "pca"],
+            [{"feature_range": (-5, 5)}, {}, {}],
         )
 
         # Expected shape is (3, 3), as pca max n_components is 4-1
-        self.assertEqual((self.array_dense.shape[0],
-                          self.array_dense.shape[1] - 1), x_chain.shape)
+        self.assertEqual(
+            (self.array_dense.shape[0], self.array_dense.shape[1] - 1), x_chain.shape
+        )
 
     # TODO: ADD TEST FOR GRADIENT (WHEN IMPLEMENTED)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CPreProcessTestCases.main()

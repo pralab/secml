@@ -14,7 +14,7 @@ def f(array):
 
 fig = CFigure()
 
-fig.sp.plot_fun(f, levels=[.5, 1, 1.5])
+fig.sp.plot_fun(f, levels=[0.5, 1, 1.5])
 
 fig.sp.grid()
 fig.show()

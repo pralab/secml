@@ -18,10 +18,12 @@ class TestCLossRegression(CUnitTest):
         self.svm = CClassifierSVM()
         self.svm.fit(self.ds.X, self.ds.Y)
         self.labels, self.scores = self.svm.predict(
-            self.ds.X, return_decision_function=True)
+            self.ds.X, return_decision_function=True
+        )
 
     def test_in_out(self):
         """Unittest for input and output to loss classes"""
+
         def _check_loss(l, n_samples):
 
             self.assertIsInstance(l, CArray)
@@ -30,9 +32,7 @@ class TestCLossRegression(CUnitTest):
             self.assertEqual(n_samples, l.size)
             self.assertIsSubDtype(l.dtype, float)
 
-        for loss_id in ('e-insensitive',
-                        'e-insensitive-squared',
-                        'quadratic'):
+        for loss_id in ("e-insensitive", "e-insensitive-squared", "quadratic"):
 
             self.logger.info("Creating loss: {:}".format(loss_id))
             loss_class = CLoss.create(loss_id)
@@ -41,14 +41,18 @@ class TestCLossRegression(CUnitTest):
             loss_mean_pos = loss_pos.mean()
             self.logger.info(
                 "{:}.loss(y_true, scores[:, 1].ravel()).mean():\n".format(
-                    loss_class.__class__.__name__, loss_mean_pos))
+                    loss_class.__class__.__name__, loss_mean_pos
+                )
+            )
             _check_loss(loss_pos, self.ds.Y.size)
 
             loss = loss_class.loss(self.ds.Y[0], self.scores[0, 1].ravel())
             loss_mean = loss.mean()
             self.logger.info(
                 "{:}.loss(y_true[0], scores[0,:]).mean():\n{:}".format(
-                    loss_class.__class__.__name__, loss_mean))
+                    loss_class.__class__.__name__, loss_mean
+                )
+            )
             _check_loss(loss, 1)
 
             with self.assertRaises(ValueError):
@@ -63,9 +67,7 @@ class TestCLossRegression(CUnitTest):
         fig = CFigure()
         x = CArray.arange(-1, 3.01, 0.01)
 
-        for loss_id in ('e-insensitive',
-                        'e-insensitive-squared',
-                        'quadratic'):
+        for loss_id in ("e-insensitive", "e-insensitive-squared", "quadratic"):
 
             self.logger.info("Creating loss: {:}".format(loss_id))
             loss_class = CLoss.create(loss_id)
@@ -77,5 +79,5 @@ class TestCLossRegression(CUnitTest):
         fig.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

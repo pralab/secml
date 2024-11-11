@@ -9,8 +9,7 @@ from secml.array import CArray
 class TestCScalerMinMax(CScalerTestCases):
     """Unittests for CScalerMinMax."""
 
-    def _compare_scalers(self, scaler, scaler_sklearn,
-                         array, convert_to_dense=False):
+    def _compare_scalers(self, scaler, scaler_sklearn, array, convert_to_dense=False):
         """Compare wrapped scikit-learn scaler to the unwrapped scaler.
 
         Parameters
@@ -31,16 +30,13 @@ class TestCScalerMinMax(CScalerTestCases):
             Trained normalizer.
 
         """
-        scaler, scaler_sklearn = \
-            super(TestCScalerMinMax, self)._compare_scalers(scaler,
-                                                            scaler_sklearn,
-                                                            array,
-                                                            convert_to_dense)
+        scaler, scaler_sklearn = super(TestCScalerMinMax, self)._compare_scalers(
+            scaler, scaler_sklearn, array, convert_to_dense
+        )
 
         self.logger.info("Testing out of range normalization")
 
-        array_sk = array.get_data() if convert_to_dense is False \
-            else array.tondarray()
+        array_sk = array.get_data() if convert_to_dense is False else array.tondarray()
 
         # Sklearn normalizer (requires float dtype input)
         transform_sklearn = CArray(scaler_sklearn.transform(array_sk * 2))
@@ -57,27 +53,28 @@ class TestCScalerMinMax(CScalerTestCases):
 
     def test_forward(self):
         """Test for `.forward()` method."""
-        self._compare_scalers(CScalerMinMax(), MinMaxScaler(),
-                              self.array_dense)
-        self._compare_scalers(CScalerMinMax(), MinMaxScaler(),
-                              self.row_dense.atleast_2d())
-        self._compare_scalers(CScalerMinMax(), MinMaxScaler(),
-                              self.column_dense)
+        self._compare_scalers(CScalerMinMax(), MinMaxScaler(), self.array_dense)
+        self._compare_scalers(
+            CScalerMinMax(), MinMaxScaler(), self.row_dense.atleast_2d()
+        )
+        self._compare_scalers(CScalerMinMax(), MinMaxScaler(), self.column_dense)
 
     def test_chain(self):
         """Test a chain of preprocessors."""
-        self._test_chain(self.array_dense,
-                         ['minmax', 'pca', 'minmax'],
-                         [{'feature_range': (-5, 5)}, {},
-                          {'feature_range': (0, 1)}])
+        self._test_chain(
+            self.array_dense,
+            ["minmax", "pca", "minmax"],
+            [{"feature_range": (-5, 5)}, {}, {"feature_range": (0, 1)}],
+        )
 
     def test_chain_gradient(self):
         """Check gradient of a chain of preprocessors."""
-        self._test_chain_gradient(self.array_dense,
-                                  ['minmax', 'std', 'minmax'],
-                                  [{'feature_range': (-5, 5)}, {},
-                                   {'feature_range': (0, 1)}])
+        self._test_chain_gradient(
+            self.array_dense,
+            ["minmax", "std", "minmax"],
+            [{"feature_range": (-5, 5)}, {}, {"feature_range": (0, 1)}],
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CScalerTestCases.main()

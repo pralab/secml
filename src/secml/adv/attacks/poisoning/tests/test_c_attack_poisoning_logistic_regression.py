@@ -8,11 +8,13 @@ class TestCAttackPoisoningLogisticRegression(CAttackPoisoningTestCases):
     """Unit test for CAttackPoisoningLogisticRegression."""
 
     def setUp(self):
-        clf_params = {'C': 100, 'random_state': 42}
-        self._set_up(clf_idx='logistic_regression',
-                     poisoning_class=CAttackPoisoningLogisticRegression,
-                     clf_class=CClassifierLogistic,
-                     clf_params=clf_params)
+        clf_params = {"C": 100, "random_state": 42}
+        self._set_up(
+            clf_idx="logistic_regression",
+            poisoning_class=CAttackPoisoningLogisticRegression,
+            clf_class=CClassifierLogistic,
+            clf_params=clf_params,
+        )
 
     def test_poisoning_with_normalization_inside(self):
         """Test the CAttackPoisoning object when the classifier contains a
@@ -40,5 +42,5 @@ class TestCAttackPoisoningLogisticRegression(CAttackPoisoningTestCases):
         self._test_single_poisoning_grad_check(normalizer=None)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CAttackPoisoningTestCases.main()

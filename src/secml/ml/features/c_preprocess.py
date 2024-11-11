@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 from secml.ml import CModule
 
@@ -21,7 +22,8 @@ class CPreProcess(CModule, metaclass=ABCMeta):
         desired preprocessor. If None, input data is used as is.
 
     """
-    __super__ = 'CPreProcess'
+
+    __super__ = "CPreProcess"
 
     def __init__(self, preprocess=None):
         CModule.__init__(self, preprocess=preprocess)
@@ -94,8 +96,7 @@ class CPreProcess(CModule, metaclass=ABCMeta):
         return self.forward(x, caching=False)
 
     def _inverse_transform(self, x):
-        raise NotImplementedError(
-            "inverting this transformation is not supported.")
+        raise NotImplementedError("inverting this transformation is not supported.")
 
     def inverse_transform(self, x):
         """Revert data to original form.

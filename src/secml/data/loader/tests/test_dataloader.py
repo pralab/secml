@@ -10,10 +10,16 @@ class TestCDataLoader(CUnitTest):
     def test_dl_instance(self):
         """Testing if all available loaders can be correctly initialized."""
 
-        available_dataset = ['classification', 'regression',
-                             'blobs', 'blobs-regression',
-                             'circles', 'circles-regression',
-                             'moons', 'binary']
+        available_dataset = [
+            "classification",
+            "regression",
+            "blobs",
+            "blobs-regression",
+            "circles",
+            "circles-regression",
+            "moons",
+            "binary",
+        ]
 
         for dl_str in available_dataset:
             self.logger.info("Loading dataset of type {:}...".format(dl_str))
@@ -26,14 +32,20 @@ class TestCDataLoader(CUnitTest):
         shapes = [(100, 2), (200, 6), (1000, 100)]
         for samples, features in shapes:
             dataset = CDataLoader.create(
-                'binary', n_samples=samples, n_features=features).load()
-            self.assertEqual((samples, features), dataset.X.shape,
-                             "Wrong default shape for binary dataset")
+                "binary", n_samples=samples, n_features=features
+            ).load()
             self.assertEqual(
-                0, dataset.X[dataset.X > 1].shape[0], "Data is not binary!")
+                (samples, features),
+                dataset.X.shape,
+                "Wrong default shape for binary dataset",
+            )
             self.assertEqual(
-                0, dataset.X[dataset.X < 0].shape[0], "Data is not binary!")
+                0, dataset.X[dataset.X > 1].shape[0], "Data is not binary!"
+            )
+            self.assertEqual(
+                0, dataset.X[dataset.X < 0].shape[0], "Data is not binary!"
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

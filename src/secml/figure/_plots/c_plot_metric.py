@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 import itertools
 
 from sklearn.metrics import confusion_matrix
@@ -44,17 +45,17 @@ class CPlotMetric(CPlot):
             fig_legend.set_visible(True)
         self.grid(grid_on=True)
         if self._ylabel is None:
-            self.ylabel('True Positive Rate (%)')
+            self.ylabel("True Positive Rate (%)")
         if self._xlabel is None:
-            self.xlabel('False Positive Rate (%)')
+            self.xlabel("False Positive Rate (%)")
         if self._yticks is None:
             self.yticks([0, 20, 40, 60, 80, 100])
         if self._yticklabels is None:
-            self.yticklabels(['0', '20', '40', '60', '80', '100'])
+            self.yticklabels(["0", "20", "40", "60", "80", "100"])
         if self._xticks is None:
             self.xticks([0.1, 0.5, 1, 2, 5, 10, 20, 50, 100])
         if self._xticklabels is None:
-            self.xticklabels(['0.1', '0.5', '1', '2', '5', '10', '20', '50', '100'])
+            self.xticklabels(["0.1", "0.5", "1", "2", "5", "10", "20", "50", "100"])
         # Limits have to applied after ticks to be effective
         if self._ylim is None:
             self.ylim(0, 100)
@@ -94,13 +95,17 @@ class CPlotMetric(CPlot):
         self.apply_params_roc()
 
         # TODO: REMOVE AFTER COLORMAPS ARE IMPLEMENTED IN CFIGURE
-        styles = ['go-', 'yp--', 'rs-.', 'bD--', 'c-.', 'm-', 'y-.']
+        styles = ["go-", "yp--", "rs-.", "bD--", "c-.", "m-", "y-."]
 
         plot_func = self.semilogx if logx is True else self.plot
 
-        plot_func(fpr * 100, tpr * 100,
-                  styles[self.n_lines % len(styles)] if style is None else style,
-                  label=label, markevery=self.get_xticks_idx(fpr * 100))
+        plot_func(
+            fpr * 100,
+            tpr * 100,
+            styles[self.n_lines % len(styles)] if style is None else style,
+            label=label,
+            markevery=self.get_xticks_idx(fpr * 100),
+        )
 
         if label is not None:
             # Legend on the lower right
@@ -111,8 +116,9 @@ class CPlotMetric(CPlot):
             self.xticklabels(self._xticklabels)
 
     # TODO: REMOVE STYLE
-    def plot_roc_mean(self, roc, label=None, invert_tpr=False,
-                      style=None, plot_std=False, logx=True):
+    def plot_roc_mean(
+        self, roc, label=None, invert_tpr=False, style=None, plot_std=False, logx=True
+    ):
         """Plot the mean of ROC curves.
 
         Curves will be plotted inside the active figure or
@@ -145,14 +151,16 @@ class CPlotMetric(CPlot):
             raise TypeError("input must be a `CRoc` instance.")
 
         if roc.has_mean is False:
-            raise ValueError("average for input roc has not been computed. "
-                             "Use `CRoc.average()` first.")
+            raise ValueError(
+                "average for input roc has not been computed. "
+                "Use `CRoc.average()` first."
+            )
 
         # Customizing figure
         self.apply_params_roc()
 
         # TODO: REMOVE AFTER COLORMAPS ARE IMPLEMENTED IN CFIGURE
-        styles = ['go-', 'yp--', 'rs-.', 'bD--', 'c-.', 'm-', 'y-.']
+        styles = ["go-", "yp--", "rs-.", "bD--", "c-.", "m-", "y-."]
 
         # If std should be plotted each run plots 2 curvers
         n_lines = int(self.n_lines / 2) if plot_std is True else self.n_lines
@@ -161,21 +169,30 @@ class CPlotMetric(CPlot):
 
         mean_tpr = roc.mean_tpr if invert_tpr is False else 1 - roc.mean_tpr
         plot_func = self.semilogx if logx is True else self.plot
-        plot_func(roc.mean_fpr * 100, mean_tpr * 100,
-                  styles[n_lines % len(styles)] if style is None else style,
-                  label=label, markevery=mkrs_idx)
+        plot_func(
+            roc.mean_fpr * 100,
+            mean_tpr * 100,
+            styles[n_lines % len(styles)] if style is None else style,
+            label=label,
+            markevery=mkrs_idx,
+        )
 
         if plot_std is True:
             if roc.has_std_dev is False:
                 raise ValueError("roc object has no standard deviation for data.")
-            self.errorbar(roc.mean_fpr[mkrs_idx] * 100, mean_tpr[mkrs_idx] * 100,
-                          ecolor=styles[n_lines % len(styles)][0] if style is None else style[0],
-                          fmt='None', yerr=roc.std_dev_tpr[mkrs_idx] * 100)
+            self.errorbar(
+                roc.mean_fpr[mkrs_idx] * 100,
+                mean_tpr[mkrs_idx] * 100,
+                ecolor=styles[n_lines % len(styles)][0] if style is None else style[0],
+                fmt="None",
+                yerr=roc.std_dev_tpr[mkrs_idx] * 100,
+            )
 
         if label is not None:
             # Legend on the lower right
-            self.legend(loc=4 if invert_tpr is False else 1,
-                        labelspacing=0.4, handletextpad=0.3)
+            self.legend(
+                loc=4 if invert_tpr is False else 1, labelspacing=0.4, handletextpad=0.3
+            )
 
         if logx is True:  # xticks have been reset by semilogx, reassign them
             self.xticks(self._xticks)
@@ -211,6 +228,7 @@ class CPlotMetric(CPlot):
             Figure after this plot session.
 
         """
+
         def label_w_rep(l_str, i):
             """Format input label to show repetition number.
 
@@ -229,9 +247,9 @@ class CPlotMetric(CPlot):
                 2) If label is not '' -> "`label` (rep `i`)"
 
             """
-            i_label = 'rep {:}'.format(i)
+            i_label = "rep {:}".format(i)
             if l_str is not None:
-                i_label = l_str + ' (' + i_label + ')'
+                i_label = l_str + " (" + i_label + ")"
 
             return i_label
 
@@ -242,7 +260,7 @@ class CPlotMetric(CPlot):
         self.apply_params_roc()
 
         # TODO: REMOVE AFTER COLORMAPS ARE IMPLEMENTED IN CFIGURE
-        styles = ['go-', 'yp--', 'rs-.', 'bD--', 'c-.', 'm-', 'y-.']
+        styles = ["go-", "yp--", "rs-.", "bD--", "c-.", "m-", "y-."]
         # Storing number of lines already plotted to chose style accordingly
         n_lines = self.n_lines
 
@@ -259,24 +277,35 @@ class CPlotMetric(CPlot):
 
             tpr = tpr if invert_tpr is False else 1 - tpr
 
-            plot_func(fpr * 100, tpr * 100,
-                      styles[(n_lines + rep_i) % len(styles)],
-                      label=label_w_rep(label, rep_i),
-                      markevery=self.get_xticks_idx(fpr * 100))
+            plot_func(
+                fpr * 100,
+                tpr * 100,
+                styles[(n_lines + rep_i) % len(styles)],
+                label=label_w_rep(label, rep_i),
+                markevery=self.get_xticks_idx(fpr * 100),
+            )
 
         if label is not None:
             # Legend on the lower right
-            self.legend(loc=4 if invert_tpr is False else 1,
-                        labelspacing=0.4, handletextpad=0.3)
+            self.legend(
+                loc=4 if invert_tpr is False else 1, labelspacing=0.4, handletextpad=0.3
+            )
 
         if logx is True:  # xticks have been reset by semilogx, reassign them
             self.xticks(self._xticks)
             self.xticklabels(self._xticklabels)
 
     # FIXME: accept a CMetricConfusionMatrix object instead
-    def plot_confusion_matrix(self, y_true, y_pred,
-                              normalize=False, labels=None,
-                              title=None, cmap='Blues', colorbar=False):
+    def plot_confusion_matrix(
+        self,
+        y_true,
+        y_pred,
+        normalize=False,
+        labels=None,
+        title=None,
+        cmap="Blues",
+        colorbar=False,
+    ):
         """Plot a confusion matrix.
 
         y_true : CArray
@@ -295,15 +324,14 @@ class CPlotMetric(CPlot):
             If True, show the colorbar side of the matrix. Default False.
 
         """
-        matrix = CArray(confusion_matrix(
-            y_true.tondarray(), y_pred.tondarray()))
+        matrix = CArray(confusion_matrix(y_true.tondarray(), y_pred.tondarray()))
 
         if normalize:  # min-max normalization
             matrix_min = matrix.min()
             matrix_max = matrix.max()
             matrix = (matrix - matrix.min()) / (matrix_max - matrix_min)
 
-        ax = self.imshow(matrix, interpolation='nearest', cmap=cmap)
+        ax = self.imshow(matrix, interpolation="nearest", cmap=cmap)
 
         self._sp.set_xticks(CArray.arange(matrix.shape[1]).tondarray())
         self._sp.set_yticks(CArray.arange(matrix.shape[0]).tondarray())
@@ -313,13 +341,16 @@ class CPlotMetric(CPlot):
 
         # Rotate the tick labels and set their alignment.
         import matplotlib.pyplot as plt
-        plt.setp(self._sp.get_xticklabels(), rotation=45,
-                 ha="right", rotation_mode="anchor")
 
-        fmt = '.2f' if normalize else 'd'
+        plt.setp(
+            self._sp.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor"
+        )
+
+        fmt = ".2f" if normalize else "d"
 
         if colorbar is True:
             from mpl_toolkits.axes_grid1 import make_axes_locatable
+
             divider = make_axes_locatable(plt.gca())
             cax = divider.append_axes("right", size="5%", pad=0.1)
             # TODO: set format -> cax.set_yticklabels
@@ -328,9 +359,12 @@ class CPlotMetric(CPlot):
         if title is True:
             self.title(title)
 
-        thresh = matrix.max() / 2.
-        for i, j in itertools.product(
-                range(matrix.shape[0]), range(matrix.shape[1])):
-            self.text(j, i, format(matrix[i, j].item(), fmt),
-                      horizontalalignment="center",
-                      color="white" if matrix[i, j] > thresh else "black")
+        thresh = matrix.max() / 2.0
+        for i, j in itertools.product(range(matrix.shape[0]), range(matrix.shape[1])):
+            self.text(
+                j,
+                i,
+                format(matrix[i, j].item(), fmt),
+                horizontalalignment="center",
+                color="white" if matrix[i, j] > thresh else "black",
+            )

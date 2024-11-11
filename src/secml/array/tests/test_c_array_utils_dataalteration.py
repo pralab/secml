@@ -51,8 +51,10 @@ class TestCArrayUtilsDataAlteration(CArrayTestCases):
             for c_limits_idx, c_limits in enumerate(intervals):
 
                 res = array.clip(*c_limits)
-                self.logger.info("array.min(c_min={:}, c_max={:}):"
-                                 "\n{:}".format(c_limits[0], c_limits[1], res))
+                self.logger.info(
+                    "array.min(c_min={:}, c_max={:}):"
+                    "\n{:}".format(c_limits[0], c_limits[1], res)
+                )
 
                 res_expected = expected[c_limits_idx]
                 self.assertIsInstance(res, CArray)
@@ -65,31 +67,42 @@ class TestCArrayUtilsDataAlteration(CArrayTestCases):
         # array_dense = CArray([[1, 0, 0, 5], [2, 4, 0, 0], [3, 6, 0, 0]]
         # row_flat_dense = CArray([4, 0, 6])
 
-        _check_clip(self.array_dense,
-                    (CArray([[1, 0, 0, 2], [2, 2, 0, 0], [2, 2, 0, 0]]),
-                     CArray([[1., 0., 0., 5.],
-                             [2., 4., 0., 0.],
-                             [3., 6., 0., 0.]]),
-                     CArray([[0., 0., 0., 0.],
-                             [0., 0., 0., 0.],
-                             [0., 0., 0., 0.]])))
+        _check_clip(
+            self.array_dense,
+            (
+                CArray([[1, 0, 0, 2], [2, 2, 0, 0], [2, 2, 0, 0]]),
+                CArray(
+                    [[1.0, 0.0, 0.0, 5.0], [2.0, 4.0, 0.0, 0.0], [3.0, 6.0, 0.0, 0.0]]
+                ),
+                CArray(
+                    [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]]
+                ),
+            ),
+        )
 
-        _check_clip(self.row_flat_dense, (CArray([2, 0, 2]),
-                                          CArray([4., 0., 6.]),
-                                          CArray([0., 0., 0.])))
+        _check_clip(
+            self.row_flat_dense,
+            (CArray([2, 0, 2]), CArray([4.0, 0.0, 6.0]), CArray([0.0, 0.0, 0.0])),
+        )
 
-        _check_clip(self.row_dense, (CArray([[2, 0, 2]]),
-                                     CArray([[4., 0., 6.]]),
-                                     CArray([[0., 0., 0.]])))
+        _check_clip(
+            self.row_dense,
+            (CArray([[2, 0, 2]]), CArray([[4.0, 0.0, 6.0]]), CArray([[0.0, 0.0, 0.0]])),
+        )
 
-        _check_clip(self.column_dense, (CArray([[2], [0], [2]]),
-                                        CArray([[4.], [0.], [6.]]),
-                                        CArray([[0.], [0.], [0.]])))
+        _check_clip(
+            self.column_dense,
+            (
+                CArray([[2], [0], [2]]),
+                CArray([[4.0], [0.0], [6.0]]),
+                CArray([[0.0], [0.0], [0.0]]),
+            ),
+        )
 
-        _check_clip(self.single_flat_dense,
-                    (CArray([2]), CArray([4.]), CArray([0.])))
-        _check_clip(self.single_dense,
-                    (CArray([[2]]), CArray([[4.]]), CArray([[0.]])))
+        _check_clip(self.single_flat_dense, (CArray([2]), CArray([4.0]), CArray([0.0])))
+        _check_clip(
+            self.single_dense, (CArray([[2]]), CArray([[4.0]]), CArray([[0.0]]))
+        )
 
         # Check intervals wrongly chosen
         with self.assertRaises(ValueError):
@@ -110,8 +123,9 @@ class TestCArrayUtilsDataAlteration(CArrayTestCases):
             for inplace in (False, True):
                 array_copy = copy.deepcopy(array)
                 array_sorted = array_copy.sort(axis=axis, inplace=inplace)
-                self.logger.info("Array sorted along axis {:}:"
-                                 "\n{:}".format(axis, array_sorted))
+                self.logger.info(
+                    "Array sorted along axis {:}:" "\n{:}".format(axis, array_sorted)
+                )
 
                 self.assertEqual(array_issparse, array_sorted.issparse)
                 self.assertEqual(array_isdense, array_sorted.isdense)
@@ -135,15 +149,21 @@ class TestCArrayUtilsDataAlteration(CArrayTestCases):
                         self.assertTrue(array_sorted[0, 0] == alter_value[0])
 
         # Sparse arrays
-        _sort(-1, self.array_sparse,
-              CArray([[0, 0, 1, 5], [0, 0, 2, 4], [0, 0, 3, 6]],
-                     tosparse=True))
-        _sort(0, self.array_sparse,
-              CArray([[1, 0, 0, 0], [2, 4, 0, 0], [3, 6, 0, 5]],
-                     tosparse=True))
-        _sort(1, self.array_sparse,
-              CArray([[0, 0, 1, 5], [0, 0, 2, 4], [0, 0, 3, 6]],
-                     tosparse=True))
+        _sort(
+            -1,
+            self.array_sparse,
+            CArray([[0, 0, 1, 5], [0, 0, 2, 4], [0, 0, 3, 6]], tosparse=True),
+        )
+        _sort(
+            0,
+            self.array_sparse,
+            CArray([[1, 0, 0, 0], [2, 4, 0, 0], [3, 6, 0, 5]], tosparse=True),
+        )
+        _sort(
+            1,
+            self.array_sparse,
+            CArray([[0, 0, 1, 5], [0, 0, 2, 4], [0, 0, 3, 6]], tosparse=True),
+        )
 
         _sort(-1, self.row_sparse, CArray([0, 4, 6], tosparse=True))
         _sort(0, self.row_sparse, CArray([4, 0, 6], tosparse=True))
@@ -154,12 +174,9 @@ class TestCArrayUtilsDataAlteration(CArrayTestCases):
         _sort(1, self.column_sparse, CArray([[4], [0], [6]], tosparse=True))
 
         # Dense arrays
-        _sort(-1, self.array_dense,
-              CArray([[0, 0, 1, 5], [0, 0, 2, 4], [0, 0, 3, 6]]))
-        _sort(0, self.array_dense,
-              CArray([[1, 0, 0, 0], [2, 4, 0, 0], [3, 6, 0, 5]]))
-        _sort(1, self.array_dense,
-              CArray([[0, 0, 1, 5], [0, 0, 2, 4], [0, 0, 3, 6]]))
+        _sort(-1, self.array_dense, CArray([[0, 0, 1, 5], [0, 0, 2, 4], [0, 0, 3, 6]]))
+        _sort(0, self.array_dense, CArray([[1, 0, 0, 0], [2, 4, 0, 0], [3, 6, 0, 5]]))
+        _sort(1, self.array_dense, CArray([[0, 0, 1, 5], [0, 0, 2, 4], [0, 0, 3, 6]]))
 
         _sort(-1, self.row_dense, CArray([0, 4, 6]))
         _sort(0, self.row_dense, CArray([4, 0, 6]))
@@ -170,31 +187,76 @@ class TestCArrayUtilsDataAlteration(CArrayTestCases):
         _sort(1, self.column_dense, CArray([[4], [0], [6]]))
 
         # Bool arrays
-        _sort(-1, self.array_dense_bool,
-              CArray([[False, True, True, True],
-                      [False, False, False, False],
-                      [True, True, True, True]]))
-        _sort(0, self.array_dense_bool,
-              CArray([[False, False, False, False],
-                      [True, False, True, True],
-                      [True, True, True, True]]))
-        _sort(1, self.array_dense_bool,
-              CArray([[False, True, True, True],
-                      [False, False, False, False],
-                      [True, True, True, True]]))
+        _sort(
+            -1,
+            self.array_dense_bool,
+            CArray(
+                [
+                    [False, True, True, True],
+                    [False, False, False, False],
+                    [True, True, True, True],
+                ]
+            ),
+        )
+        _sort(
+            0,
+            self.array_dense_bool,
+            CArray(
+                [
+                    [False, False, False, False],
+                    [True, False, True, True],
+                    [True, True, True, True],
+                ]
+            ),
+        )
+        _sort(
+            1,
+            self.array_dense_bool,
+            CArray(
+                [
+                    [False, True, True, True],
+                    [False, False, False, False],
+                    [True, True, True, True],
+                ]
+            ),
+        )
 
-        _sort(-1, self.array_sparse_bool,
-              CArray([[False, True, True, True],
-                      [False, False, False, False],
-                      [True, True, True, True]], tosparse=True))
-        _sort(0, self.array_sparse_bool,
-              CArray([[False, False, False, False],
-                      [True, False, True, True],
-                      [True, True, True, True]], tosparse=True))
-        _sort(1, self.array_sparse_bool,
-              CArray([[False, True, True, True],
-                      [False, False, False, False],
-                      [True, True, True, True]], tosparse=True))
+        _sort(
+            -1,
+            self.array_sparse_bool,
+            CArray(
+                [
+                    [False, True, True, True],
+                    [False, False, False, False],
+                    [True, True, True, True],
+                ],
+                tosparse=True,
+            ),
+        )
+        _sort(
+            0,
+            self.array_sparse_bool,
+            CArray(
+                [
+                    [False, False, False, False],
+                    [True, False, True, True],
+                    [True, True, True, True],
+                ],
+                tosparse=True,
+            ),
+        )
+        _sort(
+            1,
+            self.array_sparse_bool,
+            CArray(
+                [
+                    [False, True, True, True],
+                    [False, False, False, False],
+                    [True, True, True, True],
+                ],
+                tosparse=True,
+            ),
+        )
 
         # Check sort() for empty arrays
         self.empty_flat_dense.sort()
@@ -211,7 +273,9 @@ class TestCArrayUtilsDataAlteration(CArrayTestCases):
             sorted_idx = matrix.argsort(axis=axis)
             self.logger.info("array.argsort(axis={:}): {:}".format(axis, sorted_idx))
 
-            self.assertFalse(sorted_idx.issparse, "sorted method don't return a cndarray")
+            self.assertFalse(
+                sorted_idx.issparse, "sorted method don't return a cndarray"
+            )
 
             np_matrix = matrix.todense().tondarray()
             np_matrix = np.atleast_2d(np_matrix)
@@ -300,7 +364,7 @@ class TestCArrayUtilsDataAlteration(CArrayTestCases):
 
         _shuffle(self.empty_flat_dense)
         _shuffle(self.empty_sparse)
-    
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     CArrayTestCases.main()

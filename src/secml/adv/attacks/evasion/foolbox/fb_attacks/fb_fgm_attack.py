@@ -8,13 +8,19 @@
 
 """
 
-from foolbox.attacks.fast_gradient_method import L1FastGradientAttack, L2FastGradientAttack, LinfFastGradientAttack
+from foolbox.attacks.fast_gradient_method import (
+    L1FastGradientAttack,
+    L2FastGradientAttack,
+    LinfFastGradientAttack,
+)
 
-from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import CAttackEvasionFoolbox
+from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import (
+    CAttackEvasionFoolbox,
+)
 from secml.adv.attacks.evasion.foolbox.losses.ce_loss import CELoss
 from secml.adv.attacks.evasion.foolbox.secml_autograd import as_tensor
 
-DISTANCES = ['l1', 'l2', 'linf']
+DISTANCES = ["l1", "l2", "linf"]
 
 
 class CFoolboxFGM(CELoss, CAttackEvasionFoolbox):
@@ -49,28 +55,42 @@ class CFoolboxFGM(CELoss, CAttackEvasionFoolbox):
         "Explaining and Harnessing Adversarial Examples"
         https://arxiv.org/abs/1412.6572
     """
-    __class_type = 'e-foolbox-fgm'
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0,
-                 epsilons=0.2, distance='l2',
-                 random_start=True):
+    __class_type = "e-foolbox-fgm"
 
-        if distance == 'l1':
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=0.2,
+        distance="l2",
+        random_start=True,
+    ):
+
+        if distance == "l1":
             attack = L1FastGradientAttack
-        elif distance == 'l2':
+        elif distance == "l2":
             attack = L2FastGradientAttack
-        elif distance == 'linf':
+        elif distance == "linf":
             attack = LinfFastGradientAttack
         else:
-            raise ValueError('Distance {} is not supported for this attack. Only {} are supported'.format(
-                distance, DISTANCES
-            ))
+            raise ValueError(
+                "Distance {} is not supported for this attack. Only {} are supported".format(
+                    distance, DISTANCES
+                )
+            )
 
-        super(CFoolboxFGM, self).__init__(classifier, y_target,
-                                          lb=lb, ub=ub,
-                                          fb_attack_class=attack,
-                                          epsilons=epsilons,
-                                          random_start=random_start)
+        super(CFoolboxFGM, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            fb_attack_class=attack,
+            epsilons=epsilons,
+            random_start=random_start,
+        )
         self._y0 = None
         self.distance = distance
 
@@ -85,36 +105,51 @@ class CFoolboxFGM(CELoss, CAttackEvasionFoolbox):
 
 
 class CFoolboxFGML1(CFoolboxFGM):
-    __class_type = 'e-foolbox-fgm-l1'
+    __class_type = "e-foolbox-fgm-l1"
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0,
-                 epsilons=0.2, random_start=True):
-        super(CFoolboxFGML1, self).__init__(classifier, y_target,
-                                            lb=lb, ub=ub,
-                                            distance='l1',
-                                            epsilons=epsilons,
-                                            random_start=random_start)
+    def __init__(
+        self, classifier, y_target=None, lb=0.0, ub=1.0, epsilons=0.2, random_start=True
+    ):
+        super(CFoolboxFGML1, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            distance="l1",
+            epsilons=epsilons,
+            random_start=random_start,
+        )
 
 
 class CFoolboxFGML2(CFoolboxFGM):
-    __class_type = 'e-foolbox-fgm-l2'
+    __class_type = "e-foolbox-fgm-l2"
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0,
-                 epsilon=0.2, random_start=True):
-        super(CFoolboxFGML2, self).__init__(classifier, y_target,
-                                            lb=lb, ub=ub,
-                                            distance='l2',
-                                            epsilons=epsilon,
-                                            random_start=random_start)
+    def __init__(
+        self, classifier, y_target=None, lb=0.0, ub=1.0, epsilon=0.2, random_start=True
+    ):
+        super(CFoolboxFGML2, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            distance="l2",
+            epsilons=epsilon,
+            random_start=random_start,
+        )
 
 
 class CFoolboxFGMLinf(CFoolboxFGM):
-    __class_type = 'e-foolbox-fgm-linf'
+    __class_type = "e-foolbox-fgm-linf"
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0,
-                 epsilon=0.2, random_start=True):
-        super(CFoolboxFGMLinf, self).__init__(classifier, y_target,
-                                              lb=lb, ub=ub,
-                                              distance='linf',
-                                              epsilons=epsilon,
-                                              random_start=random_start)
+    def __init__(
+        self, classifier, y_target=None, lb=0.0, ub=1.0, epsilon=0.2, random_start=True
+    ):
+        super(CFoolboxFGMLinf, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            distance="linf",
+            epsilons=epsilon,
+            random_start=random_start,
+        )

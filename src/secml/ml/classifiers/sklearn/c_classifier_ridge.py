@@ -7,6 +7,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from sklearn.linear_model import RidgeClassifier
 
 from secml.array import CArray
@@ -16,8 +17,9 @@ from secml.ml.classifiers.loss import CLossSquare
 from secml.ml.classifiers.regularizer import CRegularizerL2
 
 
-class CClassifierRidge(CClassifierLinearMixin, CClassifierSkLearn,
-                       CClassifierGradientRidgeMixin):
+class CClassifierRidge(
+    CClassifierLinearMixin, CClassifierSkLearn, CClassifierGradientRidgeMixin
+):
     """Ridge Classifier.
 
     Parameters
@@ -51,24 +53,35 @@ class CClassifierRidge(CClassifierLinearMixin, CClassifierSkLearn,
     class_type : 'ridge'
 
     """
-    __class_type = 'ridge'
+
+    __class_type = "ridge"
 
     _loss = CLossSquare()
     _reg = CRegularizerL2()
 
-    def __init__(self, alpha=1.0, max_iter=int(1e5), class_weight=None, tol=1e-4,
-                 fit_intercept=True, preprocess=None):
+    def __init__(
+        self,
+        alpha=1.0,
+        max_iter=int(1e5),
+        class_weight=None,
+        tol=1e-4,
+        fit_intercept=True,
+        preprocess=None,
+    ):
         # create instance of sklearn model
-        sklearn_model = RidgeClassifier(alpha=alpha,
-                                        fit_intercept=fit_intercept,
-                                        tol=tol,
-                                        max_iter=max_iter,
-                                        class_weight=class_weight,
-                                        solver='auto')
+        sklearn_model = RidgeClassifier(
+            alpha=alpha,
+            fit_intercept=fit_intercept,
+            tol=tol,
+            max_iter=max_iter,
+            class_weight=class_weight,
+            solver="auto",
+        )
 
         # Calling the superclass init
-        CClassifierSkLearn.__init__(self, sklearn_model=sklearn_model,
-                                    preprocess=preprocess)
+        CClassifierSkLearn.__init__(
+            self, sklearn_model=sklearn_model, preprocess=preprocess
+        )
 
     @property
     def C(self):
@@ -89,8 +102,11 @@ class CClassifierRidge(CClassifierLinearMixin, CClassifierSkLearn,
     @property
     def b(self):
         if self.is_fitted():
-            return CArray(self._sklearn_model.intercept_[0])[0] if \
-                self.fit_intercept else 0
+            return (
+                CArray(self._sklearn_model.intercept_[0])[0]
+                if self.fit_intercept
+                else 0
+            )
         else:
             return None
 

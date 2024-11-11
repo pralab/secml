@@ -5,7 +5,7 @@ class TestCKernelLaplacian(CCKernelTestCases):
     """Unit test for CKernelLaplacian."""
 
     def setUp(self):
-        self._set_up('laplacian')
+        self._set_up("laplacian")
 
     def test_similarity_shape(self):
         """Test shape of kernel."""
@@ -20,5 +20,5 @@ class TestCKernelLaplacian(CCKernelTestCases):
         self._test_gradient_w()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CCKernelTestCases.main()

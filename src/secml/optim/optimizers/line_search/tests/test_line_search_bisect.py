@@ -12,11 +12,10 @@ class TestLineSearch(CUnitTest):
 
     def test_minimize(self):
         """Testing the bisect line-search algorithm."""
-        self.logger.info(
-            "Test for binary line search  ... ")
+        self.logger.info("Test for binary line search  ... ")
 
         def fun_test(x):
-            return x ** 2 - 1
+            return x**2 - 1
 
         self.fun = CFunction(fun=fun_test)
 
@@ -38,18 +37,21 @@ class TestLineSearch(CUnitTest):
 
         self._save_fig()
 
-        self.assertTrue(x0.norm() <= 1e-6,
-                        "Correct solution found, x0 = 0.")
+        self.assertTrue(x0.norm() <= 1e-6, "Correct solution found, x0 = 0.")
 
     def _save_fig(self):
         """Visualizing the function being optimized with line search."""
-        x_range = CArray.arange(-5, 20, 0.5, )
+        x_range = CArray.arange(
+            -5,
+            20,
+            0.5,
+        )
         score_range = x_range.T.apply_along_axis(self.fun.fun, axis=1)
         ref_line = CArray.zeros(x_range.size)
         fig = CFigure(height=6, width=12)
-        fig.sp.plot(x_range, score_range, color='b')
-        fig.sp.plot(x_range, ref_line, color='k')
-        filename = fm.join(fm.abspath(__file__), 'test_line_search_bisect.pdf')
+        fig.sp.plot(x_range, score_range, color="b")
+        fig.sp.plot(x_range, ref_line, color="k")
+        filename = fm.join(fm.abspath(__file__), "test_line_search_bisect.pdf")
         fig.savefig(filename)
 
 

@@ -7,6 +7,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from sklearn.neighbors import NearestCentroid
 
 from secml.array import CArray
@@ -35,15 +36,16 @@ class CClassifierNearestCentroid(CClassifierSkLearn):
     class_type : 'nrst-centroid'
 
     """
-    __class_type = 'nrst-centroid'
 
-    def __init__(self, metric='euclidean',
-                 shrink_threshold=None, preprocess=None):
+    __class_type = "nrst-centroid"
+
+    def __init__(self, metric="euclidean", shrink_threshold=None, preprocess=None):
 
         nc = NearestCentroid(metric=metric, shrink_threshold=shrink_threshold)
 
         super(CClassifierNearestCentroid, self).__init__(
-            sklearn_model=nc, preprocess=preprocess)
+            sklearn_model=nc, preprocess=preprocess
+        )
 
     @property
     def metric(self):
@@ -54,7 +56,7 @@ class CClassifierNearestCentroid(CClassifierSkLearn):
         return CArray(self._sklearn_model.centroids_)
 
     def _forward(self, x):
-        """ This sklearn classifier only supports predict.
+        """This sklearn classifier only supports predict.
         So we also implement a simple decision function
         based on pairwise distances.
 
@@ -70,8 +72,12 @@ class CClassifierNearestCentroid(CClassifierSkLearn):
             (i.e., similarity w/ centroid).
 
         """
-        dist = CArray(pairwise_distances(
-            x.get_data(), self._sklearn_model.centroids_,
-            metric=self._sklearn_model.metric)).atleast_2d()
+        dist = CArray(
+            pairwise_distances(
+                x.get_data(),
+                self._sklearn_model.centroids_,
+                metric=self._sklearn_model.metric,
+            )
+        ).atleast_2d()
 
         return -dist

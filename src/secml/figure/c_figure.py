@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.core import CCreator
 from secml.figure._plots import CPlot
 from secml.utils import LastInDict
@@ -13,9 +14,10 @@ from secml.core.type_utils import is_tuple
 
 import os
 import matplotlib as mpl
-if os.name == 'posix' and os.environ.get('DISPLAY', '') == '':
+
+if os.name == "posix" and os.environ.get("DISPLAY", "") == "":
     # If no display is available, use file-only backend
-    mpl.use('Agg')
+    mpl.use("Agg")
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -65,8 +67,10 @@ class CFigure(CCreator):
     >>> fig.show()  # This will open a new window with the figure
 
     """
-    def __init__(self, height=6, width=6, title="",
-                 fontsize=12, linewidth=2, markersize=7):
+
+    def __init__(
+        self, height=6, width=6, title="", fontsize=12, linewidth=2, markersize=7
+    ):
 
         # Instancing figure with desired dimensions
         self.width = width
@@ -74,9 +78,11 @@ class CFigure(CCreator):
         self._fig = plt.figure(figsize=(self.width, self.height))
 
         # Setting default fontsize, linewidth, markersize
-        self._default_params = {'font.size': fontsize,
-                                'lines.linewidth': linewidth,
-                                'lines.markersize': markersize}
+        self._default_params = {
+            "font.size": fontsize,
+            "lines.linewidth": linewidth,
+            "lines.markersize": markersize,
+        }
 
         # Setting figure super title
         self.title(title)
@@ -148,24 +154,26 @@ class CFigure(CCreator):
 
         """
         # Create a new grid if shape has changed or this is the first grid
-        if self._gs is None or self._gs.get_geometry()[0] != n_rows or \
-                self._gs.get_geometry()[1] != n_cols:
+        if (
+            self._gs is None
+            or self._gs.get_geometry()[0] != n_rows
+            or self._gs.get_geometry()[1] != n_cols
+        ):
             self._gs = gridspec.GridSpec(n_rows, n_cols)
         # If grid_slot is not a tuple, assume we want to use a single slot
-        grid_slot = grid_slot-1 if not is_tuple(grid_slot) else grid_slot
+        grid_slot = grid_slot - 1 if not is_tuple(grid_slot) else grid_slot
 
         # Calling matplotlib subplot switcher
         axes = self._fig.add_subplot(self._gs[grid_slot], **kwargs)
 
         # Set default parameters
-        axes.tick_params(labelsize=self._default_params['font.size'])
+        axes.tick_params(labelsize=self._default_params["font.size"])
 
         sp_id = hex(id(axes))  # Index of the subplot
 
         # Create the subplot if not available or switch lastitem reference
         if sp_id not in self._sp_data:
-            self._sp_data[sp_id] = CPlot(
-                sp=axes, default_params=self._default_params)
+            self._sp_data[sp_id] = CPlot(sp=axes, default_params=self._default_params)
         else:
             self._sp_data.lastin_key = sp_id
 
@@ -207,8 +215,9 @@ class CFigure(CCreator):
         """
         plt.close(self._fig if fig is None else fig)
 
-    def subplots_adjust(self, left=0.125, right=0.9,
-                        bottom=0.1, top=0.9, wspace=0.2, hspace=0.2):
+    def subplots_adjust(
+        self, left=0.125, right=0.9, bottom=0.1, top=0.9, wspace=0.2, hspace=0.2
+    ):
         """Tune the subplot layout.
 
         Parameters
@@ -232,9 +241,9 @@ class CFigure(CCreator):
             :include-source:
 
         """
-        self._fig.subplots_adjust(left=left, bottom=bottom,
-                                  right=right, top=top,
-                                  wspace=wspace, hspace=hspace)
+        self._fig.subplots_adjust(
+            left=left, bottom=bottom, right=right, top=top, wspace=wspace, hspace=hspace
+        )
 
     def tight_layout(self, pad=1.08, h_pad=None, w_pad=None, rect=None):
         """Adjust space between plot and figure.
@@ -264,18 +273,28 @@ class CFigure(CCreator):
             Same as :meth:`.text` method.
 
         """
-        if 'fontsize' not in kwargs:
-            kwargs['fontsize'] = self.get_default_params()['font.size']
+        if "fontsize" not in kwargs:
+            kwargs["fontsize"] = self.get_default_params()["font.size"]
         return self._fig.suptitle(label, **kwargs)
 
-    def savefig(self, fname, dpi=None, facecolor='w', edgecolor='w',
-                orientation='portrait', file_format=None, transparent=False,
-                bbox_inches=None, bbox_extra_artists=None, pad_inches=0.1):
+    def savefig(
+        self,
+        fname,
+        dpi=None,
+        facecolor="w",
+        edgecolor="w",
+        orientation="portrait",
+        file_format=None,
+        transparent=False,
+        bbox_inches=None,
+        bbox_extra_artists=None,
+        pad_inches=0.1,
+    ):
         """Save figure to disk.
-        
+
         Parameters
-        ----------      
-        fname : string 
+        ----------
+        fname : string
             containing a path to a filename, or a Python file-like object.
             If file_format is None and fname is a string, the output
             file_format is deduced from the extension of the filename.
@@ -311,8 +330,15 @@ class CFigure(CCreator):
             Amount of padding around the figure when bbox_inches is 'tight'.
 
         """
-        self._fig.savefig(fname, dpi=dpi, facecolor=facecolor,
-                          edgecolor=edgecolor, orientation=orientation,
-                          format=file_format, transparent=transparent,
-                          bbox_inches=bbox_inches, pad_inches=pad_inches,
-                          bbox_extra_artists=bbox_extra_artists)
+        self._fig.savefig(
+            fname,
+            dpi=dpi,
+            facecolor=facecolor,
+            edgecolor=edgecolor,
+            orientation=orientation,
+            format=file_format,
+            transparent=transparent,
+            bbox_inches=bbox_inches,
+            pad_inches=pad_inches,
+            bbox_extra_artists=bbox_extra_artists,
+        )

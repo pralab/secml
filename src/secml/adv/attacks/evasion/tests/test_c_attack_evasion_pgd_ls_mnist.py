@@ -35,9 +35,9 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
         self._digits = [4, 9]
 
         self._tr = loader.load(
-            'training', digits=self._digits, num_samples=n_tr+n_val)
-        self._ts = loader.load(
-            'testing', digits=self._digits, num_samples=n_ts)
+            "training", digits=self._digits, num_samples=n_tr + n_val
+        )
+        self._ts = loader.load("testing", digits=self._digits, num_samples=n_ts)
 
         if sparse is True:
             self._tr = self._tr.tosparse()
@@ -96,8 +96,7 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
 
     def _choose_x0_2c(self, x0_img_class):
         """Find a sample of that belong to the required class."""
-        adv_img_idx = \
-            CArray(self._ts.Y.find(self._ts.Y == x0_img_class))[0]
+        adv_img_idx = CArray(self._ts.Y.find(self._ts.Y == x0_img_class))[0]
 
         x0 = self._ts.X[adv_img_idx, :]
         y0 = self._ts.Y[adv_img_idx]
@@ -124,8 +123,9 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
         self._load_mnist49(sparse, seed)
 
         clf = CClassifierMulticlassOVA(
-            classifier=CClassifierSVM, C=1.0,
-            kernel=CKernel.create('rbf', gamma=0.01),
+            classifier=CClassifierSVM,
+            C=1.0,
+            kernel=CKernel.create("rbf", gamma=0.01),
         )
 
         return clf
@@ -141,18 +141,18 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
         evasion_params = {
             "classifier": clf,
             "double_init_ds": self._val_dts,
-            "distance": 'l1',
+            "distance": "l1",
             "dmax": 10,
             "lb": 0,
             "ub": 1,
-            "attack_classes": 'all',
+            "attack_classes": "all",
             "y_target": None,
             "solver_params": {
                 "eta": 1.0 / 255.0,
                 "eta_min": 0.1,
                 "eta_max": None,
-                "eps": 1e-6
-            }
+                "eps": 1e-6,
+            },
         }
 
         evas, x0, y0 = self._set_evasion(evasion_params, x0_img_class=1)
@@ -161,7 +161,7 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
 
         y_pred = evas.classifier.predict(evas.x_opt)
 
-        self.filename = 'pgd_ls_mnist.pdf'
+        self.filename = "pgd_ls_mnist.pdf"
         self._show_adv(x0, y0, evas.x_opt, y_pred[0])
 
     def _show_adv(self, x0, y0, x_opt, y_pred):
@@ -188,19 +188,21 @@ class TestCAttackEvasionPGDLSMNIST(CAttackEvasionTestCases):
         fig = CFigure(height=5.0, width=15.0)
         fig.subplot(1, 3, 1)
         fig.sp.title(self._digits[y0.item()])
-        fig.sp.imshow(x0.reshape(
-            (self._tr.header.img_h, self._tr.header.img_w)), cmap='gray')
+        fig.sp.imshow(
+            x0.reshape((self._tr.header.img_h, self._tr.header.img_w)), cmap="gray"
+        )
         fig.subplot(1, 3, 2)
         fig.sp.imshow(
-            added_noise.reshape(
-                (self._tr.header.img_h, self._tr.header.img_w)), cmap='gray')
+            added_noise.reshape((self._tr.header.img_h, self._tr.header.img_w)),
+            cmap="gray",
+        )
         fig.subplot(1, 3, 3)
         fig.sp.title(self._digits[y_pred.item()])
-        fig.sp.imshow(x_opt.reshape(
-            (self._tr.header.img_h, self._tr.header.img_w)), cmap='gray')
-        fig.savefig(
-            fm.join(self.images_folder, self.filename), file_format='pdf')
+        fig.sp.imshow(
+            x_opt.reshape((self._tr.header.img_h, self._tr.header.img_w)), cmap="gray"
+        )
+        fig.savefig(fm.join(self.images_folder, self.filename), file_format="pdf")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CAttackEvasionTestCases.main()

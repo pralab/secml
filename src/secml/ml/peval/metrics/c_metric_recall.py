@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import sklearn.metrics as skm
 
 from secml.array import CArray
@@ -38,7 +39,8 @@ class CMetricRecall(CMetric):
     0.75
 
     """
-    __class_type = 'recall'
+
+    __class_type = "recall"
     best_value = 1.0
 
     def _performance_score(self, y_true, y_pred):
@@ -58,9 +60,10 @@ class CMetricRecall(CMetric):
 
         """
         if y_true.unique().size > 2:  # Multiclass data
-            average = 'weighted'
+            average = "weighted"
         else:  # Default case
-            average = 'binary'
+            average = "binary"
 
-        return float(skm.recall_score(
-            y_true.tondarray(), y_pred.tondarray(), average=average))
+        return float(
+            skm.recall_score(y_true.tondarray(), y_pred.tondarray(), average=average)
+        )

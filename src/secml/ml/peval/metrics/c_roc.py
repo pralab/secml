@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.array import CArray
 
 
@@ -69,11 +70,14 @@ def average(fpr, tpr, n_points=1000):
 
     # Checking consistency between input data
     if n_fpr == 0:
-        raise ValueError("At least 1 array with false/true "
-                         "positives must be specified.")
+        raise ValueError(
+            "At least 1 array with false/true " "positives must be specified."
+        )
     if n_fpr != n_tpr:
-        raise ValueError("Number of True Positive Rates and "
-                         "False Positive Rates must be the same.")
+        raise ValueError(
+            "Number of True Positive Rates and "
+            "False Positive Rates must be the same."
+        )
 
     # Computing ROC for a single (labels, scores) pair
     mean_fpr = CArray.linspace(0, 1, n_points)
@@ -110,6 +114,7 @@ class CBaseRoc:
     .CRoc : class that fully supports ROC repetitions.
 
     """
+
     def __init__(self):
         self._fpr = None
         self._tpr = None
@@ -199,7 +204,7 @@ class CBaseRoc:
 
     def __iter__(self):
         """Returns `fpr`, `tpr`, `th` always in this order."""
-        seq = ('fpr', 'tpr', 'th')  # Fixed order for consistency
+        seq = ("fpr", "tpr", "th")  # Fixed order for consistency
         for e in seq:
             yield getattr(self, e)
 
@@ -373,11 +378,13 @@ class CRoc(CBaseRoc):
 
         # Checking consistency between input data
         if n_score == 0:
-            raise ValueError("At least 1 array with classification "
-                             "scores must be specified.")
+            raise ValueError(
+                "At least 1 array with classification " "scores must be specified."
+            )
         if n_ytrue != n_score and n_ytrue + n_score != n_score + 1:
-            raise ValueError("Either 1 or {:} labels arrays should "
-                             "be specified.".format(n_score))
+            raise ValueError(
+                "Either 1 or {:} labels arrays should " "be specified.".format(n_score)
+            )
 
         # Resetting any computed average ROC
         self._data_average.reset()
@@ -385,17 +392,17 @@ class CRoc(CBaseRoc):
 
         if n_ytrue == 1:  # Use the same true labels vs all scores
             for score_idx in range(n_score):
-                rep = CBaseRoc().compute(y_true_list[0],
-                                         score_list[score_idx],
-                                         positive_label)
+                rep = CBaseRoc().compute(
+                    y_true_list[0], score_list[score_idx], positive_label
+                )
                 # Storing result as a new repetition for ROC
                 self._data.append(rep)
 
         else:  # Use each true labels vs corresponding scores
             for score_idx in range(n_score):
-                rep = CBaseRoc().compute(y_true_list[score_idx],
-                                         score_list[score_idx],
-                                         positive_label)
+                rep = CBaseRoc().compute(
+                    y_true_list[score_idx], score_list[score_idx], positive_label
+                )
                 # Storing result as a new repetition for ROC
                 self._data.append(rep)
 
@@ -434,8 +441,7 @@ class CRoc(CBaseRoc):
             Only if return_std is True.
 
         """
-        mean_fpr, mean_tpr, std_dev_tpr = average(
-            self.fpr, self.tpr, n_points=n_points)
+        mean_fpr, mean_tpr, std_dev_tpr = average(self.fpr, self.tpr, n_points=n_points)
 
         # Assigning final data
         self._data_average._fpr = mean_fpr

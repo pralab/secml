@@ -5,6 +5,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 import numpy as np
 
 from secml.array import CArray
@@ -38,15 +39,30 @@ class CLineSearchBisectProj(CLineSearchBisect):
     class_type : 'bisect-proj'
 
     """
-    __class_type = 'bisect-proj'
 
-    def __init__(self, fun, constr=None, bounds=None,
-                 eta=1e-4, eta_min=0.1, eta_max=None,
-                 max_iter=20):
+    __class_type = "bisect-proj"
+
+    def __init__(
+        self,
+        fun,
+        constr=None,
+        bounds=None,
+        eta=1e-4,
+        eta_min=0.1,
+        eta_max=None,
+        max_iter=20,
+    ):
 
         CLineSearchBisect.__init__(
-            self, fun=fun, constr=constr, bounds=bounds,
-            eta=eta, eta_min=eta_min, eta_max=eta_max, max_iter=max_iter)
+            self,
+            fun=fun,
+            constr=constr,
+            bounds=bounds,
+            eta=eta,
+            eta_min=eta_min,
+            eta_max=eta_max,
+            max_iter=max_iter,
+        )
 
         self._best_score = None
         self._best_eta = None
@@ -66,10 +82,8 @@ class CLineSearchBisectProj(CLineSearchBisect):
 
     def _is_feasible(self, x):
         """Checks if x is within the feasible domain."""
-        constr_violation = False if self.constr is None else \
-            self.constr.is_violated(x)
-        bounds_violation = False if self.bounds is None else \
-            self.bounds.is_violated(x)
+        constr_violation = False if self.constr is None else self.constr.is_violated(x)
+        bounds_violation = False if self.bounds is None else self.bounds.is_violated(x)
 
         if constr_violation or bounds_violation:
             return False
@@ -80,8 +94,7 @@ class CLineSearchBisectProj(CLineSearchBisect):
         """Returns best point among x and the two points found by the search.
         In practice, if f(x + eta*d) increases on d, we return x."""
 
-        v = CArray(x + d * self._best_eta,
-                   dtype=self._dtype, tosparse=x.issparse)
+        v = CArray(x + d * self._best_eta, dtype=self._dtype, tosparse=x.issparse)
         if self.bounds is not None:
             v = self.bounds.projection(v) if self.bounds is not None else v
         if self.constr is not None:
@@ -89,72 +102,85 @@ class CLineSearchBisectProj(CLineSearchBisect):
         if self._is_feasible(v):
             return v, self._best_score
 
-        x1 = CArray(x + d * self.eta * idx_min,
-                    dtype=self._dtype, tosparse=x.issparse)
+        x1 = CArray(x + d * self.eta * idx_min, dtype=self._dtype, tosparse=x.issparse)
         if self.bounds is not None:
             x1 = self.bounds.projection(x1) if self.bounds is not None else x1
         if self.constr is not None:
             x1 = self.constr.projection(x1) if self.constr is not None else x1
 
-        x2 = CArray(x + d * self.eta * idx_max,
-                    dtype=self._dtype, tosparse=x.issparse)
+        x2 = CArray(x + d * self.eta * idx_max, dtype=self._dtype, tosparse=x.issparse)
         if self.bounds is not None:
             x2 = self.bounds.projection(x2) if self.bounds is not None else x2
         if self.constr is not None:
             x2 = self.constr.projection(x2) if self.constr is not None else x2
 
-        self.logger.debug("Select best point between: f[a], f[b]: [" +
-                          str(self._fun_idx_min) + "," +
-                          str(self._fun_idx_max) + "]")
+        self.logger.debug(
+            "Select best point between: f[a], f[b]: ["
+            + str(self._fun_idx_min)
+            + ","
+            + str(self._fun_idx_max)
+            + "]"
+        )
         f0 = self._fx
 
-        if not self._is_feasible(x1) and \
-                not self._is_feasible(x2):
+        if not self._is_feasible(x1) and not self._is_feasible(x2):
             if self._best_score < f0:
-                self.logger.debug("x1 and x2 are not feasible."
-                                  "Returning the best cached value.")
+                self.logger.debug(
+                    "x1 and x2 are not feasible." "Returning the best cached value."
+                )
                 return v, self._best_score
             else:
                 self.logger.debug("x1 and x2 are not feasible. Returning x.")
                 return x, f0
 
         # uses cached values (if available) to save computations
-        f1 = self._fun_idx_min if self._fun_idx_min is not None else \
-            self.fun.fun(x1, **kwargs)
+        f1 = (
+            self._fun_idx_min
+            if self._fun_idx_min is not None
+            else self.fun.fun(x1, **kwargs)
+        )
 
         if not self._is_feasible(x2):
             if f1 < f0 and f1 < self._best_score:
-                self.logger.debug("x2 not feasible. Returning x1."
-                                  " f(x): " + str(f0) +
-                                  ", f(x1): " + str(f1))
+                self.logger.debug(
+                    "x2 not feasible. Returning x1."
+                    " f(x): " + str(f0) + ", f(x1): " + str(f1)
+                )
                 return x1, f1
             if self._best_score < f1:
-                self.logger.debug("x2 not feasible. Returning the best cached"
-                                  " value.")
+                self.logger.debug(
+                    "x2 not feasible. Returning the best cached" " value."
+                )
                 return v, self._best_score
-            self.logger.debug("x2 not feasible. Returning x."
-                              " f(x): " + str(f0) +
-                              ", f(x1): " + str(f1))
+            self.logger.debug(
+                "x2 not feasible. Returning x."
+                " f(x): " + str(f0) + ", f(x1): " + str(f1)
+            )
             return x, f0
 
         # uses cached values (if available) to save computations
-        f2 = self._fun_idx_max if self._fun_idx_max is not None else \
-            self.fun.fun(x2, **kwargs)
+        f2 = (
+            self._fun_idx_max
+            if self._fun_idx_max is not None
+            else self.fun.fun(x2, **kwargs)
+        )
 
         if not self._is_feasible(x1):
             if f2 < f0 and f2 < self._best_score:
                 self.logger.debug("x1 not feasible. Returning x2.")
                 return x2, f2
             if self._best_score < f2:
-                self.logger.debug("x1 not feasible. Returning the best cached "
-                                  "value.")
+                self.logger.debug(
+                    "x1 not feasible. Returning the best cached " "value."
+                )
                 return v, self._best_score
             self.logger.debug("x1 not feasible. Returning x.")
             return x, f0
 
         # else return best point among x1, x2 and x
-        self.logger.debug("f0: {:}, f1: {:}, f2: {:}, best: {:}".format(
-            f0, f1, f2, self._best_score))
+        self.logger.debug(
+            "f0: {:}, f1: {:}, f2: {:}, best: {:}".format(f0, f1, f2, self._best_score)
+        )
 
         if f2 <= f0 and f2 <= f1 and f2 <= self._best_score:
             self.logger.debug("Returning x2.")
@@ -164,8 +190,7 @@ class CLineSearchBisectProj(CLineSearchBisect):
             self.logger.debug("Returning x1.")
             return x1, f1
 
-        if self._best_score <= f0 and self._best_score <= f1 and \
-                self._best_score <= f2:
+        if self._best_score <= f0 and self._best_score <= f1 and self._best_score <= f2:
             self.logger.debug("Returning the best cached value.")
             return v, self._best_score
 
@@ -225,8 +250,11 @@ class CLineSearchBisectProj(CLineSearchBisect):
             z = self._update_z(x, eta, d, projection=True)
 
             self.logger.debug(
-                "[_compute_eta_min] eta: " + str(eta.item()) +
-                ", f(z): " + str(self._fz))
+                "[_compute_eta_min] eta: "
+                + str(eta.item())
+                + ", f(z): "
+                + str(self._fz)
+            )
 
         # exponential line search starts here
         while self._n_iter < 10:
@@ -244,13 +272,17 @@ class CLineSearchBisectProj(CLineSearchBisect):
             self._fun_idx_max = self._fz
 
             self.logger.debug(
-                "[_compute_eta_max] eta: " + str(eta.item()) +
-                ", f(z0): " + str(self._fun_idx_min) +
-                ", f(z1): " + str(self._fun_idx_max))
+                "[_compute_eta_max] eta: "
+                + str(eta.item())
+                + ", f(z0): "
+                + str(self._fun_idx_min)
+                + ", f(z1): "
+                + str(self._fun_idx_max)
+            )
 
             self._n_iter += 1
 
-        self.logger.debug('Maximum iterations reached. Exiting.')
+        self.logger.debug("Maximum iterations reached. Exiting.")
         return eta
 
     def minimize(self, x, d, fx=None, tol=1e-4, **kwargs):
@@ -306,9 +338,7 @@ class CLineSearchBisectProj(CLineSearchBisect):
         self._best_score = self._fx
         self._best_eta = 0.0
 
-        self.logger.info(
-            "line search: " +
-            ", f(x): " + str(self._fx))
+        self.logger.info("line search: " + ", f(x): " + str(self._fx))
 
         # reset cached values
         self._fun_idx_min = None
@@ -329,8 +359,12 @@ class CLineSearchBisectProj(CLineSearchBisect):
             self._fun_idx_min = self._fx
             self._fun_idx_max = None  # this has not been cached
 
-        self.logger.debug("Running line search in: f[a], f[b]: [" +
-                          str(self._fun_idx_min) + "," +
-                          str(self._fun_idx_max) + "]")
+        self.logger.debug(
+            "Running line search in: f[a], f[b]: ["
+            + str(self._fun_idx_min)
+            + ","
+            + str(self._fun_idx_max)
+            + "]"
+        )
 
         return self._select_best_point(x, d, idx_min, idx_max, **kwargs)

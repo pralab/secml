@@ -6,6 +6,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 from functools import partial
 
@@ -33,7 +34,8 @@ class COptimizer(CCreator, metaclass=ABCMeta):
         A box constraint. Default None.
 
     """
-    __super__ = 'COptimizer'
+
+    __super__ = "COptimizer"
 
     def __init__(self, fun, constr=None, bounds=None):
 
@@ -41,8 +43,7 @@ class COptimizer(CCreator, metaclass=ABCMeta):
         # fun: the internal function to be always minimized
         # f: the "public" function. By default, minimize f(x), so fun=f
         if not isinstance(fun, CFunction):
-            raise TypeError(
-                "Input parameter is not a `CFunction` object.")
+            raise TypeError("Input parameter is not a `CFunction` object.")
         self._f = fun
         self._fun = fun
 
@@ -110,8 +111,7 @@ class COptimizer(CCreator, metaclass=ABCMeta):
             return
 
         if not isinstance(constr, CConstraint):
-            raise TypeError(
-                "Input parameter is not a `CConstraint` object.")
+            raise TypeError("Input parameter is not a `CConstraint` object.")
 
         self._constr = constr
 
@@ -128,8 +128,7 @@ class COptimizer(CCreator, metaclass=ABCMeta):
             return
 
         if not isinstance(bounds, CConstraintBox):
-            raise TypeError(
-                "Input parameter is not a `CConstraintBox` object.")
+            raise TypeError("Input parameter is not a `CConstraintBox` object.")
 
         self._bounds = bounds
 
@@ -155,7 +154,7 @@ class COptimizer(CCreator, metaclass=ABCMeta):
             Additional parameters of the minimization method.
 
         """
-        raise NotImplementedError('Function `minimize` is not implemented.')
+        raise NotImplementedError("Function `minimize` is not implemented.")
 
     def maximize(self, x_init, args=(), **kwargs):
         """Interface for maximizers.
@@ -188,7 +187,7 @@ class COptimizer(CCreator, metaclass=ABCMeta):
 
         self._fun = CFunction(
             fun=partial(fun_inv, self._f.fun),
-            gradient=partial(grad_inv, self._f.gradient)
+            gradient=partial(grad_inv, self._f.gradient),
         )
 
         x = self.minimize(x_init, args=args, **kwargs)

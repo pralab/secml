@@ -1,4 +1,6 @@
-from secml.adv.attacks.evasion.foolbox.tests.c_attack_evasion_foolbox_testcases import CAttackEvasionFoolboxTestCases
+from secml.adv.attacks.evasion.foolbox.tests.c_attack_evasion_foolbox_testcases import (
+    CAttackEvasionFoolboxTestCases,
+)
 
 try:
     import foolbox
@@ -18,7 +20,7 @@ class TestCAttackEvasionFoolboxDDN(CAttackEvasionFoolboxTestCases):
         super(TestCAttackEvasionFoolboxDDN, self).setUp()
         self.attack_class = CFoolboxL2DDN
 
-        self.attack_params = {'steps': self.default_steps, 'epsilons': None}
+        self.attack_params = {"steps": self.default_steps, "epsilons": None}
 
         self.has_targeted = True
         self.has_untargeted = True

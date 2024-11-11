@@ -99,5 +99,5 @@ class TestCArrayUtilsSearch(CArrayTestCases):
             self.array_sparse.binary_search(3)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CArrayTestCases.main()

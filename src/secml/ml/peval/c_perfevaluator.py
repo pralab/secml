@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 from copy import deepcopy
@@ -17,8 +18,7 @@ from secml.ml.peval.metrics import CMetric
 from secml.parallel import parfor2
 
 
-def _evaluate_one(
-        row_id, perf_eval, params, params_matrix, estimator, ds, verbose):
+def _evaluate_one(row_id, perf_eval, params, params_matrix, estimator, ds, verbose):
     """Evaluate performance of estimator for one combination of parameters.
 
     Parameters
@@ -57,7 +57,8 @@ def _evaluate_one(
     eval_score = perf_eval.compute_performance(estimator, ds)
 
     perf_eval.logger.info(
-        "Params: {:} - Score: {:}".format(estimator_params, eval_score))
+        "Params: {:} - Score: {:}".format(estimator_params, eval_score)
+    )
 
     return eval_score
 
@@ -73,15 +74,15 @@ class CPerfEvaluator(CCreator, metaclass=ABCMeta):
         Name of the metric that we want maximize / minimize.
 
     """
-    __super__ = 'CPerfEvaluator'
+
+    __super__ = "CPerfEvaluator"
 
     def __init__(self, splitter, metric):
 
         self.splitter = CDataSplitter.create(splitter)
         self.metric = CMetric.create(metric)
 
-    def evaluate_params(
-            self, estimator, dataset, parameters, pick='first', n_jobs=1):
+    def evaluate_params(self, estimator, dataset, parameters, pick="first", n_jobs=1):
         """Evaluate parameters for input estimator on input dataset.
 
         Parameters
@@ -119,15 +120,16 @@ class CPerfEvaluator(CCreator, metaclass=ABCMeta):
 
         # OrderedDict returns keys always in the same order,
         # so we are safe when iterating on params_matrix.shape[1]
-        parameters = OrderedDict(
-            sorted(parameters.items(), key=lambda t: t[0]))
+        parameters = OrderedDict(sorted(parameters.items(), key=lambda t: t[0]))
 
         params_idx = []
         # create a list of list 'param_idx' with index of parameters' values
         for param_name in parameters:
             if not isinstance(parameters[param_name], list):
-                raise TypeError("values for parameter `{:}` must be "
-                                "specified as a list.".format(param_name))
+                raise TypeError(
+                    "values for parameter `{:}` must be "
+                    "specified as a list.".format(param_name)
+                )
             # Add an index for each parameter's value
             params_idx.append(list(range(len(parameters[param_name]))))
 
@@ -136,18 +138,28 @@ class CPerfEvaluator(CCreator, metaclass=ABCMeta):
         params_matrix = CArray.comblist(params_idx).astype(int)
 
         # Parallelize (if requested) over the rows of params_matrix
-        res_vect = parfor2(_evaluate_one, params_matrix.shape[0],
-                           n_jobs, self, parameters, params_matrix,
-                           estimator, dataset, self.verbose)
+        res_vect = parfor2(
+            _evaluate_one,
+            params_matrix.shape[0],
+            n_jobs,
+            self,
+            parameters,
+            params_matrix,
+            estimator,
+            dataset,
+            self.verbose,
+        )
         # Transforming the list to array
         res_vect = CArray(res_vect)
 
         # Retrieve the best parameters
         best_params_dict, best_value = self._get_best_params(
-            res_vect, parameters, params_matrix, pick=pick)
+            res_vect, parameters, params_matrix, pick=pick
+        )
 
-        self.logger.info("Best params: {:} - Value: {:}".format(
-            best_params_dict, best_value))
+        self.logger.info(
+            "Best params: {:} - Value: {:}".format(best_params_dict, best_value)
+        )
 
         # Restore original parameters of classifier
         for param in original_estimator.__dict__:
@@ -163,13 +175,13 @@ class CPerfEvaluator(CCreator, metaclass=ABCMeta):
 
         Parameters
         ----------
-        estimator : CClassifier 
+        estimator : CClassifier
             The classifier that we want evaluate.
         dataset : CDataset
             Dataset that we want use for evaluate the classifier.
-        
+
         Returns
-        -------        
+        -------
         score : float
             Performance score of estimator.
 
@@ -177,7 +189,7 @@ class CPerfEvaluator(CCreator, metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractmethod
-    def _get_best_params(self, res_vect, params, params_matrix, pick='first'):
+    def _get_best_params(self, res_vect, params, params_matrix, pick="first"):
         """Returns the best parameters given input performance data.
 
         Parameters

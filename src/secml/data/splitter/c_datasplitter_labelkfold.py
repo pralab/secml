@@ -5,6 +5,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.data.splitter import CDataSplitter
 
@@ -44,7 +45,8 @@ class CDataSplitterLabelKFold(CDataSplitter):
     [CArray(2,)(dense: [0 2]), CArray(1,)(dense: [3]), CArray(1,)(dense: [1])]
 
     """
-    __class_type = 'label-kfold'
+
+    __class_type = "label-kfold"
 
     def __init__(self, num_folds=3):
 
@@ -73,9 +75,11 @@ class CDataSplitterLabelKFold(CDataSplitter):
 
         if self.num_folds > n_labels:
             raise ValueError(
-                    ("Cannot have number of folds ({0}) greater"
-                     " than the number of classes: {1}.").format(
-                        self.num_folds, n_labels))
+                (
+                    "Cannot have number of folds ({0}) greater"
+                    " than the number of classes: {1}."
+                ).format(self.num_folds, n_labels)
+            )
 
         # Weight labels by their number of occurrences
         n_samples_per_label = labels.bincount()

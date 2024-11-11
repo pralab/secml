@@ -7,6 +7,7 @@
 .. moduleauthor:: Angelo Sotgiu <angelo.sotgiu@unica.it>
 
 """
+
 from sklearn import metrics
 
 from secml.array import CArray
@@ -42,7 +43,8 @@ class CKernelChebyshevDistance(CKernel):
      [-2. -0.]])
 
     """
-    __class_type = 'chebyshev-dist'
+
+    __class_type = "chebyshev-dist"
 
     def _forward(self, x):
         """Compute (negative) Chebyshev distances between x and cached rv.
@@ -61,11 +63,14 @@ class CKernelChebyshevDistance(CKernel):
         if x.issparse is True or self._rv.issparse is True:
             raise TypeError(
                 "Chebyshev Kernel not available for sparse data."
-                "See `sklearn.metrics.pairwise_distances`.")
+                "See `sklearn.metrics.pairwise_distances`."
+            )
 
-        return -CArray(metrics.pairwise.pairwise_distances(
-            x.get_data(), self._rv.get_data(),
-            metric='chebyshev'))
+        return -CArray(
+            metrics.pairwise.pairwise_distances(
+                x.get_data(), self._rv.get_data(), metric="chebyshev"
+            )
+        )
 
     def _backward(self, w=None):
         """Calculate gradients of Chebyshev kernel wrt cached vector 'x'.
@@ -91,16 +96,17 @@ class CKernelChebyshevDistance(CKernel):
         # checking if cached x is a vector
         if not self._cached_x.is_vector_like:
             raise ValueError(
-                "kernel gradient can be computed only wrt vector-like arrays.")
+                "kernel gradient can be computed only wrt vector-like arrays."
+            )
 
         if self._rv is None:
-            raise ValueError(
-                "Please run forward with caching=True or set `rv` first.")
+            raise ValueError("Please run forward with caching=True or set `rv` first.")
 
         if self._cached_x.issparse is True or self._rv.issparse is True:
             raise TypeError(
                 "Chebyshev Kernel not available for sparse data."
-                "See `sklearn.metrics.pairwise_distances`.")
+                "See `sklearn.metrics.pairwise_distances`."
+            )
 
         diff = self._rv - self._cached_x
         m = abs(diff).max(axis=1)  # extract m from each row

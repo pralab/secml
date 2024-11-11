@@ -6,6 +6,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.core.type_utils import is_scalar
 from secml.core.decorators import deprecated
@@ -57,7 +58,8 @@ class CNormalizerMeanStd(CNormalizerLinear):
     class_type : 'mean-std'
 
     """
-    __class_type = 'mean-std'
+
+    __class_type = "mean-std"
 
     def __init__(self, mean=None, std=None, with_std=True, preprocess=None):
 
@@ -72,13 +74,20 @@ class CNormalizerMeanStd(CNormalizerLinear):
 
         # Input validation
         if with_std is True:
-            if (mean is None and std is not None) or \
-                    (mean is not None and std is None) or \
-                    (mean is not None and std is not None and
-                     len(self._in_mean) != len(self._in_std)):
-                raise ValueError("if `with_std` is True, `mean` and `std` "
-                                 "should be both None or both scalar or "
-                                 "both tuple of the same length")
+            if (
+                (mean is None and std is not None)
+                or (mean is not None and std is None)
+                or (
+                    mean is not None
+                    and std is not None
+                    and len(self._in_mean) != len(self._in_std)
+                )
+            ):
+                raise ValueError(
+                    "if `with_std` is True, `mean` and `std` "
+                    "should be both None or both scalar or "
+                    "both tuple of the same length"
+                )
 
         self._mean = None
         self._std = None
@@ -128,13 +137,16 @@ class CNormalizerMeanStd(CNormalizerLinear):
         """Expand mean value to all dimensions."""
         n_channels = len(self._in_mean)
         if not n_feats % n_channels == 0:
-            raise ValueError("input number of features must be "
-                             "divisible by {:}".format(n_channels))
+            raise ValueError(
+                "input number of features must be "
+                "divisible by {:}".format(n_channels)
+            )
         channel_size = int(n_feats / n_channels)
         self._mean = CArray.ones(shape=(n_feats,))
         for i in range(n_channels):
-            self._mean[i * channel_size:
-                       i * channel_size + channel_size] *= self._in_mean[i]
+            self._mean[
+                i * channel_size : i * channel_size + channel_size
+            ] *= self._in_mean[i]
         return self._mean
 
     def _expand_std(self, n_feats):
@@ -145,13 +157,16 @@ class CNormalizerMeanStd(CNormalizerLinear):
         else:
             n_channels = len(self._in_std)
             if not n_feats % n_channels == 0:
-                raise ValueError("input number of features must be "
-                                 "divisible by {:}".format(n_channels))
+                raise ValueError(
+                    "input number of features must be "
+                    "divisible by {:}".format(n_channels)
+                )
             channel_size = int(n_feats / n_channels)
             self._std = CArray.ones(shape=(n_feats,))
             for i in range(n_channels):
-                self._std[i * channel_size:
-                          i * channel_size + channel_size] *= self._in_std[i]
+                self._std[
+                    i * channel_size : i * channel_size + channel_size
+                ] *= self._in_std[i]
         return self._std
 
     def _compute_w_and_b(self):

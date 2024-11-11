@@ -37,5 +37,5 @@ class CPreProcessTestCases(CModuleTestCases):
         return x_chain
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

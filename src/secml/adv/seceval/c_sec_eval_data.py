@@ -5,6 +5,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.core import CCreator
 from secml.array import CArray
 from secml.utils import pickle_utils as pk
@@ -19,8 +20,9 @@ class CSecEvalData(CCreator):
     class_type : 'standard'
 
     """
-    __super__ = 'CSecEvalData'
-    __class_type = 'generic'
+
+    __super__ = "CSecEvalData"
+    __class_type = "generic"
 
     def __init__(self):
 
@@ -216,4 +218,3 @@ class CSecEvalData(CCreator):
         data = cls()
         data.set_params(pk.load(path))
         return data
-

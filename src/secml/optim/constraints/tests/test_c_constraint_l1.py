@@ -16,108 +16,142 @@ class TestCConstraintL1(CConstraintTestCases):
         self.c_array = CConstraintL1(center=CArray([1, 1]), radius=1)
 
         # create a point that lies inside the constraints
-        self.c0_p1_inside = CArray([0., 0.])
-        self.c_p1_inside = CArray([1., 1.])
+        self.c0_p1_inside = CArray([0.0, 0.0])
+        self.c_p1_inside = CArray([1.0, 1.0])
         # create a point that lies outside the constraints
-        self.c0_p2_outside = CArray([1., 1.])
-        self.c_p2_outside = CArray([2., 2.])
+        self.c0_p2_outside = CArray([1.0, 1.0])
+        self.c_p2_outside = CArray([2.0, 2.0])
         # create a point that lies on the constraints
-        self.c0_p3_on = CArray([0., 1.])
-        self.c_p3_on = CArray([0., 1.])
+        self.c0_p3_on = CArray([0.0, 1.0])
+        self.c_p3_on = CArray([0.0, 1.0])
 
     def test_is_active(self):
         """Test for CConstraint.is_active()."""
         self._test_is_active(
-            self.c0, self.c0_p1_inside, self.c0_p2_outside, self.c0_p3_on)
+            self.c0, self.c0_p1_inside, self.c0_p2_outside, self.c0_p3_on
+        )
+        self._test_is_active(self.c, self.c_p1_inside, self.c_p2_outside, self.c_p3_on)
         self._test_is_active(
-            self.c, self.c_p1_inside, self.c_p2_outside, self.c_p3_on)
-        self._test_is_active(
-            self.c_array, self.c_p1_inside, self.c_p2_outside, self.c_p3_on)
+            self.c_array, self.c_p1_inside, self.c_p2_outside, self.c_p3_on
+        )
 
         # Test for sparse arrays
         self._test_is_violated(
             self.c0,
             self.c0_p1_inside.tosparse(),
             self.c0_p2_outside.tosparse(),
-            self.c0_p3_on.tosparse())
+            self.c0_p3_on.tosparse(),
+        )
         self._test_is_violated(
             self.c_array,
             self.c_p1_inside.tosparse(),
             self.c_p2_outside.tosparse(),
-            self.c_p3_on.tosparse())
+            self.c_p3_on.tosparse(),
+        )
 
     def test_is_violated(self):
         """Test for CConstraint.is_violated()."""
         self._test_is_violated(
-            self.c0, self.c0_p1_inside, self.c0_p2_outside, self.c0_p3_on)
+            self.c0, self.c0_p1_inside, self.c0_p2_outside, self.c0_p3_on
+        )
         self._test_is_violated(
-            self.c, self.c_p1_inside, self.c_p2_outside, self.c_p3_on)
+            self.c, self.c_p1_inside, self.c_p2_outside, self.c_p3_on
+        )
         self._test_is_violated(
-            self.c_array, self.c_p1_inside, self.c_p2_outside, self.c_p3_on)
+            self.c_array, self.c_p1_inside, self.c_p2_outside, self.c_p3_on
+        )
 
         # Test for sparse arrays
         self._test_is_active(
             self.c0,
             self.c0_p1_inside.tosparse(),
             self.c0_p2_outside.tosparse(),
-            self.c0_p3_on.tosparse())
+            self.c0_p3_on.tosparse(),
+        )
         self._test_is_active(
             self.c_array,
             self.c_p1_inside.tosparse(),
             self.c_p2_outside.tosparse(),
-            self.c_p3_on.tosparse())
+            self.c_p3_on.tosparse(),
+        )
 
     def test_constraint(self):
         """Test for CConstraint.constraint()."""
         self._test_constraint(
-            self.c0, self.c0_p1_inside, self.c0_p2_outside, self.c0_p3_on)
+            self.c0, self.c0_p1_inside, self.c0_p2_outside, self.c0_p3_on
+        )
+        self._test_constraint(self.c, self.c_p1_inside, self.c_p2_outside, self.c_p3_on)
         self._test_constraint(
-            self.c, self.c_p1_inside, self.c_p2_outside, self.c_p3_on)
-        self._test_constraint(
-            self.c_array, self.c_p1_inside, self.c_p2_outside, self.c_p3_on)
+            self.c_array, self.c_p1_inside, self.c_p2_outside, self.c_p3_on
+        )
 
         # Test for sparse arrays
         self._test_constraint(
             self.c0,
             self.c0_p1_inside.tosparse(),
             self.c0_p2_outside.tosparse(),
-            self.c0_p3_on.tosparse())
+            self.c0_p3_on.tosparse(),
+        )
         self._test_constraint(
             self.c_array,
             self.c_p1_inside.tosparse(),
             self.c_p2_outside.tosparse(),
-            self.c_p3_on.tosparse())
+            self.c_p3_on.tosparse(),
+        )
 
     def test_projection(self):
         """Test for CConstraint.projection()."""
-        self._test_projection(self.c0, self.c0_p1_inside, self.c0_p2_outside,
-                              self.c0_p3_on, CArray([0.5, 0.5]))
-        self._test_projection(self.c, self.c_p1_inside, self.c_p2_outside,
-                              self.c_p3_on, CArray([1.5, 1.5]))
-        self._test_projection(self.c_array, self.c_p1_inside, self.c_p2_outside,
-                              self.c_p3_on, CArray([1.5, 1.5]))
+        self._test_projection(
+            self.c0,
+            self.c0_p1_inside,
+            self.c0_p2_outside,
+            self.c0_p3_on,
+            CArray([0.5, 0.5]),
+        )
+        self._test_projection(
+            self.c,
+            self.c_p1_inside,
+            self.c_p2_outside,
+            self.c_p3_on,
+            CArray([1.5, 1.5]),
+        )
+        self._test_projection(
+            self.c_array,
+            self.c_p1_inside,
+            self.c_p2_outside,
+            self.c_p3_on,
+            CArray([1.5, 1.5]),
+        )
 
         # Test for sparse arrays
         self._test_projection(
-            self.c0, self.c0_p1_inside.tosparse(),
-            self.c0_p2_outside.tosparse(), self.c0_p3_on.tosparse(),
-            CArray([0.5, 0.5], tosparse=True))
+            self.c0,
+            self.c0_p1_inside.tosparse(),
+            self.c0_p2_outside.tosparse(),
+            self.c0_p3_on.tosparse(),
+            CArray([0.5, 0.5], tosparse=True),
+        )
         self._test_projection(
-            self.c_array, self.c_p1_inside.tosparse(),
-            self.c_p2_outside.tosparse(), self.c_p3_on.tosparse(),
-            CArray([1.5, 1.5], tosparse=True))
+            self.c_array,
+            self.c_p1_inside.tosparse(),
+            self.c_p2_outside.tosparse(),
+            self.c_p3_on.tosparse(),
+            CArray([1.5, 1.5], tosparse=True),
+        )
 
     def test_gradient(self):
         """Test for CConstraint.gradient()."""
         # [0. 0.] is the center of the constraint, expected grad [0, c0]
         # however, numerical gradient is struggling so we avoid its comparison
         self.assert_array_almost_equal(
-            self.c0.gradient(self.c0_p1_inside), CArray([0, 0]))
+            self.c0.gradient(self.c0_p1_inside), CArray([0, 0])
+        )
 
         # [1. 1.] is the center of the constraint, expected grad [0, c0]
         # however, numerical gradient is struggling so we avoid its comparison
         self.assert_array_almost_equal(
-            self.c.gradient(self.c_p1_inside), CArray([0, 0]))
+            self.c.gradient(self.c_p1_inside), CArray([0, 0])
+        )
 
         self._test_gradient(self.c0, CArray([0.1, 0.2]))
         self._test_gradient(self.c0, self.c0_p2_outside)
@@ -128,11 +162,13 @@ class TestCConstraintL1(CConstraintTestCases):
         # [0. 1.] is the verge of the constraint, expected grad [0, 1]
         # however, numerical gradient is struggling so we avoid its comparison
         self.assert_array_almost_equal(
-            self.c0.gradient(self.c0_p3_on), CArray([0., 1.]))
+            self.c0.gradient(self.c0_p3_on), CArray([0.0, 1.0])
+        )
         # [0. 1.] is the verge of the constraint, expected grad [-1, 1]
         # however, numerical gradient is struggling so we avoid its comparison
         self.assert_array_almost_equal(
-            self.c.gradient(self.c_p3_on), CArray([-1., 0.]))
+            self.c.gradient(self.c_p3_on), CArray([-1.0, 0.0])
+        )
 
     def test_subgradient(self):
         """Check if the subgradient is computed correctly
@@ -158,23 +194,22 @@ class TestCConstraintL1(CConstraintTestCases):
 
         self.logger.info("Subgrad in {:} is:\n{:}".format(x0, gradient))
 
-        self.assertLessEqual(angl1, angl2, "Subgrad is not inside the cone of "
-                                           "{:} and {:}".format(p_min, p_max))
+        self.assertLessEqual(
+            angl1,
+            angl2,
+            "Subgrad is not inside the cone of " "{:} and {:}".format(p_min, p_max),
+        )
 
     def test_plot(self):
         """Visualize the constraint."""
         # Plotting constraint and "critical" points
-        self._test_plot(self.c0,
-                        self.c0_p1_inside,
-                        self.c0_p2_outside,
-                        self.c0_p3_on,
-                        label='c0')
-        self._test_plot(self.c,
-                        self.c_p1_inside,
-                        self.c_p2_outside,
-                        self.c_p3_on,
-                        label='c')
+        self._test_plot(
+            self.c0, self.c0_p1_inside, self.c0_p2_outside, self.c0_p3_on, label="c0"
+        )
+        self._test_plot(
+            self.c, self.c_p1_inside, self.c_p2_outside, self.c_p3_on, label="c"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CConstraintTestCases.main()

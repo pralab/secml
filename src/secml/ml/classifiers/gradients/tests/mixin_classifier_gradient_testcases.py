@@ -14,6 +14,7 @@ class CClassifierGradientMixinTestCases(CUnitTest):
         Test class implementing gradient test methods for specific clf.
 
     """
+
     clf_grads_class = None
 
     @classmethod
@@ -23,9 +24,13 @@ class CClassifierGradientMixinTestCases(CUnitTest):
 
         cls.seed = 2
 
-        cls.ds = CDLRandom(n_features=2, n_redundant=0,
-                           n_informative=2, n_clusters_per_class=1,
-                           random_state=cls.seed).load()
+        cls.ds = CDLRandom(
+            n_features=2,
+            n_redundant=0,
+            n_informative=2,
+            n_clusters_per_class=1,
+            random_state=cls.seed,
+        ).load()
         cls.ds_sparse = cls.ds.tosparse()
 
     @staticmethod
@@ -58,7 +63,8 @@ class CClassifierGradientMixinTestCases(CUnitTest):
 
         """
         i = self.ds.X.randsample(
-            CArray.arange(self.ds.num_samples), 1, random_state=self.seed)
+            CArray.arange(self.ds.num_samples), 1, random_state=self.seed
+        )
         x, y = self.ds.X[i, :], self.ds.Y[i]
         self.logger.info("idx {:}: x {:}, y {:}".format(i.item(), x, y))
 
@@ -67,8 +73,8 @@ class CClassifierGradientMixinTestCases(CUnitTest):
         # Compare the analytical grad with the numerical grad
         gradient = clf.grad_tr_params(x, y).ravel()
         num_gradient = CFunction(self._grad_tr_fun).approx_fprime(
-            params, epsilon=1e-6,
-            x0=x, y0=y, clf_grads=self.clf_grads_class, clf=clf)
+            params, epsilon=1e-6, x0=x, y0=y, clf_grads=self.clf_grads_class, clf=clf
+        )
 
         error = (gradient - num_gradient).norm()
         self.logger.info("Analytical gradient:\n{:}".format(gradient))

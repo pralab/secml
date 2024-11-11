@@ -65,15 +65,17 @@ class CNormalizerTFIDF(CNormalizer):
     normalization of flat vectors, transpose the array first.
 
     """
-    __class_type = 'tf-idf'
 
-    def __init__(self, norm='l2', preprocess=None):
+    __class_type = "tf-idf"
+
+    def __init__(self, norm="l2", preprocess=None):
         # init attributes
         self._norm = None
         self._cached_x_tfidf = None  # cached x after tfidf for gradient comp.
         self._unitnorm = CNormalizerUnitNorm()
         self._sklearn_tfidf = TfidfTransformer(
-            norm=None, use_idf=True, smooth_idf=True, sublinear_tf=False)
+            norm=None, use_idf=True, smooth_idf=True, sublinear_tf=False
+        )
 
         super(CNormalizerTFIDF, self).__init__(preprocess=preprocess)
         # set norm
@@ -109,7 +111,7 @@ class CNormalizerTFIDF(CNormalizer):
             If the preprocessor is not fitted.
 
         """
-        if not hasattr(self._sklearn_tfidf, 'idf_'):
+        if not hasattr(self._sklearn_tfidf, "idf_"):
             raise ValueError("The normalizer has not been trained.")
 
     def _fit(self, x, y=None):

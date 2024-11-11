@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.ml.peval.metrics import CMetric
 from secml.core.type_utils import is_list
@@ -37,7 +38,8 @@ class CMetricTPRatTH(CMetric):
     0.5
 
     """
-    __class_type = 'tpr-at-th'
+
+    __class_type = "tpr-at-th"
     best_value = 1.0
 
     def __init__(self, th=0.0):

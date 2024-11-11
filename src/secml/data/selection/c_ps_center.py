@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.data.selection import CPrototypesSelector
 from secml.array import CArray
 from secml.ml.kernels import CKernelEuclidean
@@ -27,7 +28,8 @@ class CPSCenter(CPrototypesSelector):
     class_type : 'center'
 
     """
-    __class_type = 'center'
+
+    __class_type = "center"
 
     def select(self, dataset, n_prototypes):
         """Selects the prototypes from input dataset.
@@ -46,7 +48,7 @@ class CPSCenter(CPrototypesSelector):
 
         """
         # Precomputing distances
-        k_euclidean = - CKernelEuclidean().k(dataset.X)
+        k_euclidean = -CKernelEuclidean().k(dataset.X)
         # List of selected prototypes (indices)
         sel_idx = []
         set_indices = list(range(dataset.num_samples))

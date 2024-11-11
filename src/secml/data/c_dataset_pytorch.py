@@ -5,6 +5,7 @@
 .. moduleauthor:: Maura Pintor <maura.pintor@unica.it>
 
 """
+
 import torch
 from torch.utils.data import Dataset
 
@@ -51,7 +52,6 @@ class CDatasetPyTorch(Dataset):
     @property
     def Y(self):
         return self._labels
-
 
     def __len__(self):
         """Returns dataset size."""

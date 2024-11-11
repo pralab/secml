@@ -12,6 +12,7 @@ else:
     import torch
     from torch import nn, optim
     from torchvision import transforms
+
     torch.manual_seed(0)
 
 from secml.array import CArray
@@ -30,20 +31,24 @@ def mlp(input_dims=100, hidden_dims=(50, 50), output_dims=10):
 
     # Input layers
     layers = [
-        ('linear1', torch.nn.Linear(input_dims, hidden_dims[0])),
-        ('relu1', torch.nn.ReLU()),
+        ("linear1", torch.nn.Linear(input_dims, hidden_dims[0])),
+        ("relu1", torch.nn.ReLU()),
     ]
     # Appending additional hidden layers
     for hl_i, hl_dims in enumerate(hidden_dims[1:]):
         prev_hl_dims = hidden_dims[hl_i]  # Dims of the previous hl
         i_str = str(hl_i + 2)
         layers += [
-            ('linear' + i_str, torch.nn.Linear(prev_hl_dims, hl_dims)),
-            ('relu' + i_str, torch.nn.ReLU())]
+            ("linear" + i_str, torch.nn.Linear(prev_hl_dims, hl_dims)),
+            ("relu" + i_str, torch.nn.ReLU()),
+        ]
     # Output layers
     layers += [
-        ('linear' + str(len(hidden_dims) + 1),
-         torch.nn.Linear(hidden_dims[-1], output_dims))]
+        (
+            "linear" + str(len(hidden_dims) + 1),
+            torch.nn.Linear(hidden_dims[-1], output_dims),
+        )
+    ]
 
     # Creating the model with the list of layers
     return torch.nn.Sequential(OrderedDict(layers))
@@ -53,16 +58,21 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
 
     @classmethod
     def setUpClass(cls):
-        cls.ds = CDLRandom(n_samples=40, n_classes=3,
-                           n_features=20, n_informative=15,
-                           random_state=0).load()
+        cls.ds = CDLRandom(
+            n_samples=40, n_classes=3, n_features=20, n_informative=15, random_state=0
+        ).load()
 
         model = mlp(input_dims=20, hidden_dims=(40,), output_dims=3)
         loss = nn.CrossEntropyLoss()
         optimizer = optim.SGD(model.parameters(), lr=1e-1)
-        cls.net = CClassifierPyTorch(model=model, loss=loss,
-                                     optimizer=optimizer, random_state=0,
-                                     epochs=10, pretrained=True)
+        cls.net = CClassifierPyTorch(
+            model=model,
+            loss=loss,
+            optimizer=optimizer,
+            random_state=0,
+            epochs=10,
+            pretrained=True,
+        )
         cls.net.fit(cls.ds.X, cls.ds.Y)
         cls.norm = CNormalizerDNN(net=cls.net)
 
@@ -84,10 +94,11 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
 
         self.assert_allclose(out_norm, out_net)
 
-        self.norm.out_layer = 'linear1'
+        self.norm.out_layer = "linear1"
 
         self.logger.info(
-            "Testing normalization at layer {:}".format(self.norm.out_layer))
+            "Testing normalization at layer {:}".format(self.norm.out_layer)
+        )
 
         out_norm = self.norm.transform(x)
         out_net = self.net.get_layer_output(x, layer=self.norm.out_layer)
@@ -101,7 +112,7 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         """Test for preprocessors chain."""
         # Inner preprocessors should be passed to the pytorch clf
         with self.assertRaises(ValueError):
-            CNormalizerDNN(net=self.net, preprocess='min-max')
+            CNormalizerDNN(net=self.net, preprocess="min-max")
 
     def test_gradient(self):
         """Test for gradient."""
@@ -120,7 +131,7 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         self.assertTrue(grad.is_vector_like)
         self.assertEqual(x.size, grad.size)
 
-        layer = 'linear1'
+        layer = "linear1"
         self.norm.out_layer = layer
         self.logger.info("Returning output for layer: {:}".format(layer))
         out = self.net.get_layer_output(x, layer=layer)
@@ -140,22 +151,25 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         model = mlp(input_dims=20, hidden_dims=(40,), output_dims=3)
         loss = nn.CrossEntropyLoss()
         optimizer = optim.SGD(model.parameters(), lr=1e-1)
-        net = CClassifierPyTorch(model=model, loss=loss,
-                                 optimizer=optimizer, random_state=0,
-                                 epochs=10, preprocess='min-max')
+        net = CClassifierPyTorch(
+            model=model,
+            loss=loss,
+            optimizer=optimizer,
+            random_state=0,
+            epochs=10,
+            preprocess="min-max",
+        )
         net.fit(self.ds.X, self.ds.Y)
 
         norm = CNormalizerDNN(net=net)
 
-        clf = CClassifierMulticlassOVA(
-            classifier=CClassifierSVM, preprocess=norm)
+        clf = CClassifierMulticlassOVA(classifier=CClassifierSVM, preprocess=norm)
 
         self.logger.info("Testing last layer")
 
         clf.fit(self.ds.X, self.ds.Y)
 
-        y_pred, scores = clf.predict(
-            self.ds.X, return_decision_function=True)
+        y_pred, scores = clf.predict(self.ds.X, return_decision_function=True)
         self.logger.info("TRUE:\n{:}".format(self.ds.Y.tolist()))
         self.logger.info("Predictions:\n{:}".format(y_pred.tolist()))
         self.logger.info("Scores:\n{:}".format(scores))
@@ -171,25 +185,23 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
 
             self.logger.info("Output of grad_f_x:\n{:}".format(grad))
 
-            check_grad_val = CFunction(
-                clf.decision_function, clf.grad_f_x).check_grad(
-                    x, y=c, epsilon=1e-1)
-            self.logger.info(
-                "norm(grad - num_grad): %s", str(check_grad_val))
+            check_grad_val = CFunction(clf.decision_function, clf.grad_f_x).check_grad(
+                x, y=c, epsilon=1e-1
+            )
+            self.logger.info("norm(grad - num_grad): %s", str(check_grad_val))
             self.assertLess(check_grad_val, 1e-3)
 
             self.assertTrue(grad.is_vector_like)
             self.assertEqual(x.size, grad.size)
 
-        layer = 'linear1'
+        layer = "linear1"
         norm.out_layer = layer
 
         self.logger.info("Testing layer {:}".format(norm.out_layer))
 
         clf.fit(self.ds.X, self.ds.Y)
 
-        y_pred, scores = clf.predict(
-            self.ds.X, return_decision_function=True)
+        y_pred, scores = clf.predict(self.ds.X, return_decision_function=True)
         self.logger.info("TRUE:\n{:}".format(self.ds.Y.tolist()))
         self.logger.info("Predictions:\n{:}".format(y_pred.tolist()))
         self.logger.info("Scores:\n{:}".format(scores))
@@ -208,7 +220,8 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
         out_norm = self.norm.transform(x)
 
         self.logger.info(
-            "Normalized sample before restoring state:\n{:}".format(out_norm))
+            "Normalized sample before restoring state:\n{:}".format(out_norm)
+        )
         state = self.norm.get_state(return_optimizer=False)
 
         model = mlp(input_dims=20, hidden_dims=(40,), output_dims=3)
@@ -220,10 +233,11 @@ class TestCNormalizerPyTorch(CPreProcessTestCases):
 
         post_out_norm = self.norm.transform(x)
         self.logger.info(
-            "Normalized sample after restoring state:\n{:}".format(post_out_norm))
+            "Normalized sample after restoring state:\n{:}".format(post_out_norm)
+        )
 
         self.assert_array_equal(out_norm, post_out_norm)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CPreProcessTestCases.main()

@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.ml.classifiers.multiclass import CClassifierMulticlass
 from secml.ml.classifiers.gradients import CClassifierGradientMixin
 from secml.array import CArray
@@ -12,8 +13,7 @@ from secml.data import CDataset
 from secml.parallel import parfor2
 
 
-def _fit_one_ova(
-        tr_class_idx, multi_ova, dataset, verbose):
+def _fit_one_ova(tr_class_idx, multi_ova, dataset, verbose):
     """Fit a OVA classifier.
 
     Parameters
@@ -34,8 +34,7 @@ def _fit_one_ova(
     # level is stored per-object looking to id
     multi_ova.verbose = verbose
 
-    multi_ova.logger.info(
-        "Training against class: {:}".format(tr_class_idx))
+    multi_ova.logger.info("Training against class: {:}".format(tr_class_idx))
 
     # Binarizing dataset
     train_ds = multi_ova.binarize_dataset(tr_class_idx, dataset)
@@ -70,15 +69,13 @@ def _forward_one_ova(tr_class_idx, multi_ova, test_x, verbose):
     # level is stored per-object looking to id
     multi_ova.verbose = verbose
 
-    multi_ova.logger.info(
-        "Forward for class: {:}".format(tr_class_idx))
+    multi_ova.logger.info("Forward for class: {:}".format(tr_class_idx))
 
     # Perform forward on data for current class classifier
     return multi_ova._binary_classifiers[tr_class_idx].forward(test_x)[:, 1]
 
 
-class CClassifierMulticlassOVA(CClassifierMulticlass,
-                               CClassifierGradientMixin):
+class CClassifierMulticlassOVA(CClassifierMulticlass, CClassifierGradientMixin):
     """OVA (One-Vs-All) Multiclass Classifier.
 
     Parameters
@@ -93,15 +90,13 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
     class_type : 'ova'
 
     """
-    __class_type = 'ova'
+
+    __class_type = "ova"
 
     def __init__(self, classifier, preprocess=None, n_jobs=1, **clf_params):
 
         super(CClassifierMulticlassOVA, self).__init__(
-            classifier=classifier,
-            preprocess=preprocess,
-            n_jobs=n_jobs,
-            **clf_params
+            classifier=classifier, preprocess=preprocess, n_jobs=n_jobs, **clf_params
         )
 
     def _fit(self, x, y):
@@ -127,10 +122,14 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
 
         # Fit a one-vs-all classifier for each class
         # Use the specified number of workers
-        self._binary_classifiers = parfor2(_fit_one_ova,
-                                           self.classes.size,
-                                           self.n_jobs, self, CDataset(x, y),
-                                           self.verbose)
+        self._binary_classifiers = parfor2(
+            _fit_one_ova,
+            self.classes.size,
+            self.n_jobs,
+            self,
+            CDataset(x, y),
+            self.verbose,
+        )
 
         return self
 
@@ -152,8 +151,10 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
 
         """
         return CDataset(
-            dataset.X, dataset.get_labels_ovr(dataset.classes[class_idx]),
-            header=dataset.header)
+            dataset.X,
+            dataset.get_labels_ovr(dataset.classes[class_idx]),
+            header=dataset.header,
+        )
 
     def _forward(self, x):
         """Computes the decision function for each pattern in x.
@@ -179,10 +180,9 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
         scores = CArray.empty(shape=(x.shape[0], self.n_classes))
 
         # Discriminant function is now called for each different class
-        res = parfor2(_forward_one_ova,
-                      self.n_classes,
-                      self.n_jobs, self, x,
-                      self.verbose)
+        res = parfor2(
+            _forward_one_ova, self.n_classes, self.n_jobs, self, x, self.verbose
+        )
 
         # Building results array
         for i in range(self.n_classes):
@@ -196,8 +196,7 @@ class CClassifierMulticlassOVA(CClassifierMulticlass,
             w = CArray.ones(shape=(self.n_classes,))
 
         # this is where we'll accumulate grads
-        grad = CArray.zeros(
-            shape=self._cached_x.shape, sparse=self._cached_x.issparse)
+        grad = CArray.zeros(shape=self._cached_x.shape, sparse=self._cached_x.issparse)
 
         # loop only over non-zero elements in w, to save computations
         for c in w.nnz_indices[1]:

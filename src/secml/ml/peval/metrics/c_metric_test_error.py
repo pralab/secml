@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import sklearn.metrics as skm
 
 from secml.array import CArray
@@ -35,7 +36,8 @@ class CMetricTestError(CMetric):
     0.25
 
     """
-    __class_type = 'test-error'
+
+    __class_type = "test-error"
     best_value = 0.0
 
     def _performance_score(self, y_true, y_pred):
@@ -54,5 +56,4 @@ class CMetricTestError(CMetric):
             Returns metric value as float.
 
         """
-        return 1.0 - float(skm.accuracy_score(y_true.tondarray(),
-                                              y_pred.tondarray()))
+        return 1.0 - float(skm.accuracy_score(y_true.tondarray(), y_pred.tondarray()))

@@ -11,7 +11,7 @@ class TestCFunctionCircle(CFunctionTestCases):
         A = CArray.eye(2, 2)
         b = CArray.zeros((2, 1))
         c = 0
-        self.fun = CFunction.create('quadratic', A, b, c)
+        self.fun = CFunction.create("quadratic", A, b, c)
 
     def test_fun_result(self):
         """Test if function returns the correct value."""
@@ -25,10 +25,10 @@ class TestCFunctionCircle(CFunctionTestCases):
 
         A = CArray.eye(2, 2)
         b = CArray.zeros(2).T
-        circle = CFunction.create('quadratic', A, b, 0)
+        circle = CFunction.create("quadratic", A, b, 0)
 
         self._test_2D(circle, grid_limits, levels=[16])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CFunctionTestCases.main()

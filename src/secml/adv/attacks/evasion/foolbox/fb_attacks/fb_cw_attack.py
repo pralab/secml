@@ -14,10 +14,17 @@ import foolbox as fb
 import numpy as np
 from foolbox import Misclassification, TargetedMisclassification
 from foolbox.attacks.base import raise_if_kwargs, get_criterion
-from foolbox.attacks.carlini_wagner import _to_attack_space, _to_model_space, best_other_classes, AdamOptimizer
+from foolbox.attacks.carlini_wagner import (
+    _to_attack_space,
+    _to_model_space,
+    best_other_classes,
+    AdamOptimizer,
+)
 from foolbox.devutils import flatten, atleast_kd
 
-from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import CAttackEvasionFoolbox
+from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import (
+    CAttackEvasionFoolbox,
+)
 from secml.adv.attacks.evasion.foolbox.losses.cw_loss import CWLoss
 from secml.adv.attacks.evasion.foolbox.secml_autograd import as_tensor
 from secml.array import CArray
@@ -62,25 +69,41 @@ class CFoolboxL2CarliniWagner(CWLoss, CAttackEvasionFoolbox):
         neural networks. In 2017 ieee symposium on security and privacy"
         https://arxiv.org/abs/1608.04644
     """
-    __class_type = 'e-foolbox-cw'
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0,
-                 binary_search_steps=9, steps=10000, stepsize=1e-2,
-                 confidence=0, initial_const=1e-3, abort_early=True):
-        super(CFoolboxL2CarliniWagner, self).__init__(classifier, y_target,
-                                                      lb=lb, ub=ub,
-                                                      fb_attack_class=_L2CarliniWagnerAttack,
-                                                      epsilons=None,
-                                                      binary_search_steps=binary_search_steps,
-                                                      steps=steps, stepsize=stepsize,
-                                                      confidence=confidence,
-                                                      initial_const=initial_const,
-                                                      abort_early=abort_early)
+    __class_type = "e-foolbox-cw"
+
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        binary_search_steps=9,
+        steps=10000,
+        stepsize=1e-2,
+        confidence=0,
+        initial_const=1e-3,
+        abort_early=True,
+    ):
+        super(CFoolboxL2CarliniWagner, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            fb_attack_class=_L2CarliniWagnerAttack,
+            epsilons=None,
+            binary_search_steps=binary_search_steps,
+            steps=steps,
+            stepsize=stepsize,
+            confidence=confidence,
+            initial_const=initial_const,
+            abort_early=abort_early,
+        )
         self.confidence = confidence
         self.c = initial_const
         self._x0 = None
         self._y0 = None
-        self.distance = 'l2'
+        self.distance = "l2"
         self._step_per_iter = None
         self.best_c_ = self.c
 
@@ -104,7 +127,7 @@ class CFoolboxL2CarliniWagner(CWLoss, CAttackEvasionFoolbox):
         divided_paths = []
         for i, s in enumerate(self.attack._steps_per_iter):
             cumulative_sum = sum(self.attack._steps_per_iter[:i])
-            divided_paths.append(all_paths[cumulative_sum: cumulative_sum + s, :])
+            divided_paths.append(all_paths[cumulative_sum : cumulative_sum + s, :])
         return divided_paths
 
     @property
@@ -193,8 +216,8 @@ class _L2CarliniWagnerAttack(fb.attacks.L2CarliniWagnerAttack):
         # the binary search searches for the smallest consts that produce adversarials
         for binary_search_step in range(self.binary_search_steps):
             if (
-                    binary_search_step == self.binary_search_steps - 1
-                    and self.binary_search_steps >= 10
+                binary_search_step == self.binary_search_steps - 1
+                and self.binary_search_steps >= 10
             ):
                 # in the last binary search step, repeat the search once
                 consts = np.minimum(upper_bounds, 1e10)

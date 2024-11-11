@@ -5,12 +5,13 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import numpy as np
 from scipy.sparse import issparse
 
 from secml.core.type_utils import is_int, is_bool, is_tuple, is_slice
 
-__all__ = ['is_vector_index', 'tuple_atomic_tolist', 'tuple_sequence_tondarray']
+__all__ = ["is_vector_index", "tuple_atomic_tolist", "tuple_sequence_tondarray"]
 
 
 def is_vector_index(idx):
@@ -31,14 +32,23 @@ def is_vector_index(idx):
         any axis with size 1, else False.
 
     """
-    return True if (np.asanyarray(idx) == 0 or np.asanyarray(idx) == -1 or  # integers 0, -1
-                    (np.asanyarray(idx) == True and np.asanyarray(idx).dtype in (bool, np.bool_)) or  # True but not '1'
-                    idx == slice(None, None, None) or  # :
-                    idx == slice(0, None, None) or  # 0:
-                    idx == slice(0, 1, None) or  # 0:1
-                    idx == slice(None, 1, None) or  # :1
-                    idx == slice(-1, 0, None)  # -1
-                    ) else False
+    return (
+        True
+        if (
+            np.asanyarray(idx) == 0
+            or np.asanyarray(idx) == -1  # integers 0, -1
+            or (
+                np.asanyarray(idx) == True
+                and np.asanyarray(idx).dtype in (bool, np.bool_)
+            )  # True but not '1'
+            or idx == slice(None, None, None)  # :
+            or idx == slice(0, None, None)  # 0:
+            or idx == slice(0, 1, None)  # 0:1
+            or idx == slice(None, 1, None)  # :1
+            or idx == slice(-1, 0, None)  # -1
+        )
+        else False
+    )
 
 
 def tuple_atomic_tolist(idx):
@@ -90,8 +100,13 @@ def tuple_sequence_tondarray(idx):
     if not is_tuple(idx):
         raise TypeError("input must be a tuple")
     # Converting CArray/CSparse/CDense to ndarray
-    idx = tuple([elem.tondarray() if
-                 hasattr(elem, 'tondarray') else elem for elem in idx])
+    idx = tuple(
+        [elem.tondarray() if hasattr(elem, "tondarray") else elem for elem in idx]
+    )
     # Converting not-slice and not-None to ndarray
-    return tuple([np.asarray(elem) if not (is_slice(elem) or elem is None)
-                  else elem for elem in idx])
+    return tuple(
+        [
+            np.asarray(elem) if not (is_slice(elem) or elem is None) else elem
+            for elem in idx
+        ]
+    )

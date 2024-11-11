@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.ml.peval.metrics import CMetric
 from secml.ml.peval.metrics import CRoc
@@ -40,7 +41,8 @@ class CMetricTPRatFPR(CMetric):
     0.5
 
     """
-    __class_type = 'tpr-at-fpr'
+
+    __class_type = "tpr-at-fpr"
     best_value = 1.0
 
     def __init__(self, fpr=0.01):
@@ -72,5 +74,4 @@ class CMetricTPRatFPR(CMetric):
         This implementation is restricted to the binary classification task.
 
         """
-        return CArray(self.fpr).interp(
-            *CRoc().compute(y_true, score)[0:2]).item()
+        return CArray(self.fpr).interp(*CRoc().compute(y_true, score)[0:2]).item()

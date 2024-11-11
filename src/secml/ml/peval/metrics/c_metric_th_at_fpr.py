@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.ml.peval.metrics import CMetric
 from secml.ml.peval.metrics import CRoc
@@ -40,7 +41,8 @@ class CMetricTHatFPR(CMetric):
     0.0005
 
     """
-    __class_type = 'th-at-fpr'
+
+    __class_type = "th-at-fpr"
     best_value = 1.0
 
     def __init__(self, fpr=0.01):

@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import sys
 import re
 import requests
@@ -13,11 +14,10 @@ from urllib import parse
 
 from secml.utils import fm
 
-__all__ = ['dl_file', 'dl_file_gitlab', 'md5']
+__all__ = ["dl_file", "dl_file_gitlab", "md5"]
 
 
-def dl_file(url, output_dir, user=None, headers=None,
-            chunk_size=1024, md5_digest=None):
+def dl_file(url, output_dir, user=None, headers=None, chunk_size=1024, md5_digest=None):
     """Download file from input url and store in output_dir.
 
     Parameters
@@ -40,19 +40,20 @@ def dl_file(url, output_dir, user=None, headers=None,
 
     """
     # Parsing user string
-    auth = tuple(user.split(':')) if user is not None else None
+    auth = tuple(user.split(":")) if user is not None else None
     # If no password is specified, use an empty string
-    auth = (auth[0], '') if auth is not None and len(auth) == 1 else auth
+    auth = (auth[0], "") if auth is not None and len(auth) == 1 else auth
 
     r = requests.get(url, auth=auth, headers=headers, stream=True)
 
     if r.status_code != 200:
         raise RuntimeError(
-            "File is not available (error code {:})".format(r.status_code))
+            "File is not available (error code {:})".format(r.status_code)
+        )
 
     # Get file size (bytes)
     if "content-length" in r.headers:
-        total_size = r.headers.get('content-length').strip()
+        total_size = r.headers.get("content-length").strip()
         total_size = int(total_size)
     else:  # Total size unknown
         total_size = None
@@ -73,17 +74,16 @@ def dl_file(url, output_dir, user=None, headers=None,
         fm.make_folder(output_dir)
 
     try:  # Get the filename from the response headers
-        fname = re.findall(
-            r"filename=\"(.+)\"", r.headers["Content-Disposition"])[0]
+        fname = re.findall(r"filename=\"(.+)\"", r.headers["Content-Disposition"])[0]
     except (KeyError, IndexError):
         # Or use the last part of download url (removing parameters)
-        fname = url.split('/')[-1].split('?', 1)[0]
+        fname = url.split("/")[-1].split("?", 1)[0]
 
     # Build full path of output file
     out_path = fm.join(output_dir, fname)
 
     # Read data and store each chunk
-    with open(out_path, 'wb') as f:
+    with open(out_path, "wb") as f:
         for chunk in r.iter_content(chunk_size=chunk_size):
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
@@ -93,8 +93,11 @@ def dl_file(url, output_dir, user=None, headers=None,
                     done = int((50 * dl) / total_size)
                     if sys.stdout.isatty() is True:
                         # Provide real-time updates (if stdout is a tty)
-                        sys.stdout.write("\r[{:}{:}] {:}/{:}".format(
-                            '=' * done, ' ' * (50-done), dl, total_size))
+                        sys.stdout.write(
+                            "\r[{:}{:}] {:}/{:}".format(
+                                "=" * done, " " * (50 - done), dl, total_size
+                            )
+                        )
                         sys.stdout.flush()
 
     sys.stdout.write("\nFile stored in `{:}`\n".format(out_path))
@@ -107,8 +110,15 @@ def dl_file(url, output_dir, user=None, headers=None,
     return out_path
 
 
-def dl_file_gitlab(repo_url, file_path, output_dir, branch='master',
-                   token=None, chunk_size=1024, md5_digest=None):
+def dl_file_gitlab(
+    repo_url,
+    file_path,
+    output_dir,
+    branch="master",
+    token=None,
+    chunk_size=1024,
+    md5_digest=None,
+):
     """Download file from a gitlab.com repository and store in output_dir.
 
     Parameters
@@ -135,33 +145,36 @@ def dl_file_gitlab(repo_url, file_path, output_dir, branch='master',
 
     """
     # Url of Repository files API, to be populated later
-    api_url = 'https://gitlab.com/api/v4/projects/' \
-              '{:}/repository/files/{:}/raw?ref={:}'
+    api_url = (
+        "https://gitlab.com/api/v4/projects/" "{:}/repository/files/{:}/raw?ref={:}"
+    )
 
     # Decode the repository url by removing 'gitlab.com' prefix if defined
     # To make urlparse work correctly, we should add a '//gitlab.com/' prefix
-    if repo_url.startswith('gitlab.com'):  # Handle 'gitlab.com/REPO' case
-        repo_url = '//' + repo_url
+    if repo_url.startswith("gitlab.com"):  # Handle 'gitlab.com/REPO' case
+        repo_url = "//" + repo_url
     if not repo_url.startswith(
-            ('https://gitlab.com', 'http://gitlab.com', '//gitlab.com')):
+        ("https://gitlab.com", "http://gitlab.com", "//gitlab.com")
+    ):
         # Handle the '/REPO/' case by stripping the first slash (if any)
-        repo_url = '//gitlab.com/' + repo_url.lstrip('/')
+        repo_url = "//gitlab.com/" + repo_url.lstrip("/")
     # Strip last slash (if any) and parse
-    repo_url_parsed = parse.urlparse(repo_url.rstrip('/'))
+    repo_url_parsed = parse.urlparse(repo_url.rstrip("/"))
     # Remove the first slash always left by urlparse and encode
-    repo_url_encoded = parse.quote(repo_url_parsed.path[1:], safe='')
+    repo_url_encoded = parse.quote(repo_url_parsed.path[1:], safe="")
 
     # Strip the first slash (if any) and encode the file path
-    file_path_encoded = parse.quote(file_path.lstrip('/'), safe='')
+    file_path_encoded = parse.quote(file_path.lstrip("/"), safe="")
 
     # Build the final download url
     url = api_url.format(repo_url_encoded, file_path_encoded, branch)
 
     # Pass the private token as a request's header if defined
-    headers = {'PRIVATE-TOKEN': token} if token is not None else None
+    headers = {"PRIVATE-TOKEN": token} if token is not None else None
 
-    return dl_file(url, output_dir, headers=headers,
-                   chunk_size=chunk_size, md5_digest=md5_digest)
+    return dl_file(
+        url, output_dir, headers=headers, chunk_size=chunk_size, md5_digest=md5_digest
+    )
 
 
 def md5(fname, blocksize=65536):
@@ -181,7 +194,7 @@ def md5(fname, blocksize=65536):
 
     """
     hash_md5 = hashlib.md5()
-    with open(fname, mode='rb') as f:
+    with open(fname, mode="rb") as f:
         for chunk in iter(lambda: f.read(blocksize), b""):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()

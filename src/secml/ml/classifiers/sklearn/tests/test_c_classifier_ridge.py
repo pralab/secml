@@ -15,26 +15,29 @@ class TestCClassifierRidge(CClassifierTestCases):
         """Test for init and fit methods."""
 
         # generate synthetic data
-        self.dataset = CDLRandom(n_features=100, n_redundant=20,
-                                 n_informative=25,
-                                 n_clusters_per_class=2,
-                                 random_state=0).load()
+        self.dataset = CDLRandom(
+            n_features=100,
+            n_redundant=20,
+            n_informative=25,
+            n_clusters_per_class=2,
+            random_state=0,
+        ).load()
 
         self.dataset.X = CNormalizerMinMax().fit_transform(self.dataset.X)
 
         kernel_types = (None, CKernelLinear, CKernelRBF, CKernelPoly)
-        self.ridges = [CClassifierRidge(
-            preprocess=kernel() if kernel is not None else None)
-            for kernel in kernel_types]
-        self.logger.info(
-            "Testing RIDGE with kernel functions: %s", str(kernel_types))
+        self.ridges = [
+            CClassifierRidge(preprocess=kernel() if kernel is not None else None)
+            for kernel in kernel_types
+        ]
+        self.logger.info("Testing RIDGE with kernel functions: %s", str(kernel_types))
 
         for ridge in self.ridges:
             ridge.verbose = 2  # Enabling debug output for each classifier
             ridge.fit(self.dataset.X, self.dataset.Y)
 
     def test_time(self):
-        """ Compare execution time of ridge and SVM"""
+        """Compare execution time of ridge and SVM"""
         self.logger.info("Testing training speed of ridge compared to SVM ")
 
         for ridge in self.ridges:
@@ -44,26 +47,31 @@ class TestCClassifierRidge(CClassifierTestCases):
 
             with self.timer() as t_svm:
                 svm.fit(self.dataset.X, self.dataset.Y)
-            self.logger.info(
-                "Execution time of SVM: {:}".format(t_svm.interval))
+            self.logger.info("Execution time of SVM: {:}".format(t_svm.interval))
             with self.timer() as t_ridge:
                 ridge.fit(self.dataset.X, self.dataset.Y)
-            self.logger.info(
-                "Execution time of ridge: {:}".format(t_ridge.interval))
+            self.logger.info("Execution time of ridge: {:}".format(t_ridge.interval))
 
     def test_plot(self):
-        """ Compare the classifiers graphically"""
-        ds = CDLRandom(n_features=2, n_redundant=0, n_informative=2,
-                       n_clusters_per_class=1, random_state=0).load()
+        """Compare the classifiers graphically"""
+        ds = CDLRandom(
+            n_features=2,
+            n_redundant=0,
+            n_informative=2,
+            n_clusters_per_class=1,
+            random_state=0,
+        ).load()
         ds.X = CNormalizerMinMax().fit_transform(ds.X)
         fig = self._test_plot(self.ridges[0], ds)
-        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
-                            'test_c_classifier_ridge.pdf'))
+        fig.savefig(
+            fm.join(fm.abspath(__file__), "figs", "test_c_classifier_ridge.pdf")
+        )
 
     def test_performance(self):
-        """ Compare the classifiers performance"""
-        self.logger.info("Testing error performance of the "
-                         "classifiers on the training set")
+        """Compare the classifiers performance"""
+        self.logger.info(
+            "Testing error performance of the " "classifiers on the training set"
+        )
 
         for ridge in self.ridges:
             self.logger.info("RIDGE kernel: {:}".format(ridge.preprocess))
@@ -77,21 +85,23 @@ class TestCClassifierRidge(CClassifierTestCases):
             svm.fit(self.dataset.X, self.dataset.Y)
 
             label_svm, y_svm = svm.predict(
-                self.dataset.X, return_decision_function=True)
+                self.dataset.X, return_decision_function=True
+            )
             label_ridge, y_ridge = ridge.predict(
-                self.dataset.X, return_decision_function=True)
+                self.dataset.X, return_decision_function=True
+            )
 
-            acc_svm = CMetric.create('f1').performance_score(
-                self.dataset.Y, label_svm)
-            acc_ridge = CMetric.create('f1').performance_score(
-                self.dataset.Y, label_ridge)
+            acc_svm = CMetric.create("f1").performance_score(self.dataset.Y, label_svm)
+            acc_ridge = CMetric.create("f1").performance_score(
+                self.dataset.Y, label_ridge
+            )
 
             self.logger.info("Accuracy of SVM: {:}".format(acc_svm))
-            self.assertGreater(acc_svm, 0.90,
-                               "Accuracy of SVM: {:}".format(acc_svm))
+            self.assertGreater(acc_svm, 0.90, "Accuracy of SVM: {:}".format(acc_svm))
             self.logger.info("Accuracy of ridge: {:}".format(acc_ridge))
-            self.assertGreater(acc_ridge, 0.90,
-                               "Accuracy of ridge: {:}".format(acc_ridge))
+            self.assertGreater(
+                acc_ridge, 0.90, "Accuracy of ridge: {:}".format(acc_ridge)
+            )
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
@@ -115,13 +125,14 @@ class TestCClassifierRidge(CClassifierTestCases):
         for ridge in self.ridges:
 
             self.logger.info(
-                "Checking grad. for Ridge with kernel: %s", ridge.preprocess)
+                "Checking grad. for Ridge with kernel: %s", ridge.preprocess
+            )
 
             # set gamma for poly and rbf
-            if hasattr(ridge.preprocess, 'gamma'):
-                ridge.set('gamma', 1e-5)
-            if hasattr(ridge.preprocess, 'degree'):  # set degree for poly
-                ridge.set('degree', 3)
+            if hasattr(ridge.preprocess, "gamma"):
+                ridge.set("gamma", 1e-5)
+            if hasattr(ridge.preprocess, "degree"):  # set degree for poly
+                ridge.set("degree", 3)
 
             self.logger.info("Testing dense data...")
             ds = self.dataset.todense()
@@ -151,16 +162,16 @@ class TestCClassifierRidge(CClassifierTestCases):
         clf = CClassifierRidge()
 
         # All linear transformations with gradient implemented
-        self._test_preprocess(ds, clf,
-                              ['min-max', 'mean-std'],
-                              [{'feature_range': (-1, 1)}, {}])
-        self._test_preprocess_grad(ds, clf,
-                                   ['min-max', 'mean-std'],
-                                   [{'feature_range': (-1, 1)}, {}])
+        self._test_preprocess(
+            ds, clf, ["min-max", "mean-std"], [{"feature_range": (-1, 1)}, {}]
+        )
+        self._test_preprocess_grad(
+            ds, clf, ["min-max", "mean-std"], [{"feature_range": (-1, 1)}, {}]
+        )
 
         # Mixed linear/nonlinear transformations without gradient
-        self._test_preprocess(ds, clf, ['pca', 'unit-norm'], [{}, {}])
+        self._test_preprocess(ds, clf, ["pca", "unit-norm"], [{}, {}])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CClassifierTestCases.main()

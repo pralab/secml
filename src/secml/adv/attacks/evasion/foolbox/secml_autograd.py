@@ -7,6 +7,7 @@
 .. moduleauthor:: Maura Pintor <maura.pintor@unica.it>
 
 """
+
 import torch
 from torch import nn
 
@@ -37,8 +38,7 @@ class SecmlAutogradFunction(torch.autograd.Function):
         input, grad_calls = ctx.saved_tensors
         # https://github.com/pytorch/pytorch/issues/1776#issuecomment-372150869
         with torch.enable_grad():
-            grad_input = clf.gradient(x=as_carray(input),
-                                      w=as_carray(grad_output))
+            grad_input = clf.gradient(x=as_carray(input), w=as_carray(grad_output))
             grad_calls += clf._cached_x.shape[0]
 
         grad_input = as_tensor(grad_input, True)
@@ -75,6 +75,7 @@ class SecmlLayer(nn.Module):
        Function and Gradient call counts will be tracked,
        however they must be reset externally before the call.
     """
+
     def __init__(self, model):
         super(SecmlLayer, self).__init__()
         self._clf = model
@@ -84,8 +85,7 @@ class SecmlLayer(nn.Module):
         self.grad_counter = torch.tensor(0)
 
     def forward(self, x):
-        x = self.secml_autograd(x, self._clf, self.func_counter,
-                                self.grad_counter)
+        x = self.secml_autograd(x, self._clf, self.func_counter, self.grad_counter)
         return x
 
     def extra_repr(self) -> str:

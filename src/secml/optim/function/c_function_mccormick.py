@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.optim.function import CFunction
 from secml.array import CArray
 
@@ -27,13 +28,15 @@ class CFunctionMcCormick(CFunction):
     class_type : mc-cormick'
 
     """
-    __class_type = 'mc-cormick'
+
+    __class_type = "mc-cormick"
 
     def __init__(self):
 
         # Passing data to CFunction
         super(CFunctionMcCormick, self).__init__(
-            fun=self._fun, n_dim=2, gradient=self._grad)
+            fun=self._fun, n_dim=2, gradient=self._grad
+        )
 
     def _fun(self, x):
         """Apply McCormick function to point x.
@@ -51,8 +54,7 @@ class CFunctionMcCormick(CFunction):
         """
         x = x.atleast_2d()
         if x.shape[1] != 2:
-            raise ValueError(
-                "McCormick function available for 2 dimensions only")
+            raise ValueError("McCormick function available for 2 dimensions only")
 
         # Split into 3 parts
         f1 = (x[0] + x[1]).sin().item()
@@ -65,8 +67,9 @@ class CFunctionMcCormick(CFunction):
         """McCormick function gradient wrt. point x."""
         x = x.atleast_2d()
         if x.shape[1] != 2:
-            raise ValueError("Gradient of McCormick function "
-                             "only available for 2 dimensions")
+            raise ValueError(
+                "Gradient of McCormick function " "only available for 2 dimensions"
+            )
         # Computing gradient of each dimension
         grad1_1 = (x[0] + x[1]).cos()
         grad1_2 = 2 * (x[0] - x[1])

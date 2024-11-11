@@ -1,4 +1,6 @@
-from secml.adv.attacks.evasion.foolbox.tests.c_attack_evasion_foolbox_testcases import CAttackEvasionFoolboxTestCases
+from secml.adv.attacks.evasion.foolbox.tests.c_attack_evasion_foolbox_testcases import (
+    CAttackEvasionFoolboxTestCases,
+)
 
 try:
     import foolbox
@@ -6,7 +8,9 @@ try:
 except ImportError:
     CAttackEvasionFoolboxTestCases.importskip("foolbox")
 
-from secml.adv.attacks.evasion.foolbox.fb_attacks.fb_cw_attack import CFoolboxL2CarliniWagner
+from secml.adv.attacks.evasion.foolbox.fb_attacks.fb_cw_attack import (
+    CFoolboxL2CarliniWagner,
+)
 
 
 class TestCAttackEvasionFoolboxCW(CAttackEvasionFoolboxTestCases):
@@ -18,7 +22,7 @@ class TestCAttackEvasionFoolboxCW(CAttackEvasionFoolboxTestCases):
         super(TestCAttackEvasionFoolboxCW, self).setUp()
         self.attack_class = CFoolboxL2CarliniWagner
 
-        self.attack_params = {'steps': self.default_steps, 'abort_early': False}
+        self.attack_params = {"steps": self.default_steps, "abort_early": False}
 
         self.has_targeted = True
         self.has_untargeted = True

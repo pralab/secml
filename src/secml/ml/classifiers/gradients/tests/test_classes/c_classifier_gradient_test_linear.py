@@ -5,14 +5,14 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from secml.ml.classifiers.gradients.tests.test_classes import \
-    CClassifierGradientTest
+
+from secml.ml.classifiers.gradients.tests.test_classes import CClassifierGradientTest
 
 from secml.array import CArray
 
 
 class CClassifierGradientTestLinear(CClassifierGradientTest):
-    __class_type = 'linear'
+    __class_type = "linear"
 
     def params(self, clf):
         """Classifier parameters."""

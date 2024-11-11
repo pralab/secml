@@ -6,6 +6,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.ml.features.normalization import CNormalizer
 from secml.core.constants import inf
@@ -66,7 +67,8 @@ class CNormalizerUnitNorm(CNormalizer):
      [ 0.    0.5  -0.5 ]])
 
     """
-    __class_type = 'unit-norm'
+
+    __class_type = "unit-norm"
 
     def __init__(self, norm="l2", preprocess=None):
         """Class constructor"""
@@ -84,9 +86,9 @@ class CNormalizerUnitNorm(CNormalizer):
         """Set the norm that must be used to normalize each row."""
         self._norm = value
 
-        if self._norm == 'l2':
+        if self._norm == "l2":
             self._order = 2
-        elif self._norm == 'l1':
+        elif self._norm == "l1":
             self._order = 1
         elif self._norm == "max":
             self._order = inf
@@ -156,7 +158,7 @@ class CNormalizerUnitNorm(CNormalizer):
         elif self.norm == "l1":
             sign = x.sign()
             grad_norm_x = sign
-        elif self.norm == 'max':
+        elif self.norm == "max":
             grad_norm_x = CArray.zeros(d, sparse=x.issparse)
             abs_x = x.abs()  # take absolute values of x...
             max_abs_x = abs_x.max()  # ... and the maximum absolute value
@@ -234,6 +236,6 @@ class CNormalizerUnitNorm(CNormalizer):
 
         # this is the derivative of the ratio x/||x||
         grad = CArray.eye(d, d) * x_norm.item() - grad_norm_x.T.dot(x)
-        grad /= (x_norm ** 2)
+        grad /= x_norm**2
 
         return grad if w is None else w.dot(grad)

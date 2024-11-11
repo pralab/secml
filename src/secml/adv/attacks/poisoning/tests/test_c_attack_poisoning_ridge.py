@@ -8,11 +8,13 @@ class TestCAttackPoisoningRidge(CAttackPoisoningTestCases):
     """Unit test for CAttackPoisoningRidge."""
 
     def setUp(self):
-        clf_params = {'fit_intercept': True, 'alpha': 1}
-        self._set_up(clf_idx='ridge',
-                     poisoning_class=CAttackPoisoningRidge,
-                     clf_class=CClassifierRidge,
-                     clf_params=clf_params)
+        clf_params = {"fit_intercept": True, "alpha": 1}
+        self._set_up(
+            clf_idx="ridge",
+            poisoning_class=CAttackPoisoningRidge,
+            clf_class=CClassifierRidge,
+            clf_params=clf_params,
+        )
 
     def test_poisoning_with_normalization_inside(self):
         """Test the CAttackPoisoning object when the classifier contains a
@@ -40,5 +42,5 @@ class TestCAttackPoisoningRidge(CAttackPoisoningTestCases):
         self._test_single_poisoning_grad_check(normalizer=None)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CAttackPoisoningTestCases.main()

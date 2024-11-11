@@ -5,6 +5,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from sklearn.svm import SVC
 
 from secml.array import CArray
@@ -37,8 +38,7 @@ def _fit_one_ova(tr_class_idx, svm, x, y, svc_kernel, verbose):
     # level is stored per-object looking to id
     svm.verbose = verbose
 
-    svm.logger.info(
-        "Training against class: {:}".format(tr_class_idx))
+    svm.logger.info("Training against class: {:}".format(tr_class_idx))
 
     # Binarize labels
     y_ova = CArray(y == svm.classes[tr_class_idx])
@@ -98,12 +98,14 @@ class CClassifierSVM(CClassifier):
     CKernel : Pairwise kernels and metrics.
 
     """
-    __class_type = 'svm'
+
+    __class_type = "svm"
 
     _loss = CLossHinge()
 
-    def __init__(self, C=1.0, kernel=None,
-                 class_weight=None, preprocess=None, n_jobs=1):
+    def __init__(
+        self, C=1.0, kernel=None, class_weight=None, preprocess=None, n_jobs=1
+    ):
 
         # calling the superclass init
         CClassifier.__init__(self, preprocess=preprocess, n_jobs=n_jobs)
@@ -156,8 +158,10 @@ class CClassifierSVM(CClassifier):
         """
         # TODO we can have one weight per class but only for OVO
         if isinstance(value, dict) and len(value) != 2:
-            raise ValueError("weight of positive (+1) and negative (0) "
-                             "classes only must be specified.")
+            raise ValueError(
+                "weight of positive (+1) and negative (0) "
+                "classes only must be specified."
+            )
         self._class_weight = value
 
     @property
@@ -207,8 +211,7 @@ class CClassifierSVM(CClassifier):
             Trained classifier.
 
         """
-        self.logger.info(
-            "Training SVM with parameters: {:}".format(self.get_params()))
+        self.logger.info("Training SVM with parameters: {:}".format(self.get_params()))
 
         # reset training
         self._w = None
@@ -223,11 +226,11 @@ class CClassifierSVM(CClassifier):
         # initialize params
         if self.kernel is None:
             # no kernel pre-processing, training in the primal
-            svc_kernel = 'linear'
+            svc_kernel = "linear"
             self._w = CArray.zeros(shape=(n_rows, n_cols))
         else:
             # inputs are kernel values, training in the dual
-            svc_kernel = 'precomputed'
+            svc_kernel = "precomputed"
             self._alpha = CArray.zeros(shape=(n_rows, n_cols), sparse=True)
         self._b = CArray.zeros(shape=(self.n_classes,))
 
@@ -248,9 +251,16 @@ class CClassifierSVM(CClassifier):
 
     def _fit_one_vs_all(self, x, y, svc_kernel):
         # ova (but we can also implement ovo - let's do separate functions)
-        out = parfor2(_fit_one_ova,
-                      self.n_classes, self.n_jobs,
-                      self, x, y, svc_kernel, self.verbose)
+        out = parfor2(
+            _fit_one_ova,
+            self.n_classes,
+            self.n_jobs,
+            self,
+            x,
+            y,
+            svc_kernel,
+            self.verbose,
+        )
 
         # Building results
         for i in range(self.n_classes):
@@ -263,7 +273,7 @@ class CClassifierSVM(CClassifier):
 
     def _fit_binary(self, x, y, svc_kernel):
         svc = SVC(C=self.C, kernel=svc_kernel, class_weight=self.class_weight)
-        if svc_kernel == 'precomputed':
+        if svc_kernel == "precomputed":
             # training on sparse precomputed kernels is not supported
             svc.fit(x.tondarray(), y.get_data())
         else:
@@ -321,12 +331,10 @@ class CClassifierSVM(CClassifier):
         if self.n_classes > 2:
             raise ValueError("SVM is not binary!")
 
-        assert (self.kernel.rv.shape[0] == self.alpha.shape[1])
+        assert self.kernel.rv.shape[0] == self.alpha.shape[1]
 
         alpha = self.alpha.todense()
-        s = alpha.find(
-            (abs(alpha) >= tol) *
-            (abs(alpha) <= self.C - tol))
+        s = alpha.find((abs(alpha) >= tol) * (abs(alpha) <= self.C - tol))
         if len(s) > 0:
             return self.kernel.rv[s, :], CArray(s)
         else:  # no margin SVs
@@ -336,9 +344,9 @@ class CClassifierSVM(CClassifier):
         """Compute kernel matrix between x and z, without pre-processing."""
         # clone kernel removing rv and pre-processing
         kernel_params = self.kernel.get_params()
-        kernel_params.pop('preprocess')  # detach preprocess and rv
-        kernel_params.pop('rv')
-        kernel_params.pop('n_jobs')  # TODO: not accepted by kernel constructor
+        kernel_params.pop("preprocess")  # detach preprocess and rv
+        kernel_params.pop("rv")
+        kernel_params.pop("n_jobs")  # TODO: not accepted by kernel constructor
         kernel = CKernel.create(self.kernel.class_type, **kernel_params)
         z = z if z is not None else x
         return kernel.k(x, z)
@@ -370,8 +378,9 @@ class CClassifierSVM(CClassifier):
         xs, _ = self._sv_margin()  # these points are already preprocessed
 
         if xs is None:
-            self.logger.debug("Warning: sv_margin is empty "
-                              "(all points are error vectors).")
+            self.logger.debug(
+                "Warning: sv_margin is empty " "(all points are error vectors)."
+            )
             return None
 
         s = xs.shape[0]  # margin support vector

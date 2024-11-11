@@ -21,11 +21,13 @@ class TestCDataLoaderImgFolders(CUnitTest):
 
         ds_rgb_path = fm.join(fm.abspath(__file__), "ds_rgb")
 
-        ds = dl.load(ds_path=ds_rgb_path, img_format='jpeg')
+        ds = dl.load(ds_path=ds_rgb_path, img_format="jpeg")
 
         self.logger.info(
             "Loaded {:} images of {:} features, {:} classes".format(
-                ds.num_samples, ds.num_features, ds.num_classes))
+                ds.num_samples, ds.num_features, ds.num_classes
+            )
+        )
 
         self.assertEqual((2, 151875), ds.X.shape)
         self.assertEqual(2, ds.num_classes)
@@ -37,11 +39,13 @@ class TestCDataLoaderImgFolders(CUnitTest):
 
         ds_gray_path = fm.join(fm.abspath(__file__), "ds_gray")
 
-        ds = dl.load(ds_path=ds_gray_path, img_format='jpeg')
+        ds = dl.load(ds_path=ds_gray_path, img_format="jpeg")
 
         self.logger.info(
             "Loaded {:} images of {:} features, {:} classes".format(
-                ds.num_samples, ds.num_features, ds.num_classes))
+                ds.num_samples, ds.num_features, ds.num_classes
+            )
+        )
 
         self.assertEqual((2, 50625), ds.X.shape)
         self.assertEqual(2, ds.num_classes)
@@ -57,19 +61,21 @@ class TestCDataLoaderImgFolders(CUnitTest):
 
         ds_rgb_path = fm.join(fm.abspath(__file__), "ds_rgb")
 
-        ds = dl.load(ds_path=ds_rgb_path, img_format='jpeg', load_data=False)
+        ds = dl.load(ds_path=ds_rgb_path, img_format="jpeg", load_data=False)
 
         self.logger.info(
             "Loaded {:} images of {:} features, {:} classes".format(
-                ds.num_samples, ds.num_features, ds.num_classes))
+                ds.num_samples, ds.num_features, ds.num_classes
+            )
+        )
 
         # TODO: USE 'U' AFTER TRANSITION TO PYTHON 3
-        self.assertIn(ds.X.dtype.char, ('S', 'U'))
+        self.assertIn(ds.X.dtype.char, ("S", "U"))
 
         # Checking behavior of `get_labels_ovr`
-        ovr = ds.get_labels_ovr(pos_label='tiger')  # Y : ['coyote', 'tiger']
+        ovr = ds.get_labels_ovr(pos_label="tiger")  # Y : ['coyote', 'tiger']
         self.assert_array_equal(ovr, CArray([0, 1]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

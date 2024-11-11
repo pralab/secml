@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from sklearn import metrics
 
 from secml.array import CArray
@@ -49,7 +50,8 @@ class CKernelRBF(CKernel):
      [3.354626e-04 1.000000e+00]])
 
     """
-    __class_type = 'rbf'
+
+    __class_type = "rbf"
 
     def __init__(self, gamma=1.0, preprocess=None):
 
@@ -96,8 +98,11 @@ class CKernelRBF(CKernel):
             Kernel between x and cached reference_samples, shape (n_x, n_rv).
 
         """
-        k = CArray(metrics.pairwise.rbf_kernel(
-            CArray(x).get_data(), CArray(self._rv).get_data(), self.gamma))
+        k = CArray(
+            metrics.pairwise.rbf_kernel(
+                CArray(x).get_data(), CArray(self._rv).get_data(), self.gamma
+            )
+        )
         self._cached_kernel = None if self._cached_x is None else k
         return k
 
@@ -125,23 +130,26 @@ class CKernelRBF(CKernel):
         # Checking if cached x is a vector
         if not self._cached_x.is_vector_like:
             raise ValueError(
-                "kernel gradient can be computed only wrt vector-like arrays.")
+                "kernel gradient can be computed only wrt vector-like arrays."
+            )
 
         if self._rv is None or self._cached_kernel is None:
             raise ValueError("Please run forward with caching=True first.")
 
         # Format of output array should be the same as cached x
-        self._rv = self._rv.tosparse() if self._cached_x.issparse \
-            else self._rv.todense()
+        self._rv = (
+            self._rv.tosparse() if self._cached_x.issparse else self._rv.todense()
+        )
 
         k_grad = self._cached_kernel.T
 
         if w is not None:
             c = w.T * k_grad
-            return CArray(2 * self.gamma * (c.T.dot(self._rv)
-                                            - c.sum() * self._cached_x))
+            return CArray(
+                2 * self.gamma * (c.T.dot(self._rv) - c.sum() * self._cached_x)
+            )
         else:
-            diff = (self._rv - self._cached_x)
+            diff = self._rv - self._cached_x
             # Casting the kernel to sparse if needed for efficient broadcasting
             if diff.issparse is True:
                 k_grad = k_grad.tosparse()

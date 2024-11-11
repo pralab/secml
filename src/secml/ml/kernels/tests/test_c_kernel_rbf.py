@@ -5,7 +5,7 @@ class TestCKernelRBF(CCKernelTestCases):
     """Unit test for CKernelRBF."""
 
     def setUp(self):
-        self._set_up('rbf')
+        self._set_up("rbf")
 
     def test_similarity_shape(self):
         """Test shape of kernel."""
@@ -20,5 +20,5 @@ class TestCKernelRBF(CCKernelTestCases):
         self._test_gradient_w()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CCKernelTestCases.main()

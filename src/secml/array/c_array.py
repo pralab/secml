@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from copy import deepcopy
 
 import numpy as np
@@ -15,8 +16,14 @@ from secml.array.c_array_interface import _CArrayInterface
 from secml.array.c_dense import CDense
 from secml.array.c_sparse import CSparse
 
-from secml.core.type_utils import \
-    is_int, is_scalar, is_bool, is_ndarray, is_scsarray, to_builtin
+from secml.core.type_utils import (
+    is_int,
+    is_scalar,
+    is_bool,
+    is_ndarray,
+    is_scsarray,
+    to_builtin,
+)
 
 
 def _instance_data(data):
@@ -59,10 +66,9 @@ def _instance_data(data):
         return NotImplemented
 
     else:  # Unknown object returned by the calling method, raise error
-        raise TypeError(
-            "objects of type {:} not supported.".format(type(data)))
-    
-    
+        raise TypeError("objects of type {:} not supported.".format(type(data)))
+
+
 class CArray(_CArrayInterface):
     """Creates an array.
 
@@ -127,10 +133,10 @@ class CArray(_CArrayInterface):
     (2, 2, 2)
 
     """
-    __slots__ = '_data'  # CArray has only one slot for the buffer
 
-    def __init__(
-            self, data, dtype=None, copy=False, shape=None, tosparse=False):
+    __slots__ = "_data"  # CArray has only one slot for the buffer
+
+    def __init__(self, data, dtype=None, copy=False, shape=None, tosparse=False):
 
         # Not implemented operators return NotImplemented
         if data is NotImplemented:
@@ -142,15 +148,17 @@ class CArray(_CArrayInterface):
 
         if isinstance(data, CArray):
             # Light casting: store data after format conversion
-            self._data = data.tosparse()._data if tosparse is True or \
-                data.issparse else data.todense()._data
+            self._data = (
+                data.tosparse()._data
+                if tosparse is True or data.issparse
+                else data.todense()._data
+            )
             if copy is True and self.isdense == data.isdense:
                 # copy needed and no previous change of format
                 self._data = deepcopy(self._data)
             if dtype is not None and self._data.dtype != dtype:
                 self._data = self._data.astype(dtype)
-        elif tosparse is True or \
-                isinstance(data, CSparse) or scs.issparse(data):
+        elif tosparse is True or isinstance(data, CSparse) or scs.issparse(data):
             self._data = CSparse(data, dtype, copy, shape)
         else:
             self._data = CDense(data, dtype, copy, shape)
@@ -770,11 +778,12 @@ class CArray(_CArrayInterface):
 
         """
         if self.issparse is False and (shape is not None or dtype is not None):
-            raise ValueError("array is already dense. Use astype() or "
-                             "reshape() function to alter array shape/dtype.")
+            raise ValueError(
+                "array is already dense. Use astype() or "
+                "reshape() function to alter array shape/dtype."
+            )
         elif self.issparse is True:
-            return self.__class__(
-                self._data.todense(), shape=shape, dtype=dtype)
+            return self.__class__(self._data.todense(), shape=shape, dtype=dtype)
         else:
             return self
 
@@ -818,11 +827,12 @@ class CArray(_CArrayInterface):
 
         """
         if self.isdense is False and (shape is not None or dtype is not None):
-            raise ValueError("array is already sparse. Use astype() or "
-                             "reshape() unction to alter array shape/dtype.")
+            raise ValueError(
+                "array is already sparse. Use astype() or "
+                "reshape() unction to alter array shape/dtype."
+            )
         elif self.isdense is True:
-            return self.__class__(
-                self._data, tosparse=True, dtype=dtype, shape=shape)
+            return self.__class__(self._data, tosparse=True, dtype=dtype, shape=shape)
         else:
             return self
 
@@ -1050,9 +1060,10 @@ class CArray(_CArrayInterface):
                 other = other.todense()
             return self.__class__(self._data.__add__(other._data))
         elif is_ndarray(other) or is_scsarray(other):
-            raise TypeError("unsupported operand type(s) for +: "
-                            "'{:}' and '{:}'".format(type(self).__name__,
-                                                     type(other).__name__))
+            raise TypeError(
+                "unsupported operand type(s) for +: "
+                "'{:}' and '{:}'".format(type(self).__name__, type(other).__name__)
+            )
         else:
             return NotImplemented
 
@@ -1114,9 +1125,10 @@ class CArray(_CArrayInterface):
                 other = other.todense()
             return self.__class__(self._data.__sub__(other._data))
         elif is_ndarray(other) or is_scsarray(other):
-            raise TypeError("unsupported operand type(s) for -: "
-                            "'{:}' and '{:}'".format(type(self).__name__,
-                                                     type(other).__name__))
+            raise TypeError(
+                "unsupported operand type(s) for -: "
+                "'{:}' and '{:}'".format(type(self).__name__, type(other).__name__)
+            )
         else:
             return NotImplemented
 
@@ -1180,9 +1192,10 @@ class CArray(_CArrayInterface):
                 return self.__class__(other._data.__mul__(self._data))
             return self.__class__(self._data.__mul__(other._data))
         elif is_ndarray(other) or is_scsarray(other):
-            raise TypeError("unsupported operand type(s) for *: "
-                            "'{:}' and '{:}'".format(type(self).__name__,
-                                                     type(other).__name__))
+            raise TypeError(
+                "unsupported operand type(s) for *: "
+                "'{:}' and '{:}'".format(type(self).__name__, type(other).__name__)
+            )
         else:
             return NotImplemented
 
@@ -1241,9 +1254,10 @@ class CArray(_CArrayInterface):
                 other = other.todense()
             return self.__class__(self._data.__truediv__(other._data))
         elif is_ndarray(other) or is_scsarray(other):
-            raise TypeError("unsupported operand type(s) for /: "
-                            "'{:}' and '{:}'".format(type(self).__name__,
-                                                     type(other).__name__))
+            raise TypeError(
+                "unsupported operand type(s) for /: "
+                "'{:}' and '{:}'".format(type(self).__name__, type(other).__name__)
+            )
         else:
             return NotImplemented
 
@@ -1297,9 +1311,10 @@ class CArray(_CArrayInterface):
                 other = other.todense()
             return self.__class__(self._data.__floordiv__(other._data))
         elif is_ndarray(other) or is_scsarray(other):
-            raise TypeError("unsupported operand type(s) for //: "
-                            "'{:}' and '{:}'".format(type(self).__name__,
-                                                     type(other).__name__))
+            raise TypeError(
+                "unsupported operand type(s) for //: "
+                "'{:}' and '{:}'".format(type(self).__name__, type(other).__name__)
+            )
         else:
             return NotImplemented
 
@@ -1373,9 +1388,10 @@ class CArray(_CArrayInterface):
                 power = power.todense()
             return self.__class__(self._data.__pow__(power._data))
         elif is_ndarray(power) or is_scsarray(power):
-            raise TypeError("unsupported operand type(s) for **: "
-                            "'{:}' and '{:}'".format(type(self).__name__,
-                                                     type(power).__name__))
+            raise TypeError(
+                "unsupported operand type(s) for **: "
+                "'{:}' and '{:}'".format(type(self).__name__, type(power).__name__)
+            )
         else:
             return NotImplemented
 
@@ -1431,9 +1447,10 @@ class CArray(_CArrayInterface):
                 other = other.todense()
             return self.__class__(self._data.__eq__(other._data))
         elif is_ndarray(other) or is_scsarray(other):
-            raise TypeError("unsupported operand type(s) for ==: "
-                            "'{:}' and '{:}'".format(type(self).__name__,
-                                                     type(other).__name__))
+            raise TypeError(
+                "unsupported operand type(s) for ==: "
+                "'{:}' and '{:}'".format(type(self).__name__, type(other).__name__)
+            )
         else:  # Any unmanaged object is considered not-equal
             return False
 
@@ -1468,9 +1485,10 @@ class CArray(_CArrayInterface):
                 other = other.todense()
             return self.__class__(self._data.__lt__(other._data))
         else:
-            raise TypeError("unsupported operand type(s) for <: "
-                            "'{:}' and '{:}'".format(type(self).__name__,
-                                                     type(other).__name__))
+            raise TypeError(
+                "unsupported operand type(s) for <: "
+                "'{:}' and '{:}'".format(type(self).__name__, type(other).__name__)
+            )
 
     def __le__(self, other):
         """Element-wise <= operator.
@@ -1503,9 +1521,10 @@ class CArray(_CArrayInterface):
                 other = other.todense()
             return self.__class__(self._data.__le__(other._data))
         else:
-            raise TypeError("unsupported operand type(s) for <=: "
-                            "'{:}' and '{:}'".format(type(self).__name__,
-                                                     type(other).__name__))
+            raise TypeError(
+                "unsupported operand type(s) for <=: "
+                "'{:}' and '{:}'".format(type(self).__name__, type(other).__name__)
+            )
 
     def __gt__(self, other):
         """Element-wise > operator.
@@ -1538,9 +1557,10 @@ class CArray(_CArrayInterface):
                 other = other.todense()
             return self.__class__(self._data.__gt__(other._data))
         else:
-            raise TypeError("unsupported operand type(s) for >: "
-                            "'{:}' and '{:}'".format(type(self).__name__,
-                                                     type(other).__name__))
+            raise TypeError(
+                "unsupported operand type(s) for >: "
+                "'{:}' and '{:}'".format(type(self).__name__, type(other).__name__)
+            )
 
     def __ge__(self, other):
         """Element-wise >= operator.
@@ -1573,9 +1593,10 @@ class CArray(_CArrayInterface):
                 other = other.todense()
             return self.__class__(self._data.__ge__(other._data))
         else:
-            raise TypeError("unsupported operand type(s) for >=: "
-                            "'{:}' and '{:}'".format(type(self).__name__,
-                                                     type(other).__name__))
+            raise TypeError(
+                "unsupported operand type(s) for >=: "
+                "'{:}' and '{:}'".format(type(self).__name__, type(other).__name__)
+            )
 
     def __ne__(self, other):
         """Element-wise != operator.
@@ -1608,9 +1629,10 @@ class CArray(_CArrayInterface):
                 other = other.todense()
             return self.__class__(self._data.__ne__(other._data))
         elif is_ndarray(other) or is_scsarray(other):
-            raise TypeError("unsupported operand type(s) for !=: "
-                            "'{:}' and '{:}'".format(type(self).__name__,
-                                                     type(other).__name__))
+            raise TypeError(
+                "unsupported operand type(s) for !=: "
+                "'{:}' and '{:}'".format(type(self).__name__, type(other).__name__)
+            )
         else:  # Any unmanaged object is considered not-equal
             return True
 
@@ -1679,8 +1701,7 @@ class CArray(_CArrayInterface):
         # Storing numpy format settings
         np_format = np.get_printoptions()
         # Preventing newlines and toggling summarization as often as possible
-        np.set_printoptions(
-            threshold=36, linewidth=79, edgeitems=3, precision=6)
+        np.set_printoptions(threshold=36, linewidth=79, edgeitems=3, precision=6)
         # Build the string
         a_str = self.__class__.__name__ + "(" + str(self._data) + ")"
         # Restoring numpy format settings
@@ -1719,24 +1740,24 @@ class CArray(_CArrayInterface):
 
         """
         import re
+
         # Storing numpy format settings
         np_format = np.get_printoptions()
         # Preventing newlines and toggling summarization as often as possible
-        np.set_printoptions(
-            threshold=36, linewidth=79, edgeitems=3, precision=6)
+        np.set_printoptions(threshold=36, linewidth=79, edgeitems=3, precision=6)
         # Starting with CArray(shape)...
         repr_str = self.__class__.__name__ + str(self.shape)
         # Replace any line separator
-        array_repr = re.sub(r'\r|\n', '', str(self._data))
+        array_repr = re.sub(r"\r|\n", "", str(self._data))
         if self.isdense is True:
-            repr_str += '(dense: ' + array_repr
+            repr_str += "(dense: " + array_repr
         elif self.issparse is True:
-            repr_str += '(sparse: '
+            repr_str += "(sparse: "
             # Replace any tabuler char
-            repr_str += re.sub(r'\t', ' ', array_repr[2:])
+            repr_str += re.sub(r"\t", " ", array_repr[2:])
         # Restoring numpy format settings
         np.set_printoptions(**np_format)
-        return repr_str + ')'
+        return repr_str + ")"
 
     # ------------------------------ #
     # # # # # # COPY UTILS # # # # # #
@@ -1786,13 +1807,21 @@ class CArray(_CArrayInterface):
         if self.issparse is True and not isinstance(datafile, str):
             # TODO: WE CAN ALLOW FILE HANDLE SAVING?!
             raise NotImplementedError(
-                "Save using file handle is only supported for dense arrays.")
+                "Save using file handle is only supported for dense arrays."
+            )
         else:
             self._data.save(datafile, overwrite=overwrite)
 
     @classmethod
-    def load(cls, datafile, dtype=float, arrayformat='dense',
-             startrow=0, skipend=0, cols=None):
+    def load(
+        cls,
+        datafile,
+        dtype=float,
+        arrayformat="dense",
+        startrow=0,
+        skipend=0,
+        cols=None,
+    ):
         """Load array data from plain text file.
 
         The default encoding is `utf-8`.
@@ -1821,12 +1850,19 @@ class CArray(_CArrayInterface):
 
         """
         # TODO: CMatrix should return a 2-D, CVector a 1-D and so on...
-        if arrayformat == 'dense':
+        if arrayformat == "dense":
             if cols is None:
                 cols = CArray([])
-            return cls(CDense.load(datafile, dtype=dtype, startrow=startrow,
-                                   skipend=skipend, cols=cols._data))
-        elif arrayformat == 'sparse':
+            return cls(
+                CDense.load(
+                    datafile,
+                    dtype=dtype,
+                    startrow=startrow,
+                    skipend=skipend,
+                    cols=cols._data,
+                )
+            )
+        elif arrayformat == "sparse":
             return cls(CSparse.load(datafile, dtype=dtype))
         else:
             raise ValueError("Supported arrayformat are 'dense' and 'sparse'.")
@@ -1922,8 +1958,7 @@ class CArray(_CArrayInterface):
           (0, 2)	3)
 
         """
-        return self.__class__(
-            CArray(self.ravel(), tosparse=self.issparse).deepcopy())
+        return self.__class__(CArray(self.ravel(), tosparse=self.issparse).deepcopy())
 
     def atleast_2d(self):
         """View original array with at least two dimensions.
@@ -2286,11 +2321,12 @@ class CArray(_CArrayInterface):
 
         """
         if c_min > c_max:
-            raise ValueError("c_min ({:}) must be lower than "
-                             "c_max ({:})".format(c_min, c_max))
+            raise ValueError(
+                "c_min ({:}) must be lower than " "c_max ({:})".format(c_min, c_max)
+            )
         return self.__class__(self._data.clip(c_min, c_max))
 
-    def sort(self, axis=-1, kind='quicksort', inplace=False):
+    def sort(self, axis=-1, kind="quicksort", inplace=False):
         """Sort an array.
 
         Parameters
@@ -2350,7 +2386,7 @@ class CArray(_CArrayInterface):
         # We return ourselves for inplace sort otherwise a new object
         return self if inplace is True else self.__class__(data_sorted)
 
-    def argsort(self, axis=-1, kind='quicksort'):
+    def argsort(self, axis=-1, kind="quicksort"):
         """Returns the indices that would sort an array.
 
         Perform an indirect sort along the given axis using
@@ -2471,8 +2507,9 @@ class CArray(_CArrayInterface):
             for i in range(self.shape[0]):
                 out[i] = func(data_2d[i, :], *args, **kwargs)
         else:
-            raise ValueError("`apply_along_axis` currently available "
-                             "for 1-D and 2-D arrays only.")
+            raise ValueError(
+                "`apply_along_axis` currently available " "for 1-D and 2-D arrays only."
+            )
 
         return out
 
@@ -2817,9 +2854,11 @@ class CArray(_CArrayInterface):
         """
         other_carray = self.__class__(array)
         if not self.has_compatible_shape(other_carray):
-            raise ValueError("arrays to compare must have the same shape. "
-                             "{:} different from {:}."
-                             "".format(self.shape, other_carray.shape))
+            raise ValueError(
+                "arrays to compare must have the same shape. "
+                "{:} different from {:}."
+                "".format(self.shape, other_carray.shape)
+            )
 
         if self.issparse:
             other_carray = other_carray.tosparse()
@@ -2872,9 +2911,11 @@ class CArray(_CArrayInterface):
         """
         other_carray = self.__class__(array)
         if not self.has_compatible_shape(other_carray):
-            raise ValueError("arrays to compare must have the same shape. "
-                             "{:} different from {:}."
-                             "".format(self.shape, other_carray.shape))
+            raise ValueError(
+                "arrays to compare must have the same shape. "
+                "{:} different from {:}."
+                "".format(self.shape, other_carray.shape)
+            )
 
         if self.issparse:
             other_carray = other_carray.tosparse()
@@ -3021,8 +3062,7 @@ class CArray(_CArrayInterface):
         CArray([0 0 1 3])
 
         """
-        return _instance_data(
-            self._data.binary_search(self.__class__(value)._data))
+        return _instance_data(self._data.binary_search(self.__class__(value)._data))
 
     # ------------- #
     # DATA ANALYSIS #
@@ -3062,8 +3102,7 @@ class CArray(_CArrayInterface):
         # Return a scalar if axis is None, CArray otherwise
         return out if axis is None else self.__class__(out)
 
-    def unique(self, return_index=False,
-               return_inverse=False, return_counts=False):
+    def unique(self, return_index=False, return_inverse=False, return_counts=False):
         """Find the unique elements of an array.
 
          There are three optional outputs in addition to the unique elements:
@@ -3118,8 +3157,7 @@ class CArray(_CArrayInterface):
         CArray([3 2])
 
         """
-        out = self._data.unique(
-            return_index, return_inverse, return_counts)
+        out = self._data.unique(return_index, return_inverse, return_counts)
         if isinstance(out, tuple):  # unique returned multiple elements
             return tuple([self.__class__(elem) for elem in out])
         else:
@@ -3152,8 +3190,9 @@ class CArray(_CArrayInterface):
         CArray([0 2 1 1 0 0 1])
 
         """
-        if (self.isdense and self.ndim > 1) or \
-                (self.issparse and not self.is_vector_like):
+        if (self.isdense and self.ndim > 1) or (
+            self.issparse and not self.is_vector_like
+        ):
             raise ValueError("Array must be one-dimensional.")
 
         return self.__class__(self._data.bincount(minlength))
@@ -3224,14 +3263,15 @@ class CArray(_CArrayInterface):
         if self.is_vector_like is False:
             raise ValueError(
                 "Array has shape {:}. Call .norm_2d() to compute "
-                "matricial norm or vector norm along axis.".format(self.shape))
+                "matricial norm or vector norm along axis.".format(self.shape)
+            )
 
         # Flat array to simplify dense case
         array = self.ravel()
 
         # 'fro' is a matrix-norm. We can exit...
-        if order == 'fro':
-            raise ValueError('Invalid norm order for vectors.')
+        if order == "fro":
+            raise ValueError("Invalid norm order for vectors.")
 
         return _instance_data(array._data.norm(order))
 
@@ -3322,11 +3362,13 @@ class CArray(_CArrayInterface):
             raise NotImplementedError
 
         if self.issparse is True:
-            out = _instance_data(self.atleast_2d()._data.norm_2d(
-                order, axis=axis, keepdims=keepdims))
+            out = _instance_data(
+                self.atleast_2d()._data.norm_2d(order, axis=axis, keepdims=keepdims)
+            )
         else:
-            out = _instance_data(self.atleast_2d()._data.norm(
-                order, axis=axis, keepdims=keepdims))
+            out = _instance_data(
+                self.atleast_2d()._data.norm(order, axis=axis, keepdims=keepdims)
+            )
 
         # Return float if axis is None, else CArray
         if axis is None:
@@ -3522,7 +3564,7 @@ class CArray(_CArrayInterface):
 
         Notes
         -----
-        Not a Number (NaN), positive infinity and negative infinity 
+        Not a Number (NaN), positive infinity and negative infinity
          evaluate to True because these are not equal to zero.
 
         Examples
@@ -4835,9 +4877,13 @@ class CArray(_CArrayInterface):
 
         """
         return self.__class__(
-            self._data.interp(CArray(x_data).astype(float)._data,
-                              CArray(y_data).astype(float)._data,
-                              return_left, return_right))
+            self._data.interp(
+                CArray(x_data).astype(float)._data,
+                CArray(y_data).astype(float)._data,
+                return_left,
+                return_right,
+            )
+        )
 
     def inv(self):
         """Compute the (multiplicative) inverse of a square matrix.
@@ -5192,8 +5238,7 @@ class CArray(_CArrayInterface):
         if sparse is True:
             # We fake the shape to create a sparse "vector"
             shape = (1, shape[0]) if len(shape) == 1 else shape
-            return cls(CSparse.rand(
-                shape, random_state=random_state, density=density))
+            return cls(CSparse.rand(shape, random_state=random_state, density=density))
         else:
             return cls(CDense.rand(shape, random_state=random_state))
 
@@ -5240,8 +5285,9 @@ class CArray(_CArrayInterface):
         return cls(CDense.randn(shape, random_state=random_state))
 
     @classmethod
-    def randuniform(cls, low=0.0, high=1.0,
-                    shape=None, random_state=None, sparse=False):
+    def randuniform(
+        cls, low=0.0, high=1.0, shape=None, random_state=None, sparse=False
+    ):
         """Return random samples from low (inclusive) to high (exclusive).
 
         Samples are uniformly distributed over the half-open
@@ -5298,21 +5344,22 @@ class CArray(_CArrayInterface):
 
         """
         if CArray(low > high).any():
-            raise ValueError(
-                "values in `low` should be lower than values in `high`")
+            raise ValueError("values in `low` should be lower than values in `high`")
 
         if isinstance(low, CArray):
             low = low.todense()._data  # Convert to CDense
         if isinstance(high, CArray):
             high = high.todense()._data  # Convert to CDense
 
-        return cls(CDense.randuniform(
-            low=low, high=high, shape=shape, random_state=random_state),
-            tosparse=sparse)
+        return cls(
+            CDense.randuniform(
+                low=low, high=high, shape=shape, random_state=random_state
+            ),
+            tosparse=sparse,
+        )
 
     @classmethod
-    def randint(cls, low, high=None,
-                shape=None, random_state=None, sparse=False):
+    def randint(cls, low, high=None, shape=None, random_state=None, sparse=False):
         """Return random integers from low (inclusive) to high (exclusive).
 
         Return random integers from the "discrete uniform" distribution
@@ -5367,12 +5414,13 @@ class CArray(_CArrayInterface):
          [0 2]])
 
         """
-        return cls(CDense.randint(low=low, high=high, shape=shape,
-                                  random_state=random_state), tosparse=sparse)
+        return cls(
+            CDense.randint(low=low, high=high, shape=shape, random_state=random_state),
+            tosparse=sparse,
+        )
 
     @classmethod
-    def randsample(cls, a, shape=None,
-                   replace=False, random_state=None, sparse=False):
+    def randsample(cls, a, shape=None, replace=False, random_state=None, sparse=False):
         """Generates a random sample from a given array.
 
         Parameters
@@ -5423,9 +5471,12 @@ class CArray(_CArrayInterface):
 
         """
         a = a if not isinstance(a, cls) else a.ravel()._data
-        return cls(CDense.randsample(
-            a=a, shape=shape, replace=replace,
-            random_state=random_state), tosparse=sparse)
+        return cls(
+            CDense.randsample(
+                a=a, shape=shape, replace=replace, random_state=random_state
+            ),
+            tosparse=sparse,
+        )
 
     @classmethod
     def linspace(cls, start, stop, num=50, endpoint=True, sparse=False):
@@ -5484,8 +5535,9 @@ class CArray(_CArrayInterface):
         CArray([3.  3.2 3.4 3.6 3.8])
 
         """
-        return cls(CDense.linspace(
-            start, stop, num=num, endpoint=endpoint), tosparse=sparse)
+        return cls(
+            CDense.linspace(start, stop, num=num, endpoint=endpoint), tosparse=sparse
+        )
 
     @classmethod
     def arange(cls, start=None, stop=None, step=1, dtype=None, sparse=False):
@@ -5556,8 +5608,10 @@ class CArray(_CArrayInterface):
         CArray([0.  0.8 1.6 2.4 3.2])
 
         """
-        return cls(CDense.arange(
-            start=start, stop=stop, step=step, dtype=dtype), tosparse=sparse)
+        return cls(
+            CDense.arange(start=start, stop=stop, step=step, dtype=dtype),
+            tosparse=sparse,
+        )
 
     @classmethod
     def concatenate(cls, array1, array2, axis=1):
@@ -5627,29 +5681,35 @@ class CArray(_CArrayInterface):
         """
         # Return sparse only if both original arrays are sparse
         if isinstance(array1, cls) and array1.issparse:
-            return cls(CSparse.concatenate(
-                array1._data, cls(array2, tosparse=True)._data, axis=axis))
+            return cls(
+                CSparse.concatenate(
+                    array1._data, cls(array2, tosparse=True)._data, axis=axis
+                )
+            )
         else:
-            return cls(CDense.concatenate(
-                cls(array1)._data, cls(array2).todense()._data, axis=axis))
+            return cls(
+                CDense.concatenate(
+                    cls(array1)._data, cls(array2).todense()._data, axis=axis
+                )
+            )
 
     @classmethod
     def comblist(cls, list_of_list, dtype=float):
         """Generate a cartesian product of list of list input.
-    
+
         Parameters
         ----------
         list_of_list : list of list
             1-D arrays to form the cartesian product of.
         dtype : str or dtype
             Datatype of output array. Default float.
-    
+
         Returns
         -------
         CArray
             2-D array of shape (M, len(arrays)) containing
             cartesian products between input arrays.
-    
+
         Examples
         --------
         >>> print(CArray.comblist([[1, 2, 3], [4, 5], [6, 7]]))
@@ -5674,7 +5734,7 @@ class CArray(_CArrayInterface):
         return cls(CDense.comblist(list_of_list, dtype=dtype))
 
     @classmethod
-    def meshgrid(cls, xi, indexing='xy'):
+    def meshgrid(cls, xi, indexing="xy"):
         """Return coordinate matrices from coordinate vectors.
 
         DENSE ARRAYS ONLY
@@ -5715,7 +5775,7 @@ class CArray(_CArrayInterface):
         CArray([[2 2 2]
          [4 4 4]
          [6 6 6]])
-        
+
         >>> xv, yv = CArray.meshgrid((x, y), indexing='ij')
         >>> print(xv)
         CArray([[1 1 1]
@@ -5728,8 +5788,7 @@ class CArray(_CArrayInterface):
 
         """
         xi = tuple(x._data for x in xi)  # This is correct-ish, xi are CArrays
-        return tuple(cls(elem) for elem in CDense.meshgrid(
-            xi, indexing=indexing))
+        return tuple(cls(elem) for elem in CDense.meshgrid(xi, indexing=indexing))
 
     @classmethod
     def from_iterables(cls, iterables_list):
@@ -5759,4 +5818,5 @@ class CArray(_CArrayInterface):
 
         """
         import itertools
+
         return CArray(list(itertools.chain.from_iterable(iterables_list)))

@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.ml.kernels import CKernel
 
@@ -37,7 +38,8 @@ class CKernelLinear(CKernel):
      [11. 25.]])
 
     """
-    __class_type = 'linear'
+
+    __class_type = "linear"
 
     def _forward(self, x):
         """Compute the linear kernel between x and cached rv.
@@ -79,11 +81,13 @@ class CKernelLinear(CKernel):
         # Checking if cached x is a vector
         if not self._cached_x.is_vector_like:
             raise ValueError(
-                "kernel gradient can be computed only wrt vector-like arrays.")
+                "kernel gradient can be computed only wrt vector-like arrays."
+            )
 
         if self._rv is None:
-            raise ValueError("Please run forward with caching=True or set"
-                             "`rv` first.")
+            raise ValueError(
+                "Please run forward with caching=True or set" "`rv` first."
+            )
 
         # Format of output array should be the same as rv
         grad = self._rv.deepcopy()

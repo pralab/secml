@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import numpy as np
 
 from secml.array import CArray
@@ -39,7 +40,8 @@ class CKernelHistIntersect(CKernel):
      [3. 7.]])
 
     """
-    __class_type = 'hist-intersect'
+
+    __class_type = "hist-intersect"
 
     def _forward(self, x):
         """Compute the histogram intersection kernel between x and cached rv.
@@ -97,11 +99,13 @@ class CKernelHistIntersect(CKernel):
         # Checking if cached x is a vector
         if not self._cached_x.is_vector_like:
             raise ValueError(
-                "kernel gradient can be computed only wrt vector-like arrays.")
+                "kernel gradient can be computed only wrt vector-like arrays."
+            )
 
         if self._rv is None:
-            raise ValueError("Please run forward with caching=True or set"
-                             "`rv` first.")
+            raise ValueError(
+                "Please run forward with caching=True or set" "`rv` first."
+            )
 
         if self._cached_x.issparse is True:
             # Broadcasting not supported for sparse arrays
@@ -109,7 +113,6 @@ class CKernelHistIntersect(CKernel):
         else:  # Broadcasting is supported by design for dense arrays
             x_broadcast = self._cached_x
 
-        grad = CArray.zeros(shape=self._rv.shape,
-                            sparse=self._cached_x.issparse)
+        grad = CArray.zeros(shape=self._rv.shape, sparse=self._cached_x.issparse)
         grad[x_broadcast < self._rv] = 1  # TODO support from CArray still missing
         return grad if w is None else w.dot(grad)

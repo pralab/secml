@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml import _NoValue
 
@@ -44,7 +45,8 @@ class CExplainerIntegratedGradients(CExplainerGradient):
     class_type : 'integrated-gradients'
 
     """
-    __class_type = 'integrated-gradients'
+
+    __class_type = "integrated-gradients"
 
     def explain(self, x, y, return_grad=_NoValue, reference=None, m=50):
         """Computes the explanation for input sample.
@@ -68,13 +70,15 @@ class CExplainerIntegratedGradients(CExplainerGradient):
 
         """
         if return_grad is not _NoValue:
-            raise ValueError("`return_grad` is not supported by `{:}`".format(
-                self.__class__.__name__))
+            raise ValueError(
+                "`return_grad` is not supported by `{:}`".format(
+                    self.__class__.__name__
+                )
+            )
 
         if reference is None:
             # Use default reference values if reference is not specified
-            reference = CArray.zeros(
-                shape=x.shape, dtype=x.dtype, sparse=x.issparse)
+            reference = CArray.zeros(shape=x.shape, dtype=x.dtype, sparse=x.issparse)
 
         x = x.atleast_2d()
 
@@ -88,8 +92,7 @@ class CExplainerIntegratedGradients(CExplainerGradient):
 
         a = (x - reference) * (1 / m) * riemman_approx
 
-        self.logger.debug(
-            "Attributions for class {:}:\n{:}".format(y, a))
+        self.logger.debug("Attributions for class {:}:\n{:}".format(y, a))
 
         # Checks prop 1: attr should add up to the difference between
         # the score at the input and that at the reference
@@ -118,17 +121,16 @@ class CExplainerIntegratedGradients(CExplainerGradient):
         """
         # Checks prop 1: attr should add up to the difference between
         # the score at the input and that at the reference
-        x_pred, x_score = self.clf.predict(
-            x, return_decision_function=True)
-        ref_pred, ref_score = self.clf.predict(
-            reference, return_decision_function=True)
+        x_pred, x_score = self.clf.predict(x, return_decision_function=True)
+        ref_pred, ref_score = self.clf.predict(reference, return_decision_function=True)
         prop_check = abs(x_score[c] - ref_score[c])
         prop_check = abs(prop_check - abs(attributions.sum())).item()
         if prop_check > 1e-1:
             self.logger.warning(
                 "Attributions should add up to the difference between the "
                 "score at the input and that at the reference. Increase `m` "
-                "or change the reference. Current value {:}.".format(prop_check))
+                "or change the reference. Current value {:}.".format(prop_check)
+            )
 
     @staticmethod
     def linearly_interpolate(x, reference=None, m=50):
@@ -152,8 +154,7 @@ class CExplainerIntegratedGradients(CExplainerGradient):
         """
         if reference is None:
             # Use default reference values if reference is not specified
-            reference = CArray.zeros(
-                shape=x.shape, dtype=x.dtype, sparse=x.issparse)
+            reference = CArray.zeros(shape=x.shape, dtype=x.dtype, sparse=x.issparse)
 
         if x.shape != reference.shape:
             raise ValueError("reference must have shape {:}".format(x.shape))

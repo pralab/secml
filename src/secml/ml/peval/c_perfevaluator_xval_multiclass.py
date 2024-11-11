@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.ml.peval import CPerfEvaluator
 from secml.array import CArray
 from secml.core.type_utils import is_scalar
@@ -26,20 +27,21 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
     class_type : 'xval-multiclass'
 
     """
-    __class_type = 'xval-multiclass'
+
+    __class_type = "xval-multiclass"
 
     def compute_performance(self, estimator, dataset):
         """Split data in folds and return the mean estimator performance.
 
         Parameters
         ----------
-        estimator : CClassifier 
+        estimator : CClassifier
             The Classifier that we want evaluate
         dataset : CDataset
             Dataset that we want use for evaluate the classifier
-        
+
         Returns
-        -------        
+        -------
         scores : list
             Mean performance score of each binary estimator
             computed on the K-Folds.
@@ -62,27 +64,28 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
             split_scores = []
             for class_idx in range(dataset.num_classes):
                 # Binarize dataset
-                test_binary_ds = estimator.binarize_dataset(
-                    class_idx, test_dataset)
+                test_binary_ds = estimator.binarize_dataset(class_idx, test_dataset)
                 # Extract the target internal binary estimator.
                 # They are all trained on the same data (normalized if needed)
                 binary_clf = estimator._binary_classifiers[class_idx]
 
                 pred_label, pred_score = binary_clf.predict(
-                    test_binary_ds.X, return_decision_function=True)
+                    test_binary_ds.X, return_decision_function=True
+                )
 
                 # Extracting score of the positive class
                 pred_score = pred_score[:, 1].ravel()
 
                 this_test_score = self.metric.performance_score(
-                    test_binary_ds.Y, y_pred=pred_label, score=pred_score)
+                    test_binary_ds.Y, y_pred=pred_label, score=pred_score
+                )
                 split_scores.append(this_test_score)
 
             test_scores[split_idx, :] = CArray(split_scores)
 
         return test_scores.mean(axis=0, keepdims=False).tolist()
 
-    def _get_best_params(self, res_vect, params, params_matrix, pick='first'):
+    def _get_best_params(self, res_vect, params, params_matrix, pick="first"):
         """Returns the best parameters given input performance scores.
 
         The best parameters have the closest associated performance score
@@ -113,8 +116,7 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
 
         """
         if not is_scalar(self.metric.best_value):
-            raise TypeError(
-                "XVal only works with metric with the best value as scalar")
+            raise TypeError("XVal only works with metric with the best value as scalar")
 
         # Get the index of the results closest to the best value
         diff = abs(res_vect - self.metric.best_value)
@@ -126,8 +128,7 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
 
             # diff has one row for each parameters combination and
             # one column for each binary classifier
-            condidates_idx = diff[:, i].find_2d(
-                diff[:, i] == diff[:, i].min())[0]
+            condidates_idx = diff[:, i].find_2d(diff[:, i] == diff[:, i].min())[0]
 
             # Get the value of the result closest to the best value
             best_score.append(res_vect[condidates_idx[0], i])
@@ -147,12 +148,13 @@ class CPerfEvaluatorXValMulticlass(CPerfEvaluator):
                 clf_best_params_list.append(best_params_dict)
 
             # Chose which candidate parameters assign to classifier
-            if pick == 'first':  # Usually the smallest
+            if pick == "first":  # Usually the smallest
                 clf_best_params_dict = clf_best_params_list[0]
-            elif pick == 'last':  # Usually the biggest
+            elif pick == "last":  # Usually the biggest
                 clf_best_params_dict = clf_best_params_list[-1]
-            elif pick == 'random':
+            elif pick == "random":
                 import random
+
                 clf_best_params_dict = random.choice(clf_best_params_list)
             else:
                 raise ValueError("pick strategy '{:}' not known".format(pick))

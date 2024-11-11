@@ -8,7 +8,7 @@ class TestCFunctionRosenbrock(CFunctionTestCases):
     """Unit test for CFunctionRosenbrock."""
 
     def setUp(self):
-        self.fun = CFunction.create('rosenbrock')
+        self.fun = CFunction.create("rosenbrock")
 
     def test_fun_result(self):
         """Test if function returns the correct value."""
@@ -23,5 +23,5 @@ class TestCFunctionRosenbrock(CFunctionTestCases):
         self._test_2D(self.fun, grid_limits, levels=[1], vmin=0, vmax=10)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CFunctionTestCases.main()

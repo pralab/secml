@@ -14,33 +14,45 @@ class TestCNormalizerMeanStd(CNormalizerTestCases):
 
             self.logger.info("Testing using std? {:}".format(with_std))
 
-            self._sklearn_comp(self.array_dense,
-                               StandardScaler(with_std=with_std),
-                               CNormalizerMeanStd(with_std=with_std))
-            self._sklearn_comp(self.array_sparse,
-                               StandardScaler(with_std=with_std),
-                               CNormalizerMeanStd(with_std=with_std))
-            self._sklearn_comp(self.row_dense.atleast_2d(),
-                               StandardScaler(with_std=with_std),
-                               CNormalizerMeanStd(with_std=with_std))
-            self._sklearn_comp(self.row_sparse,
-                               StandardScaler(with_std=with_std),
-                               CNormalizerMeanStd(with_std=with_std))
-            self._sklearn_comp(self.column_dense,
-                               StandardScaler(with_std=with_std),
-                               CNormalizerMeanStd(with_std=with_std))
-            self._sklearn_comp(self.column_sparse,
-                               StandardScaler(with_std=with_std),
-                               CNormalizerMeanStd(with_std=with_std))
+            self._sklearn_comp(
+                self.array_dense,
+                StandardScaler(with_std=with_std),
+                CNormalizerMeanStd(with_std=with_std),
+            )
+            self._sklearn_comp(
+                self.array_sparse,
+                StandardScaler(with_std=with_std),
+                CNormalizerMeanStd(with_std=with_std),
+            )
+            self._sklearn_comp(
+                self.row_dense.atleast_2d(),
+                StandardScaler(with_std=with_std),
+                CNormalizerMeanStd(with_std=with_std),
+            )
+            self._sklearn_comp(
+                self.row_sparse,
+                StandardScaler(with_std=with_std),
+                CNormalizerMeanStd(with_std=with_std),
+            )
+            self._sklearn_comp(
+                self.column_dense,
+                StandardScaler(with_std=with_std),
+                CNormalizerMeanStd(with_std=with_std),
+            )
+            self._sklearn_comp(
+                self.column_sparse,
+                StandardScaler(with_std=with_std),
+                CNormalizerMeanStd(with_std=with_std),
+            )
 
     def test_mean_std(self):
         """Test using specific mean/std."""
-        for (mean, std) in [(1.5, 0.1),
-                            ((1.0, 1.1, 1.2, 1.3), (0.0, 0.1, 0.2, 0.3))]:
+        for mean, std in [(1.5, 0.1), ((1.0, 1.1, 1.2, 1.3), (0.0, 0.1, 0.2, 0.3))]:
             for array in [self.array_dense, self.array_sparse]:
                 self.logger.info("Original array is:\n{:}".format(array))
                 self.logger.info(
-                    "Normalizing using mean: {:} std: {:}".format(mean, std))
+                    "Normalizing using mean: {:} std: {:}".format(mean, std)
+                )
 
                 n = CNormalizerMeanStd(mean=mean, std=std).fit(array)
                 out = n.transform(array)
@@ -59,16 +71,18 @@ class TestCNormalizerMeanStd(CNormalizerTestCases):
 
     def test_chain(self):
         """Test a chain of preprocessors."""
-        self._test_chain(self.array_dense,
-                         ['min-max', 'pca', 'mean-std'],
-                         [{'feature_range': (-5, 5)}, {}, {}])
+        self._test_chain(
+            self.array_dense,
+            ["min-max", "pca", "mean-std"],
+            [{"feature_range": (-5, 5)}, {}, {}],
+        )
 
     def test_chain_gradient(self):
         """Check gradient of a chain of preprocessors."""
-        self._test_chain_gradient(self.array_dense,
-                                  ['min-max', 'mean-std'],
-                                  [{'feature_range': (-5, 5)}, {}])
+        self._test_chain_gradient(
+            self.array_dense, ["min-max", "mean-std"], [{"feature_range": (-5, 5)}, {}]
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CNormalizerTestCases.main()
