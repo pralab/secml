@@ -46,6 +46,8 @@ class CDense(_CArrayInterface):
         else:  # Other inputs... just need to initialize the input shape
             self._input_shape = None
         obj = np.asarray(data, dtype=dtype)
+        if obj.ndim < 1:
+            obj = obj.reshape(1, *obj.shape)
         # numpy created an object array, maybe input is malformed?!
         if obj.dtype.char == "O":
             raise TypeError("Array is malformed, check input data.")
@@ -480,9 +482,8 @@ class CDense(_CArrayInterface):
                 and elem.size != self.shape[elem_idx]
             ):
                 raise IndexError(
-                    "boolean index array for axis {:} must have " "size {:}.".format(
-                        elem_idx, self.shape[elem_idx]
-                    )
+                    "boolean index array for axis {:} must have "
+                    "size {:}.".format(elem_idx, self.shape[elem_idx])
                 )
 
     def _check_index_slice(self, elem_idx, elem):
@@ -1506,9 +1507,11 @@ class CDense(_CArrayInterface):
             return self.__class__([0.0])
 
         out = np.linalg.norm(
-            self.atleast_2d().tondarray().astype(float)
-            if axis is not None
-            else self.tondarray().astype(float),
+            (
+                self.atleast_2d().tondarray().astype(float)
+                if axis is not None
+                else self.tondarray().astype(float)
+            ),
             order,
             axis,
         )
