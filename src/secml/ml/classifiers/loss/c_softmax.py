@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.core import CCreator
 from secml.array import CArray
 
@@ -87,8 +88,7 @@ class CSoftmax(CCreator):
 
         """
         if not s.is_vector_like:
-            raise ValueError(
-                "gradient can be computed for a single point only")
+            raise ValueError("gradient can be computed for a single point only")
 
         sigma_s = self.softmax(s)
 

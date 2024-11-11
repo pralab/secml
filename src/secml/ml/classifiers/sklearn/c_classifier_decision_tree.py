@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from sklearn import tree
 
 from secml.ml.classifiers import CClassifierSkLearn
@@ -50,18 +51,25 @@ class CClassifierDecisionTree(CClassifierSkLearn):
     class_type : 'dec-tree'
 
     """
-    __class_type = 'dec-tree'
 
-    def __init__(self, criterion='gini', splitter='best',
-                 max_depth=None, min_samples_split=2,
-                 random_state=None, preprocess=None):
+    __class_type = "dec-tree"
+
+    def __init__(
+        self,
+        criterion="gini",
+        splitter="best",
+        max_depth=None,
+        min_samples_split=2,
+        random_state=None,
+        preprocess=None,
+    ):
 
         dt = tree.DecisionTreeClassifier(
             criterion=criterion,
             splitter=splitter,
             max_depth=max_depth,
             min_samples_split=min_samples_split,
-            random_state=random_state)
+            random_state=random_state,
+        )
 
-        CClassifierSkLearn.__init__(self, sklearn_model=dt,
-                                    preprocess=preprocess)
+        CClassifierSkLearn.__init__(self, sklearn_model=dt, preprocess=preprocess)

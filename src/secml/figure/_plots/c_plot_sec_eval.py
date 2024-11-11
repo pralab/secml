@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.figure._plots import CPlot
 from secml.ml.peval.metrics import CMetric
 from secml.array import CArray
@@ -31,7 +32,8 @@ def _cmpt_sec_eval_curve(sec_eval_data, metric, label=1):
         y_pred = sec_eval_data.Y_pred[k].ravel()
 
         metric_val = metric.performance_score(
-            y_true=sec_eval_data.Y, y_pred=y_pred, score=scores)
+            y_true=sec_eval_data.Y, y_pred=y_pred, score=scores
+        )
 
         perf[k] = metric_val
 
@@ -64,9 +66,19 @@ class CPlotSecEval(CPlot):
             fig_legend.set_visible(True)
         self.grid(grid_on=True)
 
-    def plot_sec_eval(self, sec_eval_data, metric='accuracy', mean=False,
-                      percentage=False, show_average=False, label=None,
-                      linestyle='-', color=None, marker=None, metric_args=()):
+    def plot_sec_eval(
+        self,
+        sec_eval_data,
+        metric="accuracy",
+        mean=False,
+        percentage=False,
+        show_average=False,
+        label=None,
+        linestyle="-",
+        color=None,
+        marker=None,
+        metric_args=(),
+    ):
         """Plot the Security Evaluation Curve using desired metric.
 
         Parameters
@@ -115,8 +127,9 @@ class CPlotSecEval(CPlot):
             perf = perf.mean(axis=0, keepdims=False)
         else:
             if len(sec_eval_data) > 1:
-                raise ValueError("if `mean` is False, "
-                                 "only one sec eval data should be passed")
+                raise ValueError(
+                    "if `mean` is False, " "only one sec eval data should be passed"
+                )
 
         perf = perf.ravel()
 
@@ -135,9 +148,15 @@ class CPlotSecEval(CPlot):
         # This is done here to make 'markevery' work correctly
         self.xticks(sec_eval_data[0].param_values)
 
-        self.plot(sec_eval_data[0].param_values, perf, label=label,
-                  linestyle=linestyle, color=color, marker=marker,
-                  markevery=self.get_xticks_idx(sec_eval_data[0].param_values))
+        self.plot(
+            sec_eval_data[0].param_values,
+            perf,
+            label=label,
+            linestyle=linestyle,
+            color=color,
+            marker=marker,
+            markevery=self.get_xticks_idx(sec_eval_data[0].param_values),
+        )
 
         if mean is True:
             std_up = perf + perf_std
@@ -147,17 +166,22 @@ class CPlotSecEval(CPlot):
                 std_up[std_up > 100] = 100
             else:
                 std_up[std_up > 1.0] = 1.0
-            self.fill_between(sec_eval_data[0].param_values, std_up, std_down,
-                              interpolate=False, alpha=0.2, facecolor=color,
-                              linestyle='None')
+            self.fill_between(
+                sec_eval_data[0].param_values,
+                std_up,
+                std_down,
+                interpolate=False,
+                alpha=0.2,
+                facecolor=color,
+                linestyle="None",
+            )
 
         if self._xlabel is None:
             self.xlabel(sec_eval_data[0].param_name)
         if self._ylabel is None:
             self.ylabel(metric.class_type.capitalize())
 
-        self.legend(loc='best', labelspacing=0.4,
-                    handletextpad=0.3, edgecolor='k')
+        self.legend(loc="best", labelspacing=0.4, handletextpad=0.3, edgecolor="k")
         self.title("Security Evaluation Curve")
 
         self.apply_params_sec_eval()

@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.ml.classifiers.loss import CLossClassification, CSoftmax
 from secml.array import CArray
 from secml import _NoValue
@@ -31,7 +32,8 @@ class CLossCrossEntropy(CLossClassification):
     suitable_for : 'classification'
 
     """
-    __class_type = 'cross-entropy'
+
+    __class_type = "cross-entropy"
 
     def loss(self, y_true, score, pos_label=_NoValue):
         """Computes the value of the Cross Entropy loss function.

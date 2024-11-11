@@ -6,7 +6,7 @@
 
 """
 
-__all__ = ['AverageMeter', 'OrderedFlexibleClass', 'check_is_fitted']
+__all__ = ["AverageMeter", "OrderedFlexibleClass", "check_is_fitted"]
 
 
 class AverageMeter:
@@ -24,13 +24,14 @@ class AverageMeter:
         Number of seen values.
 
     """
+
     def __init__(self):
         self.reset()
 
     def reset(self):
-        self.val = 0.
-        self.avg = 0.
-        self.sum = 0.
+        self.val = 0.0
+        self.avg = 0.0
+        self.sum = 0.0
         self.count = 0
 
     def update(self, val, n=1):
@@ -84,7 +85,9 @@ class OrderedFlexibleClass:
         if len(items) == 0:
             raise ValueError("class must have at least one attribute.")
         if not all(isinstance(i, tuple) for i in items):
-            raise TypeError("each attribute must be specified as a tuple of (key, value).")
+            raise TypeError(
+                "each attribute must be specified as a tuple of (key, value)."
+            )
         # List with attributes sequence (this provides the fixed order)
         self._params = []
         # __setattr__ will store the attribute in `_params` and set its value
@@ -99,7 +102,7 @@ class OrderedFlexibleClass:
     def __setattr__(self, key, value):
         """Set desired attribute and store the key in `_params`."""
         # Register attribute only if new (skip service attribute _params)
-        if key != '_params' and not hasattr(self, key):
+        if key != "_params" and not hasattr(self, key):
             self._params.append(key)
         # Set attribute value in the standard way
         super(OrderedFlexibleClass, self).__setattr__(key, value)
@@ -145,14 +148,15 @@ def check_is_fitted(obj, attributes, msg=None, check_all=True):
     if msg is None:
         msg = "this `{name}` is not trained. Call `.fit()` first."
 
-    if not hasattr(obj, 'fit'):
+    if not hasattr(obj, "fit"):
         raise TypeError("`{:}` does not implement `.fit()`.".format(obj))
 
     if is_str(attributes):
         attributes = [attributes]
     elif not is_list(attributes):
         raise TypeError(
-            "the attribute(s) to check must be a string or a list of strings")
+            "the attribute(s) to check must be a string or a list of strings"
+        )
 
     condition = any if check_all is True else all
 

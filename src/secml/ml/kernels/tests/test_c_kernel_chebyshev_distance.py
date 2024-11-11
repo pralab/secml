@@ -5,7 +5,7 @@ class TestCKernelChebyshevDistance(CCKernelTestCases):
     """Unit test for CKernelChebyshevDistance."""
 
     def setUp(self):
-        self._set_up('chebyshev-dist')
+        self._set_up("chebyshev-dist")
 
     def test_similarity_shape(self):
         """Test shape of kernel."""
@@ -32,5 +32,5 @@ class TestCKernelChebyshevDistance(CCKernelTestCases):
         self._test_gradient_w()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CCKernelTestCases.main()

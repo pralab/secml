@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.ml.classifiers.loss import CLossRegression
 from secml.array import CArray
 
@@ -32,7 +33,8 @@ class CLossEpsilonInsensitive(CLossRegression):
     suitable_for : 'regression'
 
     """
-    __class_type = 'e-insensitive'
+
+    __class_type = "e-insensitive"
 
     def __init__(self, epsilon=0.1):
         self._epsilon = float(epsilon)
@@ -130,7 +132,8 @@ class CLossEpsilonInsensitiveSquared(CLossEpsilonInsensitive):
     suitable_for : 'regression'
 
     """
-    __class_type = 'e-insensitive-squared'
+
+    __class_type = "e-insensitive-squared"
 
     def loss(self, y_true, score):
         """Computes the value of the squared epsilon-insensitive loss function.
@@ -158,7 +161,7 @@ class CLossEpsilonInsensitiveSquared(CLossEpsilonInsensitive):
 
         # (max(0, abs(y - s) - epsilon))^2
         e = abs(y_true - score) - self.epsilon
-        e2 = e ** 2
+        e2 = e**2
         e2[e < 0] = 0
 
         return e2

@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.figure._plots import CPlot
 from secml.figure._plots.plot_utils import create_points_grid
 from secml.array import CArray
@@ -36,13 +37,28 @@ class CPlotFunction(CPlot):
             fig_legend.set_visible(True)
         self.grid(grid_on=True)
 
-    def plot_fun(self, func, multipoint=False,
-                 plot_background=True, plot_levels=True,
-                 levels=None, levels_color='k', levels_style=None,
-                 levels_linewidth=1.0, n_colors=50, cmap='jet',
-                 alpha=1.0, alpha_levels=1.0, vmin=None, vmax=None,
-                 colorbar=True, n_grid_points=30,
-                 grid_limits=None, func_args=(), **func_kwargs):
+    def plot_fun(
+        self,
+        func,
+        multipoint=False,
+        plot_background=True,
+        plot_levels=True,
+        levels=None,
+        levels_color="k",
+        levels_style=None,
+        levels_linewidth=1.0,
+        n_colors=50,
+        cmap="jet",
+        alpha=1.0,
+        alpha_levels=1.0,
+        vmin=None,
+        vmax=None,
+        colorbar=True,
+        n_grid_points=30,
+        grid_limits=None,
+        func_args=(),
+        **func_kwargs
+    ):
         """Plot a function (used for decision functions or boundaries).
 
         Parameters
@@ -105,59 +121,83 @@ class CPlotFunction(CPlot):
         levels = [0] if levels is None else levels
 
         # create the grid of the point where the function will be evaluated
-        pad_grid_point_features, pad_xgrid, pad_ygrid = \
-            create_points_grid(grid_limits, n_grid_points)
+        pad_grid_point_features, pad_xgrid, pad_ygrid = create_points_grid(
+            grid_limits, n_grid_points
+        )
 
         # Evaluate function on each grid point
         if multipoint is True:
-            grid_points_value = func(
-                pad_grid_point_features, *func_args, **func_kwargs)
+            grid_points_value = func(pad_grid_point_features, *func_args, **func_kwargs)
         else:
             grid_points_value = pad_grid_point_features.apply_along_axis(
-                func, 1, *func_args, **func_kwargs)
+                func, 1, *func_args, **func_kwargs
+            )
 
         grid_points_val_reshaped = grid_points_value.reshape(
-            (pad_xgrid.shape[0], pad_xgrid.shape[1]))
+            (pad_xgrid.shape[0], pad_xgrid.shape[1])
+        )
 
         # Clipping values to show a correct color plot
         clip_min = -inf if vmin is None else vmin
         clip_max = inf if vmax is None else vmax
-        grid_points_val_reshaped = grid_points_val_reshaped.clip(
-            clip_min, clip_max)
+        grid_points_val_reshaped = grid_points_val_reshaped.clip(clip_min, clip_max)
 
         if is_list(cmap):  # Convert list of colors to colormap
             from matplotlib.colors import ListedColormap
+
             cmap = ListedColormap(cmap)
 
         ch = None
         if plot_background is True:
             # Draw a fully colored plot using 50 levels
-            ch = self.contourf(pad_xgrid, pad_ygrid,
-                               grid_points_val_reshaped,
-                               n_colors, cmap=cmap, alpha=alpha,
-                               vmin=vmin, vmax=vmax, zorder=0)
+            ch = self.contourf(
+                pad_xgrid,
+                pad_ygrid,
+                grid_points_val_reshaped,
+                n_colors,
+                cmap=cmap,
+                alpha=alpha,
+                vmin=vmin,
+                vmax=vmax,
+                zorder=0,
+            )
 
             # Displaying 20 ticks on the colorbar
             if colorbar is True:
                 some_y = CArray.linspace(
-                    grid_points_val_reshaped.min(),
-                    grid_points_val_reshaped.max(), 20)
+                    grid_points_val_reshaped.min(), grid_points_val_reshaped.max(), 20
+                )
                 self.colorbar(ch, ticks=some_y)
 
         if plot_levels is True:
             self.contour(
-                pad_xgrid, pad_ygrid, grid_points_val_reshaped,
-                levels=levels, colors=levels_color, linestyles=levels_style,
-                linewidths=levels_linewidth, alpha=alpha_levels)
+                pad_xgrid,
+                pad_ygrid,
+                grid_points_val_reshaped,
+                levels=levels,
+                colors=levels_color,
+                linestyles=levels_style,
+                linewidths=levels_linewidth,
+                alpha=alpha_levels,
+            )
 
         # Customizing figure
         self.apply_params_fun()
 
         return ch
 
-    def plot_fgrads(self, gradf, n_grid_points=30, grid_limits=None,
-                    color='k', linestyle='-', linewidth=1.0, alpha=1.0,
-                    func_args=(), **func_kwargs):
+    def plot_fgrads(
+        self,
+        gradf,
+        n_grid_points=30,
+        grid_limits=None,
+        color="k",
+        linestyle="-",
+        linewidth=1.0,
+        alpha=1.0,
+        func_args=(),
+        **func_kwargs
+    ):
         """Plot function gradient directions.
 
         Parameters
@@ -184,25 +224,31 @@ class CPlotFunction(CPlot):
 
         """
         # create the grid of the point where the function will be evaluated
-        pad_grid_point_features, pad_xgrid, pad_ygrid = \
-            create_points_grid(grid_limits, n_grid_points)
+        pad_grid_point_features, pad_xgrid, pad_ygrid = create_points_grid(
+            grid_limits, n_grid_points
+        )
 
         n_vals = pad_grid_point_features.shape[0]
         grad_point_values = CArray.zeros((n_vals, 2))
         # compute gradient on each grid point
         for p_idx in range(n_vals):
             grad_point_values[p_idx, :] = gradf(
-                pad_grid_point_features[p_idx, :].ravel(),
-                *func_args, **func_kwargs)
+                pad_grid_point_features[p_idx, :].ravel(), *func_args, **func_kwargs
+            )
 
-        U = grad_point_values[:, 0].reshape(
-            (pad_xgrid.shape[0], pad_xgrid.shape[1]))
-        V = grad_point_values[:, 1].reshape(
-            (pad_xgrid.shape[0], pad_xgrid.shape[1]))
+        U = grad_point_values[:, 0].reshape((pad_xgrid.shape[0], pad_xgrid.shape[1]))
+        V = grad_point_values[:, 1].reshape((pad_xgrid.shape[0], pad_xgrid.shape[1]))
 
-        self.quiver(U, V, pad_xgrid, pad_ygrid,
-                    color=color, linestyle=linestyle,
-                    linewidth=linewidth, alpha=alpha)
+        self.quiver(
+            U,
+            V,
+            pad_xgrid,
+            pad_ygrid,
+            color=color,
+            linestyle=linestyle,
+            linewidth=linewidth,
+            alpha=alpha,
+        )
 
         # Customizing figure
         self.apply_params_fun()

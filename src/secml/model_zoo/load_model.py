@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import json
 import re
 from datetime import datetime, timedelta
@@ -16,14 +17,15 @@ from secml.utils.download_utils import dl_file_gitlab, md5
 
 from secml.settings import SECML_MODELS_DIR
 
-ZOO_REPO_URL = 'https://gitlab.com/secml/secml-zoo'
-ZOO_REPO_BRANCH = _parse_env('SECML_ZOO_BRANCH', default='_noValue')
-MODELS_DICT_FILE = 'models_dict.json'
+ZOO_REPO_URL = "https://gitlab.com/secml/secml-zoo"
+ZOO_REPO_BRANCH = _parse_env("SECML_ZOO_BRANCH", default="_noValue")
+MODELS_DICT_FILE = "models_dict.json"
 MODELS_DICT_PATH = fm.join(SECML_MODELS_DIR, MODELS_DICT_FILE)
 
 _logger = CLog(
     logger_id=__name__,
-    file_handler=SECML_LOGS_PATH if SECML_STORE_LOGS is True else None)
+    file_handler=SECML_LOGS_PATH if SECML_STORE_LOGS is True else None,
+)
 
 
 def _dl_data_versioned(file_path, output_dir, md5_digest=None):
@@ -49,19 +51,19 @@ def _dl_data_versioned(file_path, output_dir, md5_digest=None):
     """
     try:
         # Try downloading from the branch corresponding to current version
-        min_version = re.search(r'^\d+.\d+', secml.__version__).group(0)
-        branch = 'v' + min_version if ZOO_REPO_BRANCH == '_noValue' \
-            else ZOO_REPO_BRANCH
-        dl_file_gitlab(ZOO_REPO_URL, file_path, output_dir,
-                       branch=branch, md5_digest=md5_digest)
+        min_version = re.search(r"^\d+.\d+", secml.__version__).group(0)
+        branch = "v" + min_version if ZOO_REPO_BRANCH == "_noValue" else ZOO_REPO_BRANCH
+        dl_file_gitlab(
+            ZOO_REPO_URL, file_path, output_dir, branch=branch, md5_digest=md5_digest
+        )
 
     except Exception as e:  # Try looking into 'master' branch...
         _logger.debug(e)
         _logger.debug("Looking in the `master` branch...")
-        branch = \
-            'master' if ZOO_REPO_BRANCH == '_noValue' else ZOO_REPO_BRANCH
-        dl_file_gitlab(ZOO_REPO_URL, file_path, output_dir,
-                       branch=branch, md5_digest=md5_digest)
+        branch = "master" if ZOO_REPO_BRANCH == "_noValue" else ZOO_REPO_BRANCH
+        dl_file_gitlab(
+            ZOO_REPO_URL, file_path, output_dir, branch=branch, md5_digest=md5_digest
+        )
 
 
 def _get_models_dict():
@@ -84,7 +86,7 @@ def _get_models_dict():
     # The `.last_update` contains the last time MODELS_DICT_FILE
     # has been download. Read the last update time if this file is available.
     # Otherwise the file will be created later
-    last_update_path = fm.join(SECML_MODELS_DIR, '.last_update')
+    last_update_path = fm.join(SECML_MODELS_DIR, ".last_update")
     last_update_format = "%d %m %Y %H:%M"  # Specific format to avoid locale
     current_datetime = datetime.utcnow()  # UTC datetime to avoid locale
 
@@ -94,8 +96,7 @@ def _get_models_dict():
         if fm.file_exist(last_update_path):
             try:
                 with open(last_update_path) as fp:
-                    last_update = \
-                        datetime.strptime(fp.read(), last_update_format)
+                    last_update = datetime.strptime(fp.read(), last_update_format)
                     # Compute the threshold for triggering an update
                     last_update_th = last_update + timedelta(minutes=30)
             except ValueError as e:
@@ -126,16 +127,19 @@ def _get_models_dict():
                 # is not available, so we propagate the error. Otherwise pass
                 raise e
             _logger.debug(e)  # Log the error for debug purposes
-            _logger.debug("Error when updating the models definitions. "
-                          "Using the last available ones...")
+            _logger.debug(
+                "Error when updating the models definitions. "
+                "Using the last available ones..."
+            )
 
         else:  # No error raised during download process
 
             # Check if file has been correctly downloaded
             if not fm.file_exist(MODELS_DICT_PATH):
                 raise RuntimeError(
-                    'Something wrong happened while downloading the '
-                    'models definitions. Please try again.')
+                    "Something wrong happened while downloading the "
+                    "models definitions. Please try again."
+                )
 
             # Update or create the "last update" file
             with open(last_update_path, "w") as fp:
@@ -165,37 +169,39 @@ def load_model(model_id):
     """
     model_info = _get_models_dict()[model_id]
 
-    model_path = fm.join(SECML_MODELS_DIR, model_info['model'] + '.py')
+    model_path = fm.join(SECML_MODELS_DIR, model_info["model"] + ".py")
     # Download (if needed) model's script, check md5 and extract it
-    if not fm.file_exist(model_path) or \
-            model_info['model_md5'] != md5(model_path):
-        model_url_parts = ('models', model_info['model'] + '.py')
-        model_url = '/'.join(s.strip('/') for s in model_url_parts)
+    if not fm.file_exist(model_path) or model_info["model_md5"] != md5(model_path):
+        model_url_parts = ("models", model_info["model"] + ".py")
+        model_url = "/".join(s.strip("/") for s in model_url_parts)
         out_dir = fm.abspath(model_path)
         # Download requested model from current version's branch first,
         # then from master branch
-        _dl_data_versioned(model_url, out_dir, model_info['model_md5'])
+        _dl_data_versioned(model_url, out_dir, model_info["model_md5"])
 
         # Check if file has been correctly downloaded
         if not fm.file_exist(model_path):
-            raise RuntimeError('Something wrong happened while '
-                               'downloading the model. Please try again.')
+            raise RuntimeError(
+                "Something wrong happened while "
+                "downloading the model. Please try again."
+            )
 
-    state_path = fm.join(SECML_MODELS_DIR, model_info['state'] + '.gz')
+    state_path = fm.join(SECML_MODELS_DIR, model_info["state"] + ".gz")
     # Download (if needed) state, check md5 and extract it
-    if not fm.file_exist(state_path) or \
-            model_info['state_md5'] != md5(state_path):
-        state_url_parts = ('models', model_info['state'] + '.gz')
-        state_url = '/'.join(s.strip('/') for s in state_url_parts)
+    if not fm.file_exist(state_path) or model_info["state_md5"] != md5(state_path):
+        state_url_parts = ("models", model_info["state"] + ".gz")
+        state_url = "/".join(s.strip("/") for s in state_url_parts)
         out_dir = fm.abspath(state_path)
         # Download requested model state from current version's branch first,
         # then from master branch
-        _dl_data_versioned(state_url, out_dir, model_info['state_md5'])
+        _dl_data_versioned(state_url, out_dir, model_info["state_md5"])
 
         # Check if file has been correctly downloaded
         if not fm.file_exist(state_path):
-            raise RuntimeError('Something wrong happened while '
-                               'downloading the model. Please try again.')
+            raise RuntimeError(
+                "Something wrong happened while "
+                "downloading the model. Please try again."
+            )
 
     def import_module(full_name, path):
         """Import a python module from a path."""
@@ -209,7 +215,7 @@ def load_model(model_id):
         return mod
 
     # Name of the function returning the model
-    model_name = model_info["model"].split('/')[-1]
+    model_name = model_info["model"].split("/")[-1]
 
     # Import the python module containing the function returning the model
     model_module = import_module(model_name, model_path)

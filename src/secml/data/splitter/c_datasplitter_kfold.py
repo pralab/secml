@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from sklearn.model_selection import KFold
 
 from secml.array import CArray
@@ -50,12 +51,14 @@ class CDataSplitterKFold(CDataSplitter):
     [CArray(1,)(dense: [2]), CArray(1,)(dense: [1]), CArray(1,)(dense: [0])]
 
     """
-    __class_type = 'kfold'
+
+    __class_type = "kfold"
 
     def __init__(self, num_folds=3, random_state=None):
 
         super(CDataSplitterKFold, self).__init__(
-            num_folds=num_folds, random_state=random_state)
+            num_folds=num_folds, random_state=random_state
+        )
 
     def compute_indices(self, dataset):
         """Compute training set and test set indices for each fold.
@@ -75,13 +78,12 @@ class CDataSplitterKFold(CDataSplitter):
         self._tr_idx = []
         self._ts_idx = []
 
-        sk_splitter = KFold(n_splits=self.num_folds,
-                            shuffle=True,
-                            random_state=self.random_state)
+        sk_splitter = KFold(
+            n_splits=self.num_folds, shuffle=True, random_state=self.random_state
+        )
 
         # We take sklearn indices (iterators) and map to list of CArrays
-        for train_index, test_index in \
-                sk_splitter.split(dataset.X.get_data()):
+        for train_index, test_index in sk_splitter.split(dataset.X.get_data()):
             train_index = CArray(train_index)
             test_index = CArray(test_index)
             self._tr_idx.append(train_index)

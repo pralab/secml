@@ -8,18 +8,18 @@ here = os.path.abspath(os.path.dirname(__file__))
 # Check if we want to building a release package
 is_release = False
 try:
-    is_release = bool(os.environ['SECML_ISRELEASE'])
+    is_release = bool(os.environ["SECML_ISRELEASE"])
 except KeyError:
     pass
 
 
 def read(*path_parts):
-    with open(os.path.join(here, *path_parts), 'r', encoding='ascii') as fp:
+    with open(os.path.join(here, *path_parts), "r", encoding="ascii") as fp:
         return fp.read().strip()
 
 
 def parse_readme(*path_parts):  # For README.md we accept utf-8 chars
-    with open(os.path.join(here, *path_parts), 'r', encoding='utf-8') as fp:
+    with open(os.path.join(here, *path_parts), "r", encoding="utf-8") as fp:
         return fp.read().strip()
 
 
@@ -29,27 +29,27 @@ def git_version():
     def _minimal_ext_cmd(cmd):
         # construct minimal environment
         env = {}
-        for k in ['SYSTEMROOT', 'PATH', 'HOME']:
+        for k in ["SYSTEMROOT", "PATH", "HOME"]:
             v = os.environ.get(k)
             if v is not None:
                 env[k] = v
         # LANGUAGE is used on win32
-        env['LANGUAGE'] = 'C'
-        env['LANG'] = 'C'
-        env['LC_ALL'] = 'C'
+        env["LANGUAGE"] = "C"
+        env["LANG"] = "C"
+        env["LC_ALL"] = "C"
         # Execute in the current dir
-        res = subprocess.Popen(cmd, cwd=here, env=env,
-                               stdout=subprocess.PIPE,
-                               stderr=open(os.devnull, 'w')).communicate()[0]
+        res = subprocess.Popen(
+            cmd, cwd=here, env=env, stdout=subprocess.PIPE, stderr=open(os.devnull, "w")
+        ).communicate()[0]
         return res
 
     try:
-        out = _minimal_ext_cmd(['git', 'rev-parse', '--short', 'HEAD'])
-        GIT_REVISION = out.strip().decode('ascii')
+        out = _minimal_ext_cmd(["git", "rev-parse", "--short", "HEAD"])
+        GIT_REVISION = out.strip().decode("ascii")
         if len(GIT_REVISION) == 0:
             raise OSError
     except OSError:
-        GIT_REVISION = 'Unknown'
+        GIT_REVISION = "Unknown"
 
     return GIT_REVISION
 
@@ -60,15 +60,15 @@ def find_version(*path_parts):
         _v_f = read(*path_parts)  # Read main version file
         if not is_release:  # Override for is_release checks
             _v_git = git_version()
-            if _v_git == 'Unknown':
+            if _v_git == "Unknown":
                 try:  # Try to read rev from file. May not exists
-                    _v_git = read('src', 'secml', 'VERSION_REV')
+                    _v_git = read("src", "secml", "VERSION_REV")
                 except:
                     pass  # _v_git will stay "Unknown"
             else:
-                write_rev(_v_git, 'src', 'secml', 'VERSION_REV')
+                write_rev(_v_git, "src", "secml", "VERSION_REV")
             # Append rev number only if available
-            _v = _v_f if _v_git == 'Unknown' else _v_f + '+' + _v_git
+            _v = _v_f if _v_git == "Unknown" else _v_f + "+" + _v_git
         else:
             _v = _v_f  # release package
         _v = parse_version(_v)  # Integrity checks
@@ -81,7 +81,7 @@ def find_version(*path_parts):
 
 def write_rev(v, *path_parts):
     """Write revision id to file."""
-    a = open(os.path.join(here, *path_parts), 'w')
+    a = open(os.path.join(here, *path_parts), "w")
     try:
         a.write(v)
     finally:
@@ -116,15 +116,16 @@ def install_deps():
         https://github.com/pypa/pip/issues/3610#issuecomment-356687173
 
     """
-    default = open(os.path.join(here, 'requirements.txt'),
-                   'r', encoding='ascii').readlines()
+    default = open(
+        os.path.join(here, "requirements.txt"), "r", encoding="ascii"
+    ).readlines()
     new_pkgs = []
     links = []
     for resource in default:
-        if 'git+ssh' in resource:
-            pkg = resource.split('#')[-1]
-            links.append(resource.strip() + '-9876543210')
-            new_pkgs.append(pkg.replace('egg=', '').rstrip())
+        if "git+ssh" in resource:
+            pkg = resource.split("#")[-1]
+            links.append(resource.strip() + "-9876543210")
+            new_pkgs.append(pkg.replace("egg=", "").rstrip())
         else:
             new_pkgs.append(resource.strip())
     return new_pkgs, links
@@ -132,7 +133,7 @@ def install_deps():
 
 REQ_PKGS, DEP_LINKS = install_deps()
 
-LONG_DESCRIPTION = parse_readme('README.md')
+LONG_DESCRIPTION = parse_readme("README.md")
 
 # List of classifiers: https://pypi.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = """\
@@ -157,36 +158,40 @@ Operating System :: Microsoft :: Windows
 """
 
 setup(
-    name='secml',
+    name="secml",
     version=find_version("src", "secml", "VERSION"),
-    description='A library for Secure and Explainable Machine Learning',
+    description="A library for Secure and Explainable Machine Learning",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
-    license='Apache License 2.0',
-    classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
+    license="Apache License 2.0",
+    classifiers=[_f for _f in CLASSIFIERS.split("\n") if _f],
     platforms=["Linux", "Mac OS-X", "Unix", "Windows"],
-    url='https://secml.readthedocs.io',
+    url="https://secml.readthedocs.io",
     download_url="https://pypi.python.org/pypi/secml#files",
     project_urls={
         "Bug Tracker": "https://github.com/pralab/secml/issues",
         "Source Code": "https://github.com/pralab/secml",
     },
-    maintainer='Maura Pintor, Luca Demetrio',
-    maintainer_email='maura.pintor@unica.it, luca.demetrio@unige.it',
-    packages=find_packages('src', exclude=[
-        "*.tests", "*.tests.*", "tests.*", "tests"]),
-    package_dir={'': 'src'},
+    maintainer="Maura Pintor, Luca Demetrio",
+    maintainer_email="maura.pintor@unica.it, luca.demetrio@unige.it",
+    packages=find_packages("src", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    package_dir={"": "src"},
     include_package_data=True,
-    python_requires='>=3.5, <3.11',
+    python_requires=">=3.5, <3.11",
     install_requires=REQ_PKGS,
     extras_require={
-        'pytorch': ["torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
-        'cleverhans': ["tensorflow>=1.14,<2", "cleverhans<3.1"],
-        'tf-gpu': ["tensorflow-gpu>=1.14,<2"],
-        'foolbox': ["foolbox>=3.3.0", "torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
-        'unittests': ['pytest>=5',
-                      'pytest-cov>=2.9', 'coverage',
-                      'jupyter', 'nbval', 'requests-mock']
+        "pytorch": ["torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
+        "cleverhans": ["tensorflow>=1.14,<2", "cleverhans<3.1"],
+        "tf-gpu": ["tensorflow-gpu>=1.14,<2"],
+        "foolbox": ["foolbox>=3.3.0", "torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
+        "unittests": [
+            "pytest>=5",
+            "pytest-cov>=2.9",
+            "coverage",
+            "jupyter",
+            "nbval",
+            "requests-mock",
+        ],
     },
-    zip_safe=False
+    zip_safe=False,
 )

@@ -5,10 +5,10 @@
 .. moduleauthor:: Marco Meloni <m.meloni42@studenti.unica.it>
 
 """
+
 from secml.ml import CModule
 from secml.array import CArray
-from secml.ml.classifiers.sklearn.c_classifier_sklearn \
-    import CWrapperSkLearnMixin
+from secml.ml.classifiers.sklearn.c_classifier_sklearn import CWrapperSkLearnMixin
 from abc import ABCMeta, abstractmethod
 
 
@@ -26,7 +26,8 @@ class CScalerSkLearn(CWrapperSkLearnMixin, CModule, metaclass=ABCMeta):
         desired preprocessor. If None, input data is used as is.
 
     """
-    __super__ = 'CScalerSkLearn'
+
+    __super__ = "CScalerSkLearn"
 
     def __init__(self, sklearn_scaler, preprocess=None):
 
@@ -96,8 +97,8 @@ class CScalerSkLearn(CWrapperSkLearnMixin, CModule, metaclass=ABCMeta):
             attributes = [attributes]
         elif not is_list(attributes):
             raise TypeError(
-                "the attribute(s) to check must be a string or a list "
-                "of strings")
+                "the attribute(s) to check must be a string or a list " "of strings"
+            )
 
         obj = scaler.sklearn_scaler
 
@@ -111,4 +112,3 @@ class CScalerSkLearn(CWrapperSkLearnMixin, CModule, metaclass=ABCMeta):
 
     def _backward(self, w):
         raise NotImplementedError()
-

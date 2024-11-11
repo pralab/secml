@@ -6,6 +6,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from secml.adv.attacks.poisoning import CAttackPoisoning
 from secml.array import CArray
 from secml.ml.classifiers.clf_utils import convert_binary_labels
@@ -63,33 +64,40 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
         If None, no fixed seed will be set.
 
     """
-    __class_type = 'p-logistic'
 
-    def __init__(self, classifier,
-                 training_data,
-                 val,
-                 distance='l1',
-                 dmax=0,
-                 lb=0,
-                 ub=1,
-                 y_target=None,
-                 solver_type='pgd-ls',
-                 solver_params=None,
-                 init_type='random',
-                 random_seed=None):
+    __class_type = "p-logistic"
 
-        CAttackPoisoning.__init__(self, classifier=classifier,
-                                  training_data=training_data,
-                                  val=val,
-                                  distance=distance,
-                                  dmax=dmax,
-                                  lb=lb,
-                                  ub=ub,
-                                  y_target=y_target,
-                                  solver_type=solver_type,
-                                  solver_params=solver_params,
-                                  init_type=init_type,
-                                  random_seed=random_seed)
+    def __init__(
+        self,
+        classifier,
+        training_data,
+        val,
+        distance="l1",
+        dmax=0,
+        lb=0,
+        ub=1,
+        y_target=None,
+        solver_type="pgd-ls",
+        solver_params=None,
+        init_type="random",
+        random_seed=None,
+    ):
+
+        CAttackPoisoning.__init__(
+            self,
+            classifier=classifier,
+            training_data=training_data,
+            val=val,
+            distance=distance,
+            dmax=dmax,
+            lb=lb,
+            ub=ub,
+            y_target=y_target,
+            solver_type=solver_type,
+            solver_params=solver_params,
+            init_type=init_type,
+            random_seed=random_seed,
+        )
 
     ###########################################################################
     #                            GRAD COMPUTATION
@@ -118,13 +126,14 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
 
         d = xc.size
 
-        if hasattr(clf, 'C'):
+        if hasattr(clf, "C"):
             C = clf.C
-        elif hasattr(clf, 'alpha'):
+        elif hasattr(clf, "alpha"):
             C = 1.0 / clf.alpha
         else:
-            raise ValueError("Error: The classifier does not have neither C "
-                             "nor alpha")
+            raise ValueError(
+                "Error: The classifier does not have neither C " "nor alpha"
+            )
 
         H = clf.hessian_tr_params(tr.X, tr.Y)
 
@@ -148,7 +157,8 @@ class CAttackPoisoningLogisticRegression(CAttackPoisoning):
 
         dbx_c = z_c * w  # column vector
         dwx_c = ((yc * (-1 + sigm_c)) * CArray.eye(d, d)) + z_c * (
-            w.dot(xc))  # matrix d*d
+            w.dot(xc)
+        )  # matrix d*d
 
         G = C * (dwx_c.append(dbx_c, axis=1))
 

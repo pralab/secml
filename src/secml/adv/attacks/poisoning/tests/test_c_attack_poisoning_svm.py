@@ -8,11 +8,13 @@ class TestCAttackPoisoningSVMLinear(CAttackPoisoningTestCases):
     """Unit test for CAttackPoisoningLinearSVM."""
 
     def setUp(self):
-        clf_params = {'kernel': 'linear', 'C': 0.1}
-        self._set_up(clf_idx='lin-svm',
-                     poisoning_class=CAttackPoisoningSVM,
-                     clf_class=CClassifierSVM,
-                     clf_params=clf_params)
+        clf_params = {"kernel": "linear", "C": 0.1}
+        self._set_up(
+            clf_idx="lin-svm",
+            poisoning_class=CAttackPoisoningSVM,
+            clf_class=CClassifierSVM,
+            clf_params=clf_params,
+        )
 
     def test_poisoning_with_normalization_inside(self):
         """Test the CAttackPoisoning object when the classifier contains a
@@ -40,11 +42,13 @@ class TestCAttackPoisoningSVMRBF(CAttackPoisoningTestCases):
     """Unit test for CAttackPoisoningRBFSVM."""
 
     def setUp(self):
-        clf_params = {'kernel': 'rbf', 'C': 10}
-        self._set_up(clf_idx='RBF-svm',
-                     poisoning_class=CAttackPoisoningSVM,
-                     clf_class=CClassifierSVM,
-                     clf_params=clf_params)
+        clf_params = {"kernel": "rbf", "C": 10}
+        self._set_up(
+            clf_idx="RBF-svm",
+            poisoning_class=CAttackPoisoningSVM,
+            clf_class=CClassifierSVM,
+            clf_params=clf_params,
+        )
 
     def test_poisoning_with_normalization_inside(self):
         """Test the CAttackPoisoning object when the classifier contains a
@@ -68,5 +72,5 @@ class TestCAttackPoisoningSVMRBF(CAttackPoisoningTestCases):
         self._test_attack_effectiveness(normalizer=None)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CAttackPoisoningTestCases.main()

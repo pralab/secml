@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from secml.core import CCreator
@@ -23,7 +24,7 @@ class CAttack(CCreator, metaclass=ABCMeta):
 
     """
 
-    __super__ = 'CAttack'
+    __super__ = "CAttack"
 
     def __init__(self, classifier):
         # set the classifier to be attacked
@@ -112,17 +113,13 @@ class CAttack(CCreator, metaclass=ABCMeta):
     @property
     @abstractmethod
     def f_eval(self):
-        """Returns the number of function evaluations made during the attack.
-
-        """
+        """Returns the number of function evaluations made during the attack."""
         raise NotImplementedError
 
     @property
     @abstractmethod
     def grad_eval(self):
-        """Returns the number of gradient evaluations made during the attack.
-
-        """
+        """Returns the number of gradient evaluations made during the attack."""
         raise NotImplementedError
 
     @abstractmethod

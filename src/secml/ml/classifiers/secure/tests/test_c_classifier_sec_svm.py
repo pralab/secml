@@ -15,8 +15,10 @@ class TestCClassifierSecSVM(CUnitTest):
     def _compute_alignment(self, ds, secsvm, svm):
 
         self.logger.info(
-            "Sec-SVM, Avg. Hinge loss: \n{:}".format(secsvm.hinge_loss(
-                ds.X, 2 * ds.Y - 1).mean()))
+            "Sec-SVM, Avg. Hinge loss: \n{:}".format(
+                secsvm.hinge_loss(ds.X, 2 * ds.Y - 1).mean()
+            )
+        )
 
         self.logger.info("SVM, b: {:}".format(svm.b))
         self.logger.info("SVM, w: \n{:}".format(svm.w))
@@ -29,18 +31,22 @@ class TestCClassifierSecSVM(CUnitTest):
         self.assertGreater(angle, 0.7)
 
         self.logger.info(
-            "Objective Function: \n{:}".format(secsvm.objective(ds.X, ds.Y)))
+            "Objective Function: \n{:}".format(secsvm.objective(ds.X, ds.Y))
+        )
         self.logger.info(
-            "Gradient w vs b: \n{:}".format(secsvm.gradient_w_b(ds.X, ds.Y)))
+            "Gradient w vs b: \n{:}".format(secsvm.gradient_w_b(ds.X, ds.Y))
+        )
 
     def test_alignment(self):
 
-        ds = CDLRandom(n_samples=100,
-                       n_features=500,
-                       n_redundant=0,
-                       n_informative=10,
-                       n_clusters_per_class=1,
-                       random_state=0).load()
+        ds = CDLRandom(
+            n_samples=100,
+            n_features=500,
+            n_redundant=0,
+            n_informative=10,
+            n_clusters_per_class=1,
+            random_state=0,
+        ).load()
 
         self.logger.info("Train Sec SVM")
         sec_svm = CClassifierSecSVM(C=1, eta=0.1, eps=1e-2, lb=-0.1, ub=0.5)
@@ -63,10 +69,9 @@ class TestCClassifierSecSVM(CUnitTest):
 
     def test_plot(self):
 
-        ds = CDLRandom(n_samples=100,
-                       n_features=2,
-                       n_redundant=0,
-                       random_state=100).load()
+        ds = CDLRandom(
+            n_samples=100, n_features=2, n_redundant=0, random_state=100
+        ).load()
 
         self.logger.info("Train Sec SVM")
         sec_svm = CClassifierSecSVM(C=1, eta=0.1, eps=1e-3, lb=-0.1, ub=0.5)
@@ -84,28 +89,32 @@ class TestCClassifierSecSVM(CUnitTest):
         # Plot dataset points
         fig.sp.plot_ds(ds)
         # Plot objective function
-        fig.sp.plot_fun(svm.predict,
-                        multipoint=True,
-                        plot_background=True,
-                        plot_levels=False,
-                        n_grid_points=100,
-                        grid_limits=ds.get_bounds())
+        fig.sp.plot_fun(
+            svm.predict,
+            multipoint=True,
+            plot_background=True,
+            plot_levels=False,
+            n_grid_points=100,
+            grid_limits=ds.get_bounds(),
+        )
         fig.sp.title("SVM")
 
         fig.subplot(1, 2, 2)
         # Plot dataset points
         fig.sp.plot_ds(ds)
         # Plot objective function
-        fig.sp.plot_fun(sec_svm.predict,
-                        multipoint=True,
-                        plot_background=True,
-                        plot_levels=False,
-                        n_grid_points=100,
-                        grid_limits=ds.get_bounds())
+        fig.sp.plot_fun(
+            sec_svm.predict,
+            multipoint=True,
+            plot_background=True,
+            plot_levels=False,
+            n_grid_points=100,
+            grid_limits=ds.get_bounds(),
+        )
         fig.sp.title("Sec-SVM")
 
         fig.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

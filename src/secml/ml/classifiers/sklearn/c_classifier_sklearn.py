@@ -5,6 +5,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from secml.ml.classifiers import CClassifier
 from secml.array import CArray
 from secml.utils.dict_utils import merge_dicts, SubLevelsDict
@@ -39,8 +40,11 @@ class CWrapperSkLearnMixin:
         # as keys the attributes names without the accessibility prefix
         # We merge our dict with the sklearn `.get_params()` dict
         return SubLevelsDict(
-            merge_dicts(super(CWrapperSkLearnMixin, self).get_params(),
-                        self._sklearn_model.get_params()))
+            merge_dicts(
+                super(CWrapperSkLearnMixin, self).get_params(),
+                self._sklearn_model.get_params(),
+            )
+        )
 
     def __getattribute__(self, key):
         """Get an attribute.
@@ -50,7 +54,7 @@ class CWrapperSkLearnMixin:
         """
         try:
             # If we are not getting the sklearn model itself
-            if key != '_sklearn_model' and hasattr(self, '_sklearn_model'):
+            if key != "_sklearn_model" and hasattr(self, "_sklearn_model"):
                 return self._sklearn_model.get_params()[key]
         except KeyError:
             pass  # Parameter not found in sklearn model
@@ -63,8 +67,7 @@ class CWrapperSkLearnMixin:
         This allow setting also the attributes of the internal sklearn model.
 
         """
-        if hasattr(self, '_sklearn_model') and \
-                key in self._sklearn_model.get_params():
+        if hasattr(self, "_sklearn_model") and key in self._sklearn_model.get_params():
             self._sklearn_model.set_params(**{key: value})
         else:  # Otherwise, normal python set behavior
             super(CWrapperSkLearnMixin, self).__setattr__(key, value)
@@ -89,14 +92,14 @@ class CClassifierSkLearn(CWrapperSkLearnMixin, CClassifier):
 
     """
 
-    __class_type = 'sklearn-clf'
+    __class_type = "sklearn-clf"
 
     def __init__(self, sklearn_model, preprocess=None):
 
         CWrapperSkLearnMixin.__init__(self, sklearn_model)
         CClassifier.__init__(self, preprocess=preprocess)
 
-        if hasattr(sklearn_model, 'classes_'):  # Model is pretrained
+        if hasattr(sklearn_model, "classes_"):  # Model is pretrained
             self._classes = CArray(sklearn_model.classes_)
             # FIXME: how to obtain this from pretrained models?
             self._n_features = 0
@@ -131,7 +134,8 @@ class CClassifierSkLearn(CWrapperSkLearnMixin, CClassifier):
             probs = True
         else:
             raise AttributeError(
-                "This model has neither decision_function nor predict_proba.")
+                "This model has neither decision_function nor predict_proba."
+            )
 
         scores = CArray(scores)
 
@@ -143,12 +147,12 @@ class CClassifierSkLearn(CWrapperSkLearnMixin, CClassifier):
             scores = outputs
 
         if scores.shape[1] != self.n_classes:  # this happens in one-vs-one
-            raise ValueError(
-                "Number of columns is not equal to number of classes!")
+            raise ValueError("Number of columns is not equal to number of classes!")
 
         scores.atleast_2d()
         return scores
 
     def _backward(self, w):
         raise NotImplementedError(
-            "`_backward` is not implemented for this generic sklearn wrapper.")
+            "`_backward` is not implemented for this generic sklearn wrapper."
+        )

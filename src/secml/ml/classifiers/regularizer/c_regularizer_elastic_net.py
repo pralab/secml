@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.ml.classifiers.regularizer import CRegularizer
 
 
@@ -27,7 +28,8 @@ class CRegularizerElasticNet(CRegularizer):
     class_type : 'elastic-net'
 
     """
-    __class_type = 'elastic-net'
+
+    __class_type = "elastic-net"
 
     def __init__(self, l1_ratio=0.15):
         self._l1_ratio = float(l1_ratio)
@@ -51,8 +53,9 @@ class CRegularizerElasticNet(CRegularizer):
             Vector-like array.
 
         """
-        return self.l1_ratio * w.norm(order=1) \
-            + (1 - self.l1_ratio) * 0.5 * (w ** 2).sum()
+        return (
+            self.l1_ratio * w.norm(order=1) + (1 - self.l1_ratio) * 0.5 * (w**2).sum()
+        )
 
     def dregularizer(self, w):
         """Returns the derivative of the elastic-net regularizer

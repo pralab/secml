@@ -4,11 +4,9 @@ from secml.array import CArray
 from secml.data.loader import CDataLoaderMNIST
 from secml.data.splitter import CDataSplitterKFold
 from secml.ml.peval.metrics import CMetricAccuracy
-from secml.ml.classifiers import \
-    CClassifierSVM, CClassifierLogistic, CClassifierRidge
+from secml.ml.classifiers import CClassifierSVM, CClassifierLogistic, CClassifierRidge
 from secml.ml.kernels import CKernelRBF
-from secml.ml.classifiers.gradients.tests.test_classes import \
-    CClassifierGradientTest
+from secml.ml.classifiers.gradients.tests.test_classes import CClassifierGradientTest
 
 from secml.explanation import CExplainerInfluenceFunctions
 
@@ -23,43 +21,46 @@ class TestCExplainerInfluenceFunctions(CUnitTest):
         cls._metric = CMetricAccuracy()
 
     def test_explanation_svm(self):
-        self._clf = CClassifierSVM(kernel='linear')  # train in the dual
-        self._clf_idx = 'lin-svm'
+        self._clf = CClassifierSVM(kernel="linear")  # train in the dual
+        self._clf_idx = "lin-svm"
         self._test_explanation_simple_clf()
 
     def test_explanation_logistic(self):
         self._clf = CClassifierLogistic()
-        self._clf_idx = 'logistic regression'
+        self._clf_idx = "logistic regression"
         self._test_explanation_simple_clf()
 
     def test_explanation_svm_rbf(self):
         self._clf = CClassifierSVM(kernel=CKernelRBF(gamma=0.01), C=10)
-        self._clf_idx = 'rbf-svm'
+        self._clf_idx = "rbf-svm"
         self._test_explanation_simple_clf()
 
     def test_explanation_ridge(self):
         self._clf = CClassifierRidge()
-        self._clf_idx = 'Ridge'
+        self._clf_idx = "Ridge"
         self._test_explanation_simple_clf()
 
     @staticmethod
     def _create_mnist_dataset(
-            digits=[4, 9], n_tr=100, n_val=200, n_ts=200, seed=4):  # 10
+        digits=[4, 9], n_tr=100, n_val=200, n_ts=200, seed=4
+    ):  # 10
         loader = CDataLoaderMNIST()
 
-        tr = loader.load('training', digits=digits)
-        ts = loader.load('testing', digits=digits, num_samples=n_ts)
+        tr = loader.load("training", digits=digits)
+        ts = loader.load("testing", digits=digits, num_samples=n_ts)
 
         # start train and validation dataset split
         splitter = CDataSplitterKFold(num_folds=2, random_state=seed)
         splitter.compute_indices(tr)
 
-        val_dts_idx = CArray.randsample(CArray.arange(0, tr.num_samples),
-                                        n_val, random_state=seed)
+        val_dts_idx = CArray.randsample(
+            CArray.arange(0, tr.num_samples), n_val, random_state=seed
+        )
         val = tr[val_dts_idx, :]
 
-        tr_dts_idx = CArray.randsample(CArray.arange(0, tr.num_samples),
-                                       n_tr, random_state=seed)
+        tr_dts_idx = CArray.randsample(
+            CArray.arange(0, tr.num_samples), n_tr, random_state=seed
+        )
         tr = tr[tr_dts_idx, :]
 
         tr.X /= 255.0
@@ -81,11 +82,11 @@ class TestCExplainerInfluenceFunctions(CUnitTest):
 
         self._check_accuracy()
 
-        explanation = CExplainerInfluenceFunctions(self._clf, self._tr,
-                                                   outer_loss_idx=self._clf_loss)
+        explanation = CExplainerInfluenceFunctions(
+            self._clf, self._tr, outer_loss_idx=self._clf_loss
+        )
         self.influences = explanation.explain(self._ts.X, self._ts.Y)
-        self.clf_gradients = CClassifierGradientTest.create(
-            self._clf.class_type)
+        self.clf_gradients = CClassifierGradientTest.create(self._clf.class_type)
 
     def _get_tr_without_point(self, p_idx):
         """
@@ -124,7 +125,8 @@ class TestCExplainerInfluenceFunctions(CUnitTest):
         clf_copy.fit(new_dataset.X, new_dataset.Y)
 
         loss = (1 / self._ts.num_samples) * self.clf_gradients.l(
-            self._ts.X, self._ts.Y, clf_copy).sum(axis=None)
+            self._ts.X, self._ts.Y, clf_copy
+        ).sum(axis=None)
 
         return loss
 
@@ -143,27 +145,35 @@ class TestCExplainerInfluenceFunctions(CUnitTest):
             less influent
         """
         acc_without_p_infl = self._check_influence(p_inf_idx)
-        self.logger.info("The loss without the point {:} supposed to be "
-                         "one of the most influent is {:}".format(p_inf_idx,
-                                                                  acc_without_p_infl))
+        self.logger.info(
+            "The loss without the point {:} supposed to be "
+            "one of the most influent is {:}".format(p_inf_idx, acc_without_p_infl)
+        )
         acc_without_p_not_infl = self._check_influence(p_not_inf_idx)
-        self.logger.info("The loss without the point {:} supposed to be "
-                         "one of the less influent is {:}".format(
-            p_not_inf_idx,
-            acc_without_p_not_infl))
+        self.logger.info(
+            "The loss without the point {:} supposed to be "
+            "one of the less influent is {:}".format(
+                p_not_inf_idx, acc_without_p_not_infl
+            )
+        )
 
-        self.assertGreater(acc_without_p_infl, acc_without_p_not_infl,
-                           "The point that is supposed to be between the "
-                           "less influent has a higher influence of the "
-                           "point supposed to be between one of the most "
-                           "influent")
+        self.assertGreater(
+            acc_without_p_infl,
+            acc_without_p_not_infl,
+            "The point that is supposed to be between the "
+            "less influent has a higher influence of the "
+            "point supposed to be between one of the most "
+            "influent",
+        )
 
     def _test_explanation(self):
         self._compute_influences()
 
-        self.assertEqual(self.influences.shape,
-                         (self._ts.num_samples, self._tr.num_samples),
-                         "The shape of the influences is wrong!")
+        self.assertEqual(
+            self.influences.shape,
+            (self._ts.num_samples, self._tr.num_samples),
+            "The shape of the influences is wrong!",
+        )
 
         average_influence = self.influences.mean(axis=0).ravel()
         # order the idx of the tr samples in the way to have the less
@@ -178,10 +188,12 @@ class TestCExplainerInfluenceFunctions(CUnitTest):
             self._check_prototype_pair(infl_idx, not_infl_idx)
 
     def _test_explanation_simple_clf(self):
-        self.logger.info("Explain the decisions of a {:} classifier and "
-                         "test if they are reasonable".format(self._clf_idx))
+        self.logger.info(
+            "Explain the decisions of a {:} classifier and "
+            "test if they are reasonable".format(self._clf_idx)
+        )
         self._test_explanation()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

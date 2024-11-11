@@ -5,6 +5,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 import numpy as np
 
 from secml.array import CArray
@@ -59,18 +60,22 @@ class COptimizerPGDLS(COptimizer):
     class_type : 'pgd-ls'
 
     """
-    __class_type = 'pgd-ls'
 
-    def __init__(self, fun,
-                 constr=None, bounds=None,
-                 eta=1e-3,
-                 eta_min=None,
-                 eta_max=None,
-                 max_iter=1000,
-                 eps=1e-4):
+    __class_type = "pgd-ls"
 
-        COptimizer.__init__(self, fun=fun,
-                            constr=constr, bounds=bounds)
+    def __init__(
+        self,
+        fun,
+        constr=None,
+        bounds=None,
+        eta=1e-3,
+        eta_min=None,
+        eta_max=None,
+        max_iter=1000,
+        eps=1e-4,
+    ):
+
+        COptimizer.__init__(self, fun=fun, constr=constr, bounds=bounds)
 
         # Read/write attributes
         self.eta = eta
@@ -142,7 +147,10 @@ class COptimizerPGDLS(COptimizer):
             constr=self._constr,
             bounds=self._bounds,
             max_iter=50,
-            eta=eta, eta_min=eta_min, eta_max=eta_max)
+            eta=eta,
+            eta_min=eta_min,
+            eta_max=eta_max,
+        )
 
     @staticmethod
     def _l1_projected_gradient(grad):
@@ -158,7 +166,8 @@ class COptimizerPGDLS(COptimizer):
         argmax_pos = CArray(abs_grad == grad_max).nnz_indices[1][:1]
         # TODO: not sure if proj_grad should be always sparse (grad is not)
         proj_grad = CArray.zeros(
-            shape=grad.shape, sparse=grad.issparse, dtype=grad.dtype)
+            shape=grad.shape, sparse=grad.issparse, dtype=grad.dtype
+        )
         proj_grad[argmax_pos] = grad[argmax_pos].sign()
         return proj_grad
 
@@ -183,11 +192,17 @@ class COptimizerPGDLS(COptimizer):
         #  Use (ad wrap in CArray) np.isclose with atol=1e-6, rtol=0
         # FIXME: converting grad to dense as the sparse vs sparse logical_and
         #  is too slow
-        x_lb = (x.round(6) == CArray(self.bounds.lb).round(6)).logical_and(
-            grad > 0).astype(bool)
+        x_lb = (
+            (x.round(6) == CArray(self.bounds.lb).round(6))
+            .logical_and(grad > 0)
+            .astype(bool)
+        )
 
-        x_ub = (x.round(6) == CArray(self.bounds.ub).round(6)).logical_and(
-            grad < 0).astype(bool)
+        x_ub = (
+            (x.round(6) == CArray(self.bounds.ub).round(6))
+            .logical_and(grad < 0)
+            .astype(bool)
+        )
 
         # reset gradient for unfeasible features
         grad[x_lb + x_ub] = 0
@@ -213,17 +228,18 @@ class COptimizerPGDLS(COptimizer):
         # filter modifications that would violate bounds (to sparsify gradient)
         grad = self._box_projected_gradient(x, grad)
 
-        if self.constr is not None and self.constr.class_type == 'l1':
+        if self.constr is not None and self.constr.class_type == "l1":
             # project z onto l1 constraint (via dual norm)
             grad = self._l1_projected_gradient(grad)
 
-        next_point = CArray(x - grad * self._line_search.eta,
-                            dtype=self._dtype, tosparse=x.issparse)
+        next_point = CArray(
+            x - grad * self._line_search.eta, dtype=self._dtype, tosparse=x.issparse
+        )
 
         if self.constr is not None and self.constr.is_violated(next_point):
             self.logger.debug("Line-search on distance constraint.")
             grad = CArray(x - self.constr.projection(next_point))
-            if self.constr.class_type == 'l1':
+            if self.constr.class_type == "l1":
                 grad = grad.sign()  # to move along the l1 ball surface
             z, fz = self._line_search.minimize(x, -grad, fx)
             return z, fz
@@ -261,16 +277,16 @@ class COptimizerPGDLS(COptimizer):
         if len(kwargs) != 0:
             raise ValueError(
                 "{:} does not accept additional parameters.".format(
-                    self.__class__.__name__))
+                    self.__class__.__name__
+                )
+            )
 
         # reset fun and grad eval counts for both fun and f (by default fun==f)
         self._f.reset_eval()
         self._fun.reset_eval()
 
         # initialize line search (and re-assign fun to it)
-        self._init_line_search(eta=self.eta,
-                               eta_min=self.eta_min,
-                               eta_max=self.eta_max)
+        self._init_line_search(eta=self.eta, eta_min=self.eta_min, eta_max=self.eta_max)
 
         # constr.radius = 0, exit
         if self.constr is not None and self.constr.radius == 0:
@@ -278,11 +294,12 @@ class COptimizerPGDLS(COptimizer):
             x0 = self.constr.center
             if self.bounds is not None and self.bounds.is_violated(x0):
                 import warnings
+
                 warnings.warn(
                     "x0 " + str(x0) + " is outside of the given bounds.",
-                    category=RuntimeWarning)
-            self._x_seq = CArray.zeros(
-                (1, x0.size), sparse=x0.issparse, dtype=x0.dtype)
+                    category=RuntimeWarning,
+                )
+            self._x_seq = CArray.zeros((1, x0.size), sparse=x0.issparse, dtype=x0.dtype)
             self._f_seq = CArray.zeros(1)
             self._x_seq[0, :] = x0
             self._f_seq[0] = self._fun.fun(x0, *args)
@@ -298,10 +315,10 @@ class COptimizerPGDLS(COptimizer):
         if self.constr is not None and self.constr.is_violated(x):
             x = self.constr.projection(x)
 
-        if (self.bounds is not None and self.bounds.is_violated(x)) or \
-                (self.constr is not None and self.constr.is_violated(x)):
-            raise ValueError(
-                "x_init " + str(x) + " is outside of feasible domain.")
+        if (self.bounds is not None and self.bounds.is_violated(x)) or (
+            self.constr is not None and self.constr.is_violated(x)
+        ):
+            raise ValueError("x_init " + str(x) + " is outside of feasible domain.")
 
         # dtype depends on x and eta (the grid discretization)
         if np.issubdtype(x_init.dtype, np.floating):
@@ -311,9 +328,9 @@ class COptimizerPGDLS(COptimizer):
             self._dtype = self._line_search.eta.dtype
 
         # initialize x_seq and f_seq
-        self._x_seq = CArray.zeros((self.max_iter, x_init.size),
-                                   sparse=x_init.issparse,
-                                   dtype=self._dtype)
+        self._x_seq = CArray.zeros(
+            (self.max_iter, x_init.size), sparse=x_init.issparse, dtype=self._dtype
+        )
         self._f_seq = CArray.zeros(self.max_iter)
 
         # The first point is obviously the starting point,
@@ -322,7 +339,7 @@ class COptimizerPGDLS(COptimizer):
         self._x_seq[0, :] = x
         self._f_seq[0] = fx
 
-        self.logger.debug('Iter.: ' + str(0) + ', f(x): ' + str(fx))
+        self.logger.debug("Iter.: " + str(0) + ", f(x): " + str(fx))
 
         for i in range(1, self.max_iter):
 
@@ -334,20 +351,26 @@ class COptimizerPGDLS(COptimizer):
             self._f_seq[i] = fx
             self._x_opt = x
 
-            self.logger.debug('Iter.: ' + str(i) +
-                              ', f(x): ' + str(fx) +
-                              ', norm(gr(x)): ' +
-                              str(CArray(self._grad).norm()))
+            self.logger.debug(
+                "Iter.: "
+                + str(i)
+                + ", f(x): "
+                + str(fx)
+                + ", norm(gr(x)): "
+                + str(CArray(self._grad).norm())
+            )
 
             diff = abs(self.f_seq[i].item() - self.f_seq[i - 1].item())
 
             if diff < self.eps:
                 self.logger.debug(
                     "Flat region, exiting... ({:.4f} / {:.4f})".format(
-                        self._f_seq[i].item(), self._f_seq[i - 1].item()))
-                self._x_seq = self.x_seq[:i + 1, :]
-                self._f_seq = self.f_seq[:i + 1]
+                        self._f_seq[i].item(), self._f_seq[i - 1].item()
+                    )
+                )
+                self._x_seq = self.x_seq[: i + 1, :]
+                self._f_seq = self.f_seq[: i + 1]
                 return x
 
-        self.logger.warning('Maximum iterations reached. Exiting.')
+        self.logger.warning("Maximum iterations reached. Exiting.")
         return x

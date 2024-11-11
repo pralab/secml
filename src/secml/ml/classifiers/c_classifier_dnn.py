@@ -5,6 +5,7 @@
 .. moduleauthor:: Maura Pintor <maura.pintor@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 
 from secml.array import CArray
@@ -45,13 +46,20 @@ class CClassifierDNN(CClassifier, metaclass=ABCMeta):
     class_type : 'dnn-clf'
 
     """
-    __class_type = ' dnn-clf'
 
-    def __init__(self, model, input_shape=None, preprocess=None,
-                 pretrained=False, pretrained_classes=None,
-                 softmax_outputs=False, n_jobs=1):
-        super(CClassifierDNN, self).__init__(
-            preprocess=preprocess, n_jobs=n_jobs)
+    __class_type = " dnn-clf"
+
+    def __init__(
+        self,
+        model,
+        input_shape=None,
+        preprocess=None,
+        pretrained=False,
+        pretrained_classes=None,
+        softmax_outputs=False,
+        n_jobs=1,
+    ):
+        super(CClassifierDNN, self).__init__(preprocess=preprocess, n_jobs=n_jobs)
 
         self._model = model
         self._out_layer = None

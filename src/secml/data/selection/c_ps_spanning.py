@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.data.selection import CPrototypesSelector
 from secml.array import CArray
 from secml.ml.kernels import CKernelEuclidean
@@ -29,7 +30,8 @@ class CPSSpanning(CPrototypesSelector):
     class_type : 'spanning'
 
     """
-    __class_type = 'spanning'
+
+    __class_type = "spanning"
 
     def select(self, dataset, n_prototypes):
         """Selects the prototypes from input dataset.
@@ -48,7 +50,7 @@ class CPSSpanning(CPrototypesSelector):
 
         """
         # Precomputing distances
-        k_euclidean = - CKernelEuclidean().k(dataset.X)
+        k_euclidean = -CKernelEuclidean().k(dataset.X)
         # List of selected prototypes (indices)
         # First sample is the median
         sel_idx = [k_euclidean.sum(axis=0, keepdims=False).argmin()]

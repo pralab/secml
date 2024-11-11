@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 
 from secml.array import CArray
@@ -14,7 +15,8 @@ from secml.core import CCreator
 
 class CDataLoader(CCreator, metaclass=ABCMeta):
     """Interface for Dataset loaders."""
-    __super__ = 'CDataLoader'
+
+    __super__ = "CDataLoader"
 
     @abstractmethod
     def load(self, *args, **kwargs):
@@ -25,7 +27,8 @@ class CDataLoader(CCreator, metaclass=ABCMeta):
         """
         raise NotImplementedError(
             "Please implement a `load` method for class {:}"
-            "".format(self.__class__.__name__))
+            "".format(self.__class__.__name__)
+        )
 
     # TODO: GENERALIZE THIS FUNCTION AND PUT IT INTO CARRAY
     @staticmethod
@@ -67,7 +70,4 @@ class CDataLoader(CCreator, metaclass=ABCMeta):
         idx_feat_presents = CArray(nnz_elem_idx[1]).unique()
 
         # return ds without features that are all zero and non zero old idx
-        return patterns[:, idx_feat_presents], \
-            all_orig_feat_idx[idx_feat_presents]
-
-
+        return patterns[:, idx_feat_presents], all_orig_feat_idx[idx_feat_presents]

@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.figure._plots import CPlot
 from secml.ml.stats import CDensityEstimation
 

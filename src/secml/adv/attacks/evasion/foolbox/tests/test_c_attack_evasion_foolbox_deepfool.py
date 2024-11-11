@@ -1,4 +1,6 @@
-from secml.adv.attacks.evasion.foolbox.tests.c_attack_evasion_foolbox_testcases import CAttackEvasionFoolboxTestCases
+from secml.adv.attacks.evasion.foolbox.tests.c_attack_evasion_foolbox_testcases import (
+    CAttackEvasionFoolboxTestCases,
+)
 
 try:
     import foolbox
@@ -6,8 +8,10 @@ try:
 except ImportError:
     CAttackEvasionFoolboxTestCases.importskip("foolbox")
 
-from secml.adv.attacks.evasion.foolbox.fb_attacks.fb_deepfool_attack \
-    import CFoolboxDeepfoolL2, CFoolboxDeepfoolLinf
+from secml.adv.attacks.evasion.foolbox.fb_attacks.fb_deepfool_attack import (
+    CFoolboxDeepfoolL2,
+    CFoolboxDeepfoolLinf,
+)
 
 
 class TestCAttackEvasionFoolboxDeepfoolL2Logits(CAttackEvasionFoolboxTestCases):
@@ -19,9 +23,13 @@ class TestCAttackEvasionFoolboxDeepfoolL2Logits(CAttackEvasionFoolboxTestCases):
         super(TestCAttackEvasionFoolboxDeepfoolL2Logits, self).setUp()
         self.attack_class = CFoolboxDeepfoolL2
 
-        self.attack_params = {'steps': 25, 'epsilons': None,
-                              'loss': 'logits', 'candidates': 2,
-                              'overshoot': 0.01}
+        self.attack_params = {
+            "steps": 25,
+            "epsilons": None,
+            "loss": "logits",
+            "candidates": 2,
+            "overshoot": 0.01,
+        }
         self.has_targeted = False
         self.has_untargeted = True
 
@@ -47,9 +55,13 @@ class TestCAttackEvasionFoolboxDeepfoolLInfLogits(CAttackEvasionFoolboxTestCases
         super(TestCAttackEvasionFoolboxDeepfoolLInfLogits, self).setUp()
         self.attack_class = CFoolboxDeepfoolLinf
 
-        self.attack_params = {'steps': 100, 'epsilons': None,
-                              'loss': 'logits', 'candidates': 2,
-                              'overshoot': 0.01}
+        self.attack_params = {
+            "steps": 100,
+            "epsilons": None,
+            "loss": "logits",
+            "candidates": 2,
+            "overshoot": 0.01,
+        }
         self.has_targeted = False
         self.has_untargeted = True
 
@@ -75,9 +87,13 @@ class TestCAttackEvasionFoolboxDeepfoolL2CELoss(CAttackEvasionFoolboxTestCases):
         super(TestCAttackEvasionFoolboxDeepfoolL2CELoss, self).setUp()
         self.attack_class = CFoolboxDeepfoolL2
 
-        self.attack_params = {'steps': 100, 'epsilons': None,
-                              'loss': 'crossentropy', 'candidates': 2,
-                              'overshoot': 0.01}
+        self.attack_params = {
+            "steps": 100,
+            "epsilons": None,
+            "loss": "crossentropy",
+            "candidates": 2,
+            "overshoot": 0.01,
+        }
         self.has_targeted = False
         self.has_untargeted = True
 
@@ -93,6 +109,7 @@ class TestCAttackEvasionFoolboxDeepfoolL2CELoss(CAttackEvasionFoolboxTestCases):
     def test_obj_fun_and_grad(self):
         self._check_obj_function_and_grad()
 
+
 class TestCAttackEvasionFoolboxDeepfoolLInfCELoss(CAttackEvasionFoolboxTestCases):
     """Unit test for CAttackEvasionFoolboxDeepfoolLInf with difference of cross-entropies."""
 
@@ -102,9 +119,13 @@ class TestCAttackEvasionFoolboxDeepfoolLInfCELoss(CAttackEvasionFoolboxTestCases
         super(TestCAttackEvasionFoolboxDeepfoolLInfCELoss, self).setUp()
         self.attack_class = CFoolboxDeepfoolLinf
 
-        self.attack_params = {'steps': self.default_steps, 'epsilons': None,
-                              'loss': 'crossentropy', 'candidates': 2,
-                              'overshoot': 0.01}
+        self.attack_params = {
+            "steps": self.default_steps,
+            "epsilons": None,
+            "loss": "crossentropy",
+            "candidates": 2,
+            "overshoot": 0.01,
+        }
         self.has_targeted = False
         self.has_untargeted = True
 

@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.ml.peval import CPerfEvaluator
 from secml.array import CArray
 from secml.core.type_utils import is_scalar
@@ -27,20 +28,21 @@ class CPerfEvaluatorXVal(CPerfEvaluator):
     class_type : 'xval'
 
     """
-    __class_type = 'xval'
+
+    __class_type = "xval"
 
     def compute_performance(self, estimator, dataset):
         """Split data in folds and return the mean estimator performance.
 
         Parameters
         ----------
-        estimator : CClassifier 
+        estimator : CClassifier
             The Classifier that we want evaluate
         dataset : CDataset
             Dataset that we want use for evaluate the classifier
 
         Returns
-        -------        
+        -------
         score : float
             Mean performance score of estimator computed on the K-Folds.
 
@@ -59,7 +61,8 @@ class CPerfEvaluatorXVal(CPerfEvaluator):
             estimator.fit(train_dataset.X, train_dataset.Y)
 
             pred_label, pred_score = estimator.predict(
-                test_dataset.X, return_decision_function=True)
+                test_dataset.X, return_decision_function=True
+            )
 
             if dataset.num_classes > 2:
                 pred_score = None  # Score cannot be used in multiclass case
@@ -68,13 +71,14 @@ class CPerfEvaluatorXVal(CPerfEvaluator):
                 pred_score = pred_score[:, 1].ravel()
 
             this_test_score = self.metric.performance_score(
-                test_dataset.Y, y_pred=pred_label, score=pred_score)
+                test_dataset.Y, y_pred=pred_label, score=pred_score
+            )
 
             splits_score[split_idx] = this_test_score
 
         return splits_score.mean()
 
-    def _get_best_params(self, res_vect, params, params_matrix, pick='first'):
+    def _get_best_params(self, res_vect, params, params_matrix, pick="first"):
         """Returns the best parameters given input performance scores.
 
         The best parameters have the closest associated performance score
@@ -105,8 +109,7 @@ class CPerfEvaluatorXVal(CPerfEvaluator):
 
         """
         if not is_scalar(self.metric.best_value):
-            raise TypeError(
-                "XVal only works with metric with the best value as scalar")
+            raise TypeError("XVal only works with metric with the best value as scalar")
 
         # Get the index of the results closest to the best value
         diff = abs(res_vect - self.metric.best_value)
@@ -133,12 +136,13 @@ class CPerfEvaluatorXVal(CPerfEvaluator):
             best_params_list.append(best_params_dict)
 
         # Chose which candidate parameters assign to classifier
-        if pick == 'first':  # Usually the smallest
+        if pick == "first":  # Usually the smallest
             best_params_dict = best_params_list[0]
-        elif pick == 'last':  # Usually the biggest
+        elif pick == "last":  # Usually the biggest
             best_params_dict = best_params_list[-1]
-        elif pick == 'random':
+        elif pick == "random":
             import random
+
             best_params_dict = random.choice(best_params_list)
         else:
             raise ValueError("pick strategy '{:}' not known".format(pick))

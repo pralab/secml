@@ -5,14 +5,27 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import os
 import shutil
 import tempfile
 
 # Remember to add any new method to following list
-__all__ = ['folder_exist', 'file_exist', 'make_folder_incwd', 'make_folder',
-           'remove_folder', 'make_rand_folder', 'abspath', 'normpath',
-           'join', 'split', 'expanduser', 'dirsep', 'get_tempfile']
+__all__ = [
+    "folder_exist",
+    "file_exist",
+    "make_folder_incwd",
+    "make_folder",
+    "remove_folder",
+    "make_rand_folder",
+    "abspath",
+    "normpath",
+    "join",
+    "split",
+    "expanduser",
+    "dirsep",
+    "get_tempfile",
+]
 
 
 def folder_exist(folder_path):
@@ -55,7 +68,9 @@ def make_folder_incwd(folder_name, mode=0o777):
     make_folder : Create a directory given full path.
 
     """
-    return make_folder(os.path.join(os.path.dirname(os.getcwd()), folder_name), mode=mode)
+    return make_folder(
+        os.path.join(os.path.dirname(os.getcwd()), folder_name), mode=mode
+    )
 
 
 def make_folder(folder_path, mode=0o777):
@@ -142,8 +157,8 @@ def ignore_function(ignore):
     return _ignore_
 
 
-def copy_folder(folder_path, copy_folder_path, ignore_file=''):
-    """Copy a folder and every folder/file it contain. 
+def copy_folder(folder_path, copy_folder_path, ignore_file=""):
+    """Copy a folder and every folder/file it contain.
 
     Path must point to a directory (can not be a symbolic link).
 
@@ -153,8 +168,8 @@ def copy_folder(folder_path, copy_folder_path, ignore_file=''):
         Absolute or relative path to folder to copy.
     copy_folder_path : str
         Absolute or relative path of new folder where you want store folder_path's data.
-    ignore_file : tuple 
-        contain folder name of file + path that we wouldn't copy 
+    ignore_file : tuple
+        contain folder name of file + path that we wouldn't copy
         for example :
             file_to_ignore = ('filetoignore.txt','foldertoignore')
     """
@@ -162,14 +177,18 @@ def copy_folder(folder_path, copy_folder_path, ignore_file=''):
         raise OSError("folder that you want copy doesn't exist!")
     else:
         try:
-            shutil.copytree(folder_path, copy_folder_path, ignore=shutil.ignore_patterns(*ignore_file))
+            shutil.copytree(
+                folder_path,
+                copy_folder_path,
+                ignore=shutil.ignore_patterns(*ignore_file),
+            )
         except OSError as e:
-            print('Directory not copied. Error: %s' % e)
+            print("Directory not copied. Error: %s" % e)
 
 
 # TODO: CHECK DOCSTRING
 def copy_file(file_path, copy_file_path):
-    """Copy one file. 
+    """Copy one file.
 
     Path must point to a file (can not be a symbolic link).
 
@@ -186,7 +205,7 @@ def copy_file(file_path, copy_file_path):
         try:
             shutil.copy(file_path, copy_file_path)
         except OSError as e:
-            print('File not copied. Error: %s' % e)
+            print("File not copied. Error: %s" % e)
 
 
 def make_rand_folder(folder_path=None, custom_name=None):
@@ -217,10 +236,19 @@ def make_rand_folder(folder_path=None, custom_name=None):
     """
     # Generating random folder ID
     from numpy import random
+
     folder_id = random.randint(1, 1000000)
-    folder_name = str(folder_id) if custom_name is None else "{:}_{:}".format(custom_name, folder_id)
+    folder_name = (
+        str(folder_id)
+        if custom_name is None
+        else "{:}_{:}".format(custom_name, folder_id)
+    )
     # make_folder will manage errors
-    return make_folder_incwd(folder_name) if folder_path is None else make_folder(join(folder_path, folder_name))
+    return (
+        make_folder_incwd(folder_name)
+        if folder_path is None
+        else make_folder(join(folder_path, folder_name))
+    )
 
 
 def abspath(file_name):

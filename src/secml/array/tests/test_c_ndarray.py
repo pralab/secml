@@ -13,7 +13,7 @@ class TestCDense(CUnitTest):
 
         self.logger.info("UNITTEST - CDense - save/load matrix")
 
-        test_file = fm.join(fm.abspath(__file__), 'test.txt')
+        test_file = fm.join(fm.abspath(__file__), "test.txt")
 
         # Cleaning test file
         try:
@@ -28,8 +28,7 @@ class TestCDense(CUnitTest):
             a.save(test_file)
 
         with self.timer():
-            b = CDense().load(
-                test_file, startrow=100, cols=CDense(np.arange(0, 100)))
+            b = CDense().load(test_file, startrow=100, cols=CDense(np.arange(0, 100)))
 
         self.assertFalse((a[100:, 0:100] != b).any())
 
@@ -41,19 +40,19 @@ class TestCDense(CUnitTest):
             a.save(test_file, overwrite=True)
 
         with self.timer():
-            b = CDense().load(
-                test_file, cols=list(range(100, 1000)), dtype=int).ravel()
+            b = CDense().load(test_file, cols=list(range(100, 1000)), dtype=int).ravel()
 
         self.assertFalse((a[0, 100] != b).any())
 
-        if np.__version__ < '1.18':
+        if np.__version__ < "1.18":
             with self.assertRaises(IndexError) as e:
                 CDense().load(test_file, startrow=10)
             self.logger.info("Expected error: {:}".format(e.exception))
         else:
             with self.logger.catch_warnings():
                 self.logger.filterwarnings(
-                    "ignore", message="genfromtxt: Empty input file")
+                    "ignore", message="genfromtxt: Empty input file"
+                )
                 a = CDense().load(test_file, startrow=10)
                 self.assertEqual(a.size, 0)
 
@@ -73,13 +72,14 @@ class TestCDense(CUnitTest):
         # Let's handle the resource warning about unclosed file
         with self.logger.catch_warnings():
             self.logger.filterwarnings("ignore", message="unclosed file")
-            if np.__version__ < '1.18':
+            if np.__version__ < "1.18":
                 with self.assertRaises(IndexError) as e:
                     CDense().load(test_file, startrow=10)
                     self.logger.info("Expected error: {:}".format(e.exception))
             else:
                 self.logger.filterwarnings(
-                    "ignore", message="genfromtxt: Empty input file")
+                    "ignore", message="genfromtxt: Empty input file"
+                )
                 a = CDense().load(test_file, startrow=10)
                 self.assertEqual(a.size, 0)
 
@@ -88,7 +88,7 @@ class TestCDense(CUnitTest):
         a = -CDense().zeros(1000)
 
         a.save(test_file, overwrite=True)
-        with open(test_file, mode='at+') as fhandle:
+        with open(test_file, mode="at+") as fhandle:
             with self.timer():
                 a.save(fhandle, overwrite=True)
 
@@ -98,7 +98,7 @@ class TestCDense(CUnitTest):
 
         self.assertFalse((a != b).any())
 
-        a = CDense(['a', 'b'])
+        a = CDense(["a", "b"])
 
         with self.timer():
             a.save(test_file, overwrite=True)
@@ -114,6 +114,6 @@ class TestCDense(CUnitTest):
             if e.errno != 2:
                 raise e
 
-       
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     CUnitTest.main()

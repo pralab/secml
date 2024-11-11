@@ -12,9 +12,13 @@ class TestCClassifierLogistic(CClassifierTestCases):
     def setUp(self):
         """Test for init and fit methods."""
         # generate synthetic data
-        self.dataset = CDLRandom(n_features=2, n_redundant=0, n_informative=1,
-                                 n_clusters_per_class=1,
-                                 random_state=99).load()
+        self.dataset = CDLRandom(
+            n_features=2,
+            n_redundant=0,
+            n_informative=1,
+            n_clusters_per_class=1,
+            random_state=99,
+        ).load()
 
         self.dataset.X = CNormalizerMinMax().fit_transform(self.dataset.X)
 
@@ -23,10 +27,11 @@ class TestCClassifierLogistic(CClassifierTestCases):
         self.log = CClassifierLogistic(random_state=99)
 
     def test_plot(self):
-        """ Compare the classifiers graphically"""
+        """Compare the classifiers graphically"""
         fig = self._test_plot(self.log, self.dataset)
-        fig.savefig(fm.join(fm.abspath(__file__), 'figs',
-                            'test_c_classifier_logistic.pdf'))
+        fig.savefig(
+            fm.join(fm.abspath(__file__), "figs", "test_c_classifier_logistic.pdf")
+        )
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
@@ -73,17 +78,17 @@ class TestCClassifierLogistic(CClassifierTestCases):
         ds = CDLRandom().load()
 
         # All linear transformations with gradient implemented
-        self._test_preprocess(ds, self.log,
-                              ['min-max', 'mean-std'],
-                              [{'feature_range': (-1, 1)}, {}])
-        self._test_preprocess_grad(ds, self.log,
-                                   ['min-max', 'mean-std'],
-                                   [{'feature_range': (-1, 1)}, {}])
+        self._test_preprocess(
+            ds, self.log, ["min-max", "mean-std"], [{"feature_range": (-1, 1)}, {}]
+        )
+        self._test_preprocess_grad(
+            ds, self.log, ["min-max", "mean-std"], [{"feature_range": (-1, 1)}, {}]
+        )
 
         self.logger.info("The following case will skip the gradient test")
         # Mixed linear/nonlinear transformations without gradient
-        self._test_preprocess(ds, self.log, ['pca', 'unit-norm'], [{}, {}])
+        self._test_preprocess(ds, self.log, ["pca", "unit-norm"], [{}, {}])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CClassifierTestCases.main()

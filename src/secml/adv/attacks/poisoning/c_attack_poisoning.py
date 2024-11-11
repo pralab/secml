@@ -6,6 +6,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 import warnings
 from abc import ABCMeta, abstractmethod
 
@@ -55,20 +56,24 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
         If None, no fixed seed will be set.
 
     """
-    __super__ = 'CAttackPoisoning'
 
-    def __init__(self, classifier,
-                 training_data,
-                 val,
-                 distance='l2',
-                 dmax=0,
-                 lb=0,
-                 ub=1,
-                 y_target=None,
-                 solver_type='pgd-ls',
-                 solver_params=None,
-                 init_type='random',
-                 random_seed=None):
+    __super__ = "CAttackPoisoning"
+
+    def __init__(
+        self,
+        classifier,
+        training_data,
+        val,
+        distance="l2",
+        dmax=0,
+        lb=0,
+        ub=1,
+        y_target=None,
+        solver_type="pgd-ls",
+        solver_params=None,
+        init_type="random",
+        random_seed=None,
+    ):
 
         super(CAttackPoisoning, self).__init__(
             classifier=classifier,
@@ -77,20 +82,20 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
             lb=lb,
             ub=ub,
             solver_type=solver_type,
-            solver_params=solver_params)
+            solver_params=solver_params,
+        )
 
         # fixme: validation loss should be optional and passed from outside
-        if classifier.class_type == 'svm':
-            loss_name = 'hinge'
-        elif classifier.class_type == 'logistic':
-            loss_name = 'log'
-        elif classifier.class_type == 'ridge':
-            loss_name = 'square'
+        if classifier.class_type == "svm":
+            loss_name = "hinge"
+        elif classifier.class_type == "logistic":
+            loss_name = "log"
+        elif classifier.class_type == "ridge":
+            loss_name = "square"
         else:
             raise NotImplementedError("We cannot poisoning that classifier")
 
-        self._attacker_loss = CLoss.create(
-            loss_name)
+        self._attacker_loss = CLoss.create(loss_name)
 
         self._init_loss = self._attacker_loss
 
@@ -113,7 +118,7 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
 
         self.init_type = init_type
 
-        self.eta = solver_params['eta']
+        self.eta = solver_params["eta"]
 
         # this is used to speed up some poisoning algorithms by re-using
         # the solution obtained at a previous step of the optimization
@@ -143,7 +148,7 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
             self._val = None
             return
         if not isinstance(value, CDataset):
-            raise TypeError('val should be a CDataset!')
+            raise TypeError("val should be a CDataset!")
         self._val = value
 
     @property
@@ -156,7 +161,7 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
         """Sets the training set used to learn the targeted classifier"""
         # mandatory parameter, we raise error also if value is None
         if not isinstance(value, CDataset):
-            raise TypeError('training_data should be a CDataset!')
+            raise TypeError("training_data should be a CDataset!")
         self._training_data = value
 
     @property
@@ -219,9 +224,9 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
     def _constraint_creation(self):
 
         # only feature increments or decrements are allowed
-        lb = self._x0 if self.lb == 'x0' else self.lb
-        ub = self._x0 if self.ub == 'x0' else self.ub
-        bounds = CConstraint.create('box', lb=lb, ub=ub)
+        lb = self._x0 if self.lb == "x0" else self.lb
+        ub = self._x0 if self.ub == "x0" else self.ub
+        bounds = CConstraint.create("box", lb=lb, ub=ub)
 
         constr = CConstraint.create(self.distance, center=0, radius=1e12)
 
@@ -231,26 +236,29 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
         """Create solver instance."""
 
         if self.classifier is None:
-            raise ValueError('Solver not set properly!')
+            raise ValueError("Solver not set properly!")
 
         # map attributes to fun, constr, box
-        fun = CFunction(fun=self.objective_function,
-                        gradient=self.objective_function_gradient,
-                        n_dim=self._classifier.n_features)
+        fun = CFunction(
+            fun=self.objective_function,
+            gradient=self.objective_function_gradient,
+            n_dim=self._classifier.n_features,
+        )
 
         bounds, constr = self._constraint_creation()
 
         self._solver = COptimizer.create(
             self._solver_type,
-            fun=fun, constr=constr,
+            fun=fun,
+            constr=constr,
             bounds=bounds,
-            **self.solver_params)
+            **self.solver_params
+        )
 
         self._solver.verbose = 0
         self._warm_start = None
 
-    def _rnd_init_poisoning_points(
-            self, n_points=None, init_from_val=False, val=None):
+    def _rnd_init_poisoning_points(self, n_points=None, init_from_val=False, val=None):
         """Returns a random set of poisoning points randomly with
         flipped labels."""
         if init_from_val:
@@ -262,28 +270,30 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
             init_dataset = self.training_data
 
         if (self._n_points is None or self._n_points == 0) and (
-                n_points is None or n_points == 0):
+            n_points is None or n_points == 0
+        ):
             raise ValueError("Number of poisoning points (n_points) not set!")
 
         if n_points is None:
             n_points = self.n_points
 
-        idx = CArray.randsample(init_dataset.num_samples, n_points,
-                                random_state=self.random_seed)
+        idx = CArray.randsample(
+            init_dataset.num_samples, n_points, random_state=self.random_seed
+        )
 
         xc = init_dataset.X[idx, :].deepcopy()
 
         # if the attack is in a continuous space we add a
         # little perturbation to the initial poisoning point
-        random_noise = CArray.rand(shape=xc.shape,
-                                   random_state=self.random_seed)
+        random_noise = CArray.rand(shape=xc.shape, random_state=self.random_seed)
         xc += 1e-3 * (2 * random_noise - 1)
         yc = CArray(init_dataset.Y[idx]).deepcopy()  # true labels
 
         # randomly pick yc from a different class
         for i in range(yc.size):
-            labels = CArray.randsample(init_dataset.num_classes, 2,
-                                       random_state=self.random_seed)
+            labels = CArray.randsample(
+                init_dataset.num_classes, 2, random_state=self.random_seed
+            )
             if yc[i] == labels[0]:
                 yc[i] = labels[1]
             else:
@@ -291,8 +301,7 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
 
         return xc, yc
 
-    def _update_poisoned_clf(self, clf=None, tr=None,
-                             train_normalizer=False):
+    def _update_poisoned_clf(self, clf=None, tr=None, train_normalizer=False):
         """
         Trains classifier on D (original training data) plus {x,y} (new point).
 
@@ -373,11 +382,14 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
         y_pred, score = clf.predict(self.val.X, return_decision_function=True)
 
         # targeted attacks
-        y_ts = CArray(self._y_target).repeat(score.shape[0]) \
-            if self._y_target is not None else self.val.Y
+        y_ts = (
+            CArray(self._y_target).repeat(score.shape[0])
+            if self._y_target is not None
+            else self.val.Y
+        )
 
         # TODO: binary loss check
-        if self._attacker_loss.class_type != 'softmax':
+        if self._attacker_loss.class_type != "softmax":
             score = CArray(score[:, 1].ravel())
 
         if acc is True:
@@ -416,23 +428,27 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
         # computing gradient of loss(y, f(x)) w.r.t. f
         _, score = clf.predict(self.val.X, return_decision_function=True)
 
-        y_ts = CArray(self._y_target).repeat(score.shape[0]) \
-            if self._y_target is not None else self.val.Y
+        y_ts = (
+            CArray(self._y_target).repeat(score.shape[0])
+            if self._y_target is not None
+            else self.val.Y
+        )
 
         grad = CArray.zeros((xc.size,))
 
         if clf.n_classes <= 2:
-            loss_grad = self._attacker_loss.dloss(
-                y_ts, CArray(score[:, 1]).ravel())
+            loss_grad = self._attacker_loss.dloss(y_ts, CArray(score[:, 1]).ravel())
             grad = self._gradient_fk_xc(
-                self._xc[idx, :], self._yc[idx], clf, loss_grad, tr)
+                self._xc[idx, :], self._yc[idx], clf, loss_grad, tr
+            )
         else:
             # compute the gradient as a sum of the gradient for each class
             for c in range(clf.n_classes):
                 loss_grad = self._attacker_loss.dloss(y_ts, score, c=c)
 
-                grad += self._gradient_fk_xc(self._xc[idx, :], self._yc[idx],
-                                             clf, loss_grad, tr, c)
+                grad += self._gradient_fk_xc(
+                    self._xc[idx, :], self._yc[idx], clf, loss_grad, tr, c
+                )
 
         if normalization:
             norm = grad.norm()
@@ -514,24 +530,24 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
         """
         if self._n_points is None or self._n_points == 0:
             # evaluate performance on x,y
-            y_pred, scores = self._classifier.predict(
-                x, return_decision_function=True)
+            y_pred, scores = self._classifier.predict(x, return_decision_function=True)
             return y_pred, scores, ds_init, 0
 
         # n_points > 0
-        if self.init_type == 'random':
+        if self.init_type == "random":
             # randomly sample xc and yc
             xc, yc = self._rnd_init_poisoning_points()
-        elif self.init_type == 'loss_based':
+        elif self.init_type == "loss_based":
             xc, yc = self._loss_based_init_poisoning_points()
         else:
             raise NotImplementedError(
-                "Unknown poisoning point initialization strategy.")
+                "Unknown poisoning point initialization strategy."
+            )
 
         # re-set previously-optimized points if passed as input
         if ds_init is not None:
-            xc[0:ds_init.num_samples, :] = ds_init.X
-            yc[0:ds_init.num_samples] = ds_init.Y
+            xc[0 : ds_init.num_samples, :] = ds_init.X
+            yc[0 : ds_init.num_samples] = ds_init.Y
 
         delta = 1.0
         k = 0
@@ -540,12 +556,11 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
         if self.n_points == 1:
             max_iter = 1
 
-        metric = CMetric.create('accuracy')
+        metric = CMetric.create("accuracy")
 
         while delta > 0 and k < max_iter:
 
-            self.logger.info(
-                "Iter on all the poisoning samples: {:}".format(k))
+            self.logger.info("Iter on all the poisoning samples: {:}".format(k))
 
             xc_prv = xc.deepcopy()
             for i in range(self._n_points):
@@ -555,50 +570,57 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
                 xc[idx, :] = self._run(xc, yc, idx=idx)
                 # optimizing poisoning point 0
                 self.logger.info(
-                    "poisoning point {:} optim fopt: {:}".format(
-                        i, self._f_opt))
+                    "poisoning point {:} optim fopt: {:}".format(i, self._f_opt)
+                )
 
                 y_pred, scores = self._poisoned_clf.predict(
-                    x, return_decision_function=True)
+                    x, return_decision_function=True
+                )
                 acc = metric.performance_score(y_true=y, y_pred=y_pred)
-                self.logger.info("Poisoned classifier accuracy "
-                                 "on test data {:}".format(acc))
+                self.logger.info(
+                    "Poisoned classifier accuracy " "on test data {:}".format(acc)
+                )
 
             delta = (xc_prv - xc).norm_2d()
             self.logger.info(
-                "Optimization with n points: " + str(self._n_points) +
-                " iter: " + str(k) + ", delta: " +
-                str(delta) + ", fopt: " + str(self._f_opt))
+                "Optimization with n points: "
+                + str(self._n_points)
+                + " iter: "
+                + str(k)
+                + ", delta: "
+                + str(delta)
+                + ", fopt: "
+                + str(self._f_opt)
+            )
             k += 1
 
         # re-train the targeted classifier (copied) on poisoned data
         # to evaluate attack effectiveness on targeted classifier
-        clf, tr = self._update_poisoned_clf(clf=self._classifier,
-                                            tr=self._training_data,
-                                            train_normalizer=False)
+        clf, tr = self._update_poisoned_clf(
+            clf=self._classifier, tr=self._training_data, train_normalizer=False
+        )
         # fixme: rechange train_normalizer=True
 
         y_pred, scores = clf.predict(x, return_decision_function=True)
         acc = metric.performance_score(y_true=y, y_pred=y_pred)
-        self.logger.info(
-            "Original classifier accuracy on test data {:}".format(acc))
+        self.logger.info("Original classifier accuracy on test data {:}".format(acc))
 
         return y_pred, scores, CDataset(xc, yc), self._f_opt
 
     def _loss_based_init_poisoning_points(self, n_points=None):
-        """
-        """
+        """ """
         raise NotImplementedError
 
     def _compute_grad_inv(self, G, H, grad_loss_params):
 
         from scipy import linalg
+
         det = linalg.det(H.tondarray())
         if abs(det) < 1e-6:
             H_inv = CArray(linalg.pinv(H.tondarray()))
         else:
             H_inv = CArray(linalg.inv(H.tondarray()))
-        grad_mat = - CArray(G.dot(H_inv))  # d * (d + 1)
+        grad_mat = -CArray(G.dot(H_inv))  # d * (d + 1)
 
         self._d_params_xc = grad_mat
 
@@ -608,8 +630,8 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
     def _compute_grad_solve(self, G, H, grad_loss_params, sym_pos=True):
 
         from scipy import linalg
-        v = linalg.solve(
-            H.tondarray(), grad_loss_params.tondarray(), sym_pos=sym_pos)
+
+        v = linalg.solve(H.tondarray(), grad_loss_params.tondarray(), sym_pos=sym_pos)
         v = CArray(v)
         gt = -G.dot(v)
         return gt.ravel()
@@ -619,14 +641,18 @@ class CAttackPoisoning(CAttackMixin, metaclass=ABCMeta):
 
         if self._warm_start is None:
             v, convergence = linalg.cg(
-                H.tondarray(), grad_loss_params.tondarray(), tol=tol)
+                H.tondarray(), grad_loss_params.tondarray(), tol=tol
+            )
         else:
             v, convergence = linalg.cg(
-                H.tondarray(), grad_loss_params.tondarray(), tol=tol,
-                x0=self._warm_start.tondarray())
+                H.tondarray(),
+                grad_loss_params.tondarray(),
+                tol=tol,
+                x0=self._warm_start.tondarray(),
+            )
 
         if convergence != 0:
-            warnings.warn('Convergence of poisoning algorithm not reached!')
+            warnings.warn("Convergence of poisoning algorithm not reached!")
 
         v = CArray(v.ravel())
 

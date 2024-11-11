@@ -13,8 +13,9 @@ class TestPickleUtils(CUnitTest):
 
         # Generate a temp file to test
         import tempfile
+
         tempdir = tempfile.gettempdir()
-        tempfile = fm.join(tempdir, 'secml_testpickle')
+        tempfile = fm.join(tempdir, "secml_testpickle")
 
         tempfile = pickle_utils.save(tempfile, a)
 
@@ -23,5 +24,5 @@ class TestPickleUtils(CUnitTest):
         self.assert_array_equal(a_loaded, a)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

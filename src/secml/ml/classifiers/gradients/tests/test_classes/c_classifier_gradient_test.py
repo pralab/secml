@@ -5,13 +5,14 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 
 from secml.core import CCreator
 
 
 class CClassifierGradientTest(CCreator, metaclass=ABCMeta):
-    __super__ = 'CClassifierGradientTest'
+    __super__ = "CClassifierGradientTest"
 
     @abstractmethod
     def params(self, clf):
@@ -33,4 +34,3 @@ class CClassifierGradientTest(CCreator, metaclass=ABCMeta):
         """Return a deepcopy of the given classifier with the value
         of the parameters changed."""
         raise NotImplementedError
-

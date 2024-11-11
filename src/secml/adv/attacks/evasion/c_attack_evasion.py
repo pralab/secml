@@ -7,6 +7,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 
 from secml.adv.attacks import CAttack
@@ -32,11 +33,10 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
         'all' (default) if all classes can be manipulated.
 
     """
-    __super__ = 'CAttackEvasion'
 
-    def __init__(self, classifier,
-                 y_target=None,
-                 attack_classes='all'):
+    __super__ = "CAttackEvasion"
+
+    def __init__(self, classifier, y_target=None, attack_classes="all"):
 
         super(CAttackEvasion, self).__init__(classifier)
 
@@ -58,7 +58,7 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
 
     @attack_classes.setter
     def attack_classes(self, values):
-        if not (values == 'all' or isinstance(values, CArray)):
+        if not (values == "all" or isinstance(values, CArray)):
             raise ValueError("`attack_classes` can be 'all' or a CArray")
         self._attack_classes = values
 
@@ -79,7 +79,7 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
 
         """
         if is_int(y):
-            if self._attack_classes == 'all':
+            if self._attack_classes == "all":
                 return True  # all classes can be manipulated
             elif CArray(y == self._attack_classes).any():
                 return True  # y can be manipulated
@@ -87,7 +87,7 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
                 return False
         elif isinstance(y, CArray):
             v = CArray.zeros(shape=y.shape, dtype=bool)
-            if self.attack_classes == 'all':
+            if self.attack_classes == "all":
                 v[:] = True  # all classes can be manipulated
                 return v
             for i in range(self.attack_classes.size):
@@ -181,7 +181,9 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
         adv_ds = CDataset(x.deepcopy(), y.deepcopy())
 
         # array in which the value of the optimization function are stored
-        fs_opt = CArray.zeros(n_mod_samples, )
+        fs_opt = CArray.zeros(
+            n_mod_samples,
+        )
 
         for i in range(n_mod_samples):
             k = idx[i].item()  # idx of sample that can be modified
@@ -189,14 +191,14 @@ class CAttackEvasion(CAttack, metaclass=ABCMeta):
             xi = x[k, :] if x_init is None else x_init[k, :]
             x_opt, f_opt = self._run(x[k, :], y[k], x_init=xi)
 
-            self.logger.info(
-                "Point: {:}/{:}, f(x):{:}".format(k, x.shape[0], f_opt))
+            self.logger.info("Point: {:}/{:}, f(x):{:}".format(k, x.shape[0], f_opt))
 
             adv_ds.X[k, :] = x_opt
             fs_opt[i] = f_opt
 
         y_pred, scores = self.classifier.predict(
-            adv_ds.X, return_decision_function=True)
+            adv_ds.X, return_decision_function=True
+        )
 
         y_pred = CArray(y_pred)
 

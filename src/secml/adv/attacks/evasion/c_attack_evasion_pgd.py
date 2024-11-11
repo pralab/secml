@@ -7,6 +7,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.adv.attacks.evasion import CAttackEvasionPGDLS
 
 
@@ -68,18 +69,22 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
     class_type : 'e-pgd'
 
     """
-    __class_type = 'e-pgd'
 
-    def __init__(self, classifier,
-                 double_init_ds=None,
-                 double_init=True,
-                 distance='l1',
-                 dmax=0,
-                 lb=0,
-                 ub=1,
-                 y_target=None,
-                 attack_classes='all',
-                 solver_params=None):
+    __class_type = "e-pgd"
+
+    def __init__(
+        self,
+        classifier,
+        double_init_ds=None,
+        double_init=True,
+        distance="l1",
+        dmax=0,
+        lb=0,
+        ub=1,
+        y_target=None,
+        attack_classes="all",
+        solver_params=None,
+    ):
 
         # INTERNALS
         self._x0 = None
@@ -100,6 +105,7 @@ class CAttackEvasionPGD(CAttackEvasionPGDLS):
             ub=ub,
             y_target=y_target,
             attack_classes=attack_classes,
-            solver_params=solver_params)
+            solver_params=solver_params,
+        )
 
-        self.solver_type = 'pgd'
+        self.solver_type = "pgd"

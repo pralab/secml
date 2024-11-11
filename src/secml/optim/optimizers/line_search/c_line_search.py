@@ -5,6 +5,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 
 from secml.core import CCreator
@@ -31,9 +32,10 @@ class CLineSearch(CCreator, metaclass=ABCMeta):
         Minimum resolution of the line-search grid. Default 1e-4.
     max_iter : int, optional
         Maximum number of iterations of the line search. Default 20.
-    
+
     """
-    __super__ = 'CLineSearch'
+
+    __super__ = "CLineSearch"
 
     def __init__(self, fun, constr=None, bounds=None, eta=1e-4, max_iter=20):
 

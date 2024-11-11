@@ -12,20 +12,20 @@ class TestCPlot(CUnitTest):
         """Test for `CPlot.quiver()` method."""
 
         # gradient values creation
-        xv = CArray.arange(0, 2 * constants.pi, .2)
-        yv = CArray.arange(0, 2 * constants.pi, .2)
+        xv = CArray.arange(0, 2 * constants.pi, 0.2)
+        yv = CArray.arange(0, 2 * constants.pi, 0.2)
 
         X, Y = CArray.meshgrid((xv, yv))
         U = CArray.cos(X)
         V = CArray.sin(Y)
 
         plot = CFigure()
-        plot.sp.title('Gradient arrow')
+        plot.sp.title("Gradient arrow")
 
         plot.sp.quiver(U, V)
 
         plot.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

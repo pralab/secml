@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 
 from secml.core import CCreator
@@ -25,7 +26,8 @@ class CDataSplitter(CCreator, metaclass=ABCMeta):
         If None, is the RandomState instance used by np.random.
 
     """
-    __super__ = 'CDataSplitter'
+
+    __super__ = "CDataSplitter"
 
     def __init__(self, num_folds=3, random_state=None):
 
@@ -65,8 +67,9 @@ class CDataSplitter(CCreator, metaclass=ABCMeta):
             Instance of the dataset splitter with tr/ts indices.
 
         """
-        raise NotImplementedError("Each data splitting algorithm must define "
-                                  "a `compute_indices` method.")
+        raise NotImplementedError(
+            "Each data splitting algorithm must define " "a `compute_indices` method."
+        )
 
     def split(self, dataset):
         """Returns a list of split datasets.

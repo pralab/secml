@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.data.selection import CPrototypesSelector
 from secml.array import CArray
 
@@ -17,7 +18,8 @@ class CPSRandom(CPrototypesSelector):
     class_type : 'random'
 
     """
-    __class_type = 'random'
+
+    __class_type = "random"
 
     def select(self, dataset, n_prototypes, random_state=None):
         """Selects the prototypes from input dataset.
@@ -39,9 +41,11 @@ class CPSRandom(CPrototypesSelector):
             Dataset with selected prototypes.
 
         """
-        sel_idx = CArray.randsample(CArray(list(range(dataset.num_samples))),
-                                    shape=n_prototypes,
-                                    random_state=random_state)
+        sel_idx = CArray.randsample(
+            CArray(list(range(dataset.num_samples))),
+            shape=n_prototypes,
+            random_state=random_state,
+        )
 
         self.logger.debug("Selecting samples: {:}".format(sel_idx.tolist()))
 

@@ -5,6 +5,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from abc import abstractmethod, ABCMeta
 
 from secml.ml.classifiers import CClassifier
@@ -28,7 +29,8 @@ class CClassifierReject(CClassifier, metaclass=ABCMeta):
         preprocess type. If None, input data is used as is.
 
     """
-    __super__ = 'CClassifierReject'
+
+    __super__ = "CClassifierReject"
 
     @abstractmethod
     def predict(self, x, return_decision_function=False, n_jobs=1):
@@ -74,5 +76,4 @@ class CClassifierReject(CClassifier, metaclass=ABCMeta):
 
         """
         if y < -1 or y >= self.n_classes:
-            raise ValueError(
-                "class label {:} is out of range".format(y))
+            raise ValueError("class label {:} is out of range".format(y))

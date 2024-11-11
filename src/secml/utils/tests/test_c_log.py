@@ -8,9 +8,7 @@ class TestCLog(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.logger = CLog(logger_id=cls.__name__,
-                          add_stream=True,
-                          level='DEBUG')
+        cls.logger = CLog(logger_id=cls.__name__, add_stream=True, level="DEBUG")
 
     def test_timed_nologging(self):
 
@@ -43,10 +41,11 @@ class TestCLog(unittest.TestCase):
         # Test for predefined interval with error
         with self.assertRaises(TypeError):
             with self.logger.timer() as t:
-                time.sleep('test')
-        self.logger.info("Interval " + str(t.interval) +
-                         " should have been logged anyway")
+                time.sleep("test")
+        self.logger.info(
+            "Interval " + str(t.interval) + " should have been logged anyway"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 import inspect
 
@@ -41,12 +42,12 @@ class CMetric(CCreator, metaclass=ABCMeta):
     0.3
 
     """
-    __super__ = 'CMetric'
+
+    __super__ = "CMetric"
 
     best_value = None
 
-    def performance_score(
-            self, y_true=None, y_pred=None, score=None, **kwargs):
+    def performance_score(self, y_true=None, y_pred=None, score=None, **kwargs):
         """Compute the performance metric.
 
         Each metric can use as input either:
@@ -72,11 +73,13 @@ class CMetric(CCreator, metaclass=ABCMeta):
         # Check if all required parameters have been passed
         # Do not raise error if a defaulted parameter is not passed
         for p_idx, p in enumerate(metric_params):
-            if kwargs.get(p, None) is None and \
-                    (metric_defaults is None or
-                     len(metric_params) - len(metric_defaults) > p_idx):
-                raise TypeError("metric '{:}' requires '{:}' parameter".format(
-                    self.class_type, p))
+            if kwargs.get(p, None) is None and (
+                metric_defaults is None
+                or len(metric_params) - len(metric_defaults) > p_idx
+            ):
+                raise TypeError(
+                    "metric '{:}' requires '{:}' parameter".format(self.class_type, p)
+                )
 
         # Clean any other kwarg passed and not required by the metric
         for p in list(kwargs):

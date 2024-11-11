@@ -6,6 +6,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from sklearn import metrics
 
 from secml.array import CArray
@@ -47,7 +48,8 @@ class CKernelLaplacian(CKernel):
      [0.018316 1.      ]])
 
     """
-    __class_type = 'laplacian'
+
+    __class_type = "laplacian"
 
     def __init__(self, gamma=1.0, preprocess=None):
 
@@ -94,9 +96,11 @@ class CKernelLaplacian(CKernel):
             Kernel between x and cached rv, shape (n_x, n_rv).
 
         """
-        k = CArray(metrics.pairwise.laplacian_kernel(
-            CArray(x).get_data(), CArray(self._rv).get_data(),
-            gamma=self.gamma))
+        k = CArray(
+            metrics.pairwise.laplacian_kernel(
+                CArray(x).get_data(), CArray(self._rv).get_data(), gamma=self.gamma
+            )
+        )
         self._cached_kernel = None if self._cached_x is None else k
         return k
 
@@ -125,16 +129,16 @@ class CKernelLaplacian(CKernel):
         if not self._cached_x.is_vector_like or self._cached_x.shape[0] > 1:
             raise ValueError(
                 "kernel gradient can be computed only wrt arrays with shape "
-                "(1, n_features).")
+                "(1, n_features)."
+            )
 
         if self._rv is None or self._cached_kernel is None:
             raise ValueError("Please run forward with caching=True first.")
 
         # Format of output array should be the same as x
-        rv = self._rv.tosparse() if self._cached_x.issparse \
-            else self._rv.todense()
+        rv = self._rv.tosparse() if self._cached_x.issparse else self._rv.todense()
 
-        diff = (rv - self._cached_x)
+        diff = rv - self._cached_x
 
         k_grad = self._cached_kernel.T
 

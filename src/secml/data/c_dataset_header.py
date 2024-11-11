@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.core import CCreator
 from secml.core.attr_utils import is_writable
 from secml.core.type_utils import is_list
@@ -49,8 +50,9 @@ class CDatasetHeader(CCreator):
     32
 
     """
-    __super__ = 'CDatasetHeader'
-    __class_type = 'standard'
+
+    __super__ = "CDatasetHeader"
+    __class_type = "standard"
 
     def __init__(self, **kwargs):
 
@@ -105,8 +107,10 @@ class CDatasetHeader(CCreator):
                         delattr(self, attr_k)  # Remove faulty attribute
                         raise ValueError(
                             "`{:}` is an array of size {:}. "
-                            "{:} expected.".format(attr_k, attr_v.size,
-                                                   self.num_samples))
+                            "{:} expected.".format(
+                                attr_k, attr_v.size, self.num_samples
+                            )
+                        )
                 # Populate the protected _num_samples attribute
                 self._num_samples = attr_v.size
 
@@ -143,8 +147,7 @@ class CDatasetHeader(CCreator):
     def __str__(self):
         if len(self.get_params()) == 0:
             return self.__class__.__name__ + "{}"
-        return self.__class__.__name__ + \
-            "{'" + "', '".join(self.get_params()) + "'}"
+        return self.__class__.__name__ + "{'" + "', '".join(self.get_params()) + "'}"
 
     def append(self, header):
         """Append input header to current header.
@@ -193,13 +196,13 @@ class CDatasetHeader(CCreator):
         for attr in header.get_params():
             if hasattr(self, attr):  # Attribute already in current header
                 if isinstance(getattr(self, attr), CArray):
-                    subset[attr] = getattr(self, attr)\
-                        .append(getattr(header, attr))
+                    subset[attr] = getattr(self, attr).append(getattr(header, attr))
                 elif getattr(self, attr) != getattr(header, attr):
                     # For not-arrays, we check equality
                     raise ValueError(
                         "value of '{:}' in input header should be equal "
-                        "to '{:}'".format(attr, getattr(self, attr)))
+                        "to '{:}'".format(attr, getattr(self, attr))
+                    )
             else:  # New attribute in input header
                 subset[attr] = getattr(header, attr)
 

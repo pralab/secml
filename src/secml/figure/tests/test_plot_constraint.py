@@ -11,7 +11,7 @@ class TestCPlotConstraint(CUnitTest):
         self.constraints = [
             CConstraint.create("box", lb=0, ub=1),
             CConstraint.create("l1", center=0.5, radius=0.5),
-            CConstraint.create("l2", center=0.5, radius=0.5)
+            CConstraint.create("l2", center=0.5, radius=0.5),
         ]
 
     def test_constraint(self):
@@ -22,5 +22,5 @@ class TestCPlotConstraint(CUnitTest):
         fig.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

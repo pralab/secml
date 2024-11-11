@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from sklearn.model_selection import train_test_split
 
 from secml.core import CCreator
@@ -77,12 +78,12 @@ class CTrainTestSplit(CCreator):
 
     """
 
-    def __init__(self, train_size=None, test_size=None,
-                 random_state=None, shuffle=True):
+    def __init__(
+        self, train_size=None, test_size=None, random_state=None, shuffle=True
+    ):
 
         if train_size is None and test_size is None:
-            raise ValueError(
-                "'train_size' and 'test_size' cannot be both None")
+            raise ValueError("'train_size' and 'test_size' cannot be both None")
 
         self.train_size = train_size
         self.test_size = test_size
@@ -117,21 +118,26 @@ class CTrainTestSplit(CCreator):
 
         """
         min_set_perc = 1 / dataset.num_samples
-        if (is_float(self.train_size) and self.train_size < min_set_perc) or \
-                (is_int(self.train_size) and self.train_size < 1):
+        if (is_float(self.train_size) and self.train_size < min_set_perc) or (
+            is_int(self.train_size) and self.train_size < 1
+        ):
             raise ValueError(
-                "train_size should be at least 1 or {:}".format(min_set_perc))
-        if (is_float(self.test_size) and self.test_size < min_set_perc) or \
-                (is_int(self.test_size) and self.test_size < 1):
+                "train_size should be at least 1 or {:}".format(min_set_perc)
+            )
+        if (is_float(self.test_size) and self.test_size < min_set_perc) or (
+            is_int(self.test_size) and self.test_size < 1
+        ):
             raise ValueError(
-                "test_size should be at least 1 or {:}".format(min_set_perc))
+                "test_size should be at least 1 or {:}".format(min_set_perc)
+            )
 
         tr_idx, ts_idx = train_test_split(
             CArray.arange(dataset.num_samples).tondarray(),
             train_size=self.train_size,
             test_size=self.test_size,
             random_state=self.random_state,
-            shuffle=self.shuffle)
+            shuffle=self.shuffle,
+        )
 
         self._tr_idx = CArray(tr_idx)
         self._ts_idx = CArray(ts_idx)

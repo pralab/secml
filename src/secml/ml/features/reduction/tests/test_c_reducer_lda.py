@@ -26,7 +26,8 @@ class TestCLda(CPreProcessTestCases):
 
             # Sklearn normalizer
             sklearn_lda = LinearDiscriminantAnalysis().fit(
-                array.tondarray(), y.tondarray())
+                array.tondarray(), y.tondarray()
+            )
             target = CArray(sklearn_lda.transform(array.tondarray()))
             # Our normalizer
             lda = CLDA().fit(array, y)
@@ -66,18 +67,16 @@ class TestCLda(CPreProcessTestCases):
         red_dts = lda.fit_transform(patterns, labels)
 
         fig = CFigure(width=10, markersize=8)
-        fig.sp.scatter(red_dts[:, 0].ravel(),
-                       red_dts[:, 1].ravel(),
-                       c=labels)
+        fig.sp.scatter(red_dts[:, 0].ravel(), red_dts[:, 1].ravel(), c=labels)
         fig.show()
 
     def test_chain(self):
         """Test a chain of preprocessors."""
         x_chain = self._test_chain(
             self.array_dense,
-            ['min-max', 'mean-std', 'lda'],
-            [{'feature_range': (-5, 5)}, {}, {}],
-            y=self.labels # LDA is supervised
+            ["min-max", "mean-std", "lda"],
+            [{"feature_range": (-5, 5)}, {}, {}],
+            y=self.labels,  # LDA is supervised
         )
 
         # Expected shape is (3, 1), as lda max n_components is classes - 1
@@ -85,9 +84,9 @@ class TestCLda(CPreProcessTestCases):
 
         x_chain = self._test_chain(
             self.array_dense,
-            ['mean-std', 'lda', 'min-max'],
+            ["mean-std", "lda", "min-max"],
             [{}, {}, {}],
-            y=self.labels  # LDA is supervised
+            y=self.labels,  # LDA is supervised
         )
 
         # Expected shape is (3, 1), as lda max n_components is classes - 1
@@ -96,5 +95,5 @@ class TestCLda(CPreProcessTestCases):
     # TODO: ADD TEST FOR GRADIENT (WHEN IMPLEMENTED)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CPreProcessTestCases.main()

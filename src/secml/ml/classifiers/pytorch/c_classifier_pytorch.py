@@ -5,6 +5,7 @@
 .. moduleauthor:: Maura Pintor <maura.pintor@unica.it>
 
 """
+
 from functools import reduce
 
 import torch
@@ -74,17 +75,25 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     class_type : 'pytorch-clf'
 
     """
-    __class_type = 'pytorch-clf'
 
-    def __init__(self, model, loss=None,
-                 optimizer=None,
-                 optimizer_scheduler=None,
-                 pretrained=False,
-                 pretrained_classes=None,
-                 input_shape=None,
-                 random_state=None, preprocess=None,
-                 softmax_outputs=False,
-                 epochs=10, batch_size=1, n_jobs=1):
+    __class_type = "pytorch-clf"
+
+    def __init__(
+        self,
+        model,
+        loss=None,
+        optimizer=None,
+        optimizer_scheduler=None,
+        pretrained=False,
+        pretrained_classes=None,
+        input_shape=None,
+        random_state=None,
+        preprocess=None,
+        softmax_outputs=False,
+        epochs=10,
+        batch_size=1,
+        n_jobs=1,
+    ):
 
         self._device = self._set_device()
         self._random_state = random_state
@@ -95,15 +104,17 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             pretrained=pretrained,
             pretrained_classes=pretrained_classes,
             input_shape=input_shape,
-            softmax_outputs=softmax_outputs, n_jobs=n_jobs)
+            softmax_outputs=softmax_outputs,
+            n_jobs=n_jobs,
+        )
 
         self._init_model()
         self._batch_size = batch_size
 
         if self._batch_size is None:
             self.logger.info(
-                "No batch size passed. Value will be set to the default "
-                "value of 1.")
+                "No batch size passed. Value will be set to the default " "value of 1."
+            )
             self._batch_size = 1
 
         if self._input_shape is None:
@@ -114,7 +125,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             else:
                 raise ValueError(
                     "Input shape should be specified if the first "
-                    "layer is not a `nn.Linear` module.")
+                    "layer is not a `nn.Linear` module."
+                )
 
         self._loss = loss
         self._optimizer = optimizer
@@ -128,7 +140,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 self._classes = self._pretrained_classes
             else:
                 self._classes = CArray.arange(
-                    list(self._model.modules())[-1].out_features)
+                    list(self._model.modules())[-1].out_features
+                )
             self._n_features = reduce(lambda a, b: a * b, self._input_shape)
 
         # hooks for getting intermediate outputs
@@ -196,13 +209,12 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
     @property
     def layers(self):
-        """Returns the layers of the model, if possible. """
+        """Returns the layers of the model, if possible."""
         if self._model_layers is None:
             if isinstance(self._model, nn.Module):
                 self._model_layers = list(get_layers(self._model))
             else:
-                raise TypeError(
-                    "The input model must be an instance of `nn.Module`.")
+                raise TypeError("The input model must be an instance of `nn.Module`.")
         return self._model_layers
 
     @property
@@ -216,7 +228,8 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             self._model(x)
             for layer_name, layer in self.layers:
                 self._model_layer_shapes[layer_name] = tuple(
-                    self._intermediate_outputs[layer].shape)
+                    self._intermediate_outputs[layer].shape
+                )
             self._clean_hooks()
         return self._model_layer_shapes
 
@@ -260,8 +273,7 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
         for name, layer in get_layers(self._model):
             if name in layer_names:
-                self._handlers.append(
-                    layer.register_forward_hook(self._hook_forward))
+                self._handlers.append(layer.register_forward_hook(self._hook_forward))
             else:
                 pass
 
@@ -270,18 +282,24 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
     def get_params(self):
         """Returns the dictionary of class parameters."""
-        loss_params = {'loss': self._loss}
+        loss_params = {"loss": self._loss}
         optim_params = {
-            'optimizer':
-                self._optimizer.state_dict()['param_groups'][0]
-                if self._optimizer is not None else None,
-            'optimizer_scheduler':
+            "optimizer": (
+                self._optimizer.state_dict()["param_groups"][0]
+                if self._optimizer is not None
+                else None
+            ),
+            "optimizer_scheduler": (
                 self._optimizer_scheduler.state_dict()
-                if self._optimizer_scheduler is not None else None
+                if self._optimizer_scheduler is not None
+                else None
+            ),
         }
         return SubLevelsDict(
-            merge_dicts(super(CClassifierPyTorch, self).get_params(),
-                        loss_params, optim_params))
+            merge_dicts(
+                super(CClassifierPyTorch, self).get_params(), loss_params, optim_params
+            )
+        )
 
     def get_state(self, return_optimizer=True, **kwargs):
         """Returns the object state dictionary.
@@ -306,10 +324,10 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         state = super(CClassifierPyTorch, self).get_state(**kwargs)
 
         # Map model to CPU before saving
-        self._model.to(torch.device('cpu'))
+        self._model.to(torch.device("cpu"))
 
         # Use deepcopy as restoring device later will change them
-        state['model'] = deepcopy(self._model.state_dict())
+        state["model"] = deepcopy(self._model.state_dict())
 
         # Restore device for model
         self._model.to(self._device)
@@ -319,18 +337,18 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         # is True, `optimizer` and `optimizer_scheduler` should be included,
         # even if they are None
         if return_optimizer is False:
-            state.pop('optimizer')
-            state.pop('optimizer_scheduler')
+            state.pop("optimizer")
+            state.pop("optimizer_scheduler")
         else:
             # Unfortunately optimizer does not have a 'to(device)' method
             if self._optimizer is not None:
                 for opt_state in self._optimizer.state.values():
                     for k, v in opt_state.items():
                         if isinstance(v, torch.Tensor):
-                            opt_state[k] = v.to('cpu')
+                            opt_state[k] = v.to("cpu")
 
                 # Use deepcopy as restoring device later will change them
-                state['optimizer'] = deepcopy(self._optimizer.state_dict())
+                state["optimizer"] = deepcopy(self._optimizer.state_dict())
 
                 # Restore optimizer state to proper device
                 for opt_state in self._optimizer.state.values():
@@ -341,8 +359,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 if self._optimizer_scheduler is not None:
                     # Scheduler will be saved only if also optimizer is defined
                     # No need to map to `cpu`, tensors in state
-                    state['optimizer_scheduler'] = deepcopy(
-                        self._optimizer_scheduler.state_dict())
+                    state["optimizer_scheduler"] = deepcopy(
+                        self._optimizer_scheduler.state_dict()
+                    )
 
         return state
 
@@ -350,27 +369,30 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         """Sets the object state using input dictionary."""
         # TODO: DEEPCOPY FOR torch.load_state_dict?
 
-        if 'model' in state_dict:
-            self._model.load_state_dict(state_dict.pop('model'))
+        if "model" in state_dict:
+            self._model.load_state_dict(state_dict.pop("model"))
 
-        if 'optimizer' in state_dict:
+        if "optimizer" in state_dict:
             if self._optimizer is None:
                 raise ValueError(
                     "optimizer not found in current object but required for "
                     "restoring state."
                     "Save the state using `return_optimizer=False` or "
-                    "add an optimizer to the model first.")
-            self._optimizer.load_state_dict(state_dict.pop('optimizer'))
+                    "add an optimizer to the model first."
+                )
+            self._optimizer.load_state_dict(state_dict.pop("optimizer"))
 
-        if 'optimizer_scheduler' in state_dict:
+        if "optimizer_scheduler" in state_dict:
             if self._optimizer_scheduler is None:
                 raise ValueError(
                     "`optimizer_scheduler` not found in current object "
                     "but required for restoring state."
                     "Save the state using `return_optimizer=False` or "
-                    "add an optimizer scheduler to the model first.")
+                    "add an optimizer scheduler to the model first."
+                )
             self._optimizer_scheduler.load_state_dict(
-                state_dict.pop('optimizer_scheduler'))
+                state_dict.pop("optimizer_scheduler")
+            )
 
         super(CClassifierPyTorch, self).set_state(state_dict, copy=copy)
 
@@ -381,22 +403,27 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         loss and optimizer."""
         try:
             # If we are not getting the model itself
-            if key not in ['_model', '_optimizer', '_optimizer_scheduler']:
-                if hasattr(self, '_model') and key in self._model._modules:
+            if key not in ["_model", "_optimizer", "_optimizer_scheduler"]:
+                if hasattr(self, "_model") and key in self._model._modules:
                     return self._model[key]
-                elif hasattr(self, '_optimizer') and \
-                        self._optimizer is not None and \
-                        key in self._optimizer.state_dict()['param_groups'][0]:
-                    if len(self._optimizer.state_dict()['param_groups']) == 1:
+                elif (
+                    hasattr(self, "_optimizer")
+                    and self._optimizer is not None
+                    and key in self._optimizer.state_dict()["param_groups"][0]
+                ):
+                    if len(self._optimizer.state_dict()["param_groups"]) == 1:
                         return self._optimizer.param_groups[0][key]
                     else:
                         raise NotImplementedError(
                             "__getattribute__ is not yet supported for "
                             "optimizers with more than one element in "
-                            "param_groups.")
-                elif hasattr(self, '_optimizer_scheduler') and \
-                        self._optimizer_scheduler is not None and \
-                        key in self._optimizer_scheduler.state_dict():
+                            "param_groups."
+                        )
+                elif (
+                    hasattr(self, "_optimizer_scheduler")
+                    and self._optimizer_scheduler is not None
+                    and key in self._optimizer_scheduler.state_dict()
+                ):
                     return self._optimizer_scheduler[key]
 
         except (KeyError, AttributeError):
@@ -412,15 +439,19 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
         """
         if isinstance(value, (torch.Tensor, torch.nn.Module)):
             value = value.to(self._device)
-        if hasattr(self, '_model') and key in self._model._modules:
+        if hasattr(self, "_model") and key in self._model._modules:
             self._model._modules[key] = value
-        elif hasattr(self, '_optimizer') and \
-                self._optimizer is not None and \
-                key in self._optimizer.state_dict()['param_groups'][0]:
+        elif (
+            hasattr(self, "_optimizer")
+            and self._optimizer is not None
+            and key in self._optimizer.state_dict()["param_groups"][0]
+        ):
             self._optimizer.param_groups[0][key] = value
-        elif hasattr(self, '_optimizer_scheduler') and \
-                self._optimizer_scheduler is not None and \
-                key in self._optimizer_scheduler.state_dict():
+        elif (
+            hasattr(self, "_optimizer_scheduler")
+            and self._optimizer_scheduler is not None
+            and key in self._optimizer_scheduler.state_dict()
+        ):
             self._optimizer_scheduler.state_dict[key] = value
         else:  # Otherwise, normal python set behavior
             super(CClassifierPyTorch, self).__setattr__(key, value)
@@ -442,25 +473,28 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
     def _to_tensor(x):
         """Convert input CArray to tensor."""
         if not isinstance(x, CArray):
-            raise ValueError("A `CArray` is required as "
-                             "input to the `_to_tensor` method.")
+            raise ValueError(
+                "A `CArray` is required as " "input to the `_to_tensor` method."
+            )
         x = x.tondarray()
         x = torch.from_numpy(x)
         x = x.type(torch.FloatTensor)
         if use_cuda is True:
-            x = x.cuda(device=torch.device('cuda'))
+            x = x.cuda(device=torch.device("cuda"))
         return x
 
     @staticmethod
     def _from_tensor(x):
         """Convert input tensor to CArray"""
         if not isinstance(x, torch.Tensor):
-            raise ValueError("A `torch.Tensor` is required as "
-                             "input to the `_from_tensor` method.")
+            raise ValueError(
+                "A `torch.Tensor` is required as " "input to the `_from_tensor` method."
+            )
         return CArray(x.cpu().numpy()).astype(float)
 
-    def _data_loader(self, data, labels=None, batch_size=10,
-                     shuffle=False, num_workers=0):
+    def _data_loader(
+        self, data, labels=None, batch_size=10, shuffle=False, num_workers=0
+    ):
         """Returns `torch.DataLoader` generated from the input CDataset.
 
         Parameters
@@ -487,10 +521,14 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
         """
         transform = transforms.Lambda(lambda x: x.reshape(self._input_shape))
-        return CDataLoaderPyTorch(data, labels,
-                                  batch_size, shuffle=shuffle,
-                                  transform=transform,
-                                  num_workers=num_workers, ).get_loader()
+        return CDataLoaderPyTorch(
+            data,
+            labels,
+            batch_size,
+            shuffle=shuffle,
+            transform=transform,
+            num_workers=num_workers,
+        ).get_loader()
 
     def _fit(self, x, y):
         """Fit PyTorch model.
@@ -503,13 +541,15 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             Array of shape (n_samples,) containing the class labels.
 
         """
-        if any([self._optimizer is None,
-                self._loss is None]):
-            raise ValueError("Optimizer and loss should both be defined "
-                             "in order to fit the model.")
+        if any([self._optimizer is None, self._loss is None]):
+            raise ValueError(
+                "Optimizer and loss should both be defined "
+                "in order to fit the model."
+            )
 
         train_loader = self._data_loader(
-            x, y, batch_size=self._batch_size, num_workers=self.n_jobs - 1)
+            x, y, batch_size=self._batch_size, num_workers=self.n_jobs - 1
+        )
 
         for epoch in range(self._epochs):
             running_loss = 0.0
@@ -526,8 +566,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 # print statistics
                 running_loss += loss.item()
                 if i % 2000 == 1999:  # print every 2000 mini-batches
-                    self.logger.info('[%d, %5d] loss: %.3f' %
-                                     (epoch + 1, i + 1, running_loss / 2000))
+                    self.logger.info(
+                        "[%d, %5d] loss: %.3f" % (epoch + 1, i + 1, running_loss / 2000)
+                    )
                     running_loss = 0.0
 
             if self._optimizer_scheduler is not None:
@@ -553,21 +594,27 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             Transformed input data.
 
         """
-        data_loader = self._data_loader(x, num_workers=self.n_jobs - 1,
-                                        batch_size=self._batch_size)
+        data_loader = self._data_loader(
+            x, num_workers=self.n_jobs - 1, batch_size=self._batch_size
+        )
 
         # Switch to evaluation mode
         self._model.eval()
 
-        out_shape = self.n_classes if self._out_layer is None else \
-            reduce((lambda z, v: z * v), self.layer_shapes[self._out_layer])
+        out_shape = (
+            self.n_classes
+            if self._out_layer is None
+            else reduce((lambda z, v: z * v), self.layer_shapes[self._out_layer])
+        )
         output = torch.empty((len(data_loader.dataset), out_shape))
 
         for batch_idx, (s, _) in enumerate(data_loader):
             # Log progress
             self.logger.info(
-                'Classification: {batch}/{size}'.format(batch=batch_idx,
-                                                        size=len(data_loader)))
+                "Classification: {batch}/{size}".format(
+                    batch=batch_idx, size=len(data_loader)
+                )
+            )
 
             s = s.to(self._device)
 
@@ -584,9 +631,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
                 self._cached_s = s
                 self._cached_layer_output = ps
 
-            output[batch_idx * self.batch_size:
-                   batch_idx * self.batch_size + len(s)] = \
-                ps.view(ps.size(0), -1).detach()
+            output[
+                batch_idx * self.batch_size : batch_idx * self.batch_size + len(s)
+            ] = ps.view(ps.size(0), -1).detach()
 
         # Apply softmax-scaling if needed
         if self._softmax_outputs is True and self._out_layer is None:
@@ -627,8 +674,9 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
             return list(self._intermediate_outputs.values())[0]
         else:
-            raise ValueError("Pass layer names as a list or just None "
-                             "for last layer output.")
+            raise ValueError(
+                "Pass layer names as a list or just None " "for last layer output."
+            )
 
     def _backward(self, w):
         """Returns the gradient of the DNN - considering the output layer set
@@ -646,21 +694,19 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             Accumulated gradient of the module wrt input data.
         """
         if w is None:
-            raise ValueError("Function `_backward` needs the `w` array "
-                             "to run backward with.")
+            raise ValueError(
+                "Function `_backward` needs the `w` array " "to run backward with."
+            )
 
         # Apply softmax-scaling if needed (only if last layer is required)
         if self.softmax_outputs is True and self._out_layer is None:
-            out_carray = self._from_tensor(
-                self._cached_layer_output.squeeze(0).data)
+            out_carray = self._from_tensor(self._cached_layer_output.squeeze(0).data)
             softmax_grad = CArray.zeros(shape=out_carray.shape[0])
             for y in w.nnz_indices[1]:
-                softmax_grad += w[y] * CSoftmax().gradient(
-                    out_carray, y=y)
+                softmax_grad += w[y] * CSoftmax().gradient(out_carray, y=y)
             w = softmax_grad
 
-        w = self._to_tensor(w.atleast_2d()).reshape(
-            self._cached_layer_output.shape)
+        w = self._to_tensor(w.atleast_2d()).reshape(self._cached_layer_output.shape)
         w = w.to(self._device)
 
         if self._cached_s.grad is not None:
@@ -668,8 +714,11 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
         self._cached_layer_output.backward(w)
 
-        return self._from_tensor(self._cached_s.grad.data.view(
-            -1, reduce(lambda a, b: a * b, self.input_shape)))
+        return self._from_tensor(
+            self._cached_s.grad.data.view(
+                -1, reduce(lambda a, b: a * b, self.input_shape)
+            )
+        )
 
     def save_model(self, filename):
         """
@@ -682,17 +731,16 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
         """
         state = {
-            'model_state': self._model.state_dict(),
-            'n_features': self.n_features,
-            'classes': self.classes,
+            "model_state": self._model.state_dict(),
+            "n_features": self.n_features,
+            "classes": self.classes,
         }
 
         if self.optimizer is not None:
-            state['optimizer_state'] = self._optimizer.state_dict()
+            state["optimizer_state"] = self._optimizer.state_dict()
 
         if self._optimizer_scheduler is not None:
-            state['optimizer_scheduler_state'] = \
-                self._optimizer_scheduler.state_dict()
+            state["optimizer_scheduler_state"] = self._optimizer_scheduler.state_dict()
 
         torch.save(state, filename)
 
@@ -715,37 +763,41 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
 
         """
         state = torch.load(filename, map_location=self._device)
-        keys = ['model_state', 'n_features', 'classes']
+        keys = ["model_state", "n_features", "classes"]
         if all(key in state for key in keys):
             if classes is not None:
                 self.logger.warning(
                     "Model was saved within `secml` framework. "
-                    "The parameter `classes` will be ignored.")
+                    "The parameter `classes` will be ignored."
+                )
             # model was stored with save_model method
-            self._model.load_state_dict(state['model_state'])
+            self._model.load_state_dict(state["model_state"])
 
-            if 'optimizer_state' in state \
-                    and self._optimizer is not None:
-                self._optimizer.load_state_dict(state['optimizer_state'])
+            if "optimizer_state" in state and self._optimizer is not None:
+                self._optimizer.load_state_dict(state["optimizer_state"])
             else:
                 self._optimizer = None
 
-            if 'optimizer_scheduler_state' in state \
-                    and self._optimizer_scheduler is not None:
+            if (
+                "optimizer_scheduler_state" in state
+                and self._optimizer_scheduler is not None
+            ):
                 self._optimizer_scheduler.load_state_dict(
-                    state['optimizer_scheduler_state'])
+                    state["optimizer_scheduler_state"]
+                )
             else:
                 self._optimizer_scheduler = None
 
-            self._n_features = state['n_features']
-            self._classes = state['classes']
+            self._n_features = state["n_features"]
+            self._classes = state["classes"]
         else:  # model was stored outside secml framework
             try:
                 self._model.load_state_dict(state)
                 # This part is important to prevent not fitted
                 if classes is None:
                     self._classes = CArray.arange(
-                        self.layer_shapes[self.layer_names[-1]][1])
+                        self.layer_shapes[self.layer_names[-1]][1]
+                    )
                 else:
                     self._classes = CArray(classes)
                 self._n_features = reduce(lambda x, y: x * y, self.input_shape)
@@ -753,4 +805,5 @@ class CClassifierPyTorch(CClassifierDNN, CClassifierGradientMixin):
             except Exception:
                 self.logger.error(
                     "Model's state dict should be stored according to "
-                    "PyTorch docs. Use `torch.save(model.state_dict())`.")
+                    "PyTorch docs. Use `torch.save(model.state_dict())`."
+                )

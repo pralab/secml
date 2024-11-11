@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import sklearn.metrics as skm
 
 from secml.array import CArray
@@ -47,7 +48,8 @@ class CMetricPartialAUC(CMetric):
     0.125
 
     """
-    __class_type = 'pauc'
+
+    __class_type = "pauc"
     best_value = 1.0
 
     def __init__(self, fpr=0.01, n_points=1000):

@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from dateutil import parser
 from datetime import datetime
 
@@ -51,13 +52,21 @@ class CChronologicalSplitter(CCreator):
 
     """
 
-    def __init__(self, th_timestamp, train_size=1.0, test_size=1.0,
-                 random_state=None, shuffle=True):
+    def __init__(
+        self,
+        th_timestamp,
+        train_size=1.0,
+        test_size=1.0,
+        random_state=None,
+        shuffle=True,
+    ):
 
-        if (is_float(test_size) and (test_size <= 0 or test_size > 1.0)) or \
-                (is_float(train_size) and (train_size <= 0 or train_size > 1.0)):
-            raise ValueError("`test_size` and `train_size` "
-                             "must be between (0 and 1.0] if float")
+        if (is_float(test_size) and (test_size <= 0 or test_size > 1.0)) or (
+            is_float(train_size) and (train_size <= 0 or train_size > 1.0)
+        ):
+            raise ValueError(
+                "`test_size` and `train_size` " "must be between (0 and 1.0] if float"
+            )
 
         # We use dateutil.parser is order to allow incomplete
         # timestamps (e.g. a single year '2016')
@@ -95,18 +104,25 @@ class CChronologicalSplitter(CCreator):
             Flat arrays with the tr/ts indices.
 
         """
-        if not hasattr(dataset.header, 'timestamp') or \
-                not hasattr(dataset.header, 'timestamp_fmt'):
-            raise AttributeError("dataset must contain `timestamp` and "
-                                 "'timestamp_fmt' information")
+        if not hasattr(dataset.header, "timestamp") or not hasattr(
+            dataset.header, "timestamp_fmt"
+        ):
+            raise AttributeError(
+                "dataset must contain `timestamp` and " "'timestamp_fmt' information"
+            )
 
         timestamps = dataset.header.timestamp
         fmt = dataset.header.timestamp_fmt
 
         # Pick the samples having `timestamp <= th` to build the training set
-        tr_mask = CArray(list(map(
-            lambda tstmp: datetime.strptime(tstmp, fmt) <= self.th_timestamp,
-            timestamps)))
+        tr_mask = CArray(
+            list(
+                map(
+                    lambda tstmp: datetime.strptime(tstmp, fmt) <= self.th_timestamp,
+                    timestamps,
+                )
+            )
+        )
         # Test set samples are all the other samples
         ts_mask = tr_mask.logical_not()
 
@@ -115,19 +131,24 @@ class CChronologicalSplitter(CCreator):
         max_ts = dataset.num_samples - max_tr
 
         if max_tr == 0:
-            raise ValueError("no samples with timestamp <= {:}. "
-                             "Cannot split dataset.".format(self.th_timestamp))
+            raise ValueError(
+                "no samples with timestamp <= {:}. "
+                "Cannot split dataset.".format(self.th_timestamp)
+            )
 
         if max_ts == 0:
-            raise ValueError("no samples with timestamp > {:}. "
-                             "Cannot split dataset.".format(self.th_timestamp))
+            raise ValueError(
+                "no samples with timestamp > {:}. "
+                "Cannot split dataset.".format(self.th_timestamp)
+            )
 
         # Compute the actual number of desired train/test samples
 
         if is_int(self.train_size):
             if self.train_size < 1 or self.train_size > max_tr:
                 raise ValueError(
-                    "train_size should be between 1 and {:}".format(max_tr))
+                    "train_size should be between 1 and {:}".format(max_tr)
+                )
             else:  # train_size is a valid integer, use it directly
                 tr_size = self.train_size
         else:  # Compute the proportion of train samples (at least 1)
@@ -135,8 +156,7 @@ class CChronologicalSplitter(CCreator):
 
         if is_int(self.test_size):
             if self.test_size < 1 or self.test_size > max_ts:
-                raise ValueError(
-                    "test_size should be between 1 and {:}".format(max_ts))
+                raise ValueError("test_size should be between 1 and {:}".format(max_ts))
             else:  # test_size is a valid integer, use it directly
                 ts_size = self.test_size
         else:  # Compute the proportion of train samples (at least 1)
@@ -151,9 +171,11 @@ class CChronologicalSplitter(CCreator):
 
         if self.shuffle is True:
             tr_idx = CArray.randsample(
-                tr_idx, shape=(tr_size, ), random_state=self.random_state)
+                tr_idx, shape=(tr_size,), random_state=self.random_state
+            )
             ts_idx = CArray.randsample(
-                ts_idx, shape=(ts_size, ), random_state=self.random_state)
+                ts_idx, shape=(ts_size,), random_state=self.random_state
+            )
         else:  # Just slice the arrays of indices
             tr_idx = tr_idx[:tr_size]
             ts_idx = ts_idx[:ts_size]
@@ -177,10 +199,12 @@ class CChronologicalSplitter(CCreator):
             Train and Test datasets.
 
         """
-        if not hasattr(dataset.header, 'timestamp') or \
-                not hasattr(dataset.header, 'timestamp_fmt'):
-            raise AttributeError("dataset must contain `timestamp` and "
-                                 "'timestamp_fmt' information")
+        if not hasattr(dataset.header, "timestamp") or not hasattr(
+            dataset.header, "timestamp_fmt"
+        ):
+            raise AttributeError(
+                "dataset must contain `timestamp` and " "'timestamp_fmt' information"
+            )
 
         # Computing splitting indices
         tr_idx, ts_idx = self.compute_indices(dataset)

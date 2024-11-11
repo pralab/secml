@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 
 from secml.ml.classifiers import CClassifier
@@ -30,16 +31,17 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
         Any other construction parameter for the binary classifiers.
 
     """
-    __super__ = 'CClassifierMulticlass'
+
+    __super__ = "CClassifierMulticlass"
 
     def __init__(self, classifier, preprocess=None, n_jobs=1, **clf_params):
         # Calling init of CClassifier
         super(CClassifierMulticlass, self).__init__(
-            preprocess=preprocess, n_jobs=n_jobs)
+            preprocess=preprocess, n_jobs=n_jobs
+        )
         # Binary classifier to use
         if not issubclass(classifier, CClassifier):
-            raise TypeError(
-                "Input classifier must be a subclass of CClassifier")
+            raise TypeError("Input classifier must be a subclass of CClassifier")
         # List of binary classifiers
         self._binary_classifiers = [classifier(**clf_params)]
 
@@ -92,13 +94,12 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
 
         """
         # Support for recursive setting, e.g. -> kernel.gamma
-        sup_param_name = param_name.split('.', 1)[0]
+        sup_param_name = param_name.split(".", 1)[0]
 
         # Check if we are setting a parameter of the multiclass classifier
         if hasattr(self, sup_param_name):
             # Call standard set on the multiclass clf object
-            super(CClassifierMulticlass, self).set(
-                param_name, param_value, copy=copy)
+            super(CClassifierMulticlass, self).set(param_name, param_value, copy=copy)
             return
 
         # SET PARAMETERS OF BINARY CLASSIFIERS
@@ -107,9 +108,11 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
             if isinstance(param_value, tuple):
                 # Check if enough binary classifiers are available
                 if len(param_value) != self.num_classifiers:
-                    raise ValueError("{0} binary classifier instances needed."
-                                     " Use .prepare(num_classes={0}) first"
-                                     "".format(len(param_value)))
+                    raise ValueError(
+                        "{0} binary classifier instances needed."
+                        " Use .prepare(num_classes={0}) first"
+                        "".format(len(param_value))
+                    )
                 # Update parameter (different value) in each binary classifier
                 for clf_idx, clf in enumerate(self._binary_classifiers):
                     clf.set(param_name, param_value[clf_idx], copy=copy)
@@ -119,8 +122,7 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
                     clf.set(param_name, param_value, copy=copy)
             return
 
-        raise ValueError(
-            "cannot set unknown parameter '{:}'".format(param_name))
+        raise ValueError("cannot set unknown parameter '{:}'".format(param_name))
 
     def get_state(self, **kwargs):
         """Returns the object state dictionary.
@@ -153,7 +155,7 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
         # these attributes from the attributes of the main classifier
         # Finally convert to tuple in order to prevent future modifications
         for attr in list(clf_ref_state):
-            new_key = 'binary_classifiers.' + attr
+            new_key = "binary_classifiers." + attr
             clf_ref_state[new_key] = tuple(clf_ref_state[attr])
             del clf_ref_state[attr]
 
@@ -189,40 +191,43 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
             param_value = state_dict[param_name]
 
             # Support for recursive setting, e.g. -> kernel.gamma
-            sup_param_name = param_name.split('.', 1)[0]
+            sup_param_name = param_name.split(".", 1)[0]
 
             # Check if we are setting a parameter of the multiclass classifier
             if hasattr(self, sup_param_name):
                 # Call standard set on the multiclass clf object
                 super(CClassifierMulticlass, self).set_state(
-                    {param_name: param_value}, copy=copy)
+                    {param_name: param_value}, copy=copy
+                )
                 continue
 
             # SET PARAMETERS OF BINARY CLASSIFIERS
-            elif param_name.startswith('binary_classifiers.'):
+            elif param_name.startswith("binary_classifiers."):
 
                 # Remove the identifier of the binary classifiers's attributes
-                sub_param_name = param_name[len('binary_classifiers.'):]
+                sub_param_name = param_name[len("binary_classifiers.") :]
 
                 if sub_param_name in self._binary_classifiers[0].get_state():
 
                     if not isinstance(param_value, tuple):
-                        raise ValueError("state of attribute '{:}' "
-                                         "must specified as a tuple"
-                                         "".format(param_name))
+                        raise ValueError(
+                            "state of attribute '{:}' "
+                            "must specified as a tuple"
+                            "".format(param_name)
+                        )
 
                     # Check if enough binary classifiers are available
                     if len(param_value) != self.num_classifiers:
                         self.prepare(len(param_value))
                     # Update attribute (different value) in each binary clf
                     for clf_idx, clf in enumerate(self._binary_classifiers):
-                        clf.set_state(
-                            {sub_param_name: param_value[clf_idx]}, copy=copy)
+                        clf.set_state({sub_param_name: param_value[clf_idx]}, copy=copy)
 
                     continue
 
             raise AttributeError(
-                "cannot set unknown attribute '{:}'".format(param_name))
+                "cannot set unknown attribute '{:}'".format(param_name)
+            )
 
     def prepare(self, num_classes):
         """Creates num_classes copies of the binary classifier.
@@ -239,6 +244,7 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
 
         """
         from copy import deepcopy
+
         if num_classes < 1:
             raise ValueError("number of classes must be higher than 0")
         clf = self._binary_classifiers[0]  # Use the first clf as base
@@ -248,8 +254,9 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
         # Delete binary classifiers in excess
         del self._binary_classifiers[num_classes:]
 
-    def estimate_parameters(self, dataset, parameters, splitter, metric,
-                            pick='first', perf_evaluator='xval'):
+    def estimate_parameters(
+        self, dataset, parameters, splitter, metric, pick="first", perf_evaluator="xval"
+    ):
         """Estimate parameter that give better result respect a chose metric.
 
         Parameters
@@ -294,7 +301,8 @@ class CClassifierMulticlass(CClassifier, metaclass=ABCMeta):
             splitter=splitter,
             metric=metric,
             pick=pick,
-            perf_evaluator=perf_evaluator)
+            perf_evaluator=perf_evaluator,
+        )
 
     @abstractmethod
     def _fit(self, x, y):

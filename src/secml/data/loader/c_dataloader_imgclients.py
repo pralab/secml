@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.data.loader import CDataLoader
 from secml.data import CDataset, CDatasetHeader
 from secml.array import CArray
@@ -22,7 +23,8 @@ class CDataLoaderImgClients(CDataLoader):
     class_type : 'img-clients'
 
     """
-    __class_type = 'img-clients'
+
+    __class_type = "img-clients"
 
     def __init__(self):
         # Does nothing...
@@ -52,11 +54,11 @@ class CDataLoaderImgClients(CDataLoader):
 
         """
         # Labels file MUST be available
-        if not fm.file_exist(fm.join(ds_path, 'clients.txt')):
+        if not fm.file_exist(fm.join(ds_path, "clients.txt")):
             raise OSError("cannot load clients file.")
 
         # Ensuring 'img_format' always has an extension-like pattern
-        img_ext = '.' + img_format.strip('.').lower()
+        img_ext = "." + img_format.strip(".").lower()
 
         # Dimensions of each image
         img_w = CArray([], dtype=int)
@@ -65,32 +67,34 @@ class CDataLoaderImgClients(CDataLoader):
 
         # Load files!
         patterns, img_w, img_h, img_c = self._load_files(
-            ds_path, img_w, img_h, img_c, img_ext, load_data=load_data)
+            ds_path, img_w, img_h, img_c, img_ext, load_data=load_data
+        )
 
-        labels = CArray.load(
-            fm.join(ds_path, 'clients.txt'), dtype=label_dtype).ravel()
+        labels = CArray.load(fm.join(ds_path, "clients.txt"), dtype=label_dtype).ravel()
 
         if patterns.shape[0] != labels.size:
-            raise ValueError("patterns ({:}) and labels ({:}) do not have "
-                             "the same number of elements.".format(
-                                 patterns.shape[0], labels.size))
+            raise ValueError(
+                "patterns ({:}) and labels ({:}) do not have "
+                "the same number of elements.".format(patterns.shape[0], labels.size)
+            )
 
         # Load the file with extra dataset attributes (optional)
-        attributes_path = fm.join(ds_path, 'attributes.txt')
-        attributes = load_dict(attributes_path) if \
-            fm.file_exist(attributes_path) else dict()
+        attributes_path = fm.join(ds_path, "attributes.txt")
+        attributes = (
+            load_dict(attributes_path) if fm.file_exist(attributes_path) else dict()
+        )
 
-        self.logger.info("Loaded {:} images from {:}...".format(
-            patterns.shape[0], ds_path))
+        self.logger.info(
+            "Loaded {:} images from {:}...".format(patterns.shape[0], ds_path)
+        )
 
-        header = CDatasetHeader(id=fm.split(ds_path)[1],
-                                img_w=img_w, img_h=img_h, img_c=img_c,
-                                **attributes)
+        header = CDatasetHeader(
+            id=fm.split(ds_path)[1], img_w=img_w, img_h=img_h, img_c=img_c, **attributes
+        )
 
         return CDataset(patterns, labels, header=header)
 
-    def _load_files(self, ds_path, img_w, img_h, img_c,
-                    img_ext, load_data=True):
+    def _load_files(self, ds_path, img_w, img_h, img_c, img_ext, load_data=True):
         """Loads any file with given extension inside input folder."""
         # Files will be loaded in alphabetical order
         files_list = sorted(fm.listdir(ds_path))
@@ -120,10 +124,14 @@ class CDataLoaderImgClients(CDataLoader):
                     array_img = CArray([[file_path]])
 
                 # Creating the 2D array patterns x features
-                patterns = patterns.append(
-                    array_img, axis=0) if patterns is not None else array_img
+                patterns = (
+                    patterns.append(array_img, axis=0)
+                    if patterns is not None
+                    else array_img
+                )
 
-                self.logger.debug("{:} has been loaded..."
-                                  "".format(fm.join(ds_path, file_name)))
+                self.logger.debug(
+                    "{:} has been loaded..." "".format(fm.join(ds_path, file_name))
+                )
 
         return patterns, img_w, img_h, img_c

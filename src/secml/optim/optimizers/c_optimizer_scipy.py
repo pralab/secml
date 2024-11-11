@@ -6,12 +6,13 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from scipy import optimize as sc_opt
 
 from secml.array import CArray
 from secml.optim.optimizers import COptimizer
 
-SUPPORTED_METHODS = ['BFGS', 'L-BFGS-B']
+SUPPORTED_METHODS = ["BFGS", "L-BFGS-B"]
 
 
 class COptimizerScipy(COptimizer):
@@ -22,7 +23,8 @@ class COptimizerScipy(COptimizer):
     class_type : 'scipy-opt'
 
     """
-    __class_type = 'scipy-opt'
+
+    __class_type = "scipy-opt"
 
     def _bounds_to_scipy(self):
         """Converts bounds to scipy format.
@@ -90,7 +92,7 @@ class COptimizerScipy(COptimizer):
         options : dict, optional
             A dictionary of solver options. All methods accept the following
             generic options:
-            
+
              - maxiter : int
                Maximum number of iterations to perform.
              - disp : bool
@@ -133,15 +135,15 @@ class COptimizerScipy(COptimizer):
         self._fun.reset_eval()
 
         # select method
-        method = kwargs['method'] if 'method' in kwargs else None
+        method = kwargs["method"] if "method" in kwargs else None
         if method is None:
             # Only 'L-BFGS-B` supports bounds
-            method = 'BFGS' if self.bounds is None else 'L-BFGS-B'
+            method = "BFGS" if self.bounds is None else "L-BFGS-B"
         # check if method is supported
         if method not in SUPPORTED_METHODS:
             raise NotImplementedError("selected method is not supported.")
         # set method
-        kwargs['method'] = method
+        kwargs["method"] = method
 
         # we're not supporting any solver with constraints at this stage
         if self.constr is not None:
@@ -149,32 +151,31 @@ class COptimizerScipy(COptimizer):
 
         # converting input parameters to scipy
         # 1) gradient (jac)
-        jac = kwargs['jac'] if 'jac' in kwargs else self._fun.gradient_ndarray
-        kwargs['jac'] = jac
+        jac = kwargs["jac"] if "jac" in kwargs else self._fun.gradient_ndarray
+        kwargs["jac"] = jac
         # 2) bounds
-        bounds = kwargs['bounds'] if 'bounds' in kwargs else None
+        bounds = kwargs["bounds"] if "bounds" in kwargs else None
         if bounds is None:
             bounds = self._bounds_to_scipy()
-        kwargs['bounds'] = bounds
+        kwargs["bounds"] = bounds
 
         if self.verbose >= 2:  # Override verbosity options
-            kwargs['options']['disp'] = True
+            kwargs["options"]["disp"] = True
 
         # call minimize now
-        sc_opt_out = sc_opt.minimize(self._fun.fun_ndarray,
-                                     x_init.ravel().tondarray(),
-                                     args=args, **kwargs)
+        sc_opt_out = sc_opt.minimize(
+            self._fun.fun_ndarray, x_init.ravel().tondarray(), args=args, **kwargs
+        )
 
         if not sc_opt_out.success:
-            self.logger.warning(
-                "Optimization has not exited successfully!\n")
+            self.logger.warning("Optimization has not exited successfully!\n")
 
         if self.verbose >= 1:
             # Workaround for scipy message randomly being a str or bytes
             if isinstance(sc_opt_out.message, str):
                 self.logger.info(sc_opt_out.message + "\n")
             else:
-                self.logger.info(str(sc_opt_out.message, 'ascii') + "\n")
+                self.logger.info(str(sc_opt_out.message, "ascii") + "\n")
 
         self._f_seq = CArray(sc_opt_out.fun)  # only last iter available
 
@@ -183,11 +184,14 @@ class COptimizerScipy(COptimizer):
         # check if point is valid
         # i.e., if the selected solver does not ignore the constraints
         if self.constr is not None and self.constr.is_violated(self.x_opt):
-            self.logger.warning("Constraints are not satisfied. "
-                                "The scipy solver may be ignoring them.\n")
+            self.logger.warning(
+                "Constraints are not satisfied. "
+                "The scipy solver may be ignoring them.\n"
+            )
 
         if self.bounds is not None and self.bounds.is_violated(self.x_opt):
-            self.logger.warning("Bounds are not satisfied. "
-                                "The scipy solver may be ignoring them.\n")
+            self.logger.warning(
+                "Bounds are not satisfied. " "The scipy solver may be ignoring them.\n"
+            )
 
         return self.x_opt

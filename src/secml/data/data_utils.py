@@ -5,12 +5,13 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from sklearn.preprocessing import label_binarize as sk_binarizer
 import numpy as np
 
 from secml.array import CArray
 
-__all__ = ['label_binarize_onehot']
+__all__ = ["label_binarize_onehot"]
 
 
 def label_binarize_onehot(y):
@@ -39,5 +40,4 @@ def label_binarize_onehot(y):
     if not np.issubdtype(y.dtype, np.integer):
         raise ValueError("only integer labels are supported")
     classes = CArray.arange(y.max() + 1)
-    return CArray(sk_binarizer(
-        y.tondarray(), classes=classes.tondarray()))
+    return CArray(sk_binarizer(y.tondarray(), classes=classes.tondarray()))

@@ -5,6 +5,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from secml.figure._plots import CPlotFunction
 from secml.optim.constraints import CConstraint
 
@@ -34,12 +35,13 @@ class CPlotConstraint(CPlotFunction):
 
         """
         if not isinstance(constraint, CConstraint):
-            raise TypeError(
-                "'constraint' must be an instance of `CConstraint`.")
+            raise TypeError("'constraint' must be an instance of `CConstraint`.")
 
-        self.plot_fun(func=constraint.constraint,
-                      plot_background=False,
-                      grid_limits=grid_limits,
-                      n_grid_points=n_grid_points,
-                      levels=[0],
-                      levels_linewidth=1.5)
+        self.plot_fun(
+            func=constraint.constraint,
+            plot_background=False,
+            grid_limits=grid_limits,
+            n_grid_points=n_grid_points,
+            levels=[0],
+            levels_linewidth=1.5,
+        )

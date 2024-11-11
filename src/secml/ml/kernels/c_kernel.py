@@ -6,6 +6,7 @@
 .. moduleauthor:: Angelo Sotgiu <angelo.sotgiu@unica.it>
 
 """
+
 from abc import ABCMeta
 
 from secml.ml import CModule
@@ -32,7 +33,8 @@ class CKernel(CModule, metaclass=ABCMeta):
         Can be a CModule subclass. If None, input data is used as is.
 
     """
-    __super__ = 'CKernel'
+
+    __super__ = "CKernel"
 
     def __init__(self, preprocess=None):
         self._rv = None

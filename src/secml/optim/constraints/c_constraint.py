@@ -6,6 +6,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 
 from secml.core import CCreator
@@ -14,7 +15,8 @@ from secml.array import CArray
 
 class CConstraint(CCreator, metaclass=ABCMeta):
     """Interface for equality/inequality constraints."""
-    __super__ = 'CConstraint'
+
+    __super__ = "CConstraint"
 
     def is_active(self, x, tol=1e-4):
         """Returns True if constraint is active.

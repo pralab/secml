@@ -5,9 +5,11 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
-from secml.ml.classifiers.gradients.tests.test_classes import \
-    CClassifierGradientTestLinear
+
+from secml.ml.classifiers.gradients.tests.test_classes import (
+    CClassifierGradientTestLinear,
+)
 
 
 class CClassifierGradientTestRidge(CClassifierGradientTestLinear):
-    __class_type = 'ridge'
+    __class_type = "ridge"

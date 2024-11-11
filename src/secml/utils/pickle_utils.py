@@ -6,13 +6,14 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import pickle
 import gzip
 
 from secml.utils import fm
 
 # Remember to add any new method to following list
-__all__ = ['save', 'load']
+__all__ = ["save", "load"]
 
 
 def save(file_path, obj):
@@ -44,16 +45,16 @@ def save(file_path, obj):
     """
     # Adding extension to destination file if user forgot about it...
     file_ext = fm.splitext(file_path)[1]
-    file_path = file_path + '.gz' if file_ext != '.gz' else file_path
+    file_path = file_path + ".gz" if file_ext != ".gz" else file_path
 
     # open the reference to target file
-    with gzip.open(file_path, 'wb') as f_ref:
+    with gzip.open(file_path, "wb") as f_ref:
         pickle.dump(obj, f_ref, protocol=4)
 
     return fm.join(fm.abspath(file_path), fm.split(file_path)[1])
 
 
-def load(file_path, encoding='bytes'):
+def load(file_path, encoding="bytes"):
     """Load object from cPickle file.
 
     Load a generic gzip compressed python object created by `.save`.
@@ -66,6 +67,6 @@ def load(file_path, encoding='bytes'):
         Encoding to use for loading the file. Default 'bytes'.
 
     """
-    with gzip.open(file_path, 'rb') as f_ref:
+    with gzip.open(file_path, "rb") as f_ref:
         # Loading and returning the object
         return pickle.load(f_ref, encoding=encoding)

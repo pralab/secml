@@ -27,7 +27,10 @@ class TestSecmlAutograd(CUnitTest):
         random_op.backward()
         torch_grad = x.grad
 
-        secml_grad = self.secml_model.backward(as_carray(torch.ones(size=(self.D_out,)))) * self.N
+        secml_grad = (
+            self.secml_model.backward(as_carray(torch.ones(size=(self.D_out,))))
+            * self.N
+        )
 
         self.assertAlmostEqual(torch_grad.sum().item(), secml_grad.sum(), places=3)
 

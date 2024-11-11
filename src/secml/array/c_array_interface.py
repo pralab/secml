@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 from copy import deepcopy
 
@@ -132,8 +133,7 @@ class _CArrayInterface(metaclass=ABCMeta):
     def item(self):
         """Returns the single element in the array as built-in type."""
         if self.size != 1:
-            raise ValueError(
-                "cannot use .item(). Array has size {:}".format(self.size))
+            raise ValueError("cannot use .item(). Array has size {:}".format(self.size))
         return to_builtin(self.tondarray().ravel()[0])
 
     @abstractmethod
@@ -379,12 +379,12 @@ class _CArrayInterface(metaclass=ABCMeta):
         return abs(self)
 
     @abstractmethod
-    def sort(self, axis=-1, kind='quicksort', inplace=False):
+    def sort(self, axis=-1, kind="quicksort", inplace=False):
         """Sort an array."""
         raise NotImplementedError
 
     @abstractmethod
-    def argsort(self, axis=-1, kind='quicksort'):
+    def argsort(self, axis=-1, kind="quicksort"):
         """Returns the indices that would sort an array."""
         raise NotImplementedError
 
@@ -465,8 +465,7 @@ class _CArrayInterface(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def unique(self, return_index=False,
-               return_inverse=False, return_counts=False):
+    def unique(self, return_index=False, return_inverse=False, return_counts=False):
         """Find the unique elements of an array."""
         raise NotImplementedError
 
@@ -743,6 +742,6 @@ class _CArrayInterface(metaclass=ABCMeta):
 
     @classmethod
     @abstractmethod
-    def meshgrid(cls, xi, indexing='xy'):
+    def meshgrid(cls, xi, indexing="xy"):
         """Return coordinate matrices from coordinate vectors."""
         raise NotImplementedError

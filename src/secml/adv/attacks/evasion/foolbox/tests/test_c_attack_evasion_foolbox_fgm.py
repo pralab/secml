@@ -1,4 +1,6 @@
-from secml.adv.attacks.evasion.foolbox.tests.c_attack_evasion_foolbox_testcases import CAttackEvasionFoolboxTestCases
+from secml.adv.attacks.evasion.foolbox.tests.c_attack_evasion_foolbox_testcases import (
+    CAttackEvasionFoolboxTestCases,
+)
 
 try:
     import foolbox
@@ -6,8 +8,11 @@ try:
 except ImportError:
     CAttackEvasionFoolboxTestCases.importskip("foolbox")
 
-from secml.adv.attacks.evasion.foolbox.fb_attacks.fb_fgm_attack \
-    import CFoolboxFGML1, CFoolboxFGML2, CFoolboxFGMLinf
+from secml.adv.attacks.evasion.foolbox.fb_attacks.fb_fgm_attack import (
+    CFoolboxFGML1,
+    CFoolboxFGML2,
+    CFoolboxFGMLinf,
+)
 
 
 class TestCAttackEvasionFoolboxFGML1(CAttackEvasionFoolboxTestCases):
@@ -19,7 +24,7 @@ class TestCAttackEvasionFoolboxFGML1(CAttackEvasionFoolboxTestCases):
         super(TestCAttackEvasionFoolboxFGML1, self).setUp()
         self.attack_class = CFoolboxFGML1
 
-        self.attack_params = {'random_start': False}
+        self.attack_params = {"random_start": False}
 
         self.has_targeted = False
         self.has_untargeted = True
@@ -46,7 +51,7 @@ class TestCAttackEvasionFoolboxFGML2(CAttackEvasionFoolboxTestCases):
         super(TestCAttackEvasionFoolboxFGML2, self).setUp()
         self.attack_class = CFoolboxFGML2
 
-        self.attack_params = {'random_start': False}
+        self.attack_params = {"random_start": False}
 
         self.has_targeted = False
         self.has_untargeted = True
@@ -73,7 +78,7 @@ class TestCAttackEvasionFoolboxFGMLinf(CAttackEvasionFoolboxTestCases):
         super(TestCAttackEvasionFoolboxFGMLinf, self).setUp()
         self.attack_class = CFoolboxFGMLinf
 
-        self.attack_params = {'random_start': False}
+        self.attack_params = {"random_start": False}
 
         self.has_targeted = False
         self.has_untargeted = True

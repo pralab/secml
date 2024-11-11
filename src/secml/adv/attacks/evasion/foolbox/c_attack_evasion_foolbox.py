@@ -7,6 +7,7 @@
 .. moduleauthor:: Maura Pintor <maura.pintor@unica.it>
 
 """
+
 import eagerpy as ep
 import foolbox as fb
 import torch
@@ -14,8 +15,11 @@ from eagerpy import PyTorchTensor
 from numpy import NaN
 
 from secml.adv.attacks.evasion import CAttackEvasion
-from secml.adv.attacks.evasion.foolbox.secml_autograd import \
-    SecmlLayer, as_tensor, as_carray
+from secml.adv.attacks.evasion.foolbox.secml_autograd import (
+    SecmlLayer,
+    as_tensor,
+    as_carray,
+)
 from secml.array import CArray
 from secml.core.constants import inf
 from secml.settings import SECML_PYTORCH_USE_CUDA
@@ -51,14 +55,22 @@ class CAttackEvasionFoolbox(CAttackEvasion):
         Init parameters for creating the attack, as kwargs.
     """
 
-    __class_type = 'e-foolbox'
+    __class_type = "e-foolbox"
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0,
-                 epsilons=None, fb_attack_class=None, **attack_params):
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=None,
+        fb_attack_class=None,
+        **attack_params
+    ):
 
         super(CAttackEvasionFoolbox, self).__init__(
-            classifier=classifier,
-            y_target=y_target)
+            classifier=classifier, y_target=y_target
+        )
 
         self.attack_params = attack_params
         self.attack_class = fb_attack_class
@@ -69,8 +81,7 @@ class CAttackEvasionFoolbox(CAttackEvasion):
         # wraps secml classifier in a pytorch layer
         self._pytorch_model_wrapper = SecmlLayer(classifier)
         # wraps the pytorch model in the foolbox pytorch wrapper
-        self.f_model = _FoolboxModel(self._pytorch_model_wrapper,
-                                     bounds=(lb, ub))
+        self.f_model = _FoolboxModel(self._pytorch_model_wrapper, bounds=(lb, ub))
 
         self._last_f_eval = None
         self._last_grad_eval = None
@@ -87,14 +98,17 @@ class CAttackEvasionFoolbox(CAttackEvasion):
         self.f_model.reset()
         if self.y_target is None:
             criterion = fb.criteria.Misclassification(
-                as_tensor(y.ravel().astype('int64')))
+                as_tensor(y.ravel().astype("int64"))
+            )
         else:
             criterion = fb.criteria.TargetedMisclassification(
-                torch.tensor([self.y_target]))
+                torch.tensor([self.y_target])
+            )
 
         x_t = as_tensor(x, requires_grad=False)
         advx, clipped, is_adv = self.attack(
-            self.f_model, x_t, criterion, epsilons=self.epsilon)
+            self.f_model, x_t, criterion, epsilons=self.epsilon
+        )
 
         if isinstance(clipped, list):
             if len(clipped) == 1:
@@ -102,7 +116,8 @@ class CAttackEvasionFoolbox(CAttackEvasion):
             else:
                 raise ValueError(
                     "This attack is returning a list. Please,"
-                    "use a single value of epsilon.")
+                    "use a single value of epsilon."
+                )
 
         # f_opt is computed only in class-specific wrappers
         f_opt = NaN
@@ -131,7 +146,8 @@ class CAttackEvasionFoolbox(CAttackEvasion):
         raise NotImplementedError(
             "Objective Function and Objective Function Gradient "
             "are not supported with this constructor. Please, "
-            "use one of our wrapper-supported attacks.")
+            "use one of our wrapper-supported attacks."
+        )
 
     @property
     def x_seq(self):
@@ -162,12 +178,14 @@ class _FoolboxModel(fb.models.PyTorchModel):
         self._store_path = store_path
         self._x_path = []
         if not isinstance(model, torch.nn.Module):
-            raise ValueError(
-                "expected model to be a torch.nn.Module instance")
+            raise ValueError("expected model to be a torch.nn.Module instance")
 
-        device = 'cuda' if use_cuda else 'cpu'
+        device = "cuda" if use_cuda else "cpu"
         super().__init__(
-            model, bounds=bounds, preprocessing=None, device=device,
+            model,
+            bounds=bounds,
+            preprocessing=None,
+            device=device,
         )
 
         self.data_format = "channels_first"

@@ -1,17 +1,28 @@
-from secml.adv.attacks.evasion.cleverhans.tests import \
-    CAttackEvasionCleverhansTestCases
+from secml.adv.attacks.evasion.cleverhans.tests import CAttackEvasionCleverhansTestCases
 
 try:
     import cleverhans
 except ImportError:
     CAttackEvasionCleverhansTestCases.importskip("cleverhans")
 
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    CAttackEvasionCleverhansTestCases.importskip("tensorflow")
 
-from cleverhans.attacks import FastGradientMethod, CarliniWagnerL2, \
-    ElasticNetMethod, SPSA, LBFGS, \
-    ProjectedGradientDescent, SaliencyMapMethod, \
-    MomentumIterativeMethod, MadryEtAl, BasicIterativeMethod, DeepFool
+from cleverhans.attacks import (
+    FastGradientMethod,
+    CarliniWagnerL2,
+    ElasticNetMethod,
+    SPSA,
+    LBFGS,
+    ProjectedGradientDescent,
+    SaliencyMapMethod,
+    MomentumIterativeMethod,
+    MadryEtAl,
+    BasicIterativeMethod,
+    DeepFool,
+)
 
 from secml.array import CArray
 from secml.data.loader import CDataLoaderMNIST
@@ -26,21 +37,20 @@ from secml.adv.attacks.evasion import CAttackEvasionCleverhans
 
 class TestCAttackEvasionCleverhansMNIST(CAttackEvasionCleverhansTestCases):
     """Unittests for CAttackEvasionCleverhans on MNIST dataset"""
+
     make_figures = False  # Set as True to produce figures
 
     @classmethod
     def setUpClass(cls):
-
         CAttackEvasionCleverhansTestCases.setUpClass()
 
         cls.seed = 0
 
-        cls.tr, cls.val, cls.ts, cls.digits, \
-            cls.img_w, cls.img_h = cls._load_mnist()
+        cls.tr, cls.val, cls.ts, cls.digits, cls.img_w, cls.img_h = cls._load_mnist()
 
         cls.clf = CClassifierMulticlassOVA(CClassifierSVM)
         cls.clf.fit(cls.tr.X, cls.tr.Y)
-        
+
         cls.x0_img_class = 1
         cls.y_target = 2  # Target class for targeted tests
 
@@ -48,27 +58,25 @@ class TestCAttackEvasionCleverhansMNIST(CAttackEvasionCleverhansTestCases):
     def _load_mnist():
         """Load MNIST 4971 dataset."""
         digits = [4, 9, 7, 1]
-        digits_str = "".join(['{:}-'.format(i) for i in digits[:-1]])
-        digits_str += '{:}'.format(digits[-1])
+        digits_str = "".join(["{:}-".format(i) for i in digits[:-1]])
+        digits_str += "{:}".format(digits[-1])
 
         # FIXME: REMOVE THIS AFTER CDATALOADERS AUTOMATICALLY STORE DS
-        tr_file = fm.join(
-            fm.abspath(__file__), 'mnist_tr_{:}.gz'.format(digits_str))
+        tr_file = fm.join(fm.abspath(__file__), "mnist_tr_{:}.gz".format(digits_str))
         if not fm.file_exist(tr_file):
             loader = CDataLoaderMNIST()
-            tr = loader.load('training', digits=digits)
+            tr = loader.load("training", digits=digits)
             pickle_utils.save(tr_file, tr)
         else:
-            tr = pickle_utils.load(tr_file, encoding='latin1')
+            tr = pickle_utils.load(tr_file, encoding="latin1")
 
-        ts_file = fm.join(
-            fm.abspath(__file__), 'mnist_ts_{:}.gz'.format(digits_str))
+        ts_file = fm.join(fm.abspath(__file__), "mnist_ts_{:}.gz".format(digits_str))
         if not fm.file_exist(ts_file):
             loader = CDataLoaderMNIST()
-            ts = loader.load('testing', digits=digits)
+            ts = loader.load("testing", digits=digits)
             pickle_utils.save(ts_file, ts)
         else:
-            ts = pickle_utils.load(ts_file, encoding='latin1')
+            ts = pickle_utils.load(ts_file, encoding="latin1")
 
         idx = CArray.arange(tr.num_samples)
         val_dts_idx = CArray.randsample(idx, 200, random_state=0)
@@ -88,7 +96,7 @@ class TestCAttackEvasionCleverhansMNIST(CAttackEvasionCleverhansTestCases):
 
     def _choose_x0_2c(self, x0_img_class):
         """Find a sample of that belong to the required class.
-        
+
         Parameters
         ----------
         x0_img_class : int
@@ -97,10 +105,9 @@ class TestCAttackEvasionCleverhansMNIST(CAttackEvasionCleverhansTestCases):
         -------
         x0 : CArray
         y0 : CArray
-        
+
         """
-        adv_img_idx = \
-            CArray(self.ts.Y.find(self.ts.Y == x0_img_class))[0]
+        adv_img_idx = CArray(self.ts.Y.find(self.ts.Y == x0_img_class))[0]
 
         x0 = self.ts.X[adv_img_idx, :]
         y0 = self.ts.Y[adv_img_idx]
@@ -109,56 +116,68 @@ class TestCAttackEvasionCleverhansMNIST(CAttackEvasionCleverhansTestCases):
 
     def test_DF(self):
         """Test of DeepFool algorithm."""
-        attack = {'class': DeepFool,
-                  'params': {'nb_candidate': 2,
-                             'max_iter': 5,
-                             'clip_min': 0.,
-                             'clip_max': 1.0}}
+        attack = {
+            "class": DeepFool,
+            "params": {
+                "nb_candidate": 2,
+                "max_iter": 5,
+                "clip_min": 0.0,
+                "clip_max": 1.0,
+            },
+        }
 
         self._test_indiscriminate(attack)
 
     def test_FGM(self):
         """Test of FastGradientMethod algorithm."""
-        attack = {'class': FastGradientMethod,
-                  'params': {'eps': 0.3,
-                             'clip_min': 0.,
-                             'clip_max': 1.0}}
+        attack = {
+            "class": FastGradientMethod,
+            "params": {"eps": 0.3, "clip_min": 0.0, "clip_max": 1.0},
+        }
 
         self._test_targeted(attack)
         self._test_indiscriminate(attack)
 
     def test_ENM(self):
         """Test of ElasticNetMethod algorithm."""
-        attack = {'class': ElasticNetMethod,
-                  'params': {'max_iterations': 5,
-                             'abort_early': True,
-                             'learning_rate': 1e-3}}
+        attack = {
+            "class": ElasticNetMethod,
+            "params": {"max_iterations": 5, "abort_early": True, "learning_rate": 1e-3},
+        }
 
         self._test_targeted(attack)
         self._test_indiscriminate(attack)
 
     def test_CWL2(self):
         """Test of CarliniWagnerL2 algorithm."""
-        attack = {'class': CarliniWagnerL2,
-                  'params': {'max_iterations': 5,
-                             'learning_rate': 0.3,
-                             'clip_min': 0.,
-                             'clip_max': 1.0}}
+        attack = {
+            "class": CarliniWagnerL2,
+            "params": {
+                "max_iterations": 5,
+                "learning_rate": 0.3,
+                "clip_min": 0.0,
+                "clip_max": 1.0,
+            },
+        }
 
         self._test_targeted(attack)
         self._test_indiscriminate(attack)
 
     def test_SPSA(self):
         """Test of SPSA algorithm."""
-        attack = {'class': SPSA,
-                  'params': {'eps': 0.5,
-                             'nb_iter': 10,
-                             'early_stop_loss_threshold': -1.,
-                             'spsa_samples': 32,
-                             'spsa_iters': 5,
-                             'learning_rate': 0.03,
-                             'clip_min': 0.,
-                             'clip_max': 1., }}
+        attack = {
+            "class": SPSA,
+            "params": {
+                "eps": 0.5,
+                "nb_iter": 10,
+                "early_stop_loss_threshold": -1.0,
+                "spsa_samples": 32,
+                "spsa_iters": 5,
+                "learning_rate": 0.03,
+                "clip_min": 0.0,
+                "clip_max": 1.0,
+            },
+        }
 
         self._test_targeted(attack)
         # FIXME: random seed not working for SPSA?
@@ -166,57 +185,81 @@ class TestCAttackEvasionCleverhansMNIST(CAttackEvasionCleverhansTestCases):
 
     def test_LBFGS(self):
         """Test of LBFGS algorithm."""
-        attack = {'class': LBFGS,
-                  'params': {'max_iterations': 5,
-                             'clip_min': 0.,
-                             'clip_max': 1., }}
+        attack = {
+            "class": LBFGS,
+            "params": {
+                "max_iterations": 5,
+                "clip_min": 0.0,
+                "clip_max": 1.0,
+            },
+        }
 
         self._test_targeted(attack)
 
     def test_PGD(self):
         """Test of ProjectedGradientDescent algorithm."""
-        attack = {'class': ProjectedGradientDescent,
-                  'params': {'eps': 0.3,
-                             'clip_min': 0.,
-                             'clip_max': 1., }}
+        attack = {
+            "class": ProjectedGradientDescent,
+            "params": {
+                "eps": 0.3,
+                "clip_min": 0.0,
+                "clip_max": 1.0,
+            },
+        }
 
         self._test_targeted(attack)
         self._test_indiscriminate(attack)
 
     def test_SMM(self):
         """Test of SaliencyMapMethod algorithm."""
-        attack = {'class': SaliencyMapMethod,
-                  'params': {'clip_min': 0.,
-                             'clip_max': 1., }}
+        attack = {
+            "class": SaliencyMapMethod,
+            "params": {
+                "clip_min": 0.0,
+                "clip_max": 1.0,
+            },
+        }
 
         self._test_targeted(attack)
 
     def test_MIM(self):
         """Test of MomentumIterativeMethod algorithm."""
-        attack = {'class': MomentumIterativeMethod,
-                  'params': {'eps': 0.3,
-                             'clip_min': 0.,
-                             'clip_max': 1., }}
+        attack = {
+            "class": MomentumIterativeMethod,
+            "params": {
+                "eps": 0.3,
+                "clip_min": 0.0,
+                "clip_max": 1.0,
+            },
+        }
 
         self._test_targeted(attack)
         self._test_indiscriminate(attack)
 
     def test_Madry(self):
         """Test of MadryEtAl algorithm."""
-        attack = {'class': MadryEtAl,
-                  'params': {'eps': 0.3,
-                             'clip_min': 0.,
-                             'clip_max': 1., }}
+        attack = {
+            "class": MadryEtAl,
+            "params": {
+                "eps": 0.3,
+                "clip_min": 0.0,
+                "clip_max": 1.0,
+            },
+        }
 
         self._test_targeted(attack)
         self._test_indiscriminate(attack)
 
     def test_BIM(self):
         """Test of BasicIterativeMethod algorithm."""
-        attack = {'class': BasicIterativeMethod,
-                  'params': {'eps': 0.3,
-                             'clip_min': 0.,
-                             'clip_max': 1., }}
+        attack = {
+            "class": BasicIterativeMethod,
+            "params": {
+                "eps": 0.3,
+                "clip_min": 0.0,
+                "clip_max": 1.0,
+            },
+        }
 
         self._test_targeted(attack)
         self._test_indiscriminate(attack)
@@ -265,7 +308,7 @@ class TestCAttackEvasionCleverhansMNIST(CAttackEvasionCleverhansTestCases):
             Label of the expected final optimal point.
 
         """
-        attack_idx = attack['class'].__name__
+        attack_idx = attack["class"].__name__
         self.logger.info("Running algorithm: {:} ".format(attack_idx))
 
         tf.set_random_seed(self.seed)
@@ -273,19 +316,20 @@ class TestCAttackEvasionCleverhansMNIST(CAttackEvasionCleverhansTestCases):
         evas = CAttackEvasionCleverhans(
             classifier=self.clf,
             y_target=y_target,
-            clvh_attack_class=attack['class'],
-            **attack['params']
+            clvh_attack_class=attack["class"],
+            **attack["params"],
         )
 
         evas.verbose = 2
 
         x0, y0 = self._choose_x0_2c(self.x0_img_class)
-        
+
         with self.logger.timer():
             y_pred, scores, adv_ds, f_obj = evas.run(x0, y0)
 
-        self.logger.info("Starting score: " + str(
-            evas.classifier.decision_function(x0, y=1).item()))
+        self.logger.info(
+            "Starting score: " + str(evas.classifier.decision_function(x0, y=1).item())
+        )
 
         self.logger.info("Final score: " + str(evas.f_opt))
         self.logger.info("x*:\n" + str(evas.x_opt))
@@ -336,19 +380,18 @@ class TestCAttackEvasionCleverhansMNIST(CAttackEvasionCleverhansTestCases):
 
         fig.subplot(1, 3, 1)
         fig.sp.title(self.digits[y0.item()])
-        fig.sp.imshow(x0.reshape((self.img_h, self.img_w)), cmap='gray')
+        fig.sp.imshow(x0.reshape((self.img_h, self.img_w)), cmap="gray")
 
         fig.subplot(1, 3, 2)
-        fig.sp.imshow(
-            added_noise.reshape((self.img_h, self.img_w)), cmap='gray')
+        fig.sp.imshow(added_noise.reshape((self.img_h, self.img_w)), cmap="gray")
 
         fig.subplot(1, 3, 3)
         fig.sp.title(self.digits[y_pred.item()])
-        fig.sp.imshow(x_opt.reshape((self.img_h, self.img_w)), cmap='gray')
+        fig.sp.imshow(x_opt.reshape((self.img_h, self.img_w)), cmap="gray")
 
         name_file = "{:}_MNIST_target-{:}.pdf".format(attack_idx, y_target)
-        fig.savefig(fm.join(self.images_folder, name_file), file_format='pdf')
+        fig.savefig(fm.join(self.images_folder, name_file), file_format="pdf")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CAttackEvasionCleverhansTestCases.main()

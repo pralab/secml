@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.array import CArray
 
 from secml.explanation import CExplainerGradient
@@ -36,7 +37,8 @@ class CExplainerGradientInput(CExplainerGradient):
     class_type : 'gradient-input'
 
     """
-    __class_type = 'gradient-input'
+
+    __class_type = "gradient-input"
 
     def explain(self, x, y, return_grad=False):
         """Computes the explanation for input sample.
@@ -58,6 +60,5 @@ class CExplainerGradientInput(CExplainerGradient):
         """
         grad = self.clf.grad_f_x(x, y=y)
         rv = x * grad  # Directional derivative
-        self.logger.debug(
-            "Relevance Vector:\n{:}".format(rv))
+        self.logger.debug("Relevance Vector:\n{:}".format(rv))
         return (rv, grad) if return_grad is True else rv

@@ -6,6 +6,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from sklearn import linear_model
 
 from secml.array import CArray
@@ -15,9 +16,9 @@ from secml.ml.classifiers.regularizer import CRegularizer
 from secml.ml.classifiers.gradients import CClassifierGradientSGDMixin
 
 
-class CClassifierSGD(CClassifierLinearMixin,
-                     CClassifierSkLearn,
-                     CClassifierGradientSGDMixin):
+class CClassifierSGD(
+    CClassifierLinearMixin, CClassifierSkLearn, CClassifierGradientSGDMixin
+):
     """Stochastic Gradient Descent Classifier.
 
     Parameters
@@ -90,14 +91,27 @@ class CClassifierSGD(CClassifierLinearMixin,
     class_type : 'sgd'
 
     """
-    __class_type = 'sgd'
 
-    def __init__(self, loss, regularizer, alpha=0.01,
-                 fit_intercept=True, max_iter=1000, tol=None,
-                 shuffle=True, learning_rate='optimal',
-                 eta0=10.0, power_t=0.5, class_weight=None,
-                 warm_start=False, average=False, random_state=None,
-                 preprocess=None):
+    __class_type = "sgd"
+
+    def __init__(
+        self,
+        loss,
+        regularizer,
+        alpha=0.01,
+        fit_intercept=True,
+        max_iter=1000,
+        tol=None,
+        shuffle=True,
+        learning_rate="optimal",
+        eta0=10.0,
+        power_t=0.5,
+        class_weight=None,
+        warm_start=False,
+        average=False,
+        random_state=None,
+        preprocess=None,
+    ):
 
         # Keep private (not an sklearn sgd parameter)
         self._loss = CLoss.create(loss)
@@ -118,7 +132,8 @@ class CClassifierSGD(CClassifierLinearMixin,
             class_weight=class_weight,
             average=average,
             warm_start=warm_start,
-            random_state=random_state)
+            random_state=random_state,
+        )
 
         # Pass loss function parameters to classifier
         sklearn_model.set_params(**self.loss.get_params())
@@ -126,8 +141,9 @@ class CClassifierSGD(CClassifierLinearMixin,
         sklearn_model.set_params(**self.regularizer.get_params())
 
         # Calling the superclass init
-        CClassifierSkLearn.__init__(self, sklearn_model=sklearn_model,
-                                    preprocess=preprocess)
+        CClassifierSkLearn.__init__(
+            self, sklearn_model=sklearn_model, preprocess=preprocess
+        )
 
     @property
     def loss(self):
@@ -158,8 +174,11 @@ class CClassifierSGD(CClassifierLinearMixin,
     @property
     def b(self):
         if self.is_fitted():
-            return CArray(self._sklearn_model.intercept_[0])[0] if \
-                self.fit_intercept else 0
+            return (
+                CArray(self._sklearn_model.intercept_[0])[0]
+                if self.fit_intercept
+                else 0
+            )
         else:
             return None
 

@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 
 from secml.core import CCreator
@@ -20,7 +21,8 @@ class CExplainer(CCreator, metaclass=ABCMeta):
         Instance of the classifier to explain.
 
     """
-    __super__ = 'CExplainer'
+
+    __super__ = "CExplainer"
 
     def __init__(self, clf):
         self._clf = clf

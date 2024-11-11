@@ -6,6 +6,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from scipy import optimize as sc_opt
 
 from secml.core import CCreator
@@ -35,8 +36,9 @@ class CFunction(CCreator):
     class_type : 'generic'
 
     """
-    __super__ = 'CFunction'
-    __class_type = 'generic'
+
+    __super__ = "CFunction"
+    __class_type = "generic"
 
     def __init__(self, fun=None, gradient=None, n_dim=None):
 
@@ -82,7 +84,8 @@ class CFunction(CCreator):
         if self.n_dim is not None and n_dim != self.n_dim:
             raise ValueError(
                 "unexpected dimension of input. "
-                "Got {:}, expected {:}".format(n_dim, self.n_dim))
+                "Got {:}, expected {:}".format(n_dim, self.n_dim)
+            )
 
     def fun(self, x, *args, **kwargs):
         """Evaluates function on x.
@@ -173,11 +176,11 @@ class CFunction(CCreator):
 
     def has_fun(self):
         """True if function has been set."""
-        return True if hasattr(self, '_fun') else False
+        return True if hasattr(self, "_fun") else False
 
     def has_gradient(self):
         """True if gradient has been set."""
-        return True if hasattr(self, '_gradient') else False
+        return True if hasattr(self, "_gradient") else False
 
     def is_equal(self, x, val, tol=1e-6):
         """Evaluates if function value is close to `val` within tol."""
@@ -246,8 +249,7 @@ class CFunction(CCreator):
         # double casting to always have a CArray
         xk_ndarray = CArray(x).ravel().tondarray()
 
-        epsilon = epsilon.tondarray() if \
-            isinstance(epsilon, CArray) else epsilon
+        epsilon = epsilon.tondarray() if isinstance(epsilon, CArray) else epsilon
 
         # approx_fprime expects a scalar as output of fun
         def fun_ndarray(xk, f_args, f_kwargs):
@@ -256,8 +258,9 @@ class CFunction(CCreator):
                 return out_fun.item()  # return scalar
             return out_fun  # already scalar
 
-        return CArray(sc_opt.approx_fprime(
-            xk_ndarray, fun_ndarray, epsilon, args, kwargs))
+        return CArray(
+            sc_opt.approx_fprime(xk_ndarray, fun_ndarray, epsilon, args, kwargs)
+        )
 
     def check_grad(self, x, epsilon, *args, **kwargs):
         """Check the correctness of a gradient function by comparing

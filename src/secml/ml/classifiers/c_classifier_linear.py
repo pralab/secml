@@ -7,6 +7,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from abc import abstractmethod
 
 from secml.array import CArray

@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientLinearMixin
 

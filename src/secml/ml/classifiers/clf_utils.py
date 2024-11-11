@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.core.type_utils import is_int
 from secml.array import CArray
 
@@ -25,9 +26,9 @@ def check_binary_labels(labels):
 
 
     """
-    if (is_int(labels) and not (labels == 0 or labels == 1)) or \
-            (isinstance(labels, CArray) and
-             (labels != 0).logical_and(labels != 1).any()):
+    if (is_int(labels) and not (labels == 0 or labels == 1)) or (
+        isinstance(labels, CArray) and (labels != 0).logical_and(labels != 1).any()
+    ):
         raise ValueError("input labels should be binary in {0, +1} interval.")
 
 

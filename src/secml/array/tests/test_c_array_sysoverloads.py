@@ -17,46 +17,55 @@ class TestCArraySystemOverloads(CArrayTestCases):
         """Test for mathematical operators array vs array with broadcast."""
         operators = [op.add, op.sub]
         expected_result = [CSparse, CDense, CDense, CDense]
-        items = [(self.array_sparse_sym, self.row_sparse),
-                 (self.array_sparse_sym, self.row_dense),
-                 (self.array_dense_sym, self.row_sparse),
-                 (self.array_dense_sym, self.row_dense)]
+        items = [
+            (self.array_sparse_sym, self.row_sparse),
+            (self.array_sparse_sym, self.row_dense),
+            (self.array_dense_sym, self.row_sparse),
+            (self.array_dense_sym, self.row_dense),
+        ]
         self._test_operator_cycle(operators, items, expected_result)
 
         operators = [op.mul]
         expected_result = [CSparse, CSparse, CSparse, CDense]
-        items = [(self.array_sparse_sym, self.row_sparse),
-                 (self.array_sparse_sym, self.row_dense),
-                 (self.array_dense_sym, self.row_sparse),
-                 (self.array_dense_sym, self.row_dense)]
+        items = [
+            (self.array_sparse_sym, self.row_sparse),
+            (self.array_sparse_sym, self.row_dense),
+            (self.array_dense_sym, self.row_sparse),
+            (self.array_dense_sym, self.row_dense),
+        ]
         self._test_operator_cycle(operators, items, expected_result)
 
         operators = [op.truediv, op.floordiv]
         expected_result = [CDense, CDense, CDense, CDense]
-        items = [(self.array_sparse_sym, self.row_sparse),
-                 (self.array_sparse_sym, self.row_dense),
-                 (self.array_dense_sym, self.row_sparse),
-                 (self.array_dense_sym, self.row_dense)]
+        items = [
+            (self.array_sparse_sym, self.row_sparse),
+            (self.array_sparse_sym, self.row_dense),
+            (self.array_dense_sym, self.row_sparse),
+            (self.array_dense_sym, self.row_dense),
+        ]
 
         with self.logger.catch_warnings():
             # For 0 / 0 divisions
             self.logger.filterwarnings(
-                action='ignore',
+                action="ignore",
                 message="divide by zero encountered in true_divide",
-                category=RuntimeWarning)
+                category=RuntimeWarning,
+            )
             self._test_operator_cycle(operators, items, expected_result)
 
         operators = [op.pow, CArray.pow]
         expected_result = [CDense, CDense]
-        items = [(self.array_dense_sym, self.row_sparse),
-                 (self.array_dense_sym, self.row_dense)]
+        items = [
+            (self.array_dense_sym, self.row_sparse),
+            (self.array_dense_sym, self.row_dense),
+        ]
         self._test_operator_cycle(operators, items, expected_result)
 
         # Sparse array ** array is not supported
         with self.assertRaises(TypeError):
-            self.array_sparse ** self.row_sparse
+            self.array_sparse**self.row_sparse
         with self.assertRaises(TypeError):
-            self.array_sparse ** self.row_dense
+            self.array_sparse**self.row_dense
         with self.assertRaises(TypeError):
             self.array_sparse.pow(self.row_sparse)
         with self.assertRaises(TypeError):
@@ -66,46 +75,55 @@ class TestCArraySystemOverloads(CArrayTestCases):
         """Test for mathematical operators array vs array."""
         operators = [op.add, op.sub]
         expected_result = [CSparse, CDense, CDense, CDense]
-        items = [(self.array_sparse, self.array_sparse),
-                 (self.array_sparse, self.array_dense),
-                 (self.array_dense, self.array_sparse),
-                 (self.array_dense, self.array_dense)]
+        items = [
+            (self.array_sparse, self.array_sparse),
+            (self.array_sparse, self.array_dense),
+            (self.array_dense, self.array_sparse),
+            (self.array_dense, self.array_dense),
+        ]
         self._test_operator_cycle(operators, items, expected_result)
 
         operators = [op.mul]
         expected_result = [CSparse, CSparse, CSparse, CDense]
-        items = [(self.array_sparse, self.array_sparse),
-                 (self.array_sparse, self.array_dense),
-                 (self.array_dense, self.array_sparse),
-                 (self.array_dense, self.array_dense)]
+        items = [
+            (self.array_sparse, self.array_sparse),
+            (self.array_sparse, self.array_dense),
+            (self.array_dense, self.array_sparse),
+            (self.array_dense, self.array_dense),
+        ]
         self._test_operator_cycle(operators, items, expected_result)
 
         operators = [op.truediv, op.floordiv]
         expected_result = [CDense, CDense, CDense, CDense]
-        items = [(self.array_sparse, self.array_sparse),
-                 (self.array_sparse, self.array_dense),
-                 (self.array_dense, self.array_sparse),
-                 (self.array_dense, self.array_dense)]
+        items = [
+            (self.array_sparse, self.array_sparse),
+            (self.array_sparse, self.array_dense),
+            (self.array_dense, self.array_sparse),
+            (self.array_dense, self.array_dense),
+        ]
 
         with self.logger.catch_warnings():
             # For 0 / 0 divisions
             self.logger.filterwarnings(
-                action='ignore',
+                action="ignore",
                 message="invalid value encountered in true_divide",
-                category=RuntimeWarning)
+                category=RuntimeWarning,
+            )
             self._test_operator_cycle(operators, items, expected_result)
 
         operators = [op.pow, CArray.pow]
         expected_result = [CDense, CDense]
-        items = [(self.array_dense, self.array_sparse),
-                 (self.array_dense, self.array_dense)]
+        items = [
+            (self.array_dense, self.array_sparse),
+            (self.array_dense, self.array_dense),
+        ]
         self._test_operator_cycle(operators, items, expected_result)
 
         # Sparse array ** array is not supported
         with self.assertRaises(TypeError):
-            self.array_sparse ** self.array_sparse
+            self.array_sparse**self.array_sparse
         with self.assertRaises(TypeError):
-            self.array_sparse ** self.array_dense
+            self.array_sparse**self.array_dense
         with self.assertRaises(TypeError):
             self.array_sparse.pow(self.array_sparse)
         with self.assertRaises(TypeError):
@@ -146,26 +164,27 @@ class TestCArraySystemOverloads(CArrayTestCases):
     def test_operators_array_vs_scalar(self):
         """Test for mathematical operators array vs scalar."""
 
-        test_scalars = [
-            2, np.ravel(2)[0], 2.0, np.ravel(2.0)[0], np.float32(2.0)]
-        test_z_scalars = [
-            0, np.ravel(0)[0], 0.0, np.ravel(0.0)[0], np.float32(0.0)]
+        test_scalars = [2, np.ravel(2)[0], 2.0, np.ravel(2.0)[0], np.float32(2.0)]
+        test_z_scalars = [0, np.ravel(0)[0], 0.0, np.ravel(0.0)[0], np.float32(0.0)]
 
         # DENSE ARRAY + NONZERO SCALAR, NONZERO SCALAR + DENSE ARRAY
         # sparse array + nonzero scalar is not supported (and viceversa)
         operators = [op.add, op.mul]
         expected_result = [CDense] * 10
-        items = list(product([self.array_dense], test_scalars)) + \
-            list(product(test_scalars, [self.array_dense]))
+        items = list(product([self.array_dense], test_scalars)) + list(
+            product(test_scalars, [self.array_dense])
+        )
         self._test_operator_cycle(operators, items, expected_result)
 
         # ARRAY + ZERO SCALAR, ZERO SCALAR + ARRAY
         operators = [op.add, op.mul]
         expected_result = [CDense] * 10 + [CSparse] * 10
-        items = list(product([self.array_dense], test_z_scalars)) + \
-            list(product(test_z_scalars, [self.array_dense])) + \
-            list(product([self.array_sparse], test_z_scalars)) + \
-            list(product(test_z_scalars, [self.array_sparse]))
+        items = (
+            list(product([self.array_dense], test_z_scalars))
+            + list(product(test_z_scalars, [self.array_dense]))
+            + list(product([self.array_sparse], test_z_scalars))
+            + list(product(test_z_scalars, [self.array_sparse]))
+        )
         self._test_operator_cycle(operators, items, expected_result)
 
         # DENSE ARRAY - NONZERO SCALAR
@@ -184,40 +203,47 @@ class TestCArraySystemOverloads(CArrayTestCases):
         # ARRAY - ZERO SCALAR
         operators = [op.sub]
         expected_result = [CDense] * 5 + [CSparse] * 5
-        items = list(product([self.array_dense], test_z_scalars)) + \
-            list(product([self.array_sparse], test_z_scalars))
+        items = list(product([self.array_dense], test_z_scalars)) + list(
+            product([self.array_sparse], test_z_scalars)
+        )
         self._test_operator_cycle(operators, items, expected_result)
 
         # ZERO SCALAR - ARRAY
         operators = [op.sub]
         expected_result = [CDense] * 5 + [CSparse] * 5
-        items = list(product(test_z_scalars, [self.array_dense])) + \
-            list(product(test_z_scalars, [self.array_sparse]))
+        items = list(product(test_z_scalars, [self.array_dense])) + list(
+            product(test_z_scalars, [self.array_sparse])
+        )
         self._test_operator_cycle(operators, items, expected_result)
 
         # ARRAY * NONZERO SCALAR, NONZERO SCALAR * ARRAY
         operators = [op.mul]
         expected_result = [CDense] * 10 + [CSparse] * 10
-        items = list(product([self.array_dense], test_scalars)) + \
-            list(product(test_scalars, [self.array_dense])) + \
-            list(product([self.array_sparse], test_scalars)) + \
-            list(product(test_scalars, [self.array_sparse]))
+        items = (
+            list(product([self.array_dense], test_scalars))
+            + list(product(test_scalars, [self.array_dense]))
+            + list(product([self.array_sparse], test_scalars))
+            + list(product(test_scalars, [self.array_sparse]))
+        )
         self._test_operator_cycle(operators, items, expected_result)
 
         # ARRAY * ZERO SCALAR, ZERO SCALAR * ARRAY
         operators = [op.mul]
         expected_result = [CDense] * 10 + [CSparse] * 10
-        items = list(product([self.array_dense], test_z_scalars)) + \
-            list(product(test_z_scalars, [self.array_dense])) + \
-            list(product([self.array_sparse], test_z_scalars)) + \
-            list(product(test_z_scalars, [self.array_sparse]))
+        items = (
+            list(product([self.array_dense], test_z_scalars))
+            + list(product(test_z_scalars, [self.array_dense]))
+            + list(product([self.array_sparse], test_z_scalars))
+            + list(product(test_z_scalars, [self.array_sparse]))
+        )
         self._test_operator_cycle(operators, items, expected_result)
 
         # ARRAY / NONZERO SCALAR
         operators = [op.truediv, op.floordiv]
         expected_result = [CDense] * 5 + [CSparse] * 5
-        items = list(product([self.array_dense], test_scalars)) + \
-            list(product([self.array_sparse], test_scalars))
+        items = list(product([self.array_dense], test_scalars)) + list(
+            product([self.array_sparse], test_scalars)
+        )
         self._test_operator_cycle(operators, items, expected_result)
 
         # NONZERO SCALAR / DENSE ARRAY
@@ -228,13 +254,15 @@ class TestCArraySystemOverloads(CArrayTestCases):
         with self.logger.catch_warnings():
             # we are dividing using arrays having zeros
             self.logger.filterwarnings(
-                action='ignore',
+                action="ignore",
                 message="divide by zero encountered in true_divide",
-                category=RuntimeWarning)
+                category=RuntimeWarning,
+            )
             self.logger.filterwarnings(
-                action='ignore',
+                action="ignore",
                 message="divide by zero encountered in divide",
-                category=RuntimeWarning)
+                category=RuntimeWarning,
+            )
             self._test_operator_cycle(operators, items, expected_result)
 
         # ZERO SCALAR / DENSE ARRAY
@@ -245,25 +273,29 @@ class TestCArraySystemOverloads(CArrayTestCases):
         with self.logger.catch_warnings():
             # we are dividing a zero scalar by something
             self.logger.filterwarnings(
-                action='ignore',
+                action="ignore",
                 message="divide by zero encountered in true_divide",
-                category=RuntimeWarning)
+                category=RuntimeWarning,
+            )
             # For 0 / 0 divisions
             self.logger.filterwarnings(
-                action='ignore',
+                action="ignore",
                 message="invalid value encountered in true_divide",
-                category=RuntimeWarning)
+                category=RuntimeWarning,
+            )
             self.logger.filterwarnings(
-                action='ignore',
+                action="ignore",
                 message="invalid value encountered in divide",
-                category=RuntimeWarning)
+                category=RuntimeWarning,
+            )
             self._test_operator_cycle(operators, items, expected_result)
 
         # ARRAY ** NONZERO SCALAR
         operators = [op.pow, CArray.pow]
         expected_result = [CDense] * 5 + [CSparse] * 5
-        items = list(product([self.array_dense], test_scalars)) + \
-            list(product([self.array_sparse], test_scalars))
+        items = list(product([self.array_dense], test_scalars)) + list(
+            product([self.array_sparse], test_scalars)
+        )
         self._test_operator_cycle(operators, items, expected_result)
 
         # NONZERO SCALAR ** DENSE ARRAY
@@ -288,22 +320,25 @@ class TestCArraySystemOverloads(CArrayTestCases):
         self._test_operator_cycle(operators, items, expected_result)
 
         # NONZERO SCALAR +,- SPARSE ARRAY NOT SUPPORTED (AND VICEVERSA)
-        items = list(product([self.array_sparse], test_scalars)) + \
-            list(product(test_scalars, [self.array_sparse]))
+        items = list(product([self.array_sparse], test_scalars)) + list(
+            product(test_scalars, [self.array_sparse])
+        )
         operators = [op.add, op.sub]
         self._test_operator_notimplemented(operators, items)
 
         # ZERO SCALAR / SPARSE ARRAY NOT SUPPORTED
         # NONZERO SCALAR / SPARSE ARRAY NOT SUPPORTED
-        items = list(product(test_scalars, [self.array_sparse])) + \
-            list(product(test_z_scalars, [self.array_sparse]))
+        items = list(product(test_scalars, [self.array_sparse])) + list(
+            product(test_z_scalars, [self.array_sparse])
+        )
         operators = [op.truediv, op.floordiv]
         self._test_operator_notimplemented(operators, items)
 
         # NONZERO SCALAR ** SPARSE ARRAY NOT SUPPORTED
         # ZERO SCALAR ** SPARSE ARRAY NOT SUPPORTED
-        items = list(product(test_scalars, [self.array_sparse])) + \
-            list(product(test_z_scalars, [self.array_sparse]))
+        items = list(product(test_scalars, [self.array_sparse])) + list(
+            product(test_z_scalars, [self.array_sparse])
+        )
         operators = [op.pow]
         self._test_operator_notimplemented(operators, items)
 
@@ -318,24 +353,35 @@ class TestCArraySystemOverloads(CArrayTestCases):
         """Test for mathematical operators array vs unsupported types."""
 
         def test_unsupported(x):
-            operators = [op.add, op.sub, op.mul,
-                         op.truediv, op.floordiv, op.pow]
+            operators = [op.add, op.sub, op.mul, op.truediv, op.floordiv, op.pow]
             for operator in operators:
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} dense vs '{:}'".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} dense vs '{:}'".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(self.array_dense, x)
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} sparse vs '{:}'".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} sparse vs '{:}'".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(self.array_sparse, x)
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} dense vect vs '{:}'".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} dense vect vs '{:}'".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(self.row_flat_dense, x)
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} sparse vect vs '{:}'".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} sparse vect vs '{:}'".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(self.row_sparse, x)
 
         test_unsupported(np.array([1, 2, 3]))
@@ -344,30 +390,41 @@ class TestCArraySystemOverloads(CArrayTestCases):
         test_unsupported((1, 2, 3))
         test_unsupported(set([1, 2, 3]))
         test_unsupported(dict({1: 2}))
-        test_unsupported('test')
+        test_unsupported("test")
 
     def test_operators_unsupported_vs_array(self):
         """Test for mathematical operators unsupported types vs array."""
 
         def test_unsupported(x):
-            operators = [op.add, op.sub, op.mul,
-                         op.truediv, op.floordiv, op.pow]
+            operators = [op.add, op.sub, op.mul, op.truediv, op.floordiv, op.pow]
             for operator in operators:
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs dense".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs dense".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(x, self.array_dense)
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs sparse".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs sparse".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(x, self.array_sparse)
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs dense vect".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs dense vect".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(x, self.row_flat_dense)
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs sparse vect".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs sparse vect".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(x, self.row_sparse)
 
         # Array do broadcasting of each element wrt our array
@@ -379,59 +436,68 @@ class TestCArraySystemOverloads(CArrayTestCases):
         test_unsupported((1, 2, 3))
         test_unsupported(set([1, 2, 3]))
         test_unsupported(dict({1: 2}))
-        test_unsupported('test')
+        test_unsupported("test")
 
     def test_comparison_array_vs_array(self):
         """Test for comparison operators array vs array."""
         operators = [op.eq, op.lt, op.le, op.gt, op.ge, op.ne]
         expected_result = [CSparse, CDense, CDense, CDense]
-        items = [(self.array_sparse, self.array_sparse),
-                 (self.array_sparse, self.array_dense),
-                 (self.array_dense, self.array_sparse),
-                 (self.array_dense, self.array_dense)]
+        items = [
+            (self.array_sparse, self.array_sparse),
+            (self.array_sparse, self.array_dense),
+            (self.array_dense, self.array_sparse),
+            (self.array_dense, self.array_dense),
+        ]
 
         with self.logger.catch_warnings():
             # Comparing sparse arrays using ==, <= and >= is inefficient
             self.logger.filterwarnings(
-                action='ignore',
+                action="ignore",
                 message="Comparing sparse matrices using*",
-                category=scs.SparseEfficiencyWarning)
+                category=scs.SparseEfficiencyWarning,
+            )
             self._test_operator_cycle(operators, items, expected_result)
 
     def test_comparison_array_vs_array_broadcast(self):
         """Test for comparison operators array vs array with broadcast."""
         operators = [op.eq, op.lt, op.le, op.gt, op.ge, op.ne]
         expected_result = [CSparse, CDense, CDense, CDense]
-        items = [(self.array_sparse_sym, self.row_sparse),
-                 (self.array_sparse_sym, self.row_dense),
-                 (self.array_dense_sym, self.row_sparse),
-                 (self.array_dense_sym, self.row_dense)]
+        items = [
+            (self.array_sparse_sym, self.row_sparse),
+            (self.array_sparse_sym, self.row_dense),
+            (self.array_dense_sym, self.row_sparse),
+            (self.array_dense_sym, self.row_dense),
+        ]
 
         with self.logger.catch_warnings():
             # Comparing sparse arrays using ==, <= and >= is inefficient
             self.logger.filterwarnings(
-                action='ignore',
+                action="ignore",
                 message="Comparing sparse matrices using*",
-                category=scs.SparseEfficiencyWarning)
+                category=scs.SparseEfficiencyWarning,
+            )
             self._test_operator_cycle(operators, items, expected_result)
 
     def test_comparison_array_vs_scalar(self):
         """Test for comparison operators array vs scalar."""
         operators = [op.eq, op.lt, op.le, op.gt, op.ge, op.ne]
         expected_result = [CSparse, CDense, CSparse, CDense]
-        items = [(self.array_sparse, 2),
-                 (self.array_dense, 2),
-                 (self.array_sparse, np.ravel(2)[0]),
-                 (self.array_dense, np.ravel(2)[0])]
+        items = [
+            (self.array_sparse, 2),
+            (self.array_dense, 2),
+            (self.array_sparse, np.ravel(2)[0]),
+            (self.array_dense, np.ravel(2)[0]),
+        ]
         with self.logger.catch_warnings():
             # Comparing a sparse matrix with a scalar greater than zero
             # using < or <= is inefficient
             # Comparing a sparse matrix with a nonzero scalar
             # using != is inefficient
             self.logger.filterwarnings(
-                action='ignore',
+                action="ignore",
                 message="Comparing a sparse matrix*",
-                category=scs.SparseEfficiencyWarning)
+                category=scs.SparseEfficiencyWarning,
+            )
             self._test_operator_cycle(operators, items, expected_result)
 
     def test_comparison_array_vs_unsupported(self):
@@ -441,82 +507,122 @@ class TestCArraySystemOverloads(CArrayTestCases):
             for operator in [op.eq, op.lt, op.le, op.gt, op.ge, op.ne]:
 
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs dense".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs dense".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(self.array_dense, x)
 
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs sparse".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs sparse".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(self.array_sparse, x)
 
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs dense vect".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs dense vect".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(self.row_flat_dense, x)
 
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs sparse vect".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs sparse vect".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(self.row_sparse, x)
 
         def test_unsupported(x):
             for operator in [op.lt, op.le, op.gt, op.ge]:
 
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs dense".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs dense".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(self.array_dense, x)
 
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs sparse".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs sparse".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(self.array_sparse, x)
 
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs dense vect".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs dense vect".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(self.row_flat_dense, x)
 
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs sparse vect".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs sparse vect".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(self.row_sparse, x)
 
         def test_false(x):
 
-            self.logger.info("Testing {:} dense vs '{:}'".format(
-                op.eq.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} dense vs '{:}'".format(op.eq.__name__, type(x).__name__)
+            )
             self.assertFalse(op.eq(self.array_dense, x))
 
-            self.logger.info("Testing {:} sparse vs '{:}'".format(
-                op.eq.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} sparse vs '{:}'".format(op.eq.__name__, type(x).__name__)
+            )
             self.assertFalse(op.eq(self.array_sparse, x))
 
-            self.logger.info("Testing {:} dense vect vs '{:}'".format(
-                op.eq.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} dense vect vs '{:}'".format(
+                    op.eq.__name__, type(x).__name__
+                )
+            )
             self.assertFalse(op.eq(self.row_flat_dense, x))
 
-            self.logger.info("Testing {:} sparse vect vs '{:}'".format(
-                op.eq.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} sparse vect vs '{:}'".format(
+                    op.eq.__name__, type(x).__name__
+                )
+            )
             self.assertFalse(op.eq(self.row_sparse, x))
 
         def test_true(x):
 
-            self.logger.info("Testing {:} dense vs '{:}'".format(
-                op.ne.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} dense vs '{:}'".format(op.ne.__name__, type(x).__name__)
+            )
             self.assertTrue(op.ne(self.array_dense, x))
 
-            self.logger.info("Testing {:} sparse vs '{:}'".format(
-                op.ne.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} sparse vs '{:}'".format(op.ne.__name__, type(x).__name__)
+            )
             self.assertTrue(op.ne(self.array_sparse, x))
 
-            self.logger.info("Testing {:} dense vect vs '{:}'".format(
-                op.ne.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} dense vect vs '{:}'".format(
+                    op.ne.__name__, type(x).__name__
+                )
+            )
             self.assertTrue(op.ne(self.row_flat_dense, x))
 
-            self.logger.info("Testing {:} sparse vect vs '{:}'".format(
-                op.ne.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} sparse vect vs '{:}'".format(
+                    op.ne.__name__, type(x).__name__
+                )
+            )
             self.assertTrue(op.ne(self.row_sparse, x))
 
         test_unsupported_arrays(np.array([1, 2, 3]))
@@ -526,19 +632,19 @@ class TestCArraySystemOverloads(CArrayTestCases):
         test_unsupported((1, 2, 3))
         test_unsupported(set([1, 2, 3]))
         test_unsupported(dict({1: 2}))
-        test_unsupported('test')
+        test_unsupported("test")
 
         test_false([1, 2, 3])
         test_false((1, 2, 3))
         test_false(set([1, 2, 3]))
         test_false(dict({1: 2}))
-        test_false('test')
+        test_false("test")
 
         test_true([1, 2, 3])
         test_true((1, 2, 3))
         test_true(set([1, 2, 3]))
         test_true(dict({1: 2}))
-        test_true('test')
+        test_true("test")
 
     def test_operators_comparison_vs_array(self):
         """Test for comparison operators unsupported types vs array."""
@@ -547,59 +653,87 @@ class TestCArraySystemOverloads(CArrayTestCases):
             for operator in [op.lt, op.le, op.gt, op.ge]:
 
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs dense".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs dense".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(x, self.array_dense)
 
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs sparse".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs sparse".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(x, self.array_sparse)
 
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs dense vect".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs dense vect".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(x, self.row_flat_dense)
 
                 with self.assertRaises(TypeError):
-                    self.logger.info("Testing {:} '{:}' vs sparse vect".format(
-                        operator.__name__, type(x).__name__))
+                    self.logger.info(
+                        "Testing {:} '{:}' vs sparse vect".format(
+                            operator.__name__, type(x).__name__
+                        )
+                    )
                     operator(x, self.row_sparse)
 
         def test_false(x):
 
-            self.logger.info("Testing {:} dense vs '{:}'".format(
-                op.eq.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} dense vs '{:}'".format(op.eq.__name__, type(x).__name__)
+            )
             self.assertFalse(op.eq(x, self.array_dense))
 
-            self.logger.info("Testing {:} sparse vs '{:}'".format(
-                op.eq.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} sparse vs '{:}'".format(op.eq.__name__, type(x).__name__)
+            )
             self.assertFalse(op.eq(x, self.array_sparse))
 
-            self.logger.info("Testing {:} dense vect vs '{:}'".format(
-                op.eq.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} dense vect vs '{:}'".format(
+                    op.eq.__name__, type(x).__name__
+                )
+            )
             self.assertFalse(op.eq(x, self.row_flat_dense))
 
-            self.logger.info("Testing {:} sparse vect vs '{:}'".format(
-                op.eq.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} sparse vect vs '{:}'".format(
+                    op.eq.__name__, type(x).__name__
+                )
+            )
             self.assertFalse(op.eq(x, self.row_sparse))
 
         def test_true(x):
 
-            self.logger.info("Testing {:} dense vs '{:}'".format(
-                op.ne.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} dense vs '{:}'".format(op.ne.__name__, type(x).__name__)
+            )
             self.assertTrue(op.ne(x, self.array_dense))
 
-            self.logger.info("Testing {:} sparse vs '{:}'".format(
-                op.ne.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} sparse vs '{:}'".format(op.ne.__name__, type(x).__name__)
+            )
             self.assertTrue(op.ne(x, self.array_sparse))
 
-            self.logger.info("Testing {:} dense vect vs '{:}'".format(
-                op.ne.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} dense vect vs '{:}'".format(
+                    op.ne.__name__, type(x).__name__
+                )
+            )
             self.assertTrue(op.ne(x, self.row_flat_dense))
 
-            self.logger.info("Testing {:} sparse vect vs '{:}'".format(
-                op.ne.__name__, type(x).__name__))
+            self.logger.info(
+                "Testing {:} sparse vect vs '{:}'".format(
+                    op.ne.__name__, type(x).__name__
+                )
+            )
             self.assertTrue(op.ne(x, self.row_sparse))
 
         # Array do broadcasting of each element wrt our array
@@ -611,27 +745,27 @@ class TestCArraySystemOverloads(CArrayTestCases):
         test_unsupported((1, 2, 3))
         test_unsupported(set([1, 2, 3]))
         test_unsupported(dict({1: 2}))
-        test_unsupported('test')
+        test_unsupported("test")
 
         test_false([1, 2, 3])
         test_false((1, 2, 3))
         test_false(set([1, 2, 3]))
         test_false(dict({1: 2}))
-        test_false('test')
+        test_false("test")
 
         test_true([1, 2, 3])
         test_true((1, 2, 3))
         test_true(set([1, 2, 3]))
         test_true(dict({1: 2}))
-        test_true('test')
+        test_true("test")
 
     def test_bool_operators(self):
 
         a = CArray([1, 2, 3])
         b = CArray([1, 1, 1])
 
-        d = (a < 2)
-        c = (b == 1)
+        d = a < 2
+        c = b == 1
 
         self.logger.info("C -> " + str(c))
         self.logger.info("D -> " + str(d))
@@ -663,7 +797,7 @@ class TestCArraySystemOverloads(CArrayTestCases):
         res = []
         for elem_id, elem in enumerate(self.array_dense):
             res.append(elem)
-            self.assertEqual(self.array_dense.ravel()[elem_id].item(),  elem)
+            self.assertEqual(self.array_dense.ravel()[elem_id].item(), elem)
         # Check if all array elements have been returned
         self.assertEqual(self.array_dense.size, len(res))
 
@@ -696,5 +830,5 @@ class TestCArraySystemOverloads(CArrayTestCases):
         self.assertEqual(self.row_sparse.size, len(res))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CArrayTestCases.main()

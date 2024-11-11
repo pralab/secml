@@ -6,8 +6,7 @@ from secml.ml.tests import CModuleTestCases
 class CScalerTestCases(CModuleTestCases):
     """Unittests interface for Normalizers."""
 
-    def _compare_scalers(self, scaler, scaler_sklearn,
-                         array, convert_to_dense=False):
+    def _compare_scalers(self, scaler, scaler_sklearn, array, convert_to_dense=False):
         """Compare wrapped scikit-learn scaler to the unwrapped scaler.
 
         Parameters
@@ -31,8 +30,7 @@ class CScalerTestCases(CModuleTestCases):
         """
         self.logger.info("Original array is:\n{:}".format(array))
 
-        array_sk = array.get_data() if convert_to_dense is False \
-            else array.tondarray()
+        array_sk = array.get_data() if convert_to_dense is False else array.tondarray()
 
         # Sklearn normalizer
         scaler_sklearn.fit(array_sk, None)
@@ -52,10 +50,12 @@ class CScalerTestCases(CModuleTestCases):
     def _test_chain(self, x, class_type_list, kwargs_list, y=None):
         """Tests if preprocess chain and manual chaining yield same result."""
         x_chain = super(CScalerTestCases, self)._test_chain(
-            x, class_type_list, kwargs_list, y)
+            x, class_type_list, kwargs_list, y
+        )
 
-        self.assertEqual((self.array_dense.shape[0],
-                          self.array_dense.shape[1] - 1), x_chain.shape)
+        self.assertEqual(
+            (self.array_dense.shape[0], self.array_dense.shape[1] - 1), x_chain.shape
+        )
 
         return x_chain
 
@@ -63,12 +63,13 @@ class CScalerTestCases(CModuleTestCases):
         """Tests if gradient preprocess chain and
         gradient of manual chaining yield same result."""
         grad_chain = super(CScalerTestCases, self)._test_chain_gradient(
-            x, class_type_list, kwargs_list, y)
+            x, class_type_list, kwargs_list, y
+        )
 
         self.assertEqual((self.array_dense.shape[1],), grad_chain.shape)
 
         return grad_chain
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

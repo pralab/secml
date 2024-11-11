@@ -36,7 +36,8 @@ class deprecated:
      - https://wiki.python.org/moin/PythonDecoratorLibrary
 
     """
-    def __init__(self, version, extra=''):
+
+    def __init__(self, version, extra=""):
         self.extra = extra
         self.version = version
 
@@ -57,12 +58,12 @@ class deprecated:
     def _decorate_class(self, cls):
         """Decorate class clf."""
         msg = "class `{:}` is deprecated since version {:}".format(
-            cls.__name__, self.version)
+            cls.__name__, self.version
+        )
         if self.extra:
             msg += "; %s" % self.extra
 
-        warnings.filterwarnings(
-            'once', message=msg, category=DeprecationWarning)
+        warnings.filterwarnings("once", message=msg, category=DeprecationWarning)
 
         # FIXME: we should probably reset __new__ for full generality
         init = cls.__init__
@@ -70,9 +71,10 @@ class deprecated:
         def wrapped(*args, **kwargs):
             warnings.warn(msg, category=DeprecationWarning)
             return init(*args, **kwargs)
+
         cls.__init__ = wrapped
 
-        wrapped.__name__ = '__init__'
+        wrapped.__name__ = "__init__"
         wrapped.deprecated_original = init
 
         cls.__doc__ = self._update_doc(cls.__doc__)
@@ -82,12 +84,12 @@ class deprecated:
     def _decorate_fun(self, fun):
         """Decorate function fun."""
         msg = "function `{:}` is deprecated since version {:}".format(
-            fun.__name__, self.version)
+            fun.__name__, self.version
+        )
         if self.extra:
             msg += "; %s" % self.extra
 
-        warnings.filterwarnings(
-            'once', message=msg, category=DeprecationWarning)
+        warnings.filterwarnings("once", message=msg, category=DeprecationWarning)
 
         @functools.wraps(fun)
         def wrapped(*args, **kwargs):

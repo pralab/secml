@@ -8,13 +8,14 @@ class TestCFunctionMcCormick(CFunctionTestCases):
     """Unit test for CFunctionBeale."""
 
     def setUp(self):
-        self.fun = CFunction.create('mc-cormick')
+        self.fun = CFunction.create("mc-cormick")
 
     def test_fun_result(self):
         """Test if function returns the correct value."""
         self._show_global_min(self.fun)
         self._test_fun_result(
-            self.fun, CArray([-0.5472, -1.5472]), self.fun.global_min())
+            self.fun, CArray([-0.5472, -1.5472]), self.fun.global_min()
+        )
 
     def test_2D(self):
         """Plot of a 2D example."""
@@ -22,5 +23,5 @@ class TestCFunctionMcCormick(CFunctionTestCases):
         self._test_2D(self.fun, grid_limits, levels=[0], vmin=-2, vmax=2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CFunctionTestCases.main()

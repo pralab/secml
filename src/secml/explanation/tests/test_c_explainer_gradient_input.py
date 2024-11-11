@@ -19,7 +19,8 @@ class TestCExplainerGradientInput(CUnitTest):
         self.ds = CDLDigits().load()
 
         self.clf = CClassifierMulticlassOVA(
-            CClassifierSVM, kernel=CKernelRBF(gamma=1e-3))
+            CClassifierSVM, kernel=CKernelRBF(gamma=1e-3)
+        )
 
         # Training classifier
         self.clf.fit(self.ds.X, self.ds.Y)
@@ -36,14 +37,15 @@ class TestCExplainerGradientInput(CUnitTest):
         x_pred, x_score = self.clf.predict(x, return_decision_function=True)
 
         self.logger.info(
-            "Predicted class {:}, scores:\n{:}".format(x_pred.item(), x_score))
+            "Predicted class {:}, scores:\n{:}".format(x_pred.item(), x_score)
+        )
         self.logger.info("Candidates: {:}".format(x_score.argsort()[::-1]))
 
         fig = CFigure(height=1.5, width=12)
 
         # Plotting original image
-        fig.subplot(1, self.ds.num_classes+1, 1)
-        fig.sp.imshow(x.reshape((8, 8)), cmap='gray')
+        fig.subplot(1, self.ds.num_classes + 1, 1)
+        fig.sp.imshow(x.reshape((8, 8)), cmap="gray")
         fig.sp.title("Origin c{:}".format(y_true))
         fig.sp.yticks([])
         fig.sp.xticks([])
@@ -55,8 +57,7 @@ class TestCExplainerGradientInput(CUnitTest):
 
             attr_c = self.explainer.explain(x, y=c)
             attr[c, :] = attr_c
-            self.logger.info(
-                "Attributions class {:}:\n{:}".format(c, attr_c.tolist()))
+            self.logger.info("Attributions class {:}:\n{:}".format(c, attr_c.tolist()))
 
             self.assertIsInstance(attr, CArray)
             self.assertEqual(attr.shape, attr.shape)
@@ -66,9 +67,10 @@ class TestCExplainerGradientInput(CUnitTest):
         # Plotting attributions
         for c in self.ds.classes:
 
-            fig.subplot(1, self.ds.num_classes+1, 2+c)
-            fig.sp.imshow(attr[c, :].reshape((8, 8)),
-                          cmap='seismic', vmin=-1*th, vmax=th)
+            fig.subplot(1, self.ds.num_classes + 1, 2 + c)
+            fig.sp.imshow(
+                attr[c, :].reshape((8, 8)), cmap="seismic", vmin=-1 * th, vmax=th
+            )
             fig.sp.title("Attr c{:}".format(c))
             fig.sp.yticks([])
             fig.sp.xticks([])
@@ -78,5 +80,5 @@ class TestCExplainerGradientInput(CUnitTest):
         fig.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

@@ -44,12 +44,10 @@ class TestCClassifierPyTorchMNIST(CClassifierPyTorchTestCases):
     def _create_tr_ts(n_tr, n_ts):
         """Create MNIST 3C training and test sets."""
         digits = (1, 5, 9)
-        ds = CDataLoaderMNIST().load('training', digits=digits)
+        ds = CDataLoaderMNIST().load("training", digits=digits)
 
         # Split in training and test
-        splitter = CTrainTestSplit(train_size=n_tr,
-                                   test_size=n_ts,
-                                   random_state=0)
+        splitter = CTrainTestSplit(train_size=n_tr, test_size=n_ts, random_state=0)
         tr, ts = splitter.split(ds)
 
         tr.X /= 255
@@ -72,33 +70,37 @@ class TestCClassifierPyTorchMNIST(CClassifierPyTorchTestCases):
             def forward(self, input):
                 return input.view(input.size(0), -1)
 
-        od = OrderedDict([
-            ('conv1', nn.Conv2d(1, 10, kernel_size=5)),
-            ('pool1', nn.MaxPool2d(2)),
-            ('conv2', nn.Conv2d(10, 20, kernel_size=5)),
-            ('drop', nn.Dropout2d()),
-            ('pool2', nn.MaxPool2d(2)),
-            ('flatten', Flatten()),
-            ('fc1', nn.Linear(320, 50)),
-            ('relu', nn.ReLU()),
-            ('fc2', nn.Linear(50, 3)),
-        ])
+        od = OrderedDict(
+            [
+                ("conv1", nn.Conv2d(1, 10, kernel_size=5)),
+                ("pool1", nn.MaxPool2d(2)),
+                ("conv2", nn.Conv2d(10, 20, kernel_size=5)),
+                ("drop", nn.Dropout2d()),
+                ("pool2", nn.MaxPool2d(2)),
+                ("flatten", Flatten()),
+                ("fc1", nn.Linear(320, 50)),
+                ("relu", nn.ReLU()),
+                ("fc2", nn.Linear(50, 3)),
+            ]
+        )
 
         net = nn.Sequential(OrderedDict(od))
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9)
-        scheduler = optim.lr_scheduler.MultiStepLR(optimizer=optimizer,
-                                                   milestones=[1, 5, 8],
-                                                   gamma=0.1)
+        scheduler = optim.lr_scheduler.MultiStepLR(
+            optimizer=optimizer, milestones=[1, 5, 8], gamma=0.1
+        )
 
-        return CClassifierPyTorch(model=net,
-                                  loss=criterion,
-                                  optimizer=optimizer,
-                                  epochs=10,
-                                  batch_size=batch_size,
-                                  input_shape=(1, 28, 28),
-                                  optimizer_scheduler=scheduler,
-                                  random_state=0)
+        return CClassifierPyTorch(
+            model=net,
+            loss=criterion,
+            optimizer=optimizer,
+            epochs=10,
+            batch_size=batch_size,
+            input_shape=(1, 28, 28),
+            optimizer_scheduler=scheduler,
+            random_state=0,
+        )
 
     def test_classification(self):
         """Test for `.decision_function` and `.predict` methods."""
@@ -124,8 +126,9 @@ class TestCClassifierPyTorchMNIST(CClassifierPyTorchTestCases):
     def test_grad(self):
         """Test for `.gradient` method."""
         # TODO: ADD TEST OF GRADIENT METHOD
-        self._test_grad_atlayer(self.clf, self.ts.X[0, :],
-                                layer_names=['conv1', 'fc1', 'fc2', None])
+        self._test_grad_atlayer(
+            self.clf, self.ts.X[0, :], layer_names=["conv1", "fc1", "fc2", None]
+        )
 
     def test_softmax_outputs(self):
         """Check behavior of `softmax_outputs` parameter."""
@@ -144,5 +147,5 @@ class TestCClassifierPyTorchMNIST(CClassifierPyTorchTestCases):
         self._test_get_set_state(self.clf, clf_new, self.ts)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CClassifierPyTorchTestCases.main()

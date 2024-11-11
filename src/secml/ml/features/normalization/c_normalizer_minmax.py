@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.ml.features.normalization import CNormalizerLinear
 
@@ -66,13 +67,14 @@ class CNormalizerMinMax(CNormalizerLinear):
      [-1.        1.       -1.      ]])
 
     """
-    __class_type = 'min-max'
+
+    __class_type = "min-max"
 
     def __init__(self, feature_range=None, preprocess=None):
 
         self._feature_range = None
         # setting desired feature range... the property will check for correct type
-        self.feature_range = (0., 1.) if feature_range is None else feature_range
+        self.feature_range = (0.0, 1.0) if feature_range is None else feature_range
 
         self._min = None
         self._max = None

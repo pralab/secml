@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.figure._plots import CPlotFunction
 from secml.ml.classifiers import CClassifier
 from secml.array import CArray
@@ -30,8 +31,15 @@ class CPlotClassifier(CPlotFunction):
         """Apply defined parameters to active subplot."""
         self.grid(grid_on=False)
 
-    def plot_decision_regions(self, clf, plot_background=True, levels=None,
-                              grid_limits=None, n_grid_points=30, cmap=None):
+    def plot_decision_regions(
+        self,
+        clf,
+        plot_background=True,
+        levels=None,
+        grid_limits=None,
+        n_grid_points=30,
+        cmap=None,
+    ):
         """Plot decision boundaries and regions for the given classifier.
 
         Parameters
@@ -61,23 +69,25 @@ class CPlotClassifier(CPlotFunction):
 
         if cmap is None:
             if clf.n_classes <= 6:
-                colors = ['blue', 'red', 'lightgreen', 'black', 'gray', 'cyan']
-                cmap = colors[:clf.n_classes]
+                colors = ["blue", "red", "lightgreen", "black", "gray", "cyan"]
+                cmap = colors[: clf.n_classes]
             else:
-                cmap = 'jet'
+                cmap = "jet"
 
         if levels is None:
             levels = CArray.arange(0.5, clf.n_classes).tolist()
 
-        self.plot_fun(func=clf.predict,
-                      multipoint=True,
-                      colorbar=False,
-                      n_colors=clf.n_classes,
-                      cmap=cmap,
-                      levels=levels,
-                      plot_background=plot_background,
-                      grid_limits=grid_limits,
-                      n_grid_points=n_grid_points,
-                      alpha=0.5)
+        self.plot_fun(
+            func=clf.predict,
+            multipoint=True,
+            colorbar=False,
+            n_colors=clf.n_classes,
+            cmap=cmap,
+            levels=levels,
+            plot_background=plot_background,
+            grid_limits=grid_limits,
+            n_grid_points=n_grid_points,
+            alpha=0.5,
+        )
 
         self.apply_params_clf()

@@ -7,6 +7,7 @@
 .. moduleauthor:: Angelo Sotgiu <angelo.sotgiu@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 from secml.core import CCreator
 from secml.array import CArray
@@ -27,7 +28,8 @@ class CModule(CCreator, metaclass=ABCMeta):
         Cannot be higher than processor's number of cores. Default is 1.
 
     """
-    __super__ = 'CModule'
+
+    __super__ = "CModule"
 
     def __init__(self, preprocess=None, n_jobs=1):
         self._cached_x = None  # cached internal x repr. for backward pass
@@ -57,8 +59,7 @@ class CModule(CCreator, metaclass=ABCMeta):
         """
         chain = None
         for i, pre_id in enumerate(class_items):
-            chain = CModule.create(
-                pre_id, preprocess=chain, **kwargs_list[i])
+            chain = CModule.create(pre_id, preprocess=chain, **kwargs_list[i])
 
         return chain
 
@@ -135,8 +136,7 @@ class CModule(CCreator, metaclass=ABCMeta):
 
     @preprocess.setter
     def preprocess(self, preprocess):
-        self._preprocess = None if preprocess is None \
-            else CModule.create(preprocess)
+        self._preprocess = None if preprocess is None else CModule.create(preprocess)
 
     def _forward_preprocess(self, x, caching=True):
         """Runs forward through the pre-processing chain,
@@ -247,8 +247,9 @@ class CModule(CCreator, metaclass=ABCMeta):
         return grad.ravel() if grad.is_vector_like else grad
 
     def _backward(self, w):
-        raise NotImplementedError("`_backward` is not implemented for {:}"
-                                  "".format(self.__class__.__name__))
+        raise NotImplementedError(
+            "`_backward` is not implemented for {:}" "".format(self.__class__.__name__)
+        )
 
     _backward.__doc__ = backward.__doc__  # Same doc for the protected method
 

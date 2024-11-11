@@ -13,21 +13,27 @@ class TestCRoc(CUnitTest):
 
     def setUp(self):
 
-        self.dl1 = CDLRandom(n_features=1000, n_redundant=200,
-                             n_informative=250, n_clusters_per_class=2,
-                             random_state=0)
-        self.dl2 = CDLRandom(n_features=1000, n_redundant=200,
-                             n_informative=250, n_clusters_per_class=2,
-                             random_state=1000)
+        self.dl1 = CDLRandom(
+            n_features=1000,
+            n_redundant=200,
+            n_informative=250,
+            n_clusters_per_class=2,
+            random_state=0,
+        )
+        self.dl2 = CDLRandom(
+            n_features=1000,
+            n_redundant=200,
+            n_informative=250,
+            n_clusters_per_class=2,
+            random_state=1000,
+        )
         self.ds1 = self.dl1.load()
         self.ds2 = self.dl2.load()
 
         self.svm = CClassifierSVM(C=1e-7).fit(self.ds1.X, self.ds1.Y)
 
-        self.y1, self.s1 = self.svm.predict(
-            self.ds1.X, return_decision_function=True)
-        self.y2, self.s2 = self.svm.predict(
-            self.ds2.X, return_decision_function=True)
+        self.y1, self.s1 = self.svm.predict(self.ds1.X, return_decision_function=True)
+        self.y2, self.s2 = self.svm.predict(self.ds2.X, return_decision_function=True)
 
         self.roc = CRoc()
 
@@ -51,12 +57,12 @@ class TestCRoc(CUnitTest):
 
     def test_mean(self):
 
-        self.roc.compute([self.ds1.Y, self.ds2.Y],
-                         [self.s1[:, 1].ravel(), self.s2[:, 1].ravel()])
+        self.roc.compute(
+            [self.ds1.Y, self.ds2.Y], [self.s1[:, 1].ravel(), self.s2[:, 1].ravel()]
+        )
         mean_fp, mean_tp, mean_std = self.roc.average(return_std=True)
         fig = CFigure(linewidth=2)
-        fig.sp.errorbar(
-            self.roc.mean_fpr, self.roc.mean_tpr, yerr=mean_std)
+        fig.sp.errorbar(self.roc.mean_fpr, self.roc.mean_tpr, yerr=mean_std)
         for rep in range(self.roc.n_reps):
             fig.sp.semilogx(self.roc.fpr[rep], self.roc.tpr[rep])
         fig.sp.semilogx(mean_fp, mean_tp)
@@ -64,5 +70,5 @@ class TestCRoc(CUnitTest):
         fig.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

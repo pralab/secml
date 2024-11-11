@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 import time
 
 from secml.core import CCreator
@@ -38,8 +39,7 @@ class CSecEval(CCreator):
     .CAttack : class that implements the attack.
     """
 
-    def __init__(self, attack, param_name, param_values,
-                 save_adv_ds=False):
+    def __init__(self, attack, param_name, param_values, save_adv_ds=False):
 
         # initialize read-write attribute
         self._attack = None
@@ -55,14 +55,14 @@ class CSecEval(CCreator):
         self._sec_eval_data.param_values = param_values
 
         if param_name not in self.attack.get_params():
-            raise ValueError("param_name ({:}) should be a parameter of the "
-                             "attack but it was not found. Run `attack.get_params()` "
-                             "for getting the list of available parameters.".format(
-                param_name))
+            raise ValueError(
+                "param_name ({:}) should be a parameter of the "
+                "attack but it was not found. Run `attack.get_params()` "
+                "for getting the list of available parameters.".format(param_name)
+            )
 
         if not self._attack.y_target is None:
-            self._sec_eval_data.Y_target = CArray(
-                self._attack.y_target).deepcopy()
+            self._sec_eval_data.Y_target = CArray(self._attack.y_target).deepcopy()
 
     ###########################################################################
     #                     READ-WRITE ATTRIBUTES (INPUTS)
@@ -134,7 +134,7 @@ class CSecEval(CCreator):
         Parameters
         ----------
         dataset : CDataset
-            Dataset that will be used to evaluate the performances of  
+            Dataset that will be used to evaluate the performances of
             the classifier under attack.
         kwargs
             Additional keyword arguments for the `CAttack.run` method.
@@ -148,23 +148,30 @@ class CSecEval(CCreator):
         scores = CArray.zeros(shape=(dataset.num_samples, dataset.num_classes))
 
         # create data structures to store attack output
-        self._sec_eval_data.scores = [CArray(scores).deepcopy() for i in range(
-            self._sec_eval_data.param_values.size)]
-        self._sec_eval_data.Y_pred = [CArray(Y_pred).deepcopy() for i in range(
-            self._sec_eval_data.param_values.size)]
+        self._sec_eval_data.scores = [
+            CArray(scores).deepcopy()
+            for i in range(self._sec_eval_data.param_values.size)
+        ]
+        self._sec_eval_data.Y_pred = [
+            CArray(Y_pred).deepcopy()
+            for i in range(self._sec_eval_data.param_values.size)
+        ]
 
         self._sec_eval_data.time = CArray.zeros(
-            shape=(self._sec_eval_data.param_values.size,))
+            shape=(self._sec_eval_data.param_values.size,)
+        )
 
         self._sec_eval_data.fobj = CArray.zeros(
-            shape=(self._sec_eval_data.param_values.size,))
+            shape=(self._sec_eval_data.param_values.size,)
+        )
 
         # manipulate attack samples
         adv_ds = None
         for k, value in enumerate(self._sec_eval_data.param_values):
 
-            self.logger.info("Attack with " + self._sec_eval_data.param_name +
-                             " = " + str(value))
+            self.logger.info(
+                "Attack with " + self._sec_eval_data.param_name + " = " + str(value)
+            )
 
             # Update the value of parameter in attack class
             # (e.g., value of dmax in CEvasion)
@@ -173,8 +180,9 @@ class CSecEval(CCreator):
             start_time = time.time()
 
             # todo change x_init parameter with p_ds_init
-            attack_result = tuple(self._attack.run(
-                dataset.X, dataset.Y, ds_init=adv_ds, **kwargs))
+            attack_result = tuple(
+                self._attack.run(dataset.X, dataset.Y, ds_init=adv_ds, **kwargs)
+            )
 
             # Expanding generic attack results
             y_pred, scores, adv_ds, fobj = attack_result[:4]

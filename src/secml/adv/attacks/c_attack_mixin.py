@@ -38,13 +38,16 @@ class CAttackMixin(CAttack):
 
     """
 
-    def __init__(self, classifier,
-                 distance=None,
-                 dmax=None,
-                 lb=None,
-                 ub=None,
-                 solver_type=None,
-                 solver_params=None):
+    def __init__(
+        self,
+        classifier,
+        distance=None,
+        dmax=None,
+        lb=None,
+        ub=None,
+        solver_type=None,
+        solver_params=None,
+    ):
 
         super(CAttackMixin, self).__init__(classifier)
 

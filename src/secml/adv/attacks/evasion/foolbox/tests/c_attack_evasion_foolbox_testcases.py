@@ -41,7 +41,8 @@ class CAttackEvasionFoolboxTestCases(CAttackEvasionTestCases):
         evas = self.attack_class(
             classifier=self.clf,
             y_target=y_target,
-            lb=self.lb, ub=self.ub,
+            lb=self.lb,
+            ub=self.ub,
             **self.attack_params
         )
         return evas
@@ -50,24 +51,35 @@ class CAttackEvasionFoolboxTestCases(CAttackEvasionTestCases):
         if self.has_targeted:
             evas = self._setup_attack(targeted=True)
             self._run_evasion(evas, self.x0, self.y0)
-            self._plot_2d_evasion(evas, self.ds, self.x0,
-                                  filename="{}_target_{}.pdf"
-                                           "".format(self.attack_class.__name__,
-                                                     evas.y_target))
+            self._plot_2d_evasion(
+                evas,
+                self.ds,
+                self.x0,
+                filename="{}_target_{}.pdf"
+                "".format(self.attack_class.__name__, evas.y_target),
+            )
         else:
-            self.logger.debug("Targeted version not defined for {}, skipping test"
-                              "".format(self.attack_class.__name__))
+            self.logger.debug(
+                "Targeted version not defined for {}, skipping test"
+                "".format(self.attack_class.__name__)
+            )
             return
 
     def _test_run_untargeted(self):
         if self.has_untargeted:
             evas = self._setup_attack(targeted=False)
             self._run_evasion(evas, self.x0, self.y0)
-            self._plot_2d_evasion(evas, self.ds, self.x0, "{}_target_{}.pdf"
-                                                          "".format(self.attack_class.__name__, evas.y_target))
+            self._plot_2d_evasion(
+                evas,
+                self.ds,
+                self.x0,
+                "{}_target_{}.pdf" "".format(self.attack_class.__name__, evas.y_target),
+            )
         else:
-            self.logger.debug("Untargeted version not defined for {}, skipping test"
-                              "".format(self.attack_class.__name__))
+            self.logger.debug(
+                "Untargeted version not defined for {}, skipping test"
+                "".format(self.attack_class.__name__)
+            )
             return
 
     def _test_check_foolbox_equal_targeted(self):
@@ -75,14 +87,16 @@ class CAttackEvasionFoolboxTestCases(CAttackEvasionTestCases):
             evas = self._setup_attack(targeted=True)
             foolbox_class = evas.attack_class
             init_params = self.attack_params
-            if 'epsilons' in init_params:
-                init_params.pop('epsilons')
+            if "epsilons" in init_params:
+                init_params.pop("epsilons")
             fb_evas = foolbox_class(**init_params)
             adv_ds, adv_fb = self._check_adv_example(evas, fb_evas)
             self.assert_array_almost_equal(adv_ds.X, adv_fb, decimal=3)
         else:
-            self.logger.debug("Targeted version not defined for {}, skipping test"
-                              "".format(self.attack_class.__name__))
+            self.logger.debug(
+                "Targeted version not defined for {}, skipping test"
+                "".format(self.attack_class.__name__)
+            )
             return
 
     def _test_check_foolbox_equal_untargeted(self):
@@ -90,14 +104,16 @@ class CAttackEvasionFoolboxTestCases(CAttackEvasionTestCases):
             evas = self._setup_attack(targeted=False)
             foolbox_class = evas.attack_class
             init_params = self.attack_params
-            if 'epsilons' in init_params:
-                init_params.pop('epsilons')
+            if "epsilons" in init_params:
+                init_params.pop("epsilons")
             fb_evas = foolbox_class(**init_params)
             adv_ds, adv_fb = self._check_adv_example(evas, fb_evas)
             self.assert_array_almost_equal(adv_ds.X, adv_fb, decimal=3)
         else:
-            self.logger.debug("Untargeted version not defined for {}, skipping test"
-                              "".format(self.attack_class.__name__))
+            self.logger.debug(
+                "Untargeted version not defined for {}, skipping test"
+                "".format(self.attack_class.__name__)
+            )
             return
 
     def _test_shapes(self):
@@ -106,7 +122,9 @@ class CAttackEvasionFoolboxTestCases(CAttackEvasionTestCases):
         elif self.has_targeted:
             evas = self._setup_attack(targeted=False)
         else:
-            self.logger.debug("Nor targeted or untargeted versions are defined. Skipping test.")
+            self.logger.debug(
+                "Nor targeted or untargeted versions are defined. Skipping test."
+            )
         y_pred, scores, adv_ds, f_obj = evas.run(self.x0, self.y0)
         self.assert_array_equal(self.x0.shape, adv_ds.X.shape)
         self.assert_array_equal(self.y0.shape, adv_ds.Y.shape)
@@ -125,12 +143,16 @@ class CAttackEvasionFoolboxTestCases(CAttackEvasionTestCases):
             criterion = fb.criteria.TargetedMisclassification(torch.tensor([y_target]))
 
         y_pred, scores, adv_ds, f_obj = secml_attack.run(self.x0, self.y0)
-        _, adv_fb, _ = fb_attack(secml_attack.f_model, x0_tensor, criterion, epsilons=secml_attack.epsilon)
+        _, adv_fb, _ = fb_attack(
+            secml_attack.f_model, x0_tensor, criterion, epsilons=secml_attack.epsilon
+        )
         adv_fb = CArray(adv_fb.numpy())
         return adv_ds, adv_fb
 
     def _check_obj_function_and_grad(self):
-        for is_targeted, check in zip((True, False), (self.has_targeted, self.has_untargeted)):
+        for is_targeted, check in zip(
+            (True, False), (self.has_targeted, self.has_untargeted)
+        ):
             if check is True:
                 evas = self._setup_attack(targeted=is_targeted)
                 # some attacks require to run the attack before computing
@@ -141,4 +163,3 @@ class CAttackEvasionFoolboxTestCases(CAttackEvasionTestCases):
                 self.assertEqual(obj_function.shape, (self.x0.shape[0],))
                 self.assertEqual(obj_function_grad.shape, self.x0.shape)
         return
-

@@ -37,17 +37,16 @@ class TestCExplainerGradient(CUnitTest):
 
         # Plotting original image
         fig.subplot(1, 2, 1)
-        fig.sp.imshow(attr.reshape((8, 8)), cmap='gray')
+        fig.sp.imshow(attr.reshape((8, 8)), cmap="gray")
 
         th = max(abs(attr.min()), abs(attr.max()))
 
         # Plotting attributions
         fig.subplot(1, 2, 2)
-        fig.sp.imshow(attr.reshape((8, 8)),
-                      cmap='seismic', vmin=-1*th, vmax=th)
+        fig.sp.imshow(attr.reshape((8, 8)), cmap="seismic", vmin=-1 * th, vmax=th)
 
         fig.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

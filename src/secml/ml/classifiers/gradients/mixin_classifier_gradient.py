@@ -7,12 +7,13 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from abc import ABCMeta
 
 
 class CClassifierGradientMixin(metaclass=ABCMeta):
     """Abstract Mixin class that defines basic methods
-     for classifier gradients."""
+    for classifier gradients."""
 
     # train derivatives:
 
@@ -109,8 +110,9 @@ class CClassifierGradientMixin(metaclass=ABCMeta):
         try:  # Get the derivative of decision_function
             grad_f = self._grad_f_x(x, y, **kwargs)
         except NotImplementedError:
-            raise NotImplementedError("{:} does not implement `grad_f_x`"
-                                      "".format(self.__class__.__name__))
+            raise NotImplementedError(
+                "{:} does not implement `grad_f_x`" "".format(self.__class__.__name__)
+            )
 
         # The derivative of decision_function should be a vector
         # as we are computing the gradient wrt a class `y`
@@ -126,7 +128,8 @@ class CClassifierGradientMixin(metaclass=ABCMeta):
             grad_p = self.preprocess.gradient(x_in, w=grad_f)
             if not grad_p.is_vector_like:
                 raise ValueError(
-                    "`preprocess.gradient` must return a vector like array")
+                    "`preprocess.gradient` must return a vector like array"
+                )
             return grad_p.ravel()
 
         return grad_f  # No preprocess defined... return the clf grad

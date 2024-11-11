@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.core.constants import inf
 from secml.ml.classifiers import CClassifierSVM
@@ -46,10 +47,21 @@ class CClassifierSecSVM(CClassifierSVM):
     class_type : 'sec-svm'
 
     """
-    __class_type = 'sec-svm'
 
-    def __init__(self, ub=inf, idx_ub=None, lb=-inf, idx_lb=None,
-                 eta=0.5, max_it=1e4, eps=1e-4, *args, **kwargs):
+    __class_type = "sec-svm"
+
+    def __init__(
+        self,
+        ub=inf,
+        idx_ub=None,
+        lb=-inf,
+        idx_lb=None,
+        eta=0.5,
+        max_it=1e4,
+        eps=1e-4,
+        *args,
+        **kwargs
+    ):
 
         # Calling standard CClassifierSVM constructor
         super(self.__class__, self).__init__(*args, **kwargs)
@@ -64,11 +76,9 @@ class CClassifierSecSVM(CClassifierSVM):
             raise ValueError("Upper bounds should be higher then lower bounds")
 
         self._ub = ub
-        self._idx_ub = idx_ub if idx_ub is not None \
-            else slice(None, None, None)
+        self._idx_ub = idx_ub if idx_ub is not None else slice(None, None, None)
         self._lb = lb
-        self._idx_lb = idx_lb if idx_lb is not None \
-            else slice(None, None, None)
+        self._idx_lb = idx_lb if idx_lb is not None else slice(None, None, None)
 
     @property
     def ub(self):
@@ -136,7 +146,7 @@ class CClassifierSecSVM(CClassifierSVM):
         """
         loss = self.C * self.hinge_loss(x, y)
 
-        if self.class_weight == 'balanced':
+        if self.class_weight == "balanced":
             loss[y == -1] = self.weight[0] * loss[y == -1]
             loss[y == 1] = self.weight[1] * loss[y == 1]
 
@@ -154,11 +164,9 @@ class CClassifierSecSVM(CClassifierSVM):
 
         grad_loss = CArray.zeros(x.shape[1])
         if (idx_err_vect * (y < 0)).any():
-            grad_loss += x[idx_err_vect * (y <= 0), :].sum(
-                axis=0, keepdims=False)
+            grad_loss += x[idx_err_vect * (y <= 0), :].sum(axis=0, keepdims=False)
         if (idx_err_vect * (y > 0)).any():
-            grad_loss -= x[idx_err_vect * (y > 0), :].sum(
-                axis=0, keepdims=False)
+            grad_loss -= x[idx_err_vect * (y > 0), :].sum(axis=0, keepdims=False)
 
         grad_w = self.w + self.C * grad_loss
 
@@ -186,12 +194,11 @@ class CClassifierSecSVM(CClassifierSVM):
 
         """
         if self.n_classes != 2:
-            raise ValueError(
-                "Trying to learn an SVM on more/less than two classes.")
+            raise ValueError("Trying to learn an SVM on more/less than two classes.")
 
         y = convert_binary_labels(y)
 
-        if self.class_weight == 'balanced':
+        if self.class_weight == "balanced":
             n_pos = y[y == 1].shape[0]
             n_neg = y[y == -1].shape[0]
             self.weight = CArray.zeros(2)
@@ -208,15 +215,15 @@ class CClassifierSecSVM(CClassifierSVM):
 
             # pick a random sample subset
             idx = CArray.randsample(
-                CArray.arange(x.shape[0], dtype=int), x.shape[0],
-                random_state=i)
+                CArray.arange(x.shape[0], dtype=int), x.shape[0], random_state=i
+            )
 
             # compute subgradients
             grad_w, grad_b = self.gradient_w_b(x[idx, :], y[idx])
 
             for p in range(0, 71, 10):
 
-                step = (self.eta ** p) * 2 ** (-0.01 * i) / (x.shape[0] ** 0.5)
+                step = (self.eta**p) * 2 ** (-0.01 * i) / (x.shape[0] ** 0.5)
 
                 self._w -= step * grad_w
                 self._b -= step * grad_b
@@ -246,7 +253,6 @@ class CClassifierSecSVM(CClassifierSVM):
 
             if i % 10 == 0:
                 loss = self.hinge_loss(x, y).sum()
-                self.logger.info(
-                    "i {:}: {:.4f}, L {:.4f}".format(i, obj, loss))
+                self.logger.info("i {:}: {:.4f}, L {:.4f}".format(i, obj, loss))
             # Sparse weights if input is sparse (like in CClassifierSVM)
             self._w = self.w.tosparse() if x.issparse else self.w

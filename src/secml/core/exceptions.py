@@ -6,7 +6,7 @@
 
 """
 
-__all__ = ['NotFittedError']
+__all__ = ["NotFittedError"]
 
 
 class NotFittedError(ValueError, AttributeError):
@@ -27,4 +27,5 @@ class NotFittedError(ValueError, AttributeError):
     NotFittedError('this `CClassifierSVM` is not trained. Call `.fit()` first.',)
 
     """
+
     pass

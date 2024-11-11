@@ -11,7 +11,9 @@
 
 from foolbox.attacks.ddn import DDNAttack
 
-from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import CAttackEvasionFoolbox
+from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import (
+    CAttackEvasionFoolbox,
+)
 from secml.adv.attacks.evasion.foolbox.losses.ce_loss import CELoss
 from secml.adv.attacks.evasion.foolbox.secml_autograd import as_tensor
 
@@ -51,22 +53,38 @@ class CFoolboxL2DDN(CELoss, CAttackEvasionFoolbox):
         Robert Sabourin, Eric Granger, "Decoupling Direction and Norm for
         Efficient Gradient-Based L2 Adversarial Attacks and Defenses",
         https://arxiv.org/abs/1811.09600
-        """
-    __class_type = 'e-foolbox-ddn'
+    """
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0,
-                 epsilons=None, init_epsilon=1.0, steps=10,
-                 gamma=0.05, ):
-        attack_params = {'init_epsilon': init_epsilon,
-                         'gamma': gamma,
-                         'steps': steps, 'epsilons': epsilons}
+    __class_type = "e-foolbox-ddn"
 
-        super(CFoolboxL2DDN, self).__init__(classifier, y_target,
-                                            lb=lb, ub=ub,
-                                            fb_attack_class=DDNAttack,
-                                            **attack_params)
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=None,
+        init_epsilon=1.0,
+        steps=10,
+        gamma=0.05,
+    ):
+        attack_params = {
+            "init_epsilon": init_epsilon,
+            "gamma": gamma,
+            "steps": steps,
+            "epsilons": epsilons,
+        }
+
+        super(CFoolboxL2DDN, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            fb_attack_class=DDNAttack,
+            **attack_params
+        )
         self._y0 = None
-        self.distance = 'l2'
+        self.distance = "l2"
 
     def _run(self, x, y, x_init=None):
         self._y0 = as_tensor(y)

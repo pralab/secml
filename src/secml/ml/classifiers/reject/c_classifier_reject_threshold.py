@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 import math
 
 from secml import _NoValue
@@ -38,13 +39,15 @@ class CClassifierRejectThreshold(CClassifierReject):
         desired preprocessor. If None, input data is used as is.
 
     """
-    __class_type = 'reject-threshold'
+
+    __class_type = "reject-threshold"
 
     def __init__(self, clf, threshold, preprocess=None):
 
         if not isinstance(clf, CClassifier):
             raise ValueError(
-                "the inner classifier should be an instance of CClassifier")
+                "the inner classifier should be an instance of CClassifier"
+            )
 
         self._clf = clf
         self.threshold = threshold
@@ -171,8 +174,7 @@ class CClassifierRejectThreshold(CClassifierReject):
         if n_jobs is not _NoValue:
             raise ValueError("`n_jobs` is not supported.")
 
-        labels, scores = CClassifier.predict(
-            self, x, return_decision_function=True)
+        labels, scores = CClassifier.predict(self, x, return_decision_function=True)
         # relabel rejection class
         labels[labels == self.n_classes - 1] = -1
         return (labels, scores) if return_decision_function is True else labels
@@ -218,7 +220,7 @@ class CClassifierRejectThreshold(CClassifierReject):
         -------
         threshold : float
             The estimated reject threshold
-            
+
         """
         if not self.is_fitted():
             raise NotFittedError("The classifier must be fitted")

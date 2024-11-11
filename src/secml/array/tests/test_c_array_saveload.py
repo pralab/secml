@@ -11,30 +11,33 @@ class TestCArraySaveLoad(CArrayTestCases):
     call tearDown after each one, resetting test files even after errors.
 
     """
+
     def setUp(self):
 
         super(TestCArraySaveLoad, self).setUp()
 
-        self.test_file = fm.join(fm.abspath(__file__), 'test.txt')
-        self.test_file_2 = fm.join(fm.abspath(__file__), 'test2.txt')
+        self.test_file = fm.join(fm.abspath(__file__), "test.txt")
+        self.test_file_2 = fm.join(fm.abspath(__file__), "test2.txt")
 
     def test_save_load_sparse(self):
         """Test save/load of CArray"""
-        self.logger.info(
-            "UNITTEST - CArray - Testing save/load for sparse matrix")
+        self.logger.info("UNITTEST - CArray - Testing save/load for sparse matrix")
 
         self.array_sparse.save(self.test_file)
 
         # Saving to a file handle is not supported for sparse arrays
         with self.assertRaises(NotImplementedError):
-            with open(self.test_file_2, 'w') as f:
+            with open(self.test_file_2, "w") as f:
                 self.array_sparse.save(f)
 
         loaded_array_sparse = CArray.load(
-            self.test_file, arrayformat='sparse', dtype=int)
+            self.test_file, arrayformat="sparse", dtype=int
+        )
 
-        self.assertFalse((loaded_array_sparse != self.array_sparse).any(),
-                         "Saved and loaded arrays (sparse) are not equal!")
+        self.assertFalse(
+            (loaded_array_sparse != self.array_sparse).any(),
+            "Saved and loaded arrays (sparse) are not equal!",
+        )
 
     def test_save_load_sparse_conversion(self):
         """Test save/load of CArray"""
@@ -45,31 +48,34 @@ class TestCArraySaveLoad(CArrayTestCases):
 
         # Saving to a file handle is not supported for sparse arrays
         with self.assertRaises(NotImplementedError):
-            with open(self.test_file_2, 'w') as f:
+            with open(self.test_file_2, "w") as f:
                 self.array_sparse.save(f)
 
         loaded_array_sparse = CArray.load(
-            self.test_file, arrayformat='sparse', dtype=int)
+            self.test_file, arrayformat="sparse", dtype=int
+        )
 
-        self.assertFalse((loaded_array_sparse != self.array_sparse).any(),
-                         "Saved and loaded arrays (sparse) are not equal!")
+        self.assertFalse(
+            (loaded_array_sparse != self.array_sparse).any(),
+            "Saved and loaded arrays (sparse) are not equal!",
+        )
 
     def test_save_load_dense(self):
         """Test save/load of CArray"""
-        self.logger.info(
-            "UNITTEST - CSparse - Testing save/load for dense matrix")
+        self.logger.info("UNITTEST - CSparse - Testing save/load for dense matrix")
 
         self.array_dense.save(self.test_file, overwrite=True)
 
-        loaded_array_dense = CArray.load(
-            self.test_file, arrayformat='dense', dtype=int)
+        loaded_array_dense = CArray.load(self.test_file, arrayformat="dense", dtype=int)
 
-        self.assertFalse((loaded_array_dense != self.array_dense).any(),
-                         "Saved and loaded arrays (sparse) are not equal!")
+        self.assertFalse(
+            (loaded_array_dense != self.array_dense).any(),
+            "Saved and loaded arrays (sparse) are not equal!",
+        )
 
         # Only 'dense' and 'sparse' arrayformat are supported
         with self.assertRaises(ValueError):
-            CArray.load(self.test_file, arrayformat='test')
+            CArray.load(self.test_file, arrayformat="test")
 
     def tearDown(self):
         # Remove test file(s) if exist
@@ -81,5 +87,5 @@ class TestCArraySaveLoad(CArrayTestCases):
                 raise e
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CArrayTestCases.main()

@@ -48,10 +48,12 @@ class CNormalizerTestCases(CPreProcessTestCases):
     def _test_chain(self, x, class_type_list, kwargs_list, y=None):
         """Tests if preprocess chain and manual chaining yield same result."""
         x_chain = super(CNormalizerTestCases, self)._test_chain(
-            x, class_type_list, kwargs_list, y)
+            x, class_type_list, kwargs_list, y
+        )
 
-        self.assertEqual((self.array_dense.shape[0],
-                          self.array_dense.shape[1] - 1), x_chain.shape)
+        self.assertEqual(
+            (self.array_dense.shape[0], self.array_dense.shape[1] - 1), x_chain.shape
+        )
 
         return x_chain
 
@@ -59,12 +61,13 @@ class CNormalizerTestCases(CPreProcessTestCases):
         """Tests if gradient preprocess chain and
         gradient of manual chaining yield same result."""
         grad_chain = super(CNormalizerTestCases, self)._test_chain_gradient(
-            x, class_type_list, kwargs_list, y)
+            x, class_type_list, kwargs_list, y
+        )
 
         self.assertEqual((self.array_dense.shape[1],), grad_chain.shape)
 
         return grad_chain
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

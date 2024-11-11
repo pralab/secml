@@ -9,7 +9,7 @@ class TestCFunction(CFunctionTestCases):
 
     def setUp(self):
 
-        avail_funcs = ['3h-camel', 'beale', 'mc-cormick', 'rosenbrock']
+        avail_funcs = ["3h-camel", "beale", "mc-cormick", "rosenbrock"]
 
         # Instancing the available functions to test optimizer
         self.funcs = {}
@@ -20,20 +20,21 @@ class TestCFunction(CFunctionTestCases):
         """Test if the gradient check made up with
         COptimizer.approx_fprime() and .check_grad() methods is correct."""
         self.logger.info(
-            "Test for COptimizer.approx_fprime() and .check_grad() methods.")
+            "Test for COptimizer.approx_fprime() and .check_grad() methods."
+        )
 
-        x0 = CArray([1., 0.])  # Starting point for minimization
+        x0 = CArray([1.0, 0.0])  # Starting point for minimization
 
         for fun_id in self.funcs:
             fun = self.funcs[fun_id]
 
             self.logger.info(
-                "Testing grad approx of {:}".format(fun.__class__.__name__))
+                "Testing grad approx of {:}".format(fun.__class__.__name__)
+            )
 
             grad_err = fun.check_grad(x0, epsilon=1e-8)
 
-            self.logger.info(
-                "(Real grad - approx).norm(): {:}".format(grad_err))
+            self.logger.info("(Real grad - approx).norm(): {:}".format(grad_err))
 
             self.assertLess(grad_err, 1e-3)
 
@@ -46,12 +47,12 @@ class TestCFunction(CFunctionTestCases):
 
     # Two dumb function that have **kwargs as the second parameter
     def _fun_kwargs(self, x, **kwargs):
-        if kwargs != {'y': 1}:
+        if kwargs != {"y": 1}:
             raise ValueError
         return 1
 
     def _dfun_kwargs(self, x, **kwargs):
-        if kwargs != {'y': 1}:
+        if kwargs != {"y": 1}:
             raise ValueError
         return CArray([0])
 
@@ -74,13 +75,15 @@ class TestCFunction(CFunctionTestCases):
         self.logger.info(
             "Test the parameters passage made up by "
             "COptimizer.approx_fprime() "
-            "and .check_grad() methods.")
+            "and .check_grad() methods."
+        )
 
-        x0 = CArray([1.])  # Starting point for minimization
+        x0 = CArray([1.0])  # Starting point for minimization
         epsilon = 0.1
 
         self.logger.info(
-            "Testing when the function and the gradient have two parameter")
+            "Testing when the function and the gradient have two parameter"
+        )
 
         fun = CFunction(fun=self._fun_2_params, gradient=self._dfun_2_params)
         self.logger.info("Testing check_grad")
@@ -132,5 +135,5 @@ class TestCFunction(CFunctionTestCases):
         self.assertEqual(0, grad_err)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CFunctionTestCases.main()

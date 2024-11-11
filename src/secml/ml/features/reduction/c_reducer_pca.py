@@ -6,11 +6,12 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.ml.features.reduction import CReducer
 from secml.utils.mixed_utils import check_is_fitted
 
-__all__ = ['CPCA']
+__all__ = ["CPCA"]
 
 
 class CPCA(CReducer):
@@ -28,7 +29,8 @@ class CPCA(CReducer):
     class_type : 'pca'
 
     """
-    __class_type = 'pca'
+
+    __class_type = "pca"
 
     def __init__(self, n_components=None, preprocess=None):
         """Principal Component Analysis (PCA)
@@ -123,7 +125,7 @@ class CPCA(CReducer):
             If the preprocessor is not fitted.
 
         """
-        check_is_fitted(self, ['components', 'mean'])
+        check_is_fitted(self, ["components", "mean"])
 
     def _fit(self, x, y=None):
         """Fit the PCA using input data.
@@ -169,7 +171,9 @@ class CPCA(CReducer):
             self.n_components = min(n_samples, n_features)
         else:
             if self.n_components > n_samples:
-                raise ValueError("maximum number of components is {:}".format(n_samples))
+                raise ValueError(
+                    "maximum number of components is {:}".format(n_samples)
+                )
 
         # Centering training data
         self._mean = data_carray.mean(axis=0, keepdims=False)
@@ -184,8 +188,8 @@ class CPCA(CReducer):
         # Computing SVD reduction
         from numpy import linalg
         from sklearn.utils.extmath import svd_flip
-        u, s, v = linalg.svd(data_carray.atleast_2d().tondarray(),
-                             full_matrices=False)
+
+        u, s, v = linalg.svd(data_carray.atleast_2d().tondarray(), full_matrices=False)
         # flip eigenvectors' sign to enforce deterministic output
         u, v = svd_flip(u, v)
 
@@ -199,7 +203,7 @@ class CPCA(CReducer):
         eigenvec = CArray(eigenvec[:, idx]).atleast_2d()
         components = CArray(components[idx, :]).atleast_2d()
         # percentage of variance explained by each component
-        explained_variance = (eigenval ** 2) / (data_carray.shape[0] - 1)
+        explained_variance = (eigenval**2) / (data_carray.shape[0] - 1)
         explained_variance_ratio = explained_variance / explained_variance.sum()
 
         if 0 < self.n_components < 1.0:
@@ -209,13 +213,13 @@ class CPCA(CReducer):
             self.n_components = CArray(ratio_cumsum < self.n_components).sum() + 1
 
         # Consider only n_components
-        self._eigenval = CArray(eigenval[:self.n_components])
-        self._eigenvec = CArray(eigenvec[:, :self.n_components])
-        self._components = CArray(components[:self.n_components, :])
+        self._eigenval = CArray(eigenval[: self.n_components])
+        self._eigenvec = CArray(eigenvec[:, : self.n_components])
+        self._components = CArray(components[: self.n_components, :])
 
         # storing explained variance of n_components only
-        self._explained_variance = explained_variance[:self.n_components]
-        self._explained_variance_ratio = explained_variance_ratio[:self.n_components]
+        self._explained_variance = explained_variance[: self.n_components]
+        self._explained_variance_ratio = explained_variance_ratio[: self.n_components]
 
         return self
 
@@ -253,8 +257,10 @@ class CPCA(CReducer):
         """
         data_carray = CArray(x).todense().atleast_2d()
         if data_carray.shape[1] != self.mean.size:
-            raise ValueError("array to transform must have {:} "
-                             "features (columns).".format(self.mean.size))
+            raise ValueError(
+                "array to transform must have {:} "
+                "features (columns).".format(self.mean.size)
+            )
 
         out = CArray((data_carray - self.mean).dot(self._components.T))
         return out.atleast_2d() if x.ndim >= 2 else out
@@ -286,8 +292,10 @@ class CPCA(CReducer):
         """
         data_carray = CArray(x).atleast_2d()
         if data_carray.shape[1] != self.n_components:
-            raise ValueError("array to revert must have {:} "
-                             "features (columns).".format(self.n_components))
+            raise ValueError(
+                "array to revert must have {:} "
+                "features (columns).".format(self.n_components)
+            )
 
         out = CArray(data_carray.dot(self._components) + self.mean)
 

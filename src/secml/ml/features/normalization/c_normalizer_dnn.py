@@ -6,6 +6,7 @@
 .. moduleauthor:: Angelo Sotgiu
 
 """
+
 from secml import _NoValue
 from secml.array import CArray
 from secml.ml.features.normalization import CNormalizer
@@ -34,7 +35,8 @@ class CNormalizerDNN(CNormalizer):
     parameter but to the DNN instead.
 
     """
-    __class_type = 'dnn'
+
+    __class_type = "dnn"
 
     def __init__(self, net, out_layer=None, preprocess=_NoValue):
 
@@ -42,12 +44,10 @@ class CNormalizerDNN(CNormalizer):
         self.out_layer = out_layer
 
         if not self.net.is_fitted():
-            raise NotFittedError(
-                "the DNN should be already trained.")
+            raise NotFittedError("the DNN should be already trained.")
 
         if preprocess is not _NoValue:
-            raise ValueError(
-                "any additional `preprocess` should be passed to the DNN.")
+            raise ValueError("any additional `preprocess` should be passed to the DNN.")
 
         # No preprocess should be passed to super
         super(CNormalizerDNN, self).__init__(preprocess=None)
@@ -118,5 +118,4 @@ class CNormalizerDNN(CNormalizer):
 
     def _backward(self, w=None):
         # return the gradient at desired layer
-        return self.net.get_layer_gradient(x=self._cached_x, w=w,
-                                           layer=self.out_layer)
+        return self.net.get_layer_gradient(x=self._cached_x, w=w, layer=self.out_layer)

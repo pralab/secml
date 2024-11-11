@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from sklearn.neighbors import KernelDensity
 
 from secml.array import CArray
@@ -20,7 +21,7 @@ class CDensityEstimation(CCreator):
     bandwidth : float, optional
         The bandwidth of the kernel. Default 1.
     algorithm : str, optional
-        The tree algorithm to use. 
+        The tree algorithm to use.
         Valid options are ['kd_tree'|'ball_tree'|'auto']. Default is 'auto'.
     kernel : str, optional
         The kernel to use. Valid kernels are
@@ -52,9 +53,19 @@ class CDensityEstimation(CCreator):
         of BallTree or KDTree.
 
     """
-    def __init__(self, bandwidth=1.0, algorithm='auto', kernel='gaussian',
-                 metric='euclidean', atol=0, rtol=1e-8, breadth_first=True,
-                 leaf_size=40, metric_params=None):
+
+    def __init__(
+        self,
+        bandwidth=1.0,
+        algorithm="auto",
+        kernel="gaussian",
+        metric="euclidean",
+        atol=0,
+        rtol=1e-8,
+        breadth_first=True,
+        leaf_size=40,
+        metric_params=None,
+    ):
 
         self.bandwidth = bandwidth
         self.algorithm = algorithm
@@ -86,7 +97,8 @@ class CDensityEstimation(CCreator):
             rtol=self.rtol,
             breadth_first=self.breadth_first,
             leaf_size=self.leaf_size,
-            metric_params=self.metric_params).fit(x.atleast_2d().get_data())
+            metric_params=self.metric_params,
+        ).fit(x.atleast_2d().get_data())
 
         x = CArray.linspace(x.min() * 1.01, x.max() * 1.01, n_points)
         x = x.atleast_2d().T

@@ -5,7 +5,7 @@ class TestCKernelEuclidean(CCKernelTestCases):
     """Unit test for CKernelEuclidean."""
 
     def setUp(self):
-        self._set_up('euclidean')
+        self._set_up("euclidean")
 
     def test_similarity_shape(self):
         """Test shape of kernel."""
@@ -31,5 +31,5 @@ class TestCKernelEuclidean(CCKernelTestCases):
         self._test_gradient_w()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CCKernelTestCases.main()

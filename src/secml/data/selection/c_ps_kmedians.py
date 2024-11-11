@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.data.selection import CPrototypesSelector
 from secml.array import CArray
 from secml.ml.kernels import CKernelEuclidean
@@ -28,7 +29,8 @@ class CPSKMedians(CPrototypesSelector):
     class_type : 'k-medians'
 
     """
-    __class_type = 'k-medians'
+
+    __class_type = "k-medians"
 
     def select(self, dataset, n_prototypes, random_state=None):
         """Selects the prototypes from input dataset.
@@ -50,11 +52,13 @@ class CPSKMedians(CPrototypesSelector):
 
         """
         from sklearn.cluster import k_means
-        km = k_means(dataset.X.tondarray(), n_clusters=n_prototypes,
-                     random_state=random_state)
+
+        km = k_means(
+            dataset.X.tondarray(), n_clusters=n_prototypes, random_state=random_state
+        )
         km_labels = CArray(km[1])
         # Precomputing distances
-        k_euclidean = - CKernelEuclidean().k(dataset.X)
+        k_euclidean = -CKernelEuclidean().k(dataset.X)
         # List of selected prototypes (indices)
         sel_idx = []
         for i in range(n_prototypes):

@@ -5,6 +5,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.ml.classifiers.gradients import CClassifierGradientLinearMixin
 from secml.ml.classifiers.clf_utils import convert_binary_labels

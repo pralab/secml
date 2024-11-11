@@ -6,15 +6,23 @@
 .. moduleauthor:: Maura Pintor <maura.pintor@unica.it>
 
 """
+
 import math
 from typing import Any, Tuple
 
 import eagerpy as ep
 from foolbox import Misclassification, TargetedMisclassification
 from foolbox.attacks.base import raise_if_kwargs, get_criterion
-from foolbox.attacks.ead import EADAttack, _best_other_classes, _project_shrinkage_thresholding, _apply_decision_rule
+from foolbox.attacks.ead import (
+    EADAttack,
+    _best_other_classes,
+    _project_shrinkage_thresholding,
+    _apply_decision_rule,
+)
 
-from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import CAttackEvasionFoolbox
+from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import (
+    CAttackEvasionFoolbox,
+)
 from secml.adv.attacks.evasion.foolbox.losses.ead_loss import EADLoss
 from secml.adv.attacks.evasion.foolbox.secml_autograd import as_tensor
 from secml.array import CArray
@@ -70,44 +78,51 @@ class CFoolboxEAD(EADLoss, CAttackEvasionFoolbox):
         "Ead: elastic-net attacks to deep neural networks via adversarial examples."
         Proceedings of the AAAI Conference on Artificial Intelligence. Vol. 32. No. 1. 2018.
     """
-    __class_type = 'e-foolbox-ead'
 
-    def __init__(self,
-                 classifier: CClassifier,
-                 y_target: Any = None,
-                 lb=0.0,
-                 ub=1.0,
-                 epsilons=None,
-                 binary_search_steps=9,
-                 steps=50,
-                 initial_stepsize=1e-2,
-                 confidence=0.,
-                 initial_const=1e-3,
-                 regularization=1e-2,
-                 decision_rule: str = EN,
-                 abort_early=False,
-                 ):
+    __class_type = "e-foolbox-ead"
+
+    def __init__(
+        self,
+        classifier: CClassifier,
+        y_target: Any = None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=None,
+        binary_search_steps=9,
+        steps=50,
+        initial_stepsize=1e-2,
+        confidence=0.0,
+        initial_const=1e-3,
+        regularization=1e-2,
+        decision_rule: str = EN,
+        abort_early=False,
+    ):
         if decision_rule != L1 and decision_rule != EN:
-            raise ValueError(f"decision_rule param can be ony {EN} or {L1}, not {decision_rule}")
-        super(CFoolboxEAD, self).__init__(classifier,
-                                          y_target,
-                                          lb=lb, ub=ub,
-                                          fb_attack_class=_EADAttack,
-                                          epsilons=epsilons,
-                                          initial_const=initial_const,
-                                          binary_search_steps=binary_search_steps,
-                                          steps=steps,
-                                          confidence=confidence,
-                                          initial_stepsize=initial_stepsize,
-                                          regularization=regularization,
-                                          decision_rule=decision_rule,
-                                          abort_early=abort_early)
+            raise ValueError(
+                f"decision_rule param can be ony {EN} or {L1}, not {decision_rule}"
+            )
+        super(CFoolboxEAD, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            fb_attack_class=_EADAttack,
+            epsilons=epsilons,
+            initial_const=initial_const,
+            binary_search_steps=binary_search_steps,
+            steps=steps,
+            confidence=confidence,
+            initial_stepsize=initial_stepsize,
+            regularization=regularization,
+            decision_rule=decision_rule,
+            abort_early=abort_early,
+        )
         self.regularization = regularization
         self.confidence = confidence
         self.c = initial_const
         self._x0 = None
         self._y0 = None
-        self.distance = 'l1'
+        self.distance = "l1"
         self._step_per_iter = None
         self.best_c_ = self.c
 
@@ -131,7 +146,7 @@ class CFoolboxEAD(EADLoss, CAttackEvasionFoolbox):
         divided_paths = []
         for i, s in enumerate(self.attack._steps_per_iter):
             cumulative_sum = sum(self.attack._steps_per_iter[:i])
-            divided_paths.append(all_paths[cumulative_sum: cumulative_sum + s, :])
+            divided_paths.append(all_paths[cumulative_sum : cumulative_sum + s, :])
         return divided_paths
 
     @property
@@ -142,13 +157,13 @@ class CFoolboxEAD(EADLoss, CAttackEvasionFoolbox):
 
 class _EADAttack(EADAttack):
     def run(
-            self,
-            model,
-            inputs,
-            criterion,
-            *,
-            early_stop=None,
-            **kwargs: Any,
+        self,
+        model,
+        inputs,
+        criterion,
+        *,
+        early_stop=None,
+        **kwargs: Any,
     ):
         raise_if_kwargs(kwargs)
         x, restore_type = ep.astensor_(inputs)
@@ -223,8 +238,8 @@ class _EADAttack(EADAttack):
         # the binary search searches for the smallest consts that produce adversarials
         for binary_search_step in range(self.binary_search_steps):
             if (
-                    binary_search_step == self.binary_search_steps - 1
-                    and self.binary_search_steps >= 10
+                binary_search_step == self.binary_search_steps - 1
+                and self.binary_search_steps >= 10
             ):
                 # in the last iteration, repeat the search once
                 consts = ep.minimum(upper_bounds, 1e10)

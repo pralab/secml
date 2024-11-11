@@ -5,23 +5,40 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml import _NoValue
 from secml.core.type_utils import is_str
 
-__all__ = ['as_public',
-           'as_protected', 'has_protected', 'get_protected',
-           'as_private', 'has_private', 'get_private',
-           'has_property', 'get_property', 'has_getter', 'has_setter',
-           'add_readonly', 'add_readwrite',
-           'is_public', 'is_protected', 'is_readonly', 'is_readwrite',
-           'is_readable', 'is_writable', 'extract_attr']
+__all__ = [
+    "as_public",
+    "as_protected",
+    "has_protected",
+    "get_protected",
+    "as_private",
+    "has_private",
+    "get_private",
+    "has_property",
+    "get_property",
+    "has_getter",
+    "has_setter",
+    "add_readonly",
+    "add_readwrite",
+    "is_public",
+    "is_protected",
+    "is_readonly",
+    "is_readwrite",
+    "is_readable",
+    "is_writable",
+    "extract_attr",
+]
 
 
 def _check_is_attr_name(attr):
     """Raise TypeError if input is not an attribute name (string)."""
     if not is_str(attr):
-        raise TypeError("attribute must be passed as a string, "
-                        "not {:}.".format(type(attr)))
+        raise TypeError(
+            "attribute must be passed as a string, " "not {:}.".format(type(attr))
+        )
 
 
 def as_public(attr):
@@ -41,7 +58,8 @@ def as_public(attr):
     """
     _check_is_attr_name(attr)
     import re
-    return re.sub('^_rw_|^_r_|^_', '', attr)
+
+    return re.sub("^_rw_|^_r_|^_", "", attr)
 
 
 def as_protected(attr):
@@ -60,9 +78,9 @@ def as_protected(attr):
 
     """
     _check_is_attr_name(attr)
-    if not attr.startswith('_'):  # Public attribute
-        return '_' + attr
-    if attr.startswith('__'):  # Private attribute
+    if not attr.startswith("_"):  # Public attribute
+        return "_" + attr
+    if attr.startswith("__"):  # Private attribute
         return attr[1:]  # Remove the first underscore
     return attr  # Already a protected attribute
 
@@ -112,8 +130,8 @@ def as_private(obj_class, attr):
 
     """
     _check_is_attr_name(attr)
-    attr = '__' + attr if attr.startswith('__') is False else attr
-    return '_' + obj_class.__name__ + attr
+    attr = "__" + attr if attr.startswith("__") is False else attr
+    return "_" + obj_class.__name__ + attr
 
 
 def has_private(obj_class, attr):
@@ -161,9 +179,12 @@ def has_property(obj, attr):
 
     """
     _check_is_attr_name(attr)
-    return True if hasattr(obj.__class__, as_public(attr)) and \
-                   isinstance(getattr(
-                       obj.__class__, as_public(attr)), property) else False
+    return (
+        True
+        if hasattr(obj.__class__, as_public(attr))
+        and isinstance(getattr(obj.__class__, as_public(attr)), property)
+        else False
+    )
 
 
 def get_property(obj, attr):
@@ -181,8 +202,10 @@ def get_property(obj, attr):
     """
     _check_is_attr_name(attr)
     if not has_property(obj, attr):
-        raise AttributeError("'{:}' has no property associated with attribute "
-                             "'{:}'.".format(obj.__class__.__name__, attr))
+        raise AttributeError(
+            "'{:}' has no property associated with attribute "
+            "'{:}'.".format(obj.__class__.__name__, attr)
+        )
     return getattr(obj.__class__, as_public(attr))
 
 
@@ -198,8 +221,11 @@ def has_getter(obj, attr):
 
     """
     _check_is_attr_name(attr)
-    return True if has_property(obj, attr) and \
-                   get_property(obj, attr).fget is not None else False
+    return (
+        True
+        if has_property(obj, attr) and get_property(obj, attr).fget is not None
+        else False
+    )
 
 
 def has_setter(obj, attr):
@@ -214,8 +240,11 @@ def has_setter(obj, attr):
 
     """
     _check_is_attr_name(attr)
-    return True if has_property(obj, attr) and \
-                   get_property(obj, attr).fset is not None else False
+    return (
+        True
+        if has_property(obj, attr) and get_property(obj, attr).fset is not None
+        else False
+    )
 
 
 def add_readonly(obj, attr, value=None):
@@ -286,8 +315,7 @@ def is_public(obj, attr):
     """
     _check_is_attr_name(attr)
     # Exclude properties to only return actual public attributes
-    return True if not attr.startswith('_') and \
-                   not has_property(obj, attr) else False
+    return True if not attr.startswith("_") and not has_property(obj, attr) else False
 
 
 def is_readonly(obj, attr):
@@ -304,9 +332,13 @@ def is_readonly(obj, attr):
 
     """
     _check_is_attr_name(attr)
-    return True if not is_public(obj, attr) and \
-                   has_getter(obj, attr) and \
-                   not has_setter(obj, attr) else False
+    return (
+        True
+        if not is_public(obj, attr)
+        and has_getter(obj, attr)
+        and not has_setter(obj, attr)
+        else False
+    )
 
 
 def is_readwrite(obj, attr):
@@ -343,8 +375,7 @@ def is_protected(obj, attr):
     """
     _check_is_attr_name(attr)
     # There cannot be a setter without a getter!
-    return True if not is_public(obj, attr) and \
-                   not has_getter(obj, attr) else False
+    return True if not is_public(obj, attr) and not has_getter(obj, attr) else False
 
 
 def is_readable(obj, attr):
@@ -364,9 +395,11 @@ def is_readable(obj, attr):
 
     """
     _check_is_attr_name(attr)
-    return True if is_public(obj, attr) or \
-                   is_readwrite(obj, attr) or \
-                   is_readonly(obj, attr) else False
+    return (
+        True
+        if is_public(obj, attr) or is_readwrite(obj, attr) or is_readonly(obj, attr)
+        else False
+    )
 
 
 def is_writable(obj, attr):
@@ -418,16 +451,16 @@ def extract_attr(obj, mode):
 
     def parse_modes(mode_str):
         """Parse modes string and return a list with the required checks."""
-        mode_list = mode_str.split('+')
+        mode_list = mode_str.split("+")
         req_check = []
         for m in mode_list:
-            if m == 'pub':
+            if m == "pub":
                 req_check.append(is_public)
-            elif m == 'rw':
+            elif m == "rw":
                 req_check.append(is_readwrite)
-            elif m == 'r':
+            elif m == "r":
                 req_check.append(is_readonly)
-            elif m == 'pro':
+            elif m == "pro":
                 req_check.append(is_protected)
             else:
                 raise ValueError("mode `{:}` not supported.".format(m))

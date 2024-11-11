@@ -8,9 +8,7 @@ class CModuleTestCases(CUnitTest):
     """Unittests interface for CPreProcess."""
 
     def setUp(self):
-        self.array_dense = CArray([[1, 0, 0, 5],
-                                   [2, 4, 0, 0],
-                                   [3, 6, 0, 0]])
+        self.array_dense = CArray([[1, 0, 0, 5], [2, 4, 0, 0], [3, 6, 0, 0]])
         self.array_sparse = CArray(self.array_dense.deepcopy(), tosparse=True)
 
         self.labels = CArray([0, 1, 0])
@@ -31,8 +29,7 @@ class CModuleTestCases(CUnitTest):
         chain = None  # module with preprocessing chain
         modules = []  # list of modules (not connected via preprocessing)
         for i, pre_id in enumerate(class_type_list):
-            chain = CModule.create(
-                pre_id, preprocess=chain, **kwargs_list[i])
+            chain = CModule.create(pre_id, preprocess=chain, **kwargs_list[i])
             modules.append(CModule.create(pre_id, **kwargs_list[i]))
         return chain, modules
 
@@ -94,8 +91,7 @@ class CModuleTestCases(CUnitTest):
         for i, v in enumerate(v_list):
             grad = modules[i].gradient(v, w=grad)
 
-        self.logger.info(
-            "chain.gradient({:}):\n{:}".format(v, grad))
+        self.logger.info("chain.gradient({:}):\n{:}".format(v, grad))
         self.assert_allclose(grad_chain, grad)
 
         return grad
@@ -104,20 +100,22 @@ class CModuleTestCases(CUnitTest):
 class TestCModule(CModuleTestCases):
     def test_chain(self):
         """Test a chain of preprocessors."""
-        self._test_chain(self.array_dense,
-                         ['min-max', 'pca', 'min-max', 'rbf', 'svm'],
-                         [{'feature_range': (-5, 5)}, {},
-                          {'feature_range': (0, 1)}, {}, {}],
-                         y=self.labels)
+        self._test_chain(
+            self.array_dense,
+            ["min-max", "pca", "min-max", "rbf", "svm"],
+            [{"feature_range": (-5, 5)}, {}, {"feature_range": (0, 1)}, {}, {}],
+            y=self.labels,
+        )
 
     def test_chain_gradient(self):
         """Check gradient of a chain of preprocessors."""
-        self._test_chain_gradient(self.array_dense,
-                                  ['min-max', 'min-max', 'rbf', 'svm'],
-                                  [{'feature_range': (0, 1)},
-                                   {}, {}, {}],
-                                  y=self.labels)
+        self._test_chain_gradient(
+            self.array_dense,
+            ["min-max", "min-max", "rbf", "svm"],
+            [{"feature_range": (0, 1)}, {}, {}, {}],
+            y=self.labels,
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CUnitTest.main()

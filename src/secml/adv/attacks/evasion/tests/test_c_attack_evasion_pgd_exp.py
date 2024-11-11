@@ -56,17 +56,13 @@ class TestCAttackEvasionPGDExp(CAttackEvasionTestCases):
         evasion_params = {
             "classifier": clf,
             "double_init_ds": ds,
-            "distance": 'l1',
+            "distance": "l1",
             "dmax": 1.05,
             "lb": -1.05,
             "ub": 1.05,
             "attack_classes": CArray([1]),
             "y_target": 0,
-            "solver_params": {
-                "eta": eta,
-                "eta_min": None,
-                "eta_max": None
-            }
+            "solver_params": {"eta": eta, "eta_min": None, "eta_max": None},
         }
 
         evas, x0, y0 = self._set_evasion(ds, evasion_params)
@@ -77,7 +73,7 @@ class TestCAttackEvasionPGDExp(CAttackEvasionTestCases):
 
         self._run_evasion(evas, x0, y0, expected_x, expected_y)
 
-        self._plot_2d_evasion(evas, ds, x0, 'pgd_exp_linear_L1.pdf')
+        self._plot_2d_evasion(evas, ds, x0, "pgd_exp_linear_L1.pdf")
 
     def test_linear_l1_discrete(self):
         """Test evasion of a linear classifier using L1 distance (discrete)."""
@@ -93,17 +89,13 @@ class TestCAttackEvasionPGDExp(CAttackEvasionTestCases):
         evasion_params = {
             "classifier": clf,
             "double_init_ds": ds,
-            "distance": 'l1',
+            "distance": "l1",
             "dmax": 2,
             "lb": -1,
             "ub": 1,
             "attack_classes": CArray([1]),
             "y_target": 0,
-            "solver_params": {
-                "eta": eta,
-                "eta_min": None,
-                "eta_max": None
-            }
+            "solver_params": {"eta": eta, "eta_min": None, "eta_max": None},
         }
 
         evas, x0, y0 = self._set_evasion(ds, evasion_params)
@@ -114,7 +106,7 @@ class TestCAttackEvasionPGDExp(CAttackEvasionTestCases):
 
         self._run_evasion(evas, x0, y0, expected_x, expected_y)
 
-        self._plot_2d_evasion(evas, ds, x0, 'pgd_exp_linear_L1_discrete.pdf')
+        self._plot_2d_evasion(evas, ds, x0, "pgd_exp_linear_L1_discrete.pdf")
 
     def test_linear_l1_discrete_10d(self):
         """Test evasion of a linear classifier (10 features)
@@ -136,32 +128,26 @@ class TestCAttackEvasionPGDExp(CAttackEvasionTestCases):
         evasion_params = {
             "classifier": clf,
             "double_init_ds": ds,
-            "distance": 'l1',
+            "distance": "l1",
             "dmax": 5,
             "lb": -2,
             "ub": 2,
             "attack_classes": CArray([1]),
             "y_target": 0,
-            "solver_params": {
-                "eta": eta,
-                "eta_min": None,
-                "eta_max": None
-            }
+            "solver_params": {"eta": eta, "eta_min": None, "eta_max": None},
         }
 
         evas, x0, y0 = self._set_evasion(ds, evasion_params)
 
         # Set few features to the same max value
         w_new = clf.w.deepcopy()
-        w_new[CArray.randint(
-            clf.w.size, shape=3, random_state=seed)] = clf.w.max()
+        w_new[CArray.randint(clf.w.size, shape=3, random_state=seed)] = clf.w.max()
         clf._w = w_new
 
         # Expected final optimal point
         # CAttackEvasionPGDExp uses CLineSearchBisectProj
         # which brings the point outside of the grid
-        expected_x = \
-            CArray([-1.8333, -1.8333, 1.8333, 0, -0.5, 0, 0.5, -0.5, 1, 0.5])
+        expected_x = CArray([-1.8333, -1.8333, 1.8333, 0, -0.5, 0, 0.5, -0.5, 1, 0.5])
         expected_y = 0
 
         self._run_evasion(evas, x0, y0, expected_x, expected_y)
@@ -178,17 +164,13 @@ class TestCAttackEvasionPGDExp(CAttackEvasionTestCases):
         evasion_params = {
             "classifier": clf,
             "double_init_ds": ds,
-            "distance": 'l2',
+            "distance": "l2",
             "dmax": 1.05,
             "lb": -0.67,
             "ub": 0.67,
             "attack_classes": CArray([1]),
             "y_target": 0,
-            "solver_params": {
-                "eta": eta,
-                "eta_min": None,
-                "eta_max": None
-            }
+            "solver_params": {"eta": eta, "eta_min": None, "eta_max": None},
         }
 
         evas, x0, y0 = self._set_evasion(ds, evasion_params)
@@ -199,7 +181,7 @@ class TestCAttackEvasionPGDExp(CAttackEvasionTestCases):
 
         self._run_evasion(evas, x0, y0, expected_x, expected_y)
 
-        self._plot_2d_evasion(evas, ds, x0, 'pgd_exp_linear_L2.pdf')
+        self._plot_2d_evasion(evas, ds, x0, "pgd_exp_linear_L2.pdf")
 
     def test_nonlinear_l1(self):
         """Test evasion of a nonlinear classifier using L1 distance."""
@@ -213,17 +195,13 @@ class TestCAttackEvasionPGDExp(CAttackEvasionTestCases):
         evasion_params = {
             "classifier": clf,
             "double_init_ds": ds,
-            "distance": 'l1',
+            "distance": "l1",
             "dmax": 1.0,
             "lb": -1.0,
             "ub": 1.0,
             "attack_classes": CArray([1]),
             "y_target": 0,
-            "solver_params": {
-                "eta": eta,
-                "eta_min": 0.1,
-                "eta_max": None
-            }
+            "solver_params": {"eta": eta, "eta_min": 0.1, "eta_max": None},
         }
 
         evas, x0, y0 = self._set_evasion(ds, evasion_params)
@@ -234,7 +212,7 @@ class TestCAttackEvasionPGDExp(CAttackEvasionTestCases):
 
         self._run_evasion(evas, x0, y0, expected_x, expected_y)
 
-        self._plot_2d_evasion(evas, ds, x0, 'pgd_exp_nonlinear_L1.pdf')
+        self._plot_2d_evasion(evas, ds, x0, "pgd_exp_nonlinear_L1.pdf")
 
     def test_nonlinear_l2(self):
         """Test evasion of a nonlinear classifier using L2 distance."""
@@ -248,17 +226,13 @@ class TestCAttackEvasionPGDExp(CAttackEvasionTestCases):
         evasion_params = {
             "classifier": clf,
             "double_init_ds": ds,
-            "distance": 'l2',
+            "distance": "l2",
             "dmax": 1.25,
             "lb": -0.65,
             "ub": 1.0,
             "attack_classes": CArray([1]),
             "y_target": 0,
-            "solver_params": {
-                "eta": eta,
-                "eta_min": 0.01,
-                "eta_max": None
-            }
+            "solver_params": {"eta": eta, "eta_min": 0.01, "eta_max": None},
         }
 
         evas, x0, y0 = self._set_evasion(ds, evasion_params)
@@ -269,7 +243,7 @@ class TestCAttackEvasionPGDExp(CAttackEvasionTestCases):
 
         self._run_evasion(evas, x0, y0, expected_x, expected_y)
 
-        self._plot_2d_evasion(evas, ds, x0, 'pgd_exp_nonlinear_L2.pdf')
+        self._plot_2d_evasion(evas, ds, x0, "pgd_exp_nonlinear_L2.pdf")
 
     def test_tree_l1(self):
         """Test evasion of a tree classifier using L1 distance."""
@@ -283,17 +257,13 @@ class TestCAttackEvasionPGDExp(CAttackEvasionTestCases):
         evasion_params = {
             "classifier": clf_surr,
             "double_init_ds": ds,
-            "distance": 'l1',
+            "distance": "l1",
             "dmax": 2.0,
             "lb": -1.5,
             "ub": 1.5,
             "attack_classes": CArray([1]),
             "y_target": 0,
-            "solver_params": {
-                "eta": eta,
-                "eta_min": None,
-                "eta_max": None
-            }
+            "solver_params": {"eta": eta, "eta_min": None, "eta_max": None},
         }
 
         evas, x0, y0 = self._set_evasion(ds, evasion_params)
@@ -304,5 +274,4 @@ class TestCAttackEvasionPGDExp(CAttackEvasionTestCases):
 
         self._run_evasion(evas, x0, y0, expected_x, expected_y)
 
-        self._plot_2d_evasion(
-            evas, ds, x0, th=0.5, filename='pgd_exp_tree_L1.pdf')
+        self._plot_2d_evasion(evas, ds, x0, th=0.5, filename="pgd_exp_tree_L1.pdf")

@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.array import CArray
 from secml.ml.peval.metrics import CMetric
 
@@ -34,7 +35,8 @@ class CMetricAUCWMW(CMetric):
     0.5
 
     """
-    __class_type = 'auc-wmw'
+
+    __class_type = "auc-wmw"
     best_value = 1.0
 
     def _performance_score(self, y_true, score):

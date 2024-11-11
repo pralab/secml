@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from matplotlib import cm
 
 from secml.figure._plots import CPlot
@@ -36,7 +37,7 @@ class CPlotDataset(CPlot):
             fig_legend.set_visible(True)
         self.grid(grid_on=True)
 
-    def plot_ds(self, dataset, colors=None, markers='o', *args, **kwargs):
+    def plot_ds(self, dataset, colors=None, markers="o", *args, **kwargs):
         """Plot patterns of each class with a different color/marker.
 
         Parameters
@@ -63,29 +64,36 @@ class CPlotDataset(CPlot):
         classes = dataset.classes
         if colors is None:
             if classes.size <= 6:
-                colors = ['blue', 'red', 'lightgreen', 'black', 'gray', 'cyan']
+                colors = ["blue", "red", "lightgreen", "black", "gray", "cyan"]
                 from matplotlib.colors import ListedColormap
-                cmap = ListedColormap(colors[:classes.size])
+
+                cmap = ListedColormap(colors[: classes.size])
             else:
-                cmap = 'jet'
+                cmap = "jet"
         else:
             from matplotlib.colors import ListedColormap
+
             cmap = ListedColormap(colors)
 
         # Next returns an ndarray classes.size X 4 (RGB + Alpha)
-        colors = cm.ScalarMappable(
-            cmap=cmap).to_rgba(range(classes.size))
+        colors = cm.ScalarMappable(cmap=cmap).to_rgba(range(classes.size))
 
         if is_list(markers) and len(markers) != classes.size:
-            raise ValueError(
-                "{:} markers must be specified.".format(classes.size))
+            raise ValueError("{:} markers must be specified.".format(classes.size))
 
         for cls_idx, cls in enumerate(classes.tolist()):
             c = colors[cls_idx]
             m = markers[cls_idx] if is_list(markers) else markers
             this_c_p = dataset.Y.find(dataset.Y == cls)
-            self.plot(dataset.X[this_c_p, 0], dataset.X[this_c_p, 1],
-                      linestyle='None', color=c, marker=m, *args, **kwargs)
+            self.plot(
+                dataset.X[this_c_p, 0],
+                dataset.X[this_c_p, 1],
+                linestyle="None",
+                color=c,
+                marker=m,
+                *args,
+                **kwargs
+            )
 
         # Customizing figure
         self.apply_params_ds()

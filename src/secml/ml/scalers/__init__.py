@@ -1,7 +1,10 @@
 import warnings
-warnings.warn("This package is experimental and could change or "
-              "be removed in the future. "
-              "`ml.features.normalization` can be used instead.")
+
+warnings.warn(
+    "This package is experimental and could change or "
+    "be removed in the future. "
+    "`ml.features.normalization` can be used instead."
+)
 
 from .c_scaler_sklearn import CScalerSkLearn
 from .c_scaler_norm import CScalerNorm

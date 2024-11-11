@@ -6,6 +6,7 @@
 .. moduleauthor:: Battista Biggio <battista.biggio@unica.it>
 
 """
+
 from secml.adv.attacks.poisoning import CAttackPoisoning
 from secml.array import CArray
 from secml.ml.classifiers.clf_utils import convert_binary_labels
@@ -63,33 +64,40 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         If None, no fixed seed will be set.
 
     """
-    __class_type = 'p-ridge'
 
-    def __init__(self, classifier,
-                 training_data,
-                 val,
-                 distance='l2',
-                 dmax=0,
-                 lb=0,
-                 ub=1,
-                 y_target=None,
-                 solver_type='pgd-ls',
-                 solver_params=None,
-                 init_type=None,
-                 random_seed=None):
+    __class_type = "p-ridge"
 
-        CAttackPoisoning.__init__(self, classifier=classifier,
-                                  training_data=training_data,
-                                  val=val,
-                                  distance=distance,
-                                  dmax=dmax,
-                                  lb=lb,
-                                  ub=ub,
-                                  y_target=y_target,
-                                  solver_type=solver_type,
-                                  solver_params=solver_params,
-                                  init_type=init_type,
-                                  random_seed=random_seed)
+    def __init__(
+        self,
+        classifier,
+        training_data,
+        val,
+        distance="l2",
+        dmax=0,
+        lb=0,
+        ub=1,
+        y_target=None,
+        solver_type="pgd-ls",
+        solver_params=None,
+        init_type=None,
+        random_seed=None,
+    ):
+
+        CAttackPoisoning.__init__(
+            self,
+            classifier=classifier,
+            training_data=training_data,
+            val=val,
+            distance=distance,
+            dmax=dmax,
+            lb=lb,
+            ub=ub,
+            y_target=y_target,
+            solver_type=solver_type,
+            solver_params=solver_params,
+            init_type=init_type,
+            random_seed=random_seed,
+        )
 
     ###########################################################################
     #                            GRAD COMPUTATION
@@ -128,14 +136,13 @@ class CAttackPoisoningRidge(CAttackPoisoning):
         # handle normalizer, if present
         xc = xc if clf.preprocess is None else clf.preprocess.transform(xc)
         xc = xc.ravel().atleast_2d()
-        #xk = xk if clf.preprocess is None else clf.preprocess.transform(xk)
+        # xk = xk if clf.preprocess is None else clf.preprocess.transform(xk)
 
         # gt is the gradient in feature space
         k = xk.shape[0]  # num validation samples
         d = xk.shape[1]  # num features
 
-        M = clf.w.T.dot(
-            xc)  # xc is column, w is row (this is an outer product)
+        M = clf.w.T.dot(xc)  # xc is column, w is row (this is an outer product)
         M += (clf.w.dot(xc.T) + clf.b - yc) * CArray.eye(d)
         db_xc = clf.w.T
         G = M.append(db_xc, axis=1)
@@ -157,4 +164,3 @@ class CAttackPoisoningRidge(CAttackPoisoning):
             return clf.preprocess.gradient(xc0, w=gt)
 
         return gt
-

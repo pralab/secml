@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Meloni <m.meloni42@studenti.unica.it>
 
 """
+
 from sklearn.preprocessing import Normalizer
 
 from secml.array import CArray
@@ -28,7 +29,7 @@ class CScalerNorm(CScalerSkLearn):
 
     """
 
-    __class_type = 'norm'
+    __class_type = "norm"
 
     def __init__(self, norm="l2", copy=True, preprocess=None):
         scaler = Normalizer(norm=norm, copy=copy)
@@ -36,8 +37,7 @@ class CScalerNorm(CScalerSkLearn):
         self._order = None
         self.norm = norm
 
-        super(CScalerNorm, self).__init__(
-            sklearn_scaler=scaler, preprocess=preprocess)
+        super(CScalerNorm, self).__init__(sklearn_scaler=scaler, preprocess=preprocess)
 
     def _check_is_fitted(self):
         """This scaler doesn't need fit, so this function doesn't raise any
@@ -70,20 +70,22 @@ class CScalerNorm(CScalerSkLearn):
         """
         x = self._cached_x
         if x.shape[0] > 1:
-            raise ValueError("Parameter 'x' passed to the forward() method "
-                             "needs to be a one dimensional vector "
-                             "(passed a {:} dimensional vector)"
-                             .format(x.ndim))
+            raise ValueError(
+                "Parameter 'x' passed to the forward() method "
+                "needs to be a one dimensional vector "
+                "(passed a {:} dimensional vector)".format(x.ndim)
+            )
 
         d = self._cached_x.size  # get the number of features
         if w is not None:
             if (w.ndim != 1) or (w.size != d):
-                raise ValueError("Parameter 'w' needs to be a one dimensional "
-                                 "vector with the same number of elements "
-                                 "of parameter 'x' of the forward method "
-                                 "(passed a {:} dimensional vector with {:} "
-                                 "elements)"
-                                 .format(w.ndim, w.size))
+                raise ValueError(
+                    "Parameter 'w' needs to be a one dimensional "
+                    "vector with the same number of elements "
+                    "of parameter 'x' of the forward method "
+                    "(passed a {:} dimensional vector with {:} "
+                    "elements)".format(w.ndim, w.size)
+                )
 
         # compute the norm of x: ||x||
         x_norm = self._compute_x_norm(x)
@@ -92,7 +94,7 @@ class CScalerNorm(CScalerSkLearn):
 
         # this is the derivative of the ratio x/||x||
         grad = CArray.eye(d, d) * x_norm.item() - grad_norm_x.T.dot(x)
-        grad /= (x_norm ** 2)
+        grad /= x_norm**2
 
         return grad if w is None else w.dot(grad)
 
@@ -106,9 +108,9 @@ class CScalerNorm(CScalerSkLearn):
         """Set the norm that must be used to normalize each row."""
         self._norm = value
 
-        if self._norm == 'l2':
+        if self._norm == "l2":
             self._order = 2
-        elif self._norm == 'l1':
+        elif self._norm == "l1":
             self._order = 1
         elif self._norm == "max":
             self._order = inf
@@ -143,7 +145,7 @@ class CScalerNorm(CScalerSkLearn):
         elif self.norm == "l1":
             sign = x.sign()
             grad_norm_x = sign
-        elif self.norm == 'max':
+        elif self.norm == "max":
             grad_norm_x = CArray.zeros(d, sparse=x.issparse)
             abs_x = x.abs()  # take absolute values of x...
             max_abs_x = abs_x.max()  # ... and the maximum absolute value

@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from multiprocessing import Lock
 
 from abc import ABCMeta, abstractmethod
@@ -14,11 +15,20 @@ from secml.data.loader import CDataLoader
 from secml.data import CDataset
 from secml.array import CArray
 
-__all__ = ['CDLRandom', 'CDLRandomRegression',
-           'CDLRandomBlobs', 'CDLRandomBlobsRegression',
-           'CDLRandomCircles', 'CDLRandomCircleRegression',
-           'CDLRandomMoons', 'CDLRandomBinary',
-           'CDLIris', 'CDLDigits', 'CDLBoston', 'CDLDiabetes']
+__all__ = [
+    "CDLRandom",
+    "CDLRandomRegression",
+    "CDLRandomBlobs",
+    "CDLRandomBlobsRegression",
+    "CDLRandomCircles",
+    "CDLRandomCircleRegression",
+    "CDLRandomMoons",
+    "CDLRandomBinary",
+    "CDLIris",
+    "CDLDigits",
+    "CDLBoston",
+    "CDLDiabetes",
+]
 
 
 class CDLRandom(CDataLoader):
@@ -100,13 +110,26 @@ class CDLRandom(CDataLoader):
     class_type : 'classification'
 
     """
-    __class_type = 'classification'
 
-    def __init__(self, n_samples=100, n_features=20, n_informative=2,
-                 n_redundant=2, n_repeated=0, n_classes=2,
-                 n_clusters_per_class=2, weights=None,
-                 flip_y=0.01, class_sep=1.0, hypercube=True,
-                 shift=0.0, scale=1.0, random_state=None):
+    __class_type = "classification"
+
+    def __init__(
+        self,
+        n_samples=100,
+        n_features=20,
+        n_informative=2,
+        n_redundant=2,
+        n_repeated=0,
+        n_classes=2,
+        n_clusters_per_class=2,
+        weights=None,
+        flip_y=0.01,
+        class_sep=1.0,
+        hypercube=True,
+        shift=0.0,
+        scale=1.0,
+        random_state=None,
+    ):
 
         self.n_samples = n_samples
         self.n_features = n_features
@@ -133,6 +156,7 @@ class CDLRandom(CDataLoader):
 
         """
         from sklearn.datasets import make_classification
+
         patterns, labels = make_classification(
             n_samples=self.n_samples,
             n_features=self.n_features,
@@ -147,7 +171,8 @@ class CDLRandom(CDataLoader):
             hypercube=self.hypercube,
             shift=self.shift,
             scale=self.scale,
-            random_state=self.random_state)
+            random_state=self.random_state,
+        )
         return CDataset(patterns, labels)
 
 
@@ -161,7 +186,7 @@ class CDLRandomRegression(CDataLoader):
     random linear regression model with `n_informative` nonzero
     regressors to the previously generated input and some gaussian
     centered noise with some adjustable scale.
-    
+
     Parameters
     ----------
     n_samples : int, optional (default=100)
@@ -205,11 +230,21 @@ class CDLRandomRegression(CDataLoader):
     class_type : 'regression'
 
     """
-    __class_type = 'regression'
 
-    def __init__(self, n_samples=100, n_features=100, n_informative=10,
-                 n_targets=1, bias=0.0, effective_rank=None,
-                 tail_strength=0.5, noise=0.0, random_state=None):
+    __class_type = "regression"
+
+    def __init__(
+        self,
+        n_samples=100,
+        n_features=100,
+        n_informative=10,
+        n_targets=1,
+        bias=0.0,
+        effective_rank=None,
+        tail_strength=0.5,
+        noise=0.0,
+        random_state=None,
+    ):
 
         self.n_samples = n_samples
         self.n_features = n_features
@@ -231,15 +266,18 @@ class CDLRandomRegression(CDataLoader):
 
         """
         from sklearn.datasets import make_regression
-        patterns, labels = make_regression(n_samples=self.n_samples,
-                                           n_features=self.n_features,
-                                           n_informative=self.n_informative,
-                                           n_targets=self.n_targets,
-                                           bias=self.bias,
-                                           effective_rank=self.effective_rank,
-                                           tail_strength=self.tail_strength,
-                                           noise=self.noise,
-                                           random_state=self.random_state)
+
+        patterns, labels = make_regression(
+            n_samples=self.n_samples,
+            n_features=self.n_features,
+            n_informative=self.n_informative,
+            n_targets=self.n_targets,
+            bias=self.bias,
+            effective_rank=self.effective_rank,
+            tail_strength=self.tail_strength,
+            noise=self.noise,
+            random_state=self.random_state,
+        )
         return CDataset(patterns, labels)
 
 
@@ -272,10 +310,18 @@ class CDLRandomBlobs(CDataLoader):
     class_type : 'blobs'
 
     """
-    __class_type = 'blobs'
 
-    def __init__(self, n_samples=100, n_features=2, centers=3,
-                 cluster_std=1.0, center_box=(-10.0, 10.0), random_state=None):
+    __class_type = "blobs"
+
+    def __init__(
+        self,
+        n_samples=100,
+        n_features=2,
+        centers=3,
+        cluster_std=1.0,
+        center_box=(-10.0, 10.0),
+        random_state=None,
+    ):
 
         self.n_samples = n_samples
         self.n_features = n_features
@@ -294,13 +340,15 @@ class CDLRandomBlobs(CDataLoader):
 
         """
         from sklearn.datasets import make_blobs
+
         patterns, labels = make_blobs(
             n_samples=self.n_samples,
             n_features=self.n_features,
             centers=self.centers,
             cluster_std=self.cluster_std,
             center_box=self.center_box,
-            random_state=self.random_state)
+            random_state=self.random_state,
+        )
 
         return CDataset(patterns, labels)
 
@@ -331,11 +379,18 @@ class CDLRandomBlobsRegression(CDataLoader):
     class_type : 'blobs-regression'
 
     """
-    __class_type = 'blobs-regression'
 
-    def __init__(self, n_samples=100, cluster_std=(1.0, 1.0),
-                 bias=1.0, w=(2.0, -1.0), centers=([0, 0], [-1, -1]),
-                 random_state=None):
+    __class_type = "blobs-regression"
+
+    def __init__(
+        self,
+        n_samples=100,
+        cluster_std=(1.0, 1.0),
+        bias=1.0,
+        w=(2.0, -1.0),
+        centers=([0, 0], [-1, -1]),
+        random_state=None,
+    ):
 
         self.n_samples = n_samples
         self.bias = bias
@@ -345,15 +400,16 @@ class CDLRandomBlobsRegression(CDataLoader):
         self.random_state = random_state
 
     def _dts_function(self, X):
-        """ TODO: Put a comment for this function. """
+        """TODO: Put a comment for this function."""
         from secml.ml.stats import CDistributionGaussian
+
         d = X.shape[1]  # number of features
         Y = self.bias
         for gauss_idx in range(len(self.centers)):
-            Y += self.w[gauss_idx] * \
-                 CDistributionGaussian(mean=self.centers[gauss_idx],
-                                       cov=self.cluster_std[gauss_idx] *
-                                       CArray.eye(d, d)).pdf(X)
+            Y += self.w[gauss_idx] * CDistributionGaussian(
+                mean=self.centers[gauss_idx],
+                cov=self.cluster_std[gauss_idx] * CArray.eye(d, d),
+            ).pdf(X)
         return Y
 
     def load(self):
@@ -366,9 +422,14 @@ class CDLRandomBlobsRegression(CDataLoader):
 
         """
         from sklearn.datasets import make_blobs
+
         patterns = make_blobs(
-            n_samples=self.n_samples, n_features=2, centers=self.centers,
-            cluster_std=self.cluster_std, random_state=self.random_state)[0]
+            n_samples=self.n_samples,
+            n_features=2,
+            centers=self.centers,
+            cluster_std=self.cluster_std,
+            random_state=self.random_state,
+        )[0]
         return CDataset(patterns, self._dts_function(CArray(patterns)))
 
 
@@ -393,10 +454,10 @@ class CDLRandomCircles(CDataLoader):
     class_type : 'circles'
 
     """
-    __class_type = 'circles'
 
-    def __init__(self, n_samples=100, noise=None,
-                 factor=0.8, random_state=None):
+    __class_type = "circles"
+
+    def __init__(self, n_samples=100, noise=None, factor=0.8, random_state=None):
 
         self.n_samples = n_samples
         self.noise = noise
@@ -413,11 +474,13 @@ class CDLRandomCircles(CDataLoader):
 
         """
         from sklearn.datasets import make_circles
+
         patterns, labels = make_circles(
             n_samples=self.n_samples,
             noise=self.noise,
             factor=self.factor,
-            random_state=self.random_state)
+            random_state=self.random_state,
+        )
         return CDataset(patterns, labels)
 
 
@@ -442,10 +505,10 @@ class CDLRandomCircleRegression(CDataLoader):
     class_type : 'circles-regression'
 
     """
-    __class_type = 'circles-regression'
 
-    def __init__(self, n_samples=100, noise=None,
-                 factor=0.8, random_state=None):
+    __class_type = "circles-regression"
+
+    def __init__(self, n_samples=100, noise=None, factor=0.8, random_state=None):
 
         self.n_samples = n_samples
         self.noise = noise
@@ -466,11 +529,13 @@ class CDLRandomCircleRegression(CDataLoader):
 
         """
         from sklearn.datasets import make_circles
+
         patterns = make_circles(
             n_samples=self.n_samples,
             noise=self.noise,
             factor=self.factor,
-            random_state=self.random_state)[0]
+            random_state=self.random_state,
+        )[0]
         return CDataset(patterns, self._dts_function(patterns))
 
 
@@ -493,7 +558,8 @@ class CDLRandomMoons(CDataLoader):
     class_type : 'moons'
 
     """
-    __class_type = 'moons'
+
+    __class_type = "moons"
 
     def __init__(self, n_samples=100, noise=None, random_state=None):
 
@@ -511,10 +577,10 @@ class CDLRandomMoons(CDataLoader):
 
         """
         from sklearn.datasets import make_moons
+
         patterns, labels = make_moons(
-            n_samples=self.n_samples,
-            noise=self.noise,
-            random_state=self.random_state)
+            n_samples=self.n_samples, noise=self.noise, random_state=self.random_state
+        )
         return CDataset(patterns, labels)
 
 
@@ -533,7 +599,8 @@ class CDLRandomBinary(CDataLoader):
     class_type : 'binary'
 
     """
-    __class_type = 'binary'
+
+    __class_type = "binary"
 
     def __init__(self, n_samples=100, n_features=2):
 
@@ -573,6 +640,7 @@ class CDLRandomToy(CDataLoader, metaclass=ABCMeta):
         assigned 0 at the label with lower value, 1 to the other.
 
     """
+
     __lock = Lock()  # Lock to prevent multiple parallel download/extraction
 
     def __init__(self, class_list=None, zero_one=False):
@@ -599,14 +667,16 @@ class CDLRandomToy(CDataLoader, metaclass=ABCMeta):
                 sel_labels = labels[this_class_pat_idx]
             else:
                 sel_patterns = sel_patterns.append(
-                    patterns[this_class_pat_idx, :], axis=0)
-                sel_labels = sel_labels.append(
-                    labels[this_class_pat_idx])
+                    patterns[this_class_pat_idx, :], axis=0
+                )
+                sel_labels = sel_labels.append(labels[this_class_pat_idx])
 
         if self.zero_one is True:
             if len(class_list) > 2:
-                raise ValueError("you are try to convert to 0 1 label for a "
-                                 "dataset with more than 2 classes")
+                raise ValueError(
+                    "you are try to convert to 0 1 label for a "
+                    "dataset with more than 2 classes"
+                )
             else:
                 class_list.sort()
                 sel_labels[sel_labels == class_list[0]] = 0
@@ -624,17 +694,21 @@ class CDLRandomToy(CDataLoader, metaclass=ABCMeta):
 
         """
         with CDLRandomToy.__lock:
-            if self.toy == 'iris':
+            if self.toy == "iris":
                 from sklearn.datasets import load_iris
+
                 toy_data = load_iris()
-            elif self.toy == 'digits':
+            elif self.toy == "digits":
                 from sklearn.datasets import load_digits
+
                 toy_data = load_digits()
-            elif self.toy == 'boston':
+            elif self.toy == "boston":
                 from sklearn.datasets import load_boston
+
                 toy_data = load_boston()
-            elif self.toy == 'diabetes':
+            elif self.toy == "diabetes":
                 from sklearn.datasets import load_diabetes
+
                 toy_data = load_diabetes()
             else:
                 raise ValueError("toy dataset {:} if not available.".format(self.toy))
@@ -643,9 +717,9 @@ class CDLRandomToy(CDataLoader, metaclass=ABCMeta):
         if self.class_list is None:
             return CDataset(CArray(toy_data.data), CArray(toy_data.target))
         else:
-            return self._select_classes(self.class_list,
-                                        CArray(toy_data.data),
-                                        CArray(toy_data.target))
+            return self._select_classes(
+                self.class_list, CArray(toy_data.data), CArray(toy_data.target)
+            )
 
 
 class CDLIris(CDLRandomToy):
@@ -676,8 +750,9 @@ class CDLIris(CDLRandomToy):
     class_type : 'iris'
 
     """
-    __class_type = 'iris'
-    toy = 'iris'
+
+    __class_type = "iris"
+    toy = "iris"
 
 
 class CDLDigits(CDLRandomToy):
@@ -708,8 +783,9 @@ class CDLDigits(CDLRandomToy):
     class_type : 'digits'
 
     """
-    __class_type = 'digits'
-    toy = 'digits'
+
+    __class_type = "digits"
+    toy = "digits"
 
 
 class CDLBoston(CDLRandomToy):
@@ -738,8 +814,9 @@ class CDLBoston(CDLRandomToy):
     class_type : 'boston'
 
     """
-    __class_type = 'boston'
-    toy = 'boston'
+
+    __class_type = "boston"
+    toy = "boston"
 
 
 class CDLDiabetes(CDLRandomToy):
@@ -768,5 +845,6 @@ class CDLDiabetes(CDLRandomToy):
     class_type : 'diabetes'
 
     """
-    __class_type = 'diabetes'
-    toy = 'diabetes'
+
+    __class_type = "diabetes"
+    toy = "diabetes"

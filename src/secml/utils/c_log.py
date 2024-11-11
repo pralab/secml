@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import logging
 import time
 import sys
@@ -14,7 +15,7 @@ from functools import wraps
 
 # Custom logging level that DISABLE logging of all messages
 DISABLE = 100
-logging.addLevelName(100, 'DISABLE')
+logging.addLevelName(100, "DISABLE")
 CRITICAL = 50
 FATAL = CRITICAL
 ERROR = 40
@@ -28,8 +29,7 @@ NOTSET = 0
 logging.captureWarnings(True)
 
 # Default formatter
-formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 
 class CLog:
@@ -92,8 +92,14 @@ class CLog:
 
     """
 
-    def __init__(self, level=None, logger_id=None, add_stream=True,
-                 file_handler=None, propagate=False):
+    def __init__(
+        self,
+        level=None,
+        logger_id=None,
+        add_stream=True,
+        file_handler=None,
+        propagate=False,
+    ):
         # Setting up logger with default logging level (WARNING)
         self._logger_id = None if logger_id is None else str(logger_id)
         self._propagate = propagate
@@ -126,7 +132,7 @@ class CLog:
         """Return CLog instance before pickling."""
         state = dict(self.__dict__)
         # We now remove the store logger (will be restored after)
-        del state['_logger']
+        del state["_logger"]
         return state
 
     def __setstate__(self, state):
@@ -162,8 +168,9 @@ class CLog:
         """Adds a file handler to the logger."""
         # Handler will be attached only if not already there
         for h in self._logger.handlers:
-            if isinstance(h, logging.FileHandler) and \
-                    h.baseFilename == os.path.abspath(filepath):
+            if isinstance(h, logging.FileHandler) and h.baseFilename == os.path.abspath(
+                filepath
+            ):
                 return
         handler = logging.FileHandler(filepath)
         self._add_handler(handler)
@@ -198,12 +205,15 @@ class CLog:
 
         """
         # Root logger can be created using '' (empty string) as name
-        parent_id = '' if self._logger_id is None else self.logger_id + '.'
+        parent_id = "" if self._logger_id is None else self.logger_id + "."
         # Stream and/or file handler are set for
         # ancestors only (to avoid output duplication)
-        return self.__class__(logger_id=parent_id + str(name),
-                              add_stream=False, file_handler=None,
-                              propagate=True)  # This is a child, so propagate
+        return self.__class__(
+            logger_id=parent_id + str(name),
+            add_stream=False,
+            file_handler=None,
+            propagate=True,
+        )  # This is a child, so propagate
 
     def log(self, level, msg, *args, **kwargs):
         """Logs a message with specified level on this logger.
@@ -344,8 +354,9 @@ class CLog:
         return warnings.catch_warnings(record=record)
 
     @staticmethod
-    def filterwarnings(action, message="", category=Warning,
-                       module="", lineno=0, append=False):
+    def filterwarnings(
+        action, message="", category=Warning, module="", lineno=0, append=False
+    ):
         """Insert an entry into the list of warnings filters (at the front).
 
         Wrapper of `warnings.filterwarnings`.
@@ -367,8 +378,13 @@ class CLog:
 
         """
         return warnings.filterwarnings(
-            action, message=message, category=category,
-            module=module, lineno=lineno, append=append)
+            action,
+            message=message,
+            category=category,
+            module=module,
+            lineno=lineno,
+            append=append,
+        )
 
 
 class CTimer:
@@ -492,16 +508,18 @@ class CTimer:
         Elapsed time: ... ms
 
         """
+
         def wrapper(fun):
             @wraps(fun)  # To make wrapped_fun work as fun
             def wrapped_fun(*args, **kwargs):
                 # Setting a custom message
                 msg_a = msg
                 if msg is None:
-                    msg_a = "Entering timed block " \
-                            "`{:}`...".format(fun.__name__)
+                    msg_a = "Entering timed block " "`{:}`...".format(fun.__name__)
                 # Execute the function with the timer
                 with CTimer(log=log, msg=msg_a):
                     return fun(*args, **kwargs)
+
             return wrapped_fun
+
         return wrapper

@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from sklearn.datasets import load_svmlight_file, dump_svmlight_file
 
 from secml.data.loader import CDataLoader
@@ -21,15 +22,24 @@ class CDataLoaderSvmLight(CDataLoader):
     class_type : 'svmlight'
 
     """
-    __class_type = 'svmlight'
+
+    __class_type = "svmlight"
 
     def __init__(self):
         # Does nothing...
         pass
-    
-    def load(self, file_path, dtype_samples=float, dtype_labels=float,
-             n_features=None, zero_based=True, remove_all_zero=False,
-             multilabel=False, load_infos=False):
+
+    def load(
+        self,
+        file_path,
+        dtype_samples=float,
+        dtype_labels=float,
+        n_features=None,
+        zero_based=True,
+        remove_all_zero=False,
+        multilabel=False,
+        load_infos=False,
+    ):
         """Loads a dataset from the svmlight / libsvm format and
         returns a sparse dataset.
 
@@ -98,11 +108,13 @@ class CDataLoaderSvmLight(CDataLoader):
         """
         # Never use zero_based='auto' in order to avoid
         # any ambiguity with the features indices...
-        patterns, labels = load_svmlight_file(file_path,
-                                              n_features=n_features,
-                                              dtype=float,
-                                              multilabel=multilabel,
-                                              zero_based=zero_based)
+        patterns, labels = load_svmlight_file(
+            file_path,
+            n_features=n_features,
+            dtype=float,
+            multilabel=multilabel,
+            zero_based=zero_based,
+        )
 
         patterns = CArray(patterns, tosparse=True, dtype=dtype_samples)
         labels = CArray(labels, dtype=dtype_labels)
@@ -110,21 +122,24 @@ class CDataLoaderSvmLight(CDataLoader):
         header = CDatasetHeader()  # Will be populated with extra attributes
 
         if remove_all_zero is True:
-            patterns, idx_mapping = \
-                CDataLoaderSvmLight._remove_all_zero_features(patterns)
+            patterns, idx_mapping = CDataLoaderSvmLight._remove_all_zero_features(
+                patterns
+            )
             # Store reverse mapping as extra ds attribute
             header.idx_mapping = idx_mapping
 
         if load_infos is True:
             infos = []
-            with open(file_path, 'rt') as f:
+            with open(file_path, "rt") as f:
                 for l_idx, l in enumerate(f):
-                    i = l.split(' # ')
+                    i = l.split(" # ")
                     if len(i) > 2:  # Line should have only one split point
-                        raise ValueError("Something wrong happened when "
-                                         "extracting infos for line {:}"
-                                         "".format(l_idx))
-                    infos.append(i[1].rstrip() if len(i) == 2 else '')
+                        raise ValueError(
+                            "Something wrong happened when "
+                            "extracting infos for line {:}"
+                            "".format(l_idx)
+                        )
+                    infos.append(i[1].rstrip() if len(i) == 2 else "")
             header.infos = CArray(infos)
 
         if len(header.get_params()) == 0:
@@ -136,16 +151,16 @@ class CDataLoaderSvmLight(CDataLoader):
     def dump(d, f, zero_based=True, comment=None):
         """Dumps a dataset in the svmlight / libsvm file format.
 
-        This format is a text-based format, with one sample per line. 
+        This format is a text-based format, with one sample per line.
         It does not store zero valued features hence is suitable for sparse dataset.
-        
+
         The first element of each line can be used to store a target variable to predict.
 
         Parameters
         ----------
-        d : CDataset 
-            Contain dataset with patterns and labels that we want store. 
-        f : String 
+        d : CDataset
+            Contain dataset with patterns and labels that we want store.
+        f : String
             Path to file were we want store dataset into format svmlight or libsvm.
         zero_based : bool, optional
             Whether column indices should be written zero-based (True, default) or one-based (False).
@@ -165,5 +180,6 @@ class CDataLoaderSvmLight(CDataLoader):
         >>> CDataLoaderSvmLight.dump(CDataset(patterns,labels), "myfile.libsvm")
 
         """
-        dump_svmlight_file(d.X.get_data(), d.Y.get_data(), f,
-                           zero_based=zero_based, comment=comment)
+        dump_svmlight_file(
+            d.X.get_data(), d.Y.get_data(), f, zero_based=zero_based, comment=comment
+        )

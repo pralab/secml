@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from secml.core import CCreator
 from secml.array import CArray
 from secml.data import CDatasetHeader
@@ -72,8 +73,9 @@ class CDataset(CCreator):
     34
 
     """
-    __super__ = 'CDataset'
-    __class_type = 'standard'
+
+    __super__ = "CDataset"
+    __class_type = "standard"
 
     def __init__(self, x, y, header=None):
 
@@ -95,7 +97,7 @@ class CDataset(CCreator):
         self.__dict__.update(state)
         # Initialize header placeholder if not available
         # Necessary to unpickle old dataset (stored with secml < v0.6)
-        if not hasattr(self, '_header'):
+        if not hasattr(self, "_header"):
             self._header = None
 
     @property
@@ -150,15 +152,15 @@ class CDataset(CCreator):
         """Dataset header."""
         if value is not None:
             if not isinstance(value, CDatasetHeader):
-                raise TypeError(
-                    "'header' must be an instance of 'CDatasetHeader'")
+                raise TypeError("'header' must be an instance of 'CDatasetHeader'")
 
             # Check if header is compatible (same num_samples)
-            if value.num_samples is not None and \
-                    self.num_samples != value.num_samples:
+            if value.num_samples is not None and self.num_samples != value.num_samples:
                 raise ValueError(
                     "incompatible header size {:}. {:} expected.".format(
-                        self.num_samples, value.num_samples))
+                        self.num_samples, value.num_samples
+                    )
+                )
 
         self._header = value
 
@@ -205,20 +207,23 @@ class CDataset(CCreator):
         if x.shape[0] != y.size:
             raise ValueError(
                 "number of labels ({:}) must be equal to the number "
-                "of samples ({:}).".format(y.size, x.shape[0]))
+                "of samples ({:}).".format(y.size, x.shape[0])
+            )
 
     def __getitem__(self, idx):
         """Given an index, get the corresponding X and Y elements."""
         if not isinstance(idx, tuple) or len(idx) != self.X.ndim:
             raise IndexError(
-                "{:} sequences are required for indexing.".format(self.X.ndim))
+                "{:} sequences are required for indexing.".format(self.X.ndim)
+            )
 
         y = self.Y.__getitem__([idx[0] if isinstance(idx, tuple) else idx][0])
 
         header = None
         if self.header is not None:
             header = self.header.__getitem__(
-                [idx[0] if isinstance(idx, tuple) else idx][0])
+                [idx[0] if isinstance(idx, tuple) else idx][0]
+            )
 
         return self.__class__(self.X.__getitem__(idx), y, header=header)
 
@@ -228,7 +233,8 @@ class CDataset(CCreator):
             raise TypeError("dataset can be set only using another dataset.")
         if not isinstance(idx, tuple) or len(idx) != self.X.ndim:
             raise IndexError(
-                "{:} sequences are required for indexing.".format(self.X.ndim))
+                "{:} sequences are required for indexing.".format(self.X.ndim)
+            )
         self.X.__setitem__(idx, data.X)
         # We now set the labels corresponding to set patterns
         self.Y.__setitem__([idx[0] if isinstance(idx, tuple) else idx][0], data.Y)
@@ -301,12 +307,14 @@ class CDataset(CCreator):
                         "cannot append a dataset with header and "
                         "{:} samples as the other has no header. "
                         "Define a consistent header for both dataset "
-                        "and try again.".format(new_header.num_samples))
+                        "and try again.".format(new_header.num_samples)
+                    )
         else:  # Both input ds and self have header, merge them
             new_header = self.header.append(dataset.header)
 
         return self.__class__(
-            self.X.append(dataset.X, axis=0), new_labels, header=new_header)
+            self.X.append(dataset.X, axis=0), new_labels, header=new_header
+        )
 
     def tosparse(self):
         """Convert dataset's patterns to sparse format.
@@ -437,4 +445,3 @@ class CDataset(CCreator):
         for f_idx in range(self.num_features):
             boundary.append((x_min[0, f_idx].item(), x_max[0, f_idx].item()))
         return boundary
-

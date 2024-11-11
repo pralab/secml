@@ -5,10 +5,11 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import numpy as np
 import math
 
-__all__ = ['inf', 'nan', 'eps', 'e', 'pi']
+__all__ = ["inf", "nan", "eps", "e", "pi"]
 
 
 """Positive infinity."""

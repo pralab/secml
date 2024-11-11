@@ -12,4 +12,3 @@ fig.sp.xlim(0, 6)
 fig.sp.ylim(1, 8)
 
 fig.show()
-

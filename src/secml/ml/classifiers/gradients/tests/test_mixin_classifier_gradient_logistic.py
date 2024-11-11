@@ -1,7 +1,7 @@
-from secml.ml.classifiers.gradients.tests import \
-    CClassifierGradientMixinTestCases
-from secml.ml.classifiers.gradients.tests.test_classes import \
-    CClassifierGradientTestLogisticRegression
+from secml.ml.classifiers.gradients.tests import CClassifierGradientMixinTestCases
+from secml.ml.classifiers.gradients.tests.test_classes import (
+    CClassifierGradientTestLogisticRegression,
+)
 
 from secml.ml.classifiers import CClassifierLogistic
 from secml.ml.features.normalization import CNormalizerMinMax
@@ -9,6 +9,7 @@ from secml.ml.features.normalization import CNormalizerMinMax
 
 class TestCClassifierGradientLogisticMixin(CClassifierGradientMixinTestCases):
     """Unittests for CClassifierGradientLogisticMixin."""
+
     clf_grads_class = CClassifierGradientTestLogisticRegression()
 
     def test_grad_tr_params_linear(self):
@@ -17,9 +18,9 @@ class TestCClassifierGradientLogisticMixin(CClassifierGradientMixinTestCases):
         for n in (None, CNormalizerMinMax((-10, 10))):
             clf = CClassifierLogistic(preprocess=n)
             clf.fit(self.ds.X, self.ds.Y)
-            self.logger.info('w: ' + str(clf.w) + ', b: ' + str(clf.b))
+            self.logger.info("w: " + str(clf.w) + ", b: " + str(clf.b))
             self._test_grad_tr_params(clf)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CClassifierGradientMixinTestCases.main()

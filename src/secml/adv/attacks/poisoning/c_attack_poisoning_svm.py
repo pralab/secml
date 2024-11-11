@@ -6,6 +6,7 @@
 .. moduleauthor:: Ambra Demontis <ambra.demontis@unica.it>
 
 """
+
 from secml.adv.attacks.poisoning import CAttackPoisoning
 from secml.array import CArray
 
@@ -67,38 +68,44 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         If None, no fixed seed will be set.
 
     """
-    __class_type = 'p-svm'
 
-    def __init__(self, classifier,
-                 training_data,
-                 val,
-                 distance='l1',
-                 dmax=0,
-                 lb=0,
-                 ub=1,
-                 y_target=None,
-                 solver_type='pgd-ls',
-                 solver_params=None,
-                 init_type='random',
-                 random_seed=None):
+    __class_type = "p-svm"
 
-        CAttackPoisoning.__init__(self, classifier=classifier,
-                                  training_data=training_data,
-                                  val=val,
-                                  distance=distance,
-                                  dmax=dmax,
-                                  lb=lb,
-                                  ub=ub,
-                                  y_target=y_target,
-                                  solver_type=solver_type,
-                                  solver_params=solver_params,
-                                  init_type=init_type,
-                                  random_seed=random_seed)
+    def __init__(
+        self,
+        classifier,
+        training_data,
+        val,
+        distance="l1",
+        dmax=0,
+        lb=0,
+        ub=1,
+        y_target=None,
+        solver_type="pgd-ls",
+        solver_params=None,
+        init_type="random",
+        random_seed=None,
+    ):
+
+        CAttackPoisoning.__init__(
+            self,
+            classifier=classifier,
+            training_data=training_data,
+            val=val,
+            distance=distance,
+            dmax=dmax,
+            lb=lb,
+            ub=ub,
+            y_target=y_target,
+            solver_type=solver_type,
+            solver_params=solver_params,
+            init_type=init_type,
+            random_seed=random_seed,
+        )
 
         # check if SVM has been trained in the dual
         if self.classifier.kernel is None:
-            raise ValueError(
-                "Please retrain the SVM in the dual (kernel != None).")
+            raise ValueError("Please retrain the SVM in the dual (kernel != None).")
 
         # indices of support vectors (at previous iteration)
         # used to check if warm_start can be used in the iterative solver
@@ -228,17 +235,19 @@ class CAttackPoisoningSVM(CAttackPoisoning):
         # gt is the derivative of the loss computed on a validation
         # set w.r.t. xc
         Kd_xc = self._Kd_xc(clf, alpha_c, xc, xk)
-        assert (clf.kernel.rv.shape[0] == clf.alpha.shape[1])
+        assert clf.kernel.rv.shape[0] == clf.alpha.shape[1]
 
         gt = Kd_xc.dot(grad_loss_fk).ravel()  # gradient of the loss w.r.t. xc
 
         xs, sv_idx = clf._sv_margin()  # these points are already normalized
 
         if xs is None:
-            self.logger.debug("Warning: xs is empty "
-                              "(all points are error vectors).")
-            return gt if clf.kernel.preprocess is None else \
-                clf.kernel.preprocess.gradient(xc0, w=gt)
+            self.logger.debug("Warning: xs is empty " "(all points are error vectors).")
+            return (
+                gt
+                if clf.kernel.preprocess is None
+                else clf.kernel.preprocess.gradient(xc0, w=gt)
+            )
 
         s = xs.shape[0]
 

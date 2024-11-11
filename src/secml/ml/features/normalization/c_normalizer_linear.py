@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from abc import abstractmethod
 
 from secml.core.decorators import deprecated
@@ -58,7 +59,7 @@ class CNormalizerLinear(CNormalizer):
             If the preprocessor is not fitted.
 
         """
-        check_is_fitted(self, ['w', 'b'])
+        check_is_fitted(self, ["w", "b"])
 
     def _forward(self, x):
         """Linearly scales features.
@@ -76,8 +77,10 @@ class CNormalizerLinear(CNormalizer):
 
         """
         if x.atleast_2d().shape[1] != self.w.size:
-            raise ValueError("array to normalize must have {:} "
-                             "features (columns).".format(self.w.size))
+            raise ValueError(
+                "array to normalize must have {:} "
+                "features (columns).".format(self.w.size)
+            )
 
         return (x * self.w).todense() + self.b
 
@@ -97,8 +100,10 @@ class CNormalizerLinear(CNormalizer):
 
         """
         if x.atleast_2d().shape[1] != self.w.size:
-            raise ValueError("array to revert must have {:} "
-                             "features (columns).".format(self.w.size))
+            raise ValueError(
+                "array to revert must have {:} "
+                "features (columns).".format(self.w.size)
+            )
 
         v = (x - self.b).atleast_2d()
 

@@ -6,6 +6,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from sklearn import metrics
 
 from secml.array import CArray
@@ -52,7 +53,8 @@ class CKernelPoly(CKernel):
      [144. 676.]])
 
     """
-    __class_type = 'poly'
+
+    __class_type = "poly"
 
     def __init__(self, degree=2, gamma=1.0, coef0=1.0, preprocess=None):
 
@@ -128,9 +130,15 @@ class CKernelPoly(CKernel):
             Kernel between x and rv. Array of shape (n_x, n_rv).
 
         """
-        return CArray(metrics.pairwise.polynomial_kernel(
-            CArray(x).get_data(), CArray(self._rv).get_data(),
-            self.degree, self.gamma, self.coef0))
+        return CArray(
+            metrics.pairwise.polynomial_kernel(
+                CArray(x).get_data(),
+                CArray(self._rv).get_data(),
+                self.degree,
+                self.gamma,
+                self.coef0,
+            )
+        )
 
     # TODO: check for high gamma,
     #  we may have uncontrolled behavior (too high values)
@@ -158,15 +166,23 @@ class CKernelPoly(CKernel):
         # Checking if cached x is a vector
         if not self._cached_x.is_vector_like:
             raise ValueError(
-                "kernel gradient can be computed only wrt vector-like arrays.")
+                "kernel gradient can be computed only wrt vector-like arrays."
+            )
 
         if self._rv is None:
-            raise ValueError("Please run forward with caching=True or set"
-                             "`rv` first.")
+            raise ValueError(
+                "Please run forward with caching=True or set" "`rv` first."
+            )
 
-        k = CArray(metrics.pairwise.polynomial_kernel(
-            self._rv.get_data(), self._cached_x.get_data(),
-            self.degree - 1, self.gamma, self.coef0))
+        k = CArray(
+            metrics.pairwise.polynomial_kernel(
+                self._rv.get_data(),
+                self._cached_x.get_data(),
+                self.degree - 1,
+                self.gamma,
+                self.coef0,
+            )
+        )
 
         # Format of output array should be the same as cached x
         if self._cached_x.issparse:

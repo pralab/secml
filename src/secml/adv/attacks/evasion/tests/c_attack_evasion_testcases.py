@@ -5,23 +5,23 @@ import numpy as np
 
 from secml.array import CArray
 from secml.data.loader import CDLRandomBlobs
-from secml.optim.constraints import \
-    CConstraintBox, CConstraintL1, CConstraintL2
+from secml.optim.constraints import CConstraintBox, CConstraintL1, CConstraintL2
 from secml.ml.features.normalization import CNormalizerMinMax
 from secml.ml.classifiers import CClassifierSVM, CClassifierDecisionTree
 from secml.core.type_utils import is_list, is_float
 from secml.figure import CFigure
 from secml.utils import fm
 
-IMAGES_FOLDER = fm.join(fm.abspath(__file__), 'test_images')
+IMAGES_FOLDER = fm.join(fm.abspath(__file__), "test_images")
 if not fm.folder_exist(IMAGES_FOLDER):
     fm.make_folder(IMAGES_FOLDER)
 
 
 class CAttackEvasionTestCases(CUnitTest):
     """Unittests interface for CAttackEvasion."""
+
     images_folder = IMAGES_FOLDER
-    make_figures = os.getenv('MAKE_FIGURES', False)  # True to produce figures
+    make_figures = os.getenv("MAKE_FIGURES", False)  # True to produce figures
 
     def _load_blobs(self, n_feats, n_clusters, sparse=False, seed=None):
         """Load Random Blobs dataset.
@@ -44,10 +44,10 @@ class CAttackEvasionTestCases(CUnitTest):
             centers=n_clusters,
             center_box=(-0.5, 0.5),
             cluster_std=0.5,
-            random_state=seed)
+            random_state=seed,
+        )
 
-        self.logger.info(
-            "Loading `random_blobs` with seed: {:}".format(seed))
+        self.logger.info("Loading `random_blobs` with seed: {:}".format(seed))
         ds = loader.load()
 
         if sparse is True:
@@ -67,7 +67,7 @@ class CAttackEvasionTestCases(CUnitTest):
         """
         if is_list(eta):
             if len(eta) != ds.n_features:
-                raise ValueError('len(eta) != n_features')
+                raise ValueError("len(eta) != n_features")
             for i in range(len(eta)):
                 ds.X[:, i] = (ds.X[:, i] / eta[i]).round() * eta[i]
         else:  # eta is a single value
@@ -101,7 +101,7 @@ class CAttackEvasionTestCases(CUnitTest):
             n_feats=2,  # Number of dataset features
             n_clusters=2,  # Number of dataset clusters
             sparse=sparse,
-            seed=seed
+            seed=seed,
         )
 
         normalizer = CNormalizerMinMax(feature_range=(-1, 1))
@@ -130,7 +130,7 @@ class CAttackEvasionTestCases(CUnitTest):
             n_feats=10,  # Number of dataset features
             n_clusters=2,  # Number of dataset clusters
             sparse=sparse,
-            seed=seed
+            seed=seed,
         )
 
         normalizer = CNormalizerMinMax(feature_range=(-1, 1))
@@ -159,11 +159,11 @@ class CAttackEvasionTestCases(CUnitTest):
             n_feats=2,  # Number of dataset features
             n_clusters=2,  # Number of dataset clusters
             sparse=sparse,
-            seed=seed
+            seed=seed,
         )
 
         normalizer = CNormalizerMinMax(feature_range=(-1, 1))
-        clf = CClassifierSVM(kernel='rbf', C=1, preprocess=normalizer)
+        clf = CClassifierSVM(kernel="rbf", C=1, preprocess=normalizer)
 
         return ds, clf
 
@@ -191,11 +191,11 @@ class CAttackEvasionTestCases(CUnitTest):
             n_feats=2,  # Number of dataset features
             n_clusters=2,  # Number of dataset clusters
             sparse=sparse,
-            seed=seed
+            seed=seed,
         )
 
         clf = CClassifierDecisionTree(random_state=seed)
-        clf_surr = CClassifierSVM(kernel='rbf', C=1)
+        clf_surr = CClassifierSVM(kernel="rbf", C=1)
 
         return ds, clf, clf_surr
 
@@ -249,8 +249,9 @@ class CAttackEvasionTestCases(CUnitTest):
         with self.logger.timer():
             y_pred, scores, adv_ds, f_obj = evas.run(x0, y0)
 
-        self.logger.info("Starting score: " + str(
-            evas.classifier.decision_function(x0, y=1).item()))
+        self.logger.info(
+            "Starting score: " + str(evas.classifier.decision_function(x0, y=1).item())
+        )
 
         self.logger.info("Final score: " + str(evas.f_opt))
         self.logger.info("x*:\n" + str(evas.x_opt))
@@ -269,7 +270,8 @@ class CAttackEvasionTestCases(CUnitTest):
         # Compare optimal point with expected
         if expected_x is not None:
             self.assert_array_almost_equal(
-                evas.x_opt.todense().ravel(), expected_x, decimal=4)
+                evas.x_opt.todense().ravel(), expected_x, decimal=4
+            )
         if expected_y is not None:
             self.assert_array_almost_equal(y_pred.item(), expected_y)
 
@@ -338,26 +340,32 @@ class CAttackEvasionTestCases(CUnitTest):
         fig.sp.plot_ds(ds)
         fig.sp.plot_fun(
             func=evas.objective_function,
-            grid_limits=grid_limits, colorbar=False,
-            n_grid_points=50, plot_levels=False)
+            grid_limits=grid_limits,
+            colorbar=False,
+            n_grid_points=50,
+            plot_levels=False,
+        )
 
         fig.sp.plot_decision_regions(
-            clf=evas.classifier, plot_background=False,
+            clf=evas.classifier,
+            plot_background=False,
             grid_limits=grid_limits,
-            n_grid_points=50)
+            n_grid_points=50,
+        )
 
-        fig.sp.plot_constraint(self._box(evas),
-                               n_grid_points=20,
-                               grid_limits=grid_limits)
+        fig.sp.plot_constraint(
+            self._box(evas), n_grid_points=20, grid_limits=grid_limits
+        )
 
-        fig.sp.plot_fun(func=lambda z: self._constr(evas, x0).constraint(z),
-                        plot_background=False,
-                        n_grid_points=50,
-                        grid_limits=grid_limits,
-                        levels=[0],
-                        colorbar=False)
+        fig.sp.plot_fun(
+            func=lambda z: self._constr(evas, x0).constraint(z),
+            plot_background=False,
+            n_grid_points=50,
+            grid_limits=grid_limits,
+            levels=[0],
+            colorbar=False,
+        )
 
         fig.sp.plot_path(evas.x_seq)
 
-        fig.savefig(fm.join(self.images_folder, filename), file_format='pdf')
-
+        fig.savefig(fm.join(self.images_folder, filename), file_format="pdf")

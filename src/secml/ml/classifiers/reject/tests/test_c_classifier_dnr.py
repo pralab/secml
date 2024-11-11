@@ -45,18 +45,20 @@ class TestCClassifierDNR(CClassifierRejectTestCases):
 
         # Load only 4 digits
         digits = (1, 4, 5, 9)
-        ds = CDataLoaderMNIST().load('training', digits=digits)
+        ds = CDataLoaderMNIST().load("training", digits=digits)
 
         # Extract training set for DNN and for DNR classifier and test set
         tr_dnn, ds_dnr = CTrainTestSplit(
-            train_size=300, test_size=350, random_state=0).split(ds)
+            train_size=300, test_size=350, random_state=0
+        ).split(ds)
         tr_dnr, ts_dnr = CTrainTestSplit(
-            train_size=300, test_size=50, random_state=0).split(ds_dnr)
+            train_size=300, test_size=50, random_state=0
+        ).split(ds_dnr)
 
         # Normalize data in [0, 1]
-        tr_dnn.X /= 255.
-        tr_dnr.X /= 255.
-        ts_dnr.X /= 255.
+        tr_dnn.X /= 255.0
+        tr_dnr.X /= 255.0
+        ts_dnr.X /= 255.0
 
         return tr_dnn, tr_dnr, ts_dnr
 
@@ -70,28 +72,37 @@ class TestCClassifierDNR(CClassifierRejectTestCases):
             def forward(self, input):
                 return input.view(input.size(0), -1)
 
-        od = OrderedDict([
-            ('conv1', nn.Conv2d(1, 10, kernel_size=5)),
-            ('pool1', nn.MaxPool2d(2)),
-            ('conv2', nn.Conv2d(10, 20, kernel_size=5)),
-            ('drop', nn.Dropout2d()),
-            ('pool2', nn.MaxPool2d(2)),
-            ('flatten', Flatten()),
-            ('fc1', nn.Linear(320, 50)),
-            ('relu', nn.ReLU()),
-            ('fc2', nn.Linear(50, 4)),
-        ])
+        od = OrderedDict(
+            [
+                ("conv1", nn.Conv2d(1, 10, kernel_size=5)),
+                ("pool1", nn.MaxPool2d(2)),
+                ("conv2", nn.Conv2d(10, 20, kernel_size=5)),
+                ("drop", nn.Dropout2d()),
+                ("pool2", nn.MaxPool2d(2)),
+                ("flatten", Flatten()),
+                ("fc1", nn.Linear(320, 50)),
+                ("relu", nn.ReLU()),
+                ("fc2", nn.Linear(50, 4)),
+            ]
+        )
 
         net = nn.Sequential(OrderedDict(od))
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9)
         scheduler = optim.lr_scheduler.MultiStepLR(
-            optimizer=optimizer, milestones=[1, 5, 8], gamma=0.1)
+            optimizer=optimizer, milestones=[1, 5, 8], gamma=0.1
+        )
 
         dnn = CClassifierPyTorch(
-            model=net, loss=criterion, optimizer=optimizer, epochs=10,
-            batch_size=20, input_shape=(1, 28, 28),
-            optimizer_scheduler=scheduler, random_state=0)
+            model=net,
+            loss=criterion,
+            optimizer=optimizer,
+            epochs=10,
+            batch_size=20,
+            input_shape=(1, 28, 28),
+            optimizer_scheduler=scheduler,
+            random_state=0,
+        )
         dnn.fit(tr_dnn.X, tr_dnn.Y)
 
         return dnn
@@ -99,7 +110,7 @@ class TestCClassifierDNR(CClassifierRejectTestCases):
     @staticmethod
     def _create_clf(dnn):
         """Initialize the DNR classifier passing a single `layer_clf`"""
-        layers = ['conv2', 'relu']
+        layers = ["conv2", "relu"]
         combiner = CClassifierSVM(kernel=CKernelRBF(gamma=1), C=1)
         layer_clf = CClassifierSVM(kernel=CKernelRBF(gamma=1), C=1)
 
@@ -108,17 +119,18 @@ class TestCClassifierDNR(CClassifierRejectTestCases):
     @staticmethod
     def _create_clf_dict(dnn):
         """Initialize the DNR classifier passing a `layer_clf` dict"""
-        layers = ['conv2', 'relu']
+        layers = ["conv2", "relu"]
         combiner = CClassifierSVM(kernel=CKernelRBF(gamma=1), C=1)
-        layer_clf = {'conv2': CClassifierSVM(kernel=CKernelRBF(gamma=1), C=1),
-                     'relu': CClassifierSVM(kernel=CKernelRBF(gamma=1), C=1)}
+        layer_clf = {
+            "conv2": CClassifierSVM(kernel=CKernelRBF(gamma=1), C=1),
+            "relu": CClassifierSVM(kernel=CKernelRBF(gamma=1), C=1),
+        }
 
         return CClassifierDNR(combiner, layer_clf, dnn, layers, -inf)
 
     def test_fun(self):
         """Test for decision_function() and predict() methods."""
-        self.logger.info(
-            "Test for decision_function() and predict() methods.")
+        self.logger.info("Test for decision_function() and predict() methods.")
 
         scores_d = self._test_fun(self.clf, self.ts.todense())
         scores_s = self._test_fun(self.clf, self.ts.tosparse())
@@ -130,13 +142,13 @@ class TestCClassifierDNR(CClassifierRejectTestCases):
         self.logger.info("Accuracy: {:}".format(accuracy))
 
     def test_reject(self):
-        y_pred, score_pred = self.clf.predict(
-            self.ts.X, return_decision_function=True)
+        y_pred, score_pred = self.clf.predict(self.ts.X, return_decision_function=True)
         # set the threshold to have 10% of rejection rate
         threshold = self.clf.compute_threshold(0.1, self.ts)
         self.clf.threshold = threshold
         y_pred_reject, score_pred_reject = self.clf.predict(
-            self.ts.X, return_decision_function=True)
+            self.ts.X, return_decision_function=True
+        )
 
         # Compute the number of rejected samples
         n_rej = (y_pred_reject == -1).sum()
@@ -144,33 +156,34 @@ class TestCClassifierDNR(CClassifierRejectTestCases):
 
         self.logger.info("Real: \n{:}".format(self.ts.Y))
         self.logger.info("Predicted: \n{:}".format(y_pred))
-        self.logger.info(
-            "Predicted with reject: \n{:}".format(y_pred_reject))
+        self.logger.info("Predicted with reject: \n{:}".format(y_pred_reject))
 
-        acc = CMetric.create('accuracy').performance_score(
-            y_pred, self.ts.Y)
+        acc = CMetric.create("accuracy").performance_score(y_pred, self.ts.Y)
         self.logger.info("Accuracy no rejection: {:}".format(acc))
 
-        rej_acc = CMetric.create('accuracy').performance_score(
-            y_pred_reject[y_pred_reject != -1],
-            self.ts.Y[y_pred_reject != -1])
+        rej_acc = CMetric.create("accuracy").performance_score(
+            y_pred_reject[y_pred_reject != -1], self.ts.Y[y_pred_reject != -1]
+        )
         self.logger.info("Accuracy with rejection: {:}".format(rej_acc))
 
         # check that the accuracy using reject is higher that the one
         # without rejects
         self.assertGreaterEqual(
-            rej_acc, acc, "The accuracy of the classifier that is allowed "
-                          "to reject is lower than the one of the "
-                          "classifier that is not allowed to reject")
+            rej_acc,
+            acc,
+            "The accuracy of the classifier that is allowed "
+            "to reject is lower than the one of the "
+            "classifier that is not allowed to reject",
+        )
 
     def test_set_params(self):
         """Test layer classifiers parameters setting"""
-        self.clf.set_params({'conv2.C': 10, 'conv2.kernel.gamma': 20})
-        self.clf.set('relu.C', 20)
+        self.clf.set_params({"conv2.C": 10, "conv2.kernel.gamma": 20})
+        self.clf.set("relu.C", 20)
 
-        self.assertEqual(self.clf._layer_clfs['conv2'].C, 10.0)
-        self.assertEqual(self.clf._layer_clfs['conv2'].kernel.gamma, 20.0)
-        self.assertEqual(self.clf._layer_clfs['relu'].C, 20.0)
+        self.assertEqual(self.clf._layer_clfs["conv2"].C, 10.0)
+        self.assertEqual(self.clf._layer_clfs["conv2"].kernel.gamma, 20.0)
+        self.assertEqual(self.clf._layer_clfs["relu"].C, 20.0)
 
     def test_create_dict(self):
         self.logger.info("Testing creation with `layer_clf` dict")
@@ -178,5 +191,5 @@ class TestCClassifierDNR(CClassifierRejectTestCases):
         clf_dict.fit(self.tr.X, self.tr.Y)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CClassifierRejectTestCases.main()

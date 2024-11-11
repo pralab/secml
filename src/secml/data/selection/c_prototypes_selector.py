@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 from abc import ABCMeta, abstractmethod
 
 from secml.core import CCreator
@@ -34,7 +35,8 @@ class CPrototypesSelector(CCreator, metaclass=ABCMeta):
        Pattern Recognition. Springer Berlin Heidelberg, 2006. 287-296.
 
     """
-    __super__ = 'CPrototypesSelector'
+
+    __super__ = "CPrototypesSelector"
 
     def __init__(self):
 
@@ -62,5 +64,7 @@ class CPrototypesSelector(CCreator, metaclass=ABCMeta):
             Dataset with selected prototypes.
 
         """
-        raise NotImplementedError("Please implement a `select` method for "
-                                  "class {:}".format(self.__class__.__name__))
+        raise NotImplementedError(
+            "Please implement a `select` method for "
+            "class {:}".format(self.__class__.__name__)
+        )

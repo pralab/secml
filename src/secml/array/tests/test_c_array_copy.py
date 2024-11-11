@@ -13,8 +13,7 @@ class TestCArrayCopy(CArrayTestCases):
             self.logger.info("Array:\n{:}".format(array))
 
             array_deepcopy = array.deepcopy()
-            self.logger.info("Array deepcopied:\n{:}".format(
-                array_deepcopy.todense()))
+            self.logger.info("Array deepcopied:\n{:}".format(array_deepcopy.todense()))
 
             self.assertEqual(array.issparse, array_deepcopy.issparse)
             self.assertEqual(array.isdense, array_deepcopy.isdense)
@@ -27,5 +26,5 @@ class TestCArrayCopy(CArrayTestCases):
         _deepcopy(self.array_dense)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CArrayTestCases.main()

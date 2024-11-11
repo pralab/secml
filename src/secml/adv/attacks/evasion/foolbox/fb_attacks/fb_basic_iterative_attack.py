@@ -8,14 +8,19 @@
 
 """
 
-from foolbox.attacks.basic_iterative_method import L1BasicIterativeAttack, L2BasicIterativeAttack, \
-    LinfBasicIterativeAttack
+from foolbox.attacks.basic_iterative_method import (
+    L1BasicIterativeAttack,
+    L2BasicIterativeAttack,
+    LinfBasicIterativeAttack,
+)
 
-from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import CAttackEvasionFoolbox
+from secml.adv.attacks.evasion.foolbox.c_attack_evasion_foolbox import (
+    CAttackEvasionFoolbox,
+)
 from secml.adv.attacks.evasion.foolbox.losses.ce_loss import CELoss
 from secml.adv.attacks.evasion.foolbox.secml_autograd import as_tensor
 
-DISTANCES = ['l1', 'l2', 'linf']
+DISTANCES = ["l1", "l2", "linf"]
 
 
 class CFoolboxBasicIterative(CELoss, CAttackEvasionFoolbox):
@@ -56,32 +61,48 @@ class CFoolboxBasicIterative(CELoss, CAttackEvasionFoolbox):
         "Adversarial examples in the physical world"
         https://arxiv.org/abs/1607.02533
     """
-    __class_type = 'e-foolbox-basiciterative'
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0,
-                 epsilons=0.2, distance='l2',
-                 rel_stepsize=0.025, abs_stepsize=None, steps=50,
-                 random_start=True):
+    __class_type = "e-foolbox-basiciterative"
 
-        if distance == 'l1':
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=0.2,
+        distance="l2",
+        rel_stepsize=0.025,
+        abs_stepsize=None,
+        steps=50,
+        random_start=True,
+    ):
+
+        if distance == "l1":
             attack = L1BasicIterativeAttack
-        elif distance == 'l2':
+        elif distance == "l2":
             attack = L2BasicIterativeAttack
-        elif distance == 'linf':
+        elif distance == "linf":
             attack = LinfBasicIterativeAttack
         else:
-            raise ValueError('Distance {} is not supported for this attack. Only {} are supported'.format(
-                distance, DISTANCES
-            ))
+            raise ValueError(
+                "Distance {} is not supported for this attack. Only {} are supported".format(
+                    distance, DISTANCES
+                )
+            )
 
-        super(CFoolboxBasicIterative, self).__init__(classifier, y_target,
-                                                     lb=lb, ub=ub,
-                                                     fb_attack_class=attack,
-                                                     epsilons=epsilons,
-                                                     rel_stepsize=rel_stepsize,
-                                                     abs_stepsize=abs_stepsize,
-                                                     steps=steps,
-                                                     random_start=random_start)
+        super(CFoolboxBasicIterative, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            fb_attack_class=attack,
+            epsilons=epsilons,
+            rel_stepsize=rel_stepsize,
+            abs_stepsize=abs_stepsize,
+            steps=steps,
+            random_start=random_start,
+        )
 
         self._x0 = None
         self._y0 = None
@@ -97,48 +118,87 @@ class CFoolboxBasicIterative(CELoss, CAttackEvasionFoolbox):
 
 
 class CFoolboxBasicIterativeL1(CFoolboxBasicIterative):
-    __class_type = 'e-foolbox-basiciterative-l1'
+    __class_type = "e-foolbox-basiciterative-l1"
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0, epsilons=0.2,
-                 rel_stepsize=0.025, abs_stepsize=None,
-                 steps=50, random_start=True):
-        super(CFoolboxBasicIterativeL1, self).__init__(classifier, y_target,
-                                                       lb=lb, ub=ub,
-                                                       distance='l1',
-                                                       epsilons=epsilons,
-                                                       rel_stepsize=rel_stepsize,
-                                                       abs_stepsize=abs_stepsize,
-                                                       steps=steps,
-                                                       random_start=random_start)
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=0.2,
+        rel_stepsize=0.025,
+        abs_stepsize=None,
+        steps=50,
+        random_start=True,
+    ):
+        super(CFoolboxBasicIterativeL1, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            distance="l1",
+            epsilons=epsilons,
+            rel_stepsize=rel_stepsize,
+            abs_stepsize=abs_stepsize,
+            steps=steps,
+            random_start=random_start,
+        )
 
 
 class CFoolboxBasicIterativeL2(CFoolboxBasicIterative):
-    __class_type = 'e-foolbox-basiciterative-l2'
+    __class_type = "e-foolbox-basiciterative-l2"
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0, epsilons=0.2,
-                 rel_stepsize=0.025, abs_stepsize=None,
-                 steps=50, random_start=True):
-        super(CFoolboxBasicIterativeL2, self).__init__(classifier, y_target,
-                                                       lb=lb, ub=ub,
-                                                       distance='l2',
-                                                       epsilons=epsilons,
-                                                       rel_stepsize=rel_stepsize,
-                                                       abs_stepsize=abs_stepsize,
-                                                       steps=steps,
-                                                       random_start=random_start)
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=0.2,
+        rel_stepsize=0.025,
+        abs_stepsize=None,
+        steps=50,
+        random_start=True,
+    ):
+        super(CFoolboxBasicIterativeL2, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            distance="l2",
+            epsilons=epsilons,
+            rel_stepsize=rel_stepsize,
+            abs_stepsize=abs_stepsize,
+            steps=steps,
+            random_start=random_start,
+        )
 
 
 class CFoolboxBasicIterativeLinf(CFoolboxBasicIterative):
-    __class_type = 'e-foolbox-basiciterative-linf'
+    __class_type = "e-foolbox-basiciterative-linf"
 
-    def __init__(self, classifier, y_target=None, lb=0.0, ub=1.0, epsilons=0.2,
-                 rel_stepsize=0.025, abs_stepsize=None,
-                 steps=50, random_start=True):
-        super(CFoolboxBasicIterativeLinf, self).__init__(classifier, y_target,
-                                                         lb=lb, ub=ub,
-                                                         distance='linf',
-                                                         epsilons=epsilons,
-                                                         rel_stepsize=rel_stepsize,
-                                                         abs_stepsize=abs_stepsize,
-                                                         steps=steps,
-                                                         random_start=random_start)
+    def __init__(
+        self,
+        classifier,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        epsilons=0.2,
+        rel_stepsize=0.025,
+        abs_stepsize=None,
+        steps=50,
+        random_start=True,
+    ):
+        super(CFoolboxBasicIterativeLinf, self).__init__(
+            classifier,
+            y_target,
+            lb=lb,
+            ub=ub,
+            distance="linf",
+            epsilons=epsilons,
+            rel_stepsize=rel_stepsize,
+            abs_stepsize=abs_stepsize,
+            steps=steps,
+            random_start=random_start,
+        )

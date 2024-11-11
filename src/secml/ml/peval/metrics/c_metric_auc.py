@@ -5,6 +5,7 @@
 .. moduleauthor:: Marco Melis <marco.melis@unica.it>
 
 """
+
 import sklearn.metrics as skm
 
 from secml.array import CArray
@@ -39,7 +40,8 @@ class CMetricAUC(CMetric):
     0.5
 
     """
-    __class_type = 'auc'
+
+    __class_type = "auc"
     best_value = 1.0
 
     def _performance_score(self, y_true, score):

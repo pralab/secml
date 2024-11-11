@@ -6,6 +6,7 @@
 .. moduleauthor:: Angelo Sotgiu <angelo.sotgiu@unica.it>
 
 """
+
 from sklearn import metrics
 
 from secml.array import CArray
@@ -48,7 +49,8 @@ class CKernelEuclidean(CKernel):
      [-2.828427 0.      ]])
 
     """
-    __class_type = 'euclidean'
+
+    __class_type = "euclidean"
 
     def __init__(self, squared=False, preprocess=None):
         self._squared = squared
@@ -134,12 +136,16 @@ class CKernelEuclidean(CKernel):
             Kernel between x and cached rv, shape (n_x, n_rv).
 
         """
-        k = -CArray(metrics.pairwise.euclidean_distances(
-            x.get_data(), self._rv.get_data(), squared=self._squared,
-            X_norm_squared=self._x_norm_squared,
-            Y_norm_squared=self._rv_norm_squared))
-        self._cached_kernel = None if self._cached_x is None or self._squared \
-            else k
+        k = -CArray(
+            metrics.pairwise.euclidean_distances(
+                x.get_data(),
+                self._rv.get_data(),
+                squared=self._squared,
+                X_norm_squared=self._x_norm_squared,
+                Y_norm_squared=self._rv_norm_squared,
+            )
+        )
+        self._cached_kernel = None if self._cached_x is None or self._squared else k
         return k
 
     def _backward(self, w=None):
@@ -167,21 +173,22 @@ class CKernelEuclidean(CKernel):
         # Checking if cached x is a vector
         if not self._cached_x.is_vector_like:
             raise ValueError(
-                "kernel gradient can be computed only wrt vector-like arrays.")
+                "kernel gradient can be computed only wrt vector-like arrays."
+            )
 
-        if self._rv is None or (not self._squared
-                                and self._cached_kernel is None):
+        if self._rv is None or (not self._squared and self._cached_kernel is None):
             raise ValueError("Please run forward with caching=True first.")
 
         # Format of output array should be the same as cached x
-        self._rv = self._rv.tosparse() if self._cached_x.issparse \
-            else self._rv.todense()
+        self._rv = (
+            self._rv.tosparse() if self._cached_x.issparse else self._rv.todense()
+        )
 
         if self._squared is True:  # 2 * (rv - x)
-            diff = (self._rv - self._cached_x)
+            diff = self._rv - self._cached_x
             return 2 * diff if w is None else w.dot(2 * diff)
 
-        diff = (self._rv - self._cached_x)
+        diff = self._rv - self._cached_x
 
         k_grad = self._cached_kernel.T
         k_grad[k_grad == 0] = 1.0  # To avoid nans later

@@ -52,23 +52,24 @@ class DeepfoolLoss:
         classes = logits.argsort(dim=-1).flip(dims=(-1,))
         i0 = classes[:, 0]
         ik = classes[:, k]
-        l0 = -CrossEntropyLoss(reduction='none')(logits, i0)
-        lk = -CrossEntropyLoss(reduction='none')(logits, ik)
+        l0 = -CrossEntropyLoss(reduction="none")(logits, i0)
+        lk = -CrossEntropyLoss(reduction="none")(logits, ik)
         loss = lk - l0
         loss.backward()
         grad = x.grad
         return loss, grad
 
-
     def get_distances(self, losses, grads):
-        if self.distance == 'l2':
-            return abs(losses) / ((grads.view(grads.shape[0], -1)).norm(p=2, dim=-1) + 1e-8)
-        elif self.distance == 'linf':
-            return abs(losses) / ((grads.view(grads.shape[0], -1)).abs().sum(dim=-1) + 1e-8)
+        if self.distance == "l2":
+            return abs(losses) / (
+                (grads.view(grads.shape[0], -1)).norm(p=2, dim=-1) + 1e-8
+            )
+        elif self.distance == "linf":
+            return abs(losses) / (
+                (grads.view(grads.shape[0], -1)).abs().sum(dim=-1) + 1e-8
+            )
         else:
             raise NotImplementedError
-
-
 
     def objective_function_gradient(self, x):
         """
