@@ -1,3 +1,6 @@
+## v0.15.7
+- [#24](https://github.com/pralab/secml/issues/24) Fixed version of Numpy 1.26.4
+
 ## v0.15.6 (02/05/2023)
 - [#18](https://github.com/pralab/secml/issues/18) added support for python 3.10
 - [#9](https://github.com/pralab/secml/issues/9) fixed import errors
