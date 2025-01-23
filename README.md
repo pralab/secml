@@ -298,7 +298,7 @@ https://arxiv.org/abs/1912.10013), Melis *et al.*, arXiv preprint arXiv:1912.100
 ## Contacts
 The best way for reaching us is by opening issues. However, if you wish to contact us, you can drop an email to:
 * [maura.pintor@unica.it](mailto:maura.pintor@unica.it)
-* [luca.demetrio93@unica.it](mailto:luca.demetrio93@unica.it)
+* [luca.demetrio@unige.it](mailto:luca.demetrio93@unica.it)
 
 
 ## Acknowledgements
