@@ -177,7 +177,7 @@ setup(
         "*.tests", "*.tests.*", "tests.*", "tests"]),
     package_dir={'': 'src'},
     include_package_data=True,
-    python_requires='>=3.5, <3.11',
+    python_requires='>=3.5, <=3.11',
     install_requires=REQ_PKGS,
     extras_require={
         'pytorch': ["torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
